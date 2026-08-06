@@ -15,6 +15,7 @@ BƯỚC 4 → Phân tích yêu cầu, hỏi nếu chưa rõ
 BƯỚC 5 → Code theo đúng standards
 BƯỚC 6 → Kiểm tra không có lỗi console / PHP error
 BƯỚC 7 → Cập nhật PROJECT_REGISTRY.md nếu tạo file mới
+BƯỚC 8 → Chạy ./sync.sh để tự động đẩy code lên GitHub
 ```
 
 **KHÔNG được code trước khi đọc hết 3 file. KHÔNG được bỏ bước nào.**
@@ -22,6 +23,11 @@ BƯỚC 7 → Cập nhật PROJECT_REGISTRY.md nếu tạo file mới
 ---
 
 ## 1 · NGUYÊN TẮC CỐT LÕI
+
+### 1.5 Tự động đẩy code lên GitHub (Auto Sync)
+- **BẮT BUỘC:** Mỗi khi hoàn thành yêu cầu code, sửa lỗi, hay chỉnh sửa bất kỳ file nào trong dự án, tác vụ cuối cùng phải là chạy lệnh `./sync.sh`.
+- Đẩy code lên GitHub tự động thông qua `./sync.sh` mà không cần chờ user ra lệnh thêm.
+
 
 ### 1.1 Đừng đoán mò — Hãy hỏi
 
