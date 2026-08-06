@@ -437,6 +437,9 @@ const SetlistUI = (() => {
       });
     }
 
+    document.getElementById('btn-print-setlist')?.addEventListener('click', printSetlist);
+    document.getElementById('btn-copy-setlist-slide')?.addEventListener('click', copySetlistSlide);
+
     document.getElementById('btn-close-add-setlist')?.addEventListener('click', () => {
       document.getElementById('add-to-setlist-modal')?.classList.add('hidden');
     });
@@ -449,7 +452,87 @@ const SetlistUI = (() => {
     }, true);
   }
 
-  return { init, fetchSetlists, next, prev, getCurrentSetlist: () => _currentSetlist, getCurrentIndex: () => _currentIndex, promptAddSong };
+  function printSetlist() {
+    if (!_currentSetlist || !_currentSetlist.items || _currentSetlist.items.length === 0) {
+      window.App?.showToast?.('Chưa có bài hát trong Setlist!', 'warning');
+      return;
+    }
+
+    const printWin = window.open('', '_blank');
+    if (!printWin) return;
+
+    let itemsHtml = _currentSetlist.items.map((item, idx) => {
+      const songObj = _allSongsCache.find(s => String(s.id) === String(item.song_id)) || window.LibraryUI?.getSongObj?.(item.song_id);
+      const title = songObj ? songObj.title : item.song_id;
+      const key = item.transpose_key && item.transpose_key != 0 ? `(Tông: ${item.transpose_key > 0 ? '+' : ''}${item.transpose_key})` : '';
+      const bpm = item.bpm ? `• Tempo: ${item.bpm} BPM` : '';
+      const chord = item.chord_profile && item.chord_profile !== 'default' ? `• Hợp âm: ${item.chord_profile}` : '';
+
+      return `
+        <tr style="border-bottom:1px solid #ddd;">
+          <td style="padding:10px; font-weight:bold; width:40px;">${idx + 1}.</td>
+          <td style="padding:10px;">
+            <div style="font-size:16px; font-weight:bold; color:#1e1b4b;">${_esc(title)} ${key}</div>
+            <div style="font-size:13px; color:#6b7280; margin-top:4px;">${bpm} ${chord}</div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+
+    printWin.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Chương Trình Tập & Biểu Diễn - ${_esc(_currentSetlist.title)}</title>
+        <style>
+          body { font-family: system-ui, -apple-system, sans-serif; padding: 30px; color: #111; }
+          h2 { margin-bottom: 5px; color: #6d28d9; }
+          .meta { font-size: 14px; color: #666; margin-bottom: 20px; border-bottom: 2px solid #6d28d9; padding-bottom: 10px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        </style>
+      </head>
+      <body>
+        <h2>📋 CHƯƠNG TRÌNH BIỂU DIỄN & TẬP HÁT</h2>
+        <div class="meta">
+          <strong>Tên Setlist:</strong> ${_esc(_currentSetlist.title)} &nbsp;|&nbsp; 
+          <strong>Ngày:</strong> ${_esc(_currentSetlist.scheduled_date || new Date().toLocaleDateString('vi-VN'))}
+        </div>
+        <table>
+          <tbody>${itemsHtml}</tbody>
+        </table>
+        <script>window.onload = function() { window.print(); };</script>
+      </body>
+      </html>
+    `);
+    printWin.document.close();
+  }
+
+  async function copySetlistSlide() {
+    if (!_currentSetlist || !_currentSetlist.items || _currentSetlist.items.length === 0) {
+      window.App?.showToast?.('Chưa có bài hát trong Setlist!', 'warning');
+      return;
+    }
+
+    let slideText = `📋 CHƯƠNG TRÌNH: ${_currentSetlist.title}\n==============================\n\n`;
+
+    _currentSetlist.items.forEach((item, idx) => {
+      const songObj = _allSongsCache.find(s => String(s.id) === String(item.song_id)) || window.LibraryUI?.getSongObj?.(item.song_id);
+      const title = songObj ? songObj.title : item.song_id;
+      const key = item.transpose_key && item.transpose_key != 0 ? ` (Tông: ${item.transpose_key > 0 ? '+' : ''}${item.transpose_key})` : '';
+      const bpm = item.bpm ? ` [♩${item.bpm} BPM]` : '';
+      slideText += `${idx + 1}. ${title}${key}${bpm}\n`;
+    });
+
+    try {
+      await navigator.clipboard.writeText(slideText);
+      window.App?.showToast?.('📋 Đã copy danh sách bài hát cho Slide!', 'success');
+    } catch (e) {
+      window.App?.showToast?.('Lỗi copy bộ đệm', 'error');
+    }
+  }
+
+  return { init, fetchSetlists, next, prev, getCurrentSetlist: () => _currentSetlist, getCurrentIndex: () => _currentIndex, promptAddSong, printSetlist, copySetlistSlide };
+
 })();
 
 window.SetlistUI = SetlistUI;

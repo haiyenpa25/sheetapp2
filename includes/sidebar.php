@@ -105,8 +105,13 @@
             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
           <h3 id="setlist-detail-title" class="setlist-detail-title">Setlist</h3>
-          <button id="btn-play-setlist" class="btn btn-sm btn-primary">Phat</button>
+          <div style="display:flex; gap:4px; align-items:center;">
+            <button id="btn-print-setlist" class="icon-btn-xs" title="🖨️ In Chương Trình Biểu Diễn A4">🖨️</button>
+            <button id="btn-copy-setlist-slide" class="icon-btn-xs" title="📋 Copy Danh Sách Cho Slide Màn Hình">📋</button>
+            <button id="btn-play-setlist" class="btn btn-sm btn-primary">Phat</button>
+          </div>
         </div>
+
         <div id="setlist-items" class="setlist-items"></div>
         <div id="setlist-add-container" class="setlist-add-container hidden">
           <input type="text" id="setlist-search-song-input" class="form-input w-full" placeholder="Go tim bai hat de them..." autocomplete="off">
