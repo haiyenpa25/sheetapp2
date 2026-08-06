@@ -153,6 +153,13 @@
         <label class="check-row">
           <input type="checkbox" id="chk-compact-chordnotes" checked> Ẩn Nốt Dưới (Nốt Chùm)
         </label>
+        <label class="check-row">
+          <input type="checkbox" id="chk-compact-lyrics"> Ẩn Lời Ca (Chế độ nhạc cụ)
+        </label>
+        <label class="check-row">
+          <input type="checkbox" id="chk-compact-measures"> Ẩn Số Ô Nhịp
+        </label>
+
         <label class="check-row divider-top">
           <input type="checkbox" id="chk-compact-texts" checked> Tối giản Nhạc Sĩ/Tác Giả
         </label>

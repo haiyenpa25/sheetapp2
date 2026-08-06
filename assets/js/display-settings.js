@@ -21,8 +21,11 @@ const DisplaySettings = (() => {
         hideVoices: true,
         hideChordNotes: true,
         hideText: true,
-        hideTitle: false
+        hideTitle: false,
+        hideLyrics: false,
+        hideMeasureNumbers: false
     };
+
 
     let previewOsmd = null;
     let previewTimeout = null;
@@ -274,6 +277,9 @@ const DisplaySettings = (() => {
         compactPrefs.hideChordNotes = document.getElementById('chk-compact-chordnotes')?.checked ?? true;
         compactPrefs.hideText = document.getElementById('chk-compact-texts')?.checked ?? true;
         compactPrefs.hideTitle = document.getElementById('chk-compact-title')?.checked ?? false;
+        compactPrefs.hideLyrics = document.getElementById('chk-compact-lyrics')?.checked ?? false;
+        compactPrefs.hideMeasureNumbers = document.getElementById('chk-compact-measures')?.checked ?? false;
+
         
         localStorage.setItem(COMPACT_PREFS_KEY, JSON.stringify(compactPrefs));
 

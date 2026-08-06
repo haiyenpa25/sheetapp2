@@ -558,10 +558,15 @@ const OSMDRenderer = (() => {
           });
       }
 
-      // Title visibility
-      osmd.setOptions({ drawTitle: !compactPrefs.hideTitle });
+      // Title, Lyrics & Measure numbers visibility
+      osmd.setOptions({
+        drawTitle: !compactPrefs.hideTitle,
+        drawLyrics: !compactPrefs.hideLyrics,
+        drawMeasureNumbers: !compactPrefs.hideMeasureNumbers
+      });
 
       // Ẩn/hiện chữ Điệp Khúc/Coda sau khi OSMD render xong SVG
+
       setTimeout(() => _hideRepeatLabels(_isCompactMode), 400);
   }
 
