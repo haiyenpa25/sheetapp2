@@ -7,8 +7,10 @@ class DB {
 
     public static function get(): PDO {
         if (self::$pdo === null) {
-            $file = __DIR__ . '/../../storage/data/app.sqlite';
+            require_once __DIR__ . '/Config.php';
+            $file = Config::get('DB_PATH');
             self::$pdo = new PDO('sqlite:' . $file);
+
             self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             self::$pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
             self::$pdo->exec('PRAGMA foreign_keys = ON;');

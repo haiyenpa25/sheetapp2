@@ -10,6 +10,7 @@
 const SW_VERSION   = 'v3';
 const CACHE_VENDOR = `sheetapp-vendor-${SW_VERSION}`;
 const CACHE_APP    = `sheetapp-app-${SW_VERSION}`;
+const CACHE_MUSICXML = `sheetapp-musicxml-${SW_VERSION}`;
 
 // ── Tài nguyên pre-cache khi install ──────────────────────────────
 const PRECACHE_VENDOR = [
@@ -44,7 +45,7 @@ self.addEventListener('activate', event => {
     caches.keys().then(keys =>
       Promise.all(
         keys
-          .filter(k => k !== CACHE_VENDOR && k !== CACHE_APP)
+          .filter(k => k !== CACHE_VENDOR && k !== CACHE_APP && k !== CACHE_MUSICXML)
           .map(k => caches.delete(k))
       )
     ).then(() => self.clients.claim())
@@ -66,18 +67,25 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // 3. App JS/CSS: Stale While Revalidate
+  // 3. MusicXML Files: Stale While Revalidate (đảm bảo offline)
+  if (url.pathname.startsWith('/storage/')) {
+    event.respondWith(staleWhileRevalidate(event.request, CACHE_MUSICXML));
+    return;
+  }
+
+  // 4. App JS/CSS: Stale While Revalidate
   if (url.pathname.startsWith('/assets/')) {
     event.respondWith(staleWhileRevalidate(event.request, CACHE_APP));
     return;
   }
 
-  // 4. HTML (index.php): Network First với cache fallback
+  // 5. HTML (index.php): Network First với cache fallback
   if (event.request.mode === 'navigate') {
     event.respondWith(networkFirst(event.request, CACHE_APP));
     return;
   }
 });
+
 
 // ── Cache strategies ──────────────────────────────────────────────
 

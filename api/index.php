@@ -2,7 +2,10 @@
 /**
  * api/index.php — Front Controller / Router
  */
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 
 // Bật gzip cho API response (giảm bandwidth mobile/iPad)
 if (!ob_start('ob_gzhandler')) { ob_start(); }
