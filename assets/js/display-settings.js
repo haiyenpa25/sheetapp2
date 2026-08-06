@@ -164,6 +164,8 @@ const DisplaySettings = (() => {
         const chkChordNotes = document.getElementById('chk-compact-chordnotes');
         const chkText = document.getElementById('chk-compact-texts');
         const chkTitle = document.getElementById('chk-compact-title');
+        const chkLyrics = document.getElementById('chk-compact-lyrics');
+        const chkMeasures = document.getElementById('chk-compact-measures');
 
         if (chkBass) {
             chkBass.checked = compactPrefs.hideBass;
@@ -177,6 +179,14 @@ const DisplaySettings = (() => {
             chkChordNotes.checked = compactPrefs.hideChordNotes;
             chkChordNotes.addEventListener('change', _onCompactPrefChanged);
         }
+        if (chkLyrics) {
+            chkLyrics.checked = compactPrefs.hideLyrics;
+            chkLyrics.addEventListener('change', _onCompactPrefChanged);
+        }
+        if (chkMeasures) {
+            chkMeasures.checked = compactPrefs.hideMeasureNumbers;
+            chkMeasures.addEventListener('change', _onCompactPrefChanged);
+        }
         if (chkText) {
             chkText.checked = compactPrefs.hideText;
             chkText.addEventListener('change', _onCompactPrefChanged);
@@ -185,6 +195,7 @@ const DisplaySettings = (() => {
             chkTitle.checked = compactPrefs.hideTitle;
             chkTitle.addEventListener('change', _onCompactPrefChanged);
         }
+
 
         // 2. Gắn sự kiện cho Admin Tab
         document.getElementById('chord-size-slider')?.addEventListener('input', _onChordPrefPreview);
