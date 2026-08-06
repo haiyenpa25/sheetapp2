@@ -126,9 +126,9 @@
       <span id="capo-badge" class="capo-badge hidden" title="Đề xuất Capo tự động" style="display:none">Capo 0</span>
     </div>
 
-    <!-- ② Zoom -->
+    <!-- ② Zoom & Lock View -->
     <div class="pb-group pb-sep" role="group" aria-label="Thu phóng">
-      <div class="zoom-select-wrap">
+      <div class="zoom-select-wrap" style="display:flex; align-items:center; gap:4px;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="zoom-icon-sm"><circle cx="11" cy="11" r="8"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
         <select id="zoom-slider" class="zoom-select" disabled title="Chọn mức phóng to">
           <option value="10">10%</option><option value="15">15%</option>
@@ -144,9 +144,13 @@
           <option value="170">170%</option><option value="180">180%</option>
           <option value="190">190%</option><option value="200">200%</option>
         </select>
+        <button id="btn-lock-zoom" class="icon-btn-xs zoom-lock-btn" title="Khóa tỷ lệ View (khi đổi bài sẽ giữ nguyên zoom này)">
+          <span class="lock-icon">🔓</span>
+        </button>
         <span id="zoom-value-label" style="display:none">100%</span>
       </div>
     </div>
+
 
     <!-- ③ Hợp Âm -->
     <div class="pb-group pb-group--chord pb-sep" id="chord-set-bar" role="group" aria-label="Quản lý hợp âm">

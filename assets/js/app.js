@@ -109,6 +109,11 @@ const App = (() => {
   async function setZoom(percent) {
     const zoom = percent / 100;
     Store.set('currentZoom', zoom);
+
+    if (localStorage.getItem('sheetapp_zoom_locked') === 'true') {
+      localStorage.setItem('sheetapp_locked_zoom_val', String(percent));
+    }
+
     const slider = document.getElementById('zoom-slider');
     if (slider) {
       if (slider.tagName.toLowerCase() === 'select') {
@@ -125,6 +130,7 @@ const App = (() => {
     const lvc = document.getElementById('lyric-view-container');
     if (lvc) lvc.style.fontSize = `${percent}%`;
   }
+
 
   /* ── Measure Progress (Sprint E1) ── */
   function updateMeasureProgress(current, total) {

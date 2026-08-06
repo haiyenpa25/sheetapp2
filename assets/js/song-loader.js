@@ -48,7 +48,15 @@ const SongLoader = (() => {
       Store.set('originalXml', xml);
 
       const transpose = transposeOverride ?? 0;
-      const zoom = settings?.userSettings?.zoomLevel || 1.0;
+      let zoom = 1.0;
+      const isZoomLocked = localStorage.getItem('sheetapp_zoom_locked') === 'true';
+      if (isZoomLocked) {
+        const lockedPct = parseInt(localStorage.getItem('sheetapp_locked_zoom_val') || '100', 10);
+        zoom = (lockedPct || 100) / 100;
+      } else {
+        zoom = settings?.userSettings?.zoomLevel || 1.0;
+      }
+
       Store.set('currentTranspose', transpose);
       Store.set('currentZoom', zoom);
 
@@ -65,9 +73,11 @@ const SongLoader = (() => {
 
       // ── Post-render tasks ──
       _syncZoomUI(zoom);
-      // Luôn chạy autoFitZoom sau mỗi lần load (kể cả khi đã có zoom từ session)
-      // để đảm bảo SVG được layout đúng sau khi container vừa được hiển thị
-      setTimeout(_autoFitZoom, 80);
+      // Nếu đã Lock View thì không chạy _autoFitZoom để giữ nguyên tỷ lệ zoom đã khóa
+      if (!isZoomLocked) {
+        setTimeout(_autoFitZoom, 80);
+      }
+
 
       SheetAudioPlayer.setup(OSMDRenderer.getInstance());
       AppUI.updateTransposeDisplay(transpose);
@@ -209,7 +219,9 @@ const SongLoader = (() => {
   }
 
   function _autoFitZoom() {
+    if (localStorage.getItem('sheetapp_zoom_locked') === 'true') return;
     const svg = document.getElementById('osmd-container')?.querySelector('svg');
+
     const wrapper = document.querySelector('.sheet-viewer-wrapper');
     if (!svg || !wrapper) return;
     const avail = wrapper.clientWidth - 20; // 20px = padding

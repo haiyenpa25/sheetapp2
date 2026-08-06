@@ -31,10 +31,51 @@ const ToolbarController = (() => {
 
   function _bindZoom() {
     const el = document.getElementById('zoom-slider');
-    if (!el) return;
-    const evt = el.tagName.toLowerCase() === 'select' ? 'change' : 'input';
-    el.addEventListener(evt, e => App?.setZoom?.(parseInt(e.target.value, 10)));
+    if (el) {
+      const evt = el.tagName.toLowerCase() === 'select' ? 'change' : 'input';
+      el.addEventListener(evt, e => App?.setZoom?.(parseInt(e.target.value, 10)));
+    }
+
+    const lockBtn = document.getElementById('btn-lock-zoom');
+    if (lockBtn) {
+      _initLockZoomUI(lockBtn);
+      lockBtn.addEventListener('click', () => _toggleLockZoom(lockBtn));
+    }
   }
+
+  function _initLockZoomUI(lockBtn) {
+    const isLocked = localStorage.getItem('sheetapp_zoom_locked') === 'true';
+    if (isLocked) {
+      lockBtn.classList.add('locked');
+      lockBtn.innerHTML = '<span class="lock-icon">🔒</span>';
+      lockBtn.title = 'Khóa tỷ lệ View ĐANG BẬT (Bấm để mở khóa)';
+    } else {
+      lockBtn.classList.remove('locked');
+      lockBtn.innerHTML = '<span class="lock-icon">🔓</span>';
+      lockBtn.title = 'Khóa tỷ lệ zoom (khi đổi bài khác sẽ giữ nguyên tỷ lệ này)';
+    }
+  }
+
+  function _toggleLockZoom(lockBtn) {
+    const wasLocked = localStorage.getItem('sheetapp_zoom_locked') === 'true';
+    const isLocked = !wasLocked;
+    localStorage.setItem('sheetapp_zoom_locked', isLocked ? 'true' : 'false');
+
+    if (isLocked) {
+      const currentPct = Math.round((Store.get('currentZoom') || 1.0) * 100);
+      localStorage.setItem('sheetapp_locked_zoom_val', String(currentPct));
+      lockBtn.classList.add('locked');
+      lockBtn.innerHTML = '<span class="lock-icon">🔒</span>';
+      lockBtn.title = 'Khóa tỷ lệ View ĐANG BẬT (Bấm để mở khóa)';
+      App?.showToast?.(`🔒 Đã khóa view ở tỷ lệ ${currentPct}%. Đổi bài sẽ giữ nguyên zoom.`, 'success');
+    } else {
+      lockBtn.classList.remove('locked');
+      lockBtn.innerHTML = '<span class="lock-icon">🔓</span>';
+      lockBtn.title = 'Khóa tỷ lệ zoom (khi đổi bài khác sẽ giữ nguyên tỷ lệ này)';
+      App?.showToast?.('🔓 Đã mở khóa tỷ lệ view.', 'info');
+    }
+  }
+
 
   function _bindSidebar() {
     const sidebar = document.getElementById('sidebar');

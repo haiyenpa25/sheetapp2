@@ -1930,6 +1930,38 @@ body.dark-mode .tp-btn:hover {
 }
 
 /* =============================================================
+   LOCK ZOOM / LOCK VIEW BUTTON STYLES
+   ============================================================= */
+.zoom-lock-btn {
+  padding: 3px 6px;
+  border-radius: var(--radius-sm, 4px);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+.zoom-lock-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.zoom-lock-btn.locked {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  color: #ffffff !important;
+  border-color: #059669 !important;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+.zoom-lock-btn .lock-icon {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+
+/* =============================================================
    PRINT MEDIA STYLES (Printable A4 Sheet Music Layout)
    ============================================================= */
 @media print {
