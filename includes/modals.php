@@ -26,7 +26,49 @@
 </div>
 
 
+<!-- ===== LIVE BAND SYNC MODAL ===== -->
+<div id="livesync-modal" class="modal-overlay hidden">
+  <div class="modal-box" style="max-width: 440px;">
+    <div class="modal-header">
+      <h3>📡 Đồng Bộ Biểu Diễn Live (Live Band Sync)</h3>
+      <button id="btn-close-livesync-modal" class="icon-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p class="help-text">Tự động lật trang & đổi bài hát theo thời gian thực cho cả ban nhạc.</p>
+
+      <!-- ROOM CREATION & JOIN OPTIONS -->
+      <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 0.75rem;">
+        
+        <!-- HOST (CA TRƯỞNG) -->
+        <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem;">
+          <h4 style="margin: 0 0 0.5rem 0; font-size: 0.95rem; color: var(--accent);">🎙️ Ca Trưởng / Trưởng Nhóm (Host)</h4>
+          <p class="text-xs text-muted" style="margin-bottom: 0.75rem;">Mở phòng phát sóng. Khi bạn chọn bài hoặc cuộn trang, tất cả thành viên trong phòng sẽ chạy theo.</p>
+          <div style="display: flex; gap: 0.5rem;">
+            <input type="text" id="host-room-code-input" class="form-input" style="flex: 1;" placeholder="Tên phòng (VD: ROOM-888)">
+            <button id="btn-start-host-room" class="btn btn-primary btn-sm">📡 Phát Sóng</button>
+          </div>
+        </div>
+
+        <!-- JOIN (MEMBER) -->
+        <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem;">
+          <h4 style="margin: 0 0 0.5rem 0; font-size: 0.95rem; color: #10b981;">🎸 Thành Viên Ban Nhạc (Join)</h4>
+          <p class="text-xs text-muted" style="margin-bottom: 0.75rem;">Nhập mã phòng từ Ca trưởng để tự động lật trang theo.</p>
+          <div style="display: flex; gap: 0.5rem;">
+            <input type="text" id="join-room-code-input" class="form-input" style="flex: 1;" placeholder="Nhập Mã Phòng (VD: ROOM-888)">
+            <button id="btn-join-live-room" class="btn btn-sm" style="background: #10b981; color: #fff; border: none;">🔗 Tham Gia</button>
+          </div>
+        </div>
+
+        <button id="btn-leave-live-room" class="btn btn-ghost btn-sm w-full text-danger mt-half">👋 Rời Phòng Live Sync</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ===== INSTRUMENT MIXER MODAL ===== -->
+
 <div id="mixer-modal" class="modal-overlay hidden">
   <div class="modal-box" style="max-width: 400px;">
     <div class="modal-header">

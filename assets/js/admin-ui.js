@@ -55,6 +55,7 @@ const AdminUI = (() => {
     });
 
     // Load users
+    document.getElementById('btn-admin-create-user')?.addEventListener('click', createUser);
     document.getElementById('btn-admin-add-user')?.addEventListener('click', createUser);
   }
 
@@ -63,6 +64,7 @@ const AdminUI = (() => {
       modal().classList.remove('hidden');
     }
   }
+
 
   /* ====================================
      CÁC HÀM CHO TAB CATEGORIES
@@ -224,57 +226,75 @@ const AdminUI = (() => {
   /* ====================================
      CÁC HÀM CHO TAB NGƯỜI DÙNG
      ==================================== */
-  function loadUsers() {
-    window.ApiService.users.list()
-      .then(res => {
-        // UserController trả {success:true, users:[...]}
-        if (!res.success) return; // Không phải admin → forbidden
-        const users = res.users || [];
-        const tbody = document.querySelector('#admin-users-table tbody');
-        if(!tbody) return;
-        tbody.innerHTML = '';
-        users.forEach(u => {
-          const amIOwner = (u.username === 'banhat');
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>#${u.id}</td>
-            <td><strong>${u.username}</strong></td>
-            <td>
-              <select class="form-input" ${amIOwner ? 'disabled' : ''} style="padding:0.2rem; font-size:0.8rem;" onchange="AdminUI.updateUserRole(${u.id}, this.value)">
-                <option value="admin"  ${u.role === 'admin'  ? 'selected' : ''}>Admin (Quản Trị)</option>
-                <option value="banhat" ${u.role === 'banhat' ? 'selected' : ''}>Ban Hát (thêm hợp âm)</option>
-                <option value="viewer" ${u.role === 'viewer' ? 'selected' : ''}>Viewer (Khách)</option>
-              </select>
-            </td>
-            <td style="text-align:center; display:flex; gap:0.25rem; justify-content:center;">
-              <button class="btn btn-sm btn-ghost" onclick="AdminUI.changeUserPass(${u.id})">🔑 Set Pass</button>
-              <button class="btn btn-sm btn-ghost" style="color:var(--danger);" onclick="AdminUI.deleteUser(${u.id})" ${amIOwner ? 'disabled' : ''}>🗑</button>
-            </td>
-          `;
-          tbody.appendChild(tr);
-        });
-      })
-      .catch(console.error);
+  async function loadUsers() {
+    try {
+      const res = await window.ApiService.users.list();
+      if (!res.success) return;
+      const users = res.users || [];
+      const tbody = document.getElementById('admin-users-list-body') || document.querySelector('#admin-users-table tbody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      if (users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted);">Chưa có tài khoản nào.</td></tr>';
+        return;
+      }
+      users.forEach(u => {
+        const amIOwner = (u.username === 'banhat');
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>#${u.id}</td>
+          <td><strong>${u.username}</strong></td>
+          <td>
+            <select class="form-input" ${amIOwner ? 'disabled' : ''} style="padding:0.2rem; font-size:0.8rem;" onchange="AdminUI.updateUserRole(${u.id}, this.value)">
+              <option value="admin"  ${u.role === 'admin'  ? 'selected' : ''}>Admin (Quản Trị)</option>
+              <option value="banhat" ${u.role === 'banhat' ? 'selected' : ''}>Ban Hát (Thêm Hợp Âm)</option>
+              <option value="viewer" ${u.role === 'viewer' ? 'selected' : ''}>Viewer (Khách)</option>
+            </select>
+          </td>
+          <td>${u.created_at ? u.created_at.substring(0, 10) : '—'}</td>
+          <td style="text-align:right;">
+            <button class="btn btn-sm btn-ghost" onclick="AdminUI.changeUserPass(${u.id})">🔑 Đổi Pass</button>
+            <button class="btn btn-sm btn-ghost" style="color:var(--danger);" onclick="AdminUI.deleteUser(${u.id})" ${amIOwner ? 'disabled' : ''}>🗑 Xóa</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   async function createUser() {
-    const user = prompt("Tên đăng nhập (Username) mong muốn:");
-    if(!user) return;
-    const pass = prompt(`Thiết lập mật khẩu cho ${user}:`);
-    if(!pass) return;
+    const userInp = document.getElementById('admin-new-user-name');
+    const passInp = document.getElementById('admin-new-user-pass');
+    const roleInp = document.getElementById('admin-new-user-role');
+
+    let user = userInp?.value.trim();
+    let pass = passInp?.value.trim();
+    let role = roleInp?.value || 'banhat';
+
+    if (!user || !pass) {
+      user = prompt("Tên đăng nhập (Username) mong muốn:");
+      if (!user) return;
+      pass = prompt(`Thiết lập mật khẩu cho ${user}:`);
+      if (!pass) return;
+    }
 
     try {
-      const res = await window.ApiService.users.create({ username: user, password: pass, role: 'viewer' });
-      if(res.success) {
-        showToast('Tạo tài khoản thành công');
-        loadUsers();
+      const res = await window.ApiService.users.create({ username: user, password: pass, role });
+      if (res.success) {
+        showToast(`✅ Đã tạo tài khoản "${user}" (${role})`);
+        if (userInp) userInp.value = '';
+        if (passInp) passInp.value = '';
       } else {
         showToast(res.error || 'Có lỗi xảy ra', 'error');
       }
     } catch (e) {
       console.error(e);
+      showToast('Lỗi kết nối khi tạo tài khoản', 'error');
     }
   }
+
 
   async function updateUserRole(id, role) {
     await window.ApiService.users.update(id, { role });

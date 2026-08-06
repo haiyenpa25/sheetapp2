@@ -1052,11 +1052,24 @@ const ChordCanvas = (() => {
       countBadge.style.color = chordCount > 0 ? 'var(--success,#16a34a)' : 'var(--text-muted,#9ca3af)';
     }
 
+    const canCreate = window.Auth?.isBanhat?.() ?? false;
+
     selector.innerHTML = sets.map(s =>
       `<option value="${s}" ${s === _currentSet ? 'selected' : ''}>${
         s === 'default' ? 'TLH (gốc)' : s
       }</option>`
-    ).join('');
+    ).join('') + (canCreate ? `<option value="__create_new_set__" style="color: var(--accent,#6d28d9); font-weight: bold;">➕ Tạo Bộ Hợp Âm Mới...</option>` : '');
+
+    if (!selector.dataset.boundCreateHandler) {
+      selector.dataset.boundCreateHandler = 'true';
+      selector.addEventListener('change', (e) => {
+        const val = e.target.value;
+        if (val === '__create_new_set__') {
+          selector.value = _currentSet;
+          showNewSetModal();
+        }
+      });
+    }
 
     const isAdmin    = window.Auth?.isAdmin?.()   ?? false;
     const isLoggedIn = window.Auth?.isLoggedIn?.() ?? false;
@@ -1066,6 +1079,7 @@ const ChordCanvas = (() => {
     const newBtn = document.getElementById('btn-new-chord-set');
     if (newBtn) newBtn.classList.toggle('hidden', !isLoggedIn);
   }
+
 
   /** Cập nhật nhanh UI selector + nút xóa/tạo mà không cần gọi API. */
   function _updateSetUI() {

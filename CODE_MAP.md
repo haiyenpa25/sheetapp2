@@ -1,7 +1,7 @@
 # CODE_MAP.md — Gitnexus Codebase Knowledge Graph & Map (SheetApp)
 
 > **GITNEXUS SECOND BRAIN CODE MAP**
-> Bản đồ tri thức toàn bộ hệ thống SheetApp. Cập nhật tự động: 2026-08-06 05:46:42
+> Bản đồ tri thức toàn bộ hệ thống SheetApp. Cập nhật tự động: 2026-08-06 05:54:58
 > AI Agent BẮT BUỘC tra cứu sơ đồ phụ thuộc dưới đây trước khi chỉnh sửa file.
 
 ---
@@ -34,6 +34,7 @@ graph TD
 - **CategoryController.php**: Handler cho route `category`
 - **ChordSetController.php**: Handler cho route `chordset`
 - **ImportController.php**: Handler cho route `import`
+- **LiveSyncController.php**: Handler cho route `livesync`
 - **OmrController.php**: Handler cho route `omr`
 - **SessionController.php**: Handler cho route `session`
 - **SetlistController.php**: Handler cho route `setlist`
@@ -45,6 +46,7 @@ graph TD
 - **CategoryService.php**: Xử lý logic & truy vấn SQLite cho `Category`
 - **ChordSetService.php**: Xử lý logic & truy vấn SQLite cho `ChordSet`
 - **ImportService.php**: Xử lý logic & truy vấn SQLite cho `Import`
+- **LiveSyncService.php**: Xử lý logic & truy vấn SQLite cho `LiveSync`
 - **OmrService.php**: Xử lý logic & truy vấn SQLite cho `Omr`
 - **SessionService.php**: Xử lý logic & truy vấn SQLite cho `Session`
 - **SetlistService.php**: Xử lý logic & truy vấn SQLite cho `Setlist`
@@ -78,6 +80,7 @@ graph TD
 - `assets/js/instruments.js`
 - `assets/js/keyboard-handler.js`
 - `assets/js/library-ui.js`
+- `assets/js/live-sync.js`
 - `assets/js/lyric-extractor.js`
 - `assets/js/metronome.js`
 - `assets/js/osmd-renderer.js`
@@ -103,5 +106,5 @@ graph TD
 
 ---
 
-## 5 · FILE REGISTRY INDEX (2897 files total)
-Total indexed files: 2897
+## 5 · FILE REGISTRY INDEX (2900 files total)
+Total indexed files: 2900

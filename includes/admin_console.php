@@ -16,11 +16,12 @@
         <button class="admin-tab-btn" data-target="admin-tab-categories">📂 Thể Loại Nhạc</button>
         <button class="admin-tab-btn" data-target="admin-tab-songs">🎼 Cơ Sở Bài Hát</button>
         <button class="admin-tab-btn" data-target="admin-tab-chords">🎸 Cấu Hình Hợp Âm</button>
-        <!-- <button class="admin-tab-btn" data-target="admin-tab-users">🔐 Quản Lý Quyền</button> -->
+        <button class="admin-tab-btn" data-target="admin-tab-users">🔐 Quản Lý Quyền & Tài Khoản</button>
       </div>
 
       <!-- ADMIN CONTENT AREA -->
       <div class="admin-content" style="flex: 1; padding: 1.5rem; overflow-y: auto; background: var(--bg-overlay);">
+
         
         <!-- =============================================
              1. IMPORT & OMR (Kế thừa logic cũ của importer.js)
@@ -218,10 +219,63 @@
           </div>
         </div>
 
+        <!-- =============================================
+             5. QUẢN LÝ TÀI KHOẢN NGƯỜI DÙNG (USERS)
+             ============================================= -->
+        <div id="admin-tab-users" class="admin-panel hidden">
+          <h4 style="margin-top:0; margin-bottom: 1rem;">🔐 Quản Lý & Tạo Tài Khoản Thành Viên</h4>
+          
+          <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
+            <h5 style="margin-top: 0; margin-bottom: 0.75rem;">➕ Tạo Tài Khoản Mới</h5>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 0.75rem; align-items: end;">
+              <div>
+                <label class="form-label">Tên đăng nhập</label>
+                <input type="text" id="admin-new-user-name" class="form-input w-full" placeholder="VD: guitarnam">
+              </div>
+              <div>
+                <label class="form-label">Mật khẩu</label>
+                <input type="password" id="admin-new-user-pass" class="form-input w-full" placeholder="Mật khẩu">
+              </div>
+              <div>
+                <label class="form-label">Phân quyền</label>
+                <select id="admin-new-user-role" class="form-input w-full">
+                  <option value="banhat">Ban Hát / Nhạc Công (Được tạo hợp âm)</option>
+                  <option value="viewer">Viewer (Chỉ xem sheet)</option>
+                  <option value="admin">Admin (Quản trị toàn quyền)</option>
+                </select>
+              </div>
+              <div>
+                <button id="btn-admin-create-user" class="btn btn-primary" style="height: 38px;">✓ Tạo Tài Khoản</button>
+              </div>
+            </div>
+          </div>
+
+          <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden;">
+            <div style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); background: var(--bg-overlay); font-weight: bold; font-size: 0.9rem;">
+              Danh Sách Tài Khoản Hệ Thống
+            </div>
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Tên Đăng Nhập</th>
+                  <th>Vai Trò</th>
+                  <th>Ngày Tạo</th>
+                  <th style="text-align: right;">Hành Động</th>
+                </tr>
+              </thead>
+              <tbody id="admin-users-list-body">
+                <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Đang tải danh sách tài khoản...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
 </div>
+
 
 <style>
 /* Styling for Admin Console Dashboard */

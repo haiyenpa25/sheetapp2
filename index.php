@@ -201,6 +201,8 @@ echo jsTag('auto-scroller.js');
 echo jsTag('page-nav.js');
 echo jsTag('app-ui.js');
 echo jsTag('song-info-bar.js');
+echo jsTag('live-sync.js');
+
 
 // ── 4. App Controllers (defer, phụ thuộc vào modules trên) ──
 echo jsTag('song-loader.js');

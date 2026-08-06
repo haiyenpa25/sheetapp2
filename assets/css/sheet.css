@@ -1960,6 +1960,27 @@ body.dark-mode .tp-btn:hover {
   line-height: 1;
 }
 
+/* Live Sync Badge */
+.live-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 12px;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.live-badge.host-active {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  box-shadow: 0 0 10px rgba(124, 58, 237, 0.4);
+}
+.live-badge.join-active {
+  background: linear-gradient(135deg, #10b981, #059669);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+
+
 
 /* =============================================================
    PRINT MEDIA STYLES (Printable A4 Sheet Music Layout)

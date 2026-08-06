@@ -77,7 +77,14 @@ try {
             $controller->handleRequest($method);
             break;
 
+        case 'live_sync':
+            require_once __DIR__ . '/controllers/LiveSyncController.php';
+            $controller = new LiveSyncController();
+            $controller->handleRequest($method);
+            break;
+
         case 'annotations':
+
             require_once __DIR__ . '/controllers/AnnotationController.php';
             $controller = new AnnotationController();
             $controller->handleRequest($method);
