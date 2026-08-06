@@ -10,5 +10,7 @@
 
 # SheetApp Project Standards — Đọc theo thứ tự
 @./AI_AGENT.md
+@./CODE_MAP.md
 @./CODING_STANDARDS.md
 @./PROJECT_REGISTRY.md
+

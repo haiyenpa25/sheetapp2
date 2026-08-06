@@ -5,28 +5,39 @@
 
 ---
 
-## 0 · WORKFLOW BẮT BUỘC (Theo thứ tự)
+## 0 · WORKFLOW BẮT BUỘC (Theo thứ tự - Superpowers & Gitnexus Integrated)
 
 ```
-BƯỚC 1 → Đọc file này (AI_AGENT.md)       — nắm quy tắc làm việc
-BƯỚC 2 → Đọc CODING_STANDARDS.md          — hiểu tiêu chuẩn code
-BƯỚC 3 → Đọc PROJECT_REGISTRY.md          — biết cấu trúc hiện tại
-BƯỚC 4 → Phân tích yêu cầu, hỏi nếu chưa rõ
-BƯỚC 5 → Code theo đúng standards
-BƯỚC 6 → Kiểm tra không có lỗi console / PHP error
-BƯỚC 7 → Cập nhật PROJECT_REGISTRY.md nếu tạo file mới
-BƯỚC 8 → Chạy ./sync.sh để tự động đẩy code lên GitHub
+BƯỚC 1 → Đọc file này (AI_AGENT.md) & tra cứu GITNEXUS (CODE_MAP.md) — nắm quy tắc & bản đồ codebase
+BƯỚC 2 → Đọc CODING_STANDARDS.md & PROJECT_REGISTRY.md          — hiểu tiêu chuẩn code & cấu trúc
+BƯỚC 3 → [SUPERPOWERS: PLAN] Phân tích yêu cầu & Impact Analysis — kiểm tra các file ảnh hưởng
+BƯỚC 4 → [SUPERPOWERS: DEV] Code đúng tiêu chuẩn standards      — không gõ bừa, không xóa nhầm logic
+BƯỚC 5 → [SUPERPOWERS: TEST] Kiểm tra cú pháp PHP & JS console — tự kiểm thử trước khi bàn giao
+BƯỚC 6 → [SUPERPOWERS: DEVOPS] Cập nhật PROJECT_REGISTRY.md    — nếu tạo file mới
+BƯỚC 7 → [AUTO SYNC] Chạy ./sync.sh                             — tự động update CODE_MAP.md & push GitHub
 ```
 
-**KHÔNG được code trước khi đọc hết 3 file. KHÔNG được bỏ bước nào.**
+**KHÔNG được code trước khi đọc hết quy trình. KHÔNG được bỏ bước nào.**
 
 ---
 
 ## 1 · NGUYÊN TẮC CỐT LÕI
 
-### 1.5 Tự động đẩy code lên GitHub (Auto Sync)
+### 1.5 Gitnexus Code Map (Second Brain cho Code)
+- **BẮT BUỘC:** Đọc [CODE_MAP.md](file:///home/sheet.hyb.io.vn/public_html/CODE_MAP.md) trước khi thực hiện thay đổi cấu trúc hoặc sửa đổi các hàm core.
+- Đảm bảo hiểu rõ phụ thuộc giữa Frontend JS Modules (`assets/js/core/`), REST API Controllers (`api/controllers/`), và SQLite Schema.
+- Không được xóa hoặc đổi tên hàm/module mà không kiểm tra toàn bộ điểm gọi (Call Graph) trong `CODE_MAP.md`.
+
+### 1.6 Quy trình Superpowers (Professional Team Engineering Workflow)
+- **Architect (Lập kế hoạch):** Đánh giá tác động (Impact Analysis) và lập kế hoạch trước khi thay đổi.
+- **Developer (Viết code):** Code có cấu trúc, chuẩn IIFE / MVC, không viết code dở dang hoặc "vibe coding".
+- **Tester (Tự kiểm thử):** Tự động kiểm tra cú pháp PHP (`php -l`), JS syntax, và log lỗi trước khi bàn giao.
+- **DevOps (Auto Sync):** Tự động chạy `./sync.sh` ở bước cuối cùng để cập nhật bản đồ tri thức `CODE_MAP.md` và push code lên GitHub.
+
+### 1.7 Tự động đẩy code lên GitHub (Auto Sync)
 - **BẮT BUỘC:** Mỗi khi hoàn thành yêu cầu code, sửa lỗi, hay chỉnh sửa bất kỳ file nào trong dự án, tác vụ cuối cùng phải là chạy lệnh `./sync.sh`.
 - Đẩy code lên GitHub tự động thông qua `./sync.sh` mà không cần chờ user ra lệnh thêm.
+
 
 
 ### 1.1 Đừng đoán mò — Hãy hỏi
