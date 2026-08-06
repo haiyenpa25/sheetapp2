@@ -70,11 +70,16 @@ const PerformanceNotes = (() => {
   /* ══════════════════════════════════════
    *  toggle — chỉ Admin mới dùng panel chỉnh sửa
    * ══════════════════════════════════════ */
+  /* ══════════════════════════════════════
+   *  toggle — Ban Hát và Admin dùng panel chỉnh sửa
+   * ══════════════════════════════════════ */
   function toggle() {
-    const isAdmin = window.Auth?.isAdmin?.() ?? false;
+    const canEdit = window.Auth?.isBanhat?.() || window.Auth?.isAdmin?.();
 
-    // Khách/User: không show panel — nội dung đã inline trên strip
-    if (!isAdmin) return;
+    if (!canEdit) {
+      window.App?.showToast?.('Vui lòng đăng nhập tài khoản Ban Hát để lưu ghi chú!', 'info');
+      return;
+    }
 
     if (!_panel) _createPanel();
 
@@ -83,7 +88,7 @@ const PerformanceNotes = (() => {
   }
 
   /* ══════════════════════════════════════
-   *  _createPanel — ADMIN edit panel
+   *  _createPanel — Edit panel với Presets & Auto Sync
    * ══════════════════════════════════════ */
   function _createPanel() {
     _panel = document.createElement('div');
@@ -91,30 +96,68 @@ const PerformanceNotes = (() => {
 
     _panel.innerHTML = `
       <div class="pnp-header">
-        <span>📋 Nhật ký</span>
+        <span>📋 Nhật Ký & Ghi Chú Bài Tập</span>
         <button id="pnp-close" title="Đóng">✕</button>
       </div>
       <div class="pnp-body">
-        <div class="pnp-row">
-          <label>🎵 Tông lưu</label>
-          <input id="pnp-key" type="text" maxlength="8" placeholder="VD: G, Bb, F#m…">
+        <div style="display:flex; gap:0.5rem; margin-bottom: 0.5rem; align-items: flex-end;">
+          <div style="flex:1;">
+            <label>🎵 Tông lưu</label>
+            <input id="pnp-key" type="text" maxlength="8" placeholder="VD: G, Bb, F#m…">
+          </div>
+          <div style="flex:1;">
+            <label>⏱ BPM</label>
+            <input id="pnp-bpm" type="number" min="30" max="300" placeholder="VD: 72">
+          </div>
+          <button id="pnp-auto-sync" class="btn btn-ghost btn-sm" style="font-size:0.75rem;" title="Tự động lấy Tông & Tempo hiện tại">⚡ Tự Lấy</button>
         </div>
-        <div class="pnp-row">
-          <label>⏱ BPM</label>
-          <input id="pnp-bpm" type="number" min="30" max="300" placeholder="VD: 72">
-        </div>
+
         <div class="pnp-row pnp-row-full">
-          <label>📝 Ghi chú biểu diễn</label>
-          <textarea id="pnp-text" rows="6"
-            placeholder="VD:&#10;- Câu 1-2: Đàn dạo 2 lần&#10;- Câu 3: Hát + đàn&#10;- Điệp khúc: Tất cả cùng hát&#10;- Coda: Fade out nhẹ"></textarea>
+          <label>📝 Ghi chú biểu diễn / bài tập</label>
+          <textarea id="pnp-text" rows="5"
+            placeholder="VD:&#10;- Dạo guitar 2 lần&#10;- Nữ hát câu 1, Nam hát câu 2&#10;- Điệp khúc: Cả ban hợp xướng&#10;- Kết: Fade out nhẹ"></textarea>
         </div>
+
+        <!-- QUICK PRESETS -->
+        <div style="margin-bottom:0.75rem;">
+          <div style="font-size:0.75rem; color:var(--text-muted,#6b7280); margin-bottom:0.25rem;">Gợi ý mẫu nhanh:</div>
+          <div style="display:flex; gap:4px; flex-wrap:wrap;">
+            <button class="pnp-preset-btn btn btn-ghost btn-xs" data-text="🔄 Điệp khúc x2">🔄 Điệp khúc x2</button>
+            <button class="pnp-preset-btn btn btn-ghost btn-xs" data-text="🎸 Dạo guitar">🎸 Dạo guitar</button>
+            <button class="pnp-preset-btn btn btn-ghost btn-xs" data-text="👩 Nữ -> 👨 Nam">👩 Nữ -> 👨 Nam</button>
+            <button class="pnp-preset-btn btn btn-ghost btn-xs" data-text="🛑 Kết nhẹ (Fade out)">🛑 Kết nhẹ</button>
+          </div>
+        </div>
+
         <div class="pnp-actions">
           <span id="pnp-saved" class="pnp-saved-hint" style="opacity:0">✓ Đã lưu</span>
-          <button id="pnp-save-btn" class="btn btn-primary btn-sm">💾 Lưu</button>
+          <button id="pnp-save-btn" class="btn btn-primary btn-sm">💾 Lưu Ghi Chú</button>
         </div>
       </div>`;
 
     document.body.appendChild(_panel);
+
+    // Auto sync current Key & BPM
+    document.getElementById('pnp-auto-sync')?.addEventListener('click', () => {
+      const curKey = window.SongInfoBar?.getSongInfo?.()?.key || '';
+      const curBpm = window.Metronome?.getBpm?.() || '';
+      if (curKey) document.getElementById('pnp-key').value = curKey;
+      if (curBpm) document.getElementById('pnp-bpm').value = curBpm;
+      window.App?.showToast?.('⚡ Đã lấy Tông & BPM hiện tại!', 'success');
+      _doSave();
+    });
+
+    // Quick Presets click handler
+    _panel.querySelectorAll('.pnp-preset-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const textInp = document.getElementById('pnp-text');
+        if (textInp) {
+          const insertText = e.currentTarget.dataset.text || '';
+          textInp.value = textInp.value ? (textInp.value + '\n' + insertText) : insertText;
+          _doSave();
+        }
+      });
+    });
 
     // Auto-save on input
     ['pnp-key', 'pnp-bpm', 'pnp-text'].forEach(id => {
@@ -138,6 +181,7 @@ const PerformanceNotes = (() => {
       }
     });
   }
+
 
   /* ══════════════════════════════════════
    *  _renderPanel — đổ data vào inputs

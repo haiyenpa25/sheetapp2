@@ -109,7 +109,24 @@ const Metronome = (() => {
         _soundType = e.target.value;
       });
     }
+
+    // Beats Per Measure Select
+    const beatsSelect = document.getElementById('metronome-beats-select');
+    if (beatsSelect) {
+      beatsSelect.addEventListener('change', (e) => {
+        setBeatsPerMeasure(parseInt(e.target.value, 10));
+      });
+    }
+
+    // Tempo Presets
+    document.querySelectorAll('.btn-tempo-preset').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const bpm = parseInt(e.currentTarget.dataset.bpm, 10);
+        if (bpm) setBpm(bpm);
+      });
+    });
   }
+
 
   function _initAudio() {
     if (_audioContext) return;
@@ -293,10 +310,13 @@ const Metronome = (() => {
   function _updateBpmUI() {
     const bpmVal = document.getElementById('metronome-bpm-val');
     const bpmSlider = document.getElementById('metronome-bpm-slider');
+    const beatsSelect = document.getElementById('metronome-beats-select');
     
     if (bpmVal) bpmVal.textContent = _bpm;
     if (bpmSlider) bpmSlider.value = _bpm;
+    if (beatsSelect) beatsSelect.value = String(_beatsPerMeasure);
   }
+
 
   function _renderBeatDots() {
     const container = document.getElementById('metronome-beats-container');
@@ -392,7 +412,16 @@ const Metronome = (() => {
     _renderBeatDots();
   }
 
-  return { init, play, stop, togglePlay, setBpm, getBpm, getBeatsPerMeasure, setBpmAndBeats, showPanel, hidePanel, togglePanel };
+  function setBeatsPerMeasure(beats) {
+    if (beats && beats >= 1 && beats <= 12) {
+      _beatsPerMeasure = beats;
+      _updateBpmUI();
+      _renderBeatDots();
+    }
+  }
+
+  return { init, play, stop, togglePlay, setBpm, getBpm, getBeatsPerMeasure, setBeatsPerMeasure, setBpmAndBeats, showPanel, hidePanel, togglePanel };
+
 })();
 
 window.Metronome = Metronome;

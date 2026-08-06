@@ -131,6 +131,15 @@ echo cssTag('fab.css');
     <!-- Metronome Volume & Sound Select -->
     <div class="metronome-settings">
       <div class="metronome-setting-row">
+        <span class="metronome-setting-label">Số Phách:</span>
+        <select id="metronome-beats-select" class="metronome-select" title="Số phách trong 1 ô nhịp">
+          <option value="2">2/4 (Nhịp 2)</option>
+          <option value="3">3/4 (Nhịp 3)</option>
+          <option value="4" selected>4/4 (Nhịp 4)</option>
+          <option value="6">6/8 (Nhịp 6)</option>
+        </select>
+      </div>
+      <div class="metronome-setting-row">
         <span class="metronome-setting-label">Âm lượng:</span>
         <input type="range" id="metronome-volume-slider" class="metronome-slider volume-slider" min="0" max="100" value="60" title="Âm lượng tiếng gõ">
       </div>
@@ -143,8 +152,17 @@ echo cssTag('fab.css');
         </select>
       </div>
     </div>
+
+    <!-- Quick Tempo Presets -->
+    <div class="metronome-presets" style="display: flex; gap: 4px; justify-content: center; margin-top: 8px; flex-wrap: wrap;">
+      <button class="btn-tempo-preset" data-bpm="60" style="padding: 2px 6px; font-size: 0.72rem; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-surface); cursor: pointer;">Largo (60)</button>
+      <button class="btn-tempo-preset" data-bpm="76" style="padding: 2px 6px; font-size: 0.72rem; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-surface); cursor: pointer;">Andante (76)</button>
+      <button class="btn-tempo-preset" data-bpm="108" style="padding: 2px 6px; font-size: 0.72rem; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-surface); cursor: pointer;">Moderato (108)</button>
+      <button class="btn-tempo-preset" data-bpm="132" style="padding: 2px 6px; font-size: 0.72rem; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-surface); cursor: pointer;">Allegro (132)</button>
+    </div>
   </div>
 </div>
+
 
 <!-- Nút thoát Sheet-Only Mode (fixed, luôn ở góc trên phải) -->
 <button id="btn-exit-sheet-only" title="Thoát chế độ toàn màn hình (Esc)" aria-label="Thoát">
