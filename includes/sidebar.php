@@ -28,11 +28,17 @@
   </div>
 
   <div class="sidebar-search">
-    <div class="mt-half">
-      <select id="category-filter" class="form-input w-full select-toolbar" style="height: 30px; border-color: var(--border);">
-        <option value="">Tat ca danh muc</option>
+    <div class="mt-half" style="display: flex; gap: 4px;">
+      <select id="category-filter" class="form-input select-toolbar" style="flex: 1; height: 30px; border-color: var(--border);">
+        <option value="">Tất cả danh mục</option>
+      </select>
+      <select id="sort-filter" class="form-input select-toolbar" style="width: 105px; height: 30px; border-color: var(--border); font-size: .8rem;" title="Sắp xếp bài hát">
+        <option value="num" selected>STT HTTLVN</option>
+        <option value="title">Tên (A-Z)</option>
+        <option value="key">Tông gốc</option>
       </select>
     </div>
+
     <div class="search-box" style="position:relative;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <input id="search-input" type="text" placeholder="Tim bai hat..." autocomplete="off">

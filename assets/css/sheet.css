@@ -1928,3 +1928,40 @@ body.dark-mode .tp-btn:hover {
   color: var(--accent);
   background: rgba(109,40,217,.12);
 }
+
+/* =============================================================
+   PRINT MEDIA STYLES (Printable A4 Sheet Music Layout)
+   ============================================================= */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 12pt !important;
+  }
+
+  /* Hide UI controls during printing */
+  header, footer, nav, .sidebar, .sidebar-overlay, .top-toolbar, 
+  .fab-container, .metronome-panel, .modal-backdrop, .modal, 
+  .page-nav-bar, #btn-exit-sheet-only, .admin-console {
+    display: none !important;
+  }
+
+  /* Expand main sheet viewer to full page */
+  .main-content, .sheet-viewer-wrapper, #osmd-container {
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    overflow: visible !important;
+  }
+
+  /* SVG sheet music page break controls */
+  #osmd-container svg {
+    max-width: 100% !important;
+    height: auto !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+}
+

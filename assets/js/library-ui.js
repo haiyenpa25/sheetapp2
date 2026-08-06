@@ -37,8 +37,10 @@ const LibraryUI = (() => {
     });
     document.getElementById('btn-search-lyrics')?.addEventListener('click', _toggleSearchMode);
     categoryEl()?.addEventListener('change', _onSearch);
+    document.getElementById('sort-filter')?.addEventListener('change', _onSearch);
 
     // Sidebar tabs
+
     document.getElementById('sidebar-tab-favs')?.addEventListener('click', _showFavorites);
     document.getElementById('sidebar-tab-lib')?.addEventListener('click', () => {
       document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
@@ -234,6 +236,19 @@ const LibraryUI = (() => {
   // ── Search ───────────────────────────────────────────────────
   let _searchMode = 'title'; // 'title' | 'lyric'
 
+  function _sortSongs(list) {
+    const mode = document.getElementById('sort-filter')?.value || 'num';
+    const copy = [...list];
+    if (mode === 'title') {
+      copy.sort((a, b) => (a.title || '').localeCompare(b.title || '', 'vi'));
+    } else if (mode === 'key') {
+      copy.sort((a, b) => (a.defaultKey || '').localeCompare(b.defaultKey || ''));
+    } else {
+      copy.sort((a, b) => (a.httlvnId || 0) - (b.httlvnId || 0));
+    }
+    return copy;
+  }
+
   function _onSearch() {
     const q   = (searchEl()?.value || '').trim().toLowerCase();
     const cat = categoryEl()?.value || '';
@@ -258,11 +273,13 @@ const LibraryUI = (() => {
         });
       }
     }
+    filtered = _sortSongs(filtered);
     render(filtered, {
       emptyMsg: q ? `Không tìm thấy "${q}"` : 'Không có bài hát',
       emptyHint: q ? 'Thử từ khóa khác' : ''
     });
   }
+
 
   function _toggleSearchMode() {
     _searchMode = _searchMode === 'title' ? 'lyric' : 'title';

@@ -5,15 +5,36 @@
 require_once __DIR__ . '/../core/DB.php';
 
 class SongService {
+    private static function cachePath(): string {
+        return __DIR__ . '/../../storage/data/songs_cache.json';
+    }
+
+    public static function invalidateCache(): void {
+        $file = self::cachePath();
+        if (file_exists($file)) {
+            @unlink($file);
+        }
+    }
+
     public static function getAll(): array {
-        return DB::query("
+        $cacheFile = self::cachePath();
+        if (file_exists($cacheFile) && (time() - filemtime($cacheFile) < 3600)) {
+            $data = json_decode(file_get_contents($cacheFile), true);
+            if (is_array($data) && !empty($data)) return $data;
+        }
+
+        $songs = DB::query("
             SELECT s.id, s.title, s.httlvnId, s.xmlPath, s.defaultKey, s.category_id,
                    c.name as category
             FROM songs s
             LEFT JOIN categories c ON s.category_id = c.id
             ORDER BY s.httlvnId ASC, s.title ASC
         ");
+
+        @file_put_contents($cacheFile, json_encode($songs, JSON_UNESCAPED_UNICODE));
+        return $songs;
     }
+
 
     public static function searchByLyric(string $q): array {
         $keyword = '%' . $q . '%';
@@ -51,6 +72,7 @@ class SongService {
 
         DB::run("INSERT INTO songs (id,title,httlvnId,xmlPath,defaultKey,category_id) VALUES (?,?,?,?,?,?)",
             [$id, $title, $httlvnId, $xmlPath, $defaultKey, $catId]);
+        self::invalidateCache();
 
         return compact('id','title','xmlPath','defaultKey','httlvnId') + ['category_id' => $catId];
     }
@@ -69,6 +91,7 @@ class SongService {
         if (!$fields) return ['error' => 'No data to update'];
         $params[] = $id;
         DB::run("UPDATE songs SET " . implode(', ', $fields) . " WHERE id = ?", $params);
+        self::invalidateCache();
         return DB::run("SELECT * FROM songs WHERE id = ?", [$id])->fetch() ?: [];
     }
 
@@ -76,6 +99,8 @@ class SongService {
         $song = DB::run("SELECT xmlPath FROM songs WHERE id = ?", [$id])->fetch();
         if (!$song) return ['error' => 'Song not found'];
         DB::run("DELETE FROM songs WHERE id = ?", [$id]);
+        self::invalidateCache();
+
         if (!empty($song['xmlPath'])) {
             $f = __DIR__ . '/../../' . $song['xmlPath'];
             if (file_exists($f)) @unlink($f);
