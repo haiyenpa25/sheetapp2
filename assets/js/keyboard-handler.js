@@ -7,7 +7,39 @@ const KeyboardHandler = (() => {
 
   function init() {
     document.addEventListener('keydown', _onKey);
+    _initWebMIDI();
   }
+
+  function _initWebMIDI() {
+    if (navigator.requestMIDIAccess) {
+      navigator.requestMIDIAccess().then(midi => {
+        midi.inputs.forEach(input => {
+          input.onmidimessage = _onMIDIMessage;
+        });
+        midi.onstatechange = (e) => {
+          if (e.port.type === 'input' && e.port.state === 'connected') {
+            e.port.onmidimessage = _onMIDIMessage;
+            window.App?.showToast?.(`🔌 Bàn đạp MIDI đã kết nối: ${e.port.name}`, 'info');
+          }
+        };
+      }).catch(() => {});
+    }
+  }
+
+  function _onMIDIMessage(event) {
+    const [status, note, velocity] = event.data || [];
+    if (velocity > 0) {
+      const wrapper = document.querySelector('.sheet-viewer-wrapper') || document.documentElement;
+      const scrollAmount = (wrapper?.clientHeight || 600) * 0.75;
+
+      if (note === 60 || note === 64 || status === 176) {
+        if (wrapper) wrapper.scrollBy({ top: scrollAmount, behavior: 'smooth' });
+      } else if (note === 62 || note === 67) {
+        if (wrapper) wrapper.scrollBy({ top: -scrollAmount, behavior: 'smooth' });
+      }
+    }
+  }
+
 
   function _onKey(e) {
     // Bỏ qua khi đang nhập liệu
