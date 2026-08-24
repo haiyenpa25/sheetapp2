@@ -122,9 +122,10 @@ echo cssTag('fab.css');
       <input type="range" id="metronome-bpm-slider" class="metronome-slider" min="30" max="250" value="80" title="Kéo để điều chỉnh BPM">
     </div>
     
-    <!-- Metronome Controls: Play & TAP Tempo -->
-    <div class="metronome-actions">
-      <button id="btn-metronome-toggle-play" class="btn-metronome-play" title="Bật/Tắt âm gõ nhịp">🔊 Bật nhịp</button>
+    <!-- Metronome Controls: Play, Count-in & TAP Tempo -->
+    <div class="metronome-actions" style="display:flex;gap:0.4rem;">
+      <button id="btn-metronome-toggle-play" class="btn-metronome-play" style="flex:1;" title="Bật/Tắt âm gõ nhịp">🔊 Bật nhịp</button>
+      <button id="btn-metronome-count-in" class="btn-metronome-play" style="flex:1.2;background:linear-gradient(135deg,#7c3aed,#6d28d9);" title="Đếm nhịp chuẩn bị 1-2-3-4 đồng bộ">⏱️ Đếm nhịp</button>
       <button id="btn-metronome-tap" class="btn-metronome-tap" title="Gõ liên tục theo tốc độ để tính BPM">TAP</button>
     </div>
     
@@ -221,6 +222,8 @@ echo jsTag('app-ui.js');
 echo jsTag('song-info-bar.js');
 
 // ── 4. Performance Engine & Live Sync V2 (Protocol V2) ──
+echo jsTag('performance/transport-clock.js');
+echo jsTag('performance/count-in-engine.js');
 echo jsTag('performance/musical-position.js');
 echo jsTag('performance/live-transport.js');
 echo jsTag('performance/qr-helper.js');

@@ -73,6 +73,15 @@ const Metronome = (() => {
       togglePlay();
     });
 
+    // Nút Count-in Đếm Nhịp Chuẩn Bị
+    document.getElementById('btn-metronome-count-in')?.addEventListener('click', () => {
+      if (window.PerformanceEngine) {
+        window.PerformanceEngine.triggerHostCountIn(1);
+      } else if (window.CountInEngine) {
+        window.CountInEngine.startCountIn({ bpm: _bpm, beats: _beatsPerMeasure });
+      }
+    });
+
     // Nút TAP Tempo
     document.getElementById('btn-metronome-tap')?.addEventListener('click', () => {
       _handleTap();

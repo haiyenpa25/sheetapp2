@@ -50,6 +50,12 @@ const LiveSession = (() => {
     document.getElementById('btn-join-live-room')?.addEventListener('click', _handleJoinRoom);
     document.getElementById('btn-leave-live-room')?.addEventListener('click', leaveRoom);
     document.getElementById('btn-copy-live-link')?.addEventListener('click', _handleCopyShareLink);
+    document.getElementById('btn-live-count-in')?.addEventListener('click', () => {
+      if (window.PerformanceEngine) {
+        window.PerformanceEngine.triggerHostCountIn(1);
+        hideModal();
+      }
+    });
 
     // Role selector
     const roleSelect = document.getElementById('live-role-select');
@@ -295,6 +301,11 @@ const LiveSession = (() => {
       url.searchParams.set('live', _roomCode);
       if (roomLinkDisplay) roomLinkDisplay.value = url.href;
       _renderQR();
+
+      const hostControls = document.getElementById('live-host-controls');
+      if (hostControls) {
+        hostControls.classList.toggle('hidden', _mode !== 'host');
+      }
     }
   }
 

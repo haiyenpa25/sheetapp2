@@ -100,6 +100,11 @@
           </select>
         </div>
 
+        <!-- HOST COUNT-IN TRIGGER -->
+        <div id="live-host-controls" style="width:100%;">
+          <button id="btn-live-count-in" class="btn btn-primary btn-sm w-full" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);font-weight:700;height:38px;">⏱️ Đếm Nhịp Vào Bài (1, 2, 3, 4)</button>
+        </div>
+
         <button id="btn-leave-live-room" class="btn btn-danger btn-sm w-full mt-half">👋 Rời Khỏi Phòng</button>
       </div>
 

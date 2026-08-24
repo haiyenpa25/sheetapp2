@@ -132,7 +132,64 @@ const PerformanceEngine = (() => {
       }
     }
 
+    // 5. Đồng bộ Bộ Đếm Nhịp Chuẩn Bị (Synchronized Count-in)
+    if (state.transport && state.transport.state === 'count_in') {
+      const startAt = state.transport.startAt || 0;
+      if (startAt && (!_lastAppliedState || _lastAppliedState.transport?.startAt !== startAt)) {
+        window.CountInEngine?.startCountIn({
+          bpm: state.music?.bpm || 80,
+          beats: state.music?.meter?.beats || 4,
+          countInBars: state.transport.countInBars || 1,
+          startAtServer: startAt,
+          onComplete: () => {
+            console.log('[PerformanceEngine] Follower count-in completed -> Entering playback');
+          }
+        });
+      }
+    } else if (state.transport && state.transport.state === 'stopped') {
+      window.CountInEngine?.cancel();
+    }
+
     _lastAppliedState = state;
+  }
+
+  /**
+   * Kích hoạt đếm nhịp chuẩn bị đồng bộ cho cả ban nhạc (Dành cho Host / Trưởng ban)
+   */
+  function triggerHostCountIn(countInBars = 1) {
+    const bpm   = window.Metronome?.getBpm?.() || 80;
+    const beats = 4;
+    const serverStartAt = (window.TransportClock?.nowServerSeconds?.() || (Date.now() / 1000.0)) + 0.45;
+
+    // Phát sóng trạng thái count_in cho tất cả follower
+    if (LiveSession.isHost()) {
+      LiveSession.broadcastState({
+        transport: {
+          state: 'count_in',
+          countInBars: countInBars,
+          startAt: serverStartAt
+        }
+      });
+    }
+
+    // Chạy count-in trên máy Host
+    window.CountInEngine?.startCountIn({
+      bpm: bpm,
+      beats: beats,
+      countInBars: countInBars,
+      startAtServer: serverStartAt,
+      onComplete: () => {
+        if (LiveSession.isHost()) {
+          LiveSession.broadcastState({
+            transport: { state: 'playing', startAt: 0 }
+          });
+        }
+        // Tự động bật cuộn trang nếu đã bật
+        if (window.AutoScroller && !window.AutoScroller.isActive?.()) {
+          window.AutoScroller.start?.();
+        }
+      }
+    });
   }
 
   /**
@@ -195,6 +252,7 @@ const PerformanceEngine = (() => {
     init,
     applyRemoteState,
     applyRoleView,
+    triggerHostCountIn,
     onSessionStarted,
     onSessionEnded
   };

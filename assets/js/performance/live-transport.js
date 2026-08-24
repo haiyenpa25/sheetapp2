@@ -60,8 +60,14 @@ class PollingTransport extends LiveTransport {
       if (!this.isConnected || this.isPolling || !this.room) return;
       this.isPolling = true;
 
+      const t1 = Date.now();
       try {
         const res = await window.ApiService.liveSync.poll(this.room, this.revision);
+        const t2 = Date.now();
+
+        if (res && res.serverTime && window.TransportClock) {
+          window.TransportClock.calibrate(t1, res.serverTime, t2);
+        }
 
         if (this.consecutiveErrors > 0) {
           this.consecutiveErrors = 0;

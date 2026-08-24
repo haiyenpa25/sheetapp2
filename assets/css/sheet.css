@@ -1998,6 +1998,112 @@ body.dark-mode .tp-btn:hover {
 
 
 /* =============================================================
+   COUNT-IN OVERLAY & VISUAL PERFORMANCE CUES (Phase 2)
+   ============================================================= */
+.count-in-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(15, 23, 42, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeInCountIn 0.2s ease-out;
+}
+
+.count-in-box {
+  background: rgba(30, 27, 75, 0.88);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(124, 58, 237, 0.25);
+  border-radius: 24px;
+  padding: 2rem 3rem;
+  text-align: center;
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.count-in-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.count-in-pill {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #a78bfa;
+  background: rgba(124, 58, 237, 0.2);
+  padding: 4px 12px;
+  border-radius: 99px;
+  border: 1px solid rgba(167, 139, 250, 0.3);
+}
+
+.count-in-meta {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.count-in-digit-container {
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.count-in-digit {
+  font-size: 6.5rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #ffffff;
+  text-shadow: 0 0 30px rgba(167, 139, 250, 0.8);
+  font-family: system-ui, -apple-system, sans-serif;
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.15s ease;
+}
+
+.count-in-digit.pulse {
+  animation: digitPulse 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.count-in-digit.is-entry {
+  font-size: 4.5rem;
+  color: #34d399;
+  text-shadow: 0 0 40px rgba(52, 211, 153, 0.9);
+  animation: entryPulse 0.5s ease-out;
+}
+
+.count-in-footer {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+@keyframes digitPulse {
+  0% { transform: scale(0.6); opacity: 0.5; }
+  50% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes entryPulse {
+  0% { transform: scale(0.7); opacity: 0.6; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeInCountIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* =============================================================
    PRINT MEDIA STYLES (Printable A4 Sheet Music Layout)
    ============================================================= */
 @media print {
