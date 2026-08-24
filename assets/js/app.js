@@ -32,6 +32,8 @@ const App = (() => {
     if (window.PerformanceNotes) PerformanceNotes.init();
     if (window.SongInfoBar)      SongInfoBar.init();
     if (window.Metronome)        Metronome.init();
+    if (window.LiveSession)      LiveSession.init();
+    if (window.PerformanceEngine) PerformanceEngine.init();
 
     ToolbarController.init();
     KeyboardHandler.init();
@@ -139,6 +141,18 @@ const App = (() => {
     if (fill) fill.style.width = Math.round((current / total) * 100) + '%';
   }
 
+  function setTransposeDirect(val) {
+    const num = parseInt(val, 10) || 0;
+    if (Math.abs(num) > 8) return;
+    if (Store.get('currentTranspose') === num) return;
+    Store.set('currentTranspose', num);
+    AppUI.updateTransposeDisplay(num);
+    AppUI.updateSongInfo(Store.get('currentSong'), num);
+    window.URLState?.update?.({ t: num });
+    clearTimeout(_transposeTimer);
+    _transposeTimer = setTimeout(() => SongLoader.commitTranspose(), 250);
+  }
+
   // Boot
   document.addEventListener('DOMContentLoaded', init);
 
@@ -148,7 +162,7 @@ const App = (() => {
     loadSongWithProfile: (song, profile, t) => {
       return SongLoader.load(song, t, profile);
     },
-    transposeBy, resetTranspose, setZoom, navigateNext, navigatePrev,
+    transposeBy, resetTranspose, setTransposeDirect, setZoom, navigateNext, navigatePrev,
     saveModifiedXML:     (xml) => SongLoader.saveModifiedXML(xml),
     reloadCurrentXML:    ()    => SongLoader.commitTranspose(),
     getCurrentTranspose: ()    => Store.get('currentTranspose'),

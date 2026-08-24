@@ -219,10 +219,16 @@ echo jsTag('auto-scroller.js');
 echo jsTag('page-nav.js');
 echo jsTag('app-ui.js');
 echo jsTag('song-info-bar.js');
+
+// ── 4. Performance Engine & Live Sync V2 (Protocol V2) ──
+echo jsTag('performance/musical-position.js');
+echo jsTag('performance/live-transport.js');
+echo jsTag('performance/qr-helper.js');
+echo jsTag('performance/live-session.js');
+echo jsTag('performance/performance-engine.js');
 echo jsTag('live-sync.js');
 
-
-// ── 4. App Controllers (defer, phụ thuộc vào modules trên) ──
+// ── 5. App Controllers (defer, phụ thuộc vào modules trên) ──
 echo jsTag('song-loader.js');
 echo jsTag('keyboard-handler.js');
 echo jsTag('toolbar-controller.js');

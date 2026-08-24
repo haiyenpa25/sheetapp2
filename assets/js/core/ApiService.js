@@ -93,8 +93,10 @@ const ApiService = (() => {
   };
 
   const liveSync = {
-    poll:   (room) => _request(`api/index.php?route=live_sync&room=${encodeURIComponent(room)}`),
-    update: (data) => _json('POST', 'api/index.php?route=live_sync', data),
+    create: (room, data = {})         => _json('POST', 'api/index.php?route=live_sync&action=create', { room, ...data }),
+    poll:   (room, rev = 0)           => _request(`api/index.php?route=live_sync&room=${encodeURIComponent(room)}&rev=${rev}`),
+    update: (room, hostToken, data)   => _json('POST', 'api/index.php?route=live_sync', { room, hostToken, ...data }),
+    close:  (room, hostToken)         => _json('POST', 'api/index.php?route=live_sync&action=close', { room, hostToken }),
   };
 
   return { songs, chordSets, sessions, annotations, setlists, categories, saveXml, omr, importer, users, auth, liveSync };

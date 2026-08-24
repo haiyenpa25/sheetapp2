@@ -26,43 +26,83 @@
 </div>
 
 
-<!-- ===== LIVE BAND SYNC MODAL ===== -->
+<!-- ===== LIVE BAND SYNC MODAL V2 ===== -->
 <div id="livesync-modal" class="modal-overlay hidden">
-  <div class="modal-box" style="max-width: 440px;">
+  <div class="modal-box" style="max-width: 460px;">
     <div class="modal-header">
-      <h3>📡 Đồng Bộ Biểu Diễn Live (Live Band Sync)</h3>
+      <div style="display:flex;align-items:center;gap:.6rem;">
+        <span style="font-size:1.3rem;">📡</span>
+        <h3 style="margin:0;font-size:1.05rem;">Đồng Bộ Biểu Diễn Live (Live Band Sync)</h3>
+      </div>
       <button id="btn-close-livesync-modal" class="icon-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <div class="modal-body">
-      <p class="help-text">Tự động lật trang & đổi bài hát theo thời gian thực cho cả ban nhạc.</p>
+      
+      <!-- 1. CHƯA VÀO PHÒNG (SETUP) -->
+      <div id="live-setup-section" style="display:flex;flex-direction:column;gap:1rem;">
+        <p class="help-text" style="margin-top:0;">Đồng bộ bài hát, dịch giọng và vị trí ô nhịp theo thời gian thực cho ban nhạc.</p>
 
-      <!-- ROOM CREATION & JOIN OPTIONS -->
-      <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 0.75rem;">
-        
         <!-- HOST (CA TRƯỞNG) -->
-        <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem;">
-          <h4 style="margin: 0 0 0.5rem 0; font-size: 0.95rem; color: var(--accent);">🎙️ Ca Trưởng / Trưởng Nhóm (Host)</h4>
-          <p class="text-xs text-muted" style="margin-bottom: 0.75rem;">Mở phòng phát sóng. Khi bạn chọn bài hoặc cuộn trang, tất cả thành viên trong phòng sẽ chạy theo.</p>
-          <div style="display: flex; gap: 0.5rem;">
-            <input type="text" id="host-room-code-input" class="form-input" style="flex: 1;" placeholder="Tên phòng (VD: ROOM-888)">
-            <button id="btn-start-host-room" class="btn btn-primary btn-sm">📡 Phát Sóng</button>
+        <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:1rem;">
+          <h4 style="margin:0 0 .35rem 0;font-size:.95rem;color:var(--accent);">🎙️ Ca Trưởng / Trưởng Nhóm (Host)</h4>
+          <p class="text-xs text-muted" style="margin-bottom:.75rem;">Mở phòng phát sóng. Khi bạn chọn bài, dịch giọng hay cuộn nhạc, cả ban nhạc sẽ chạy theo.</p>
+          <div style="display:flex;gap:.5rem;">
+            <input type="text" id="host-room-code-input" class="form-input" style="flex:1;text-transform:uppercase;font-weight:700;" placeholder="Mã phòng (VD: BAND-2026)">
+            <button id="btn-start-host-room" class="btn btn-primary btn-sm">📡 Mở Phòng</button>
           </div>
         </div>
 
         <!-- JOIN (MEMBER) -->
-        <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem;">
-          <h4 style="margin: 0 0 0.5rem 0; font-size: 0.95rem; color: #10b981;">🎸 Thành Viên Ban Nhạc (Join)</h4>
-          <p class="text-xs text-muted" style="margin-bottom: 0.75rem;">Nhập mã phòng từ Ca trưởng để tự động lật trang theo.</p>
-          <div style="display: flex; gap: 0.5rem;">
-            <input type="text" id="join-room-code-input" class="form-input" style="flex: 1;" placeholder="Nhập Mã Phòng (VD: ROOM-888)">
-            <button id="btn-join-live-room" class="btn btn-sm" style="background: #10b981; color: #fff; border: none;">🔗 Tham Gia</button>
+        <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:1rem;">
+          <h4 style="margin:0 0 .35rem 0;font-size:.95rem;color:#10b981;">🎸 Thành Viên Ban Nhạc (Join)</h4>
+          <p class="text-xs text-muted" style="margin-bottom:.75rem;">Nhập mã phòng từ Ca Trưởng hoặc quét mã QR để đồng bộ màn hình.</p>
+          <div style="display:flex;gap:.5rem;">
+            <input type="text" id="join-room-code-input" class="form-input" style="flex:1;text-transform:uppercase;font-weight:700;" placeholder="Nhập Mã Phòng">
+            <button id="btn-join-live-room" class="btn btn-sm" style="background:#10b981;color:#fff;border:none;">🔗 Tham Gia</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. ĐANG TRONG PHÒNG (ACTIVE SESSION) -->
+      <div id="live-active-section" class="hidden" style="display:flex;flex-direction:column;gap:1rem;align-items:center;text-align:center;">
+        <div style="background:rgba(109,40,217,0.08);border:1px solid rgba(109,40,217,0.25);border-radius:var(--radius-md);padding:.75rem 1.25rem;width:100%;box-sizing:border-box;">
+          <div style="font-size:.8rem;color:var(--text-secondary);text-transform:uppercase;font-weight:600;">Mã Phòng Đang Phát</div>
+          <div id="live-room-code-display" style="font-size:1.6rem;font-weight:800;color:var(--accent);letter-spacing:1px;margin:.2rem 0;">BAND-2026</div>
+          <div style="font-size:.78rem;color:#10b981;font-weight:600;">● Đang kết nối thời gian thực</div>
+        </div>
+
+        <!-- QR CODE CANVAS -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:.35rem;background:#fff;padding:.75rem;border-radius:var(--radius-md);border:1px solid var(--border);box-shadow:0 4px 12px rgba(0,0,0,0.05);">
+          <canvas id="live-qr-canvas" width="180" height="180" style="border-radius:4px;display:block;"></canvas>
+          <span style="font-size:.75rem;color:var(--text-muted);">Quét mã để vào phòng tức thì trên iPad/Điện thoại</span>
+        </div>
+
+        <!-- SHARE LINK -->
+        <div style="width:100%;">
+          <label style="font-size:.8rem;color:var(--text-secondary);display:block;text-align:left;margin-bottom:.3rem;font-weight:600;">Link tham gia 1-chạm:</label>
+          <div style="display:flex;gap:.5rem;">
+            <input type="text" id="live-room-link-display" class="form-input" readonly style="flex:1;font-size:.82rem;background:var(--bg-overlay);">
+            <button id="btn-copy-live-link" class="btn btn-ghost btn-sm" title="Sao chép link">📋 Copy</button>
           </div>
         </div>
 
-        <button id="btn-leave-live-room" class="btn btn-ghost btn-sm w-full text-danger mt-half">👋 Rời Phòng Live Sync</button>
+        <!-- ROLE PREFERENCE -->
+        <div style="width:100%;text-align:left;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.65rem .85rem;">
+          <label style="font-size:.82rem;font-weight:600;display:block;margin-bottom:.35rem;color:var(--text-primary);">Vai Trò Hiển Thị Của Bạn:</label>
+          <select id="live-role-select" class="form-select" style="width:100%;">
+            <option value="leader">👑 Trưởng Ban / Ca Trưởng</option>
+            <option value="guitar">🎸 Guitar (Hiện Hợp Âm & Capo)</option>
+            <option value="piano">🎹 Piano / Organ (Bản Nhạc 2 Tay)</option>
+            <option value="vocal">🎤 Ca Đoàn (Chế Độ Lời Nhạc)</option>
+            <option value="viewer">👀 Khán Giả / Thành Viên</option>
+          </select>
+        </div>
+
+        <button id="btn-leave-live-room" class="btn btn-danger btn-sm w-full mt-half">👋 Rời Khỏi Phòng</button>
       </div>
+
     </div>
   </div>
 </div>
