@@ -168,12 +168,7 @@
           </div>
         </div>
 
-        <!-- =============================================
-             4. QUẢN LÝ NGƯỜI DÙNG (Tắt tạm nếu chưa có luồng users)
-             ============================================= -->
-        <div id="admin-tab-users" class="admin-panel hidden">
-          <!-- TODO -->
-        </div>
+
 
         <!-- =============================================
              5. CẤU HÌNH HỢP ÂM (PER DEVICE)
@@ -198,7 +193,7 @@
 
               <div>
                 <label class="form-label">Màu Sắc Hợp Âm</label>
-                <input type="color" id="chord-color-picker" value="#dc2626" style="width: 100%; height: 40px; border: none; border-radius: vả(--radius-sm); cursor: pointer;">
+                <input type="color" id="chord-color-picker" value="#dc2626" style="width: 100%; height: 40px; border: none; border-radius: var(--radius-sm); cursor: pointer;">
               </div>
 
               <div style="margin-top: auto;">

@@ -120,7 +120,7 @@ const SetlistUI = (() => {
       const toneBadge = item.transpose_key && item.transpose_key != 0 ? `<span class="tag tag-purple">Tone: ${item.transpose_key > 0 ? '+' : ''}${parseInt(item.transpose_key)}</span>` : '';
       const chordBadge = item.chord_profile && item.chord_profile !== 'default' ? `<span class="tag">🎸 ${_esc(item.chord_profile)}</span>` : '';
       const bpmBadge = item.bpm ? `<span class="tag tag-blue" title="${_esc(String(item.beats_per_measure || 4))}/4 nhịp">♩${_esc(String(item.bpm))} BPM</span>` : '';
-      const isAdmin = window.Auth && window.Auth.canEdit && window.Auth.canEdit();
+      const isAdmin = window.Auth && (window.Auth.isAdmin?.() || window.Auth.isBanhat?.());
 
       el.innerHTML = `
         <div class="song-item-info" style="flex:1;min-width:0;">

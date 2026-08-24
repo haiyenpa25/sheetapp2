@@ -842,7 +842,7 @@ const ChordCanvas = (() => {
        const container = document.getElementById('osmd-container');
        if (!container) return;
        // Tìm hàm show bằng document querySelector
-       const dotBtn = container.querySelector(`.chord-dot-btn[style*="left:${(next.rect.left - container.getBoundingClientRect().left) + next.rect.width/2}px"]`);
+       const dotBtn = container.querySelector(`.cc-dot-btn[style*="left:${(next.rect.left - container.getBoundingClientRect().left) + next.rect.width/2}px"]`);
        setTimeout(() => {
           if (dotBtn) dotBtn.click();
           else _showPopup(next.el, next.measureIdx, next.noteIdx, '');

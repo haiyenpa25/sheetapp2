@@ -90,14 +90,12 @@ const LiveSync = (() => {
       room: _room,
       songId: songId,
       scrollTop: scrollTop,
-      leader: window.Auth?.username?.() || 'Ca Trưởng'
+      leader: window.Auth?.getUser?.() || 'Ca Trưởng'
     };
 
-    fetch('/api/index.php?route=live_sync', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    }).catch(() => {});
+    if (window.ApiService?.liveSync?.update) {
+      window.ApiService.liveSync.update(payload).catch(() => {});
+    }
   }
 
   function _bindScrollListener() {
@@ -125,8 +123,9 @@ const LiveSync = (() => {
     _pollTimer = setInterval(async () => {
       if (_mode !== 'join' || !_room) return;
       try {
-        const res = await fetch(`/api/index.php?route=live_sync&room=${encodeURIComponent(_room)}`);
-        const json = await res.json();
+        const json = window.ApiService?.liveSync?.poll
+          ? await window.ApiService.liveSync.poll(_room)
+          : await (await fetch(`api/index.php?route=live_sync&room=${encodeURIComponent(_room)}`)).json();
         if (json.success && json.active && json.data) {
           const data = json.data;
           if (data.timestamp > _lastSyncTs) {

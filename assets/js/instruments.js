@@ -22,7 +22,7 @@ const InstrumentMixer = (() => {
 
   function openMixer() {
     const osmd = window.OSMDRenderer?.getInstance?.();
-    const insts = osmd?.sheet?.Instruments;
+    const insts = osmd?.Sheet?.Instruments ?? osmd?.sheet?.Instruments;
     if (!insts || insts.length === 0) {
       window.App?.showToast?.('Bài hát này không chia nhiều dải nhạc cụ', 'warning');
       return;
@@ -61,7 +61,7 @@ const InstrumentMixer = (() => {
 
   async function applyMixer() {
     const osmd = window.OSMDRenderer?.getInstance?.();
-    const insts = osmd?.sheet?.Instruments;
+    const insts = osmd?.Sheet?.Instruments ?? osmd?.sheet?.Instruments;
     if (!insts) return;
 
     const listEl = document.getElementById('mixer-instruments-list');
@@ -118,7 +118,7 @@ const InstrumentMixer = (() => {
 
   function preserveState() {
      const osmd = window.OSMDRenderer?.getInstance?.();
-     const insts = osmd?.sheet?.Instruments;
+     const insts = osmd?.Sheet?.Instruments ?? osmd?.sheet?.Instruments;
      if (!insts) return;
      _savedMixerState = insts.map(i => i.Visible);
   }
@@ -126,7 +126,7 @@ const InstrumentMixer = (() => {
   function restoreState() {
      if (!_savedMixerState) return;
      const osmd = window.OSMDRenderer?.getInstance?.();
-     const insts = osmd?.sheet?.Instruments;
+     const insts = osmd?.Sheet?.Instruments ?? osmd?.sheet?.Instruments;
      if (insts && insts.length === _savedMixerState.length) {
          insts.forEach((ins, idx) => { ins.Visible = _savedMixerState[idx]; });
      } else {

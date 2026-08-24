@@ -98,8 +98,12 @@ const KeyboardHandler = (() => {
         if (e.ctrlKey || e.metaKey) { e.preventDefault(); ChordCanvas?.redo?.(); }
         break;
       case 'Escape':
-        document.getElementById('import-modal')?.classList.add('hidden');
+        document.getElementById('admin-modal')?.classList.add('hidden');
+        document.getElementById('livesync-modal')?.classList.add('hidden');
+        document.getElementById('mixer-modal')?.classList.add('hidden');
         document.getElementById('session-panel')?.classList.add('hidden');
+        document.getElementById('add-to-setlist-modal')?.classList.add('hidden');
+        document.getElementById('pwa-install-modal')?.classList.add('hidden');
         if (document.body.classList.contains('sheet-only-mode')) AppUI?.toggleFullscreen?.();
         break;
     }

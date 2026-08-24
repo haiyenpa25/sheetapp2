@@ -13,10 +13,10 @@
 window.onerror = function(message, source, lineno, colno, error) {
   const errData = {
     type: 'error',
-    message: message,
-    source: source,
-    lineno: lineno,
-    colno: colno,
+    message: String(message || ''),
+    source: String(source || ''),
+    lineno: lineno || 0,
+    colno: colno || 0,
     stack: error ? error.stack : ''
   };
   fetch('api/log_error.php', {
@@ -37,45 +37,6 @@ window.onunhandledrejection = function(event) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(errData)
   }).catch(() => {});
-};
-
-// --- Temporary Diagnostics Interceptors ---
-const _originalConsoleError = console.error;
-const _originalConsoleWarn = console.warn;
-
-const _logToServer = (type, args) => {
-  const msg = args.map(arg => {
-    if (arg instanceof Error) return arg.message + '\n' + arg.stack;
-    if (typeof arg === 'object') {
-      try { return JSON.stringify(arg); } catch(e) { return String(arg); }
-    }
-    return String(arg);
-  }).join(' ');
-
-  const errData = {
-    type: type,
-    message: msg,
-    source: 'console_intercept',
-    lineno: 0,
-    colno: 0,
-    stack: new Error().stack
-  };
-
-  fetch('api/log_error.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(errData)
-  }).catch(() => {});
-};
-
-console.error = function(...args) {
-  _originalConsoleError.apply(console, args);
-  _logToServer('console_error', args);
-};
-
-console.warn = function(...args) {
-  _originalConsoleWarn.apply(console, args);
-  _logToServer('console_warn', args);
 };
 
 const EventBus = (() => {

@@ -47,6 +47,9 @@ const SessionTracker = (() => {
 
     if (note !== null) {
       const today = _today();
+      if (!Array.isArray(currentSettings?.history)) {
+        currentSettings.history = [];
+      }
       const existing = currentSettings.history.find(h => h.date === today);
       if (existing) {
         existing.note = note;

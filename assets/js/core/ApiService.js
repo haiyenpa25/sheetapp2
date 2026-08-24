@@ -92,7 +92,12 @@ const ApiService = (() => {
     save:   (data)   => _json('POST', 'api/import.php', { type: 'save', ...data })
   };
 
-  return { songs, chordSets, sessions, annotations, setlists, categories, saveXml, omr, importer, users, auth };
+  const liveSync = {
+    poll:   (room) => _request(`api/index.php?route=live_sync&room=${encodeURIComponent(room)}`),
+    update: (data) => _json('POST', 'api/index.php?route=live_sync', data),
+  };
+
+  return { songs, chordSets, sessions, annotations, setlists, categories, saveXml, omr, importer, users, auth, liveSync };
 })();
 
 window.ApiService = ApiService;

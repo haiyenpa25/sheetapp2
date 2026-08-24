@@ -92,5 +92,5 @@ const HistoryManager = (() => {
     if (_onChangeCb) _onChangeCb();
   }
 
-  return { init, trackView, getHistory, toggleFavorite, isFavorite, getFavorites, clearHistory };
+  return { init, trackView, getHistory, getRecent: getHistory, toggleFavorite, isFavorite, getFavorites, clearHistory };
 })();
