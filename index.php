@@ -225,6 +225,8 @@ echo jsTag('song-info-bar.js');
 echo jsTag('performance/transport-clock.js');
 echo jsTag('performance/count-in-engine.js');
 echo jsTag('performance/musical-position.js');
+echo jsTag('performance/arrangement-engine.js');
+echo jsTag('performance/cue-engine.js');
 echo jsTag('performance/live-transport.js');
 echo jsTag('performance/qr-helper.js');
 echo jsTag('performance/live-session.js');

@@ -441,11 +441,55 @@
     window._helpModalOpen = openHelp;
   });
 })();
+</script>
 
-/* ===== TRANSPOSE PICK MODAL INIT ===== */
+<!-- ===== SECTION EDITOR MODAL (Phase 3) ===== -->
+<div id="modal-section-editor" class="modal-overlay hidden">
+  <div class="modal-box section-editor-card" style="max-width: 650px;">
+    <div class="modal-header">
+      <div style="display:flex;align-items:center;gap:.6rem;">
+        <span style="font-size:1.3rem;">📐</span>
+        <h3 style="margin:0;font-size:1.05rem;">Cấu Trúc Phân Đoạn & Roadmap Bài Hát</h3>
+      </div>
+      <button class="icon-btn" onclick="document.getElementById('modal-section-editor').classList.add('hidden')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p class="section-editor-desc">Định nghĩa các đoạn nhạc (Intro, Lời 1, Điệp khúc, Dạo giữa, Outro) theo số thứ tự ô nhịp trong bản nhạc để kích hoạt thanh nhảy đoạn và cảnh báo diễn tập.</p>
+      <div class="section-table-container">
+        <table class="section-edit-table" id="section-edit-table">
+          <thead>
+            <tr>
+              <th style="width: 135px">Loại đoạn</th>
+              <th>Tên hiển thị</th>
+              <th style="width: 85px; text-align: center;">Từ ô</th>
+              <th style="width: 85px; text-align: center;">Đến ô</th>
+              <th style="width: 55px; text-align: center;">Màu</th>
+              <th style="width: 45px; text-align: center;"></th>
+            </tr>
+          </thead>
+          <tbody id="section-edit-tbody"></tbody>
+        </table>
+      </div>
+      <div style="margin-top: 12px; display: flex; justify-content: space-between; align-items: center;">
+        <button type="button" class="btn btn-secondary btn-sm" id="btn-add-section-row">
+          ➕ Thêm phân đoạn
+        </button>
+      </div>
+    </div>
+    <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:.5rem;">
+      <button type="button" class="btn btn-secondary" onclick="document.getElementById('modal-section-editor').classList.add('hidden')">Hủy</button>
+      <button type="button" class="btn btn-primary" id="btn-save-sections-all">💾 Lưu Cấu Trúc</button>
+    </div>
+  </div>
+</div>
+
+<script>
 (function() {
+  /* Script for Transpose Picker */
   document.addEventListener('DOMContentLoaded', function() {
-    var modal     = document.getElementById('transpose-pick-modal');
+    var modal     = document.getElementById('modal-transpose-pick');
     var customIn  = document.getElementById('transpose-pick-custom');
     var btnOk     = document.getElementById('btn-transpose-pick-ok');
     var btnCancel = document.getElementById('btn-transpose-pick-cancel');

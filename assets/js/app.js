@@ -32,6 +32,8 @@ const App = (() => {
     if (window.PerformanceNotes) PerformanceNotes.init();
     if (window.SongInfoBar)      SongInfoBar.init();
     if (window.Metronome)        Metronome.init();
+    if (window.ArrangementEngine) ArrangementEngine.init();
+    if (window.CueEngine)        CueEngine.init();
     if (window.LiveSession)      LiveSession.init();
     if (window.PerformanceEngine) PerformanceEngine.init();
 

@@ -51,7 +51,54 @@ try {
             display_order INTEGER NOT NULL,
             chord_profile TEXT,
             transpose_key INTEGER DEFAULT 0,
+            bpm INTEGER,
+            beats_per_measure INTEGER,
             FOREIGN KEY (setlist_id) REFERENCES setlists(id) ON DELETE CASCADE
+        )
+    ");
+
+    // 4. Tạo bảng song_sections (Cấu trúc phân đoạn ô nhịp)
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS song_sections (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            song_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            type TEXT NOT NULL DEFAULT 'verse',
+            start_measure INTEGER NOT NULL DEFAULT 1,
+            end_measure INTEGER NOT NULL DEFAULT 4,
+            color TEXT NOT NULL DEFAULT '#6366f1',
+            display_order INTEGER NOT NULL DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (song_id) REFERENCES songs(id) ON DELETE CASCADE
+        )
+    ");
+
+    // 5. Tạo bảng arrangements (Kịch bản biểu diễn)
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS arrangements (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            song_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            description TEXT,
+            is_default INTEGER NOT NULL DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (song_id) REFERENCES songs(id) ON DELETE CASCADE
+        )
+    ");
+
+    // 6. Tạo bảng arrangement_steps (Các bước kịch bản)
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS arrangement_steps (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            arrangement_id INTEGER NOT NULL,
+            seq INTEGER NOT NULL DEFAULT 0,
+            section_id INTEGER NOT NULL,
+            repeat_count INTEGER NOT NULL DEFAULT 1,
+            transpose_delta INTEGER NOT NULL DEFAULT 0,
+            bpm INTEGER,
+            cue_text TEXT,
+            FOREIGN KEY (arrangement_id) REFERENCES arrangements(id) ON DELETE CASCADE,
+            FOREIGN KEY (section_id) REFERENCES song_sections(id) ON DELETE CASCADE
         )
     ");
 

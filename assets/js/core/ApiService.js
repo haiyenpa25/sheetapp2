@@ -92,6 +92,17 @@ const ApiService = (() => {
     save:   (data)   => _json('POST', 'api/import.php', { type: 'save', ...data })
   };
 
+  const arrangements = {
+    getSections:       (songId)                  => _request(`api/index.php?route=arrangements&action=sections&songId=${encodeURIComponent(songId)}`),
+    saveSection:       (songId, section)         => _json('POST', `api/index.php?route=arrangements&action=save_section&songId=${encodeURIComponent(songId)}`, section),
+    saveAllSections:   (songId, sections)        => _json('POST', `api/index.php?route=arrangements&action=save_sections`, { songId, sections }),
+    deleteSection:     (id)                      => _request(`api/index.php?route=arrangements&action=delete_section&id=${id}`, { method: 'DELETE' }),
+    list:              (songId)                  => _request(`api/index.php?route=arrangements&action=arrangements&songId=${encodeURIComponent(songId)}`),
+    getSteps:          (arrangementId)           => _request(`api/index.php?route=arrangements&action=steps&arrangementId=${arrangementId}`),
+    saveArrangement:   (songId, arr, steps = []) => _json('POST', `api/index.php?route=arrangements&action=save_arrangement`, { songId, arrangement: arr, steps }),
+    deleteArrangement: (id)                      => _request(`api/index.php?route=arrangements&action=delete_arrangement&id=${id}`, { method: 'DELETE' }),
+  };
+
   const liveSync = {
     create: (room, data = {})         => _json('POST', 'api/index.php?route=live_sync&action=create', { room, ...data }),
     poll:   (room, rev = 0)           => _request(`api/index.php?route=live_sync&room=${encodeURIComponent(room)}&rev=${rev}`),
@@ -99,7 +110,7 @@ const ApiService = (() => {
     close:  (room, hostToken)         => _json('POST', 'api/index.php?route=live_sync&action=close', { room, hostToken }),
   };
 
-  return { songs, chordSets, sessions, annotations, setlists, categories, saveXml, omr, importer, users, auth, liveSync };
+  return { songs, chordSets, sessions, annotations, setlists, categories, saveXml, omr, importer, users, auth, liveSync, arrangements };
 })();
 
 window.ApiService = ApiService;

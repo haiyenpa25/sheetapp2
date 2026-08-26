@@ -38,8 +38,16 @@ const PerformanceEngine = (() => {
             if (currentMeasure !== _lastSentMeasure) {
               _lastSentMeasure = currentMeasure;
               _lastSentTime = now;
+              
+              if (typeof EventBus !== 'undefined') {
+                EventBus.emit('performance:measure_changed', { measure: currentMeasure });
+              }
+
               LiveSession.broadcastState({
-                position: { measure: currentMeasure }
+                position: { 
+                  measure: currentMeasure,
+                  sectionId: window.ArrangementEngine?.getCurrentSection?.()?.id || null
+                }
               });
             }
           }
@@ -118,13 +126,21 @@ const PerformanceEngine = (() => {
       }
     }
 
-    // 3. Đồng bộ Vị trí Ô Nhịp (Musical Position)
+    // 3. Đồng bộ Vị trí Ô Nhịp (Musical Position) & Section
     const targetMeasure = state.position?.measure || state.measure;
     if (targetMeasure && targetMeasure > 0) {
       MusicalPosition.scrollToMeasure(targetMeasure, true);
+      if (typeof EventBus !== 'undefined') {
+        EventBus.emit('performance:measure_changed', { measure: targetMeasure });
+      }
     }
 
-    // 4. Đồng bộ Metronome BPM nếu có
+    // 4. Đồng bộ Cảnh báo (Cue Message) từ Host nếu có
+    if (state.cue && state.cue.text) {
+      window.CueEngine?.showBanner?.(state.cue.text, state.cue.type || 'info', state.cue.durationMs || 3000, state.cue.icon || '⚡');
+    }
+
+    // 5. Đồng bộ Metronome BPM nếu có
     if (state.music && state.music.bpm && window.Metronome) {
       const curBpm = window.Metronome.getBpm?.();
       if (curBpm !== state.music.bpm) {
@@ -132,7 +148,7 @@ const PerformanceEngine = (() => {
       }
     }
 
-    // 5. Đồng bộ Bộ Đếm Nhịp Chuẩn Bị (Synchronized Count-in)
+    // 6. Đồng bộ Bộ Đếm Nhịp Chuẩn Bị (Synchronized Count-in)
     if (state.transport && state.transport.state === 'count_in') {
       const startAt = state.transport.startAt || 0;
       if (startAt && (!_lastAppliedState || _lastAppliedState.transport?.startAt !== startAt)) {

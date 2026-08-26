@@ -96,6 +96,12 @@ try {
             $controller->handleRequest($method);
             break;
 
+        case 'arrangements':
+            require_once __DIR__ . '/controllers/ArrangementController.php';
+            $controller = new ArrangementController();
+            $controller->handleRequest($method);
+            break;
+
         default:
             Response::notFound("Endpoint /api/{$route} không tồn tại.");
             break;

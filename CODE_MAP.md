@@ -1,7 +1,7 @@
 # CODE_MAP.md — Gitnexus Codebase Knowledge Graph & Map (SheetApp)
 
 > **GITNEXUS SECOND BRAIN CODE MAP**
-> Bản đồ tri thức toàn bộ hệ thống SheetApp. Cập nhật tự động: 2026-08-24 08:01:23
+> Bản đồ tri thức toàn bộ hệ thống SheetApp. Cập nhật tự động: 2026-08-26 03:41:16
 > AI Agent BẮT BUỘC tra cứu sơ đồ phụ thuộc dưới đây trước khi chỉnh sửa file.
 
 ---
@@ -30,6 +30,7 @@ graph TD
 
 ### 2.2 Controllers (`api/controllers/`)
 - **AnnotationController.php**: Handler cho route `annotation`
+- **ArrangementController.php**: Handler cho route `arrangement`
 - **AuthController.php**: Handler cho route `auth`
 - **CategoryController.php**: Handler cho route `category`
 - **ChordSetController.php**: Handler cho route `chordset`
@@ -43,6 +44,7 @@ graph TD
 
 ### 2.3 Services (`api/services/`)
 - **AnnotationService.php**: Xử lý logic & truy vấn SQLite cho `Annotation`
+- **ArrangementService.php**: Xử lý logic & truy vấn SQLite cho `Arrangement`
 - **CategoryService.php**: Xử lý logic & truy vấn SQLite cho `Category`
 - **ChordSetService.php**: Xử lý logic & truy vấn SQLite cho `ChordSet`
 - **ImportService.php**: Xử lý logic & truy vấn SQLite cho `Import`
@@ -85,7 +87,9 @@ graph TD
 - `assets/js/metronome.js`
 - `assets/js/osmd-renderer.js`
 - `assets/js/page-nav.js`
+- `assets/js/performance/arrangement-engine.js`
 - `assets/js/performance/count-in-engine.js`
+- `assets/js/performance/cue-engine.js`
 - `assets/js/performance/live-session.js`
 - `assets/js/performance/live-transport.js`
 - `assets/js/performance/musical-position.js`
@@ -113,5 +117,5 @@ graph TD
 
 ---
 
-## 5 · FILE REGISTRY INDEX (2916 files total)
-Total indexed files: 2916
+## 5 · FILE REGISTRY INDEX (2920 files total)
+Total indexed files: 2920
