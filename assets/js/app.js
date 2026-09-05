@@ -94,6 +94,9 @@ const App = (() => {
     AppUI.updateTransposeDisplay(newVal);
     AppUI.updateSongInfo(Store.get('currentSong'), newVal);
     window.URLState?.update?.({ t: newVal });
+    if (typeof EventBus !== 'undefined') {
+      EventBus.emit('transpose:changed', { value: newVal });
+    }
     clearTimeout(_transposeTimer);
     _transposeTimer = setTimeout(() => SongLoader.commitTranspose(), 400);
   }
@@ -105,6 +108,9 @@ const App = (() => {
     AppUI.updateTransposeDisplay(0);
     AppUI.updateSongInfo(Store.get('currentSong'), 0);
     window.URLState?.update?.({ t: 0 });
+    if (typeof EventBus !== 'undefined') {
+      EventBus.emit('transpose:changed', { value: 0 });
+    }
     await SongLoader.commitTranspose();
     SessionTracker?.setTranspose?.(0);
   }
@@ -151,6 +157,9 @@ const App = (() => {
     AppUI.updateTransposeDisplay(num);
     AppUI.updateSongInfo(Store.get('currentSong'), num);
     window.URLState?.update?.({ t: num });
+    if (typeof EventBus !== 'undefined') {
+      EventBus.emit('transpose:changed', { value: num });
+    }
     clearTimeout(_transposeTimer);
     _transposeTimer = setTimeout(() => SongLoader.commitTranspose(), 250);
   }

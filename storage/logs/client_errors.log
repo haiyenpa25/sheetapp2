@@ -1,1 +1,22 @@
 [2026-08-24 07:06:00] [test_check] Verification test | Source: unknown:0 | IP: 127.0.0.1
+[2026-09-02 07:02:33] [console_error] Auth: Failed to fetch
+TypeError: Failed to fetch
+    at _request (https://sheet.hyb.io.vn/assets/js/core/ApiService.js?v=1781016282:10:23)
+    at Object.me (https://sheet.hyb.io.vn/assets/js/core/ApiService.js?v=1781016282:77:27)
+    at checkSession (https://sheet.hyb.io.vn/assets/js/auth.js?v=1780754972:13:49)
+    at Object.init (https://sheet.hyb.io.vn/assets/js/auth.js?v=1780754972:185:5)
+    at HTMLDocument.init (https://sheet.hyb.io.vn/assets/js/app.js?v=1785995078:27:39) | Source: console_intercept:0 | IP: 2405:4803:c7e9:a2a0:a842:5ae8:e5ed:50bf
+[2026-09-02 07:02:33] [console_error] [Library] Lỗi tải danh sách: Failed to fetch
+TypeError: Failed to fetch
+    at _request (https://sheet.hyb.io.vn/assets/js/core/ApiService.js?v=1781016282:10:23)
+    at Object.list (https://sheet.hyb.io.vn/assets/js/core/ApiService.js?v=1781016282:24:30)
+    at loadSongs (https://sheet.hyb.io.vn/assets/js/library-ui.js?v=1785994920:126:38)
+    at Object.init (https://sheet.hyb.io.vn/assets/js/library-ui.js?v=1785994920:26:5)
+    at HTMLDocument.init (https://sheet.hyb.io.vn/assets/js/app.js?v=1785995078:28:15) | Source: console_intercept:0 | IP: 2405:4803:c7e9:a2a0:a842:5ae8:e5ed:50bf
+[2026-09-02 07:02:33] [console_error] Failed to load songs for SetlistUI Failed to fetch
+TypeError: Failed to fetch
+    at _request (https://sheet.hyb.io.vn/assets/js/core/ApiService.js?v=1781016282:10:23)
+    at Object.list (https://sheet.hyb.io.vn/assets/js/core/ApiService.js?v=1781016282:24:30)
+    at ensureSongsLoaded (https://sheet.hyb.io.vn/assets/js/setlist-ui.js?v=1785996367:318:47)
+    at Object.init (https://sheet.hyb.io.vn/assets/js/setlist-ui.js?v=1785996367:326:5)
+    at HTMLDocument.init (https://sheet.hyb.io.vn/assets/js/app.js?v=1785995078:29:44) | Source: console_intercept:0 | IP: 2405:4803:c7e9:a2a0:a842:5ae8:e5ed:50bf

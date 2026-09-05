@@ -318,7 +318,13 @@ SheetApp/
 
 > AI Agent cập nhật mục này sau mỗi phiên làm việc
 
-```
+[2026-09-05] — Rà soát toàn diện dự án & Chuẩn hóa Transpose Event Flow
+  ~ Sửa: assets/js/app.js (Bổ sung EventBus.emit('transpose:changed', { value }) khi set/reset/relative transpose)
+  ~ Sửa: includes/sidebar.php (Loại bỏ input file thừa bị trùng lặp ID 'omr-file-input')
+  ✅ Kiểm thử toàn diện: 100% PHP 8.1 syntax check, 100% Node.js JS syntax check trên toàn bộ modules
+  ✅ Xác thực dữ liệu: 903 bài hát và 903 bộ hợp âm 'HD' mặc định nguyên vẹn, SQLite integrity test đạt 'ok'
+  ✅ Đồng bộ Performance Engine: Broadcast thời gian thực khi Host dịch giọng hoạt động chuẩn xác
+
 [2026-05-25] — Sửa lỗi trắng trang khi chuyển bài + Full system audit
   ~ Sửa: assets/js/song-loader.js (unhide #sheet-area TRƯỚC OSMDRenderer.load() — fix trắng trang)
   ~ Sửa: assets/js/song-loader.js (module-scoped _autoFitRetryCount thay vì window.*)
