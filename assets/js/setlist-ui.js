@@ -97,6 +97,57 @@ const SetlistUI = (() => {
     window.App?.hideLoading?.();
   }
 
+  function _calcTransposedKey(origKey, semitones) {
+    if (!origKey) return null;
+    const trimmed = String(origKey).trim();
+    if (!trimmed) return null;
+    if (!semitones || semitones === 0) return trimmed;
+
+    if (window.TransposeEngine?.transposeChord) {
+      try {
+        const res = window.TransposeEngine.transposeChord(trimmed, semitones);
+        if (res) return res;
+      } catch (e) {}
+    }
+
+    const NOTES_SHARP = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const NOTES_FLAT  = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+    const m = trimmed.match(/^([A-G][#b]?)(.*)$/);
+    if (!m) return trimmed;
+    const root = m[1];
+    const suffix = m[2] || '';
+    const useFlats = trimmed.includes('b') || ['F', 'Dm', 'Gm', 'Cm', 'Fm', 'Bbm', 'Ebm'].includes(trimmed);
+    const arr = useFlats ? NOTES_FLAT : NOTES_SHARP;
+    let idx = NOTES_SHARP.indexOf(root);
+    if (idx === -1) idx = NOTES_FLAT.indexOf(root);
+    if (idx === -1) return trimmed;
+    const newRoot = arr[((idx + semitones) % 12 + 12) % 12];
+    return newRoot + suffix;
+  }
+
+  function _formatToneBadge(origKey, transposeKey, canEdit = false) {
+    const semitones = parseInt(transposeKey, 10) || 0;
+    const hasOrig = Boolean(origKey && String(origKey).trim());
+    const cleanOrig = hasOrig ? String(origKey).trim() : '';
+
+    const cursorStyle = canEdit ? 'cursor:pointer;' : '';
+    const editHint = canEdit ? 'Click để đổi tông tập | ' : '';
+
+    if (cleanOrig) {
+      const practiced = _calcTransposedKey(cleanOrig, semitones) || cleanOrig;
+      if (semitones !== 0) {
+        const diffStr = semitones > 0 ? `+${semitones}` : `${semitones}`;
+        return `<span class="tag tag-purple btn-edit-tone" style="font-weight:600;${cursorStyle}" title="${editHint}Tông gốc: ${cleanOrig} | Đã dịch: ${diffStr} cung">Tone: ${cleanOrig} | Tập: ${practiced}</span>`;
+      } else {
+        return `<span class="tag tag-purple btn-edit-tone" style="${cursorStyle}" title="${editHint}Tông gốc: ${cleanOrig} (Chơi đúng tông gốc)">Tone: ${cleanOrig} | Tập: ${cleanOrig}</span>`;
+      }
+    } else if (semitones !== 0) {
+      const diffStr = semitones > 0 ? `+${semitones}` : `${semitones}`;
+      return `<span class="tag tag-purple btn-edit-tone" style="${cursorStyle}" title="${editHint}Đã dịch ${diffStr} cung">Tập: ${diffStr}</span>`;
+    }
+    return '';
+  }
+
   async function renderSetlistItems() {
     const itemsEl = document.getElementById('setlist-items');
     if (!itemsEl) return;
@@ -117,14 +168,16 @@ const SetlistUI = (() => {
       el.className = 'song-item';
       if (_currentIndex === idx) el.classList.add('active');
       
-      const toneBadge = item.transpose_key && item.transpose_key != 0 ? `<span class="tag tag-purple">Tone: ${item.transpose_key > 0 ? '+' : ''}${parseInt(item.transpose_key)}</span>` : '';
+      const numStr = String(idx + 1).padStart(2, '0');
+      const isAdmin = window.Auth && (window.Auth.isAdmin?.() || window.Auth.isBanhat?.());
+      const origKey = songObj?.defaultKey || songObj?.keySignature || '';
+      const toneBadge = _formatToneBadge(origKey, item.transpose_key, isAdmin);
       const chordBadge = item.chord_profile && item.chord_profile !== 'default' ? `<span class="tag">🎸 ${_esc(item.chord_profile)}</span>` : '';
       const bpmBadge = item.bpm ? `<span class="tag tag-blue" title="${_esc(String(item.beats_per_measure || 4))}/4 nhịp">♩${_esc(String(item.bpm))} BPM</span>` : '';
-      const isAdmin = window.Auth && (window.Auth.isAdmin?.() || window.Auth.isBanhat?.());
 
       el.innerHTML = `
         <div class="song-item-info" style="flex:1;min-width:0;">
-          <div class="song-item-title">${idx + 1}. ${_esc(title)}</div>
+          <div class="song-item-title">${numStr} - ${_esc(title)}</div>
           <div class="song-item-meta text-xs" style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;">
             ${toneBadge} ${chordBadge} ${bpmBadge}
           </div>
@@ -136,11 +189,36 @@ const SetlistUI = (() => {
       `;
       
       el.addEventListener('click', async (e) => {
-        if (e.target.closest('.btn-del-item') || e.target.closest('.btn-save-bpm')) return;
+        if (e.target.closest('.btn-del-item') || e.target.closest('.btn-save-bpm') || e.target.closest('.btn-edit-tone')) return;
         _currentIndex = idx;
         await renderSetlistItems();
         playCurrentItem();
       });
+
+      // Cho phép click vào tag Tone để chỉnh nhanh số cung dịch giọng cho bài này
+      const toneBadgeBtn = el.querySelector('.btn-edit-tone');
+      if (toneBadgeBtn && isAdmin) {
+        toneBadgeBtn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          if (window.TransposePick) {
+            const currentSemi = parseInt(item.transpose_key, 10) || 0;
+            const newTranspose = await window.TransposePick.show(title, currentSemi);
+            if (newTranspose !== null && newTranspose !== currentSemi) {
+              try {
+                await window.ApiService.setlists.updateItem(item.id, { transpose_key: newTranspose });
+                item.transpose_key = newTranspose;
+                window.App?.showToast?.(`✅ Đã đổi tông tập cho "${title}"`, 'success');
+                await renderSetlistItems();
+                if (_currentIndex === idx) {
+                  playCurrentItem();
+                }
+              } catch (err) {
+                window.App?.showToast?.('Lỗi cập nhật tông', 'error');
+              }
+            }
+          }
+        });
+      }
 
       // Nút lưu BPM hiện tại vào item này
       const saveBpmBtn = el.querySelector('.btn-save-bpm');
@@ -522,13 +600,22 @@ const SetlistUI = (() => {
     let itemsHtml = _currentSetlist.items.map((item, idx) => {
       const songObj = _allSongsCache.find(s => String(s.id) === String(item.song_id)) || window.LibraryUI?.getSongObj?.(item.song_id);
       const title = songObj ? songObj.title : item.song_id;
-      const key = item.transpose_key && item.transpose_key != 0 ? `(Tông: ${item.transpose_key > 0 ? '+' : ''}${item.transpose_key})` : '';
+      const numStr = String(idx + 1).padStart(2, '0');
+      const origKey = songObj?.defaultKey || songObj?.keySignature || '';
+      const semitones = parseInt(item.transpose_key, 10) || 0;
+      let key = '';
+      if (origKey) {
+        const practiced = _calcTransposedKey(origKey, semitones) || origKey;
+        key = `(Tone: ${origKey} | Tập: ${practiced})`;
+      } else if (semitones !== 0) {
+        key = `(Tông: ${semitones > 0 ? '+' : ''}${semitones})`;
+      }
       const bpm = item.bpm ? `• Tempo: ${item.bpm} BPM` : '';
       const chord = item.chord_profile && item.chord_profile !== 'default' ? `• Hợp âm: ${item.chord_profile}` : '';
 
       return `
         <tr style="border-bottom:1px solid #ddd;">
-          <td style="padding:10px; font-weight:bold; width:40px;">${idx + 1}.</td>
+          <td style="padding:10px; font-weight:bold; width:40px;">${numStr}.</td>
           <td style="padding:10px;">
             <div style="font-size:16px; font-weight:bold; color:#1e1b4b;">${_esc(title)} ${key}</div>
             <div style="font-size:13px; color:#6b7280; margin-top:4px;">${bpm} ${chord}</div>
@@ -576,9 +663,18 @@ const SetlistUI = (() => {
     _currentSetlist.items.forEach((item, idx) => {
       const songObj = _allSongsCache.find(s => String(s.id) === String(item.song_id)) || window.LibraryUI?.getSongObj?.(item.song_id);
       const title = songObj ? songObj.title : item.song_id;
-      const key = item.transpose_key && item.transpose_key != 0 ? ` (Tông: ${item.transpose_key > 0 ? '+' : ''}${item.transpose_key})` : '';
+      const numStr = String(idx + 1).padStart(2, '0');
+      const origKey = songObj?.defaultKey || songObj?.keySignature || '';
+      const semitones = parseInt(item.transpose_key, 10) || 0;
+      let key = '';
+      if (origKey) {
+        const practiced = _calcTransposedKey(origKey, semitones) || origKey;
+        key = ` [Tone: ${origKey} | Tập: ${practiced}]`;
+      } else if (semitones !== 0) {
+        key = ` [Tông: ${semitones > 0 ? '+' : ''}${semitones}]`;
+      }
       const bpm = item.bpm ? ` [♩${item.bpm} BPM]` : '';
-      slideText += `${idx + 1}. ${title}${key}${bpm}\n`;
+      slideText += `${numStr}. ${title}${key}${bpm}\n`;
     });
 
     try {
