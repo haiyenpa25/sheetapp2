@@ -183,7 +183,7 @@ const SetlistUI = (() => {
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
-          ${isAdmin ? `<button class="icon-btn-xs btn-save-bpm" title="Lưu BPM hiện tại vào bài này" style="color:var(--accent);font-size:.7rem;padding:.2rem .4rem;">♩Lưu BPM</button>` : ''}
+          ${isAdmin ? `<button class="icon-btn-xs btn-save-bpm" title="Lưu Tone & BPM đang tập vào bài này" style="color:var(--accent);font-size:.7rem;padding:.2rem .4rem;font-weight:600;">💾 Lưu Tập</button>` : ''}
           <button class="icon-btn-xs text-danger btn-del-item" title="Xóa khỏi list">✕</button>
         </div>
       `;
@@ -220,28 +220,50 @@ const SetlistUI = (() => {
         });
       }
 
-      // Nút lưu BPM hiện tại vào item này
+      // Nút lưu Tone & BPM hiện tại vào item này
       const saveBpmBtn = el.querySelector('.btn-save-bpm');
       if (saveBpmBtn) {
         saveBpmBtn.addEventListener('click', async (e) => {
           e.stopPropagation();
           const currentBpm   = window.Metronome?.getBpm?.() ?? null;
           const currentBeats = window.Metronome?.getBeatsPerMeasure?.() ?? 4;
-          if (!currentBpm) {
-            window.App?.showToast?.('Chưa có BPM. Mở máy gõ nhịp trước!', 'warning');
-            return;
-          }
+          const currentTranspose = window.Store?.get?.('currentTranspose') ?? 0;
+
           saveBpmBtn.textContent = '...';
           saveBpmBtn.disabled = true;
           try {
-            await window.ApiService.setlists.updateItem(item.id, { bpm: currentBpm, beats_per_measure: currentBeats });
+            const updatePayload = {
+              bpm: currentBpm,
+              beats_per_measure: currentBeats,
+              transpose_key: currentTranspose
+            };
+            await window.ApiService.setlists.updateItem(item.id, updatePayload);
             item.bpm = currentBpm;
             item.beats_per_measure = currentBeats;
-            window.App?.showToast?.(`✅ Đã lưu ♩${currentBpm} BPM cho "${title}"`, 'success');
+            item.transpose_key = currentTranspose;
+
+            // Đồng bộ sang PerformanceNotes của bài
+            if (window.PerformanceNotes) {
+              const origKey = songObj?.defaultKey || '';
+              const practicedKey = _calcTransposedKey(origKey, currentTranspose) || origKey;
+              const existingNotes = window.PerformanceNotes.getNotes(item.song_id);
+              const newNotes = {
+                ...existingNotes,
+                key: practicedKey,
+                bpm: currentBpm ? String(currentBpm) : (existingNotes.bpm || ''),
+                updatedAt: new Date().toISOString()
+              };
+              window.ApiService?.sessions?.savePerfNotes?.(item.song_id, newNotes).catch(() => {});
+            }
+
+            const origKey = songObj?.defaultKey || '';
+            const practicedKey = _calcTransposedKey(origKey, currentTranspose) || origKey;
+            const toneMsg = origKey ? `Tone: ${origKey} | Tập: ${practicedKey}` : `Tông: ${currentTranspose > 0 ? '+' : ''}${currentTranspose}`;
+            window.App?.showToast?.(`✅ Đã lưu ${toneMsg}${currentBpm ? ` & ♩${currentBpm} BPM` : ''} vào Setlist!`, 'success');
             await renderSetlistItems();
           } catch(err) {
-            window.App?.showToast?.('Lỗi lưu BPM', 'error');
-            saveBpmBtn.textContent = '♩Lưu BPM';
+            window.App?.showToast?.('Lỗi lưu thông tin tập', 'error');
+            saveBpmBtn.textContent = '💾 Lưu Tập';
             saveBpmBtn.disabled = false;
           }
         });
@@ -685,7 +707,7 @@ const SetlistUI = (() => {
     }
   }
 
-  return { init, fetchSetlists, next, prev, getCurrentSetlist: () => _currentSetlist, getCurrentIndex: () => _currentIndex, promptAddSong, printSetlist, copySetlistSlide };
+  return { init, fetchSetlists, next, prev, getCurrentSetlist: () => _currentSetlist, getCurrentIndex: () => _currentIndex, promptAddSong, printSetlist, copySetlistSlide, renderSetlistItems };
 
 })();
 

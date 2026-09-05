@@ -100,6 +100,7 @@ const PerformanceNotes = (() => {
         <button id="pnp-close" title="Đóng">✕</button>
       </div>
       <div class="pnp-body">
+        <div id="pnp-setlist-notice" class="hidden" style="background:rgba(109,40,217,0.1);border:1px solid rgba(109,40,217,0.25);border-radius:4px;padding:6px 8px;font-size:0.75rem;color:var(--accent);margin-bottom:0.6rem;line-height:1.4;"></div>
         <div style="display:flex; gap:0.5rem; margin-bottom: 0.5rem; align-items: flex-end;">
           <div style="flex:1;">
             <label>🎵 Tông lưu</label>
@@ -137,13 +138,18 @@ const PerformanceNotes = (() => {
 
     document.body.appendChild(_panel);
 
-    // Auto sync current Key & BPM
+    // Auto sync current Key & BPM (tính cả số cung đang dịch giọng)
     document.getElementById('pnp-auto-sync')?.addEventListener('click', () => {
-      const curKey = window.SongInfoBar?.getSongInfo?.()?.key || '';
+      const origKey = window.SongInfoBar?.getSongKey?.() || '';
+      const curTranspose = window.Store?.get?.('currentTranspose') ?? 0;
+      let curKey = origKey;
+      if (origKey && curTranspose !== 0 && window.TransposeEngine) {
+        curKey = window.TransposeEngine.transposeChord(origKey, curTranspose) || origKey;
+      }
       const curBpm = window.Metronome?.getBpm?.() || '';
       if (curKey) document.getElementById('pnp-key').value = curKey;
       if (curBpm) document.getElementById('pnp-bpm').value = curBpm;
-      window.App?.showToast?.('⚡ Đã lấy Tông & BPM hiện tại!', 'success');
+      window.App?.showToast?.(`⚡ Đã lấy Tông (${curKey}) & BPM (${curBpm || 'mặc định'})!`, 'success');
       _doSave();
     });
 
@@ -194,18 +200,35 @@ const PerformanceNotes = (() => {
     if (k) k.value = _cache.key  || '';
     if (b) b.value = _cache.bpm  || '';
     if (t) t.value = _cache.text || '';
+
+    // Thông báo trạng thái nếu đang tập trong Setlist
+    const noticeEl = document.getElementById('pnp-setlist-notice');
+    const setlist = window.SetlistUI?.getCurrentSetlist?.();
+    const idx = window.SetlistUI?.getCurrentIndex?.();
+    if (setlist && setlist.items && idx !== undefined && idx >= 0) {
+      if (noticeEl) {
+        noticeEl.classList.remove('hidden');
+        noticeEl.innerHTML = `📋 Đang tập trong Setlist: <strong>${setlist.title || ''}</strong> (Bài ${idx + 1}/${setlist.items.length})<br><span style="font-size:0.7rem;opacity:0.85;">Khi lưu sẽ tự động đồng bộ Tông & Tempo vào bài này trong Setlist!</span>`;
+      }
+    } else if (noticeEl) {
+      noticeEl.classList.add('hidden');
+    }
   }
 
   /* ══════════════════════════════════════
-   *  _doSave — POST lên server
+   *  _doSave — POST lên server & đồng bộ Setlist
    * ══════════════════════════════════════ */
   async function _doSave() {
     if (!_songId || !_panel) return;
 
+    const keyVal = document.getElementById('pnp-key')?.value.trim()  || '';
+    const bpmVal = document.getElementById('pnp-bpm')?.value.trim()  || '';
+    const textVal = document.getElementById('pnp-text')?.value.trim() || '';
+
     const data = {
-      key:       document.getElementById('pnp-key')?.value.trim()  || '',
-      bpm:       document.getElementById('pnp-bpm')?.value.trim()  || '',
-      text:      document.getElementById('pnp-text')?.value.trim() || '',
+      key:       keyVal,
+      bpm:       bpmVal,
+      text:      textVal,
       updatedAt: new Date().toISOString(),
     };
 
@@ -219,6 +242,32 @@ const PerformanceNotes = (() => {
 
     // Cập nhật inline display ngay sau khi lưu
     window.SongInfoBar?.refreshNotesChip?.(_songId);
+
+    // 🔥 Đồng bộ vào Setlist nếu đang mở bài trong Setlist
+    const setlist = window.SetlistUI?.getCurrentSetlist?.();
+    const curIdx = window.SetlistUI?.getCurrentIndex?.();
+    if (setlist && setlist.items && curIdx !== undefined && curIdx >= 0) {
+      const item = setlist.items[curIdx];
+      if (item && String(item.song_id) === String(_songId)) {
+        const curTranspose = window.Store?.get?.('currentTranspose') ?? 0;
+        const bpmNum = parseInt(bpmVal, 10) || null;
+        const beatsNum = window.Metronome?.getBeatsPerMeasure?.() || 4;
+
+        try {
+          await window.ApiService?.setlists?.updateItem?.(item.id, {
+            transpose_key: curTranspose,
+            bpm: bpmNum,
+            beats_per_measure: beatsNum
+          });
+          item.transpose_key = curTranspose;
+          item.bpm = bpmNum;
+          item.beats_per_measure = beatsNum;
+          window.SetlistUI?.renderSetlistItems?.();
+        } catch (err) {
+          console.warn('[PerfNotes] Lỗi sync vào setlist:', err);
+        }
+      }
+    }
 
     const hint = document.getElementById('pnp-saved');
     if (hint) { hint.style.opacity = '1'; setTimeout(() => hint.style.opacity = '0', 1500); }
