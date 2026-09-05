@@ -46,11 +46,15 @@
 
 ---
 
-### 6. ⏱️ Máy Đếm Nhịp Pro (Metronome Engine)
-- **Web Audio API Engine:** Âm thanh chuẩn xác, không bị trễ tiếng.
+### 6. ⏱️ Máy Đếm Nhịp Pro & Chỉnh Tempo Tương Tác (Interactive Tempo & Metronome)
+- **Web Audio API Engine:** Âm thanh chuẩn xác, không bị trễ tiếng, hỗ trợ âm sắc Woodblock, Cowbell, Beep.
+- **Chỉnh Tempo Nhanh (TempoPick Modal):** Bấm trực tiếp vào chip `[♩ = ... bpm ✎]` trên thanh thông tin để mở popup:
+  - Thanh trượt Slider kéo nhanh (40 - 220 BPM), nút `−` và `+` tinh chỉnh.
+  - Phím chọn tốc độ chuẩn (*60 Chậm*, *80 Vừa*, *100 Nhanh*, *120 Rộn rã*).
+  - **👆 TAP Tempo:** Gõ nhịp ngón tay theo cảm nhận để máy tự động tính BPM.
+  - **🔊 Bật Nhịp / Nghe Thử:** Bật máy gõ nhịp trực tiếp từ popup để bắt nhịp chuẩn xác.
 - **Chỉ Số Nhịp Lập Lịch:** Hỗ trợ nhịp `2/4`, `3/4`, `4/4`, `6/8` với phách 1 đầu ô nhịp đánh chuông/âm cao (Accented Beat).
 - **Visual Beat LED:** Đèn LED nháy nhịp động trực quan bằng mắt.
-- **TAP Tempo & Presets:** Tính BPM nhanh bằng cách gõ tay, kèm phím chọn tốc độ chuẩn (*Largo 60*, *Andante 76*, *Moderato 108*, *Allegro 132*).
 
 ---
 
@@ -61,9 +65,11 @@
 
 ---
 
-### 8. 📋 Quản Lý Setlist Biểu Diễn & Xuất Dữ Liệu
-- Tạo danh sách bài hát (Setlist) cho từng buổi nhóm/buổi tập.
-- Đặt Tông và BPM ghi đè cho từng bài trong Setlist.
+### 8. 📋 Quản Lý Setlist Biểu Diễn & Đồng Bộ Tông - Tempo
+- **Hiển Thị Song Song Tông Gốc & Tông Tập:** Hiển thị rõ ràng `Tone: G | Tập: A` giúp ca trưởng và nhạc công nắm chắc giọng hát của bài.
+- **Thiết Lập Trước Tông & Tempo:** Khi thêm bài vào Setlist, modal cho phép chọn trước cả Tông tập và Tempo tập trước khi mở bài.
+- **Đổi Tempo & Tông Nhanh:** Bấm trực tiếp vào nhãn `♩ {bpm}` trong danh sách để đổi tốc độ, nút `💾 Lưu Tập` lưu ngay vào DB.
+- **Tối Ưu Cho Điện Thoại & iPad:** Nút `💾 Lưu vào Setlist` được ưu tiên hiển thị ngay cạnh Tông & Tempo (vị trí thứ 4), không bị che khuất trên màn hình hẹp; cảm ứng chạm không độ trễ.
 - **🖨️ In Chương Trình A4:** 1-click in trang lịch tập A4 chuyên nghiệp.
 - **📋 Copy Slide:** Copy danh sách bài hát kèm Tông & BPM dán thẳng vào phần mềm trình chiếu nhà thờ (ProPresenter, EasyWorship).
 

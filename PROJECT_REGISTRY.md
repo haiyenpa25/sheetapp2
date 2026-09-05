@@ -11,19 +11,19 @@
 Tên dự án:   SheetApp — Ứng dụng đọc & biểu diễn bản nhạc
 Phiên bản:   v2.0-dev
 Ngày tạo:    2026-04-25
-Cập nhật:    2026-05-25
+Cập nhật:    2026-09-05
 
 Stack:
   Frontend:  Vanilla JS (ES6+ IIFE modules) + OSMD (OpenSheetMusicDisplay)
-  Backend:   PHP 8+ (MVC: Controller → Service → DB)
+  Backend:   PHP 8.1+ (MVC: Controller → Service → DB)
   Database:  SQLite (via PDO)
-  Server:    XAMPP (local) / Apache + PHP (production)
-  Deploy:    File copy lên server Apache
+  Server:    LiteSpeed / Apache / Nginx + PHP 8.1
+  Deploy:    Git Auto-sync (./sync.sh)
 
 Môi trường:
-  Dev URL:   http://localhost/SheetApp/
-  Prod URL:  [production URL]
-  DB Path:   storage/data/sheetapp.sqlite
+  Dev URL:   https://sheet.hyb.io.vn/
+  Prod URL:  https://sheet.hyb.io.vn/
+  DB Path:   storage/data/app.sqlite
   OMR URL:   http://localhost:5555 (Docker service)
 ```
 
@@ -33,17 +33,19 @@ Môi trường:
 
 ```
 SheetApp/
-├── AI_AGENT.md               ← Đọc đầu tiên (quy tắc làm việc)
-├── CODING_STANDARDS.md       ← Đọc thứ hai (tiêu chuẩn code)
-├── PROJECT_REGISTRY.md       ← File này. Cập nhật thường xuyên.
+├── AI_AGENT.md               ← Đọc đầu tiên (quy tắc làm việc & Core Rules)
+├── CODING_STANDARDS.md       ← Đọc thứ hai (tiêu chuẩn code, EventBus, API)
+├── PROJECT_REGISTRY.md       ← File này. Bản đồ dự án & lịch sử thay đổi.
+├── CODE_MAP.md               ← Bản đồ tri thức codebase (tự sinh bởi Gitnexus)
 ├── INFO.md                   ← Tài liệu tổng quan, sprint plan, keyboard shortcuts
+├── sync.sh                   ← Auto-sync script (cập nhật CODE_MAP.md & push GitHub)
 │
 ├── index.php                 ← Entry point HTML (PHP partial includes)
 ├── includes/                 ← PHP view partials
 │   ├── toolbar.php           # Top toolbar: audio, scroll, compact controls
-│   ├── sidebar.php           # Sidebar: thư viện bài hát
+│   ├── sidebar.php           # Sidebar: thư viện bài hát & setlist
 │   ├── sheet_viewer.php      # Page-bar + OSMD container
-│   └── modals.php            # Tất cả modal dialogs
+│   └── modals.php            # Tất cả modal dialogs (TransposePick, TempoPick, Help...)
 │
 ├── api/                      ← Backend PHP REST API
 │   ├── index.php             # Front Controller / Router (switch route)
@@ -79,12 +81,16 @@ SheetApp/
 │
 ├── assets/
 │   ├── css/
-│   │   └── sheet.css         ← CSS duy nhất của app (không tạo file CSS khác)
+│   │   ├── sheet.css         ← CSS chính: OSMD viewer, song info strip, chord overlay
+│   │   ├── base.css          ← CSS nền tảng: typography, reset, variables
+│   │   ├── layout.css        ← Layout: sidebar, toolbar, responsive drawer
+│   │   └── components.css    ← UI components: buttons, inputs, modal dialogs
 │   └── js/
 │       ├── core/             # Load đầu tiên, toàn bộ app phụ thuộc
 │       │   ├── ApiService.js # Centralized HTTP client (mọi fetch đi qua đây)
 │       │   ├── EventBus.js   # Pub/Sub — giao tiếp giữa modules
-│       │   └── Store.js      # Centralized state (currentSong, transpose, zoom)
+│       │   ├── Store.js      # Centralized state (currentSong, transpose, zoom)
+│       │   └── ServiceWorkerManager.js # PWA offline caching & service worker lifecycle
 │       │
 │       ├── app.js            # App bootstrap + init sequence
 │       ├── app-ui.js         # UI state: toolbar, FAB, fullscreen
@@ -96,12 +102,14 @@ SheetApp/
 │       ├── annotation-canvas.js # Sticky note annotations
 │       ├── audio-player.js   # MIDI playback (OSMD Web Audio)
 │       ├── auto-scroller.js  # Lerp scroll + BPM sync
+│       ├── metronome.js      # Máy đếm nhịp Pro Web Audio + TAP tempo
 │       ├── transpose-engine.js # Math: semitone, capo, enharmonic
 │       ├── library-ui.js     # Song list + search + favorites
-│       ├── setlist-ui.js     # Setlist management UI
+│       ├── setlist-ui.js     # Setlist management UI (Tông tập, Tempo tập)
 │       ├── session-tracker.js # Buổi chơi tracker
 │       ├── performance-notes.js # Nhật ký biểu diễn per-song
-│       ├── song-info-bar.js  # Info bar: key, time sig, tempo
+│       ├── song-info-bar.js  # Info bar: key, tempo click, quick save, setlist
+│       ├── live-sync.js      # Realtime Band Sync (Host / Client)
 │       ├── display-settings.js # Compact mode, staff visibility
 │       ├── page-nav.js       # Page navigation controls
 │       ├── keyboard-handler.js # Keyboard shortcuts
@@ -166,12 +174,15 @@ SheetApp/
 
 | File | Chức năng chính | Emit events | Lắng nghe events |
 |------|-----------------|-------------|-----------------|
-| `app.js` | Bootstrap, init order | - | `song:selected` |
+| `app.js` | Bootstrap, init order | `transpose:changed` | `song:selected` |
 | `song-loader.js` | Fetch XML, init song | `song:loaded`, `song:cleared` | `song:selected` |
 | `osmd-renderer.js` | Render OSMD SVG | - | `song:loaded`, `zoom:changed` |
 | `chord-canvas.js` | Chord overlay | `chord:saved` | `song:loaded`, `transpose:changed` |
 | `audio-player.js` | MIDI playback | - | `song:loaded` |
 | `auto-scroller.js` | Lerp scroll | - | `song:loaded` |
+| `metronome.js` | Web Audio Metronome & TAP | `metronome:bpm` | `song:loaded` |
+| `song-info-bar.js` | Tông, Tempo tương tác, Lưu Setlist | `tempo:changed` | `song:loaded`, `transpose:changed`, `metronome:bpm` |
+| `setlist-ui.js` | Setlist UI, chọn Tông & Tempo tập | `setlist:changed` | `song:loaded` |
 | `library-ui.js` | Song list UI | `song:selected` | - |
 | `app-ui.js` | Toolbar, zoom, fullscreen | `transpose:changed`, `zoom:changed` | `song:loaded` |
 
@@ -202,7 +213,8 @@ SheetApp/
 | `setlists` | GET | - | `{data: Setlist[]}` | Tất cả setlist |
 | `setlists` | GET | `?id=X` | `{data: Setlist}` | 1 setlist |
 | `setlists` | POST | `{name, ...}` | `{data: Setlist}` | Tạo setlist |
-| `setlists` | POST | `?action=add_item` + body | `{success}` | Thêm bài vào setlist |
+| `setlists` | POST | `?action=add_item` + `{setlist_id, song_id, order_index, chord_profile, transpose_key, bpm, beats_per_measure}` | `{success}` | Thêm bài vào setlist kèm Tông và Tempo |
+| `setlists` | PATCH / POST | `?action=update_item&id=X` + `{bpm, beats_per_measure, transpose_key, chord_profile}` | `{success}` | Cập nhật thông số tập (Tông, Tempo) của bài trong setlist |
 | `setlists` | DELETE | `?id=X` | `{success}` | Xóa setlist |
 | `setlists` | DELETE | `?action=remove_item&id=X` | `{success}` | Xóa item |
 | `categories` | GET | - | `{data: Category[]}` | Danh mục |
@@ -236,7 +248,7 @@ SheetApp/
 | `annotations` | `id, song_id, measure_idx, note_idx, text` | Sticky notes |
 | `sessions` | `id, song_id, user_id, user_settings_json, perf_notes_json` | Per-user per-song |
 | `setlists` | `id, name, user_id` | Header |
-| `setlist_items` | `id, setlist_id, song_id, position, transpose_override` | Items |
+| `setlist_items` | `id, setlist_id, song_id, order_index, chord_profile, transpose_key, bpm, beats_per_measure` | Items trong Setlist kèm Tông tập & Tempo tập |
 | `categories` | `id, name, sort_order` | Danh mục bài |
 | `users` | `id, username, password_hash, role` | `role: 'admin'\|'user'` |
 | `omr_jobs` | `id, filename, status, result_xml` | OMR processing queue |
@@ -317,6 +329,15 @@ SheetApp/
 ## 9 · NHẬT KÝ CẬP NHẬT
 
 > AI Agent cập nhật mục này sau mỗi phiên làm việc
+
+[2026-09-05] — Nâng cấp chỉnh sửa Tempo (BPM) & Tối ưu giao diện lưu Setlist trên Điện thoại, iPad
+  ~ Sửa: includes/modals.php (Tạo #tempo-pick-modal với Slider 40-220, nút +/-, TAP tempo, Presets, Test nhịp; Nâng cấp #transpose-pick-modal chọn trước cả Tông tập và Tempo tập; Thêm window.TempoPick API)
+  ~ Sửa: assets/js/song-info-bar.js (Chip Tempo [♩ = ... bpm ✎] tương tác mở TempoPick; Dời nút [💾 Lưu vào Setlist] lên vị trí thứ 4 ưu tiên hiển thị trên mobile/iPad; Bỏ rào cản isAdmin chặn lưu setlist; Lắng nghe metronome:bpm realtime)
+  ~ Sửa: assets/js/setlist-ui.js (addSongToSetlist gửi cả Tông & Tempo; Bỏ chặn isAdmin cho nút [💾 Lưu Tập]; Click nhãn BPM để đổi nhanh; Hiển thị đồng bộ cả Tông gốc và Tông tập 'Tone: G | Tập: A')
+  ~ Sửa: assets/js/metronome.js (Bổ sung EventBus.emit('metronome:bpm', { bpm }) khi thay đổi tốc độ)
+  ~ Sửa: assets/css/sheet.css (Tối ưu cảm ứng mobile/iPad: touch-action manipulation, -webkit-overflow-scrolling touch, nút lưu xanh lá nổi bật, touch targets >= 32px)
+  ✅ Khắc phục triệt để lỗi không chỉnh được Tempo từ thanh thông tin.
+  ✅ Khắc phục lỗi khó bấm / bị ẩn nút lưu Setlist trên iPhone và iPad.
 
 [2026-09-05] — Rà soát toàn diện dự án & Chuẩn hóa Transpose Event Flow
   ~ Sửa: assets/js/app.js (Bổ sung EventBus.emit('transpose:changed', { value }) khi set/reset/relative transpose)

@@ -134,6 +134,10 @@ Database (SQLite): songs | annotations | chord_sets | users | sessions
 [x] Tao/quan ly Setlist
 [x] Nhat ky buoi choi (Session)
 [x] Luu transpose per-session
+[x] Dong bo Tong tap va Tempo tap trong Setlist
+[x] Hien thi song song Tong goc va Tong tap (Tone: G | Tap: A)
+[x] Chon Tong tap va Tempo tap khi them bai vao Setlist
+[x] Luu nhanh thong so tap (BPM, Tong) tren mobile/iPad
 
 ### 3.11 Import
 [x] Upload MusicXML
@@ -146,7 +150,9 @@ Database (SQLite): songs | annotations | chord_sets | users | sessions
 [x] Keyboard shortcuts day du
 [x] Mobile responsive (<768px compact)
 [x] Print CSS (chord overlay + annotation)
-[ ] Song Info Card (key/tempo khi load bai) — CHUA CO
+[x] Song Info Strip (key/tempo tuong tac khi load bai) — DA HOAN THANH
+[x] TempoPick popup (slider, TAP tempo, test nhip) — DA HOAN THANH
+[x] Toi uu nut Luu Setlist tren mobile & iPad (vi tri uu tien top 4, touch target >= 32px) — DA HOAN THANH
 [ ] Measure progress indicator — CHUA CO
 
 ---

@@ -97,6 +97,13 @@ Nếu yêu cầu mơ hồ hoặc thiếu thông tin → **hỏi ngay**, không t
 - Khi xóa set khác đang chọn: fallback về "HD" (không phải default)
 - **File:** `chord-canvas.js` (deleteSet, _refreshSetDropdown)
 
+### RULE 4: Đồng Bộ Tông & Tempo Trong Setlist (Setlist Practice Synchronization)
+- Khi phát bài từ Setlist (`playCurrentItem`): BẮT BUỘC áp dụng đúng `chord_profile`, `transpose_key` và `bpm` đã lưu cho bài đó.
+- Thanh thông tin (`SongInfoBar`) luôn hiển thị rõ ràng cả Tông gốc và Tông tập (`Tông: G | Tập: A`) và Tempo tương tác (`[♩ = ... bpm ✎]`).
+- Khi thêm bài hát vào Setlist: Modal xác nhận (`TransposePick`) phải hỗ trợ chọn cả Tông tập và Tempo tập trước khi lưu vào Setlist.
+- Nút lưu Setlist (`💾 Lưu vào Setlist` và `💾 Lưu Tập`) không bị chặn bởi điều kiện `isAdmin`, ưu tiên đặt ở vị trí dễ bấm trên màn hình điện thoại & iPad.
+- **File:** `setlist-ui.js`, `song-info-bar.js`, `includes/modals.php`
+
 ---
 
 ## 3 · CÁCH ĐỌC & VIẾT CODE
@@ -218,5 +225,5 @@ Checklist đầu phiên:
 
 ---
 
-*Cập nhật: 2026-05-15 | SheetApp v2.0-dev*
+*Cập nhật: 2026-09-05 | SheetApp v2.0-dev*
 *AI Agent: Sau khi đọc xong, tiếp tục đọc CODING_STANDARDS.md và PROJECT_REGISTRY.md.*

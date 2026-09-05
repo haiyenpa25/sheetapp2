@@ -176,11 +176,14 @@ ChordCanvas.onSongLoaded(song); // coupling chặt, khó bảo trì
 | Event | Payload | Emit bởi | Lắng nghe bởi |
 |-------|---------|----------|---------------|
 | `song:selected` | `{ song }` | library-ui | app.js |
-| `song:loaded` | `{ song, xml }` | song-loader | osmd-renderer, chord-canvas, ... |
+| `song:loaded` | `{ song, xml }` | song-loader | osmd-renderer, chord-canvas, metronome, ... |
 | `song:cleared` | `{}` | app.js | tất cả modules |
-| `transpose:changed` | `{ value }` | app-ui | chord-canvas, transpose-engine |
+| `transpose:changed` | `{ value }` | app.js, app-ui | chord-canvas, transpose-engine, song-info-bar |
 | `zoom:changed` | `{ value }` | app-ui | osmd-renderer |
 | `chord:saved` | `{ measureIdx, noteIdx, chord }` | chord-canvas | chord-canvas-xml |
+| `metronome:bpm` | `{ bpm }` | metronome | song-info-bar, setlist-ui |
+| `tempo:changed` | `{ bpm }` | song-info-bar | metronome |
+| `setlist:changed` | `{}` | setlist-ui | song-info-bar |
 
 ### 2.5 Store — State tập trung
 
@@ -367,6 +370,12 @@ Mọi mặc định nghiệp vụ cốt lõi (như quy tắc "Bộ hợp âm HD 
 1. **Database Schema:** Cột lưu trữ có giá trị mặc định khớp quy tắc (hoặc cho phép null/default).
 2. **PHP Controller:** Khi parse request, nếu client không truyền, phải gán fallback về đúng bộ mặc định (vd: `'HD'`).
 3. **JS Client:** Khi gửi API tạo/thêm bản ghi, chủ động truyền cấu hình đang hiển thị để bảo toàn trạng thái trực quan của người dùng.
+
+### 4.6 Thao tác Di động & Tablet (Mobile & Touch Accessibility)
+
+1. **Vùng chạm tối thiểu (Touch Target Size):** Mọi nút bấm hoặc chip tương tác (như nút Lưu Setlist, Lưu Tập, Chỉnh Tempo, Đổi tông) phải có chiều cao tối thiểu 32px-36px, đệm padding vừa vặn cho ngón tay và có thuộc tính `touch-action: manipulation` để triệt tiêu độ trễ 300ms của iOS Safari/iPadOS.
+2. **Thứ tự ưu tiên trên dải cuộn ngang (`SongInfoBar`):** Các nút thao tác quan trọng nhất của người dùng (Setlist, Tông, Tempo, Nút Lưu vào Setlist) phải được xếp ở nhóm đầu tiên (top 4) để hiển thị tức thì trên các màn hình có chiều ngang hẹp (375px - 768px).
+3. **Không khóa quyền tùy tiện trên giao diện (Permission Guarding):** Việc lưu Tông tập, Tempo tập và ghi chú bài hát phục vụ ca đoàn và ban nhạc không được chặn bởi điều kiện `isAdmin` ở frontend khi API backend cho phép.
 
 ---
 
