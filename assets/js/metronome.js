@@ -308,10 +308,13 @@ const Metronome = (() => {
   }
 
   function setBpm(val) {
-    const num = parseInt(val);
+    const num = parseInt(val, 10);
     if (num >= 30 && num <= 250) {
       _bpm = num;
       _updateBpmUI();
+      if (typeof EventBus !== 'undefined') {
+        EventBus.emit('metronome:bpm', { bpm: _bpm });
+      }
     }
   }
 
@@ -419,6 +422,9 @@ const Metronome = (() => {
     if (beats && beats >= 1 && beats <= 12) _beatsPerMeasure = beats;
     _updateBpmUI();
     _renderBeatDots();
+    if (typeof EventBus !== 'undefined') {
+      EventBus.emit('metronome:bpm', { bpm: _bpm });
+    }
   }
 
   function setBeatsPerMeasure(beats) {

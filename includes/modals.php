@@ -257,15 +257,83 @@
         <button class="tp-btn" data-v="5">+5</button>
       </div>
       
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:1.15rem;background:var(--bg-overlay);padding:6px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.85rem;background:var(--bg-overlay);padding:6px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);">
         <label style="font-size:.82rem;color:var(--text-secondary);font-weight:500;">Tùy chỉnh số nửa cung:</label>
         <input id="transpose-pick-custom" type="number" min="-12" max="12" value="0"
           class="form-input" style="width:75px;text-align:center;font-size:.95rem;font-weight:700;height:32px;">
+      </div>
+
+      <!-- Chọn Tempo / BPM khi thêm bài vào Setlist -->
+      <div style="margin-bottom:1.15rem;background:var(--bg-overlay);padding:8px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <label style="font-size:.82rem;color:var(--text-secondary);font-weight:600;">⏱️ Tốc độ (Tempo / BPM):</label>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <button type="button" id="tp-bpm-dec" style="width:28px;height:28px;font-size:.9rem;font-weight:700;border:1px solid var(--border);border-radius:4px;background:var(--bg-surface);cursor:pointer;" title="Giảm 1 BPM">−</button>
+            <input id="transpose-pick-bpm" type="number" min="30" max="250" value="100" class="form-input" style="width:65px;text-align:center;font-size:.95rem;font-weight:700;height:30px;">
+            <button type="button" id="tp-bpm-inc" style="width:28px;height:28px;font-size:.9rem;font-weight:700;border:1px solid var(--border);border-radius:4px;background:var(--bg-surface);cursor:pointer;" title="Tăng 1 BPM">+</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:4px;">
+          <button type="button" class="tp-bpm-preset" data-bpm="68" style="flex:1;font-size:.7rem;padding:3px 0;border:1px solid var(--border);border-radius:4px;background:var(--bg-surface);cursor:pointer;">68 Chậm</button>
+          <button type="button" class="tp-bpm-preset" data-bpm="80" style="flex:1;font-size:.7rem;padding:3px 0;border:1px solid var(--border);border-radius:4px;background:var(--bg-surface);cursor:pointer;">80 Vừa</button>
+          <button type="button" class="tp-bpm-preset" data-bpm="100" style="flex:1;font-size:.7rem;padding:3px 0;border:1px solid var(--border);border-radius:4px;background:var(--bg-surface);cursor:pointer;">100 Nhanh</button>
+          <button type="button" class="tp-bpm-preset" data-bpm="120" style="flex:1;font-size:.7rem;padding:3px 0;border:1px solid var(--border);border-radius:4px;background:var(--bg-surface);cursor:pointer;">120 Rộn</button>
+        </div>
       </div>
       
       <div style="display:flex;gap:.5rem;">
         <button id="btn-transpose-pick-cancel" class="btn btn-ghost" style="flex:1;">Hủy</button>
         <button id="btn-transpose-pick-ok" class="btn btn-primary" style="flex:2;">✓ Xác Nhận & Mở Bài</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TEMPO PICK MODAL (Chỉnh Tốc Độ BPM Trực Quan) ===== -->
+<div id="tempo-pick-modal" class="modal-overlay hidden">
+  <div class="modal-box" style="max-width:360px;">
+    <div class="modal-header">
+      <div style="display:flex;align-items:center;gap:.6rem;">
+        <span style="font-size:1.25rem;">⏱️</span>
+        <h3 style="margin:0;font-size:1.05rem;">Chỉnh Tốc Độ (Tempo / BPM)</h3>
+      </div>
+      <button id="btn-close-tempo-pick" class="icon-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <!-- BPM Value Display -->
+      <div style="display:flex;align-items:center;justify-content:center;gap:.75rem;padding:1rem;background:linear-gradient(135deg, rgba(16,185,129,0.08), rgba(59,130,246,0.08));border:1px solid rgba(16,185,129,0.25);border-radius:var(--radius-md);margin-bottom:1rem;text-align:center;">
+        <button id="tempo-modal-dec" class="tempo-btn" style="width:38px;height:38px;font-size:1.3rem;font-weight:700;border:1px solid var(--border);border-radius:8px;background:var(--bg-surface);cursor:pointer;touch-action:manipulation;">−</button>
+        <div style="display:flex;flex-direction:column;align-items:center;min-width:100px;">
+          <span id="tempo-modal-val" style="font-size:2.2rem;font-weight:900;color:var(--text-primary);line-height:1;">104</span>
+          <span style="font-size:.75rem;color:var(--text-muted);font-weight:700;margin-top:4px;">BPM</span>
+        </div>
+        <button id="tempo-modal-inc" class="tempo-btn" style="width:38px;height:38px;font-size:1.3rem;font-weight:700;border:1px solid var(--border);border-radius:8px;background:var(--bg-surface);cursor:pointer;touch-action:manipulation;">+</button>
+      </div>
+
+      <!-- Slider -->
+      <div style="margin-bottom:1rem;">
+        <input type="range" id="tempo-modal-slider" min="40" max="220" value="104" style="width:100%;cursor:pointer;touch-action:manipulation;">
+      </div>
+
+      <!-- Presets -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:1rem;">
+        <button class="tempo-preset-btn" data-bpm="68" style="padding:.38rem 0;font-size:.75rem;font-weight:600;border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);cursor:pointer;">68 Chậm</button>
+        <button class="tempo-preset-btn" data-bpm="80" style="padding:.38rem 0;font-size:.75rem;font-weight:600;border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);cursor:pointer;">80 Vừa</button>
+        <button class="tempo-preset-btn" data-bpm="100" style="padding:.38rem 0;font-size:.75rem;font-weight:600;border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);cursor:pointer;">100 Nhanh</button>
+        <button class="tempo-preset-btn" data-bpm="120" style="padding:.38rem 0;font-size:.75rem;font-weight:600;border:1px solid var(--border);border-radius:6px;background:var(--bg-surface);cursor:pointer;">120 Rộn rã</button>
+      </div>
+
+      <!-- TAP Tempo & Metronome panel toggle -->
+      <div style="display:flex;gap:6px;margin-bottom:1.2rem;">
+        <button id="tempo-modal-tap" class="btn btn-ghost" style="flex:1;font-weight:700;letter-spacing:.5px;border:1px solid #10b981;color:#10b981;touch-action:manipulation;">👆 TAP TEMPO</button>
+        <button id="tempo-modal-metronome" class="btn btn-ghost" style="flex:1;font-weight:600;" title="Mở bảng gõ nhịp chi tiết">🔊 Bật Nhịp</button>
+      </div>
+
+      <div style="display:flex;gap:.5rem;">
+        <button id="btn-tempo-pick-cancel" class="btn btn-ghost" style="flex:1;">Hủy</button>
+        <button id="btn-tempo-pick-ok" class="btn btn-primary" style="flex:2;">✓ Áp Dụng Tempo</button>
       </div>
     </div>
   </div>
@@ -609,23 +677,141 @@
       });
     }
 
-    if (btnOk)     btnOk.addEventListener('click',    function() { closePick(_curSemi); });
+    var bpmIn = document.getElementById('transpose-pick-bpm');
+    var bpmDecBtn = document.getElementById('tp-bpm-dec');
+    var bpmIncBtn = document.getElementById('tp-bpm-inc');
+
+    if (bpmDecBtn && bpmIn) bpmDecBtn.addEventListener('click', function() {
+      bpmIn.value = Math.max(30, (parseInt(bpmIn.value, 10) || 100) - 1);
+    });
+    if (bpmIncBtn && bpmIn) bpmIncBtn.addEventListener('click', function() {
+      bpmIn.value = Math.min(250, (parseInt(bpmIn.value, 10) || 100) + 1);
+    });
+    document.querySelectorAll('.tp-bpm-preset').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        if (bpmIn) bpmIn.value = btn.dataset.bpm;
+      });
+    });
+
+    if (btnOk) btnOk.addEventListener('click', function() {
+      var bpmVal = bpmIn ? (parseInt(bpmIn.value, 10) || null) : null;
+      closePick({
+        transpose: _curSemi,
+        transpose_key: _curSemi,
+        bpm: bpmVal,
+        valueOf: function() { return _curSemi; }
+      });
+    });
     if (btnCancel) btnCancel.addEventListener('click', function() { closePick(null); });
     if (btnClose)  btnClose.addEventListener('click',  function() { closePick(null); });
     if (modal)     modal.addEventListener('click', function(e) { if (e.target === modal) closePick(null); });
 
-    /* Public API: window.TransposePick.show(songName, defaultVal, origKey) → Promise<number|null> */
+    /* Public API: window.TransposePick.show(songName, defaultVal, origKey, defaultBpm) → Promise<object|null> */
     window.TransposePick = {
-      show: function(songName, defaultVal, origKey) {
-        if (!modal) return Promise.resolve(0);
+      show: function(songName, defaultVal, origKey, defaultBpm) {
+        if (!modal) return Promise.resolve({ transpose: 0, transpose_key: 0, bpm: defaultBpm || 100 });
         _origKey = origKey ? String(origKey).trim() : '';
         var defV = defaultVal !== undefined ? (parseInt(defaultVal, 10) || 0) : 0;
         _updatePreview(defV);
+        if (bpmIn) {
+          bpmIn.value = (defaultBpm && parseInt(defaultBpm, 10)) ? parseInt(defaultBpm, 10) : 100;
+        }
         var nameEl = document.getElementById('transpose-pick-song-name');
         if (nameEl) nameEl.textContent = songName ? ('🎵 ' + songName) : 'Bài hát';
         modal.classList.remove('hidden');
         setTimeout(function() { if (customIn) customIn.select(); }, 80);
         return new Promise(function(resolve) { _cb = resolve; });
+      }
+    };
+  });
+
+  /* Script for Tempo Picker (window.TempoPick) */
+  document.addEventListener('DOMContentLoaded', function() {
+    var tModal    = document.getElementById('tempo-pick-modal');
+    var tValEl    = document.getElementById('tempo-modal-val');
+    var tSlider   = document.getElementById('tempo-modal-slider');
+    var tDecBtn   = document.getElementById('tempo-modal-dec');
+    var tIncBtn   = document.getElementById('tempo-modal-inc');
+    var tTapBtn   = document.getElementById('tempo-modal-tap');
+    var tMetroBtn = document.getElementById('tempo-modal-metronome');
+    var tOkBtn    = document.getElementById('btn-tempo-pick-ok');
+    var tCancelBtn= document.getElementById('btn-tempo-pick-cancel');
+    var tCloseBtn = document.getElementById('btn-close-tempo-pick');
+
+    var _tCb = null;
+    var _curBpm = 100;
+    var _tapTimes = [];
+
+    function _setBpmUI(bpm) {
+      bpm = Math.max(30, Math.min(250, parseInt(bpm, 10) || 100));
+      _curBpm = bpm;
+      if (tValEl) tValEl.textContent = bpm;
+      if (tSlider) tSlider.value = bpm;
+      document.querySelectorAll('.tempo-preset-btn').forEach(function(b) {
+        b.classList.toggle('active', parseInt(b.dataset.bpm, 10) === bpm);
+      });
+    }
+
+    function _closeTempo(val) {
+      if (tModal) tModal.classList.add('hidden');
+      if (_tCb) { _tCb(val); _tCb = null; }
+    }
+
+    if (tDecBtn) tDecBtn.addEventListener('click', function() { _setBpmUI(_curBpm - 1); });
+    if (tIncBtn) tIncBtn.addEventListener('click', function() { _setBpmUI(_curBpm + 1); });
+    if (tSlider) tSlider.addEventListener('input', function(e) { _setBpmUI(e.target.value); });
+
+    document.querySelectorAll('.tempo-preset-btn').forEach(function(b) {
+      b.addEventListener('click', function() {
+        _setBpmUI(parseInt(b.dataset.bpm, 10));
+      });
+    });
+
+    if (tTapBtn) {
+      tTapBtn.addEventListener('click', function() {
+        var now = performance.now();
+        if (_tapTimes.length > 0 && (now - _tapTimes[_tapTimes.length - 1] > 2000)) {
+          _tapTimes = [];
+        }
+        _tapTimes.push(now);
+        if (_tapTimes.length >= 2) {
+          var totalDiff = 0;
+          for (var i = 1; i < _tapTimes.length; i++) {
+            totalDiff += (_tapTimes[i] - _tapTimes[i - 1]);
+          }
+          var avgInterval = totalDiff / (_tapTimes.length - 1);
+          var calcBpm = Math.round(60000 / avgInterval);
+          if (calcBpm >= 30 && calcBpm <= 250) {
+            _setBpmUI(calcBpm);
+          }
+        }
+      });
+    }
+
+    if (tMetroBtn) {
+      tMetroBtn.addEventListener('click', function() {
+        if (window.Metronome) {
+          window.Metronome.setBpm(_curBpm);
+          window.Metronome.togglePlay();
+          tMetroBtn.textContent = window.Metronome.togglePlay ? '🔊 Bật / Tắt' : '🔊 Bật Nhịp';
+        }
+      });
+    }
+
+    if (tOkBtn) tOkBtn.addEventListener('click', function() { _closeTempo(_curBpm); });
+    if (tCancelBtn) tCancelBtn.addEventListener('click', function() { _closeTempo(null); });
+    if (tCloseBtn) tCloseBtn.addEventListener('click', function() { _closeTempo(null); });
+    if (tModal) tModal.addEventListener('click', function(e) { if (e.target === tModal) _closeTempo(null); });
+
+    /* Public API: window.TempoPick.show(currentBpm) → Promise<number|null> */
+    window.TempoPick = {
+      show: function(currentBpm) {
+        if (!tModal) return Promise.resolve(currentBpm || 100);
+        var defBpm = parseInt(currentBpm, 10) || (window.Metronome ? window.Metronome.getBpm() : 100);
+        _setBpmUI(defBpm);
+        _tapTimes = [];
+        tModal.classList.remove('hidden');
+        return new Promise(function(resolve) { _tCb = resolve; });
       }
     };
   });

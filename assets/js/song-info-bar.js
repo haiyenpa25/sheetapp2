@@ -1,16 +1,13 @@
 /**
  * song-info-bar.js — Sprint A1 & Consolidated Single Row
  * Strip thông tin bài nhạc hiển thị trên 1 DÒNG DUY NHẤT:
- * - Tông gốc & Tông tập (Tone: G | Tập: A (+2))
- * - Số chỉ nhịp (2/4, 4/4)
- * - Tốc độ (BPM)
- * - Số ô nhịp
- * - Bộ hợp âm đang chọn
- * - Ghi chú vắn tắt
- * - Nút ✎ Nhật ký
- * - Nút 💾 Lưu vào Setlist (khi đang trong Setlist)
+ * - Tông gốc & Tông tập (Tone: G | Tập: A (+2)) -> Click để đổi tông
+ * - Tốc độ (♩ = 104 bpm ✎) -> Click để đổi Tempo / mở Gõ Nhịp
+ * - Nút 💾 Lưu vào Setlist (Luôn ưu tiên hiển thị ngay đầu trên mobile/iPad khi đang trong Setlist)
+ * - Nút ✎ Sửa nhật ký
+ * - Số chỉ nhịp (2/4, 4/4), Số ô nhịp, Bộ hợp âm, Ghi chú
  *
- * Tự động cập nhật Tông tập realtime khi người dùng bấm dịch giọng trên toolbar.
+ * Tự động cập nhật Tông tập và Tempo realtime khi người dùng bấm dịch giọng hoặc chỉnh nhịp.
  */
 const SongInfoBar = (() => {
   'use strict';
@@ -28,6 +25,10 @@ const SongInfoBar = (() => {
       });
       EventBus.on('state:currentTranspose', ({ value }) => {
         _updateToneChip(value);
+      });
+      // Lắng nghe sự kiện đổi BPM từ Metronome / TempoPick để cập nhật tức thì
+      EventBus.on('metronome:bpm', ({ bpm }) => {
+        _updateTempoChip(bpm);
       });
     }
   }
@@ -156,7 +157,7 @@ const SongInfoBar = (() => {
       chips.push(`<span class="si-chip si-setlist-chip" title="Bài trong Setlist: ${_esc(setlist.title)}">📋 Setlist: Bài ${idx + 1}/${setlist.items.length}</span>`);
     }
 
-    // 2. Chip Tông: TÔNG GỐC VÀ TÔNG TẬP
+    // 2. Chip Tông: TÔNG GỐC VÀ TÔNG TẬP (Click để đổi nhanh)
     const origKey = _songData.key || window.Store?.get?.('currentSong')?.defaultKey || '';
     const curTranspose = window.Store?.get?.('currentTranspose') ?? 0;
     const practicedKey = _calcPracticedKey(origKey, curTranspose);
@@ -174,12 +175,7 @@ const SongInfoBar = (() => {
     }
     chips.push(`<span class="si-chip si-key" id="si-tone-chip" title="Click để chọn tông tập nhanh">${toneHtml}</span>`);
 
-    // 3. Số chỉ nhịp
-    if (_songData.timeBeats && _songData.timeBeatType) {
-      chips.push(`<span class="si-chip si-time" title="Số chỉ nhịp">♩ ${_songData.timeBeats}/${_songData.timeBeatType}</span>`);
-    }
-
-    // 4. Tempo / BPM
+    // 3. Chip Tempo / BPM (Click để chỉnh nhanh hoặc mở Gõ Nhịp)
     let effectiveBpm = null;
     if (inSetlist && setlist?.items?.[idx]?.bpm) {
       effectiveBpm = setlist.items[idx].bpm;
@@ -188,16 +184,31 @@ const SongInfoBar = (() => {
     } else if (_songData.tempo) {
       effectiveBpm = _songData.tempo;
     }
-    if (effectiveBpm) {
-      chips.push(`<span class="si-chip si-tempo" title="Tốc độ nhịp">♩ = ${effectiveBpm} bpm</span>`);
+    const bpmDisplay = effectiveBpm || 100;
+    chips.push(`<span class="si-chip si-tempo" id="si-tempo-chip" style="cursor:pointer;" title="Click để chỉnh Tempo (BPM) / Gõ nhịp">♩ = <strong>${bpmDisplay}</strong> bpm <span style="font-size:0.75em;opacity:0.8;">✎</span></span>`);
+
+    // 4. ⭐ NÚT LƯU VÀO SETLIST: ĐƯA LÊN NGAY SAU TÔNG & TEMPO ĐỂ HIỆN RÕ TRÊN MOBILE / IPAD
+    if (inSetlist) {
+      chips.push(`<button class="si-chip-btn si-btn-save-setlist" id="si-ni-save-setlist-btn" title="Lưu nhanh Tông và Tempo đang tập vào bài này trong Setlist">💾 Lưu vào Setlist</button>`);
     }
 
-    // 5. Số ô nhịp
+    // 5. Nút ✎ Nhật ký
+    if (canEdit) {
+      const hasData = Boolean(notes.key || notes.bpm || notes.text);
+      chips.push(`<button class="si-chip-btn si-btn-edit" id="si-ni-edit-btn" title="Ghi chú & Nhật ký bài tập">✎ ${hasData ? 'Sửa nhật ký' : 'Nhật ký'}</button>`);
+    }
+
+    // 6. Số chỉ nhịp
+    if (_songData.timeBeats && _songData.timeBeatType) {
+      chips.push(`<span class="si-chip si-time" title="Số chỉ nhịp">♩ ${_songData.timeBeats}/${_songData.timeBeatType}</span>`);
+    }
+
+    // 7. Số ô nhịp
     if (_songData.measureCount) {
       chips.push(`<span class="si-chip si-measures" title="Tổng số ô nhịp">${_songData.measureCount} nhịp</span>`);
     }
 
-    // 6. Bộ hợp âm
+    // 8. Bộ hợp âm
     const currentSet = window.ChordCanvas?.getCurrentSet?.();
     const chordCount = Object.keys(window.ChordCanvas?.getCustomChords?.() ?? {}).length;
     if (currentSet && currentSet !== 'default') {
@@ -208,21 +219,10 @@ const SongInfoBar = (() => {
       chips.push(`<span class="si-chip si-chord-set" title="Hợp âm từ TLH (gốc)">🎸 TLH (gốc)</span>`);
     }
 
-    // 7. Ghi chú vắn tắt (nếu có)
+    // 9. Ghi chú vắn tắt (nếu có)
     if (notes.text) {
       const cleanNote = _esc(notes.text.replace(/\r?\n/g, ' '));
       chips.push(`<span class="si-chip si-notes" title="${_esc(notes.text)}">📝 ${cleanNote}</span>`);
-    }
-
-    // 8. Nút ✎ Nhật ký
-    if (canEdit) {
-      const hasData = Boolean(notes.key || notes.bpm || notes.text);
-      chips.push(`<button class="si-chip-btn si-btn-edit" id="si-ni-edit-btn" title="Ghi chú & Nhật ký bài tập">✎ ${hasData ? 'Sửa nhật ký' : 'Nhật ký'}</button>`);
-      
-      // 9. Nút 💾 Lưu vào Setlist (khi đang trong Setlist)
-      if (inSetlist) {
-        chips.push(`<button class="si-chip-btn si-btn-save-setlist" id="si-ni-save-setlist-btn" title="Lưu nhanh Tông và Tempo đang tập vào bài này trong Setlist">💾 Lưu vào Setlist</button>`);
-      }
     }
 
     inner.innerHTML = chips.join('');
@@ -233,16 +233,39 @@ const SongInfoBar = (() => {
       const songTitle = curSong?.title || _songData.title || 'Bài hát';
       const currentTranspose = window.Store?.get?.('currentTranspose') ?? 0;
       const oKey = _songData.key || curSong?.defaultKey || '';
+      const curBpm = window.Metronome?.getBpm?.() || effectiveBpm || 100;
 
       if (window.TransposePick) {
-        const newTrans = await window.TransposePick.show(songTitle, currentTranspose, oKey);
-        if (newTrans !== null && newTrans !== currentTranspose) {
-          if (window.App?.setTransposeDirect) {
-            window.App.setTransposeDirect(newTrans);
-          } else if (window.App?.transposeBy) {
-            window.App.transposeBy(newTrans - currentTranspose);
+        const res = await window.TransposePick.show(songTitle, currentTranspose, oKey, curBpm);
+        if (res !== null) {
+          const newTrans = typeof res === 'object' ? res.transpose : res;
+          if (newTrans !== null && newTrans !== currentTranspose) {
+            if (window.App?.setTransposeDirect) {
+              window.App.setTransposeDirect(newTrans);
+            } else if (window.App?.transposeBy) {
+              window.App.transposeBy(newTrans - currentTranspose);
+            }
+          }
+          if (typeof res === 'object' && res.bpm) {
+            window.Metronome?.setBpm?.(res.bpm);
+            _updateTempoChip(res.bpm);
           }
         }
+      }
+    });
+
+    // Wire sự kiện click vào Chip Tempo để đổi nhanh / gõ nhịp
+    document.getElementById('si-tempo-chip')?.addEventListener('click', async () => {
+      const curBpm = window.Metronome?.getBpm?.() || effectiveBpm || 100;
+      if (window.TempoPick) {
+        const newBpm = await window.TempoPick.show(curBpm);
+        if (newBpm && newBpm !== curBpm) {
+          window.Metronome?.setBpm?.(newBpm);
+          _updateTempoChip(newBpm);
+          window.App?.showToast?.(`⚡ Đã đặt Tempo: ♩ = ${newBpm} BPM`, 'info', 1500);
+        }
+      } else if (window.Metronome) {
+        window.Metronome.togglePanel();
       }
     });
 
@@ -251,14 +274,14 @@ const SongInfoBar = (() => {
       window.PerformanceNotes?.toggle?.();
     });
 
-    // Wire nút 💾 Lưu vào Setlist
+    // Wire nút 💾 Lưu vào Setlist (luôn hoạt động trên cả mobile và iPad)
     document.getElementById('si-ni-save-setlist-btn')?.addEventListener('click', async () => {
       const curSetlist = window.SetlistUI?.getCurrentSetlist?.();
       const currentIdx = window.SetlistUI?.getCurrentIndex?.();
       if (!curSetlist || !curSetlist.items || currentIdx === undefined || currentIdx < 0) return;
       const item = curSetlist.items[currentIdx];
       const curTranspose = window.Store?.get?.('currentTranspose') ?? 0;
-      const curBpm = window.Metronome?.getBpm?.() ?? null;
+      const curBpm = window.Metronome?.getBpm?.() ?? effectiveBpm ?? null;
       const curBeats = window.Metronome?.getBeatsPerMeasure?.() ?? 4;
 
       try {
@@ -319,6 +342,13 @@ const SongInfoBar = (() => {
     }
 
     toneChip.innerHTML = toneHtml;
+  }
+
+  /* Cập nhật chip Tempo khi BPM thay đổi từ Metronome / TempoPick */
+  function _updateTempoChip(bpm) {
+    const tempoChip = document.getElementById('si-tempo-chip');
+    if (!tempoChip || !bpm) return;
+    tempoChip.innerHTML = `♩ = <strong>${bpm}</strong> bpm <span style="font-size:0.75em;opacity:0.8;">✎</span>`;
   }
 
   /* Đọc notes từ PerformanceNotes cache */

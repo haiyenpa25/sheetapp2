@@ -174,9 +174,11 @@ const SetlistUI = (() => {
       const numStr = String(idx + 1).padStart(2, '0');
       const isAdmin = window.Auth && (window.Auth.isAdmin?.() || window.Auth.isBanhat?.());
       const origKey = songObj?.defaultKey || songObj?.keySignature || '';
-      const toneBadge = _formatToneBadge(origKey, item.transpose_key, isAdmin);
+      const toneBadge = _formatToneBadge(origKey, item.transpose_key, true);
       const chordBadge = item.chord_profile && item.chord_profile !== 'default' ? `<span class="tag">🎸 ${_esc(item.chord_profile)}</span>` : '';
-      const bpmBadge = item.bpm ? `<span class="tag tag-blue" title="${_esc(String(item.beats_per_measure || 4))}/4 nhịp">♩${_esc(String(item.bpm))} BPM</span>` : '';
+      const bpmBadge = item.bpm
+        ? `<span class="tag tag-blue btn-edit-bpm" style="cursor:pointer;" title="Click để đổi BPM">♩${_esc(String(item.bpm))} BPM ✎</span>`
+        : `<span class="tag btn-edit-bpm" style="cursor:pointer;opacity:0.8;" title="Click để đặt BPM">♩ BPM ✎</span>`;
 
       el.innerHTML = `
         <div class="song-item-info" style="flex:1;min-width:0;">
@@ -186,13 +188,13 @@ const SetlistUI = (() => {
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
-          ${isAdmin ? `<button class="icon-btn-xs btn-save-bpm" title="Lưu Tone & BPM đang tập vào bài này" style="color:var(--accent);font-size:.7rem;padding:.2rem .4rem;font-weight:600;">💾 Lưu Tập</button>` : ''}
+          <button class="icon-btn-xs btn-save-bpm" title="Lưu Tone & BPM đang tập vào bài này" style="color:var(--accent);font-size:.7rem;padding:.25rem .5rem;font-weight:700;touch-action:manipulation;">💾 Lưu Tập</button>
           <button class="icon-btn-xs text-danger btn-del-item" title="Xóa khỏi list">✕</button>
         </div>
       `;
       
       el.addEventListener('click', async (e) => {
-        if (e.target.closest('.btn-del-item') || e.target.closest('.btn-save-bpm') || e.target.closest('.btn-edit-tone')) return;
+        if (e.target.closest('.btn-del-item') || e.target.closest('.btn-save-bpm') || e.target.closest('.btn-edit-tone') || e.target.closest('.btn-edit-bpm')) return;
         _currentIndex = idx;
         await renderSetlistItems();
         playCurrentItem();
@@ -200,24 +202,55 @@ const SetlistUI = (() => {
 
       // Cho phép click vào tag Tone để chỉnh nhanh số cung dịch giọng cho bài này
       const toneBadgeBtn = el.querySelector('.btn-edit-tone');
-      if (toneBadgeBtn && isAdmin) {
+      if (toneBadgeBtn) {
         toneBadgeBtn.addEventListener('click', async (e) => {
           e.stopPropagation();
           if (window.TransposePick) {
             const currentSemi = parseInt(item.transpose_key, 10) || 0;
             const origKey = songObj?.defaultKey || songObj?.keySignature || '';
-            const newTranspose = await window.TransposePick.show(title, currentSemi, origKey);
-            if (newTranspose !== null && newTranspose !== currentSemi) {
+            const currentBpm = parseInt(item.bpm, 10) || 100;
+            const res = await window.TransposePick.show(title, currentSemi, origKey, currentBpm);
+            if (res !== null) {
+              const newTranspose = typeof res === 'object' ? res.transpose : res;
+              const newBpm = typeof res === 'object' ? res.bpm : null;
               try {
-                await window.ApiService.setlists.updateItem(item.id, { transpose_key: newTranspose });
+                const updateData = { transpose_key: newTranspose };
+                if (newBpm) updateData.bpm = newBpm;
+                await window.ApiService.setlists.updateItem(item.id, updateData);
                 item.transpose_key = newTranspose;
-                window.App?.showToast?.(`✅ Đã đổi tông tập cho "${title}"`, 'success');
+                if (newBpm) item.bpm = newBpm;
+                window.App?.showToast?.(`✅ Đã cập nhật cho "${title}"`, 'success');
                 await renderSetlistItems();
                 if (_currentIndex === idx) {
                   playCurrentItem();
                 }
               } catch (err) {
-                window.App?.showToast?.('Lỗi cập nhật tông', 'error');
+                window.App?.showToast?.('Lỗi cập nhật', 'error');
+              }
+            }
+          }
+        });
+      }
+
+      // Cho phép click vào tag BPM để chỉnh nhanh tempo cho bài này
+      const bpmBadgeBtn = el.querySelector('.btn-edit-bpm');
+      if (bpmBadgeBtn) {
+        bpmBadgeBtn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const currentBpm = parseInt(item.bpm, 10) || 100;
+          if (window.TempoPick) {
+            const newBpm = await window.TempoPick.show(currentBpm);
+            if (newBpm && newBpm !== currentBpm) {
+              try {
+                await window.ApiService.setlists.updateItem(item.id, { bpm: newBpm });
+                item.bpm = newBpm;
+                window.App?.showToast?.(`✅ Đã đổi BPM thành ${newBpm} cho "${title}"`, 'success');
+                await renderSetlistItems();
+                if (_currentIndex === idx && window.Metronome) {
+                  window.Metronome.setBpm(newBpm);
+                }
+              } catch (err) {
+                window.App?.showToast?.('Lỗi cập nhật BPM', 'error');
               }
             }
           }
@@ -370,10 +403,19 @@ const SetlistUI = (() => {
     const origKey = songObj?.defaultKey || songObj?.keySignature || '';
     const currentTranspose = window.Store?.get?.('currentTranspose') ?? 0;
 
-    let transpose_key;
+    const defaultBpm = window.Metronome?.getBpm?.() || songObj?.bpm || 80;
+
+    let transpose_key = 0;
+    let songBpm = defaultBpm;
     if (window.TransposePick) {
-      transpose_key = await window.TransposePick.show(songName, currentTranspose, origKey);
-      if (transpose_key === null) return; // Người dùng bấm Hủy
+      const pickRes = await window.TransposePick.show(songName, currentTranspose, origKey, defaultBpm);
+      if (pickRes === null) return; // Người dùng bấm Hủy
+      if (typeof pickRes === 'object') {
+        transpose_key = pickRes.transpose_key ?? 0;
+        songBpm = pickRes.bpm || defaultBpm;
+      } else {
+        transpose_key = parseInt(pickRes, 10) || 0;
+      }
     } else {
       // Fallback nếu modal chưa load
       const toneStr = prompt('Nhập số cung dịch giọng (vd: -2, 0, +1):', String(currentTranspose));
@@ -389,7 +431,8 @@ const SetlistUI = (() => {
         song_id: songId,
         order_index: songIndex,
         transpose_key: transpose_key,
-        chord_profile: currentSet
+        chord_profile: currentSet,
+        bpm: songBpm
       });
       if (data.success) {
         window.App?.showToast?.('Đã thêm bài hát vào Setlist!', 'success');
