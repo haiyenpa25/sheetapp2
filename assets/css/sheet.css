@@ -1173,100 +1173,141 @@ body.dark-mode .lvi-word-only {
 }
 
 /* =============================================
-   SPRINT A1 — Song Info Strip
+/* =============================================
+   SPRINT A1 — Song Info Strip (Single Row Consolidate)
    ============================================= */
 .song-info-strip {
-  display: flex; align-items: center; gap: .5rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
   background: linear-gradient(90deg, #f0f4ff 0%, #f8f6ff 100%);
   border-bottom: 1px solid #e5e7eb;
   padding: .2rem .75rem;
-  font-size: .75rem; color: #4b5563;
-  min-height: 30px; flex-shrink: 0;
+  font-size: .75rem;
+  color: #4b5563;
+  min-height: 32px;
+  flex-shrink: 0;
   transition: all .2s ease;
+  overflow: hidden;
 }
-.song-info-strip.si-hidden { display: none; }
-.si-inner { display: flex; align-items: center; gap: .35rem; flex-wrap: wrap; flex: 1; }
-.si-top-row.si-collapsed { display: none; }
+.song-info-strip.si-hidden { display: none !important; }
+.si-inner {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex: 1;
+  min-width: 0;
+}
+.si-inner::-webkit-scrollbar { display: none; }
+.si-inner.si-collapsed { display: none !important; }
 
 .si-chip {
-  display: inline-flex; align-items: center; gap: 2px;
-  background: white; border: 1px solid #e5e7eb;
-  border-radius: 9px; padding: .08rem .42rem;
-  font-size: .7rem; font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 9px;
+  padding: .08rem .45rem;
+  font-size: .7rem;
+  font-weight: 600;
   white-space: nowrap;
+  flex-shrink: 0;
+  user-select: none;
 }
-.si-key     { border-color: #a78bfa; color: #6d28d9; background: #f5f3ff; }
+.si-chip strong { font-weight: 800; }
+
+.si-key {
+  border-color: #a78bfa;
+  color: #6d28d9;
+  background: #f5f3ff;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.si-key:hover {
+  border-color: #7c3aed;
+  background: #ede9fe;
+  transform: translateY(-1px);
+}
+.si-tone-diff {
+  font-size: .66rem;
+  font-weight: 700;
+  opacity: .85;
+  margin-left: 2px;
+}
+.si-setlist-chip {
+  border-color: #c4b5fd;
+  color: #6d28d9;
+  background: rgba(109, 40, 217, 0.12);
+  font-weight: 700;
+}
 .si-time    { border-color: #93c5fd; color: #1d4ed8; background: #eff6ff; }
 .si-tempo   { border-color: #6ee7b7; color: #065f46; background: #ecfdf5; }
 .si-measures{ border-color: #fcd34d; color: #92400e; background: #fffbeb; }
 .si-chord-set     { border-color: #d1d5db; color: #6b7280; background: #f9fafb; }
 .si-chord-has     { border-color: #86efac; color: #15803d; background: #f0fdf4; }
 .si-chord-empty   { border-color: #d1d5db; color: #9ca3af; background: #f9fafb; font-style: italic; }
-.si-notes         { border-color: #fca5a5; color: #b91c1c; background: #fff5f5; }
-.si-toggle  { background: none; border: none; cursor: pointer; color: #9ca3af;
-              padding: 0 .3rem; font-size: .8rem; transition: color .15s; }
-.si-toggle:hover { color: #6d28d9; }
+.si-notes {
+  border-color: #fca5a5;
+  color: #b91c1c;
+  background: #fff5f5;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
-/* ─── Inline Notes Row (bên dưới chips) ─── */
-.song-info-strip {
-  flex-direction: column;
-  align-items: stretch;
-}
-.si-top-row {
-  display: flex; align-items: center; gap: .5rem; width: 100%;
-}
-.si-notes-inline {
-  display: flex;
-  align-items: baseline;
-  gap: .55rem;
-  padding: .2rem .1rem .1rem;
-  border-top: 1px solid rgba(109,40,217,.1);
-  font-size: .74rem;
-  color: var(--text-secondary, #4b5563);
-  flex-wrap: wrap;
-  line-height: 1.5;
-  animation: fadeSlideUp .15s ease;
-}
-.si-notes-inline.si-notes-hidden { display: none !important; }
-.si-ni-key {
-  font-weight: 800;
-  color: #6d28d9;
-  white-space: nowrap;
-  font-size: .78rem;
-}
-.si-ni-bpm {
-  font-weight: 700;
-  color: #065f46;
-  white-space: nowrap;
-  font-size: .74rem;
-}
-.si-ni-dot {
-  color: #d1d5db;
+/* Các nút hành động inline trong strip */
+.si-chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  border-radius: 6px;
+  padding: .12rem .48rem;
   font-size: .7rem;
-}
-.si-ni-text {
-  color: #4b5563;
-  flex: 1;
-  min-width: 0;
-  white-space: pre-wrap;
-  line-height: 1.5;
-}
-/* Nút edit nhật ký (admin only) */
-.si-ni-edit {
+  font-weight: 600;
+  white-space: nowrap;
   flex-shrink: 0;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.si-btn-edit {
+  background: white;
+  border: 1px solid #d1d5db;
+  color: #4b5563;
+}
+.si-btn-edit:hover {
+  border-color: #a78bfa;
+  color: #6d28d9;
+  background: #f5f3ff;
+}
+.si-btn-save-setlist {
+  background: var(--accent, #7c3aed);
+  border: 1px solid var(--accent, #7c3aed);
+  color: #ffffff !important;
+  box-shadow: 0 1px 2px rgba(124, 58, 237, 0.25);
+}
+.si-btn-save-setlist:hover {
+  background: #6d28d9;
+  transform: translateY(-1px);
+}
+
+.si-toggle {
   background: none;
   border: none;
   cursor: pointer;
   color: #9ca3af;
-  font-size: .7rem;
-  padding: 0 .2rem;
-  border-radius: 4px;
-  transition: color .15s, background .15s;
-  white-space: nowrap;
-  align-self: flex-start;
-  margin-top: .05rem;
+  padding: 0 .3rem;
+  font-size: .8rem;
+  transition: color .15s;
+  flex-shrink: 0;
 }
-.si-ni-edit:hover { color: #6d28d9; background: rgba(109,40,217,.08); }
+.si-toggle:hover { color: #6d28d9; }
 
 
 /* =============================================
@@ -1358,12 +1399,21 @@ body.dark-mode .song-info-strip {
   border-color: var(--border, #2a2a38) !important;
   color: var(--text-primary, #e4e4ec) !important;
 }
-body.dark-mode .si-notes-inline {
-  border-top-color: rgba(167,139,250,.15);
+body.dark-mode .si-chip {
+  background: #1e1e2c;
+  border-color: #2e2e42;
+  color: #e4e4ec;
 }
-body.dark-mode .si-ni-key { color: #a78bfa; }
-body.dark-mode .si-ni-bpm { color: #6ee7b7; }
-body.dark-mode .si-ni-text { color: #9ca3af; }
+body.dark-mode .si-key {
+  border-color: #6d28d9;
+  color: #c4b5fd;
+  background: rgba(109, 40, 217, 0.2);
+}
+body.dark-mode .si-btn-edit {
+  background: #1e1e2c;
+  border-color: #3b3b50;
+  color: #9ca3af;
+}
 body.dark-mode .sheet-viewer-wrapper { background: #0c0c14 !important; }
 body.dark-mode .osmd-container {
   background: #1a1a24 !important;

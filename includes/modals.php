@@ -213,41 +213,59 @@
   </div>
 </div>
 
-<!-- ===== TRANSPOSE PICK MODAL (INC-3 — thay prompt()) ===== -->
+<!-- ===== TRANSPOSE PICK MODAL (Chọn Tông Tập Trực Quan) ===== -->
 <div id="transpose-pick-modal" class="modal-overlay hidden">
-  <div class="modal-box" style="max-width:340px;">
+  <div class="modal-box" style="max-width:380px;">
     <div class="modal-header">
       <div style="display:flex;align-items:center;gap:.6rem;">
         <span style="font-size:1.25rem;">🎵</span>
-        <h3 style="margin:0;font-size:1rem;">Dịch Giọng Bài Hát</h3>
+        <h3 style="margin:0;font-size:1.05rem;">Chọn Tông Tập Cho Bài Hát</h3>
       </div>
       <button id="btn-close-transpose-pick" class="icon-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <div class="modal-body">
-      <p style="font-size:.85rem;color:var(--text-secondary);margin-bottom:.75rem;">Chọn số cung dịch giọng khi thêm bài vào Setlist:</p>
-      <div id="transpose-pick-song-name" style="font-weight:600;font-size:.9rem;margin-bottom:1rem;padding:.5rem .75rem;background:var(--bg-overlay);border-radius:var(--radius-sm);border:1px solid var(--border);"></div>
-      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:.4rem;margin-bottom:1rem;">
+      <div id="transpose-pick-song-name" style="font-weight:700;font-size:.9rem;margin-bottom:.85rem;padding:.5rem .75rem;background:var(--bg-overlay);border-radius:var(--radius-sm);border:1px solid var(--border);color:var(--text-primary);"></div>
+      
+      <!-- Live Preview: Tông Gốc ➔ Tông Tập -->
+      <div id="tp-preview-box" style="display:flex;align-items:center;justify-content:center;gap:.85rem;padding:.75rem 1rem;background:linear-gradient(135deg, rgba(109,40,217,0.08), rgba(59,130,246,0.08));border:1px solid rgba(109,40,217,0.25);border-radius:var(--radius-md);margin-bottom:1rem;text-align:center;">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <span style="font-size:.72rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Tông gốc</span>
+          <span id="tp-orig-key-display" style="font-size:1.2rem;font-weight:800;color:var(--text-primary);margin-top:2px;">—</span>
+        </div>
+        <div style="font-size:1.3rem;color:var(--accent);line-height:1;margin:0 2px;">➔</div>
+        <div style="display:flex;flex-direction:column;align-items:center;">
+          <span style="font-size:.72rem;color:var(--accent);text-transform:uppercase;letter-spacing:0.5px;font-weight:700;">Tông tập</span>
+          <span id="tp-target-key-display" style="font-size:1.35rem;font-weight:800;color:var(--accent);margin-top:2px;">—</span>
+        </div>
+        <div id="tp-diff-display" style="font-size:.75rem;padding:3px 8px;border-radius:12px;background:rgba(109,40,217,0.15);color:var(--accent);font-weight:700;margin-left:4px;">Gốc (0)</div>
+      </div>
+
+      <p style="font-size:.82rem;color:var(--text-secondary);margin-bottom:.55rem;font-weight:500;">Chọn nhanh số nửa cung (semitones):</p>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:.4rem;margin-bottom:.85rem;">
+        <button class="tp-btn" data-v="-5">-5</button>
         <button class="tp-btn" data-v="-4">-4</button>
         <button class="tp-btn" data-v="-3">-3</button>
         <button class="tp-btn" data-v="-2">-2</button>
         <button class="tp-btn" data-v="-1">-1</button>
-        <button class="tp-btn tp-zero active" data-v="0">0</button>
+        <button class="tp-btn tp-zero active" data-v="0" style="font-weight:700;">0 (Gốc)</button>
         <button class="tp-btn" data-v="1">+1</button>
         <button class="tp-btn" data-v="2">+2</button>
         <button class="tp-btn" data-v="3">+3</button>
         <button class="tp-btn" data-v="4">+4</button>
         <button class="tp-btn" data-v="5">+5</button>
       </div>
-      <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;">
-        <label style="font-size:.82rem;color:var(--text-secondary);white-space:nowrap;">Tùy chỉnh:</label>
+      
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:1.15rem;background:var(--bg-overlay);padding:6px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);">
+        <label style="font-size:.82rem;color:var(--text-secondary);font-weight:500;">Tùy chỉnh số nửa cung:</label>
         <input id="transpose-pick-custom" type="number" min="-12" max="12" value="0"
-          class="form-input" style="width:80px;text-align:center;font-size:.95rem;font-weight:600;">
+          class="form-input" style="width:75px;text-align:center;font-size:.95rem;font-weight:700;height:32px;">
       </div>
+      
       <div style="display:flex;gap:.5rem;">
         <button id="btn-transpose-pick-cancel" class="btn btn-ghost" style="flex:1;">Hủy</button>
-        <button id="btn-transpose-pick-ok" class="btn btn-primary" style="flex:2;">✓ Xác Nhận</button>
+        <button id="btn-transpose-pick-ok" class="btn btn-primary" style="flex:2;">✓ Xác Nhận & Mở Bài</button>
       </div>
     </div>
   </div>
@@ -520,12 +538,53 @@
 (function() {
   /* Script for Transpose Picker */
   document.addEventListener('DOMContentLoaded', function() {
-    var modal     = document.getElementById('modal-transpose-pick');
+    var modal     = document.getElementById('transpose-pick-modal') || document.getElementById('modal-transpose-pick');
     var customIn  = document.getElementById('transpose-pick-custom');
     var btnOk     = document.getElementById('btn-transpose-pick-ok');
     var btnCancel = document.getElementById('btn-transpose-pick-cancel');
     var btnClose  = document.getElementById('btn-close-transpose-pick');
     var _cb = null;
+    var _origKey = '';
+    var _curSemi = 0;
+
+    function _calcTargetKey(orig, semi) {
+      if (!orig) return '';
+      if (window.TransposeEngine && window.TransposeEngine.calcKey) {
+        return window.TransposeEngine.calcKey(orig, semi) || orig;
+      }
+      if (window.TransposeEngine && window.TransposeEngine.transposeChord) {
+        return window.TransposeEngine.transposeChord(orig, semi) || orig;
+      }
+      return orig;
+    }
+
+    function _updatePreview(semi) {
+      _curSemi = semi;
+      if (customIn) customIn.value = semi;
+      document.querySelectorAll('.tp-btn').forEach(function(b) {
+        b.classList.toggle('active', parseInt(b.dataset.v, 10) === semi);
+      });
+
+      var origEl = document.getElementById('tp-orig-key-display');
+      var targetEl = document.getElementById('tp-target-key-display');
+      var diffEl = document.getElementById('tp-diff-display');
+      
+      var cleanOrig = _origKey ? _origKey.trim() : '';
+      if (cleanOrig) {
+        if (origEl) origEl.textContent = cleanOrig;
+        var target = _calcTargetKey(cleanOrig, semi);
+        if (targetEl) targetEl.textContent = target;
+        if (diffEl) {
+          diffEl.textContent = semi === 0 ? 'Gốc (0)' : (semi > 0 ? ('+' + semi + ' nửa cung') : (semi + ' nửa cung'));
+        }
+      } else {
+        if (origEl) origEl.textContent = '—';
+        if (targetEl) targetEl.textContent = semi === 0 ? 'Gốc' : (semi > 0 ? ('+' + semi) : String(semi));
+        if (diffEl) {
+          diffEl.textContent = semi === 0 ? '0' : (semi > 0 ? ('+' + semi) : String(semi));
+        }
+      }
+    }
 
     function closePick(val) {
       if (modal) modal.classList.add('hidden');
@@ -534,41 +593,36 @@
 
     document.querySelectorAll('.tp-btn').forEach(function(btn) {
       btn.addEventListener('click', function() {
-        document.querySelectorAll('.tp-btn').forEach(function(b) { b.classList.remove('active'); });
-        btn.classList.add('active');
-        if (customIn) customIn.value = btn.dataset.v;
+        var v = parseInt(btn.dataset.v, 10) || 0;
+        _updatePreview(v);
       });
     });
 
     if (customIn) {
       customIn.addEventListener('input', function() {
-        var v = parseInt(customIn.value) || 0;
-        document.querySelectorAll('.tp-btn').forEach(function(b) {
-          b.classList.toggle('active', parseInt(b.dataset.v) === v);
-        });
+        var v = parseInt(customIn.value, 10) || 0;
+        _updatePreview(v);
       });
       customIn.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') { e.preventDefault(); closePick(parseInt(customIn.value) || 0); }
+        if (e.key === 'Enter') { e.preventDefault(); closePick(_curSemi); }
         if (e.key === 'Escape') { e.preventDefault(); closePick(null); }
       });
     }
 
-    if (btnOk)     btnOk.addEventListener('click',    function() { closePick(parseInt(customIn ? customIn.value : 0) || 0); });
+    if (btnOk)     btnOk.addEventListener('click',    function() { closePick(_curSemi); });
     if (btnCancel) btnCancel.addEventListener('click', function() { closePick(null); });
     if (btnClose)  btnClose.addEventListener('click',  function() { closePick(null); });
     if (modal)     modal.addEventListener('click', function(e) { if (e.target === modal) closePick(null); });
 
-    /* Public API: window.TransposePick.show(songName, defaultVal) → Promise<number|null> */
+    /* Public API: window.TransposePick.show(songName, defaultVal, origKey) → Promise<number|null> */
     window.TransposePick = {
-      show: function(songName, defaultVal) {
+      show: function(songName, defaultVal, origKey) {
         if (!modal) return Promise.resolve(0);
-        var defV = defaultVal !== undefined ? (parseInt(defaultVal) || 0) : 0;
-        if (customIn) customIn.value = defV;
-        document.querySelectorAll('.tp-btn').forEach(function(b) {
-          b.classList.toggle('active', parseInt(b.dataset.v) === defV);
-        });
+        _origKey = origKey ? String(origKey).trim() : '';
+        var defV = defaultVal !== undefined ? (parseInt(defaultVal, 10) || 0) : 0;
+        _updatePreview(defV);
         var nameEl = document.getElementById('transpose-pick-song-name');
-        if (nameEl) nameEl.textContent = songName || '';
+        if (nameEl) nameEl.textContent = songName ? ('🎵 ' + songName) : 'Bài hát';
         modal.classList.remove('hidden');
         setTimeout(function() { if (customIn) customIn.select(); }, 80);
         return new Promise(function(resolve) { _cb = resolve; });

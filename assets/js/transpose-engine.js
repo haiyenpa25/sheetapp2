@@ -212,7 +212,30 @@ const TransposeEngine = (() => {
     return Math.sign(semitones) * steps[abs];
   }
 
-  return { transposeChord, transposeXML, suggestBestCapo, extractChordsFromXML, NOTES_SHARP, NOTES_FLAT };
+  function calcKey(origKey, semitones) {
+    if (!origKey) return '';
+    const trimmed = String(origKey).trim();
+    if (!trimmed) return '';
+    if (!semitones || semitones === 0) return trimmed;
+    try {
+      const res = transposeChord(trimmed, semitones);
+      if (res) return res;
+    } catch (e) {}
+
+    const m = trimmed.match(/^([A-G][#b]?)(.*)$/);
+    if (!m) return trimmed;
+    const root = m[1];
+    const suffix = m[2] || '';
+    const useFlats = trimmed.includes('b') || ['F', 'Dm', 'Gm', 'Cm', 'Fm', 'Bbm', 'Ebm'].includes(trimmed);
+    const arr = useFlats ? NOTES_FLAT : NOTES_SHARP;
+    let idx = NOTES_SHARP.indexOf(root);
+    if (idx === -1) idx = NOTES_FLAT.indexOf(root);
+    if (idx === -1) return trimmed;
+    const newRoot = arr[((idx + semitones) % 12 + 12) % 12];
+    return newRoot + suffix;
+  }
+
+  return { transposeChord, calcKey, transposeXML, suggestBestCapo, extractChordsFromXML, NOTES_SHARP, NOTES_FLAT };
 })();
 
 window.TransposeEngine = TransposeEngine;

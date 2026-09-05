@@ -235,14 +235,10 @@
     <button class="hint-close-btn" onclick="window.ChordCanvas?.setAddMode(false)" title="Thoát chế độ nhập">Xong</button>
   </div>
 
-  <!-- Song Info Strip — Sprint A1 -->
+  <!-- Song Info Strip — Single Row Consolidate -->
   <div id="song-info-strip" class="song-info-strip si-hidden">
-    <div class="si-top-row">
-      <div id="si-inner" class="si-inner"></div>
-      <button id="btn-song-info-toggle" class="si-toggle" title="Thu gọn">▼</button>
-    </div>
-    <!-- Nội dung Nhật ký hiển thị inline -->
-    <div id="si-notes-inline" class="si-notes-inline si-notes-hidden"></div>
+    <div id="si-inner" class="si-inner"></div>
+    <button id="btn-song-info-toggle" class="si-toggle" title="Thu gọn / Mở rộng thông tin">▼</button>
   </div>
 
   <!-- OSMD CONTAINER -->

@@ -432,16 +432,15 @@ const LibraryUI = (() => {
     opts.querySelectorAll('.song-item').forEach(item => {
       item.addEventListener('click', async () => {
         modal.classList.add('hidden');
-        const currentSet = window.ChordCanvas?.getCurrentSet?.() || 'HD';
-        // BUG-E fix: truyền transpose_key = transpose hiện tại (không để mặc định 0)
-        const currentTranspose = window.Store?.get?.('currentTranspose') ?? 0;
-        const result = await ApiService.setlists.addItem({
-          setlist_id: parseInt(item.dataset.id),
-          song_id: songId,
-          chord_profile: currentSet,
-          transpose_key: currentTranspose
-        });
-        if (result) window.App?.showToast('Đã thêm bài hát vào Setlist', 'success');
+        const setId = parseInt(item.dataset.id, 10);
+
+        // Chuyển sang Tab Setlist và mở modal chọn Tông tập + tự động hiển thị bài
+        if (window.SetlistUI?.switchToSetlistTab) {
+          window.SetlistUI.switchToSetlistTab(setId);
+        }
+        if (window.SetlistUI?.addSongToSetlist) {
+          await window.SetlistUI.addSongToSetlist(setId, songId);
+        }
       });
     });
     modal.classList.remove('hidden');

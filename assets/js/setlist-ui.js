@@ -103,6 +103,9 @@ const SetlistUI = (() => {
     if (!trimmed) return null;
     if (!semitones || semitones === 0) return trimmed;
 
+    if (window.TransposeEngine?.calcKey) {
+      return window.TransposeEngine.calcKey(trimmed, semitones) || trimmed;
+    }
     if (window.TransposeEngine?.transposeChord) {
       try {
         const res = window.TransposeEngine.transposeChord(trimmed, semitones);
@@ -202,7 +205,8 @@ const SetlistUI = (() => {
           e.stopPropagation();
           if (window.TransposePick) {
             const currentSemi = parseInt(item.transpose_key, 10) || 0;
-            const newTranspose = await window.TransposePick.show(title, currentSemi);
+            const origKey = songObj?.defaultKey || songObj?.keySignature || '';
+            const newTranspose = await window.TransposePick.show(title, currentSemi, origKey);
             if (newTranspose !== null && newTranspose !== currentSemi) {
               try {
                 await window.ApiService.setlists.updateItem(item.id, { transpose_key: newTranspose });
@@ -358,35 +362,73 @@ const SetlistUI = (() => {
   }
 
   async function addSongToSetlist(setId, songId) {
+    await ensureSongsLoaded();
     const songIndex = _currentSetlist && _currentSetlist.items ? _currentSetlist.items.length : 0;
 
-    // INC-3 fix: dùng TransposePick modal thay vì prompt()
-    const songName = _allSongsCache.find(s => String(s.id) === String(songId))?.title || 'Bài hát';
+    const songObj = _allSongsCache.find(s => String(s.id) === String(songId)) || window.LibraryUI?.getSongObj?.(songId);
+    const songName = songObj?.title || 'Bài hát';
+    const origKey = songObj?.defaultKey || songObj?.keySignature || '';
     const currentTranspose = window.Store?.get?.('currentTranspose') ?? 0;
 
     let transpose_key;
     if (window.TransposePick) {
-      transpose_key = await window.TransposePick.show(songName, currentTranspose);
-      if (transpose_key === null) return; // Hủy
+      transpose_key = await window.TransposePick.show(songName, currentTranspose, origKey);
+      if (transpose_key === null) return; // Người dùng bấm Hủy
     } else {
       // Fallback nếu modal chưa load
       const toneStr = prompt('Nhập số cung dịch giọng (vd: -2, 0, +1):', String(currentTranspose));
       if (toneStr === null) return;
-      transpose_key = parseInt(toneStr) || 0;
+      transpose_key = parseInt(toneStr, 10) || 0;
     }
 
     const currentSet = window.ChordCanvas?.getCurrentSet?.() || 'HD';
 
     try {
-      const data = await window.ApiService.setlists.addItem({ setlist_id: setId, song_id: songId, order_index: songIndex, transpose_key: transpose_key, chord_profile: currentSet });
+      const data = await window.ApiService.setlists.addItem({
+        setlist_id: setId,
+        song_id: songId,
+        order_index: songIndex,
+        transpose_key: transpose_key,
+        chord_profile: currentSet
+      });
       if (data.success) {
-        window.App?.showToast?.('Đã thêm vào Setlist!', 'success');
-        if (_currentSetlist?.id === setId) viewSetlistDetail(setId); // Refresh detail
+        window.App?.showToast?.('Đã thêm bài hát vào Setlist!', 'success');
+        
+        // Mở / Làm mới chi tiết Setlist
+        await viewSetlistDetail(setId);
         fetchSetlists(); // Refresh count
+
+        // TỰ ĐỘNG CHỌN BÀI VỪA THÊM VÀ HIỂN THỊ NGAY TRÊN MÀN HÌNH
+        if (_currentSetlist && _currentSetlist.items && _currentSetlist.items.length > 0) {
+          _currentIndex = _currentSetlist.items.length - 1;
+          await renderSetlistItems();
+          await playCurrentItem();
+        }
       } else {
         window.App?.showToast?.(data.error || 'Lỗi thêm bài hát', 'error');
       }
-    } catch(err) { console.error(err); }
+    } catch(err) {
+      console.error('[SetlistUI] addSongToSetlist error:', err);
+    }
+  }
+
+  function switchToSetlistTab(setId = null) {
+    const tabs = document.querySelectorAll('.sidebar-tab');
+    tabs.forEach(t => {
+      t.classList.toggle('active', t.dataset.tab === 'setlist');
+    });
+    document.getElementById('tab-content-library')?.classList.add('hidden');
+    document.getElementById('tab-content-setlist')?.classList.remove('hidden');
+    document.getElementById('btn-admin-console')?.classList.add('hidden');
+    document.getElementById('btn-create-setlist')?.classList.remove('hidden');
+    document.querySelector('.sidebar-search')?.classList.add('hidden');
+    document.querySelector('.quick-jump')?.classList.add('hidden');
+
+    if (setId) {
+      viewSetlistDetail(setId);
+    } else {
+      fetchSetlists();
+    }
   }
 
   function next() {
@@ -707,7 +749,22 @@ const SetlistUI = (() => {
     }
   }
 
-  return { init, fetchSetlists, next, prev, getCurrentSetlist: () => _currentSetlist, getCurrentIndex: () => _currentIndex, promptAddSong, printSetlist, copySetlistSlide, renderSetlistItems };
+  return {
+    init,
+    fetchSetlists,
+    next,
+    prev,
+    getCurrentSetlist: () => _currentSetlist,
+    getCurrentIndex: () => _currentIndex,
+    promptAddSong,
+    addSongToSetlist,
+    switchToSetlistTab,
+    viewSetlistDetail,
+    playCurrentItem,
+    printSetlist,
+    copySetlistSlide,
+    renderSetlistItems
+  };
 
 })();
 

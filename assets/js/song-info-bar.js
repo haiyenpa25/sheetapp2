@@ -1,10 +1,16 @@
 /**
- * song-info-bar.js — Sprint A1
- * Strip thông tin bài nhạc: tông, nhịp, BPM, số nhịp
- * Hiển thị ngay khi load bài để user biết context ngay lập tức.
+ * song-info-bar.js — Sprint A1 & Consolidated Single Row
+ * Strip thông tin bài nhạc hiển thị trên 1 DÒNG DUY NHẤT:
+ * - Tông gốc & Tông tập (Tone: G | Tập: A (+2))
+ * - Số chỉ nhịp (2/4, 4/4)
+ * - Tốc độ (BPM)
+ * - Số ô nhịp
+ * - Bộ hợp âm đang chọn
+ * - Ghi chú vắn tắt
+ * - Nút ✎ Nhật ký
+ * - Nút 💾 Lưu vào Setlist (khi đang trong Setlist)
  *
- * v2: Nội dung Nhật ký hiển thị INLINE ngay trên strip (không qua popup)
- *     Admin thấy nút ✎ để mở panel chỉnh sửa.
+ * Tự động cập nhật Tông tập realtime khi người dùng bấm dịch giọng trên toolbar.
  */
 const SongInfoBar = (() => {
   'use strict';
@@ -14,21 +20,36 @@ const SongInfoBar = (() => {
 
   function init() {
     document.getElementById('btn-song-info-toggle')?.addEventListener('click', _toggle);
+
+    // Lắng nghe sự kiện đổi tông từ App / Store để cập nhật Tông tập tức thì
+    if (typeof EventBus !== 'undefined') {
+      EventBus.on('transpose:changed', ({ value }) => {
+        _updateToneChip(value);
+      });
+      EventBus.on('state:currentTranspose', ({ value }) => {
+        _updateToneChip(value);
+      });
+    }
   }
 
   function loadSong(xmlString, song) {
     if (!xmlString) { clearSong(); return; }
     _songId   = song?.id || song?.httlvnId || null;
     _songData = _parseXml(xmlString, song);
-    _render(_songData);
+    if (!_songData.key && song?.defaultKey) {
+      _songData.key = song.defaultKey;
+    }
+    _render();
     document.getElementById('song-info-strip')?.classList.remove('si-hidden');
   }
 
   function clearSong() {
     _songData = null;
     _songId   = null;
-    document.getElementById('song-info-strip')?.classList.add('si-hidden');
-    _clearNotesInline();
+    const strip = document.getElementById('song-info-strip');
+    if (strip) strip.classList.add('si-hidden');
+    const inner = document.getElementById('si-inner');
+    if (inner) inner.innerHTML = '';
   }
 
   /* ─── Parse MusicXML ─────────────────────────────────────── */
@@ -51,7 +72,7 @@ const SongInfoBar = (() => {
       // Key signature
       const keyEl = doc.querySelector('key');
       if (keyEl) {
-        const fifths = parseInt(keyEl.querySelector('fifths')?.textContent || '0');
+        const fifths = parseInt(keyEl.querySelector('fifths')?.textContent || '0', 10);
         const mode   = (keyEl.querySelector('mode')?.textContent || 'major').toLowerCase();
         info.key     = _fifthsToKeyName(fifths, mode);
         info.mode    = mode === 'minor' ? 'thứ' : 'trưởng';
@@ -100,100 +121,142 @@ const SongInfoBar = (() => {
     return key;
   }
 
-  /* ─── Render chips (hàng trên) ───────────────────────────── */
-  function _render(info) {
+  /* Tính Tông tập từ Tông gốc và semitones */
+  function _calcPracticedKey(origKey, semitones) {
+    if (!origKey) {
+      if (!semitones || semitones === 0) return 'Gốc';
+      return semitones > 0 ? `+${semitones}` : `${semitones}`;
+    }
+    const cleanOrig = String(origKey).trim();
+    if (!semitones || semitones === 0) return cleanOrig;
+    if (window.TransposeEngine?.calcKey) {
+      return window.TransposeEngine.calcKey(cleanOrig, semitones) || cleanOrig;
+    }
+    if (window.TransposeEngine?.transposeChord) {
+      return window.TransposeEngine.transposeChord(cleanOrig, semitones) || cleanOrig;
+    }
+    return cleanOrig;
+  }
+
+  /* ─── Render toàn bộ thông tin trên 1 DÒNG DUY NHẤT ──────── */
+  function _render() {
     const inner = document.getElementById('si-inner');
-    if (!inner) return;
+    if (!inner || !_songData) return;
+
+    const notes = _loadNotes();
+    const canEdit = (window.Auth?.isAdmin?.() || window.Auth?.isBanhat?.()) ?? false;
+    const inSetlist = document.querySelector('.toolbar-left')?.classList.contains('in-setlist');
+    const setlist = window.SetlistUI?.getCurrentSetlist?.();
+    const idx = window.SetlistUI?.getCurrentIndex?.();
 
     const chips = [];
-    if (info.key)          chips.push(`<span class="si-chip si-key">🎵 ${info.key} ${info.mode}</span>`);
-    if (info.timeBeats)    chips.push(`<span class="si-chip si-time">♩ ${info.timeBeats}/${info.timeBeatType}</span>`);
-    if (info.tempo)        chips.push(`<span class="si-chip si-tempo">= ${info.tempo} bpm</span>`);
-    if (info.measureCount) chips.push(`<span class="si-chip si-measures">${info.measureCount} nhịp</span>`);
 
-    // Chord set chip
-    const currentSet   = window.ChordCanvas?.getCurrentSet?.();
-    const chordCount   = Object.keys(window.ChordCanvas?.getCustomChords?.() ?? {}).length;
+    // 1. Setlist Badge (khi đang xem bài trong setlist)
+    if (inSetlist && setlist && setlist.items && idx !== undefined && idx >= 0) {
+      chips.push(`<span class="si-chip si-setlist-chip" title="Bài trong Setlist: ${_esc(setlist.title)}">📋 Setlist: Bài ${idx + 1}/${setlist.items.length}</span>`);
+    }
+
+    // 2. Chip Tông: TÔNG GỐC VÀ TÔNG TẬP
+    const origKey = _songData.key || window.Store?.get?.('currentSong')?.defaultKey || '';
+    const curTranspose = window.Store?.get?.('currentTranspose') ?? 0;
+    const practicedKey = _calcPracticedKey(origKey, curTranspose);
+
+    let toneHtml = '';
+    if (origKey) {
+      if (curTranspose !== 0) {
+        const diffStr = curTranspose > 0 ? `+${curTranspose}` : `${curTranspose}`;
+        toneHtml = `🎵 Tone: <strong>${_esc(origKey)}</strong> | Tập: <strong>${_esc(practicedKey)}</strong> <span class="si-tone-diff">(${diffStr})</span>`;
+      } else {
+        toneHtml = `🎵 Tone: <strong>${_esc(origKey)}</strong> | Tập: <strong>${_esc(origKey)}</strong>`;
+      }
+    } else {
+      toneHtml = `🎵 Tập: <strong>${_esc(practicedKey)}</strong>`;
+    }
+    chips.push(`<span class="si-chip si-key" id="si-tone-chip" title="Click để chọn tông tập nhanh">${toneHtml}</span>`);
+
+    // 3. Số chỉ nhịp
+    if (_songData.timeBeats && _songData.timeBeatType) {
+      chips.push(`<span class="si-chip si-time" title="Số chỉ nhịp">♩ ${_songData.timeBeats}/${_songData.timeBeatType}</span>`);
+    }
+
+    // 4. Tempo / BPM
+    let effectiveBpm = null;
+    if (inSetlist && setlist?.items?.[idx]?.bpm) {
+      effectiveBpm = setlist.items[idx].bpm;
+    } else if (notes.bpm) {
+      effectiveBpm = notes.bpm;
+    } else if (_songData.tempo) {
+      effectiveBpm = _songData.tempo;
+    }
+    if (effectiveBpm) {
+      chips.push(`<span class="si-chip si-tempo" title="Tốc độ nhịp">♩ = ${effectiveBpm} bpm</span>`);
+    }
+
+    // 5. Số ô nhịp
+    if (_songData.measureCount) {
+      chips.push(`<span class="si-chip si-measures" title="Tổng số ô nhịp">${_songData.measureCount} nhịp</span>`);
+    }
+
+    // 6. Bộ hợp âm
+    const currentSet = window.ChordCanvas?.getCurrentSet?.();
+    const chordCount = Object.keys(window.ChordCanvas?.getCustomChords?.() ?? {}).length;
     if (currentSet && currentSet !== 'default') {
-      const countLabel = chordCount > 0 ? `● ${chordCount} hợp âm` : '○ Chưa có';
+      const countLabel = chordCount > 0 ? ` · ● ${chordCount}` : ' · ○ 0';
       const chipClass  = chordCount > 0 ? 'si-chip si-chord-set si-chord-has' : 'si-chip si-chord-set si-chord-empty';
-      chips.push(`<span class="${chipClass}" title="Bộ hợp âm: ${currentSet}">🎸 ${currentSet} · ${countLabel}</span>`);
+      chips.push(`<span class="${chipClass}" title="Bộ hợp âm: ${currentSet}">🎸 ${currentSet}${countLabel}</span>`);
     } else if (currentSet === 'default') {
       chips.push(`<span class="si-chip si-chord-set" title="Hợp âm từ TLH (gốc)">🎸 TLH (gốc)</span>`);
     }
 
+    // 7. Ghi chú vắn tắt (nếu có)
+    if (notes.text) {
+      const cleanNote = _esc(notes.text.replace(/\r?\n/g, ' '));
+      chips.push(`<span class="si-chip si-notes" title="${_esc(notes.text)}">📝 ${cleanNote}</span>`);
+    }
+
+    // 8. Nút ✎ Nhật ký
+    if (canEdit) {
+      const hasData = Boolean(notes.key || notes.bpm || notes.text);
+      chips.push(`<button class="si-chip-btn si-btn-edit" id="si-ni-edit-btn" title="Ghi chú & Nhật ký bài tập">✎ ${hasData ? 'Sửa nhật ký' : 'Nhật ký'}</button>`);
+      
+      // 9. Nút 💾 Lưu vào Setlist (khi đang trong Setlist)
+      if (inSetlist) {
+        chips.push(`<button class="si-chip-btn si-btn-save-setlist" id="si-ni-save-setlist-btn" title="Lưu nhanh Tông và Tempo đang tập vào bài này trong Setlist">💾 Lưu vào Setlist</button>`);
+      }
+    }
+
     inner.innerHTML = chips.join('');
 
-    // Render notes inline (hàng dưới)
-    _renderNotesInline();
-  }
+    // Wire sự kiện click vào Chip Tông để đổi nhanh
+    document.getElementById('si-tone-chip')?.addEventListener('click', async () => {
+      const curSong = window.Store?.get?.('currentSong');
+      const songTitle = curSong?.title || _songData.title || 'Bài hát';
+      const currentTranspose = window.Store?.get?.('currentTranspose') ?? 0;
+      const oKey = _songData.key || curSong?.defaultKey || '';
 
-  /* ─── Render nội dung nhật ký INLINE (hàng dưới strip) ───── */
-  function _renderNotesInline() {
-    const container = document.getElementById('si-notes-inline');
-    if (!container) return;
-
-    const notes = _loadNotes();
-    const hasData = notes.key || notes.bpm || notes.text;
-
-    const canEdit = (window.Auth?.isAdmin?.() || window.Auth?.isBanhat?.()) ?? false;
-    const inSetlist = document.querySelector('.toolbar-left')?.classList.contains('in-setlist');
-
-    if (!hasData && !inSetlist) {
-      container.classList.add('si-notes-hidden');
-      container.innerHTML = '';
-      return;
-    }
-
-    const parts = [];
-
-    if (inSetlist) {
-      const setlist = window.SetlistUI?.getCurrentSetlist?.();
-      const idx = window.SetlistUI?.getCurrentIndex?.();
-      if (setlist && setlist.items && idx !== undefined && idx >= 0) {
-        parts.push(`<span class="si-chip" style="background:rgba(109,40,217,0.12);color:var(--accent);font-weight:600;padding:1px 6px;border-radius:3px;">📋 Setlist: Bài ${idx + 1}/${setlist.items.length}</span>`);
+      if (window.TransposePick) {
+        const newTrans = await window.TransposePick.show(songTitle, currentTranspose, oKey);
+        if (newTrans !== null && newTrans !== currentTranspose) {
+          if (window.App?.setTransposeDirect) {
+            window.App.setTransposeDirect(newTrans);
+          } else if (window.App?.transposeBy) {
+            window.App.transposeBy(newTrans - currentTranspose);
+          }
+        }
       }
-    }
+    });
 
-    // Tông lưu
-    if (notes.key) {
-      parts.push(`<span class="si-ni-key">🎵 ${_esc(notes.key)}</span>`);
-    }
-
-    // BPM
-    if (notes.bpm) {
-      if (parts.length) parts.push(`<span class="si-ni-dot">·</span>`);
-      parts.push(`<span class="si-ni-bpm">♩ = ${_esc(notes.bpm)}</span>`);
-    }
-
-    // Ghi chú text
-    if (notes.text) {
-      if (parts.length) parts.push(`<span class="si-ni-dot">—</span>`);
-      parts.push(`<span class="si-ni-text">${_esc(notes.text).replace(/\n/g, '  ·  ')}</span>`);
-    }
-
-    // Nút ✎ sửa ghi chú (admin & banhat)
-    if (canEdit) {
-      parts.push(`<button class="si-ni-edit" id="si-ni-edit-btn" title="Ghi chú & Nhật ký bài tập">✎ ${hasData ? 'sửa' : 'ghi chú'}</button>`);
-      if (inSetlist) {
-        parts.push(`<button class="si-ni-save-setlist" id="si-ni-save-setlist-btn" title="Lưu nhanh Tông và Tempo đang tập vào bài này trong Setlist" style="background:var(--accent);color:#fff;border:none;border-radius:4px;padding:2px 8px;font-size:0.75rem;cursor:pointer;margin-left:4px;font-weight:600;">💾 Lưu vào Setlist</button>`);
-      }
-    }
-
-    container.innerHTML = parts.join('');
-    container.classList.remove('si-notes-hidden');
-
-    // Wire nút ✎ → mở panel chỉnh sửa
+    // Wire nút ✎ Nhật ký
     document.getElementById('si-ni-edit-btn')?.addEventListener('click', () => {
       window.PerformanceNotes?.toggle?.();
     });
 
-    // Wire nút Lưu vào Setlist
+    // Wire nút 💾 Lưu vào Setlist
     document.getElementById('si-ni-save-setlist-btn')?.addEventListener('click', async () => {
-      const setlist = window.SetlistUI?.getCurrentSetlist?.();
-      const idx = window.SetlistUI?.getCurrentIndex?.();
-      if (!setlist || !setlist.items || idx === undefined || idx < 0) return;
-      const item = setlist.items[idx];
+      const curSetlist = window.SetlistUI?.getCurrentSetlist?.();
+      const currentIdx = window.SetlistUI?.getCurrentIndex?.();
+      if (!curSetlist || !curSetlist.items || currentIdx === undefined || currentIdx < 0) return;
+      const item = curSetlist.items[currentIdx];
       const curTranspose = window.Store?.get?.('currentTranspose') ?? 0;
       const curBpm = window.Metronome?.getBpm?.() ?? null;
       const curBeats = window.Metronome?.getBeatsPerMeasure?.() ?? 4;
@@ -208,46 +271,54 @@ const SongInfoBar = (() => {
         item.bpm = curBpm;
         item.beats_per_measure = curBeats;
 
-        // Cập nhật PerformanceNotes để đồng bộ
+        // Cập nhật PerformanceNotes để đồng bộ 2 chiều
         if (window.PerformanceNotes) {
-          const origKey = _songData?.key || '';
-          let practicedKey = origKey;
-          if (origKey && curTranspose !== 0 && window.TransposeEngine) {
-            practicedKey = window.TransposeEngine.transposeChord(origKey, curTranspose) || origKey;
-          }
+          const oKey = _songData?.key || '';
+          const pKey = _calcPracticedKey(oKey, curTranspose);
           const existing = window.PerformanceNotes.getNotes(item.song_id);
           const newNotes = {
             ...existing,
-            key: practicedKey,
+            key: pKey,
             bpm: curBpm ? String(curBpm) : (existing.bpm || ''),
             updatedAt: new Date().toISOString()
           };
           window.ApiService?.sessions?.savePerfNotes?.(item.song_id, newNotes).catch(() => {});
         }
 
-        const origKey = _songData?.key || '';
-        let practicedKey = origKey;
-        if (origKey && curTranspose !== 0 && window.TransposeEngine) {
-          practicedKey = window.TransposeEngine.transposeChord(origKey, curTranspose) || origKey;
-        }
-        const toneMsg = origKey ? `Tone: ${origKey} | Tập: ${practicedKey}` : `Tông: ${curTranspose > 0 ? '+' : ''}${curTranspose}`;
+        const oKey = _songData?.key || '';
+        const pKey = _calcPracticedKey(oKey, curTranspose);
+        const toneMsg = oKey ? `Tone: ${oKey} | Tập: ${pKey}` : `Tông: ${curTranspose > 0 ? '+' : ''}${curTranspose}`;
         window.App?.showToast?.(`✅ Đã lưu ${toneMsg}${curBpm ? ` & ♩${curBpm} BPM` : ''} vào Setlist!`, 'success');
         window.SetlistUI?.renderSetlistItems?.();
-        _renderNotesInline();
+        _render();
       } catch (e) {
         window.App?.showToast?.('Lỗi lưu vào Setlist', 'error');
       }
     });
   }
 
-  function _clearNotesInline() {
-    const el = document.getElementById('si-notes-inline');
-    if (el) { el.classList.add('si-notes-hidden'); el.innerHTML = ''; }
-  }
+  /* Cập nhật chip Tông khi bấm nút dịch giọng trên toolbar */
+  function _updateToneChip(semitones) {
+    const toneChip = document.getElementById('si-tone-chip');
+    if (!toneChip || !_songData) return;
 
-  /* Gọi lại _render để cập nhật chord chip sau khi set switch */
-  function refreshChordChip() {
-    if (_songData) _render(_songData);
+    const origKey = _songData.key || window.Store?.get?.('currentSong')?.defaultKey || '';
+    const semi = semitones ?? (window.Store?.get?.('currentTranspose') ?? 0);
+    const practicedKey = _calcPracticedKey(origKey, semi);
+
+    let toneHtml = '';
+    if (origKey) {
+      if (semi !== 0) {
+        const diffStr = semi > 0 ? `+${semi}` : `${semi}`;
+        toneHtml = `🎵 Tone: <strong>${_esc(origKey)}</strong> | Tập: <strong>${_esc(practicedKey)}</strong> <span class="si-tone-diff">(${diffStr})</span>`;
+      } else {
+        toneHtml = `🎵 Tone: <strong>${_esc(origKey)}</strong> | Tập: <strong>${_esc(origKey)}</strong>`;
+      }
+    } else {
+      toneHtml = `🎵 Tập: <strong>${_esc(practicedKey)}</strong>`;
+    }
+
+    toneChip.innerHTML = toneHtml;
   }
 
   /* Đọc notes từ PerformanceNotes cache */
@@ -256,22 +327,27 @@ const SongInfoBar = (() => {
     return window.PerformanceNotes?.getNotes?.(_songId) || {};
   }
 
-  /* Gọi sau khi lưu Nhật Ký — cập nhật inline ngay */
-  function refreshNotesChip(songId) {
-    if (songId && songId !== _songId) return;
-    if (_songData) _renderNotesInline();
+  /* Refresh khi đổi chord set */
+  function refreshChordChip() {
+    if (_songData) _render();
   }
 
+  /* Refresh khi lưu ghi chú / nhật ký */
+  function refreshNotesChip(songId) {
+    if (songId && songId !== _songId) return;
+    if (_songData) _render();
+  }
+
+  /* Bật / tắt thu gọn thanh thông tin */
   function _toggle() {
-    const topRow = document.querySelector('.si-top-row');
-    const notesEl = document.getElementById('si-notes-inline');
+    const inner = document.getElementById('si-inner');
     const btn = document.getElementById('btn-song-info-toggle');
-    if (!topRow) return;
-    const collapsed = topRow.classList.toggle('si-collapsed');
-    // Ẩn cả notes inline khi collapse
-    if (notesEl) notesEl.classList.toggle('si-notes-hidden', collapsed);
-    if (btn) btn.title  = collapsed ? 'Hiện thông tin bài' : 'Thu gọn';
-    if (btn) btn.textContent = collapsed ? '▶' : '▼';
+    if (!inner) return;
+    const collapsed = inner.classList.toggle('si-collapsed');
+    if (btn) {
+      btn.title = collapsed ? 'Mở rộng thông tin bài' : 'Thu gọn';
+      btn.textContent = collapsed ? '▶' : '▼';
+    }
   }
 
   /* Escape HTML */
