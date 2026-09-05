@@ -126,7 +126,7 @@ const LibraryUI = (() => {
       songs = await ApiService.songs.list();
       if (!Array.isArray(songs)) songs = [];
       songs.sort((a, b) => (a.httlvnId || 0) - (b.httlvnId || 0));
-      render(songs);
+      render(_sortSongs(songs));
       _updateCount(songs.length);
       _buildCategoryFilter();
       _buildQuickJump(songs);
@@ -190,10 +190,11 @@ const LibraryUI = (() => {
     info.appendChild(title);
     const meta = document.createElement('div');
     meta.className = 'song-item-meta';
-    if (song.keySignature) {
+    const songKey = song.defaultKey || song.keySignature;
+    if (songKey) {
       const badge = document.createElement('span');
       badge.className   = 'song-key-badge';
-      badge.textContent = song.keySignature;
+      badge.textContent = songKey;
       meta.appendChild(badge);
     }
     info.appendChild(meta);
@@ -240,9 +241,17 @@ const LibraryUI = (() => {
     const mode = document.getElementById('sort-filter')?.value || 'num';
     const copy = [...list];
     if (mode === 'title') {
-      copy.sort((a, b) => (a.title || '').localeCompare(b.title || '', 'vi'));
+      copy.sort((a, b) => (a.title || '').localeCompare(b.title || '', 'vi', { sensitivity: 'base' }));
     } else if (mode === 'key') {
-      copy.sort((a, b) => (a.defaultKey || '').localeCompare(b.defaultKey || ''));
+      copy.sort((a, b) => {
+        const keyA = a.defaultKey || a.keySignature || '';
+        const keyB = b.defaultKey || b.keySignature || '';
+        if (!keyA && !keyB) return (a.httlvnId || 0) - (b.httlvnId || 0);
+        if (!keyA) return 1;
+        if (!keyB) return -1;
+        const cmp = keyA.localeCompare(keyB);
+        return cmp !== 0 ? cmp : (a.httlvnId || 0) - (b.httlvnId || 0);
+      });
     } else {
       copy.sort((a, b) => (a.httlvnId || 0) - (b.httlvnId || 0));
     }
@@ -252,6 +261,14 @@ const LibraryUI = (() => {
   function _onSearch() {
     const q   = (searchEl()?.value || '').trim().toLowerCase();
     const cat = categoryEl()?.value || '';
+    const mode = document.getElementById('sort-filter')?.value || 'num';
+
+    // Ẩn thanh nhảy nhanh (Quick Jump STT) nếu đang lọc từ khóa hoặc đang xem theo Tên / Tông
+    const quickJumpEl = document.querySelector('.quick-jump');
+    if (quickJumpEl) {
+      quickJumpEl.style.display = (mode === 'num' && !q && !cat) ? '' : 'none';
+    }
+
     let filtered = songs;
     if (cat) filtered = filtered.filter(s => s.category === cat);
     if (q) {

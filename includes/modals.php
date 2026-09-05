@@ -182,6 +182,37 @@
   </div>
 </div>
 
+<!-- ===== CREATE SETLIST MODAL ===== -->
+<div id="create-setlist-modal" class="modal-overlay hidden">
+  <div class="modal-box" style="max-width: 400px;">
+    <div class="modal-header">
+      <div style="display:flex;align-items:center;gap:.6rem;">
+        <span style="font-size:1.25rem;">📋</span>
+        <h3 style="margin:0;font-size:1.05rem;">Tạo Setlist Mới</h3>
+      </div>
+      <button id="btn-close-create-setlist-modal" class="icon-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="form-create-setlist" onsubmit="return false;">
+        <div style="margin-bottom: 1rem;">
+          <label style="display:block;margin-bottom:0.35rem;font-size:0.85rem;font-weight:600;color:var(--text-primary);">Tên Setlist <span style="color:#ef4444;">*</span></label>
+          <input type="text" id="create-setlist-title-input" class="form-input" style="width:100%;box-sizing:border-box;" placeholder="VD: Worship Chúa Nhật 20/4, Thánh Lễ..." required autocomplete="off">
+        </div>
+        <div style="margin-bottom: 1.25rem;">
+          <label style="display:block;margin-bottom:0.35rem;font-size:0.85rem;font-weight:600;color:var(--text-primary);">Ngày biểu diễn</label>
+          <input type="date" id="create-setlist-date-input" class="form-input" style="width:100%;box-sizing:border-box;">
+        </div>
+        <div style="display:flex;gap:0.5rem;">
+          <button type="button" id="btn-cancel-create-setlist" class="btn btn-ghost" style="flex:1;">Hủy</button>
+          <button type="submit" id="btn-confirm-create-setlist" class="btn btn-primary" style="flex:2;">✓ Tạo Setlist</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <!-- ===== TRANSPOSE PICK MODAL (INC-3 — thay prompt()) ===== -->
 <div id="transpose-pick-modal" class="modal-overlay hidden">
   <div class="modal-box" style="max-width:340px;">

@@ -356,11 +356,69 @@ const SetlistUI = (() => {
       });
     });
 
-    document.getElementById('btn-create-setlist')?.addEventListener('click', async () => {
-      const title = prompt("Tên Setlist mới (VD: Worship CN 20/4):");
-      if (!title) return;
-      const data = await window.ApiService.setlists.create({ title, scheduled_date: new Date().toISOString().split('T')[0] });
-      if (data.success) fetchSetlists();
+    const modalCreate = document.getElementById('create-setlist-modal');
+    const titleInp = document.getElementById('create-setlist-title-input');
+    const dateInp = document.getElementById('create-setlist-date-input');
+    const btnCloseModal = document.getElementById('btn-close-create-setlist-modal');
+    const btnCancelModal = document.getElementById('btn-cancel-create-setlist');
+    const formCreate = document.getElementById('form-create-setlist');
+
+    function openCreateSetlistModal() {
+      if (!modalCreate) {
+        const title = prompt("Tên Setlist mới (VD: Worship CN 20/4):");
+        if (!title) return;
+        window.ApiService.setlists.create({ title, scheduled_date: new Date().toISOString().split('T')[0] }).then(data => {
+          if (data.success) fetchSetlists();
+        });
+        return;
+      }
+      if (titleInp) titleInp.value = '';
+      if (dateInp) dateInp.value = new Date().toISOString().split('T')[0];
+      modalCreate.classList.remove('hidden');
+      setTimeout(() => titleInp?.focus(), 50);
+    }
+
+    function closeCreateSetlistModal() {
+      modalCreate?.classList.add('hidden');
+    }
+
+    async function submitCreateSetlist() {
+      const title = titleInp?.value.trim();
+      if (!title) {
+        titleInp?.focus();
+        return;
+      }
+      const scheduled_date = dateInp?.value || new Date().toISOString().split('T')[0];
+      try {
+        const data = await window.ApiService.setlists.create({ title, scheduled_date });
+        if (data.success) {
+          closeCreateSetlistModal();
+          if (window.App?.showToast) {
+            window.App.showToast(`✅ Đã tạo setlist "${title}"`, 'success');
+          }
+          fetchSetlists();
+        } else {
+          alert(data.error || 'Lỗi khi tạo setlist');
+        }
+      } catch (err) {
+        console.error('Error creating setlist:', err);
+      }
+    }
+
+    document.getElementById('btn-create-setlist')?.addEventListener('click', openCreateSetlistModal);
+    btnCloseModal?.addEventListener('click', closeCreateSetlistModal);
+    btnCancelModal?.addEventListener('click', closeCreateSetlistModal);
+    formCreate?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      submitCreateSetlist();
+    });
+    modalCreate?.addEventListener('click', (e) => {
+      if (e.target === modalCreate) closeCreateSetlistModal();
+    });
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modalCreate && !modalCreate.classList.contains('hidden')) {
+        closeCreateSetlistModal();
+      }
     });
 
     document.getElementById('btn-back-setlists')?.addEventListener('click', backToSetlists);
