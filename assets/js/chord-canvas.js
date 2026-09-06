@@ -13,8 +13,8 @@ const ChordCanvas = (() => {
   let _editEnabled   = false;
   let _highlightMode = false; // Chế độ nổi bật: badge tím đậm ngay cả khi không edit
   let _popup         = null;
-  let _currentSet    = 'default';
-  let _prevSet       = 'default'; // Track set tr\u01b0\u1edbc \u0111\u1ec3 quy\u1ebft \u0111\u1ecbnh reload OSMD
+  let _currentSet    = 'HD';
+  let _prevSet       = 'HD'; // Track set trước để quyết định reload OSMD
   let _customChords  = {};
   let _noteEls       = [];
   let _ro            = null;
@@ -802,16 +802,16 @@ const ChordCanvas = (() => {
   }
 
   /* ─── Popup ─────────────────────────────────────────────────── */
-  function _showPopup(anchor, measureIdx, noteIdx, existing) {
+  async function _showPopup(anchor, measureIdx, noteIdx, existing) {
     // Guard 1: cần quyền banhat
     if (!window.Auth?.isBanhat?.()) {
       window.App?.showToast?.('⚠️ Cần đăng nhập với quyền Ban Hát để sửa hợp âm', 'error');
       return;
     }
-    // Guard 2: TLH (default) là bản gốc — không cho sửa, chỉ đọc
+    // Guard 2: TLH (default) là bản gốc — tự động chuyển sang bộ HD (ưu tiên) để sửa
     if (_currentSet === 'default') {
-      window.App?.showToast?.('🔒 Bộ TLH là bản gốc, không thể sửa. Vui lòng chọn bộ HD hoặc tạo bộ mới.', 'info');
-      return;
+      window.App?.showToast?.('⚡ Tự động chuyển sang bộ HD (Ưu tiên) để sửa hợp âm...', 'info', 2000);
+      await switchSet('HD');
     }
     _closePopup();
     _popup = ChordCanvasUI.createPopup(anchor, measureIdx, noteIdx, existing, _currentSet, {
@@ -1027,18 +1027,17 @@ const ChordCanvas = (() => {
 
     const songId = window.App?.getCurrentSongId?.();
     if (!songId) {
-      selector.innerHTML = '<option value="default">TLH (gốc)</option>';
+      selector.innerHTML = '<option value="HD" selected>⭐ HD (Ưu tiên)</option><option value="default">TLH (gốc)</option>';
       selector.disabled = true; return;
     }
 
     selector.disabled = false;
-    let sets = ['default'];
+    let sets = ['HD', 'default'];
     try {
       const r = await window.ApiService.chordSets.list(songId);
       if (r.success) {
-        // Đảm bảo HD luôn trong danh sách (dù rỗng)
-        const hdInList = r.sets.some(s => s === 'HD');
-        sets = ['default', ...(hdInList ? r.sets : ['HD', ...r.sets])];
+        const otherSets = r.sets.filter(s => s !== 'HD' && s !== 'default');
+        sets = ['HD', 'default', ...otherSets];
       }
     } catch(e) {}
 
@@ -1056,7 +1055,7 @@ const ChordCanvas = (() => {
 
     selector.innerHTML = sets.map(s =>
       `<option value="${s}" ${s === _currentSet ? 'selected' : ''}>${
-        s === 'default' ? 'TLH (gốc)' : s
+        s === 'HD' ? '⭐ HD (Ưu tiên)' : (s === 'default' ? 'TLH (gốc)' : s)
       }</option>`
     ).join('') + (canCreate ? `<option value="__create_new_set__" style="color: var(--accent,#6d28d9); font-weight: bold;">➕ Tạo Bộ Hợp Âm Mới...</option>` : '');
 

@@ -187,7 +187,7 @@ const SongLoader = (() => {
 
   /* ── Private helpers ── */
   function _injectChords(xml) {
-    const currentSet = window.ChordCanvas?.getCurrentSet?.() || 'default';
+    const currentSet = window.ChordCanvas?.getCurrentSet?.() || 'HD';
     const chords     = window.ChordCanvas?.getCustomChords?.() ?? {};
     if (currentSet !== 'default' && Object.keys(chords).length > 0) {
       return window.ChordCanvasXML?.cloneAndInjectChords?.(xml, chords) || xml;
@@ -197,7 +197,7 @@ const SongLoader = (() => {
 
   function _updateCapoBadge(xml) {
     if (!window.TransposeEngine) return;
-    const set    = window.ChordCanvas?.getCurrentSet?.() || 'default';
+    const set    = window.ChordCanvas?.getCurrentSet?.() || 'HD';
     const chords = window.ChordCanvas?.getCustomChords?.();
     let list = (set !== 'default' && chords) ? Object.values(chords) : TransposeEngine.extractChordsFromXML(xml);
     const transpose = Store.get('currentTranspose');
@@ -284,7 +284,7 @@ const SongLoader = (() => {
     const key   = window.SongInfoBar?.getSongKey?.() || '';
     const set   = window.ChordCanvas?.getCurrentSet?.() || 'HD';
     const cnt   = Object.keys(window.ChordCanvas?.getCustomChords?.() ?? {}).length;
-    const setLbl = set === 'default' ? 'TLH (gốc)' : set;
+    const setLbl = set === 'default' ? 'TLH (gốc)' : (set === 'HD' ? '⭐ HD (Ưu tiên)' : set);
     const cntLbl = set !== 'default' ? ` (${cnt > 0 ? cnt + ' hợp âm' : 'chưa có'})` : '';
     AppUI.showToast(`🎵 ${song.title}${key ? ' · '+key : ''} · ${setLbl}${cntLbl}`, 'info');
   }

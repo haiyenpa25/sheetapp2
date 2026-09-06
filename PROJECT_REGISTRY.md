@@ -330,6 +330,14 @@ SheetApp/
 
 > AI Agent cập nhật mục này sau mỗi phiên làm việc
 
+[2026-09-06] — Ưu tiên chọn bộ hợp âm HD thay cho TLH (gốc)
+  ~ Sửa: includes/sheet_viewer.php (Dropdown #chord-set-selector đưa option '⭐ HD (Ưu tiên)' lên đầu tiên trước 'TLH (gốc)')
+  ~ Sửa: assets/js/chord-canvas.js (Khởi tạo _currentSet và _prevSet mặc định là 'HD'; _refreshSetDropdown đưa 'HD' lên vị trí số 1; _showPopup tự động chuyển sang HD khi người dùng sửa hợp âm ở TLH)
+  ~ Sửa: assets/js/song-loader.js (Fallback set trong _injectChords, _updateCapoBadge và _showLoadToast ưu tiên 'HD' thay vì 'default')
+  ~ Sửa: assets/js/song-info-bar.js (Chip hợp âm ưu tiên hiển thị '🎸 ⭐ HD (Ưu tiên)'; Bổ sung sự kiện click vào chip để chuyển đổi tức thì giữa HD và TLH (gốc))
+  ✅ Bộ hợp âm HD luôn được chọn và ưu tiên hàng đầu trên toàn bộ giao diện và luồng dữ liệu.
+  ✅ Nhạc công có thể 1-chạm vào chip hợp âm trên thanh thông tin để so sánh đối chiếu nhanh giữa HD và TLH.
+
 [2026-09-05] — Nâng cấp chỉnh sửa Tempo (BPM) & Tối ưu giao diện lưu Setlist trên Điện thoại, iPad
   ~ Sửa: includes/modals.php (Tạo #tempo-pick-modal với Slider 40-220, nút +/-, TAP tempo, Presets, Test nhịp; Nâng cấp #transpose-pick-modal chọn trước cả Tông tập và Tempo tập; Thêm window.TempoPick API)
   ~ Sửa: assets/js/song-info-bar.js (Chip Tempo [♩ = ... bpm ✎] tương tác mở TempoPick; Dời nút [💾 Lưu vào Setlist] lên vị trí thứ 4 ưu tiên hiển thị trên mobile/iPad; Bỏ rào cản isAdmin chặn lưu setlist; Lắng nghe metronome:bpm realtime)

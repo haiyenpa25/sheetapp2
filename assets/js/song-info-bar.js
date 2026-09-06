@@ -208,15 +208,16 @@ const SongInfoBar = (() => {
       chips.push(`<span class="si-chip si-measures" title="Tổng số ô nhịp">${_songData.measureCount} nhịp</span>`);
     }
 
-    // 8. Bộ hợp âm
-    const currentSet = window.ChordCanvas?.getCurrentSet?.();
+    // 8. Bộ hợp âm (Ưu tiên HD thay cho TLH)
+    const currentSet = window.ChordCanvas?.getCurrentSet?.() || 'HD';
     const chordCount = Object.keys(window.ChordCanvas?.getCustomChords?.() ?? {}).length;
     if (currentSet && currentSet !== 'default') {
       const countLabel = chordCount > 0 ? ` · ● ${chordCount}` : ' · ○ 0';
       const chipClass  = chordCount > 0 ? 'si-chip si-chord-set si-chord-has' : 'si-chip si-chord-set si-chord-empty';
-      chips.push(`<span class="${chipClass}" title="Bộ hợp âm: ${currentSet}">🎸 ${currentSet}${countLabel}</span>`);
+      const label      = currentSet === 'HD' ? '⭐ HD (Ưu tiên)' : currentSet;
+      chips.push(`<span id="si-chord-set-chip" class="${chipClass}" title="Đang chọn ${label}. Bấm để chuyển đổi nhanh sang TLH (gốc)" style="cursor:pointer;touch-action:manipulation;">🎸 ${label}${countLabel}</span>`);
     } else if (currentSet === 'default') {
-      chips.push(`<span class="si-chip si-chord-set" title="Hợp âm từ TLH (gốc)">🎸 TLH (gốc)</span>`);
+      chips.push(`<span id="si-chord-set-chip" class="si-chip si-chord-set" title="Đang chọn TLH (gốc). Bấm để chuyển đổi nhanh sang bộ HD (Ưu tiên)" style="cursor:pointer;touch-action:manipulation;">🎸 TLH (gốc)</span>`);
     }
 
     // 9. Ghi chú vắn tắt (nếu có)
@@ -317,6 +318,17 @@ const SongInfoBar = (() => {
       } catch (e) {
         window.App?.showToast?.('Lỗi lưu vào Setlist', 'error');
       }
+    });
+
+    // Wire sự kiện click vào Chip Hợp Âm để chuyển đổi nhanh giữa HD và TLH (gốc)
+    document.getElementById('si-chord-set-chip')?.addEventListener('click', async () => {
+      if (!window.ChordCanvas?.switchSet) return;
+      const curSet = window.ChordCanvas.getCurrentSet() || 'HD';
+      const targetSet = curSet === 'HD' ? 'default' : 'HD';
+      await window.ChordCanvas.switchSet(targetSet);
+      const setLabel = targetSet === 'HD' ? '⭐ Bộ HD (Ưu tiên)' : '🎸 Bộ TLH (gốc)';
+      window.App?.showToast?.(`Đã chọn ${setLabel}`, 'info', 1800);
+      _render();
     });
   }
 
