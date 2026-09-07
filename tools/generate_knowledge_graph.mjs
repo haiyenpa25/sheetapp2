@@ -14,9 +14,23 @@ fs.mkdirSync(TMP_DIR, { recursive: true });
 
 console.log('🚀 Generating Understand-Anything Knowledge Graph for SheetApp...');
 
+// 0. Auto-run scan and compute-batches if missing
+const scanFile = path.join(INTERMEDIATE_DIR, 'scan-result.json');
+const batchesFile = path.join(INTERMEDIATE_DIR, 'batches.json');
+
+if (!fs.existsSync(scanFile)) {
+  console.log('🔍 Scanning project structure with scan-project.mjs...');
+  execSync(`node "${PLUGIN_ROOT}/skills/understand/scan-project.mjs" "${PROJECT_ROOT}" "${scanFile}" --exclude-analysis-data`, { stdio: 'inherit' });
+}
+
+if (!fs.existsSync(batchesFile)) {
+  console.log('📦 Computing batches with compute-batches.mjs...');
+  execSync(`node "${PLUGIN_ROOT}/skills/understand/compute-batches.mjs" "${PROJECT_ROOT}"`, { stdio: 'inherit' });
+}
+
 // 1. Read scan-result.json and batches.json
-const scanResult = JSON.parse(fs.readFileSync(path.join(INTERMEDIATE_DIR, 'scan-result.json'), 'utf8'));
-const batchesData = JSON.parse(fs.readFileSync(path.join(INTERMEDIATE_DIR, 'batches.json'), 'utf8'));
+const scanResult = JSON.parse(fs.readFileSync(scanFile, 'utf8'));
+const batchesData = JSON.parse(fs.readFileSync(batchesFile, 'utf8'));
 
 console.log(`📊 Processing ${batchesData.batches.length} batches across ${scanResult.files.length} files...`);
 
@@ -287,3 +301,20 @@ fs.writeFileSync(path.join(UA_DIR, 'meta.json'), JSON.stringify(meta, null, 2));
 console.log(`🎉 Knowledge Graph created successfully!`);
 console.log(`📈 Nodes: ${assembled.nodes.length} | Edges: ${assembled.edges.length} | Layers: ${layers.length} | Tour Steps: ${tour.length}`);
 console.log(`💾 Saved to: ${finalGraphPath}`);
+
+// Sync to live web dashboard if exists
+const dashboardDir = path.join(PROJECT_ROOT, 'dashboard');
+if (fs.existsSync(dashboardDir)) {
+  fs.copyFileSync(finalGraphPath, path.join(dashboardDir, 'knowledge-graph.json'));
+  fs.copyFileSync(path.join(UA_DIR, 'meta.json'), path.join(dashboardDir, 'meta.json'));
+  console.log(`🚀 Synced knowledge graph to ${dashboardDir}/`);
+}
+
+// Clean up temporary batch extraction files to prevent repository clutter
+if (!process.argv.includes('--keep-temp')) {
+  const intermediateDir = path.join(UA_DIR, 'intermediate');
+  const tmpDir = path.join(UA_DIR, 'tmp');
+  if (fs.existsSync(intermediateDir)) fs.rmSync(intermediateDir, { recursive: true, force: true });
+  if (fs.existsSync(tmpDir)) fs.rmSync(tmpDir, { recursive: true, force: true });
+  console.log('🧹 Cleaned up temporary extraction files in .ua/intermediate/ and .ua/tmp/');
+}

@@ -21,7 +21,7 @@ Nguon du lieu: MusicXML (.xml) render qua OSMD — chuan quoc te cho sheet nhac.
 > Day la cac quy tac KHONG thay doi. Moi developer phai doc va tuan thu.
 
 ### RULE 1: Bo Hop Am HD la Mac Dinh
-- Moi bai hat LUON co bo "HD" (du rong) — tao tu dong qua tools/init_hd_sets.php
+- Moi bai hat LUON co bo "HD" (du rong) — tao tu dong qua tools/create_hd_sets.php (hoac create_hd.sh)
 - Khi load bai: ChordCanvas tu dong chon set "HD"
 - Neu HD co hop am (>0): render HD, an TLH goc
 - Neu HD rong: fallback hien TLH goc (khong inject empty map — tranh mat hop am)

@@ -79,7 +79,7 @@ Nếu yêu cầu mơ hồ hoặc thiếu thông tin → **hỏi ngay**, không t
 > Đây là các quy tắc nghiệp vụ đặc thù, KHÔNG thay đổi không có lý do.
 
 ### RULE 1: Bộ Hợp Âm HD là Mặc Định
-- Mọi bài hát LUÔN có bộ "HD" (dù rỗng) — tạo tự động qua `tools/init_hd_sets.php`
+- Mọi bài hát LUÔN có bộ "HD" (dù rỗng) — tạo tự động qua `tools/create_hd_sets.php` (hoặc `create_hd.sh`)
 - Khi load bài: ChordCanvas tự động chọn set "HD"
 - Nếu HD có hợp âm (>0): render HD, ẩn TLH gốc
 - Nếu HD rỗng: fallback hiện TLH gốc (không inject empty map)

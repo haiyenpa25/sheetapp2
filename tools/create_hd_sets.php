@@ -12,9 +12,10 @@ if (php_sapi_name() !== 'cli') {
 }
 
 require_once __DIR__ . '/../api/core/DB.php';
+require_once __DIR__ . '/../api/services/ChordSetService.php';
 $pdo = DB::get();
 
-$BASE_DIR    = __DIR__ . '/../data/chord_sets';
+$BASE_DIR    = ChordSetService::BASE_DIR;
 $SET_NAME    = 'HD';
 $EMPTY_JSON  = '[]';
 
