@@ -67,7 +67,7 @@ function learnCssTag(string $file): string {
 <body>
 <div class="learn-page" data-status="idle">
 
-  <!-- ═══ HEADER ═══════════════════════════════════════════════════════ -->
+  <!-- ═══ HEADER ═══════════════════════════════════════════════════ -->
   <header class="learn-header">
     <a href="/" class="learn-back-btn" title="Quay về SheetApp">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -76,10 +76,15 @@ function learnCssTag(string $file): string {
       SheetApp
     </a>
 
-    <span class="learn-header-title">🎹 Learn</span>
+    <span class="learn-header-title">
+      <svg viewBox="0 0 24 24" fill="currentColor" class="learn-svg-icon" style="width:18px;height:18px;display:inline-block;vertical-align:-3px;margin-right:4px;">
+        <path d="M20 5H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 10H9v-5h2v5zm4 0h-2v-5h2v5zm4 0h-2v-5h2v5z"/>
+      </svg>
+      Learn Studio
+    </span>
 
     <div class="learn-song-info">
-      <div class="learn-song-info-title" id="learn-song-label">Chọn bài để bắt đầu</div>
+      <div class="learn-song-info-title" id="learn-song-label">Đang tải bài hát...</div>
       <div class="learn-song-info-meta" id="learn-song-meta"></div>
     </div>
 
@@ -118,13 +123,22 @@ function learnCssTag(string $file): string {
     <span class="learn-status-badge" id="learn-status-badge">Sẵn sàng</span>
   </header>
 
-  <!-- ═══ SONG PICKER PANEL ════════════════════════════════════════════ -->
+  <!-- ═══ SONG PICKER PANEL (Modal Dialog) ════════════════════════════ -->
   <div id="learn-song-picker-panel" class="learn-song-picker-panel hidden">
+    <div class="learn-picker-header">
+      <div class="learn-picker-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;vertical-align:-3px;margin-right:6px;">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        </svg>
+        Chọn bài hát học tập
+      </div>
+      <button type="button" class="btn-picker-close" id="btn-picker-close" title="Đóng">✕</button>
+    </div>
     <input
       type="search"
       id="learn-song-search"
       class="learn-song-search"
-      placeholder="🔍 Tìm bài hát..."
+      placeholder="Tìm theo số bài hoặc tên (vd: 90, 001, Kìa xem ngọn đồi xanh...)"
       autocomplete="off">
     <div id="learn-song-list" class="learn-song-list">
       <!-- Populated by LearnApp.init() -->
@@ -138,43 +152,112 @@ function learnCssTag(string $file): string {
   <!-- ═══ MAIN LAYOUT ══════════════════════════════════════════════════ -->
   <div class="learn-main">
 
-    <!-- ── Score ─────────────────────────────────────────────────────── -->
-    <section class="learn-score-section">
-      <div id="learn-score-container">
-        <!-- OSMD renders here -->
-        <div style="padding:32px;text-align:center;color:#888;font-size:14px;">
-          🎵 Chọn một bài hát để hiện sheet nhạc
-        </div>
-      </div>
-    </section>
+    <!-- ── Center Stage (Score + Virtual Keyboard) ──────────────────── -->
+    <div class="learn-center-stage">
 
-    <!-- ── Side Panel ─────────────────────────────────────────────────── -->
+      <!-- Score Section -->
+      <section class="learn-score-section">
+        <!-- Score Toolbar (Zoom & Tools) -->
+        <div class="learn-score-toolbar">
+          <div class="score-toolbar-left">
+            <span class="score-toolbar-tag">Sheet Music</span>
+          </div>
+          <div class="score-toolbar-right">
+            <!-- Zoom Controls -->
+            <div class="learn-zoom-controls">
+              <button type="button" class="btn-learn-score-tool" id="btn-learn-zoom-out" title="Thu nhỏ (Zoom Out)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </button>
+              <button type="button" class="btn-learn-score-tool btn-zoom-val" id="btn-learn-zoom-reset" title="Khôi phục 100%">
+                <span id="learn-zoom-val">100%</span>
+              </button>
+              <button type="button" class="btn-learn-score-tool" id="btn-learn-zoom-in" title="Phóng to (Zoom In)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </button>
+              <button type="button" class="btn-learn-score-tool btn-zoom-fit" id="btn-learn-zoom-fit" title="Vừa toàn bộ bản nhạc (Fit Sheet)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+                <span>Vừa trang</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="learn-score-container">
+          <!-- OSMD renders here -->
+          <div class="learn-score-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:36px;height:36px;margin-bottom:12px;opacity:0.6;">
+              <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+            </svg>
+            <div>Đang tải bài hát... Hãy chọn bài từ thanh công cụ để bắt đầu</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Virtual Keyboard across bottom of score -->
+      <section class="learn-keyboard-section" id="learn-keyboard-section">
+        <div class="learn-keyboard-header">
+          <span class="learn-keyboard-title">
+            <svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px;">
+              <path d="M20 5H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 10H9v-5h2v5zm4 0h-2v-5h2v5zm4 0h-2v-5h2v5z"/>
+            </svg>
+            BÀN PHÍM PIANO
+          </span>
+          <div class="vkb-legend">
+            <span class="vkb-legend-rh"><span class="legend-dot legend-dot-rh"></span> Tay phải (Hợp âm)</span>
+            <span class="vkb-legend-lh"><span class="legend-dot legend-dot-lh"></span> Tay trái (Bass)</span>
+            <span class="vkb-legend-next"><span class="legend-dot legend-dot-next"></span> Hợp âm kế tiếp</span>
+          </div>
+        </div>
+        <div id="learn-virtual-keyboard">
+          <!-- Mounted by VirtualKeyboard.mount() -->
+        </div>
+      </section>
+    </div>
+
+    <!-- ── Side Panel (Studio Controls) ───────────────────────────────── -->
     <aside class="learn-side-panel">
 
       <!-- Mode selector -->
       <div class="learn-mode-bar">
-        <button class="btn-learn-mode active" data-mode="piano"  title="Học Piano">🎹 Piano</button>
-        <button class="btn-learn-mode"        data-mode="chord"  title="Tập Hợp âm">🎸 Hợp âm</button>
-        <button class="btn-learn-mode"        data-mode="satb"   title="Luyện giọng SATB">🎤 SATB</button>
-        <button class="btn-learn-mode"        data-mode="melody" title="Tập Giai điệu">🎵 Melody</button>
+        <button class="btn-learn-mode active" data-mode="piano"  title="Học Piano">
+          <svg viewBox="0 0 24 24" fill="currentColor" class="mode-icon"><path d="M20 5H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 10H9v-5h2v5zm4 0h-2v-5h2v5zm4 0h-2v-5h2v5z"/></svg>
+          Piano
+        </button>
+        <button class="btn-learn-mode"        data-mode="chord"  title="Tập Hợp âm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mode-icon"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Hợp âm
+        </button>
+        <button class="btn-learn-mode"        data-mode="satb"   title="Luyện giọng SATB">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mode-icon"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          SATB
+        </button>
+        <button class="btn-learn-mode"        data-mode="melody" title="Tập Giai điệu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mode-icon"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          Melody
+        </button>
       </div>
 
       <!-- Accompaniment Pattern Selector -->
       <div class="learn-panel-card" id="learn-pattern-card">
         <div class="learn-panel-card-header">
-          <span class="learn-panel-card-title">🎼 Kiểu đệm tự động</span>
+          <span class="learn-panel-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:-3px;margin-right:4px;">
+              <path d="M2 10s3-3 5-3 5 6 7 6 5-3 8-3"/><path d="M2 14s3-3 5-3 5 6 7 6 5-3 8-3"/>
+            </svg>
+            Kiểu đệm tự động
+          </span>
           <label class="learn-toggle-switch" title="Bật/Tắt đệm">
             <input type="checkbox" id="learn-pattern-toggle" checked>
             <span class="learn-toggle-slider"></span>
           </label>
         </div>
         <select id="learn-pattern-select" class="learn-select">
-          <option value="piano-block-4-4-v1">🎹 Piano Block (4/4 Cơ bản)</option>
-          <option value="piano-bass-chord-4-4-v1" selected>🎹 Bass + Chords (4/4 Pop/Ballad)</option>
-          <option value="piano-arpeggio-4-4-v1">✨ Arpeggio Rải Nốt (4/4 Nhẹ nhàng)</option>
-          <option value="piano-waltz-3-4-v1">💃 Waltz Cổ Điển (3/4 Bùm-Chát)</option>
-          <option value="piano-worship-6-8-v1">🕊️ Worship Ballad (6/8 Sâu lắng)</option>
-          <option value="organ-church-4-4-v1">⛪ Organ Thánh Ca (4/4 Ngân dài)</option>
+          <option value="piano-block-4-4-v1">Piano Block (4/4 Cơ bản)</option>
+          <option value="piano-bass-chord-4-4-v1" selected>Bass + Chords (4/4 Pop/Ballad)</option>
+          <option value="piano-arpeggio-4-4-v1">Arpeggio Rải Nốt (4/4 Nhẹ nhàng)</option>
+          <option value="piano-waltz-3-4-v1">Waltz Cổ Điển (3/4 Bùm-Chát)</option>
+          <option value="piano-worship-6-8-v1">Worship Ballad (6/8 Sâu lắng)</option>
+          <option value="organ-church-4-4-v1">Organ Thánh Ca (4/4 Ngân dài)</option>
         </select>
 
         <!-- Sound Mixer preview -->
@@ -197,67 +280,64 @@ function learnCssTag(string $file): string {
         </div>
       </div>
 
-      <!-- Virtual Keyboard -->
-      <section class="learn-keyboard-section" id="learn-keyboard-section">
-        <div class="chord-label" style="padding:0 0 6px 0;">Bàn Phím Piano</div>
-        <div id="learn-virtual-keyboard">
-          <!-- Mounted by VirtualKeyboard.mount() -->
-        </div>
-      </section>
-
     </aside>
+  </div><!-- /.learn-main -->
 
-    <!-- ── Controls Bar ───────────────────────────────────────────────── -->
-    <div class="learn-controls-bar">
+  <!-- ── Controls Bar ───────────────────────────────────────────────── -->
+  <div class="learn-controls-bar">
 
-      <!-- Play / Pause -->
-      <button
-        id="btn-learn-play"
-        class="btn-learn-play"
-        title="Play / Dừng (Space)"
-        disabled>
-        ▶ Play
+    <!-- Play / Pause -->
+    <button
+      id="btn-learn-play"
+      class="btn-learn-play"
+      title="Play / Dừng (Space)"
+      disabled>
+      <svg viewBox="0 0 24 24" fill="currentColor" class="control-btn-icon"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      <span>Play</span>
+    </button>
+
+    <!-- Stop -->
+    <button
+      id="btn-learn-stop"
+      class="btn-learn-stop"
+      title="Dừng & quay đầu"
+      disabled>
+      <svg viewBox="0 0 24 24" fill="currentColor" class="control-btn-icon"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+      <span>Stop</span>
+    </button>
+
+    <!-- Section / Loop Selector -->
+    <div class="learn-loop-group">
+      <select id="learn-section-select" class="learn-select learn-section-select" title="Chọn phân đoạn để tập">
+        <option value="all">Toàn bài (Không lặp)</option>
+      </select>
+      <button id="btn-learn-loop-toggle" class="btn-learn-loop" title="Bật/Tắt vòng lặp phân đoạn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="control-btn-icon"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        <span id="learn-loop-label">Lặp: TẮT</span>
       </button>
-
-      <!-- Stop -->
-      <button
-        id="btn-learn-stop"
-        class="btn-learn-stop"
-        title="Dừng & quay đầu"
-        disabled>
-        ⏹ Stop
-      </button>
-
-      <!-- Section / Loop Selector -->
-      <div class="learn-loop-group">
-        <select id="learn-section-select" class="learn-select learn-section-select" title="Chọn phân đoạn để tập">
-          <option value="all">Toàn bài (Không lặp)</option>
-        </select>
-        <button id="btn-learn-loop-toggle" class="btn-learn-loop" title="Bật/Tắt vòng lặp phân đoạn">
-          🔁 Lặp: TẮT
-        </button>
-      </div>
-
-      <!-- BPM Control -->
-      <div class="learn-bpm-control">
-        <span class="learn-bpm-label">BPM</span>
-        <button class="btn-learn-bpm" id="btn-learn-bpm-dec" title="Giảm BPM">−</button>
-        <span class="learn-bpm-value" id="learn-bpm-value">76</span>
-        <button class="btn-learn-bpm" id="btn-learn-bpm-inc" title="Tăng BPM">+</button>
-      </div>
-
-      <!-- Tempo Ladder -->
-      <div class="learn-tempo-ladder">
-        <button class="btn-tempo-ladder" data-ratio="0.5" title="Tập chậm (50% BPM)">50%</button>
-        <button class="btn-tempo-ladder" data-ratio="0.75" title="Tăng tốc (75% BPM)">75%</button>
-        <button class="btn-tempo-ladder active" data-ratio="1.0" title="Nhịp chuẩn (100% BPM)">100%</button>
-        <button class="btn-tempo-ladder" data-ratio="1.1" title="Thử thách (110% BPM)">110%</button>
-        <button id="btn-learn-auto-tempo" class="btn-tempo-ladder" title="Tự động tăng nhịp độ sau mỗi 2 vòng lặp">⚡ Tăng dần</button>
-      </div>
-
     </div>
 
-  </div><!-- /.learn-main -->
+    <!-- BPM Control -->
+    <div class="learn-bpm-control">
+      <span class="learn-bpm-label">BPM</span>
+      <button class="btn-learn-bpm" id="btn-learn-bpm-dec" title="Giảm BPM">−</button>
+      <span class="learn-bpm-value" id="learn-bpm-value">76</span>
+      <button class="btn-learn-bpm" id="btn-learn-bpm-inc" title="Tăng BPM">+</button>
+    </div>
+
+    <!-- Tempo Ladder -->
+    <div class="learn-tempo-ladder">
+      <button class="btn-tempo-ladder" data-ratio="0.5" title="Tập chậm (50% BPM)">50%</button>
+      <button class="btn-tempo-ladder" data-ratio="0.75" title="Tăng tốc (75% BPM)">75%</button>
+      <button class="btn-tempo-ladder active" data-ratio="1.0" title="Nhịp chuẩn (100% BPM)">100%</button>
+      <button class="btn-tempo-ladder" data-ratio="1.1" title="Thử thách (110% BPM)">110%</button>
+      <button id="btn-learn-auto-tempo" class="btn-tempo-ladder" title="Tự động tăng nhịp độ sau mỗi 2 vòng lặp">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;vertical-align:-2px;margin-right:3px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <span>Tăng dần</span>
+      </button>
+    </div>
+
+  </div><!-- /.learn-controls-bar -->
 
 </div><!-- /.learn-page -->
 

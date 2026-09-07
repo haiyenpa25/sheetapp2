@@ -50,7 +50,12 @@ const ChordCard = (() => {
     if (!chord) {
       _container.innerHTML = `
         <div class="chord-card chord-card--empty">
-          <div class="chord-card-placeholder">🎵 Chọn bài và nhấn Play</div>
+          <div class="chord-card-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;vertical-align:-4px;margin-right:6px;opacity:0.7;">
+              <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+            </svg>
+            Chọn bài và nhấn Play
+          </div>
         </div>`;
       return;
     }
@@ -73,14 +78,14 @@ const ChordCard = (() => {
         </div>
 
         <div class="chord-card-notes">
-          <div class="chord-label">Các nốt</div>
+          <div class="chord-label">CÁC NỐT</div>
           <div class="chord-notes-list">${notesStr}</div>
           ${bassStr ? `<div class="chord-bass-note">Bass: <strong>${bassStr}</strong></div>` : ''}
         </div>
 
         ${invs.length > 1 ? `
         <div class="chord-card-inversions">
-          <div class="chord-label">Thế đảo</div>
+          <div class="chord-label">THẾ ĐẢO</div>
           ${invs.map((inv, i) => `
             <div class="chord-inversion ${i === 0 ? 'chord-inv-root' : ''}">
               <span class="inv-label">${i === 0 ? 'Gốc' : `Đảo ${i}`}:</span>
@@ -90,10 +95,16 @@ const ChordCard = (() => {
 
         <div class="chord-card-actions">
           <button class="btn-hear-chord" id="btn-hear-chord" title="Nghe hợp âm">
-            🔊 Nghe
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px;">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            </svg>
+            Nghe
           </button>
           <button class="btn-show-keyboard" id="btn-show-keyboard" title="Hiện bàn phím">
-            🎹 Phím
+            <svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px;vertical-align:-2px;margin-right:4px;">
+              <path d="M20 5H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 10H9v-5h2v5zm4 0h-2v-5h2v5zm4 0h-2v-5h2v5z"/>
+            </svg>
+            Phím
           </button>
         </div>
 

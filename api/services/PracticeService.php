@@ -9,20 +9,21 @@ class PracticeService {
     /**
      * Bắt đầu một phiên luyện tập
      */
-    public static function startSession(int $userId, int $songId, string $mode = 'piano', int $startBpm = 76): array {
-        if ($songId <= 0) {
+    public static function startSession(int $userId, mixed $songId, string $mode = 'piano', int $startBpm = 76): array {
+        $songIdStr = trim((string)$songId);
+        if (empty($songIdStr)) {
             throw new InvalidArgumentException('Mã bài hát không hợp lệ');
         }
 
         $sql = "INSERT INTO practice_sessions 
                     (user_id, song_id, mode, started_at, start_bpm, max_bpm, created_at)
                 VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)";
-        DB::run($sql, [$userId, $songId, $mode, time(), $startBpm, $startBpm]);
+        DB::run($sql, [$userId, $songIdStr, $mode, time(), $startBpm, $startBpm]);
 
         $id = (int)DB::lastId();
         return [
             'session_id' => $id,
-            'song_id' => $songId,
+            'song_id' => $songIdStr,
             'mode' => $mode,
             'started_at' => time()
         ];
@@ -78,12 +79,13 @@ class PracticeService {
     /**
      * Lấy tiến độ luyện tập theo bài hát của người dùng
      */
-    public static function getProgress(int $songId, int $userId = 0): array {
+    public static function getProgress(mixed $songId, int $userId = 0): array {
+        $songIdStr = trim((string)$songId);
         $sql = "SELECT id, mode, started_at, ended_at, duration_seconds, start_bpm, max_bpm, accuracy_total 
                 FROM practice_sessions 
                 WHERE song_id = ? AND (user_id = ? OR user_id = 0)
                 ORDER BY id DESC LIMIT 20";
-        $sessions = DB::run($sql, [$songId, $userId])->fetchAll();
+        $sessions = DB::run($sql, [$songIdStr, $userId])->fetchAll();
 
         // Tổng số phút luyện tập
         $totalMinutes = 0;

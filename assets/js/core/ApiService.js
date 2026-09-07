@@ -7,7 +7,8 @@ const ApiService = (() => {
   'use strict';
 
   async function _request(url, options = {}) {
-    const res = await fetch(url, options);
+    const finalUrl = (url.startsWith('http') || url.startsWith('/')) ? url : `/${url}`;
+    const res = await fetch(finalUrl, options);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();
   }

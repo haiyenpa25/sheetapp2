@@ -15,8 +15,8 @@ class PracticeController {
         try {
             if ($method === 'GET') {
                 if ($action === 'progress') {
-                    $songId = (int)($_GET['song_id'] ?? $_GET['songId'] ?? 0);
-                    if ($songId <= 0) {
+                    $songId = trim($_GET['song_id'] ?? $_GET['songId'] ?? '');
+                    if (empty($songId)) {
                         Response::error('Thiếu mã bài hát (song_id)', 400);
                         return;
                     }
@@ -30,7 +30,7 @@ class PracticeController {
                 $body = json_decode(file_get_contents('php://input'), true) ?? [];
 
                 if ($action === 'start') {
-                    $songId   = (int)($body['song_id'] ?? 0);
+                    $songId   = trim((string)($body['song_id'] ?? ''));
                     $mode     = trim($body['mode'] ?? 'piano');
                     $startBpm = (int)($body['start_bpm'] ?? 76);
 

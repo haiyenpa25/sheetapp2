@@ -19,6 +19,7 @@ const LearnApp = (() => {
 
   /* ─── State ──────────────────────────────────────────────────── */
   let _osmd             = null;
+  let _osmdZoom         = 1.0;
   let _xmlDoc           = null;
   let _currentSong      = null;
   let _rawChordData     = [];
@@ -26,7 +27,7 @@ const LearnApp = (() => {
   let _songsList        = [];
   let _initialized      = false;
 
-  /* ─── OSMD Setup ─────────────────────────────────────────────── */
+  /* ─── OSMD Setup & Zoom ───────────────────────────────────────── */
   function _initOsmd() {
     const container = document.getElementById('learn-score-container');
     if (!container || !window.opensheetmusicdisplay) return null;
@@ -36,28 +37,106 @@ const LearnApp = (() => {
       backend: 'svg',
       drawTitle: false,
       drawComposer: false,
+      drawCredits: false,
       drawingParameters: 'compact',
+      pageFormat: 'Endless',
     });
     return osmd;
+  }
+
+  function _setZoom(newZoom) {
+    if (!_osmd) return;
+    _osmdZoom = Math.max(0.4, Math.min(1.8, Math.round(newZoom * 100) / 100));
+    _osmd.zoom = _osmdZoom;
+    _osmd.render();
+    const zoomLabel = document.getElementById('learn-zoom-val');
+    if (zoomLabel) zoomLabel.textContent = `${Math.round(_osmdZoom * 100)}%`;
+  }
+
+  function _zoomIn() {
+    _setZoom(_osmdZoom + 0.1);
+  }
+
+  function _zoomOut() {
+    _setZoom(_osmdZoom - 0.1);
+  }
+
+  function _resetZoom() {
+    _setZoom(1.0);
+  }
+
+  function _fitScore() {
+    if (!_osmd) return;
+    const container = document.getElementById('learn-score-container');
+    const scoreSec = document.querySelector('.learn-score-section');
+    if (!container || !scoreSec) return;
+
+    const availableHeight = scoreSec.clientHeight - 60;
+    const currentHeight = container.scrollHeight || 1600;
+    if (availableHeight > 250 && currentHeight > 250) {
+      const targetZoom = Math.min(1.0, Math.max(0.55, Math.round((availableHeight / currentHeight) * _osmdZoom * 100) / 100));
+      _setZoom(targetZoom);
+    }
+  }
+
+  function _scrollToMeasure(measure) {
+    const scoreSec = document.querySelector('.learn-score-section');
+    const container = document.getElementById('learn-score-container');
+    if (!scoreSec || !container) return;
+
+    const meta = _getSongMeta();
+    const total = Math.max(1, meta.totalMeasures);
+    const scrollableH = container.scrollHeight - scoreSec.clientHeight;
+    if (scrollableH <= 0) return;
+
+    const progress = Math.max(0, Math.min(1, (measure - 1) / total));
+    const targetScrollTop = progress * container.scrollHeight;
+    scoreSec.scrollTo({
+      top: Math.max(0, targetScrollTop - 40),
+      behavior: 'smooth'
+    });
   }
 
   /* ─── Song Loading ───────────────────────────────────────────── */
   async function _loadSongs() {
     try {
       const res = await ApiService.songs.list();
-      _songsList = res?.songs ?? res?.data ?? [];
+      _songsList = Array.isArray(res) ? res : (res?.songs ?? res?.data ?? []);
       _renderSongList();
 
-      // Auto-select from URL param
+      // Auto-select: Priority 1 = URL param, Priority 2 = localStorage, Priority 3 = Default song #90 or first
+      let targetSong = null;
       const pending = LearnStore.get('_pendingSongParam');
       if (pending) {
-        const song = _songsList.find(s =>
-          String(s.id) === String(pending) ||
-          s.slug === pending ||
-          (s.title || '').toLowerCase().includes(String(pending).toLowerCase())
-        );
-        if (song) _selectSong(song);
+        const pStr = String(pending).trim().toLowerCase();
+        targetSong = _songsList.find(s => {
+          const idStr = String(s.id || '').toLowerCase();
+          const titleStr = String(s.title || '').toLowerCase();
+          const numStr = String(s.httlvnId || '').padStart(3, '0');
+          return idStr === pStr ||
+                 idStr.includes(pStr) ||
+                 numStr === pStr ||
+                 String(s.httlvnId) === pStr ||
+                 titleStr.includes(pStr);
+        });
         LearnStore.set('_pendingSongParam', null);
+      }
+
+      if (!targetSong) {
+        try {
+          const lastId = localStorage.getItem('sheetapp_learn_last_song');
+          if (lastId) {
+            targetSong = _songsList.find(s => s.id === lastId);
+          }
+        } catch (e) {}
+      }
+
+      if (!targetSong && _songsList.length > 0) {
+        targetSong = _songsList.find(s => s.id === 'thanh-ca-090' || s.httlvnId === 90) || _songsList[0];
+      }
+
+      if (targetSong) {
+        _selectSong(targetSong);
       }
     } catch (e) {
       console.error('[LearnApp] Load songs failed:', e);
@@ -74,7 +153,15 @@ const LearnApp = (() => {
       const item = document.createElement('div');
       item.className  = 'learn-song-item';
       item.dataset.id = song.id;
-      item.textContent = song.title ?? `Bài ${song.id}`;
+      const numBadge = song.httlvnId ? `<span class="song-num-badge">#${song.httlvnId}</span>` : '';
+      const keyBadge = song.defaultKey ? `<span class="song-key-badge">${song.defaultKey}</span>` : '';
+      item.innerHTML = `
+        <div class="song-item-content">
+          ${numBadge}
+          <span class="song-item-title">${song.title ?? `Bài ${song.id}`}</span>
+          ${keyBadge}
+        </div>
+      `;
       item.addEventListener('click', () => {
         _selectSong(song);
         document.getElementById('learn-song-picker-panel')?.classList.add('hidden');
@@ -98,6 +185,14 @@ const LearnApp = (() => {
     _currentSong = song;
     _currentTranspose = 0; // Reset Transpose về 0
 
+    // Save to localStorage and update browser URL without full reload
+    try {
+      localStorage.setItem('sheetapp_learn_last_song', song.id);
+      const newUrl = new URL(window.location);
+      newUrl.searchParams.set('song', song.id);
+      window.history.replaceState({}, '', newUrl);
+    } catch (e) {}
+
     const transValEl = document.getElementById('learn-trans-val');
     if (transValEl) transValEl.textContent = '0';
 
@@ -112,11 +207,15 @@ const LearnApp = (() => {
     const label = document.getElementById('learn-song-label');
     if (label) label.textContent = song.title;
 
+    const metaLabel = document.getElementById('learn-song-meta');
+    if (metaLabel) metaLabel.textContent = `Tông gốc: ${song.defaultKey || 'C'} • #${song.httlvnId || song.id}`;
+
     try {
       // Fetch XML + chord set concurrently (mặc định HD)
       const chordProfile = LearnStore.get('chordSet') || 'HD';
+      const xmlUrl = song.xmlPath.startsWith('/') ? song.xmlPath : '/' + song.xmlPath;
       const [xmlRes, chordData] = await Promise.all([
-        fetch(song.xmlPath),
+        fetch(xmlUrl),
         _loadChordSet(song.id, chordProfile),
       ]);
 
@@ -263,12 +362,15 @@ const LearnApp = (() => {
   }
 
   function _getSongMeta() {
+    const firstPart = _xmlDoc ? _xmlDoc.querySelector('part') : null;
+    const measuresCount = firstPart
+      ? firstPart.querySelectorAll('measure').length
+      : (_xmlDoc ? _xmlDoc.querySelectorAll('part:first-of-type > measure').length : 16);
+
     return {
       beats:         LearnStore.get('_beats') ?? 4,
       beatType:      LearnStore.get('_beatType') ?? 4,
-      totalMeasures: _xmlDoc
-        ? (_xmlDoc.querySelectorAll('part > measure').length)
-        : 100,
+      totalMeasures: measuresCount || 16,
     };
   }
 
@@ -287,6 +389,9 @@ const LearnApp = (() => {
       if (chord) {
         EventBus.emit(LEARN_EVENTS.CHORD_CHANGED, { chord, next });
       }
+
+      // Auto-scroll score to current measure
+      _scrollToMeasure(measure);
 
       // Record practice stats
       if (window.PracticeTracker) {
@@ -309,16 +414,40 @@ const LearnApp = (() => {
     const btn = document.getElementById('btn-learn-play');
     if (!btn) return;
     const isPlaying = status === 'playing';
-    btn.textContent = isPlaying ? '⏸ Dừng' : '▶ Play';
+    btn.innerHTML = isPlaying
+      ? `<svg viewBox="0 0 24 24" fill="currentColor" class="control-btn-icon"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg><span>Tạm dừng</span>`
+      : `<svg viewBox="0 0 24 24" fill="currentColor" class="control-btn-icon"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Play</span>`;
     btn.classList.toggle('btn-learn-play--active', isPlaying);
+    btn.disabled = (status === 'idle' || status === 'preparing');
+
+    const stopBtn = document.getElementById('btn-learn-stop');
+    if (stopBtn) stopBtn.disabled = (status === 'idle' || status === 'preparing');
   }
 
   /* ─── Controls Binding ───────────────────────────────────────── */
   function _bindControls() {
+    // Zoom controls
+    document.getElementById('btn-learn-zoom-in')?.addEventListener('click', () => {
+      _zoomIn();
+    });
+    document.getElementById('btn-learn-zoom-out')?.addEventListener('click', () => {
+      _zoomOut();
+    });
+    document.getElementById('btn-learn-zoom-reset')?.addEventListener('click', () => {
+      _resetZoom();
+    });
+    document.getElementById('btn-learn-zoom-fit')?.addEventListener('click', () => {
+      _fitScore();
+    });
+
     // Play/Pause
     document.getElementById('btn-learn-play')?.addEventListener('click', async () => {
       const status = LearnStore.get('uiStatus');
-      if (status === 'idle' || status === 'song_selected') return;
+      if (status === 'idle' || status === 'preparing') return;
+
+      if (window.Tone && Tone.context.state !== 'running') {
+        try { await Tone.start(); } catch (e) {}
+      }
 
       if (MusicTransport.isPlaying()) {
         MusicTransport.pause();
@@ -474,16 +603,30 @@ const LearnApp = (() => {
       });
     });
 
-    // Song picker open
+    // Song picker open / close
     document.getElementById('btn-learn-song-picker')?.addEventListener('click', () => {
-      document.getElementById('learn-song-picker-panel')?.classList.toggle('hidden');
+      const panel = document.getElementById('learn-song-picker-panel');
+      panel?.classList.toggle('hidden');
+      if (!panel?.classList.contains('hidden')) {
+        document.getElementById('learn-song-search')?.focus();
+      }
+    });
+
+    document.getElementById('btn-picker-close')?.addEventListener('click', () => {
+      document.getElementById('learn-song-picker-panel')?.classList.add('hidden');
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('learn-song-picker-panel')?.classList.add('hidden');
+      }
     });
 
     // Song search
     document.getElementById('learn-song-search')?.addEventListener('input', (e) => {
-      const q = e.target.value.toLowerCase();
+      const q = e.target.value.trim().toLowerCase();
       document.querySelectorAll('.learn-song-item').forEach(item => {
-        const visible = item.textContent.toLowerCase().includes(q);
+        const visible = !q || item.textContent.toLowerCase().includes(q);
         item.style.display = visible ? '' : 'none';
       });
     });
@@ -540,7 +683,14 @@ const LearnApp = (() => {
   }
 
   /* ─── Public API ─────────────────────────────────────────────── */
-  return { init, selectSong: _selectSong };
+  return {
+    init,
+    selectSong: _selectSong,
+    getOsmd: () => _osmd,
+    setZoom: _setZoom,
+    getZoom: () => _osmdZoom,
+    fitScore: _fitScore,
+  };
 })();
 
 // Auto-init when DOM ready

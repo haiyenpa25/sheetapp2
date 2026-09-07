@@ -87,16 +87,6 @@ const VirtualKeyboard = (() => {
     const wrapper = document.createElement('div');
     wrapper.className = 'vkb-wrapper';
 
-    // Legend
-    const legend = document.createElement('div');
-    legend.className = 'vkb-legend';
-    legend.innerHTML = `
-      <span class="vkb-legend-rh">■ Tay phải</span>
-      <span class="vkb-legend-lh">■ Tay trái</span>
-      <span class="vkb-legend-next">□ Tiếp theo</span>
-    `;
-    _container.appendChild(legend);
-
     for (let oct = FIRST_OCTAVE; oct < FIRST_OCTAVE + OCTAVES_SHOWN; oct++) {
       const octaveEl = document.createElement('div');
       octaveEl.className = 'vkb-octave';
