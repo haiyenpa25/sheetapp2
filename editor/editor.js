@@ -332,13 +332,14 @@
     // 2. Cảnh báo ô nhịp tại nốt này
     const health = _measureHealth[measureNumber];
     const alertChip = document.getElementById('measure-alert-chip');
+    const alertText = document.getElementById('measure-alert-text');
     if (alertChip) {
       if (health && health.status === 'underflow') {
-        alertChip.textContent = `⚠️ Thiếu ${health.missingBeats} phách`;
+        if (alertText) alertText.textContent = `⚠️ Thiếu ${health.missingBeats} phách`;
         alertChip.className = 'measure-alert-chip underflow';
         alertChip.classList.remove('hidden');
       } else if (health && health.status === 'overflow') {
-        alertChip.textContent = `⛔ Thừa ${health.excessBeats} phách`;
+        if (alertText) alertText.textContent = `⛔ Thừa ${health.excessBeats} phách`;
         alertChip.className = 'measure-alert-chip overflow';
         alertChip.classList.remove('hidden');
       } else {
@@ -444,22 +445,22 @@
     }
   }
 
-  function undo() {
+  async function undo() {
     if (_undoStack.length === 0) return;
     const currentXml = new XMLSerializer().serializeToString(_xmlDoc);
     _redoStack.push(currentXml);
     const prevXml = _undoStack.pop();
-    _parseAndLoadXml(prevXml, false);
+    await _parseAndLoadXml(prevXml, false);
     _updateUndoRedoButtons();
     showToast('↶ Đã hoàn tác', 'info', 1000);
   }
 
-  function redo() {
+  async function redo() {
     if (_redoStack.length === 0) return;
     const currentXml = new XMLSerializer().serializeToString(_xmlDoc);
     _undoStack.push(currentXml);
     const nextXml = _redoStack.pop();
-    _parseAndLoadXml(nextXml, false);
+    await _parseAndLoadXml(nextXml, false);
     _updateUndoRedoButtons();
     showToast('↷ Đã làm lại', 'info', 1000);
   }
@@ -692,6 +693,218 @@
         nextInput.focus();
       }
     }
+  }
+
+  // Bật / Tắt Dấu Luyến (Slur)
+  function toggleSlur() {
+    const curNote = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
+    if (!curNote || !curNote.xmlNode) return;
+    _saveSnapshotForUndo();
+    const noteEl = curNote.xmlNode;
+    let notEl = noteEl.querySelector('notations');
+    if (!notEl) {
+      notEl = _xmlDoc.createElement('notations');
+      noteEl.appendChild(notEl);
+    }
+    const slurEl = notEl.querySelector('slur');
+    if (slurEl) {
+      slurEl.remove();
+      showToast('Đã bỏ dấu luyến', 'info', 1000);
+    } else {
+      const s = _xmlDoc.createElement('slur');
+      s.setAttribute('type', 'start');
+      notEl.appendChild(s);
+      showToast('⌒ Đã thêm dấu luyến', 'info', 1000);
+    }
+    _renderOsmdFromXmlDoc();
+  }
+
+  // Bật / Tắt Dấu Mắt Ngỗng (Fermata)
+  function toggleFermata() {
+    const curNote = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
+    if (!curNote || !curNote.xmlNode) return;
+    _saveSnapshotForUndo();
+    const noteEl = curNote.xmlNode;
+    let notEl = noteEl.querySelector('notations');
+    if (!notEl) {
+      notEl = _xmlDoc.createElement('notations');
+      noteEl.appendChild(notEl);
+    }
+    const fermataEl = notEl.querySelector('fermata');
+    if (fermataEl) {
+      fermataEl.remove();
+      showToast('Đã bỏ dấu mắt ngỗng', 'info', 1000);
+    } else {
+      const f = _xmlDoc.createElement('fermata');
+      f.setAttribute('type', 'upright');
+      notEl.appendChild(f);
+      showToast('𝄐 Đã gắn dấu mắt ngỗng', 'info', 1000);
+    }
+    _renderOsmdFromXmlDoc();
+  }
+
+  // Bật / Tắt Liên ba (Tuplet)
+  function toggleTuplet() {
+    const curNote = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
+    if (!curNote || !curNote.xmlNode) return;
+    _saveSnapshotForUndo();
+    const noteEl = curNote.xmlNode;
+    let notEl = noteEl.querySelector('notations');
+    if (!notEl) {
+      notEl = _xmlDoc.createElement('notations');
+      noteEl.appendChild(notEl);
+    }
+    const tupletEl = notEl.querySelector('tuplet');
+    if (tupletEl) {
+      tupletEl.remove();
+      const timeMod = noteEl.querySelector('time-modification');
+      if (timeMod) timeMod.remove();
+      showToast('Đã hủy liên 3', 'info', 1000);
+    } else {
+      const t = _xmlDoc.createElement('tuplet');
+      t.setAttribute('type', 'start');
+      notEl.appendChild(t);
+      let tm = noteEl.querySelector('time-modification');
+      if (!tm) {
+        tm = _xmlDoc.createElement('time-modification');
+        const an = _xmlDoc.createElement('actual-notes'); an.textContent = '3';
+        const nn = _xmlDoc.createElement('normal-notes'); nn.textContent = '2';
+        tm.appendChild(an);
+        tm.appendChild(nn);
+        noteEl.appendChild(tm);
+      }
+      showToast('³ Đã đặt liên 3 (3 nốt gom 2 phách)', 'info', 1000);
+    }
+    _renderOsmdFromXmlDoc();
+  }
+
+  // Thêm 1 ô nhịp sau ô nhịp hiện tại
+  function addMeasureAfter() {
+    if (!_xmlDoc) return;
+    _saveSnapshotForUndo();
+
+    const curMNum = _selectedPosition.measureNumber;
+    const parts = _xmlDoc.querySelectorAll('part');
+
+    parts.forEach(part => {
+      const allMeasures = Array.from(part.querySelectorAll('measure'));
+      const targetM = part.querySelector(`measure[number="${curMNum}"]`) || allMeasures[allMeasures.length - 1];
+      if (!targetM) return;
+
+      const newM = _xmlDoc.createElement('measure');
+      newM.setAttribute('number', String(curMNum + 1));
+
+      // Lấy divisions hiện tại
+      const divEl = _xmlDoc.querySelector('divisions');
+      const divisions = divEl ? parseInt(divEl.textContent, 10) : 1;
+
+      // Thêm nốt lặng tròn (4 phách)
+      const restNote = _xmlDoc.createElement('note');
+      restNote.appendChild(_xmlDoc.createElement('rest'));
+      const durEl = _xmlDoc.createElement('duration');
+      durEl.textContent = String(divisions * 4);
+      restNote.appendChild(durEl);
+      const typeEl = _xmlDoc.createElement('type');
+      typeEl.textContent = 'whole';
+      restNote.appendChild(typeEl);
+      newM.appendChild(restNote);
+
+      if (targetM.nextSibling) {
+        part.insertBefore(newM, targetM.nextSibling);
+      } else {
+        part.appendChild(newM);
+      }
+
+      // Đánh số lại các ô nhịp sau
+      let num = 1;
+      part.querySelectorAll('measure').forEach(m => {
+        m.setAttribute('number', String(num++));
+      });
+    });
+
+    _selectedPosition.measureNumber = curMNum + 1;
+    _selectedPosition.beatIndex = 0;
+    showToast(`+ Đã thêm ô nhịp mới sau ô ${curMNum}!`, 'success', 1500);
+    _renderOsmdFromXmlDoc();
+  }
+
+  // Xóa ô nhịp hiện tại
+  function deleteCurrentMeasure() {
+    if (!_xmlDoc) return;
+    const curMNum = _selectedPosition.measureNumber;
+    const parts = _xmlDoc.querySelectorAll('part');
+    const firstPartMeasures = parts[0]?.querySelectorAll('measure');
+    if (!firstPartMeasures || firstPartMeasures.length <= 1) {
+      showToast('Không thể xóa ô nhịp duy nhất của bản nhạc!', 'warn');
+      return;
+    }
+
+    if (!confirm(`Bạn có chắc chắn muốn xóa ô nhịp ${curMNum} trên toàn bộ các bè?`)) {
+      return;
+    }
+
+    _saveSnapshotForUndo();
+
+    parts.forEach(part => {
+      const mEl = part.querySelector(`measure[number="${curMNum}"]`);
+      if (mEl) mEl.remove();
+
+      let num = 1;
+      part.querySelectorAll('measure').forEach(m => {
+        m.setAttribute('number', String(num++));
+      });
+    });
+
+    _selectedPosition.measureNumber = Math.max(1, curMNum - 1);
+    _selectedPosition.beatIndex = 0;
+    showToast(`- Đã xóa ô nhịp ${curMNum}!`, 'info', 1500);
+    _renderOsmdFromXmlDoc();
+  }
+
+  // Đổi số chỉ nhịp
+  function changeTimeSignature(timeSigStr) {
+    if (!timeSigStr || !_xmlDoc) return;
+    const [beats, beatType] = timeSigStr.split('/');
+    if (!beats || !beatType) return;
+
+    _saveSnapshotForUndo();
+
+    const curMNum = _selectedPosition.measureNumber;
+    const parts = _xmlDoc.querySelectorAll('part');
+
+    parts.forEach(part => {
+      const mEl = part.querySelector(`measure[number="${curMNum}"]`) || part.querySelector('measure[number="1"]');
+      if (!mEl) return;
+
+      let attrEl = mEl.querySelector('attributes');
+      if (!attrEl) {
+        attrEl = _xmlDoc.createElement('attributes');
+        mEl.insertBefore(attrEl, mEl.firstChild);
+      }
+
+      let timeEl = attrEl.querySelector('time');
+      if (!timeEl) {
+        timeEl = _xmlDoc.createElement('time');
+        attrEl.appendChild(timeEl);
+      }
+
+      let beatsEl = timeEl.querySelector('beats');
+      if (!beatsEl) {
+        beatsEl = _xmlDoc.createElement('beats');
+        timeEl.appendChild(beatsEl);
+      }
+      beatsEl.textContent = beats;
+
+      let typeEl = timeEl.querySelector('beat-type');
+      if (!typeEl) {
+        typeEl = _xmlDoc.createElement('beat-type');
+        timeEl.appendChild(typeEl);
+      }
+      typeEl.textContent = beatType;
+    });
+
+    showToast(`Đã đổi số chỉ nhịp ô ${curMNum} thành ${timeSigStr}`, 'success', 1500);
+    _renderOsmdFromXmlDoc();
   }
 
   /* ─── HỆ THỐNG KIỂM TRA & CẢNH BÁO ĐỦ Ô NHỊP (BEAT VALIDATOR) ─ */
@@ -992,7 +1205,7 @@
     _wireVerticalDragEvents();
   }
 
-  function _parseAndLoadXml(xmlString, resetUndo = true) {
+  async function _parseAndLoadXml(xmlString, resetUndo = true) {
     const parser = new DOMParser();
     _xmlDoc = parser.parseFromString(xmlString, 'text/xml');
     if (resetUndo) {
@@ -1001,7 +1214,7 @@
       _setDirty(false);
       _updateUndoRedoButtons();
     }
-    _renderOsmdFromXmlDoc();
+    await _renderOsmdFromXmlDoc();
   }
 
   /* ─── Bàn Phím Piano Ảo Mini ─────────────────────────────────── */
@@ -1218,7 +1431,7 @@
     try {
       const res = await fetch('/api/index.php?route=songs');
       const data = await res.json();
-      _songsList = data.data || [];
+      _songsList = Array.isArray(data) ? data : (data.data || []);
       _renderSongListModal();
 
       const params = new URLSearchParams(window.location.search);
@@ -1252,14 +1465,17 @@
     if (overlay) overlay.classList.remove('hidden');
 
     try {
-      const fetchPath = version ? version.xml_path : song.xmlPath;
-      const res = await fetch('/' + fetchPath.replace(/^\//, ''));
+      const rawPath = version ? (version.xml_path || version.xmlPath) : (song.xmlPath || song.xml_path);
+      if (!rawPath) throw new Error('Không tìm thấy đường dẫn XML!');
+      const cleanPath = rawPath.replace(/^\//, '');
+      const fetchUrl = '/' + encodeURI(cleanPath);
+      const res = await fetch(fetchUrl);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const xmlText = await res.text();
 
       _selectedPosition.measureNumber = 1;
       _selectedPosition.beatIndex = 0;
-      _parseAndLoadXml(xmlText, true);
+      await _parseAndLoadXml(xmlText, true);
 
       // Cập nhật URL
       const url = new URL(window.location);
@@ -1270,7 +1486,7 @@
       showToast(`Đã nạp: "${song.title}" (${version ? version.version_name : 'Bản Gốc'})`, 'success', 1500);
     } catch (e) {
       console.error('[Editor] Load XML error:', e);
-      showToast('Lỗi khi tải file MusicXML!', 'error');
+      showToast('Lỗi khi tải file MusicXML: ' + e.message, 'error');
     } finally {
       if (overlay) overlay.classList.add('hidden');
     }
@@ -1420,16 +1636,54 @@
     });
     document.getElementById('btn-pal-dot')?.addEventListener('click', toggleDot);
     document.getElementById('btn-pal-tie')?.addEventListener('click', toggleTie);
+    document.getElementById('btn-pal-slur')?.addEventListener('click', toggleSlur);
+    document.getElementById('btn-pal-tuplet')?.addEventListener('click', toggleTuplet);
+    document.getElementById('btn-pal-fermata')?.addEventListener('click', toggleFermata);
     document.getElementById('btn-pal-delete-rest')?.addEventListener('click', deleteNoteAsRest);
     document.getElementById('btn-pal-split-note')?.addEventListener('click', splitCurrentNote);
+
+    // Cấu trúc ô nhịp
+    document.getElementById('btn-add-measure-after')?.addEventListener('click', addMeasureAfter);
+    document.getElementById('btn-del-measure')?.addEventListener('click', deleteCurrentMeasure);
+    document.getElementById('select-time-sig')?.addEventListener('change', (e) => {
+      if (e.target.value) {
+        changeTimeSignature(e.target.value);
+        e.target.value = '';
+      }
+    });
 
     // Music Palette: Accidentals
     document.querySelectorAll('[data-acc]').forEach(btn => {
       btn.addEventListener('click', () => modifyAccidental(btn.dataset.acc));
     });
 
-    // Bù dấu lặng tự động
+    // Bù dấu lặng tự động & Quick fix chip
     document.getElementById('btn-auto-fix-all-rests')?.addEventListener('click', autoFillAllRests);
+    document.getElementById('btn-quick-autofill')?.addEventListener('click', () => {
+      autoFillRestForMeasure(_selectedPosition.measureNumber);
+    });
+
+    // Tab switching trong footer inspector (Nốt & Lời, Mixer, Piano)
+    document.querySelectorAll('.tool-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tool-tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tool-pane').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        const targetId = btn.dataset.tab ? btn.dataset.tab.replace('tab-', 'pane-') : '';
+        if (targetId) document.getElementById(targetId)?.classList.add('active');
+      });
+    });
+
+    // Thu gọn / Mở rộng panel chân trang
+    const foldBtn = document.getElementById('btn-toggle-panel-fold');
+    foldBtn?.addEventListener('click', () => {
+      const panel = document.getElementById('satb-panel');
+      panel?.classList.toggle('folded');
+      foldBtn.textContent = panel?.classList.contains('folded') ? '▲' : '▼';
+    });
+
+    // Nút nghe hợp âm SATB trên Tab 1
+    document.getElementById('btn-play-chord')?.addEventListener('click', playSatbChord);
 
     // Mixer Channels: Solo & Mute & Volume
     ['soprano', 'alto', 'tenor', 'bass'].forEach(voice => {
