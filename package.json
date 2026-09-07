@@ -4,7 +4,10 @@
   "description": "SheetApp - Application for reading and performing sheet music and chord charts",
   "scripts": {
     "sync": "./sync.sh",
-    "codemap": "node tools/generate_code_map.js"
+    "codemap": "node tools/generate_code_map.js",
+    "test:ui": "node tools/test_editor_ui.js"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "puppeteer-core": "^24.43.1"
+  }
 }

@@ -115,7 +115,11 @@ body.editor-body {
   cursor: pointer;
   max-width: 280px;
 }
-.btn-song-picker svg { flex-shrink: 0; }
+.btn-song-picker svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
 #current-song-label {
   white-space: nowrap;
   overflow: hidden;
@@ -812,8 +816,16 @@ body.editor-body {
 }
 .dur-glyph {
   font-size: 1.15rem;
-  line-height: 1.1;
+  line-height: 1;
   color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+}
+.dur-glyph svg {
+  color: #fff;
+  display: block;
 }
 .dur-name {
   font-size: 0.58rem;

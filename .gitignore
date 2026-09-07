@@ -24,6 +24,13 @@ omr-service/
 test*.php
 tmp_player.js
 
+# ── Node.js & Dependencies ──
+node_modules/
+package-lock.json
+
+# ── Generated Screenshots & Artifacts ──
+storage/*.png
+
 # ── IDE / OS ──
 .DS_Store
 Thumbs.db

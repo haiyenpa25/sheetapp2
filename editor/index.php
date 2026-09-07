@@ -213,19 +213,27 @@ $currentUser = Auth::username() ?: 'banhat';
 
         <div class="duration-buttons-grid">
           <button class="btn-dur-card" data-dur="whole" title="Nốt Tròn (4 phách) [Phím 6]">
-            <span class="dur-glyph">𝅝</span>
+            <span class="dur-glyph">
+              <svg width="20" height="15" viewBox="0 0 24 16" fill="none" stroke="currentColor" stroke-width="2.5"><ellipse cx="12" cy="8" rx="8" ry="5" transform="rotate(-15 12 8)"/></svg>
+            </span>
             <span class="dur-name">Tròn (4)</span>
           </button>
           <button class="btn-dur-card" data-dur="half" title="Nốt Trắng (2 phách) [Phím 5]">
-            <span class="dur-glyph">𝅗𝅥</span>
+            <span class="dur-glyph">
+              <svg width="15" height="20" viewBox="0 0 16 24" fill="none" stroke="currentColor"><ellipse cx="6" cy="18" rx="5" ry="3.5" stroke-width="2" transform="rotate(-20 6 18)"/><line x1="11" y1="18" x2="11" y2="3" stroke-width="2"/></svg>
+            </span>
             <span class="dur-name">Trắng (2)</span>
           </button>
           <button class="btn-dur-card active" data-dur="quarter" title="Nốt Đen (1 phách) [Phím 4]">
-            <span class="dur-glyph">𝅘𝅥</span>
+            <span class="dur-glyph">
+              <svg width="15" height="20" viewBox="0 0 16 24" fill="currentColor" stroke="currentColor"><ellipse cx="6" cy="18" rx="5" ry="3.5" transform="rotate(-20 6 18)"/><line x1="11" y1="18" x2="11" y2="3" stroke-width="2"/></svg>
+            </span>
             <span class="dur-name">Đen (1)</span>
           </button>
           <button class="btn-dur-card" data-dur="eighth" title="Nốt Móc Đơn (1/2 phách) [Phím 3]">
-            <span class="dur-glyph">𝅘𝅥𝅯</span>
+            <span class="dur-glyph">
+              <svg width="16" height="20" viewBox="0 0 18 24" fill="currentColor" stroke="currentColor"><ellipse cx="6" cy="18" rx="5" ry="3.5" transform="rotate(-20 6 18)"/><line x1="11" y1="18" x2="11" y2="3" stroke-width="2"/><path d="M11 3 C15 5 17 9 16 13" fill="none" stroke-width="2"/></svg>
+            </span>
             <span class="dur-name">Móc (1/2)</span>
           </button>
         </div>
