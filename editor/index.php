@@ -1,7 +1,7 @@
 <?php
 /**
- * editor/index.php — SheetApp MusicXML Visual Note Editor Pro
- * Tinh gọn · Tập trung vào bản nhạc · Kéo thả nốt trực tiếp · 4 Bè SATB độc lập
+ * editor/index.php — SheetApp MusicXML Note Editor Pro (Ultra-Simplified)
+ * Tối giản · Tập trung nốt nhạc · 3 Bước: Chọn nốt -> Chọn bè -> Chỉnh cao độ/trường độ
  */
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -14,10 +14,10 @@ $currentUser = Auth::username() ?: 'banhat';
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SheetApp · MusicXML Note Editor (4 Bè SATB)</title>
+  <title>SheetApp · Biên Tập Nốt Nhạc (4 Bè SATB)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/base.css">
   <link rel="stylesheet" href="editor.css?v=<?php echo time(); ?>">
   <!-- OpenSheetMusicDisplay Vendor -->
@@ -37,9 +37,9 @@ $currentUser = Auth::username() ?: 'banhat';
 
     <!-- Chọn bài hát & Chọn phiên bản -->
     <div class="header-center">
-      <button id="btn-select-song" class="btn-song-picker" title="Chọn bài hát khác">
+      <button id="btn-select-song" class="btn-song-picker" title="Chọn bài hát khác (Tìm trong 903 bài)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-        <span id="current-song-label">Đang tải danh sách bài hát...</span>
+        <span id="current-song-label">Đang nạp bài hát...</span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;"><path d="M6 9l6 6 6-6"/></svg>
       </button>
 
@@ -88,69 +88,11 @@ $currentUser = Auth::username() ?: 'banhat';
     </div>
   </header>
 
-  <!-- ==================== 2. SLEEK MUSIC PALETTE (THANH CÔNG CỤ TINH GỌN) ==================== -->
-  <nav class="music-palette-bar" id="music-palette">
-    <!-- Trường độ -->
-    <div class="palette-cluster">
-      <button class="palette-btn" data-dur="whole" title="Nốt Tròn (4 phách) [Phím 6]">𝅝</button>
-      <button class="palette-btn" data-dur="half" title="Nốt Trắng (2 phách) [Phím 5]">𝅗𝅥</button>
-      <button class="palette-btn active" data-dur="quarter" title="Nốt Đen (1 phách) [Phím 4]">𝅘𝅥</button>
-      <button class="palette-btn" data-dur="eighth" title="Nốt Móc Đơn (1/2 phách) [Phím 3]">𝅘𝅥𝅯</button>
-      <button class="palette-btn" data-dur="16th" title="Nốt Móc Đôi (1/4 phách) [Phím 2]">𝅘𝅥𝅰</button>
-      <button class="palette-btn" id="btn-pal-dot" title="Dấu Chấm Dôi (•) [Phím .]">•</button>
-    </div>
-
-    <div class="palette-divider"></div>
-
-    <!-- Dấu hóa -->
-    <div class="palette-cluster">
-      <button class="palette-btn" data-acc="flat" title="Dấu Giáng (♭)">♭</button>
-      <button class="palette-btn active" data-acc="natural" title="Dấu Bình (♮)">♮</button>
-      <button class="palette-btn" data-acc="sharp" title="Dấu Thăng (♯)">♯</button>
-    </div>
-
-    <div class="palette-divider"></div>
-
-    <!-- Ký hiệu nhạc -->
-    <div class="palette-cluster">
-      <button class="palette-btn" id="btn-pal-tie" title="Dấu Nối Âm (Tie) [Phím T]">⌢ Nối</button>
-      <button class="palette-btn" id="btn-pal-slur" title="Dấu Luyến (Slur)">⌒ Luyến</button>
-      <button class="palette-btn" id="btn-pal-tuplet" title="Liên Ba (Triplet - 3 nốt gom 2 phách)">³ Liên 3</button>
-      <button class="palette-btn" id="btn-pal-fermata" title="Dấu Mắt Ngỗng (Fermata)">𝄐</button>
-    </div>
-
-    <div class="palette-divider"></div>
-
-    <!-- Thao tác nốt an toàn -->
-    <div class="palette-cluster">
-      <button class="palette-btn btn-danger-soft" id="btn-pal-delete-rest" title="Xóa nốt thành Dấu Lặng (Bảo toàn 100% phách) [Delete]">𝄽 Xóa nốt</button>
-      <button class="palette-btn" id="btn-pal-split-note" title="Tách Phách: Chia đôi nốt để chèn nốt mới">✂️ Tách nốt</button>
-    </div>
-
-    <div class="palette-divider"></div>
-
-    <!-- Cấu trúc ô nhịp -->
-    <div class="palette-cluster">
-      <button class="palette-btn" id="btn-add-measure-after" title="Chèn thêm 1 ô nhịp vào sau">+ Ô nhịp</button>
-      <button class="palette-btn btn-danger-soft" id="btn-del-measure" title="Xóa ô nhịp hiện tại">- Xóa ô</button>
-      <select id="select-time-sig" class="palette-select" title="Đổi số chỉ nhịp">
-        <option value="">Nhịp...</option>
-        <option value="4/4">4/4</option>
-        <option value="3/4">3/4</option>
-        <option value="2/4">2/4</option>
-        <option value="6/8">6/8</option>
-      </select>
-    </div>
-
-    <!-- Hướng dẫn kéo thả chuột thẳng đứng -->
-    <div class="palette-tip">
-      <span>💡 Kéo chuột lên/xuống trực tiếp trên nốt để đổi cao độ</span>
-    </div>
-  </nav>
-
-  <!-- ==================== 3. KHU VỰC BẢN NHẠC (CHÍNH - RỘNG RÃI) ==================== -->
-  <main class="editor-workspace">
-    <section class="sheet-canvas-wrapper" id="sheet-wrapper">
+  <!-- ==================== 2. MAIN WORKSPACE: BẢN NHẠC + CARD SỬA NỐT ==================== -->
+  <div class="editor-main-layout">
+    
+    <!-- CỘT TRÁI: BẢN NHẠC TOÀN DIỆN (80% KHÔNG GIAN) -->
+    <main class="sheet-canvas-wrapper" id="sheet-wrapper">
       <div id="loading-overlay" class="loading-overlay">
         <div class="spinner"></div>
         <div id="loading-text" class="loading-text">Đang nạp bản nhạc MusicXML...</div>
@@ -166,156 +108,192 @@ $currentUser = Auth::username() ?: 'banhat';
       <div class="sheet-paper-container">
         <div id="osmd-editor-container" class="osmd-editor-container"></div>
       </div>
-    </section>
-  </main>
+    </main>
 
-  <!-- ==================== 4. BẢNG ĐIỀU KHIỂN CHÂN TRANG (TABBED & COMPACT) ==================== -->
-  <aside class="satb-inspector-panel" id="satb-panel">
-    
-    <!-- Header: Chọn bè & Đổi tab công cụ -->
-    <div class="inspector-header">
-      <div class="inspector-left-info">
-        <span class="pos-badge" id="pos-info-label">Ô: <strong>1</strong> · Phách: <strong>1</strong></span>
-        <span id="unsaved-status-badge" class="badge-clean">Đã đồng bộ</span>
-        <!-- Cảnh báo ô nhịp -->
-        <span id="measure-alert-chip" class="measure-alert-chip hidden">
-          <span id="measure-alert-text">⚠️ Thiếu phách</span>
-          <button id="btn-quick-autofill" class="btn-quick-fix" title="Bù dấu lặng cho ô nhịp này">⚡ Bù</button>
-        </span>
-      </div>
-
-      <!-- 4 Tab Bè SATB độc lập -->
-      <div class="satb-tabs" role="tablist">
-        <button class="satb-tab-btn active" data-voice="soprano" id="tab-soprano" title="Khóa Sol - Nốt trên (Phím 1)">
-          <span class="voice-dot dot-soprano"></span>
-          <span>1. Soprano</span>
-          <strong id="lbl-pitch-soprano">--</strong>
-        </button>
-        <button class="satb-tab-btn" data-voice="alto" id="tab-alto" title="Khóa Sol - Nốt dưới (Phím 2)">
-          <span class="voice-dot dot-alto"></span>
-          <span>2. Alto</span>
-          <strong id="lbl-pitch-alto">--</strong>
-        </button>
-        <button class="satb-tab-btn" data-voice="tenor" id="tab-tenor" title="Khóa Fa - Nốt trên (Phím 3)">
-          <span class="voice-dot dot-tenor"></span>
-          <span>3. Tenor</span>
-          <strong id="lbl-pitch-tenor">--</strong>
-        </button>
-        <button class="satb-tab-btn" data-voice="bass" id="tab-bass" title="Khóa Fa - Nốt dưới (Phím 4)">
-          <span class="voice-dot dot-bass"></span>
-          <span>4. Bass</span>
-          <strong id="lbl-pitch-bass">--</strong>
-        </button>
-      </div>
-
-      <!-- Bộ chọn Tab công cụ bên dưới & Nút thu gọn -->
-      <div class="inspector-tool-tabs">
-        <button class="tool-tab-btn active" data-tab="tab-notes" title="Chỉnh nốt, cao độ và lời ca">🎵 Nốt & Lời</button>
-        <button class="tool-tab-btn" data-tab="tab-mixer" title="Bộ trộn âm thanh 4 bè SATB">🎛️ Mixer 4 Bè</button>
-        <button class="tool-tab-btn" data-tab="tab-piano" title="Bàn phím Piano ảo">🎹 Piano</button>
-        <button id="btn-toggle-panel-fold" class="btn-fold" title="Thu gọn / Mở rộng bảng điều khiển">▼</button>
-      </div>
-    </div>
-
-    <!-- Thân bảng điều khiển (3 Tab riêng biệt) -->
-    <div class="inspector-body" id="inspector-body">
+    <!-- CỘT PHẢI: BẢNG CHỈNH NỐT TRỌNG TÂM (FOCUS ON NOTE) -->
+    <aside class="note-inspector-sidebar inspector-body" id="note-inspector">
       
-      <!-- TAB 1: CHỈNH NỐT, CAO ĐỘ & LỜI CA (Mặc định) -->
-      <div class="tool-pane active" id="pane-notes">
-        <div class="pane-sub-box">
-          <span class="box-sub-title">CAO ĐỘ:</span>
-          <div class="pitch-step-selector">
-            <button class="btn-step" data-step="C">C</button>
-            <button class="btn-step" data-step="D">D</button>
-            <button class="btn-step" data-step="E">E</button>
-            <button class="btn-step" data-step="F">F</button>
-            <button class="btn-step" data-step="G">G</button>
-            <button class="btn-step" data-step="A">A</button>
-            <button class="btn-step" data-step="B">B</button>
-          </div>
-          <div class="octave-mini-selector">
-            <button id="btn-oct-dec" class="btn-oct-sm">▼</button>
-            <span class="oct-label">Quãng: <strong id="current-octave-val">4</strong></span>
-            <button id="btn-oct-inc" class="btn-oct-sm">▲</button>
-          </div>
+      <!-- Tiêu đề & Vị trí nốt đang chọn -->
+      <div class="inspector-card-header">
+        <div class="inspector-pos-info">
+          <span class="badge-title">CHỈNH SỬA NỐT</span>
+          <span id="pos-info-label" class="pos-badge">Ô nhịp: <strong>1</strong> | Phách: <strong>1/4</strong></span>
         </div>
+        <span id="unsaved-status-badge" class="badge-clean">Đã đồng bộ</span>
+      </div>
 
-        <div class="pane-sub-box">
-          <span class="box-sub-title">ĐIỀU HƯỚNG & NGHE:</span>
-          <div class="action-btn-row">
-            <button id="btn-nav-prev-note" class="btn-sm-act">◀ Trước</button>
-            <button id="btn-play-single" class="btn-sm-act btn-play-act">🔊 Nghe nốt</button>
-            <button id="btn-play-chord" class="btn-sm-act btn-play-act">▶ Nghe 4 bè</button>
-            <button id="btn-nav-next-note" class="btn-sm-act">Sau ▶</button>
-          </div>
+      <!-- Cảnh báo ô nhịp (nếu thiếu hoặc thừa phách) -->
+      <div id="measure-alert-chip" class="measure-alert-chip hidden">
+        <span id="measure-alert-text">⚠️ Thiếu phách</span>
+        <button id="btn-quick-autofill" class="btn-quick-fix-auto" title="Tự động bù dấu lặng cho ô nhịp này">⚡ Bù tự động</button>
+      </div>
+
+      <!-- BƯỚC 1: CHỌN 1 TRONG 4 BÈ SATB -->
+      <div class="inspector-section">
+        <div class="section-label">
+          <span class="step-num">1</span>
+          <span>BÈ CẦN SỬA (BẤM ĐỂ CHỌN):</span>
         </div>
+        <div class="satb-voice-grid" role="tablist">
+          <button class="voice-card-btn satb-tab-btn active" data-voice="soprano" id="tab-soprano" title="Khóa Sol - Nốt trên (Phím 1)">
+            <div class="voice-card-top">
+              <span class="voice-badge badge-s">1. Soprano</span>
+            </div>
+            <div class="voice-card-pitch" id="lbl-pitch-soprano">--</div>
+          </button>
 
-        <div class="pane-sub-box lyric-sub-box">
-          <span class="box-sub-title">LỜI CA (Gõ Space hoặc '-' để nhảy nốt):</span>
-          <div class="lyric-input-wrap">
-            <input type="text" id="input-note-lyric" class="input-lyric-compact" placeholder="Nhập từ ca..." autocomplete="off">
-            <button id="btn-apply-lyric" class="btn-apply-compact">Lưu</button>
-          </div>
+          <button class="voice-card-btn satb-tab-btn" data-voice="alto" id="tab-alto" title="Khóa Sol - Nốt dưới (Phím 2)">
+            <div class="voice-card-top">
+              <span class="voice-badge badge-a">2. Alto</span>
+            </div>
+            <div class="voice-card-pitch" id="lbl-pitch-alto">--</div>
+          </button>
+
+          <button class="voice-card-btn satb-tab-btn" data-voice="tenor" id="tab-tenor" title="Khóa Fa - Nốt trên (Phím 3)">
+            <div class="voice-card-top">
+              <span class="voice-badge badge-t">3. Tenor</span>
+            </div>
+            <div class="voice-card-pitch" id="lbl-pitch-tenor">--</div>
+          </button>
+
+          <button class="voice-card-btn satb-tab-btn" data-voice="bass" id="tab-bass" title="Khóa Fa - Nốt dưới (Phím 4)">
+            <div class="voice-card-top">
+              <span class="voice-badge badge-b">4. Bass</span>
+            </div>
+            <div class="voice-card-pitch" id="lbl-pitch-bass">--</div>
+          </button>
         </div>
       </div>
 
-      <!-- TAB 2: SATB AUDIO SYNTH MIXER -->
-      <div class="tool-pane" id="pane-mixer">
-        <div class="mixer-channels-compact">
-          <div class="mixer-ch" id="mixer-soprano">
-            <span class="ch-lbl ch-s">Soprano</span>
-            <input type="range" class="ch-volume" min="0" max="1" step="0.05" value="0.85">
-            <div class="ch-btns">
-              <button class="btn-solo" data-voice="soprano" title="Solo">S</button>
-              <button class="btn-mute" data-voice="soprano" title="Mute">M</button>
-            </div>
+      <!-- BƯỚC 2: CHỈNH CAO ĐỘ (PITCH) -->
+      <div class="inspector-section">
+        <div class="section-label">
+          <span class="step-num">2</span>
+          <span>CHỈNH CAO ĐỘ (BẤM HOẶC KÉO CHUỘT):</span>
+        </div>
+
+        <!-- 7 Phím nốt Đồ..Si to rõ ràng -->
+        <div class="pitch-key-buttons">
+          <button class="btn-step btn-pitch-solfa" data-step="C"><strong>Đồ</strong><span>C</span></button>
+          <button class="btn-step btn-pitch-solfa" data-step="D"><strong>Rê</strong><span>D</span></button>
+          <button class="btn-step btn-pitch-solfa" data-step="E"><strong>Mi</strong><span>E</span></button>
+          <button class="btn-step btn-pitch-solfa" data-step="F"><strong>Fa</strong><span>F</span></button>
+          <button class="btn-step btn-pitch-solfa" data-step="G"><strong>Sol</strong><span>G</span></button>
+          <button class="btn-step btn-pitch-solfa" data-step="A"><strong>La</strong><span>A</span></button>
+          <button class="btn-step btn-pitch-solfa" data-step="B"><strong>Si</strong><span>B</span></button>
+        </div>
+
+        <!-- Quãng 8 & Dấu Hóa -->
+        <div class="pitch-modifier-row">
+          <div class="octave-control">
+            <button id="btn-oct-dec" class="btn-oct-action" title="Hạ 1 quãng tám">▼</button>
+            <span class="oct-display">Quãng <strong id="current-octave-val">4</strong></span>
+            <button id="btn-oct-inc" class="btn-oct-action" title="Tăng 1 quãng tám">▲</button>
           </div>
-          <div class="mixer-ch" id="mixer-alto">
-            <span class="ch-lbl ch-a">Alto</span>
-            <input type="range" class="ch-volume" min="0" max="1" step="0.05" value="0.85">
-            <div class="ch-btns">
-              <button class="btn-solo" data-voice="alto" title="Solo">S</button>
-              <button class="btn-mute" data-voice="alto" title="Mute">M</button>
-            </div>
-          </div>
-          <div class="mixer-ch" id="mixer-tenor">
-            <span class="ch-lbl ch-t">Tenor</span>
-            <input type="range" class="ch-volume" min="0" max="1" step="0.05" value="0.85">
-            <div class="ch-btns">
-              <button class="btn-solo" data-voice="tenor" title="Solo">S</button>
-              <button class="btn-mute" data-voice="tenor" title="Mute">M</button>
-            </div>
-          </div>
-          <div class="mixer-ch" id="mixer-bass">
-            <span class="ch-lbl ch-b">Bass</span>
-            <input type="range" class="ch-volume" min="0" max="1" step="0.05" value="0.85">
-            <div class="ch-btns">
-              <button class="btn-solo" data-voice="bass" title="Solo">S</button>
-              <button class="btn-mute" data-voice="bass" title="Mute">M</button>
-            </div>
+
+          <div class="accidental-buttons">
+            <button class="btn-acc" data-acc="flat" title="Dấu Giáng (♭)">♭</button>
+            <button class="btn-acc active" data-acc="natural" title="Dấu Bình (♮)">♮</button>
+            <button class="btn-acc" data-acc="sharp" title="Dấu Thăng (♯)">♯</button>
           </div>
         </div>
 
-        <div class="mixer-controls-compact">
-          <div class="tempo-box">
-            <span>Tốc độ: <strong id="val-tempo">90</strong> BPM</span>
-            <input type="range" id="slider-tempo" min="40" max="200" step="2" value="90">
-          </div>
-          <div class="playback-quick-btns">
-            <button id="btn-mixer-play-chord" class="btn-m-act">▶ Nghe 4 bè</button>
-            <button id="btn-mixer-play-measure" class="btn-m-act">▶ Nghe ô nhịp</button>
-            <button id="btn-mixer-metronome" class="btn-m-act">🔔 Metronome</button>
-          </div>
+        <!-- Mẹo kéo thả trực tiếp -->
+        <div class="drag-hint-box">
+          <span>💡 Hoặc <strong>kéo chuột thẳng đứng</strong> trên nốt để đổi cao độ</span>
         </div>
       </div>
 
-      <!-- TAB 3: BÀN PHÍM PIANO ẢO -->
-      <div class="tool-pane" id="pane-piano">
-        <div class="mini-piano-keyboard" id="mini-piano"></div>
+      <!-- BƯỚC 3: TRƯỜNG ĐỘ & THAO TÁC AN TOÀN -->
+      <div class="inspector-section">
+        <div class="section-label">
+          <span class="step-num">3</span>
+          <span>TRƯỜNG ĐỘ & THAO TÁC:</span>
+        </div>
+
+        <div class="duration-buttons-grid">
+          <button class="btn-dur-card" data-dur="whole" title="Nốt Tròn (4 phách) [Phím 6]">
+            <span class="dur-glyph">𝅝</span>
+            <span class="dur-name">Tròn (4)</span>
+          </button>
+          <button class="btn-dur-card" data-dur="half" title="Nốt Trắng (2 phách) [Phím 5]">
+            <span class="dur-glyph">𝅗𝅥</span>
+            <span class="dur-name">Trắng (2)</span>
+          </button>
+          <button class="btn-dur-card active" data-dur="quarter" title="Nốt Đen (1 phách) [Phím 4]">
+            <span class="dur-glyph">𝅘𝅥</span>
+            <span class="dur-name">Đen (1)</span>
+          </button>
+          <button class="btn-dur-card" data-dur="eighth" title="Nốt Móc Đơn (1/2 phách) [Phím 3]">
+            <span class="dur-glyph">𝅘𝅥𝅯</span>
+            <span class="dur-name">Móc (1/2)</span>
+          </button>
+        </div>
+
+        <div class="action-extra-row">
+          <button class="btn-action-tool" id="btn-pal-dot" title="Dấu Chấm Dôi (•) [Phím .]">• Chấm</button>
+          <button class="btn-action-tool" id="btn-pal-tie" title="Dấu Nối (Tie) [Phím T]">‿ Nối</button>
+          <button class="btn-action-tool" id="btn-pal-slur" title="Dấu Luyến (Slur)">⁀ Luyến</button>
+          <button class="btn-action-tool" id="btn-pal-fermata" title="Dấu Miễn Nhịp (Fermata)">𝄐 Lưu</button>
+          <button class="btn-action-tool" id="btn-pal-tuplet" title="Liên 3 (Tuplet)">³ Liên 3</button>
+        </div>
+
+        <div class="action-extra-row" style="margin-top: 5px;">
+          <button class="btn-action-tool btn-danger-tone" id="btn-pal-delete-rest" title="Xóa nốt thành Dấu Lặng (Bảo toàn 100% phách) [Delete]">𝄽 Xóa nốt</button>
+          <button class="btn-action-tool" id="btn-pal-split-note" title="Tách nốt: Chia đôi nốt để thêm nốt mới">✂️ Tách nốt</button>
+          <button class="btn-action-tool btn-accent-tone" id="btn-auto-fix-all-rests" title="Tự động bù dấu lặng cho toàn bộ bản nhạc">⚡ Bù tất cả</button>
+        </div>
       </div>
 
-    </div>
-  </aside>
+      <!-- ĐIỀU HƯỚNG & NGHE THỬ -->
+      <div class="inspector-section">
+        <div class="section-label">
+          <span>ĐIỀU HƯỚNG & NGHE THỬ:</span>
+        </div>
+        <div class="playback-action-grid">
+          <button id="btn-nav-prev-note" class="btn-nav-step" title="Nốt trước">◀ Trước</button>
+          <button id="btn-play-single" class="btn-play-tone" title="Phát âm thanh nốt này">🔊 Nghe nốt</button>
+          <button id="btn-play-chord" class="btn-play-tone btn-chord" title="Phát cả 4 bè tại nốt này (Phím Space)">▶ Nghe 4 bè</button>
+          <button id="btn-nav-next-note" class="btn-nav-step" title="Nốt sau">Sau ▶</button>
+        </div>
+      </div>
+
+      <!-- QUẢN LÝ Ô NHỊP -->
+      <div class="inspector-section">
+        <div class="section-label">
+          <span>CẤU TRÚC Ô NHỊP:</span>
+        </div>
+        <div class="measure-manage-row">
+          <button id="btn-add-measure-after" class="btn-measure-tool" title="Thêm ô nhịp sau ô hiện tại">+ Thêm ô</button>
+          <button id="btn-del-measure" class="btn-measure-tool btn-measure-del" title="Xóa ô nhịp hiện tại">- Xóa ô</button>
+          <select id="select-time-sig" class="select-time-sig" title="Đổi số chỉ nhịp">
+            <option value="">Nhịp...</option>
+            <option value="2/4">2/4</option>
+            <option value="3/4">3/4</option>
+            <option value="4/4">4/4</option>
+            <option value="6/8">6/8</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- LỜI CA (LYRICS) -->
+      <div class="inspector-section lyric-section">
+        <div class="section-label">
+          <span>LỜI CA (NHẤN SPACE HOẶC '-' ĐỂ NHẢY NỐT):</span>
+        </div>
+        <div class="lyric-input-group">
+          <input type="text" id="input-note-lyric" class="input-lyric-field" placeholder="Nhập từ ca..." autocomplete="off">
+          <button id="btn-apply-lyric" class="btn-apply-lyric-btn">Lưu</button>
+        </div>
+      </div>
+
+      <!-- CÁC THẺ ẨN ĐỂ ĐẢM BẢO TƯƠNG THÍCH HOÀN TOÀN VỚI JS -->
+      <div id="health-summary-badge" style="display:none;"></div>
+      <div id="measure-strip-pills" style="display:none;"></div>
+      <div id="mini-piano" style="display:none;"></div>
+
+    </aside>
+  </div>
 
   <!-- ==================== MODAL LƯU PHIÊN BẢN (VERSION SAVE MODAL) ==================== -->
   <div id="save-version-modal" class="modal-backdrop hidden">
