@@ -201,6 +201,7 @@
 
     const chordP1 = p1Chords[safeIdx] || [];
     const chordP2 = p2Chords[safeIdx] || [];
+    const allChordsAtBeat = [...chordP1, ...chordP2];
 
     // Phân loại Khóa Sol: Soprano (trên) & Alto (dưới)
     let sopranoNote = null;
@@ -227,10 +228,10 @@
     return {
       beatIndex: safeIdx,
       totalBeats: totalBeats,
-      soprano: sopranoNote ? _parseNoteData(sopranoNote, 'soprano') : null,
-      alto:    altoNote ? _parseNoteData(altoNote, 'alto') : null,
-      tenor:   tenorNote ? _parseNoteData(tenorNote, 'tenor') : null,
-      bass:    bassNote ? _parseNoteData(bassNote, 'bass') : null
+      soprano: sopranoNote ? _parseNoteData(sopranoNote, 'soprano', allChordsAtBeat) : null,
+      alto:    altoNote ? _parseNoteData(altoNote, 'alto', allChordsAtBeat) : null,
+      tenor:   tenorNote ? _parseNoteData(tenorNote, 'tenor', allChordsAtBeat) : null,
+      bass:    bassNote ? _parseNoteData(bassNote, 'bass', allChordsAtBeat) : null
     };
   }
 
@@ -278,7 +279,7 @@
     return _pitchToMidi(stepEl.textContent.trim(), octEl.textContent.trim(), altEl ? altEl.textContent.trim() : 0);
   }
 
-  function _parseNoteData(noteEl, voiceName) {
+  function _parseNoteData(noteEl, voiceName, chordGroup = null) {
     const isRest = noteEl.querySelector('rest') !== null;
     const stepEl = noteEl.querySelector('pitch > step');
     const octEl  = noteEl.querySelector('pitch > octave');
@@ -286,7 +287,16 @@
     const typeEl = noteEl.querySelector('type');
     const dotEl  = noteEl.querySelector('dot') !== null;
     const durEl  = noteEl.querySelector('duration');
-    const lyricEl= noteEl.querySelector('lyric > text');
+    let lyricEl= noteEl.querySelector('lyric > text');
+    if (!lyricEl && chordGroup && Array.isArray(chordGroup)) {
+      for (const sib of chordGroup) {
+        const sibLyric = sib.querySelector('lyric > text');
+        if (sibLyric && sibLyric.textContent.trim()) {
+          lyricEl = sibLyric;
+          break;
+        }
+      }
+    }
     const tieEl  = noteEl.querySelector('tie') || noteEl.querySelector('tied');
     const slurEl = noteEl.querySelector('slur');
     const fermataEl = noteEl.querySelector('fermata');
@@ -306,7 +316,8 @@
       isTie: !!tieEl,
       isSlur: !!slurEl,
       isFermata: !!fermataEl,
-      isTuplet: !!tupletEl
+      isTuplet: !!tupletEl,
+      _chordSiblings: chordGroup
     };
   }
 
@@ -417,6 +428,9 @@
 
     // Mini piano highlight
     _highlightPianoKey(curNote.step, curNote.octave, curNote.alter);
+
+    // Đồng bộ highlight nốt trên bản nhạc SVG
+    _highlightSelectedSvgNote();
   }
 
   function _setControlsDisabled(disabled) {
@@ -666,6 +680,17 @@
     _saveSnapshotForUndo();
     const noteEl = curNote.xmlNode;
     let lyricEl = noteEl.querySelector('lyric');
+
+    // Nếu nốt này không có lyric, kiểm tra xem nốt khác trong chord có lyric không để sửa đồng bộ
+    if (!lyricEl && curNote._chordSiblings) {
+      for (const sib of curNote._chordSiblings) {
+        const sibLyric = sib.querySelector('lyric');
+        if (sibLyric) {
+          lyricEl = sibLyric;
+          break;
+        }
+      }
+    }
 
     if (!text || !text.trim()) {
       if (lyricEl) lyricEl.remove();
@@ -1084,43 +1109,196 @@
   }
 
   /* ─── TƯƠNG TÁC KÉO THẢ NỐT THẲNG ĐỨNG (VERTICAL DRAG-TO-PITCH) ─ */
+  const _svgNoteMap = new Map();
+  const _svgLyricMap = new Map();
+  let _hasBoundGlobalDragListeners = false;
+
+  function _buildSvgNoteMap() {
+    _svgNoteMap.clear();
+    _svgLyricMap.clear();
+    if (!_osmd || !_osmd.GraphicSheet) return;
+
+    const gs = _osmd.GraphicSheet;
+    (gs.MeasureList || []).forEach(staves => {
+      staves.forEach((staffMeasure, sIdx) => {
+        const mNum = staffMeasure.MeasureNumber;
+        const entries = staffMeasure.staffEntries || [];
+        entries.forEach((se, seIdx) => {
+          // 1. Ánh xạ lời ca
+          (se.LyricsEntries || []).forEach(le => {
+            const txt = le.graphicalLabel?.Label?.text;
+            if (txt) {
+              const cleanTxt = txt.replace(/^\d+\./, '').trim().toLowerCase();
+              if (cleanTxt) {
+                _svgLyricMap.set(`${mNum}_${cleanTxt}`, {
+                  measureNumber: mNum,
+                  beatIndex: seIdx,
+                  staffIndex: sIdx
+                });
+              }
+            }
+          });
+
+          // 2. Ánh xạ stavenote
+          (se.graphicalVoiceEntries || []).forEach(gve => {
+            (gve.notes || []).forEach(gn => {
+              const el = gn.getSVGGElement?.();
+              if (el) {
+                if (!_svgNoteMap.has(el)) {
+                  _svgNoteMap.set(el, {
+                    measureNumber: mNum,
+                    beatIndex: seIdx,
+                    staffIndex: sIdx,
+                    notes: []
+                  });
+                }
+                const p = gn.sourceNote?.Pitch;
+                _svgNoteMap.get(el).notes.push({
+                  step: p?.step,
+                  octave: p?.octave,
+                  alter: p?.alter,
+                  isRest: gn.sourceNote?.isRest?.(),
+                  absY: gn.PositionAndShape?.AbsolutePosition?.y || 0
+                });
+              }
+            });
+          });
+        });
+      });
+    });
+  }
+
+  function _resolveVoiceFromClick(info, clientY, staveNoteEl) {
+    if (!info) return 'soprano';
+
+    const noteheads = Array.from(staveNoteEl.querySelectorAll('g.vf-notehead'));
+    if (noteheads.length >= 2) {
+      // Xác định chính xác nốt trên / nốt dưới bằng tọa độ thực tế của từng notehead
+      const sorted = noteheads.map(nh => {
+        const r = nh.getBoundingClientRect();
+        return { el: nh, centerY: r.top + r.height / 2 };
+      }).sort((a, b) => a.centerY - b.centerY);
+
+      const topCenter = sorted[0].centerY;
+      const bottomCenter = sorted[sorted.length - 1].centerY;
+      const midY = (topCenter + bottomCenter) / 2;
+
+      if (info.staffIndex === 0) {
+        // Khóa Sol: Nốt trên = Soprano, Nốt dưới = Alto
+        return clientY < midY ? 'soprano' : 'alto';
+      } else {
+        // Khóa Fa: Nốt trên = Tenor, Nốt dưới = Bass
+        return clientY < midY ? 'tenor' : 'bass';
+      }
+    }
+
+    if (info.staffIndex === 0) {
+      return 'soprano';
+    } else {
+      return 'bass';
+    }
+  }
+
+  function _highlightSelectedSvgNote() {
+    const container = document.getElementById('osmd-editor-container');
+    if (!container) return;
+
+    // Reset các class highlight cũ
+    container.querySelectorAll('.selected-note-item, .selected-voice-notehead, .selected-chord-peer').forEach(el => {
+      el.classList.remove('selected-note-item', 'selected-voice-notehead', 'selected-chord-peer');
+    });
+
+    const { measureNumber, beatIndex, voice } = _selectedPosition;
+    const isUpperStaff = (voice === 'soprano' || voice === 'alto');
+    const isTopVoice = (voice === 'soprano' || voice === 'tenor');
+
+    container.querySelectorAll('svg g.vf-stavenote').forEach(n => {
+      const info = _svgNoteMap.get(n);
+      if (info && info.measureNumber === measureNumber && info.beatIndex === beatIndex) {
+        const matchesStaff = isUpperStaff ? (info.staffIndex === 0) : (info.staffIndex === 1);
+        if (matchesStaff) {
+          n.classList.add('selected-note-item');
+
+          // Phân biệt nốt của bè đang chọn và bè phụ trong hợp âm
+          const noteheads = Array.from(n.querySelectorAll('g.vf-notehead'));
+          if (noteheads.length >= 2) {
+            noteheads.sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top);
+            const activeNh = isTopVoice ? noteheads[0] : noteheads[1];
+            const peerNh = isTopVoice ? noteheads[1] : noteheads[0];
+            activeNh?.classList.add('selected-voice-notehead');
+            peerNh?.classList.add('selected-chord-peer');
+          } else if (noteheads.length === 1) {
+            noteheads[0].classList.add('selected-voice-notehead');
+          }
+        }
+      }
+    });
+  }
+
   function _wireVerticalDragEvents() {
     const container = document.getElementById('osmd-editor-container');
     if (!container) return;
 
+    _buildSvgNoteMap();
+
     const noteGroups = container.querySelectorAll('svg g.vf-stavenote');
     noteGroups.forEach(staveNote => {
       staveNote.style.cursor = 'ns-resize';
+      staveNote.style.pointerEvents = 'all';
+
+      // Tạo hoặc cập nhật hitbox vô hình để người dùng click không bao giờ trượt
+      let hitbox = staveNote.querySelector('.vf-hitbox');
+      if (hitbox) hitbox.style.display = 'none';
+      let b = null;
+      try {
+        b = staveNote.getBBox();
+      } catch (err) {}
+      if (hitbox) hitbox.style.display = '';
+
+      if (b && b.width > 0 && b.height > 0) {
+        if (!hitbox) {
+          hitbox = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          hitbox.setAttribute('class', 'vf-hitbox');
+          hitbox.setAttribute('fill', 'transparent');
+          hitbox.setAttribute('pointer-events', 'all');
+          hitbox.style.cursor = 'ns-resize';
+          staveNote.insertBefore(hitbox, staveNote.firstChild);
+        }
+        const padX = 14;
+        const padY = 10;
+        hitbox.setAttribute('x', b.x - padX);
+        hitbox.setAttribute('y', b.y - padY);
+        hitbox.setAttribute('width', Math.max(38, b.width + padX * 2));
+        hitbox.setAttribute('height', Math.max(44, b.height + padY * 2));
+      }
 
       staveNote.onpointerdown = (e) => {
         e.preventDefault();
         e.stopPropagation();
 
-        _dragState.active = true;
-        _dragState.pointerId = e.pointerId;
-        _dragState.targetEl = staveNote;
-        _dragState.startY = e.clientY;
-        _dragState.startX = e.clientX;
-
-        // Bỏ chọn các nốt khác
-        noteGroups.forEach(n => n.classList.remove('selected-note-item'));
-        staveNote.classList.add('selected-note-item');
-
-        // Tìm số ô nhịp
-        const measureGroup = staveNote.closest('g[id^="measure_"]') || staveNote.closest('g.vf-measure');
-        if (measureGroup) {
-          const mMatch = measureGroup.id ? measureGroup.id.match(/\d+/) : null;
-          if (mMatch) _selectedPosition.measureNumber = parseInt(mMatch[0], 10);
+        const info = _svgNoteMap.get(staveNote);
+        if (info) {
+          _selectedPosition.measureNumber = info.measureNumber;
+          _selectedPosition.beatIndex = info.beatIndex;
+          _selectedPosition.voice = _resolveVoiceFromClick(info, e.clientY, staveNote);
         }
 
         _refreshInspectorUI();
 
         const curNote = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
         if (curNote && !curNote.isRest) {
+          playSinglePitch(curNote.step, curNote.octave, curNote.alter, 0.25);
+
+          _dragState.active = true;
+          _dragState.pointerId = e.pointerId;
+          _dragState.targetEl = staveNote;
+          _dragState.startY = e.clientY;
+          _dragState.startX = e.clientX;
           _dragState.currentStep = curNote.step;
           _dragState.currentOctave = curNote.octave;
           _dragState.currentAlter = curNote.alter;
-          _dragState.baseMidi = _pitchToMidi(curNote.step, curNote.octave, curNote.alter);
+          _dragState.previewStep = curNote.step;
+          _dragState.previewOctave = curNote.octave;
 
           // Hiển thị overlay nốt bóng
           const overlay = document.getElementById('drag-ghost-overlay');
@@ -1128,27 +1306,91 @@
           const line = document.getElementById('drag-guide-line');
           if (overlay && badge && line) {
             overlay.classList.remove('hidden');
-            const rect = container.getBoundingClientRect();
-            badge.style.left = `${e.clientX - rect.left}px`;
-            badge.style.top = `${e.clientY - rect.top}px`;
+            const cRect = container.getBoundingClientRect();
+            badge.style.left = `${e.clientX - cRect.left}px`;
+            badge.style.top = `${e.clientY - cRect.top}px`;
             badge.textContent = `${curNote.step}${curNote.octave}`;
-            line.style.left = `${e.clientX - rect.left}px`;
+            line.style.left = `${e.clientX - cRect.left}px`;
             line.style.top = '0';
             line.style.height = '100%';
           }
         }
-
-        try {
-          staveNote.setPointerCapture(e.pointerId);
-        } catch (err) {}
       };
+    });
 
-      staveNote.onpointermove = (e) => {
+    // Bắt sự kiện click & kéo vào các từ lời ca bên dưới nốt
+    container.querySelectorAll('svg text').forEach(textEl => {
+      const raw = (textEl.textContent || '').trim();
+      if (!raw || /^\d+$/.test(raw)) return;
+
+      const clean = raw.replace(/^\d+\./, '').trim().toLowerCase();
+      for (const [key, loc] of _svgLyricMap.entries()) {
+        const [, word] = key.split('_');
+        if (clean === word || clean.includes(word) || word.includes(clean)) {
+          textEl.style.cursor = 'ns-resize';
+          textEl.onpointerdown = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            _selectedPosition.measureNumber = loc.measureNumber;
+            _selectedPosition.beatIndex = loc.beatIndex;
+
+            if (loc.staffIndex === 0) {
+              if (_selectedPosition.voice !== 'soprano' && _selectedPosition.voice !== 'alto') {
+                _selectedPosition.voice = 'soprano';
+              }
+            } else {
+              if (_selectedPosition.voice !== 'tenor' && _selectedPosition.voice !== 'bass') {
+                _selectedPosition.voice = 'bass';
+              }
+            }
+
+            _refreshInspectorUI();
+
+            const cur = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
+            if (cur && !cur.isRest) {
+              playSinglePitch(cur.step, cur.octave, cur.alter, 0.25);
+
+              _dragState.active = true;
+              _dragState.pointerId = e.pointerId;
+              _dragState.targetEl = textEl;
+              _dragState.startY = e.clientY;
+              _dragState.startX = e.clientX;
+              _dragState.currentStep = cur.step;
+              _dragState.currentOctave = cur.octave;
+              _dragState.currentAlter = cur.alter;
+              _dragState.previewStep = cur.step;
+              _dragState.previewOctave = cur.octave;
+
+              const overlay = document.getElementById('drag-ghost-overlay');
+              const badge = document.getElementById('drag-ghost-badge');
+              const line = document.getElementById('drag-guide-line');
+              if (overlay && badge && line) {
+                overlay.classList.remove('hidden');
+                const cRect = container.getBoundingClientRect();
+                badge.style.left = `${e.clientX - cRect.left}px`;
+                badge.style.top = `${e.clientY - cRect.top}px`;
+                badge.textContent = `${cur.step}${cur.octave}`;
+                line.style.left = `${e.clientX - cRect.left}px`;
+                line.style.top = '0';
+                line.style.height = '100%';
+              }
+            }
+          };
+          break;
+        }
+      }
+    });
+
+    // Lắng nghe pointermove và pointerup trên window một lần duy nhất
+    if (!_hasBoundGlobalDragListeners) {
+      _hasBoundGlobalDragListeners = true;
+
+      window.addEventListener('pointermove', (e) => {
         if (!_dragState.active) return;
         e.preventDefault();
 
         const deltaY = _dragState.startY - e.clientY;
-        const stepPixels = Math.max(4, 6 * _zoom);
+        const stepPixels = Math.max(5, 7 * _zoom);
         const deltaSteps = Math.round(deltaY / stepPixels);
 
         const diatonicSteps = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
@@ -1158,23 +1400,26 @@
         const newStep = diatonicSteps[((newIdx % 7) + 7) % 7];
         const newOctave = Math.floor(newIdx / 7);
 
-        // Cập nhật nhãn nổi
-        const rect = container.getBoundingClientRect();
         const badge = document.getElementById('drag-ghost-badge');
+        const line = document.getElementById('drag-guide-line');
+        const cRect = container.getBoundingClientRect();
         if (badge) {
-          badge.style.top = `${e.clientY - rect.top}px`;
+          badge.style.left = `${e.clientX - cRect.left}px`;
+          badge.style.top = `${e.clientY - cRect.top}px`;
           badge.textContent = `${newStep}${newOctave}`;
         }
+        if (line) {
+          line.style.left = `${e.clientX - cRect.left}px`;
+        }
 
-        // Phát âm thanh nếu đổi cao độ
         if (newStep !== _dragState.previewStep || newOctave !== _dragState.previewOctave) {
           _dragState.previewStep = newStep;
           _dragState.previewOctave = newOctave;
-          playSinglePitch(newStep, newOctave, _dragState.currentAlter, 0.2);
+          playSinglePitch(newStep, newOctave, _dragState.currentAlter, 0.15);
         }
-      };
+      });
 
-      staveNote.onpointerup = (e) => {
+      window.addEventListener('pointerup', () => {
         if (!_dragState.active) return;
         _dragState.active = false;
 
@@ -1183,14 +1428,16 @@
         if (_dragState.previewStep && (_dragState.previewStep !== _dragState.currentStep || _dragState.previewOctave !== _dragState.currentOctave)) {
           modifyPitch(_dragState.previewStep, _dragState.previewOctave, _dragState.currentAlter);
         }
+      });
 
-        try {
-          staveNote.releasePointerCapture(e.pointerId);
-        } catch (err) {}
-      };
+      window.addEventListener('pointercancel', () => {
+        if (!_dragState.active) return;
+        _dragState.active = false;
+        document.getElementById('drag-ghost-overlay')?.classList.add('hidden');
+      });
+    }
 
-      staveNote.onpointercancel = staveNote.onpointerup;
-    });
+    _highlightSelectedSvgNote();
   }
 
   /* ─── Render OSMD từ Cây DOM XML ─────────────────────────────── */
@@ -1744,17 +1991,28 @@
         _selectedPosition.beatIndex--;
       } else if (_selectedPosition.measureNumber > 1) {
         _selectedPosition.measureNumber--;
+        const prevSatb = _getMeasureChordsSATB(_selectedPosition.measureNumber);
+        _selectedPosition.beatIndex = Math.max(0, prevSatb.length - 1);
+      }
+      _refreshInspectorUI();
+      const cur = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
+      if (cur && !cur.isRest) playSinglePitch(cur.step, cur.octave, cur.alter, 0.25);
+    });
+    document.getElementById('btn-nav-next-note')?.addEventListener('click', () => {
+      const curSatb = _getMeasureChordsSATB(_selectedPosition.measureNumber);
+      if (_selectedPosition.beatIndex < curSatb.length - 1) {
+        _selectedPosition.beatIndex++;
+      } else {
+        _selectedPosition.measureNumber++;
         _selectedPosition.beatIndex = 0;
       }
       _refreshInspectorUI();
-    });
-    document.getElementById('btn-nav-next-note')?.addEventListener('click', () => {
-      _selectedPosition.beatIndex++;
-      _refreshInspectorUI();
+      const cur = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
+      if (cur && !cur.isRest) playSinglePitch(cur.step, cur.octave, cur.alter, 0.25);
     });
     document.getElementById('btn-play-single')?.addEventListener('click', () => {
       const cur = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
-      if (cur && !cur.isRest) playSinglePitch(cur.step, cur.octave, cur.alter);
+      if (cur && !cur.isRest) playSinglePitch(cur.step, cur.octave, cur.alter, 0.35);
     });
 
     // Phím tắt bàn phím (Keyboard Shortcuts)

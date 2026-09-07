@@ -413,10 +413,33 @@ body.editor-body {
   pointer-events: none;
 }
 .selected-note-item path, .selected-note-item ellipse {
-  fill: #3b82f6 !important;
   stroke: #60a5fa !important;
   stroke-width: 1.5px !important;
-  filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.8));
+}
+
+/* Nốt của bè đang chọn (Active Voice Notehead) - Rực rỡ và nổi bật */
+.selected-voice-notehead path, .selected-voice-notehead ellipse {
+  fill: #06b6d4 !important;
+  stroke: #67e8f9 !important;
+  stroke-width: 2.2px !important;
+  filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.95)) !important;
+}
+
+/* Nốt bè phụ trong hợp âm (Peer chord notehead) - Màu xanh dịu để nhận biết */
+.selected-chord-peer path, .selected-chord-peer ellipse {
+  fill: #6366f1 !important;
+  stroke: #818cf8 !important;
+  stroke-width: 1.2px !important;
+  opacity: 0.85;
+}
+
+/* Hitbox vô hình để dễ dàng click và kéo thả không bao giờ trượt */
+.vf-hitbox {
+  cursor: ns-resize;
+  pointer-events: all !important;
+}
+.vf-hitbox:hover {
+  fill: rgba(59, 130, 246, 0.06);
 }
 
 /* Cảnh báo ô nhịp trên SVG */
