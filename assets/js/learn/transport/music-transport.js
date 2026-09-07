@@ -211,7 +211,7 @@ const MusicTransport = (() => {
           EventBus.emit(LEARN_EVENTS.POSITION_CHANGED, { measure, beat, timeSeconds });
         }
       }
-    }, `${_beatsPerMeasure}n`); // Every beat
+    }, `${_beatType || 4}n`); // Every beat
   }
 
   /* ─── Count-in ───────────────────────────────────────────────── */

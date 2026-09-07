@@ -102,6 +102,18 @@ try {
             $controller->handleRequest($method);
             break;
 
+        case 'learning':
+            require_once __DIR__ . '/controllers/LearningController.php';
+            $controller = new LearningController();
+            $controller->handleRequest($method);
+            break;
+
+        case 'practice':
+            require_once __DIR__ . '/controllers/PracticeController.php';
+            $controller = new PracticeController();
+            $controller->handleRequest($method);
+            break;
+
         default:
             Response::notFound("Endpoint /api/{$route} không tồn tại.");
             break;

@@ -580,4 +580,237 @@
   .vkb-black { width: 14px; height: 42px; }
   .learn-controls-bar { padding: 8px; gap: 6px; }
   .btn-learn-play { padding: 8px 16px; }
+  .learn-header-tools { display: none; }
 }
+
+/* ─── Header Tools (Chord Set & Transpose) ───────────────────────── */
+.learn-header-tools {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--learn-surface2);
+  padding: 4px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--learn-border);
+}
+
+.learn-tool-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.learn-tool-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--learn-text-muted);
+}
+
+.learn-tool-select {
+  background: var(--learn-surface);
+  border: 1px solid var(--learn-border);
+  color: var(--learn-text);
+  border-radius: var(--radius-sm);
+  padding: 3px 6px;
+  font-size: 12px;
+  cursor: pointer;
+  outline: none;
+}
+
+.learn-transpose-box {
+  border-left: 1px solid var(--learn-border);
+  padding-left: 10px;
+}
+
+.learn-trans-value {
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Fira Code', monospace;
+  min-width: 20px;
+  text-align: center;
+  color: var(--learn-accent2);
+}
+
+.btn-learn-tool {
+  width: 22px;
+  height: 22px;
+  background: var(--learn-surface);
+  border: 1px solid var(--learn-border);
+  border-radius: 4px;
+  color: var(--learn-text);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+.btn-learn-tool:hover {
+  border-color: var(--learn-accent);
+  color: var(--learn-accent2);
+}
+
+/* ─── Accompaniment Pattern Card ─────────────────────────────────── */
+.learn-panel-card {
+  background: var(--learn-surface);
+  border: 1px solid var(--learn-border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.learn-panel-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.learn-panel-card-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--learn-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.learn-select {
+  background: var(--learn-surface2);
+  border: 1px solid var(--learn-border);
+  color: var(--learn-text);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 13px;
+  width: 100%;
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--transition);
+}
+.learn-select:hover, .learn-select:focus {
+  border-color: var(--learn-accent);
+}
+
+.learn-toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 34px;
+  height: 18px;
+  cursor: pointer;
+}
+.learn-toggle-switch input { opacity: 0; width: 0; height: 0; }
+.learn-toggle-slider {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: var(--learn-border);
+  border-radius: 20px;
+  transition: .3s;
+}
+.learn-toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  width: 12px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: .3s;
+}
+.learn-toggle-switch input:checked + .learn-toggle-slider {
+  background-color: var(--learn-accent);
+}
+.learn-toggle-switch input:checked + .learn-toggle-slider:before {
+  transform: translateX(16px);
+}
+
+.learn-mini-mixer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding-top: 4px;
+  border-top: 1px dashed var(--learn-border);
+}
+.mixer-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mixer-item span {
+  font-size: 10px;
+  color: var(--learn-text-muted);
+}
+.mixer-item input[type="range"] {
+  width: 100%;
+  accent-color: var(--learn-accent);
+  cursor: pointer;
+}
+
+/* ─── Looper & Tempo Ladder Controls Bar ─────────────────────────── */
+.learn-loop-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.learn-section-select {
+  width: auto;
+  max-width: 180px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.btn-learn-loop {
+  padding: 7px 12px;
+  background: var(--learn-surface2);
+  border: 1px solid var(--learn-border);
+  border-radius: var(--radius-md);
+  color: var(--learn-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.btn-learn-loop:hover {
+  border-color: var(--learn-accent);
+  color: var(--learn-text);
+}
+.btn-learn-loop.active {
+  background: rgba(124,58,237,0.2);
+  border-color: var(--learn-accent);
+  color: var(--learn-accent2);
+  box-shadow: 0 0 10px var(--learn-accent-glow);
+}
+
+.learn-tempo-ladder {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--learn-surface2);
+  padding: 4px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--learn-border);
+}
+
+.btn-tempo-ladder {
+  padding: 4px 8px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--learn-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.btn-tempo-ladder:hover {
+  color: var(--learn-text);
+  background: var(--learn-surface);
+}
+.btn-tempo-ladder.active {
+  background: var(--learn-accent);
+  color: #fff;
+}
+

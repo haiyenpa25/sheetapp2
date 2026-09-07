@@ -1,7 +1,7 @@
 # CODE_MAP.md — Gitnexus Codebase Knowledge Graph & Map (SheetApp)
 
 > **GITNEXUS SECOND BRAIN CODE MAP**
-> Bản đồ tri thức toàn bộ hệ thống SheetApp. Cập nhật tự động: 2026-09-07 09:48:22
+> Bản đồ tri thức toàn bộ hệ thống SheetApp. Cập nhật tự động: 2026-09-07 10:06:48
 > AI Agent BẮT BUỘC tra cứu sơ đồ phụ thuộc dưới đây trước khi chỉnh sửa file.
 
 ---
@@ -35,8 +35,10 @@ graph TD
 - **CategoryController.php**: Handler cho route `category`
 - **ChordSetController.php**: Handler cho route `chordset`
 - **ImportController.php**: Handler cho route `import`
+- **LearningController.php**: Handler cho route `learning`
 - **LiveSyncController.php**: Handler cho route `livesync`
 - **OmrController.php**: Handler cho route `omr`
+- **PracticeController.php**: Handler cho route `practice`
 - **SessionController.php**: Handler cho route `session`
 - **SetlistController.php**: Handler cho route `setlist`
 - **SongController.php**: Handler cho route `song`
@@ -48,8 +50,10 @@ graph TD
 - **CategoryService.php**: Xử lý logic & truy vấn SQLite cho `Category`
 - **ChordSetService.php**: Xử lý logic & truy vấn SQLite cho `ChordSet`
 - **ImportService.php**: Xử lý logic & truy vấn SQLite cho `Import`
+- **LearningService.php**: Xử lý logic & truy vấn SQLite cho `Learning`
 - **LiveSyncService.php**: Xử lý logic & truy vấn SQLite cho `LiveSync`
 - **OmrService.php**: Xử lý logic & truy vấn SQLite cho `Omr`
+- **PracticeService.php**: Xử lý logic & truy vấn SQLite cho `Practice`
 - **SessionService.php**: Xử lý logic & truy vấn SQLite cho `Session`
 - **SetlistService.php**: Xử lý logic & truy vấn SQLite cho `Setlist`
 - **SongService.php**: Xử lý logic & truy vấn SQLite cho `Song`
@@ -81,9 +85,15 @@ graph TD
 - `assets/js/importer.js`
 - `assets/js/instruments.js`
 - `assets/js/keyboard-handler.js`
+- `assets/js/learn/accompaniment/pattern-engine.js`
+- `assets/js/learn/accompaniment/pattern-library.js`
+- `assets/js/learn/audio/learn-sound-engine.js`
+- `assets/js/learn/harmony/voicing-engine.js`
 - `assets/js/learn/learn-app.js`
 - `assets/js/learn/learn-interfaces.js`
 - `assets/js/learn/learn-store.js`
+- `assets/js/learn/practice/loop-controller.js`
+- `assets/js/learn/practice/practice-tracker.js`
 - `assets/js/learn/timeline/chord-timeline-normalizer.js`
 - `assets/js/learn/transport/music-transport.js`
 - `assets/js/learn/ui/chord-card.js`
@@ -124,5 +134,5 @@ graph TD
 
 ---
 
-## 5 · FILE REGISTRY INDEX (2037 files total)
-Total indexed files: 2037
+## 5 · FILE REGISTRY INDEX (2048 files total)
+Total indexed files: 2048

@@ -83,6 +83,27 @@ function learnCssTag(string $file): string {
       <div class="learn-song-info-meta" id="learn-song-meta"></div>
     </div>
 
+    <!-- Chord profile & Transpose controls -->
+    <div class="learn-header-tools">
+      <!-- Chord Set -->
+      <div class="learn-tool-item">
+        <label for="learn-chord-set-select" class="learn-tool-label">Hợp âm:</label>
+        <select id="learn-chord-set-select" class="learn-tool-select" title="Chọn bộ hợp âm">
+          <option value="HD" selected>HD (Mặc định)</option>
+          <option value="TLH">TLH</option>
+          <option value="default">Cơ bản</option>
+        </select>
+      </div>
+
+      <!-- Transpose -->
+      <div class="learn-tool-item learn-transpose-box">
+        <span class="learn-tool-label">Transpose:</span>
+        <button id="btn-learn-trans-dec" class="btn-learn-tool" title="Hạ nửa cung (b)">−</button>
+        <span id="learn-trans-val" class="learn-trans-value">0</span>
+        <button id="btn-learn-trans-inc" class="btn-learn-tool" title="Tăng nửa cung (#)">+</button>
+      </div>
+    </div>
+
     <!-- Song picker toggle -->
     <button class="btn-learn-song-picker" id="btn-learn-song-picker" title="Chọn bài hát">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -138,6 +159,37 @@ function learnCssTag(string $file): string {
         <button class="btn-learn-mode"        data-mode="melody" title="Tập Giai điệu">🎵 Melody</button>
       </div>
 
+      <!-- Accompaniment Pattern Selector -->
+      <div class="learn-panel-card" id="learn-pattern-card">
+        <div class="learn-panel-card-header">
+          <span class="learn-panel-card-title">🎼 Kiểu đệm tự động</span>
+          <label class="learn-toggle-switch" title="Bật/Tắt đệm">
+            <input type="checkbox" id="learn-pattern-toggle" checked>
+            <span class="learn-toggle-slider"></span>
+          </label>
+        </div>
+        <select id="learn-pattern-select" class="learn-select">
+          <option value="piano-block-4-4-v1">🎹 Piano Block (4/4 Cơ bản)</option>
+          <option value="piano-bass-chord-4-4-v1" selected>🎹 Bass + Chords (4/4 Pop/Ballad)</option>
+          <option value="piano-arpeggio-4-4-v1">✨ Arpeggio Rải Nốt (4/4 Nhẹ nhàng)</option>
+          <option value="piano-waltz-3-4-v1">💃 Waltz Cổ Điển (3/4 Bùm-Chát)</option>
+          <option value="piano-worship-6-8-v1">🕊️ Worship Ballad (6/8 Sâu lắng)</option>
+          <option value="organ-church-4-4-v1">⛪ Organ Thánh Ca (4/4 Ngân dài)</option>
+        </select>
+
+        <!-- Sound Mixer preview -->
+        <div class="learn-mini-mixer">
+          <div class="mixer-item">
+            <span>Piano</span>
+            <input type="range" id="slider-vol-piano" min="-30" max="4" value="-2">
+          </div>
+          <div class="mixer-item">
+            <span>Bass</span>
+            <input type="range" id="slider-vol-bass" min="-30" max="4" value="-1">
+          </div>
+        </div>
+      </div>
+
       <!-- Chord Card -->
       <div class="chord-card-container">
         <div id="learn-chord-card">
@@ -176,12 +228,31 @@ function learnCssTag(string $file): string {
         ⏹ Stop
       </button>
 
+      <!-- Section / Loop Selector -->
+      <div class="learn-loop-group">
+        <select id="learn-section-select" class="learn-select learn-section-select" title="Chọn phân đoạn để tập">
+          <option value="all">Toàn bài (Không lặp)</option>
+        </select>
+        <button id="btn-learn-loop-toggle" class="btn-learn-loop" title="Bật/Tắt vòng lặp phân đoạn">
+          🔁 Lặp: TẮT
+        </button>
+      </div>
+
       <!-- BPM Control -->
       <div class="learn-bpm-control">
         <span class="learn-bpm-label">BPM</span>
         <button class="btn-learn-bpm" id="btn-learn-bpm-dec" title="Giảm BPM">−</button>
         <span class="learn-bpm-value" id="learn-bpm-value">76</span>
         <button class="btn-learn-bpm" id="btn-learn-bpm-inc" title="Tăng BPM">+</button>
+      </div>
+
+      <!-- Tempo Ladder -->
+      <div class="learn-tempo-ladder">
+        <button class="btn-tempo-ladder" data-ratio="0.5" title="Tập chậm (50% BPM)">50%</button>
+        <button class="btn-tempo-ladder" data-ratio="0.75" title="Tăng tốc (75% BPM)">75%</button>
+        <button class="btn-tempo-ladder active" data-ratio="1.0" title="Nhịp chuẩn (100% BPM)">100%</button>
+        <button class="btn-tempo-ladder" data-ratio="1.1" title="Thử thách (110% BPM)">110%</button>
+        <button id="btn-learn-auto-tempo" class="btn-tempo-ladder" title="Tự động tăng nhịp độ sau mỗi 2 vòng lặp">⚡ Tăng dần</button>
       </div>
 
     </div>
@@ -216,11 +287,16 @@ echo learnJsTag('assets/js/core/ApiService.js', false);
 
 <!-- /learn modules -->
 <?php
-$t = time();
 echo learnJsTag('assets/js/learn/learn-interfaces.js', true);
 echo learnJsTag('assets/js/learn/learn-store.js', true);
 echo learnJsTag('assets/js/learn/timeline/chord-timeline-normalizer.js', true);
 echo learnJsTag('assets/js/learn/transport/music-transport.js', true);
+echo learnJsTag('assets/js/learn/accompaniment/pattern-library.js', true);
+echo learnJsTag('assets/js/learn/harmony/voicing-engine.js', true);
+echo learnJsTag('assets/js/learn/audio/learn-sound-engine.js', true);
+echo learnJsTag('assets/js/learn/accompaniment/pattern-engine.js', true);
+echo learnJsTag('assets/js/learn/practice/loop-controller.js', true);
+echo learnJsTag('assets/js/learn/practice/practice-tracker.js', true);
 echo learnJsTag('assets/js/learn/ui/virtual-keyboard.js', true);
 echo learnJsTag('assets/js/learn/ui/chord-card.js', true);
 echo learnJsTag('assets/js/learn/learn-app.js', true);

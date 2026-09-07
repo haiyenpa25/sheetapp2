@@ -179,6 +179,26 @@ SheetApp/
 | `UserController` | `users` | GET, POST, PUT, DELETE | `UserService` |
 | `ImportController` | `import` | POST | `ImportService` |
 | `OmrController` | `omr` | GET, POST, DELETE | `OmrService` |
+| `LearningController` | `learning` | GET, POST | `LearningService` |
+| `PracticeController` | `practice` | GET, POST | `PracticeService` |
+
+### Learn Studio Modules (`assets/js/learn/`)
+
+| Module | File | Vai trò |
+|--------|------|---------|
+| Core App | `learn-app.js` | Bootstrap controller, song loading, OSMD render |
+| State | `learn-store.js` | Isolated state namespace (LearnStore) |
+| Interfaces | `learn-interfaces.js` | Types, LEARN_EVENTS, LEARN_FLAGS |
+| Timeline | `timeline/chord-timeline-normalizer.js` | Chuẩn hóa tọa độ visual sang nhạc lý (Trái tim /learn) |
+| Transport | `transport/music-transport.js` | Tone.Transport unified clock, ticker, count-in |
+| Patterns | `accompaniment/pattern-library.js` | Thư viện mẫu đệm 4/4, 3/4, 6/8, Organ |
+| Voicing | `harmony/voicing-engine.js` | Smooth voice leading, nearest inversion, slash bass |
+| Audio | `audio/learn-sound-engine.js` | Polyphonic Web Audio synths (Piano, Bass, Organ) |
+| Scheduler | `accompaniment/pattern-engine.js` | Lên lịch phát đệm tự động theo ô nhịp và hợp âm |
+| Looper | `practice/loop-controller.js` | A/B looping, sections, tempo ladder (50%-110%) |
+| Tracker | `practice/practice-tracker.js` | Theo dõi phiên tập client-first, batch sync server |
+| Virtual Keyboard | `ui/virtual-keyboard.js` | Bàn phím piano ảo C3-B6, highlight RH/LH/Next |
+| Chord Card | `ui/chord-card.js` | Hiển thị hợp âm, thế đảo, nghe nốt, xem trước |
 
 ### Frontend Core (`assets/js/core/`)
 
