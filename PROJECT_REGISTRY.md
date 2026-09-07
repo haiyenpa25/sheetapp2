@@ -41,6 +41,10 @@ SheetApp/
 ├── sync.sh                   ← Auto-sync script (cập nhật CODE_MAP.md & push GitHub)
 │
 ├── index.php                 ← Entry point HTML (PHP partial includes)
+├── editor/                   ← Trình biên tập sheet nhạc MusicXML 4 bè SATB (/editor/)
+│   ├── index.php             # Giao diện chính của Editor
+│   ├── editor.css            # Stylesheet chuyên dụng Studio Dark Mode
+│   └── editor.js             # Logic SATB Note Editor, Audio Synth, Undo/Redo
 ├── includes/                 ← PHP view partials
 │   ├── toolbar.php           # Top toolbar: audio, scroll, compact controls
 │   ├── sidebar.php           # Sidebar: thư viện bài hát & setlist
@@ -403,6 +407,16 @@ SheetApp/
   ✅ Annotation consumer: parse đúng {success:true, annotations:[...]}
   ✅ Session/ChordSet/Setlist consumers: đã kiểm tra, format tương thích
 
+
+[2026-09-07] — Triển khai Trình biên tập Sheet Nhạc độc lập (/editor/) & Sửa riêng 4 bè SATB
+  + Tạo: editor/index.php (Giao diện Studio Dark Mode, OSMD preview, SATB inspector, Mini Piano, Song picker)
+  + Tạo: editor/editor.css (CSS Studio tối ưu UI/UX, responsive cho iPad & PC)
+  + Tạo: editor/editor.js (Trích xuất & biên tập độc lập 4 bè SATB: Step, Octave, Accidental, Duration, Lyric; Audio Synthesizer; Undo/Redo)
+  + Sửa: api/services/SongService.php (Tự động tạo bản sao an toàn .xml.bak trước khi ghi đè file MusicXML; thêm restoreXmlBackup)
+  + Sửa: api/controllers/SongController.php (Bổ sung action 'restore_xml' cho phép hoàn tác về bản backup)
+  + Sửa: includes/toolbar.php (Thêm nút '🎼 Sửa Sheet' trực tiếp trên thanh công cụ và trong dropdown menu)
+  ✅ An toàn dữ liệu 100%: mọi thao tác lưu đều tạo file .xml.bak và có nút khôi phục tức thì
+  ✅ Hỗ trợ sửa độc lập từng bè: Soprano, Alto (Part P1 - Khóa Sol) và Tenor, Bass (Part P2 - Khóa Fa)
 
 [2026-05-15] — Audit round 2: AuthController SQL + UserController response format
   ~ Sửa: api/controllers/AuthController.php  (SQL trong Controller → dùng UserService::findByUsername())

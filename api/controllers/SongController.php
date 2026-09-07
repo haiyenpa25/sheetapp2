@@ -12,6 +12,18 @@ class SongController {
             switch ($method) {
                 case 'HEAD':
                 case 'GET':
+                    $action = $_GET['action'] ?? '';
+                    if ($action === 'get_versions') {
+                        $songId = $_GET['song_id'] ?? '';
+                        if (!$songId) {
+                            Response::error('Thiếu tham số song_id');
+                            return;
+                        }
+                        $versions = SongService::getVersions($songId);
+                        Response::ok($versions);
+                        return;
+                    }
+
                     $lyric = trim($_GET['lyric_search'] ?? '');
                     if ($lyric !== '') {
                         $data = SongService::searchByLyric($lyric);
@@ -69,6 +81,43 @@ class SongController {
                     $action = $_GET['action'] ?? '';
                     $body = json_decode(file_get_contents('php://input'), true) ?? [];
 
+                    // 1. Lưu phiên bản người dùng
+                    if ($action === 'save_version') {
+                        Auth::requireBanhat();
+                        if (empty($body['song_id']) || empty($body['xml'])) {
+                            Response::error('Lỗi: Thiếu tham số song_id hoặc xml.');
+                            return;
+                        }
+                        $versionName = trim($body['version_name'] ?? '');
+                        $versionId   = !empty($body['version_id']) ? (int)$body['version_id'] : null;
+                        $description = $body['description'] ?? null;
+
+                        $result = SongService::saveVersion($body['song_id'], $body['xml'], $versionName, $versionId, $description);
+                        if (!$result['success']) {
+                            Response::error($result['message']);
+                        } else {
+                            Response::ok($result['data'] ?? [], $result['message']);
+                        }
+                        return;
+                    }
+
+                    // 2. Xóa phiên bản người dùng
+                    if ($action === 'delete_version') {
+                        Auth::requireBanhat();
+                        $versionId = !empty($body['version_id']) ? (int)$body['version_id'] : (int)($_GET['version_id'] ?? 0);
+                        if (!$versionId) {
+                            Response::error('Lỗi: Thiếu version_id.');
+                            return;
+                        }
+                        $result = SongService::deleteVersion($versionId);
+                        if (!$result['success']) {
+                            Response::error($result['message']);
+                        } else {
+                            Response::ok([], $result['message']);
+                        }
+                        return;
+                    }
+
                     if ($action === 'save_xml') {
                         // Lưu hợp âm vào XML gốc — Ban Hát và Admin đều có quyền
                         Auth::requireBanhat();
@@ -77,6 +126,21 @@ class SongController {
                             return;
                         }
                         $result = SongService::saveXml($body['filepath'], $body['xml']);
+                        if (!$result['success']) {
+                            Response::error($result['message']);
+                        } else {
+                            Response::ok(['message' => $result['message']]);
+                        }
+                        return;
+                    }
+
+                    if ($action === 'restore_xml') {
+                        Auth::requireBanhat();
+                        if (empty($body['filepath'])) {
+                            Response::error('Lỗi: Thiếu tham số filepath.');
+                            return;
+                        }
+                        $result = SongService::restoreXmlBackup($body['filepath']);
                         if (!$result['success']) {
                             Response::error($result['message']);
                         } else {

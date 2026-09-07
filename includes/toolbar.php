@@ -132,6 +132,36 @@
       <span id="live-sync-badge" class="live-badge hidden" style="margin-left: 4px;"></span>
     </div>
 
+    <!-- 🎼 NOTE EDITOR BUTTON (Chỉnh sửa nốt 4 bè SATB) -->
+    <div class="control-group">
+      <button id="btn-toolbar-editor" class="btn btn-ghost btn-sm" title="Mở Trình Biên Tập Sheet Nhạc 4 Bè SATB (/editor/)" onclick="(function(){ var sid = window.App?.getCurrentSongId?.(); window.location.href = sid ? ('/editor/?song=' + sid) : '/editor/'; })()">
+        <span style="font-size: 0.9rem;">🎼</span>
+        <span class="btn-text">Sửa Sheet</span>
+      </button>
+    </div>
+
+    <!-- 👥 PHIÊN BẢN SHEET NHẠC (Version Switcher) -->
+    <div class="control-group" style="position: relative;">
+      <button id="btn-song-versions" class="btn btn-ghost btn-sm" disabled title="Chọn phiên bản sheet nhạc (Bản Gốc / Bản người chỉnh sửa)">
+        <span style="font-size: 0.9rem;">👥</span>
+        <span id="btn-version-label" class="btn-text">Bản Gốc</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;margin-left:2px;"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div id="dropdown-song-versions" class="dropdown-menu hidden" style="min-width: 250px; padding: 4px 0;">
+        <div style="padding: 6px 12px; font-weight: 700; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border);">
+          PHIÊN BẢN BÀI HÁT
+        </div>
+        <div id="version-list-items" style="max-height: 240px; overflow-y: auto; padding: 4px 0;">
+          <!-- Danh sách version nạp động -->
+        </div>
+        <div style="border-top: 1px solid var(--border); padding: 4px 6px;">
+          <button id="btn-create-new-version" class="btn btn-ghost btn-xs" style="width:100%; justify-content:flex-start; color:var(--accent); font-weight:600;" onclick="(function(){ var sid = window.App?.getCurrentSongId?.(); window.location.href = sid ? ('/editor/?song=' + sid) : '/editor/'; })()">
+            <span>✏️ Mở Editor tạo bản mới</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
 
     <!-- COMPACT MODE + SETTINGS -->
     <div class="control-group" style="position: relative;">
@@ -199,6 +229,11 @@
           Nhật ký
         </button>
 
+
+        <button id="btn-menu-open-editor" class="btn btn-ghost btn-sm btn-menu-item" title="Mở Trình Biên Tập Sheet Nhạc 4 Bè SATB (/editor/)" onclick="(function(){ var sid = window.App?.getCurrentSongId?.(); window.location.href = sid ? ('/editor/?song=' + sid) : '/editor/'; })()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Sửa Sheet (Editor)
+        </button>
 
         <button id="btn-print" class="btn btn-ghost btn-sm btn-menu-item" disabled title="In sheet nhạc">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>

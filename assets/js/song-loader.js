@@ -90,6 +90,7 @@ const SongLoader = (() => {
 
       _enableAudioControls();
       AppUI.showOSMD();
+      _updateVersionsUI(song);
 
       // INTENTIONAL: Không gọi thủ công onOSMDRendered nữa vì OSMDRenderer.load đã tự kích hoạt thông qua onReady callback.
       if (window.ChordCanvas?.refreshSetDropdown) {
@@ -306,6 +307,102 @@ const SongLoader = (() => {
       if (state.lv === 'inline') localStorage.setItem('sheetapp_lyric_mode', 'inline');
       const lyric = document.getElementById('lyric-view-container');
       if (lyric?.classList.contains('hidden')) document.getElementById('btn-lyric-view')?.click();
+    }
+  }
+
+  /* ── Quản lý và nạp danh sách phiên bản của bài hát ── */
+  async function _updateVersionsUI(song) {
+    const btn = document.getElementById('btn-song-versions');
+    const label = document.getElementById('btn-version-label');
+    const dropdown = document.getElementById('dropdown-song-versions');
+    const listContainer = document.getElementById('version-list-items');
+    if (!btn || !dropdown || !listContainer) return;
+
+    btn.removeAttribute('disabled');
+
+    // Cập nhật nhãn phiên bản hiện tại
+    const currentVerName = song.versionName || 'Bản Gốc';
+    if (label) label.textContent = currentVerName;
+
+    // Lắng nghe mở / đóng dropdown menu
+    if (!btn._hasVersionListener) {
+      btn._hasVersionListener = true;
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('hidden');
+      });
+      document.addEventListener('click', (e) => {
+        if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
+          dropdown.classList.add('hidden');
+        }
+      });
+    }
+
+    try {
+      const res = await fetch(`/api/index.php?route=songs&action=get_versions&song_id=${encodeURIComponent(song.id)}`);
+      const data = await res.json();
+      const versions = data.data || [];
+
+      listContainer.innerHTML = '';
+
+      // 1. Mục Bản Gốc (Master Root)
+      const origBtn = document.createElement('button');
+      origBtn.className = 'btn btn-ghost btn-xs btn-menu-item' + (!song.versionId ? ' active-ver' : '');
+      origBtn.style.cssText = 'width:100%; justify-content:space-between; text-align:left; padding:7px 12px; border-radius:4px;';
+      origBtn.innerHTML = `
+        <span style="display:flex; align-items:center; gap:6px;">
+          <span>⭐️</span>
+          <strong>Bản Gốc (Master)</strong>
+        </span>
+        ${!song.versionId ? '<span style="color:var(--accent); font-size:0.75rem; font-weight:700;">● Đang chọn</span>' : ''}
+      `;
+      origBtn.onclick = () => {
+        dropdown.classList.add('hidden');
+        if (song.versionId) {
+          const baseSong = { ...song };
+          delete baseSong.versionId;
+          delete baseSong.versionName;
+          baseSong.xmlPath = song.masterXmlPath || song.xmlPath;
+          load(baseSong);
+        }
+      };
+      listContainer.appendChild(origBtn);
+
+      // 2. Danh sách phiên bản do người dùng chỉnh sửa
+      if (versions.length > 0) {
+        const header = document.createElement('div');
+        header.style.cssText = 'padding: 6px 12px 2px 12px; font-size: 0.7rem; color: var(--text-muted); font-weight:700; text-transform:uppercase;';
+        header.textContent = `Bản chỉnh sửa (${versions.length})`;
+        listContainer.appendChild(header);
+
+        versions.forEach(v => {
+          const vBtn = document.createElement('button');
+          const isCurrent = String(song.versionId) === String(v.id);
+          vBtn.className = 'btn btn-ghost btn-xs btn-menu-item' + (isCurrent ? ' active-ver' : '');
+          vBtn.style.cssText = 'width:100%; justify-content:space-between; text-align:left; padding:6px 12px; border-radius:4px; margin-top:2px;';
+          vBtn.innerHTML = `
+            <div style="display:flex; flex-direction:column; gap:1px; overflow:hidden;">
+              <span style="font-weight:600; font-size:0.83rem; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">👤 ${v.version_name}</span>
+              <span style="font-size:0.7rem; color:var(--text-muted);">${v.username} · ${v.created_at ? v.created_at.slice(0, 10) : ''}</span>
+            </div>
+            ${isCurrent ? '<span style="color:var(--accent); font-size:0.75rem; font-weight:700; margin-left:6px;">● Đang chọn</span>' : ''}
+          `;
+          vBtn.onclick = () => {
+            dropdown.classList.add('hidden');
+            const verSong = {
+              ...song,
+              masterXmlPath: song.masterXmlPath || song.xmlPath,
+              xmlPath: v.xml_path,
+              versionId: v.id,
+              versionName: `${v.username}: ${v.version_name}`
+            };
+            load(verSong);
+          };
+          listContainer.appendChild(vBtn);
+        });
+      }
+    } catch (e) {
+      console.warn('[SongLoader] Tải phiên bản thất bại:', e);
     }
   }
 

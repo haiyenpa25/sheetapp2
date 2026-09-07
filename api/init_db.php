@@ -102,6 +102,27 @@ try {
         )
     ");
 
+    // 7. Tạo bảng song_versions (Quản lý các phiên bản sheet nhạc theo người dùng)
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS song_versions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            song_id TEXT NOT NULL,
+            user_id INTEGER NOT NULL,
+            username TEXT NOT NULL,
+            version_name TEXT NOT NULL,
+            version_slug TEXT NOT NULL,
+            xml_path TEXT NOT NULL,
+            description TEXT,
+            is_default INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (song_id) REFERENCES songs(id) ON DELETE CASCADE
+        );
+        CREATE INDEX IF NOT EXISTS idx_song_versions_song_id ON song_versions(song_id);
+        CREATE INDEX IF NOT EXISTS idx_song_versions_user_id ON song_versions(user_id);
+    ");
+
     // 4. Tạo tài khoản mặc định (nếu chưa có)
     $stmt = $pdo->query("SELECT COUNT(*) FROM users");
     $count = $stmt->fetchColumn();
