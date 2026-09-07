@@ -1,0 +1,916 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 3,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 3,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 0,
+      "failed": 0,
+      "skipped": 3
+    }
+  },
+  "results": [
+    {
+      "path": "docs/LIVE_BAND_AND_SMART_PRACTICE_PLAN.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 206,
+      "nonEmptyLines": 171,
+      "sections": [
+        {
+          "heading": "Kế Hoạch Thiết Kế & Triển Khai: Live Band Sync & Smart Rehearsal System",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "MỤC LỤC",
+          "level": 2,
+          "line": 10
+        },
+        {
+          "heading": "1. BỐI CẢNH & MỤC TIÊU DỰ ÁN",
+          "level": 2,
+          "line": 26
+        },
+        {
+          "heading": "2. PHẦN I: HỆ THỐNG LIVE BAND SYNC (ĐỒNG BỘ THỜI GIAN THỰC)",
+          "level": 2,
+          "line": 37
+        },
+        {
+          "heading": "2.1. Mô hình kiến trúc Master - Follower",
+          "level": 3,
+          "line": 39
+        },
+        {
+          "heading": "2.2. Luồng trải nghiệm người dùng (UX Flow)",
+          "level": 3,
+          "line": 68
+        },
+        {
+          "heading": "2.3. Dữ liệu đồng bộ thời gian thực (State Payload)",
+          "level": 3,
+          "line": 85
+        },
+        {
+          "heading": "2.4. Phân vai hiển thị theo nhạc cụ (Role-based Views)",
+          "level": 3,
+          "line": 111
+        },
+        {
+          "heading": "3. PHẦN II: BỘ DIỄN TẬP THÔNG MINH (SMART REHEARSAL & SONG ROADMAP)",
+          "level": 2,
+          "line": 119
+        },
+        {
+          "heading": "3.1. Đếm phách chuẩn bị (Lead-in Count-in \"1, 2, 3, 4\")",
+          "level": 3,
+          "line": 121
+        },
+        {
+          "heading": "3.2. Cấu trúc bài hát & Đếm ô nhịp dạo (Section Markers & Cue Banner)",
+          "level": 3,
+          "line": 128
+        },
+        {
+          "heading": "3.3. Đổi Tông & Đổi Tempo theo đoạn (Modulation & Multi-tempo Map)",
+          "level": 3,
+          "line": 143
+        },
+        {
+          "heading": "4. THIẾT KẾ CƠ SỞ DỮ LIỆU & API",
+          "level": 2,
+          "line": 150
+        },
+        {
+          "heading": "4.1. Bảng lưu trữ cấu trúc bài hát (`song_roadmaps` trong SQLite)",
+          "level": 3,
+          "line": 152
+        },
+        {
+          "heading": "4.2. Danh sách API bổ sung",
+          "level": 3,
+          "line": 176
+        },
+        {
+          "heading": "5. LỘ TRÌNH TRIỂN KHAI (PHASED ROADMAP)",
+          "level": 2,
+          "line": 184
+        },
+        {
+          "heading": "🚀 Giai đoạn 1: Nâng cấp Live Band Sync Toàn Diện (Ưu tiên cao nhất)",
+          "level": 3,
+          "line": 186
+        },
+        {
+          "heading": "🎯 Giai đoạn 2: Bộ đếm Lead-in Count-in & Cảnh Báo Ô Nhịp Dạo",
+          "level": 3,
+          "line": 195
+        },
+        {
+          "heading": "🌟 Giai đoạn 3: Song Roadmap & Multi-tempo / Modulation Map",
+          "level": 3,
+          "line": 200
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 19
+      }
+    },
+    {
+      "path": "docs/SHEETAPP2_ARCHITECTURE_REVIEW_AND_ROADMAP.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 2597,
+      "nonEmptyLines": 1894,
+      "sections": [
+        {
+          "heading": "SHEETAPP2 — ĐÁNH GIÁ KIẾN TRÚC & KẾ HOẠCH NÂNG CẤP LIVE PERFORMANCE ENGINE",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "1. KẾT LUẬN ĐIỀU HÀNH",
+          "level": 1,
+          "line": 11
+        },
+        {
+          "heading": "2. MỤC TIÊU SẢN PHẨM",
+          "level": 1,
+          "line": 60
+        },
+        {
+          "heading": "3. NHỮNG ĐIỂM ĐÚNG TRONG KẾ HOẠCH HIỆN TẠI",
+          "level": 1,
+          "line": 85
+        },
+        {
+          "heading": "3.1. Master / Follower là mô hình phù hợp",
+          "level": 2,
+          "line": 87
+        },
+        {
+          "heading": "3.2. Role-based View là hướng rất mạnh",
+          "level": 2,
+          "line": 119
+        },
+        {
+          "heading": "Guitar",
+          "level": 3,
+          "line": 125
+        },
+        {
+          "heading": "Piano / Organ",
+          "level": 3,
+          "line": 134
+        },
+        {
+          "heading": "Vocal",
+          "level": 3,
+          "line": 144
+        },
+        {
+          "heading": "Leader",
+          "level": 3,
+          "line": 153
+        },
+        {
+          "heading": "4. VẤN ĐỀ KIẾN TRÚC SỐ 1 — KHÔNG ĐỒNG BỘ `scrollTop`",
+          "level": 1,
+          "line": 168
+        },
+        {
+          "heading": "4.1. Vấn đề",
+          "level": 2,
+          "line": 172
+        },
+        {
+          "heading": "5. GIẢI PHÁP — MUSICAL POSITION",
+          "level": 1,
+          "line": 209
+        },
+        {
+          "heading": "6. TÁCH `VIEW STATE` VÀ `PERFORMANCE STATE`",
+          "level": 1,
+          "line": 262
+        },
+        {
+          "heading": "6.1. Performance State",
+          "level": 2,
+          "line": 266
+        },
+        {
+          "heading": "6.2. View State",
+          "level": 2,
+          "line": 283
+        },
+        {
+          "heading": "7. VẤN ĐỀ KIẾN TRÚC SỐ 2 — LATENCY",
+          "level": 1,
+          "line": 311
+        },
+        {
+          "heading": "8. KHÔNG CẦN VỘI CHUYỂN SANG WEBSOCKET",
+          "level": 1,
+          "line": 340
+        },
+        {
+          "heading": "9. LỘ TRÌNH TRANSPORT",
+          "level": 1,
+          "line": 369
+        },
+        {
+          "heading": "V1",
+          "level": 2,
+          "line": 371
+        },
+        {
+          "heading": "V2",
+          "level": 2,
+          "line": 397
+        },
+        {
+          "heading": "V3",
+          "level": 2,
+          "line": 409
+        },
+        {
+          "heading": "10. VẤN ĐỀ KIẾN TRÚC SỐ 3 — KHÔNG STREAM METRONOME TICK",
+          "level": 1,
+          "line": 424
+        },
+        {
+          "heading": "11. GIẢI PHÁP — SYNCHRONIZED CLOCK",
+          "level": 1,
+          "line": 451
+        },
+        {
+          "heading": "12. CLOCK SYNC",
+          "level": 1,
+          "line": 484
+        },
+        {
+          "heading": "13. COUNT-IN ENGINE",
+          "level": 1,
+          "line": 526
+        },
+        {
+          "heading": "14. SONG ROADMAP KHÔNG NÊN GẮN TRỰC TIẾP 1:1 VỚI SONG",
+          "level": 1,
+          "line": 588
+        },
+        {
+          "heading": "Arrangement A",
+          "level": 2,
+          "line": 596
+        },
+        {
+          "heading": "Arrangement B",
+          "level": 2,
+          "line": 607
+        },
+        {
+          "heading": "15. DATA MODEL ĐỀ NGHỊ",
+          "level": 1,
+          "line": 632
+        },
+        {
+          "heading": "`songs`",
+          "level": 2,
+          "line": 634
+        },
+        {
+          "heading": "`arrangements`",
+          "level": 2,
+          "line": 647
+        },
+        {
+          "heading": "`arrangement_steps`",
+          "level": 2,
+          "line": 661
+        },
+        {
+          "heading": "`song_sections`",
+          "level": 2,
+          "line": 676
+        },
+        {
+          "heading": "16. SCORE MAP VÀ PERFORMANCE ROADMAP PHẢI TÁCH RIÊNG",
+          "level": 1,
+          "line": 700
+        },
+        {
+          "heading": "Score Map",
+          "level": 2,
+          "line": 702
+        },
+        {
+          "heading": "Performance Roadmap",
+          "level": 2,
+          "line": 712
+        },
+        {
+          "heading": "17. ROADMAP STEP",
+          "level": 1,
+          "line": 742
+        },
+        {
+          "heading": "18. CUE ENGINE",
+          "level": 1,
+          "line": 776
+        },
+        {
+          "heading": "19. CÁC LOẠI CUE",
+          "level": 1,
+          "line": 807
+        },
+        {
+          "heading": "20. CUE TIMELINE",
+          "level": 1,
+          "line": 839
+        },
+        {
+          "heading": "21. KHÔNG NÊN AUTO-TRANSPOSE FULL SCORE NGAY Ở V1",
+          "level": 1,
+          "line": 876
+        },
+        {
+          "heading": "22. MODULATION ROADMAP NÊN CHIA THÀNH 3 CẤP",
+          "level": 1,
+          "line": 906
+        },
+        {
+          "heading": "V1 — Notification Only",
+          "level": 2,
+          "line": 908
+        },
+        {
+          "heading": "V2 — Chord Layer Transpose",
+          "level": 2,
+          "line": 920
+        },
+        {
+          "heading": "V3 — Full Score Modulation",
+          "level": 2,
+          "line": 936
+        },
+        {
+          "heading": "23. PERFORMANCE STATE V2",
+          "level": 1,
+          "line": 948
+        },
+        {
+          "heading": "24. REVISION / EVENT SEQUENCE",
+          "level": 1,
+          "line": 1006
+        },
+        {
+          "heading": "25. ROOM MODEL",
+          "level": 1,
+          "line": 1040
+        },
+        {
+          "heading": "26. CLIENT ID",
+          "level": 1,
+          "line": 1060
+        },
+        {
+          "heading": "27. PARTICIPANT ROLE",
+          "level": 1,
+          "line": 1084
+        },
+        {
+          "heading": "28. HOST AUTHORITY",
+          "level": 1,
+          "line": 1105
+        },
+        {
+          "heading": "29. RECONNECT",
+          "level": 1,
+          "line": 1130
+        },
+        {
+          "heading": "30. OFFLINE-FIRST CHO BẢN NHẠC",
+          "level": 1,
+          "line": 1168
+        },
+        {
+          "heading": "31. SETLIST PRELOAD",
+          "level": 1,
+          "line": 1193
+        },
+        {
+          "heading": "32. PHÂN LỚP MODULE",
+          "level": 1,
+          "line": 1220
+        },
+        {
+          "heading": "33. PERFORMANCE ENGINE",
+          "level": 1,
+          "line": 1256
+        },
+        {
+          "heading": "34. EVENT BUS",
+          "level": 1,
+          "line": 1276
+        },
+        {
+          "heading": "35. TRÁNH GOD OBJECT",
+          "level": 1,
+          "line": 1297
+        },
+        {
+          "heading": "36. STATE MACHINE",
+          "level": 1,
+          "line": 1321
+        },
+        {
+          "heading": "37. ROLE PROFILE",
+          "level": 1,
+          "line": 1352
+        },
+        {
+          "heading": "38. LEADER CONTROL",
+          "level": 1,
+          "line": 1375
+        },
+        {
+          "heading": "39. JUMP BY SECTION",
+          "level": 1,
+          "line": 1402
+        },
+        {
+          "heading": "40. SMART REHEARSAL",
+          "level": 1,
+          "line": 1439
+        },
+        {
+          "heading": "41. LOOP SECTION",
+          "level": 1,
+          "line": 1457
+        },
+        {
+          "heading": "42. PRACTICE SPEED",
+          "level": 1,
+          "line": 1471
+        },
+        {
+          "heading": "43. TEMPO MAP",
+          "level": 1,
+          "line": 1488
+        },
+        {
+          "heading": "44. MODULATION MAP",
+          "level": 1,
+          "line": 1518
+        },
+        {
+          "heading": "45. PRE-CUE",
+          "level": 1,
+          "line": 1535
+        },
+        {
+          "heading": "46. DATABASE ROADMAP ĐỀ NGHỊ",
+          "level": 1,
+          "line": 1563
+        },
+        {
+          "heading": "47. KHÔNG NÊN LƯU TẤT CẢ VÀO `structure_json`",
+          "level": 1,
+          "line": 1587
+        },
+        {
+          "heading": "48. API V2 ĐỀ NGHỊ",
+          "level": 1,
+          "line": 1611
+        },
+        {
+          "heading": "Room",
+          "level": 2,
+          "line": 1613
+        },
+        {
+          "heading": "Arrangement",
+          "level": 2,
+          "line": 1625
+        },
+        {
+          "heading": "Sections",
+          "level": 2,
+          "line": 1636
+        },
+        {
+          "heading": "49. API RESPONSE STANDARD",
+          "level": 1,
+          "line": 1645
+        },
+        {
+          "heading": "50. SECURITY",
+          "level": 1,
+          "line": 1674
+        },
+        {
+          "heading": "51. ROOM EXPIRATION",
+          "level": 1,
+          "line": 1700
+        },
+        {
+          "heading": "52. RATE LIMIT",
+          "level": 1,
+          "line": 1714
+        },
+        {
+          "heading": "53. KHÔNG GỬI FULL STATE MỖI FRAME",
+          "level": 1,
+          "line": 1736
+        },
+        {
+          "heading": "54. SNAPSHOT + EVENTS",
+          "level": 1,
+          "line": 1765
+        },
+        {
+          "heading": "55. PHASE 0 — PERFORMANCE PROTOCOL V2",
+          "level": 1,
+          "line": 1789
+        },
+        {
+          "heading": "56. PHASE 1 — LIVE SESSION + MUSICAL POSITION",
+          "level": 1,
+          "line": 1811
+        },
+        {
+          "heading": "57. PHASE 2 — SYNCHRONIZED COUNT-IN",
+          "level": 1,
+          "line": 1841
+        },
+        {
+          "heading": "58. PHASE 3 — ARRANGEMENT / SONG ROADMAP",
+          "level": 1,
+          "line": 1855
+        },
+        {
+          "heading": "59. PHASE 4 — CUE ENGINE",
+          "level": 1,
+          "line": 1870
+        },
+        {
+          "heading": "60. PHASE 5 — TEMPO MAP + MODULATION",
+          "level": 1,
+          "line": 1886
+        },
+        {
+          "heading": "61. PHASE 6 — ROLE PRESETS",
+          "level": 1,
+          "line": 1899
+        },
+        {
+          "heading": "62. PHASE 7 — WEBSOCKET TRANSPORT",
+          "level": 1,
+          "line": 1922
+        },
+        {
+          "heading": "63. PHASE 8 — SMART PRACTICE",
+          "level": 1,
+          "line": 1940
+        },
+        {
+          "heading": "64. PHASE 9 — ADVANCED FEATURES",
+          "level": 1,
+          "line": 1954
+        },
+        {
+          "heading": "65. UI NGUYÊN TẮC LIVE",
+          "level": 1,
+          "line": 1972
+        },
+        {
+          "heading": "66. FOLLOWER UI",
+          "level": 1,
+          "line": 1995
+        },
+        {
+          "heading": "67. LIVE STATUS",
+          "level": 1,
+          "line": 2032
+        },
+        {
+          "heading": "68. PERFORMANCE SAFETY",
+          "level": 1,
+          "line": 2046
+        },
+        {
+          "heading": "69. TESTING BẮT BUỘC",
+          "level": 1,
+          "line": 2063
+        },
+        {
+          "heading": "70. TEST CASE LIVE SYNC",
+          "level": 1,
+          "line": 2079
+        },
+        {
+          "heading": "Case 1",
+          "level": 2,
+          "line": 2081
+        },
+        {
+          "heading": "Case 2",
+          "level": 2,
+          "line": 2091
+        },
+        {
+          "heading": "Case 3",
+          "level": 2,
+          "line": 2109
+        },
+        {
+          "heading": "71. PERFORMANCE BUDGET",
+          "level": 1,
+          "line": 2125
+        },
+        {
+          "heading": "72. LOGGING",
+          "level": 1,
+          "line": 2148
+        },
+        {
+          "heading": "73. DEBUG PANEL",
+          "level": 1,
+          "line": 2169
+        },
+        {
+          "heading": "74. MIGRATION TỪ LIVE SYNC HIỆN TẠI",
+          "level": 1,
+          "line": 2192
+        },
+        {
+          "heading": "75. QUY TẮC CODE CHO ANTIGRAVITY",
+          "level": 1,
+          "line": 2225
+        },
+        {
+          "heading": "76. CẤU TRÚC DEPENDENCY ĐỀ NGHỊ",
+          "level": 1,
+          "line": 2242
+        },
+        {
+          "heading": "77. QUY TẮC QUAN TRỌNG NHẤT CHO KIẾN TRÚC",
+          "level": 1,
+          "line": 2280
+        },
+        {
+          "heading": "Rule 1",
+          "level": 2,
+          "line": 2282
+        },
+        {
+          "heading": "Rule 2",
+          "level": 2,
+          "line": 2289
+        },
+        {
+          "heading": "Rule 3",
+          "level": 2,
+          "line": 2296
+        },
+        {
+          "heading": "Rule 4",
+          "level": 2,
+          "line": 2302
+        },
+        {
+          "heading": "Rule 5",
+          "level": 2,
+          "line": 2308
+        },
+        {
+          "heading": "Rule 6",
+          "level": 2,
+          "line": 2314
+        },
+        {
+          "heading": "78. ƯU TIÊN THỰC HIỆN",
+          "level": 1,
+          "line": 2323
+        },
+        {
+          "heading": "79. NHỮNG VIỆC KHÔNG NÊN LÀM NGAY",
+          "level": 1,
+          "line": 2374
+        },
+        {
+          "heading": "80. QUICK WIN",
+          "level": 1,
+          "line": 2390
+        },
+        {
+          "heading": "Quick Win 1",
+          "level": 3,
+          "line": 2394
+        },
+        {
+          "heading": "Quick Win 2",
+          "level": 3,
+          "line": 2410
+        },
+        {
+          "heading": "Quick Win 3",
+          "level": 3,
+          "line": 2422
+        },
+        {
+          "heading": "Quick Win 4",
+          "level": 3,
+          "line": 2428
+        },
+        {
+          "heading": "Quick Win 5",
+          "level": 3,
+          "line": 2439
+        },
+        {
+          "heading": "81. DEFINITION OF DONE — LIVE SYNC V2",
+          "level": 1,
+          "line": 2445
+        },
+        {
+          "heading": "82. DEFINITION OF DONE — COUNT-IN",
+          "level": 1,
+          "line": 2464
+        },
+        {
+          "heading": "83. DEFINITION OF DONE — ROADMAP",
+          "level": 1,
+          "line": 2475
+        },
+        {
+          "heading": "84. ĐỊNH HƯỚNG DÀI HẠN",
+          "level": 1,
+          "line": 2488
+        },
+        {
+          "heading": "85. KẾT LUẬN",
+          "level": 1,
+          "line": 2511
+        },
+        {
+          "heading": "86. CHỈ THỊ TRIỂN KHAI CHO ANTIGRAVITY",
+          "level": 1,
+          "line": 2552
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 127
+      }
+    },
+    {
+      "path": "docs/SYSTEM_DEEP_AUDIT_REPORT.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 173,
+      "nonEmptyLines": 133,
+      "sections": [
+        {
+          "heading": "📊 BÁO CÁO RÀ SOÁT KIỂM TRÚC, TÍNH NĂNG, VẬN HÀNH VÀ KẾ HOẠCH CẢI THIỆN TOÀN DIỆN SHEETAPP (v2.0-dev)",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "1 · TỔNG QUAN HỆ THỐNG & ĐÁNH GIÁ TỔNG THỂ",
+          "level": 2,
+          "line": 11
+        },
+        {
+          "heading": "1.1 Mục đích & Phạm vi Ứng dụng",
+          "level": 3,
+          "line": 13
+        },
+        {
+          "heading": "1.2 Kiến trúc Hệ thống Tổng thể",
+          "level": 3,
+          "line": 20
+        },
+        {
+          "heading": "1.3 Đánh giá Đạt được từ Mô hình Superpowers & Gitnexus Integration",
+          "level": 3,
+          "line": 40
+        },
+        {
+          "heading": "2 · RÀ SOÁT TOÀN BỘ 12 NHÓM TÍNH NĂNG HIỆN CÓ",
+          "level": 2,
+          "line": 46
+        },
+        {
+          "heading": "3 · ĐÁNH GIÁ CÁCH VẬN HÀNH & NGUYÊN TẮC CỐT LÕI (CORE RULES)",
+          "level": 2,
+          "line": 65
+        },
+        {
+          "heading": "3.1 Tuân thủ 3 Core Rules Bắt Bắt Của Dự Án",
+          "level": 3,
+          "line": 67
+        },
+        {
+          "heading": "3.2 Đánh giá Kiến trúc Backend PHP (MVC)",
+          "level": 3,
+          "line": 75
+        },
+        {
+          "heading": "3.3 Đánh giá Kiến trúc Frontend JS (IIFE Modules)",
+          "level": 3,
+          "line": 84
+        },
+        {
+          "heading": "4 · ĐỀ XUẤT CẢI THIỆN & LỘ TRÌNH NÂNG CẤP CHUYÊN SÂU",
+          "level": 2,
+          "line": 94
+        },
+        {
+          "heading": "4.1 🔴 Mức Độ Ưu Tiên Cao (Critical / High Priority)",
+          "level": 3,
+          "line": 114
+        },
+        {
+          "heading": "1. Đóng gói PWA & Service Worker Offline Caching",
+          "level": 4,
+          "line": 116
+        },
+        {
+          "heading": "2. Phân Trang & Chế Độ In Ấn Chuẩn A4 (Printable A4 Layout)",
+          "level": 4,
+          "line": 122
+        },
+        {
+          "heading": "3. Caching Layer cho REST API (SQLite Response Caching)",
+          "level": 4,
+          "line": 128
+        },
+        {
+          "heading": "4. Error Boundaries & Fallback UI khi Mất Kết Nối",
+          "level": 4,
+          "line": 133
+        },
+        {
+          "heading": "4.2 🟡 Mức Độ Ưu Tiên Trung Bình (Medium Priority)",
+          "level": 3,
+          "line": 140
+        },
+        {
+          "heading": "5. Bộ Lọc Bài Hát Nâng Cao (Advanced Sorting & Filtering)",
+          "level": 4,
+          "line": 142
+        },
+        {
+          "heading": "6. Tích Hợp Web MIDI / Bluetooth Foot Pedal (Rảnh Tay Chuyển Trang)",
+          "level": 4,
+          "line": 145
+        },
+        {
+          "heading": "7. Tính Năng So Sánh Hợp Âm (Multi-Chord Set Comparison)",
+          "level": 4,
+          "line": 149
+        },
+        {
+          "heading": "4.3 🔵 Mức Độ Ưu Tiên Mở Rộng / Dài Hạn (Long-term Enhancements)",
+          "level": 3,
+          "line": 154
+        },
+        {
+          "heading": "8. Đồng Bộ Biểu Diễn Realtime Cho Ban Nhạc (Live Band Sync via WebSockets)",
+          "level": 4,
+          "line": 156
+        },
+        {
+          "heading": "9. Export / Import Setlist & Data Backup Cá Nhân",
+          "level": 4,
+          "line": 159
+        },
+        {
+          "heading": "5 · HƯỚNG DẪN THỰC THI CHO AGENT & DEVELOPER",
+          "level": 2,
+          "line": 164
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 24
+      }
+    }
+  ]
+}

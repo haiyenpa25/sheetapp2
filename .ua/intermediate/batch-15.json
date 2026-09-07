@@ -1,0 +1,64 @@
+{
+  "batchIndex": 15,
+  "nodes": [
+    {
+      "id": "file:tools/omr_sync.php",
+      "name": "omr_sync.php",
+      "type": "file",
+      "path": "tools/omr_sync.php",
+      "summary": "File omr_sync.php (105 lines)",
+      "complexity": "simple",
+      "tags": [
+        "code",
+        "php"
+      ],
+      "lineCount": 105
+    },
+    {
+      "id": "file:tools/setup_hd_sets.php",
+      "name": "setup_hd_sets.php",
+      "type": "file",
+      "path": "tools/setup_hd_sets.php",
+      "summary": "File setup_hd_sets.php (70 lines)",
+      "complexity": "simple",
+      "tags": [
+        "code",
+        "php"
+      ],
+      "lineCount": 70
+    },
+    {
+      "id": "file:tools/test_editor_ui.js",
+      "name": "test_editor_ui.js",
+      "type": "file",
+      "path": "tools/test_editor_ui.js",
+      "summary": "File test_editor_ui.js (138 lines)",
+      "complexity": "simple",
+      "tags": [
+        "code",
+        "javascript"
+      ],
+      "lineCount": 138
+    },
+    {
+      "id": "function:tools/test_editor_ui.js:runEditorUiTest",
+      "name": "runEditorUiTest",
+      "type": "function",
+      "path": "tools/test_editor_ui.js",
+      "summary": "Function runEditorUiTest() in test_editor_ui.js",
+      "complexity": "simple",
+      "tags": [
+        "function"
+      ],
+      "lineStart": 15,
+      "lineEnd": 133
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tools/test_editor_ui.js",
+      "target": "function:tools/test_editor_ui.js:runEditorUiTest",
+      "type": "contains"
+    }
+  ]
+}

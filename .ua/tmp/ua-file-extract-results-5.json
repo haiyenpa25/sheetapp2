@@ -1,0 +1,1219 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 14,
+  "filesSkipped": [
+    "create_hd.bat",
+    "test_osmd.html"
+  ],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 14,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 0,
+      "failed": 0,
+      "skipped": 14
+    }
+  },
+  "results": [
+    {
+      "path": "AI_AGENT.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 229,
+      "nonEmptyLines": 173,
+      "sections": [
+        {
+          "heading": "AI_AGENT.md — Hướng Dẫn Làm Việc Với AI (SheetApp)",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "0 · WORKFLOW BẮT BUỘC (Theo thứ tự - Superpowers & Gitnexus Integrated)",
+          "level": 2,
+          "line": 8
+        },
+        {
+          "heading": "1 · NGUYÊN TẮC CỐT LÕI",
+          "level": 2,
+          "line": 24
+        },
+        {
+          "heading": "1.5 Gitnexus Code Map (Second Brain cho Code)",
+          "level": 3,
+          "line": 26
+        },
+        {
+          "heading": "1.6 Quy trình Superpowers (Professional Team Engineering Workflow)",
+          "level": 3,
+          "line": 31
+        },
+        {
+          "heading": "1.7 Tự động đẩy code lên GitHub (Auto Sync)",
+          "level": 3,
+          "line": 37
+        },
+        {
+          "heading": "1.1 Đừng đoán mò — Hãy hỏi",
+          "level": 3,
+          "line": 43
+        },
+        {
+          "heading": "1.2 Không tự thêm tính năng không được yêu cầu",
+          "level": 3,
+          "line": 52
+        },
+        {
+          "heading": "1.3 Không xóa code hiện có mà không hỏi",
+          "level": 3,
+          "line": 59
+        },
+        {
+          "heading": "1.4 Luôn kiểm tra trước khi kết thúc",
+          "level": 3,
+          "line": 66
+        },
+        {
+          "heading": "2 · CORE RULES SHEETAPP — BẮT BUỘC GIỮ NGUYÊN",
+          "level": 2,
+          "line": 77
+        },
+        {
+          "heading": "RULE 1: Bộ Hợp Âm HD là Mặc Định",
+          "level": 3,
+          "line": 81
+        },
+        {
+          "heading": "RULE 2: Tông Gốc = 0 Luôn Luôn",
+          "level": 3,
+          "line": 88
+        },
+        {
+          "heading": "RULE 3: Lock TLH và HD",
+          "level": 3,
+          "line": 94
+        },
+        {
+          "heading": "RULE 4: Đồng Bộ Tông & Tempo Trong Setlist (Setlist Practice Synchronization)",
+          "level": 3,
+          "line": 100
+        },
+        {
+          "heading": "3 · CÁCH ĐỌC & VIẾT CODE",
+          "level": 2,
+          "line": 109
+        },
+        {
+          "heading": "3.1 Trước khi sửa file",
+          "level": 3,
+          "line": 111
+        },
+        {
+          "heading": "3.2 Khi tạo file mới (Frontend JS)",
+          "level": 3,
+          "line": 117
+        },
+        {
+          "heading": "3.3 Khi tạo file mới (Backend PHP)",
+          "level": 3,
+          "line": 129
+        },
+        {
+          "heading": "3.4 Khi sửa file hiện có",
+          "level": 3,
+          "line": 139
+        },
+        {
+          "heading": "4 · GIAO TIẾP VỚI USER",
+          "level": 2,
+          "line": 150
+        },
+        {
+          "heading": "4.1 Báo cáo tiến độ",
+          "level": 3,
+          "line": 152
+        },
+        {
+          "heading": "4.2 Khi gặp vấn đề",
+          "level": 3,
+          "line": 160
+        },
+        {
+          "heading": "4.3 Breaking changes",
+          "level": 3,
+          "line": 170
+        },
+        {
+          "heading": "5 · ANTI-PATTERNS — Những lỗi phổ biến cần tránh",
+          "level": 2,
+          "line": 182
+        },
+        {
+          "heading": "Code",
+          "level": 3,
+          "line": 184
+        },
+        {
+          "heading": "Architecture",
+          "level": 3,
+          "line": 193
+        },
+        {
+          "heading": "Làm việc với AI",
+          "level": 3,
+          "line": 202
+        },
+        {
+          "heading": "6 · KHI NHẬN DỰ ÁN MỚI / ĐẦU PHIÊN",
+          "level": 2,
+          "line": 213
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 29
+      }
+    },
+    {
+      "path": "ARCHITECTURE_AUDIT.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 430,
+      "nonEmptyLines": 368,
+      "sections": [
+        {
+          "heading": "ARCHITECTURE_AUDIT.md — Rà Soát Kiến Trúc SheetApp",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "1 · TỔNG QUAN",
+          "level": 2,
+          "line": 9
+        },
+        {
+          "heading": "2 · SƠ ĐỒ KIẾN TRÚC TỔNG THỂ",
+          "level": 2,
+          "line": 19
+        },
+        {
+          "heading": "3 · EVENT FLOW — Song Loading",
+          "level": 2,
+          "line": 85
+        },
+        {
+          "heading": "4 · MODULE REGISTRY — JavaScript (31 modules)",
+          "level": 2,
+          "line": 109
+        },
+        {
+          "heading": "4.1 Core (3 modules) — Load đầu tiên",
+          "level": 3,
+          "line": 111
+        },
+        {
+          "heading": "4.2 Orchestration (2 modules)",
+          "level": 3,
+          "line": 122
+        },
+        {
+          "heading": "4.3 Feature Modules (26 modules)",
+          "level": 3,
+          "line": 129
+        },
+        {
+          "heading": "5 · VẤN ĐỀ OOP / CODING STANDARDS PHÁT HIỆN",
+          "level": 2,
+          "line": 162
+        },
+        {
+          "heading": "🔴 CRITICAL — Cần sửa sớm",
+          "level": 3,
+          "line": 164
+        },
+        {
+          "heading": "C1. EventBus.js có code ngoài module scope",
+          "level": 4,
+          "line": 166
+        },
+        {
+          "heading": "C2. SongService.php dùng static methods nhưng pattern không nhất quán với CODING_STANDARDS.md",
+          "level": 4,
+          "line": 173
+        },
+        {
+          "heading": "🟡 WARNING — Nên cải thiện",
+          "level": 3,
+          "line": 181
+        },
+        {
+          "heading": "W1. setlist-ui.js — inline HTML injection tiềm ẩn XSS",
+          "level": 4,
+          "line": 183
+        },
+        {
+          "heading": "W2. setlist-ui.js — prompt() không nên dùng trong UI hiện đại",
+          "level": 4,
+          "line": 191
+        },
+        {
+          "heading": "W3. chord-canvas.js — file quá dài (1230 dòng)",
+          "level": 4,
+          "line": 199
+        },
+        {
+          "heading": "W4. song-loader.js — DOM manipulation trong loader",
+          "level": 4,
+          "line": 208
+        },
+        {
+          "heading": "W5. app.js — setZoom() trực tiếp query DOM",
+          "level": 4,
+          "line": 215
+        },
+        {
+          "heading": "W6. magic strings hardcoded",
+          "level": 4,
+          "line": 222
+        },
+        {
+          "heading": "🟢 INFO — Tốt, ghi nhận để maintain",
+          "level": 3,
+          "line": 233
+        },
+        {
+          "heading": "I1. ApiService tuân thủ 100%",
+          "level": 4,
+          "line": 235
+        },
+        {
+          "heading": "I2. EventBus pattern tuân thủ tốt",
+          "level": 4,
+          "line": 239
+        },
+        {
+          "heading": "I3. Store được dùng đúng cho state quan trọng",
+          "level": 4,
+          "line": 243
+        },
+        {
+          "heading": "I4. PHP Security tốt",
+          "level": 4,
+          "line": 247
+        },
+        {
+          "heading": "6 · DEPENDENCY GRAPH — Frontend Modules",
+          "level": 2,
+          "line": 254
+        },
+        {
+          "heading": "7 · BACKEND ROUTE MAP",
+          "level": 2,
+          "line": 297
+        },
+        {
+          "heading": "8 · DATABASE SCHEMA OVERVIEW",
+          "level": 2,
+          "line": 321
+        },
+        {
+          "heading": "9 · LOAD ORDER (index.php) — Bắt buộc theo thứ tự",
+          "level": 2,
+          "line": 338
+        },
+        {
+          "heading": "10 · KNOWN ISSUES (carry over + mới phát hiện)",
+          "level": 2,
+          "line": 376
+        },
+        {
+          "heading": "11 · TUÂN THỦ OOP / SOLID — TỔNG KẾT",
+          "level": 2,
+          "line": 397
+        },
+        {
+          "heading": "12 · ƯU TIÊN CẢI THIỆN (Backlog)",
+          "level": 2,
+          "line": 415
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 31
+      }
+    },
+    {
+      "path": "CLAUDE.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 15,
+      "nonEmptyLines": 12,
+      "sections": [
+        {
+          "heading": "SheetApp AI Instructions",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Web Engineering Standards (Agent Skills)",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "SheetApp Project Standards — Đọc theo thứ tự",
+          "level": 1,
+          "line": 12
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 3
+      }
+    },
+    {
+      "path": "CODE_MAP.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 121,
+      "nonEmptyLines": 103,
+      "sections": [
+        {
+          "heading": "CODE_MAP.md — Gitnexus Codebase Knowledge Graph & Map (SheetApp)",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "1 · ARCHITECTURE & CALL HIERARCHY OVERVIEW",
+          "level": 2,
+          "line": 9
+        },
+        {
+          "heading": "2 · BACKEND MAP (PHP MVC & API ROUTES)",
+          "level": 2,
+          "line": 25
+        },
+        {
+          "heading": "2.1 Front Controller / Router",
+          "level": 3,
+          "line": 27
+        },
+        {
+          "heading": "2.2 Controllers (`api/controllers/`)",
+          "level": 3,
+          "line": 31
+        },
+        {
+          "heading": "2.3 Services (`api/services/`)",
+          "level": 3,
+          "line": 45
+        },
+        {
+          "heading": "3 · FRONTEND MAP (JAVASCRIPT MODULE DEPENDENCY)",
+          "level": 2,
+          "line": 60
+        },
+        {
+          "heading": "3.1 Core Infrastructure (`assets/js/core/`)",
+          "level": 3,
+          "line": 62
+        },
+        {
+          "heading": "3.2 Feature Modules",
+          "level": 3,
+          "line": 67
+        },
+        {
+          "heading": "4 · DATABASE SCHEMA & STORAGE MAP",
+          "level": 2,
+          "line": 110
+        },
+        {
+          "heading": "5 · FILE REGISTRY INDEX (2932 files total)",
+          "level": 2,
+          "line": 120
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 11
+      }
+    },
+    {
+      "path": "CODING_STANDARDS.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 433,
+      "nonEmptyLines": 333,
+      "sections": [
+        {
+          "heading": "CODING_STANDARDS.md — Quy Tắc Code Bắt Buộc (SheetApp)",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "1 · NGUYÊN TẮC KIẾN TRÚC",
+          "level": 2,
+          "line": 8
+        },
+        {
+          "heading": "1.1 MVC — Tách biệt trách nhiệm",
+          "level": 3,
+          "line": 10
+        },
+        {
+          "heading": "1.2 SOLID (áp dụng cho PHP & JS)",
+          "level": 3,
+          "line": 29
+        },
+        {
+          "heading": "1.3 DRY — Don't Repeat Yourself",
+          "level": 3,
+          "line": 47
+        },
+        {
+          "heading": "1.4 Clean Code",
+          "level": 3,
+          "line": 60
+        },
+        {
+          "heading": "2 · QUY TẮC JAVASCRIPT (Vanilla ES6+)",
+          "level": 2,
+          "line": 91
+        },
+        {
+          "heading": "2.1 Module Pattern (IIFE)",
+          "level": 3,
+          "line": 93
+        },
+        {
+          "heading": "2.2 Async/Await — Luôn xử lý error",
+          "level": 3,
+          "line": 125
+        },
+        {
+          "heading": "2.3 Constants — Không hardcode string",
+          "level": 3,
+          "line": 144
+        },
+        {
+          "heading": "2.4 EventBus — Giao tiếp giữa modules",
+          "level": 3,
+          "line": 159
+        },
+        {
+          "heading": "2.5 Store — State tập trung",
+          "level": 3,
+          "line": 188
+        },
+        {
+          "heading": "3 · QUY TẮC PHP (Backend)",
+          "level": 2,
+          "line": 204
+        },
+        {
+          "heading": "3.1 Controller Pattern",
+          "level": 3,
+          "line": 206
+        },
+        {
+          "heading": "3.2 Service Pattern",
+          "level": 3,
+          "line": 250
+        },
+        {
+          "heading": "3.3 Response Format Chuẩn",
+          "level": 3,
+          "line": 278
+        },
+        {
+          "heading": "3.4 Validate Input",
+          "level": 3,
+          "line": 293
+        },
+        {
+          "heading": "4 · QUY TẮC API LAYER (Frontend JS)",
+          "level": 2,
+          "line": 309
+        },
+        {
+          "heading": "4.1 Mọi call qua ApiService",
+          "level": 3,
+          "line": 311
+        },
+        {
+          "heading": "4.2 Ngoại lệ: fetch() Static Asset",
+          "level": 3,
+          "line": 322
+        },
+        {
+          "heading": "4.3 Mở rộng ApiService khi có endpoint mới",
+          "level": 3,
+          "line": 337
+        },
+        {
+          "heading": "4.4 Nguyên tắc đồng bộ State & URL",
+          "level": 3,
+          "line": 351
+        },
+        {
+          "heading": "4.5 Giá trị mặc định phòng thủ (Defensive Defaults)",
+          "level": 3,
+          "line": 367
+        },
+        {
+          "heading": "4.6 Thao tác Di động & Tablet (Mobile & Touch Accessibility)",
+          "level": 3,
+          "line": 374
+        },
+        {
+          "heading": "5 · QUY TẮC FILE & THƯ MỤC",
+          "level": 2,
+          "line": 382
+        },
+        {
+          "heading": "6 · CHECKLIST TRƯỚC KHI KẾT THÚC PHIÊN",
+          "level": 2,
+          "line": 416
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 26
+      }
+    },
+    {
+      "path": "GEMINI.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 16,
+      "nonEmptyLines": 13,
+      "sections": [
+        {
+          "heading": "Web Engineering Standards (Agent Skills)",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "SheetApp Project Standards — Đọc theo thứ tự",
+          "level": 1,
+          "line": 11
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "INFO.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 341,
+      "nonEmptyLines": 275,
+      "sections": [
+        {
+          "heading": "🎵 SheetApp — Tai Lieu He Thong & Ke Hoach Nang Cap",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "1. TONG QUAN",
+          "level": 2,
+          "line": 8
+        },
+        {
+          "heading": "1b. CORE RULES — Bat Buoc Giu Nguyen",
+          "level": 2,
+          "line": 19
+        },
+        {
+          "heading": "RULE 1: Bo Hop Am HD la Mac Dinh",
+          "level": 3,
+          "line": 23
+        },
+        {
+          "heading": "RULE 2: Tong Goc = 0 Luon Luon",
+          "level": 3,
+          "line": 30
+        },
+        {
+          "heading": "RULE 3: Lock TLH va HD",
+          "level": 3,
+          "line": 36
+        },
+        {
+          "heading": "2. KIEN TRUC MODULE",
+          "level": 2,
+          "line": 44
+        },
+        {
+          "heading": "3. 12 NHOM TINH NANG",
+          "level": 2,
+          "line": 56
+        },
+        {
+          "heading": "3.1 Thu Vien Bai Hat (LibraryUI)",
+          "level": 3,
+          "line": 58
+        },
+        {
+          "heading": "3.2 Hien Thi Sheet Nhac (OSMD Renderer)",
+          "level": 3,
+          "line": 70
+        },
+        {
+          "heading": "3.3 Hop Am Overlay (Chord Canvas)",
+          "level": 3,
+          "line": 79
+        },
+        {
+          "heading": "3.4 Transpose & Capo",
+          "level": 3,
+          "line": 91
+        },
+        {
+          "heading": "3.5 Ghi Chu (Annotation Canvas)",
+          "level": 3,
+          "line": 98
+        },
+        {
+          "heading": "3.6 Nhat Ky Bieu Dien (Performance Notes)",
+          "level": 3,
+          "line": 105
+        },
+        {
+          "heading": "3.7 Audio Player",
+          "level": 3,
+          "line": 111
+        },
+        {
+          "heading": "3.8 Auto Scroller",
+          "level": 3,
+          "line": 119
+        },
+        {
+          "heading": "3.9 Fullscreen & Display",
+          "level": 3,
+          "line": 126
+        },
+        {
+          "heading": "3.10 Setlist & Session",
+          "level": 3,
+          "line": 133
+        },
+        {
+          "heading": "3.11 Import",
+          "level": 3,
+          "line": 142
+        },
+        {
+          "heading": "3.12 UX General",
+          "level": 3,
+          "line": 147
+        },
+        {
+          "heading": "4. PHAN TICH UX & GAP",
+          "level": 2,
+          "line": 160
+        },
+        {
+          "heading": "Flow hien tai vs Ly tuong:",
+          "level": 3,
+          "line": 162
+        },
+        {
+          "heading": "Top 10 Van De UX:",
+          "level": 3,
+          "line": 176
+        },
+        {
+          "heading": "5. WRITING PLAN 6 SPRINT",
+          "level": 2,
+          "line": 191
+        },
+        {
+          "heading": "6. KEYBOARD SHORTCUTS",
+          "level": 2,
+          "line": 275
+        },
+        {
+          "heading": "7. API REFERENCE",
+          "level": 2,
+          "line": 294
+        },
+        {
+          "heading": "8. CAU TRUC FILE QUAN TRONG",
+          "level": 2,
+          "line": 312
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 27
+      }
+    },
+    {
+      "path": "PROJECT_REGISTRY.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 462,
+      "nonEmptyLines": 394,
+      "sections": [
+        {
+          "heading": "PROJECT_REGISTRY.md — Sơ Đồ Dự Án SheetApp",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "1 · THÔNG TIN DỰ ÁN",
+          "level": 2,
+          "line": 8
+        },
+        {
+          "heading": "2 · CẤU TRÚC THƯ MỤC",
+          "level": 2,
+          "line": 32
+        },
+        {
+          "heading": "3 · FILE REGISTRY — CÁC FILE QUAN TRỌNG",
+          "level": 2,
+          "line": 143
+        },
+        {
+          "heading": "Backend Core (`api/core/`)",
+          "level": 3,
+          "line": 145
+        },
+        {
+          "heading": "Backend Controllers (`api/controllers/`)",
+          "level": 3,
+          "line": 154
+        },
+        {
+          "heading": "Frontend Core (`assets/js/core/`)",
+          "level": 3,
+          "line": 169
+        },
+        {
+          "heading": "Frontend Modules (`assets/js/`)",
+          "level": 3,
+          "line": 177
+        },
+        {
+          "heading": "4 · API CONTRACT",
+          "level": 2,
+          "line": 195
+        },
+        {
+          "heading": "Tất cả endpoints qua `api/index.php?route=<name>`",
+          "level": 3,
+          "line": 197
+        },
+        {
+          "heading": "Response Format Chuẩn (BẮT BUỘC)",
+          "level": 3,
+          "line": 232
+        },
+        {
+          "heading": "5 · DATABASE SCHEMA (SQLite)",
+          "level": 2,
+          "line": 244
+        },
+        {
+          "heading": "Bảng chính",
+          "level": 3,
+          "line": 246
+        },
+        {
+          "heading": "6 · KNOWN ISSUES & GOTCHAS",
+          "level": 2,
+          "line": 262
+        },
+        {
+          "heading": "7 · ARCHITECTURE DECISION RECORDS",
+          "level": 2,
+          "line": 292
+        },
+        {
+          "heading": "8 · LOAD ORDER TRONG index.php",
+          "level": 2,
+          "line": 306
+        },
+        {
+          "heading": "9 · NHẬT KÝ CẬP NHẬT",
+          "level": 2,
+          "line": 333
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 17
+      }
+    },
+    {
+      "path": "README.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 169,
+      "nonEmptyLines": 128,
+      "sections": [
+        {
+          "heading": "🎼 SheetApp — Ứng Dụng Quản Lý & Hiển Thị Bản Nhạc Hợp Âm Thông Minh (v2.0-dev)",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "✨ 🌟 Các Tính Năng Nổi Bật (Key Features)",
+          "level": 2,
+          "line": 7
+        },
+        {
+          "heading": "1. 🎼 Hiển Thị Bản Nhạc MusicXML & Chế Độ Gọn Nhẹ (Compact Mode)",
+          "level": 3,
+          "line": 9
+        },
+        {
+          "heading": "2. 🎸 Hệ Thống Soạn Hợp Âm & Đa Bộ Hợp Âm (Chord Canvas & Multi-Sets)",
+          "level": 3,
+          "line": 20
+        },
+        {
+          "heading": "3. 🎵 Dịch Giọng Thông Minh (Transpose & Capo Engine)",
+          "level": 3,
+          "line": 30
+        },
+        {
+          "heading": "4. 📡 Đồng Bộ Biểu Diễn Realtime Ban Nhạc (Live Band Sync)",
+          "level": 3,
+          "line": 37
+        },
+        {
+          "heading": "5. 🎹 Bàn Đạp Bluetooth Foot Pedal & Web MIDI",
+          "level": 3,
+          "line": 43
+        },
+        {
+          "heading": "6. ⏱️ Máy Đếm Nhịp Pro & Chỉnh Tempo Tương Tác (Interactive Tempo & Metronome)",
+          "level": 3,
+          "line": 49
+        },
+        {
+          "heading": "7. 📝 Nhật Ký Bài Tập & Ghi Chú Biểu Diễn (Practice Notes)",
+          "level": 3,
+          "line": 61
+        },
+        {
+          "heading": "8. 📋 Quản Lý Setlist Biểu Diễn & Đồng Bộ Tông - Tempo",
+          "level": 3,
+          "line": 68
+        },
+        {
+          "heading": "9. 🔐 Phân Quyền & Quản Lý Tài Khoản (User Roles)",
+          "level": 3,
+          "line": 78
+        },
+        {
+          "heading": "🏗️ 📐 Kiến Trúc Dự Án (Architecture & Code Map)",
+          "level": 2,
+          "line": 85
+        },
+        {
+          "heading": "⌨️ 🛠️ Phím Tắt Tiện Ích (Keyboard Shortcuts)",
+          "level": 2,
+          "line": 114
+        },
+        {
+          "heading": "🚀 💻 Hướng Dẫn Cài Đặt (Installation)",
+          "level": 2,
+          "line": 131
+        },
+        {
+          "heading": "1. Yêu Cầu Môi Trường Server:",
+          "level": 3,
+          "line": 133
+        },
+        {
+          "heading": "2. Triển Khai (Deployment):",
+          "level": 3,
+          "line": 138
+        },
+        {
+          "heading": "⚙️ 🤖 Quy Trình Đồng Bộ GitHub (Auto-Sync)",
+          "level": 2,
+          "line": 152
+        },
+        {
+          "heading": "📄 Giấy Phép (License)",
+          "level": 2,
+          "line": 167
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 18
+      }
+    },
+    {
+      "path": "create_hd.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 20,
+      "nonEmptyLines": 17,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "manifest.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 17,
+      "nonEmptyLines": 17,
+      "sections": [
+        {
+          "heading": "name",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "short_name",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "description",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "start_url",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "display",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "background_color",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "theme_color",
+          "level": 1,
+          "line": 8
+        },
+        {
+          "heading": "orientation",
+          "level": 1,
+          "line": 9
+        },
+        {
+          "heading": "icons",
+          "level": 1,
+          "line": 10
+        },
+        {
+          "heading": "categories",
+          "level": 1,
+          "line": 15
+        },
+        {
+          "heading": "lang",
+          "level": 1,
+          "line": 16
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 11
+      }
+    },
+    {
+      "path": "package.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 13,
+      "nonEmptyLines": 13,
+      "sections": [
+        {
+          "heading": "name",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "version",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "description",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "scripts",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "devDependencies",
+          "level": 1,
+          "line": 10
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 5
+      }
+    },
+    {
+      "path": "sync.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 8,
+      "nonEmptyLines": 7,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "vibercode.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 141,
+      "nonEmptyLines": 109,
+      "sections": [
+        {
+          "heading": "VIBERCODE.md — Hướng Dẫn Dùng Understand Anything Với SheetApp",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "🧠 Understand Anything Là Gì?",
+          "level": 2,
+          "line": 8
+        },
+        {
+          "heading": "🚀 Cài Đặt (Chạy 1 Lần)",
+          "level": 2,
+          "line": 21
+        },
+        {
+          "heading": "Bước 1 — Clone tool về máy",
+          "level": 3,
+          "line": 23
+        },
+        {
+          "heading": "Bước 2 — Cài Gemini CLI (nếu chưa có)",
+          "level": 3,
+          "line": 28
+        },
+        {
+          "heading": "Bước 3 — Copy skill vào SheetApp (tùy chọn, để Gemini CLI tự nhận)",
+          "level": 3,
+          "line": 33
+        },
+        {
+          "heading": "▶️ Dùng Mỗi Khi Viết Tính Năng Mới",
+          "level": 2,
+          "line": 40
+        },
+        {
+          "heading": "Option A — Qua Gemini CLI",
+          "level": 3,
+          "line": 42
+        },
+        {
+          "heading": "Option B — Câu hỏi nhanh không cần graph",
+          "level": 3,
+          "line": 53
+        },
+        {
+          "heading": "💡 Câu Hỏi Hữu Ích Trước Khi Code",
+          "level": 2,
+          "line": 61
+        },
+        {
+          "heading": "🗺️ Quick Map — SheetApp Architecture",
+          "level": 2,
+          "line": 76
+        },
+        {
+          "heading": "Frontend Event Flow",
+          "level": 3,
+          "line": 80
+        },
+        {
+          "heading": "Backend Request Flow",
+          "level": 3,
+          "line": 92
+        },
+        {
+          "heading": "Module Groups",
+          "level": 3,
+          "line": 102
+        },
+        {
+          "heading": "⚠️ Rules Nhớ Trước Khi Code",
+          "level": 2,
+          "line": 113
+        },
+        {
+          "heading": "📁 Files Hay Đụng Nhất",
+          "level": 2,
+          "line": 127
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 16
+      }
+    }
+  ]
+}

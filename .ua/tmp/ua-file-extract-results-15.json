@@ -1,0 +1,462 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 3,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 3,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 3,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "results": [
+    {
+      "path": "tools/omr_sync.php",
+      "language": "php",
+      "fileCategory": "code",
+      "totalLines": 105,
+      "nonEmptyLines": 90,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tools/setup_hd_sets.php",
+      "language": "php",
+      "fileCategory": "code",
+      "totalLines": 70,
+      "nonEmptyLines": 58,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tools/test_editor_ui.js",
+      "language": "javascript",
+      "fileCategory": "code",
+      "totalLines": 138,
+      "nonEmptyLines": 117,
+      "functions": [
+        {
+          "name": "runEditorUiTest",
+          "startLine": 15,
+          "endLine": 133,
+          "params": []
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.log",
+          "lineNumber": 16
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.log",
+          "lineNumber": 17
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.log",
+          "lineNumber": 18
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.log",
+          "lineNumber": 19
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.log",
+          "lineNumber": 20
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "puppeteer.launch",
+          "lineNumber": 24
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.error",
+          "lineNumber": 36
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "process.exit",
+          "lineNumber": 37
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "browser.newPage",
+          "lineNumber": 40
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "page.setViewport",
+          "lineNumber": 41
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "page.on",
+          "lineNumber": 46
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "msg.type",
+          "lineNumber": 47
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "consoleLogs.push",
+          "lineNumber": 48
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "msg.text",
+          "lineNumber": 48
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "page.on",
+          "lineNumber": 52
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "pageErrors.push",
+          "lineNumber": 53
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "err.toString",
+          "lineNumber": 53
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.log",
+          "lineNumber": 56
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "page.goto",
+          "lineNumber": 57
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.log",
+          "lineNumber": 58
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "response.status",
+          "lineNumber": 58
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "response.status",
+          "lineNumber": 60
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.error",
+          "lineNumber": 61
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "response.status",
+          "lineNumber": 61
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "browser.close",
+          "lineNumber": 62
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "process.exit",
+          "lineNumber": 63
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.log",
+          "lineNumber": 67
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "page.waitForSelector",
+          "lineNumber": 69
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.log",
+          "lineNumber": 70
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.error",
+          "lineNumber": 72
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "page.$eval('#current-song-label', el => el.textContent.trim()).catch",
+          "lineNumber": 76
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "page.$eval",
+          "lineNumber": 76
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "el.textContent.trim",
+          "lineNumber": 76
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "page.$eval('#pos-info-label', el => el.textContent.trim()).catch",
+          "lineNumber": 77
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "page.$eval",
+          "lineNumber": 77
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "el.textContent.trim",
+          "lineNumber": 77
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "page.$eval('.voice-card-btn.active', el => el.dataset.voice).catch",
+          "lineNumber": 78
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "page.$eval",
+          "lineNumber": 78
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.log",
+          "lineNumber": 80
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.log",
+          "lineNumber": 81
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.log",
+          "lineNumber": 82
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "activeVoice.toUpperCase",
+          "lineNumber": 82
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "page.evaluate",
+          "lineNumber": 85
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "document.getElementById('lbl-pitch-soprano')?.textContent.trim",
+          "lineNumber": 87
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "document.getElementById",
+          "lineNumber": 87
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "document.getElementById('lbl-pitch-alto')?.textContent.trim",
+          "lineNumber": 88
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "document.getElementById",
+          "lineNumber": 88
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "document.getElementById('lbl-pitch-tenor')?.textContent.trim",
+          "lineNumber": 89
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "document.getElementById",
+          "lineNumber": 89
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "document.getElementById('lbl-pitch-bass')?.textContent.trim",
+          "lineNumber": 90
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "document.getElementById",
+          "lineNumber": 90
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.log",
+          "lineNumber": 93
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.log",
+          "lineNumber": 96
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "page.click",
+          "lineNumber": 97
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "page.$eval('.voice-card-btn.active', el => el.dataset.voice).catch",
+          "lineNumber": 98
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "page.$eval",
+          "lineNumber": 98
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.log",
+          "lineNumber": 99
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "newActiveVoice.toUpperCase",
+          "lineNumber": 99
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.log",
+          "lineNumber": 102
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "page.click",
+          "lineNumber": 103
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "setTimeout",
+          "lineNumber": 104
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "page.$eval('#pos-info-label', el => el.textContent.trim()).catch",
+          "lineNumber": 105
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "page.$eval",
+          "lineNumber": 105
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "el.textContent.trim",
+          "lineNumber": 105
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.log",
+          "lineNumber": 106
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "path.dirname",
+          "lineNumber": 109
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "fs.existsSync",
+          "lineNumber": 110
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "fs.mkdirSync",
+          "lineNumber": 110
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "page.screenshot",
+          "lineNumber": 111
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.log",
+          "lineNumber": 112
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.log",
+          "lineNumber": 115
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.log",
+          "lineNumber": 116
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.log",
+          "lineNumber": 117
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.error",
+          "lineNumber": 119
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.warn",
+          "lineNumber": 122
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.log",
+          "lineNumber": 125
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.log",
+          "lineNumber": 127
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "console.log",
+          "lineNumber": 129
+        },
+        {
+          "caller": "runEditorUiTest",
+          "callee": "browser.close",
+          "lineNumber": 132
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    }
+  ]
+}
