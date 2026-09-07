@@ -45,6 +45,20 @@ SheetApp/
 │   ├── index.php             # Giao diện chính của Editor
 │   ├── editor.css            # Stylesheet chuyên dụng Studio Dark Mode
 │   └── editor.js             # Logic SATB Note Editor, Audio Synth, Undo/Redo
+├── learn/                    ← Interactive Music Learning Studio (/learn/) [NEW 2026-09]
+│   ├── index.php             # Trang chính /learn — Shell + song picker + OSMD
+│   └── learn.css             # Stylesheet premium dark cho /learn
+├── assets/js/learn/          ← JS modules chuyên biệt cho /learn
+│   ├── learn-interfaces.js   # Stage 0: Type definitions, LEARN_EVENTS, LEARN_FLAGS
+│   ├── learn-store.js        # Stage 0: LearnStore — state namespace cho /learn
+│   ├── learn-app.js          # Stage 1: LearnApp — app controller chính
+│   ├── timeline/
+│   │   └── chord-timeline-normalizer.js  # Stage 2: Chuyển chord visual→musical
+│   ├── transport/
+│   │   └── music-transport.js            # Stage 3: Unified Tone.js Transport
+│   └── ui/
+│       ├── chord-card.js     # Stage 2/4: Chord info panel (symbol, inversions)
+│       └── virtual-keyboard.js           # Stage 4: Bàn phím Piano ảo
 ├── includes/                 ← PHP view partials
 │   ├── toolbar.php           # Top toolbar: audio, scroll, compact controls
 │   ├── sidebar.php           # Sidebar: thư viện bài hát & setlist
