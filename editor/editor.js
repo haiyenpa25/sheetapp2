@@ -255,20 +255,37 @@
   }
 
   function _groupChordsInMeasure(measureEl) {
-    const groups = [];
-    let currentChord = [];
-    const noteEls = measureEl.querySelectorAll('note');
-    noteEls.forEach(noteEl => {
-      const isChord = noteEl.querySelector('chord') !== null;
-      if (!isChord) {
-        if (currentChord.length > 0) groups.push(currentChord);
-        currentChord = [noteEl];
-      } else {
-        currentChord.push(noteEl);
+    if (!measureEl) return [];
+    // Nhóm nốt theo mốc thời gian thực tế trong ô nhịp (xử lý chuẩn xác thẻ <backup> và <forward>)
+    const notesByTime = new Map();
+    let curTime = 0;
+    let lastStartTime = 0;
+
+    for (const child of Array.from(measureEl.children)) {
+      const tag = child.tagName.toLowerCase();
+      if (tag === 'note') {
+        const isChord = child.querySelector('chord') !== null;
+        const dur = parseInt(child.querySelector('duration')?.textContent || '0', 10);
+        let noteTime = curTime;
+        if (isChord) {
+          noteTime = lastStartTime;
+        } else {
+          lastStartTime = curTime;
+          curTime += dur;
+        }
+        if (!notesByTime.has(noteTime)) notesByTime.set(noteTime, []);
+        notesByTime.get(noteTime).push(child);
+      } else if (tag === 'backup') {
+        const dur = parseInt(child.querySelector('duration')?.textContent || '0', 10);
+        curTime = Math.max(0, curTime - dur);
+      } else if (tag === 'forward') {
+        const dur = parseInt(child.querySelector('duration')?.textContent || '0', 10);
+        curTime += dur;
       }
-    });
-    if (currentChord.length > 0) groups.push(currentChord);
-    return groups;
+    }
+
+    const sortedTimes = Array.from(notesByTime.keys()).sort((a, b) => a - b);
+    return sortedTimes.map(t => notesByTime.get(t));
   }
 
   function _pitchValue(noteEl) {
@@ -1121,7 +1138,8 @@
     const gs = _osmd.GraphicSheet;
     (gs.MeasureList || []).forEach(staves => {
       staves.forEach((staffMeasure, sIdx) => {
-        const mNum = staffMeasure.MeasureNumber;
+        // Quan trọng: Sử dụng MeasureNumberXML để khớp chính xác 100% với MusicXML kể cả bài có nhịp lấy đà
+        const mNum = parseInt(staffMeasure.parentSourceMeasure?.MeasureNumberXML ?? staffMeasure.MeasureNumber, 10);
         const entries = staffMeasure.staffEntries || [];
         entries.forEach((se, seIdx) => {
           // 1. Ánh xạ lời ca
@@ -1168,33 +1186,45 @@
     });
   }
 
-  function _resolveVoiceFromClick(info, clientY, staveNoteEl) {
+  function _resolveVoiceFromClick(info, clientY, staveNoteEl, targetEl = null) {
     if (!info) return 'soprano';
 
     const noteheads = Array.from(staveNoteEl.querySelectorAll('g.vf-notehead'));
     if (noteheads.length >= 2) {
-      // Xác định chính xác nốt trên / nốt dưới bằng tọa độ thực tế của từng notehead
+      // Sắp xếp notehead từ trên xuống dưới theo tọa độ Y
       const sorted = noteheads.map(nh => {
         const r = nh.getBoundingClientRect();
-        return { el: nh, centerY: r.top + r.height / 2 };
+        return { el: nh, centerY: r.top + r.height / 2, rect: r };
       }).sort((a, b) => a.centerY - b.centerY);
 
-      const topCenter = sorted[0].centerY;
-      const bottomCenter = sorted[sorted.length - 1].centerY;
-      const midY = (topCenter + bottomCenter) / 2;
+      // Nếu click trúng chính xác một notehead element
+      const clickedHead = targetEl ? targetEl.closest('g.vf-notehead') : null;
+      if (clickedHead) {
+        if (clickedHead === sorted[0].el) {
+          return info.staffIndex === 0 ? 'soprano' : 'tenor';
+        }
+        if (clickedHead === sorted[sorted.length - 1].el) {
+          return info.staffIndex === 0 ? 'alto' : 'bass';
+        }
+      }
+
+      // So sánh khoảng cách tới tâm đầu nốt trên vs đầu nốt dưới
+      const topDist = Math.abs(clientY - sorted[0].centerY);
+      const botDist = Math.abs(clientY - sorted[sorted.length - 1].centerY);
+      const isTop = topDist <= botDist;
 
       if (info.staffIndex === 0) {
-        // Khóa Sol: Nốt trên = Soprano, Nốt dưới = Alto
-        return clientY < midY ? 'soprano' : 'alto';
+        return isTop ? 'soprano' : 'alto';
       } else {
-        // Khóa Fa: Nốt trên = Tenor, Nốt dưới = Bass
-        return clientY < midY ? 'tenor' : 'bass';
+        return isTop ? 'tenor' : 'bass';
       }
     }
 
     if (info.staffIndex === 0) {
+      if (_selectedPosition.voice === 'alto') return 'alto';
       return 'soprano';
     } else {
+      if (_selectedPosition.voice === 'tenor') return 'tenor';
       return 'bass';
     }
   }
@@ -1280,7 +1310,7 @@
         if (info) {
           _selectedPosition.measureNumber = info.measureNumber;
           _selectedPosition.beatIndex = info.beatIndex;
-          _selectedPosition.voice = _resolveVoiceFromClick(info, e.clientY, staveNote);
+          _selectedPosition.voice = _resolveVoiceFromClick(info, e.clientY, staveNote, e.target);
         }
 
         _refreshInspectorUI();
@@ -1682,9 +1712,17 @@
       _renderSongListModal();
 
       const params = new URLSearchParams(window.location.search);
-      const songId = params.get('song');
-      if (songId) {
-        const found = _songsList.find(s => String(s.id) === String(songId));
+      const songParam = params.get('song') || params.get('id');
+      if (songParam) {
+        const pClean = String(songParam).trim().toLowerCase();
+        const found = _songsList.find(s => {
+          const sId = String(s.id || '').toLowerCase();
+          const httlvnId = String(s.httlvnId || '');
+          return sId === pClean || 
+                 httlvnId === pClean || 
+                 sId === `thanh-ca-${pClean.padStart(3, '0')}` ||
+                 sId.includes(pClean);
+        });
         if (found) {
           await loadSong(found);
           return;
@@ -2111,6 +2149,10 @@
     undo,
     redo,
     autoFillAllRests,
-    saveVersion: confirmSaveVersion
+    saveVersion: confirmSaveVersion,
+    getOsmd: () => _osmd,
+    getSvgNoteMap: () => _svgNoteMap,
+    getSelectedPosition: () => _selectedPosition,
+    getXmlDoc: () => _xmlDoc
   };
 })();
