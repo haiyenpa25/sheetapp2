@@ -795,6 +795,119 @@ body.editor-body {
   box-shadow: 0 0 8px rgba(99, 102, 241, 0.35);
 }
 
+/* Semitone (+/- nửa cung) */
+.semitone-control {
+  display: flex;
+  gap: 2px;
+}
+.btn-semitone {
+  font-weight: 700;
+  font-size: 0.72rem;
+  padding: 0 4px;
+}
+
+/* Bàn phím Piano ảo mini */
+.mini-piano-card {
+  margin: 6px 0;
+  background: #090e1a;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.mini-piano-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 8px;
+  background: #0b1120;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.piano-title {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+}
+.btn-toggle-piano {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 0.62rem;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+.btn-toggle-piano:hover { color: #cbd5e1; }
+
+.mini-piano-keys {
+  position: relative;
+  height: 56px;
+  display: flex;
+  overflow-x: auto;
+  background: #1e293b;
+  padding: 4px 4px 6px;
+  user-select: none;
+  scrollbar-width: thin;
+}
+.mini-piano-keys.collapsed {
+  display: none;
+}
+.piano-key {
+  position: relative;
+  cursor: pointer;
+  transition: background 0.08s, transform 0.06s;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+.piano-white-key {
+  width: 14px;
+  height: 46px;
+  background: linear-gradient(to bottom, #f8fafc 0%, #e2e8f0 100%);
+  border: 1px solid #94a3b8;
+  border-radius: 0 0 3px 3px;
+  z-index: 1;
+  margin-right: -1px;
+}
+.piano-white-key:hover {
+  background: #ffffff;
+}
+.piano-white-key.active {
+  background: #a855f7 !important;
+  border-color: #7e22ce !important;
+  transform: scaleY(0.97);
+  box-shadow: 0 0 8px #a855f7;
+}
+.piano-white-key span {
+  position: absolute;
+  bottom: 1px;
+  left: 1px;
+  right: 1px;
+  font-size: 7px;
+  color: #64748b;
+  text-align: center;
+  pointer-events: none;
+}
+.piano-black-key {
+  width: 9px;
+  height: 28px;
+  background: linear-gradient(to bottom, #334155 0%, #0f172a 100%);
+  border: 1px solid #000;
+  border-radius: 0 0 2px 2px;
+  margin-left: -5px;
+  margin-right: -5px;
+  z-index: 2;
+  box-shadow: 0 2px 3px rgba(0,0,0,0.5);
+}
+.piano-black-key:hover {
+  background: #475569;
+}
+.piano-black-key.active {
+  background: #ec4899 !important;
+  border-color: #be185d !important;
+  box-shadow: 0 0 8px #ec4899;
+}
+
 /* Drag hint box */
 .drag-hint-box {
   font-size: 0.63rem;
@@ -809,11 +922,11 @@ body.editor-body {
   color: #a5b4fc;
 }
 
-/* BƯỚC 3: Trường độ - 4 nút card */
+/* BƯỚC 3: Trường độ - 5 nút card */
 .duration-buttons-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 3px;
   margin-bottom: 6px;
 }
 .btn-dur-card {
@@ -905,6 +1018,55 @@ body.editor-body {
 }
 .btn-accent-tone:hover {
   background: rgba(99, 102, 241, 0.22);
+  color: #fff;
+}
+
+/* Thao tác Thêm nốt & Sao chép */
+.note-insert-action-box {
+  margin-top: 6px;
+  padding: 5px 6px;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: 6px;
+}
+.insert-box-title {
+  font-size: 0.61rem;
+  font-weight: 700;
+  color: #a5b4fc;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 3px;
+}
+.insert-buttons-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr 1fr 1fr;
+  gap: 3px;
+}
+.btn-insert-tool {
+  padding: 5px 2px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  border-radius: 4px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.1s;
+  white-space: nowrap;
+  text-align: center;
+}
+.btn-insert-tool:hover {
+  background: var(--bg-surface-elevated);
+  border-color: var(--accent);
+  color: #fff;
+}
+.btn-insert-highlight {
+  background: rgba(99, 102, 241, 0.22);
+  border-color: rgba(99, 102, 241, 0.5);
+  color: #c7d2fe;
+}
+.btn-insert-highlight:hover {
+  background: var(--accent);
   color: #fff;
 }
 
@@ -1264,6 +1426,81 @@ body.editor-body {
 .editor-toast.success { border-color: var(--success); color: #6ee7b7; }
 .editor-toast.error   { border-color: var(--danger); color: #fca5a5; }
 .editor-toast.info    { border-color: var(--accent); color: #c7d2fe; }
+
+/* Nút phím tắt & Modal tra cứu */
+.btn-shortcut-guide {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0.35rem 0.65rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-shortcut-guide:hover {
+  background: var(--bg-surface-elevated);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.shortcut-guide-dialog {
+  max-width: 580px;
+  width: 92vw;
+  background: #0f172a;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+.modal-content-shortcut {
+  padding: 16px;
+  max-height: 75vh;
+  overflow-y: auto;
+}
+.shortcut-grid-sections {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 600px) {
+  .shortcut-grid-sections { grid-template-columns: 1fr; }
+}
+.shortcut-block {
+  margin-bottom: 14px;
+}
+.shortcut-block h4 {
+  font-size: 0.74rem;
+  color: #818cf8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 3px;
+}
+.shortcut-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px 0;
+  font-size: 0.72rem;
+  color: #cbd5e1;
+}
+.shortcut-row kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: #f1f5f9;
+  background: #1e293b;
+  border: 1px solid #475569;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
 
 /* Responsive */
 @media (max-width: 900px) {

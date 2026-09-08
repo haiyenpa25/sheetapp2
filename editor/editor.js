@@ -318,6 +318,9 @@
     const slurEl = noteEl.querySelector('slur');
     const fermataEl = noteEl.querySelector('fermata');
     const tupletEl  = noteEl.querySelector('time-modification');
+    const staccatoEl = noteEl.querySelector('staccato');
+    const accentEl = noteEl.querySelector('accent');
+    const tenutoEl = noteEl.querySelector('tenuto');
 
     return {
       xmlNode: noteEl,
@@ -334,6 +337,9 @@
       isSlur: !!slurEl,
       isFermata: !!fermataEl,
       isTuplet: !!tupletEl,
+      isStaccato: !!staccatoEl,
+      isAccent: !!accentEl,
+      isTenuto: !!tenutoEl,
       _chordSiblings: chordGroup
     };
   }
@@ -430,10 +436,13 @@
       btn.classList.toggle('active', type === curNote.type);
     });
 
-    // Dot
+    // Dot & Articulations
     document.getElementById('btn-pal-dot')?.classList.toggle('active', !!curNote.isDot);
     document.getElementById('btn-pal-tie')?.classList.toggle('active', !!curNote.isTie);
     document.getElementById('btn-pal-slur')?.classList.toggle('active', !!curNote.isSlur);
+    document.getElementById('btn-pal-staccato')?.classList.toggle('active', !!curNote.isStaccato);
+    document.getElementById('btn-pal-accent')?.classList.toggle('active', !!curNote.isAccent);
+    document.getElementById('btn-pal-tenuto')?.classList.toggle('active', !!curNote.isTenuto);
     document.getElementById('btn-pal-fermata')?.classList.toggle('active', !!curNote.isFermata);
     document.getElementById('btn-pal-tuplet')?.classList.toggle('active', !!curNote.isTuplet);
 
@@ -531,7 +540,14 @@
     }
     stepEl.textContent = newStep.toUpperCase();
 
-    const targetOct = newOctave !== null ? newOctave : curNote.octave;
+    const defaultVoicePitch = {
+      soprano: { step: 'G', octave: 4 },
+      alto:    { step: 'E', octave: 4 },
+      tenor:   { step: 'C', octave: 3 },
+      bass:    { step: 'G', octave: 2 }
+    };
+    const defaultP = defaultVoicePitch[_selectedPosition.voice] || { step: 'C', octave: 4 };
+    const targetOct = newOctave !== null ? newOctave : (curNote.isRest ? defaultP.octave : curNote.octave);
     let octEl = pitchEl.querySelector('octave');
     if (!octEl) {
       octEl = _xmlDoc.createElement('octave');
@@ -539,7 +555,7 @@
     }
     octEl.textContent = String(targetOct);
 
-    const targetAlt = newAlter !== null ? newAlter : curNote.alter;
+    const targetAlt = newAlter !== null ? newAlter : (curNote.isRest ? 0 : curNote.alter);
     let altEl = pitchEl.querySelector('alter');
     if (targetAlt !== 0) {
       if (!altEl) {
@@ -571,6 +587,34 @@
     if (newOct !== curNote.octave) {
       modifyPitch(curNote.step, newOct, curNote.alter);
     }
+  }
+
+  // Tăng/Giảm Nửa Cung (Semitone Chromatic Step)
+  function stepSemitone(delta) {
+    const curNote = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
+    if (!curNote) return;
+    const defaultVoiceMidi = { soprano: 67, alto: 64, tenor: 48, bass: 43 };
+    const curMidi = curNote.isRest ? (defaultVoiceMidi[_selectedPosition.voice] || 60) : _pitchToMidi(curNote.step, curNote.octave, curNote.alter);
+    const newMidi = Math.max(24, Math.min(96, curMidi + delta));
+
+    // Chromatic Scale Mapping
+    const chromaticMap = [
+      { step: 'C', alter: 0 },
+      { step: 'C', alter: 1 },
+      { step: 'D', alter: 0 },
+      { step: 'D', alter: 1 },
+      { step: 'E', alter: 0 },
+      { step: 'F', alter: 0 },
+      { step: 'F', alter: 1 },
+      { step: 'G', alter: 0 },
+      { step: 'G', alter: 1 },
+      { step: 'A', alter: 0 },
+      { step: 'A', alter: 1 },
+      { step: 'B', alter: 0 }
+    ];
+    const item = chromaticMap[newMidi % 12];
+    const newOct = Math.floor(newMidi / 12) - 1;
+    modifyPitch(item.step, newOct, item.alter);
   }
 
   function modifyDuration(newType) {
@@ -818,6 +862,336 @@
       showToast('³ Đã đặt liên 3 (3 nốt gom 2 phách)', 'info', 1000);
     }
     _renderOsmdFromXmlDoc();
+  }
+
+  // Bật / Tắt Dấu Ngắt (Staccato)
+  function toggleStaccato() {
+    const curNote = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
+    if (!curNote || !curNote.xmlNode) return;
+    _saveSnapshotForUndo();
+    const noteEl = curNote.xmlNode;
+    let notEl = noteEl.querySelector('notations');
+    if (!notEl) {
+      notEl = _xmlDoc.createElement('notations');
+      noteEl.appendChild(notEl);
+    }
+    let artEl = notEl.querySelector('articulations');
+    if (!artEl) {
+      artEl = _xmlDoc.createElement('articulations');
+      notEl.appendChild(artEl);
+    }
+    const staccatoEl = artEl.querySelector('staccato');
+    if (staccatoEl) {
+      staccatoEl.remove();
+      if (!artEl.children.length) artEl.remove();
+      showToast('Đã bỏ dấu ngắt (staccato)', 'info', 1000);
+    } else {
+      const s = _xmlDoc.createElement('staccato');
+      artEl.appendChild(s);
+      showToast('• Đã gắn dấu ngắt (staccato)', 'info', 1000);
+    }
+    _renderOsmdFromXmlDoc();
+  }
+
+  // Bật / Tắt Dấu Nhấn (Accent)
+  function toggleAccent() {
+    const curNote = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
+    if (!curNote || !curNote.xmlNode) return;
+    _saveSnapshotForUndo();
+    const noteEl = curNote.xmlNode;
+    let notEl = noteEl.querySelector('notations');
+    if (!notEl) {
+      notEl = _xmlDoc.createElement('notations');
+      noteEl.appendChild(notEl);
+    }
+    let artEl = notEl.querySelector('articulations');
+    if (!artEl) {
+      artEl = _xmlDoc.createElement('articulations');
+      notEl.appendChild(artEl);
+    }
+    const accentEl = artEl.querySelector('accent');
+    if (accentEl) {
+      accentEl.remove();
+      if (!artEl.children.length) artEl.remove();
+      showToast('Đã bỏ dấu nhấn (accent)', 'info', 1000);
+    } else {
+      const a = _xmlDoc.createElement('accent');
+      artEl.appendChild(a);
+      showToast('> Đã gắn dấu nhấn (accent)', 'info', 1000);
+    }
+    _renderOsmdFromXmlDoc();
+  }
+
+  // Bật / Tắt Dấu Ngân Đủ (Tenuto)
+  function toggleTenuto() {
+    const curNote = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
+    if (!curNote || !curNote.xmlNode) return;
+    _saveSnapshotForUndo();
+    const noteEl = curNote.xmlNode;
+    let notEl = noteEl.querySelector('notations');
+    if (!notEl) {
+      notEl = _xmlDoc.createElement('notations');
+      noteEl.appendChild(notEl);
+    }
+    let artEl = notEl.querySelector('articulations');
+    if (!artEl) {
+      artEl = _xmlDoc.createElement('articulations');
+      notEl.appendChild(artEl);
+    }
+    const tenutoEl = artEl.querySelector('tenuto');
+    if (tenutoEl) {
+      tenutoEl.remove();
+      if (!artEl.children.length) artEl.remove();
+      showToast('Đã bỏ dấu ngân đủ (tenuto)', 'info', 1000);
+    } else {
+      const t = _xmlDoc.createElement('tenuto');
+      artEl.appendChild(t);
+      showToast('— Đã gắn dấu ngân đủ (tenuto)', 'info', 1000);
+    }
+    _renderOsmdFromXmlDoc();
+  }
+
+  // Thêm Nốt Mới Ngay Sau Nốt Hiện Tại
+  async function insertNoteAfter(durType = null) {
+    const curNote = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
+    if (!curNote || !curNote.xmlNode) {
+      showToast('Hãy chọn vị trí nốt để chèn nốt sau!', 'error');
+      return;
+    }
+
+    _saveSnapshotForUndo();
+    const curEl = curNote.xmlNode;
+    const measureEl = curEl.closest('measure');
+    const divisionsEl = measureEl?.querySelector('attributes > divisions');
+    const divisions = divisionsEl ? (parseInt(divisionsEl.textContent, 10) || 4) : 4;
+
+    const chosenType = durType || document.querySelector('.btn-dur-card.active')?.dataset?.dur || 'quarter';
+    const multMap = { whole: 4, half: 2, quarter: 1, eighth: 0.5, '16th': 0.25 };
+    const mult = multMap[chosenType] || 1;
+    const targetDuration = Math.max(1, Math.round(divisions * mult));
+
+    const defaultVoicePitch = {
+      soprano: { step: 'G', octave: 4 },
+      alto:    { step: 'E', octave: 4 },
+      tenor:   { step: 'C', octave: 3 },
+      bass:    { step: 'G', octave: 2 }
+    };
+    const defaultP = defaultVoicePitch[_selectedPosition.voice] || { step: 'C', octave: 4 };
+    const step = curNote.isRest ? defaultP.step : curNote.step;
+    const oct  = curNote.isRest ? defaultP.octave : curNote.octave;
+    const alt  = curNote.isRest ? 0 : curNote.alter;
+
+    const newNote = _xmlDoc.createElement('note');
+
+    const pitchEl = _xmlDoc.createElement('pitch');
+    const stepEl  = _xmlDoc.createElement('step');
+    stepEl.textContent = step;
+    const octEl   = _xmlDoc.createElement('octave');
+    octEl.textContent = String(oct);
+    pitchEl.appendChild(stepEl);
+    pitchEl.appendChild(octEl);
+    if (alt !== 0) {
+      const altEl = _xmlDoc.createElement('alter');
+      altEl.textContent = String(alt);
+      pitchEl.appendChild(altEl);
+    }
+    newNote.appendChild(pitchEl);
+
+    const durEl = _xmlDoc.createElement('duration');
+    durEl.textContent = String(targetDuration);
+    newNote.appendChild(durEl);
+
+    const curVoiceEl = curEl.querySelector('voice');
+    if (curVoiceEl) {
+      const voiceEl = _xmlDoc.createElement('voice');
+      voiceEl.textContent = curVoiceEl.textContent;
+      newNote.appendChild(voiceEl);
+    }
+
+    const typeEl = _xmlDoc.createElement('type');
+    typeEl.textContent = chosenType;
+    newNote.appendChild(typeEl);
+
+    const curStaffEl = curEl.querySelector('staff');
+    if (curStaffEl) {
+      const staffEl = _xmlDoc.createElement('staff');
+      staffEl.textContent = curStaffEl.textContent;
+      newNote.appendChild(staffEl);
+    }
+
+    curEl.parentNode.insertBefore(newNote, curEl.nextSibling);
+
+    showToast('✨ Đã thêm nốt mới thành công!', 'success', 1200);
+    playSinglePitch(step, oct, alt, 0.3);
+    _selectedPosition.beatIndex++;
+    await _renderOsmdFromXmlDoc();
+  }
+
+  // Thêm Nốt Mới Ngay Trước Nốt Hiện Tại
+  async function insertNoteBefore(durType = null) {
+    const curNote = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
+    if (!curNote || !curNote.xmlNode) {
+      showToast('Hãy chọn vị trí nốt để chèn nốt trước!', 'error');
+      return;
+    }
+
+    _saveSnapshotForUndo();
+    const curEl = curNote.xmlNode;
+    const measureEl = curEl.closest('measure');
+    const divisionsEl = measureEl?.querySelector('attributes > divisions');
+    const divisions = divisionsEl ? (parseInt(divisionsEl.textContent, 10) || 4) : 4;
+
+    const chosenType = durType || document.querySelector('.btn-dur-card.active')?.dataset?.dur || 'quarter';
+    const multMap = { whole: 4, half: 2, quarter: 1, eighth: 0.5, '16th': 0.25 };
+    const mult = multMap[chosenType] || 1;
+    const targetDuration = Math.max(1, Math.round(divisions * mult));
+
+    const defaultVoicePitch = {
+      soprano: { step: 'G', octave: 4 },
+      alto:    { step: 'E', octave: 4 },
+      tenor:   { step: 'C', octave: 3 },
+      bass:    { step: 'G', octave: 2 }
+    };
+    const defaultP = defaultVoicePitch[_selectedPosition.voice] || { step: 'C', octave: 4 };
+    const step = curNote.isRest ? defaultP.step : curNote.step;
+    const oct  = curNote.isRest ? defaultP.octave : curNote.octave;
+    const alt  = curNote.isRest ? 0 : curNote.alter;
+
+    const newNote = _xmlDoc.createElement('note');
+
+    const pitchEl = _xmlDoc.createElement('pitch');
+    const stepEl  = _xmlDoc.createElement('step');
+    stepEl.textContent = step;
+    const octEl   = _xmlDoc.createElement('octave');
+    octEl.textContent = String(oct);
+    pitchEl.appendChild(stepEl);
+    pitchEl.appendChild(octEl);
+    if (alt !== 0) {
+      const altEl = _xmlDoc.createElement('alter');
+      altEl.textContent = String(alt);
+      pitchEl.appendChild(altEl);
+    }
+    newNote.appendChild(pitchEl);
+
+    const durEl = _xmlDoc.createElement('duration');
+    durEl.textContent = String(targetDuration);
+    newNote.appendChild(durEl);
+
+    const curVoiceEl = curEl.querySelector('voice');
+    if (curVoiceEl) {
+      const voiceEl = _xmlDoc.createElement('voice');
+      voiceEl.textContent = curVoiceEl.textContent;
+      newNote.appendChild(voiceEl);
+    }
+
+    const typeEl = _xmlDoc.createElement('type');
+    typeEl.textContent = chosenType;
+    newNote.appendChild(typeEl);
+
+    const curStaffEl = curEl.querySelector('staff');
+    if (curStaffEl) {
+      const staffEl = _xmlDoc.createElement('staff');
+      staffEl.textContent = curStaffEl.textContent;
+      newNote.appendChild(staffEl);
+    }
+
+    curEl.parentNode.insertBefore(newNote, curEl);
+
+    showToast('✨ Đã thêm nốt mới phía trước!', 'success', 1200);
+    playSinglePitch(step, oct, alt, 0.3);
+    await _renderOsmdFromXmlDoc();
+  }
+
+  // Thêm Dấu Lặng Mới Ngay Sau Nốt Hiện Tại
+  async function insertRestAfter(durType = null) {
+    const curNote = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
+    if (!curNote || !curNote.xmlNode) {
+      showToast('Hãy chọn vị trí nốt!', 'error');
+      return;
+    }
+
+    _saveSnapshotForUndo();
+    const curEl = curNote.xmlNode;
+    const measureEl = curEl.closest('measure');
+    const divisionsEl = measureEl?.querySelector('attributes > divisions');
+    const divisions = divisionsEl ? (parseInt(divisionsEl.textContent, 10) || 4) : 4;
+
+    const chosenType = durType || document.querySelector('.btn-dur-card.active')?.dataset?.dur || 'quarter';
+    const multMap = { whole: 4, half: 2, quarter: 1, eighth: 0.5, '16th': 0.25 };
+    const mult = multMap[chosenType] || 1;
+    const targetDuration = Math.max(1, Math.round(divisions * mult));
+
+    const newNote = _xmlDoc.createElement('note');
+    const restEl = _xmlDoc.createElement('rest');
+    newNote.appendChild(restEl);
+
+    const durEl = _xmlDoc.createElement('duration');
+    durEl.textContent = String(targetDuration);
+    newNote.appendChild(durEl);
+
+    const curVoiceEl = curEl.querySelector('voice');
+    if (curVoiceEl) {
+      const voiceEl = _xmlDoc.createElement('voice');
+      voiceEl.textContent = curVoiceEl.textContent;
+      newNote.appendChild(voiceEl);
+    }
+
+    const typeEl = _xmlDoc.createElement('type');
+    typeEl.textContent = chosenType;
+    newNote.appendChild(typeEl);
+
+    const curStaffEl = curEl.querySelector('staff');
+    if (curStaffEl) {
+      const staffEl = _xmlDoc.createElement('staff');
+      staffEl.textContent = curStaffEl.textContent;
+      newNote.appendChild(staffEl);
+    }
+
+    curEl.parentNode.insertBefore(newNote, curEl.nextSibling);
+    showToast('𝄽 Đã thêm dấu lặng mới!', 'info', 1200);
+    _selectedPosition.beatIndex++;
+    await _renderOsmdFromXmlDoc();
+  }
+
+  // Nhân bản nốt hiện tại (Duplicate Note)
+  async function duplicateCurrentNote() {
+    const curNote = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
+    if (!curNote || !curNote.xmlNode) {
+      showToast('Hãy chọn nốt để nhân bản!', 'error');
+      return;
+    }
+
+    _saveSnapshotForUndo();
+    const curEl = curNote.xmlNode;
+    const cloneEl = curEl.cloneNode(true);
+
+    // Xóa dấu nối cũ khỏi bản clone nếu có
+    cloneEl.querySelectorAll('tie, tied').forEach(t => t.remove());
+
+    curEl.parentNode.insertBefore(cloneEl, curEl.nextSibling);
+    showToast('📋 Đã nhân bản nốt thành công!', 'success', 1200);
+    if (!curNote.isRest) {
+      playSinglePitch(curNote.step, curNote.octave, curNote.alter, 0.3);
+    }
+    _selectedPosition.beatIndex++;
+    await _renderOsmdFromXmlDoc();
+  }
+
+  // Xóa hẳn nốt khỏi cây DOM (Hard Delete)
+  async function deleteNoteCompletely() {
+    const curNote = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
+    if (!curNote || !curNote.xmlNode) {
+      showToast('Hãy chọn nốt cần xóa!', 'error');
+      return;
+    }
+
+    _saveSnapshotForUndo();
+    const curEl = curNote.xmlNode;
+    curEl.remove();
+
+    showToast('🗑 Đã xóa bỏ nốt khỏi ô nhịp', 'info', 1200);
+    _selectedPosition.beatIndex = Math.max(0, _selectedPosition.beatIndex - 1);
+    await _renderOsmdFromXmlDoc();
   }
 
   // Thêm 1 ô nhịp sau ô nhịp hiện tại
@@ -1523,19 +1897,25 @@
         key.dataset.octave = oct;
         key.dataset.alter = item.alter || 0;
 
+        const pitchName = item.isBlack ? `${item.step}♯${oct} / ${item.label || ''}` : `${item.step}${oct}`;
+        key.title = pitchName;
+
         if (!item.isBlack && item.step === 'C') {
           const span = document.createElement('span');
           span.textContent = `C${oct}`;
           key.appendChild(span);
         }
 
-        key.addEventListener('pointerdown', (e) => {
+        const handleKeyTrigger = (e) => {
           e.preventDefault();
-          key.classList.add('active');
           modifyPitch(item.step, oct, item.alter || 0);
-        });
-        key.addEventListener('pointerup', () => key.classList.remove('active'));
-        key.addEventListener('pointerleave', () => key.classList.remove('active'));
+        };
+
+        key.addEventListener('click', handleKeyTrigger);
+        key.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          handleKeyTrigger(e);
+        }, { passive: false });
 
         container.appendChild(key);
       });
@@ -1543,11 +1923,14 @@
   }
 
   function _highlightPianoKey(step, octave, alter = 0) {
+    if (!step) {
+      document.querySelectorAll('.piano-key.active').forEach(k => k.classList.remove('active'));
+      return;
+    }
+    const targetMidi = _pitchToMidi(step, octave, alter);
     document.querySelectorAll('.piano-key').forEach(k => {
-      const match = k.dataset.step === step &&
-                    parseInt(k.dataset.octave, 10) === octave &&
-                    parseInt(k.dataset.alter, 10) === alter;
-      k.classList.toggle('active', match);
+      const kMidi = _pitchToMidi(k.dataset.step, parseInt(k.dataset.octave, 10), parseInt(k.dataset.alter, 10));
+      k.classList.toggle('active', kMidi === targetMidi);
     });
   }
 
@@ -1922,10 +2305,45 @@
     document.getElementById('btn-pal-dot')?.addEventListener('click', toggleDot);
     document.getElementById('btn-pal-tie')?.addEventListener('click', toggleTie);
     document.getElementById('btn-pal-slur')?.addEventListener('click', toggleSlur);
+    document.getElementById('btn-pal-staccato')?.addEventListener('click', toggleStaccato);
+    document.getElementById('btn-pal-accent')?.addEventListener('click', toggleAccent);
+    document.getElementById('btn-pal-tenuto')?.addEventListener('click', toggleTenuto);
     document.getElementById('btn-pal-tuplet')?.addEventListener('click', toggleTuplet);
     document.getElementById('btn-pal-fermata')?.addEventListener('click', toggleFermata);
     document.getElementById('btn-pal-delete-rest')?.addEventListener('click', deleteNoteAsRest);
     document.getElementById('btn-pal-split-note')?.addEventListener('click', splitCurrentNote);
+
+    // Semitone (+/- nửa cung)
+    document.getElementById('btn-semi-dec')?.addEventListener('click', () => stepSemitone(-1));
+    document.getElementById('btn-semi-inc')?.addEventListener('click', () => stepSemitone(1));
+
+    // Toggle mini piano
+    document.getElementById('btn-toggle-mini-piano')?.addEventListener('click', (e) => {
+      const keysEl = document.getElementById('mini-piano');
+      if (keysEl) {
+        keysEl.classList.toggle('collapsed');
+        e.target.textContent = keysEl.classList.contains('collapsed') ? 'Mở rộng ▼' : 'Thu gọn ▲';
+      }
+    });
+
+    // Thao tác Thêm nốt & Sao chép & Xóa hẳn
+    document.getElementById('btn-insert-note-after')?.addEventListener('click', () => insertNoteAfter());
+    document.getElementById('btn-insert-note-before')?.addEventListener('click', () => insertNoteBefore());
+    document.getElementById('btn-insert-rest-after')?.addEventListener('click', () => insertRestAfter());
+    document.getElementById('btn-duplicate-note')?.addEventListener('click', duplicateCurrentNote);
+    document.getElementById('btn-hard-delete-note')?.addEventListener('click', deleteNoteCompletely);
+
+    // Modal phím tắt
+    const shortcutModal = document.getElementById('shortcut-guide-modal');
+    document.getElementById('btn-open-shortcut-modal')?.addEventListener('click', () => {
+      shortcutModal?.classList.remove('hidden');
+    });
+    document.getElementById('btn-close-shortcut-modal')?.addEventListener('click', () => {
+      shortcutModal?.classList.add('hidden');
+    });
+    shortcutModal?.addEventListener('click', (e) => {
+      if (e.target === shortcutModal) shortcutModal.classList.add('hidden');
+    });
 
     // Cấu trúc ô nhịp
     document.getElementById('btn-add-measure-after')?.addEventListener('click', addMeasureAfter);
@@ -2072,18 +2490,45 @@
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
         e.preventDefault();
         openSaveVersionModal();
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === '/' || e.key === '?')) {
+        e.preventDefault();
+        document.getElementById('shortcut-guide-modal')?.classList.toggle('hidden');
+        return;
+      }
+      if (e.key === 'Escape') {
+        document.getElementById('shortcut-guide-modal')?.classList.add('hidden');
+      }
+
+      // Insert key to insert note after
+      if (e.key === 'Insert') {
+        e.preventDefault();
+        insertNoteAfter();
+        return;
+      }
+
+      // Hard delete (Shift+Delete) vs Soft delete to rest (Delete)
+      if (e.shiftKey && (e.key === 'Delete' || e.key === 'Backspace')) {
+        e.preventDefault();
+        deleteNoteCompletely();
+        return;
       }
       if (e.key === 'Delete' || e.key === 'Backspace') {
         e.preventDefault();
         deleteNoteAsRest();
+        return;
       }
+
       if (e.key.toLowerCase() === 't') {
         e.preventDefault();
         toggleTie();
+        return;
       }
       if (e.key === ' ') {
         e.preventDefault();
         playSatbChord();
+        return;
       }
 
       // Voice selection shortcuts (1: Soprano, 2: Alto, 3: Tenor, 4: Bass) with instant audio feedback
@@ -2092,65 +2537,96 @@
         _refreshInspectorUI();
         const cur = _selectedPosition.activeVoiceMap['soprano'];
         if (cur && !cur.isRest) playSinglePitch(cur.step, cur.octave, cur.alter, 0.25);
+        return;
       }
       if (e.key === '2') {
         _selectedPosition.voice = 'alto';
         _refreshInspectorUI();
         const cur = _selectedPosition.activeVoiceMap['alto'];
         if (cur && !cur.isRest) playSinglePitch(cur.step, cur.octave, cur.alter, 0.25);
+        return;
       }
       if (e.key === '3') {
         _selectedPosition.voice = 'tenor';
         _refreshInspectorUI();
         const cur = _selectedPosition.activeVoiceMap['tenor'];
         if (cur && !cur.isRest) playSinglePitch(cur.step, cur.octave, cur.alter, 0.25);
+        return;
       }
       if (e.key === '4') {
         _selectedPosition.voice = 'bass';
         _refreshInspectorUI();
         const cur = _selectedPosition.activeVoiceMap['bass'];
         if (cur && !cur.isRest) playSinglePitch(cur.step, cur.octave, cur.alter, 0.25);
+        return;
       }
 
       // Horizontal navigation: ArrowLeft / ArrowRight
       if (e.key === 'ArrowLeft') {
         e.preventDefault();
         _navPrevNote();
+        return;
       }
       if (e.key === 'ArrowRight') {
         e.preventDefault();
         _navNextNote();
+        return;
+      }
+
+      // Alt + ArrowUp / ArrowDown for semitone step
+      if (e.altKey && e.key === 'ArrowUp') {
+        e.preventDefault();
+        stepSemitone(1);
+        return;
+      }
+      if (e.altKey && e.key === 'ArrowDown') {
+        e.preventDefault();
+        stepSemitone(-1);
+        return;
+      }
+
+      // Shift + ArrowUp / ArrowDown for octave step
+      if (e.shiftKey && e.key === 'ArrowUp') {
+        e.preventDefault();
+        modifyOctave(1);
+        return;
+      }
+      if (e.shiftKey && e.key === 'ArrowDown') {
+        e.preventDefault();
+        modifyOctave(-1);
+        return;
+      }
+
+      // Arrow Up / Down for semitone stepping
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        stepSemitone(1);
+        return;
+      }
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        stepSemitone(-1);
+        return;
       }
 
       // Direct letter key shortcuts (C, D, E, F, G, A, B)
       const keyUpper = e.key.toUpperCase();
-      if (['C', 'D', 'E', 'F', 'G', 'A', 'B'].includes(keyUpper)) {
+      if (['C', 'D', 'E', 'F', 'G', 'A', 'B'].includes(keyUpper) && !e.ctrlKey && !e.metaKey && !e.altKey) {
         e.preventDefault();
         const cur = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
-        if (cur && !cur.isRest) {
-          modifyPitch(keyUpper, cur.octave, cur.alter);
-          playSinglePitch(keyUpper, cur.octave, cur.alter, 0.3);
+        if (cur) {
+          const defaultVoicePitch = {
+            soprano: { step: 'G', octave: 4 },
+            alto:    { step: 'E', octave: 4 },
+            tenor:   { step: 'C', octave: 3 },
+            bass:    { step: 'G', octave: 2 }
+          };
+          const defP = defaultVoicePitch[_selectedPosition.voice] || { step: 'C', octave: 4 };
+          const oct = cur.isRest ? defP.octave : cur.octave;
+          const alt = cur.isRest ? 0 : cur.alter;
+          modifyPitch(keyUpper, oct, alt);
         }
-      }
-
-      // Arrow Up / Down for pitch stepping (+/- semitone)
-      if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        const cur = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
-        if (cur && !cur.isRest) {
-          const newMidi = _pitchToMidi(cur.step, cur.octave, cur.alter) + 1;
-          const steps = ['C', 'C', 'D', 'D', 'E', 'F', 'F', 'G', 'G', 'A', 'A', 'B'];
-          modifyPitch(steps[newMidi % 12], Math.floor(newMidi / 12) - 1, [1,3,6,8,10].includes(newMidi % 12) ? 1 : 0);
-        }
-      }
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        const cur = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
-        if (cur && !cur.isRest) {
-          const newMidi = _pitchToMidi(cur.step, cur.octave, cur.alter) - 1;
-          const steps = ['C', 'C', 'D', 'D', 'E', 'F', 'F', 'G', 'G', 'A', 'A', 'B'];
-          modifyPitch(steps[newMidi % 12], Math.floor(newMidi / 12) - 1, [1,3,6,8,10].includes(newMidi % 12) ? 1 : 0);
-        }
+        return;
       }
     });
   }
