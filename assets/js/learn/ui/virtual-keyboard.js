@@ -136,23 +136,58 @@ const VirtualKeyboard = (() => {
 
   /* ─── Highlight ──────────────────────────────────────────────── */
   function _updateHighlights() {
-    // Clear all
+    // Clear all classes and finger badges
     _keyEls.forEach(el => {
       el.classList.remove('vkb-active-rh', 'vkb-active-lh', 'vkb-next');
+      const badge = el.querySelector('.vkb-finger-badge');
+      if (badge) badge.remove();
     });
 
-    // Mark current chord
-    const markMidi = (midiList, cls) => {
-      for (const midi of midiList) {
-        const name = _midiToNoteName(midi);
-        const el = _keyEls.get(name);
-        if (el) el.classList.add(cls);
-      }
-    };
+    // Mark current chord RH with fingers
+    const rhFingers = _rhNotes.length === 3 ? ['1', '3', '5']
+                    : (_rhNotes.length === 4 ? ['1', '2', '3', '5']
+                    : (_rhNotes.length === 2 ? ['1', '5'] : ['1']));
 
-    markMidi(_rhNotes, 'vkb-active-rh');
-    markMidi(_lhNotes, 'vkb-active-lh');
-    markMidi(_nextNotes, 'vkb-next');
+    _rhNotes.forEach((midi, idx) => {
+      const name = _midiToNoteName(midi);
+      const el = _keyEls.get(name);
+      if (el) {
+        el.classList.add('vkb-active-rh');
+        const finger = rhFingers[idx];
+        if (finger) {
+          const badge = document.createElement('span');
+          badge.className = 'vkb-finger-badge vkb-finger-rh';
+          badge.textContent = finger;
+          badge.title = `Ngón tay phải: ${finger}`;
+          el.appendChild(badge);
+        }
+      }
+    });
+
+    // Mark current chord LH (Bass) with finger 5
+    _lhNotes.forEach(midi => {
+      const name = _midiToNoteName(midi);
+      const el = _keyEls.get(name);
+      if (el) {
+        el.classList.add('vkb-active-lh');
+        if (!el.querySelector('.vkb-finger-badge')) {
+          const badge = document.createElement('span');
+          badge.className = 'vkb-finger-badge vkb-finger-lh';
+          badge.textContent = '5';
+          badge.title = 'Ngón tay trái (Bass): 5';
+          el.appendChild(badge);
+        }
+      }
+    });
+
+    // Mark next chord (outline preview)
+    for (const midi of _nextNotes) {
+      const name = _midiToNoteName(midi);
+      const el = _keyEls.get(name);
+      if (el && !el.classList.contains('vkb-active-rh') && !el.classList.contains('vkb-active-lh')) {
+        el.classList.add('vkb-next');
+      }
+    }
   }
 
   /* ─── Play Note (hear on click) ──────────────────────────────── */

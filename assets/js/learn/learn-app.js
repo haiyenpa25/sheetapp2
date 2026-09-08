@@ -234,6 +234,10 @@ const LearnApp = (() => {
       if (_osmd) {
         await _osmd.load(xml);
         await _osmd.render();
+        if (_osmd.cursor) {
+          _osmd.cursor.reset();
+          _osmd.cursor.hide();
+        }
       }
 
       // Extract song metadata (BPM, meter)
@@ -374,8 +378,168 @@ const LearnApp = (() => {
     };
   }
 
+  /* ─── SATB Extraction & Helper Methods ───────────────────────── */
+  const _PITCH_MAP = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+  function _pitchToMidi(step, octave, alter = 0) {
+    const s = String(step).toUpperCase();
+    const semitone = _PITCH_MAP[s] ?? 0;
+    const oct = parseInt(octave, 10);
+    const alt = parseInt(alter || 0, 10);
+    return 12 * (oct + 1) + semitone + alt;
+  }
+
+  function _pitchToNoteStr(step, octave, alter = 0) {
+    if (!step || !octave) return null;
+    let acc = '';
+    const a = parseInt(alter || 0, 10);
+    if (a === 1) acc = '#';
+    else if (a === -1) acc = 'b';
+    else if (a === 2) acc = '##';
+    else if (a === -2) acc = 'bb';
+    return `${step.toUpperCase()}${acc}${octave}`;
+  }
+
+  function _groupChordsInMeasure(measureEl) {
+    if (!measureEl) return [];
+    const notesByTime = new Map();
+    let curTime = 0;
+    let lastStartTime = 0;
+
+    for (const child of Array.from(measureEl.children)) {
+      const tag = child.tagName.toLowerCase();
+      if (tag === 'note') {
+        const isChord = child.querySelector('chord') !== null;
+        const dur = parseInt(child.querySelector('duration')?.textContent || '0', 10);
+        let noteTime = curTime;
+        if (isChord) {
+          noteTime = lastStartTime;
+        } else {
+          lastStartTime = curTime;
+          curTime += dur;
+        }
+        if (!notesByTime.has(noteTime)) notesByTime.set(noteTime, []);
+        notesByTime.get(noteTime).push(child);
+      } else if (tag === 'backup') {
+        const dur = parseInt(child.querySelector('duration')?.textContent || '0', 10);
+        curTime = Math.max(0, curTime - dur);
+      } else if (tag === 'forward') {
+        const dur = parseInt(child.querySelector('duration')?.textContent || '0', 10);
+        curTime += dur;
+      }
+    }
+
+    const sortedTimes = Array.from(notesByTime.keys()).sort((a, b) => a - b);
+    return sortedTimes.map(t => notesByTime.get(t));
+  }
+
+  function _pitchValue(noteEl) {
+    const stepEl = noteEl.querySelector('pitch > step');
+    const octEl  = noteEl.querySelector('pitch > octave');
+    const altEl  = noteEl.querySelector('pitch > alter');
+    if (!stepEl || !octEl) return 0;
+    return _pitchToMidi(stepEl.textContent.trim(), octEl.textContent.trim(), altEl ? altEl.textContent.trim() : 0);
+  }
+
+  function _parseNoteData(noteEl, voiceName) {
+    const isRest = noteEl.querySelector('rest') !== null;
+    const stepEl = noteEl.querySelector('pitch > step');
+    const octEl  = noteEl.querySelector('pitch > octave');
+    const altEl  = noteEl.querySelector('pitch > alter');
+    return {
+      voice: voiceName,
+      isRest: isRest,
+      step: stepEl ? stepEl.textContent.trim().toUpperCase() : 'C',
+      octave: octEl ? parseInt(octEl.textContent.trim(), 10) : 4,
+      alter: altEl ? parseInt(altEl.textContent.trim(), 10) : 0,
+    };
+  }
+
+  function _extractSatbNotesAt(measureNum, beatIndex = 0) {
+    if (!_xmlDoc) return null;
+    const parts = _xmlDoc.querySelectorAll('part');
+    const part1 = _xmlDoc.querySelector('part#P1') || parts[0];
+    const part2 = _xmlDoc.querySelector('part#P2') || parts[1];
+    if (!part1) return null;
+
+    const m1 = part1.querySelector(`measure[number="${measureNum}"]`);
+    const m2 = part2 ? part2.querySelector(`measure[number="${measureNum}"]`) : null;
+    if (!m1) return null;
+
+    const p1Chords = _groupChordsInMeasure(m1);
+    const p2Chords = m2 ? _groupChordsInMeasure(m2) : [];
+    const totalBeats = Math.max(p1Chords.length, 1);
+    const safeIdx = Math.max(0, Math.min(beatIndex, totalBeats - 1));
+
+    const chordP1 = p1Chords[safeIdx] || [];
+    const chordP2 = p2Chords[safeIdx] || [];
+
+    let sopranoNote = null;
+    let altoNote = null;
+    if (chordP1.length === 1) {
+      sopranoNote = chordP1[0];
+    } else if (chordP1.length >= 2) {
+      const sorted = [...chordP1].sort((a, b) => _pitchValue(b) - _pitchValue(a));
+      sopranoNote = sorted[0];
+      altoNote = sorted[1];
+    }
+
+    let tenorNote = null;
+    let bassNote = null;
+    if (chordP2.length === 1) {
+      bassNote = chordP2[0];
+    } else if (chordP2.length >= 2) {
+      const sorted = [...chordP2].sort((a, b) => _pitchValue(b) - _pitchValue(a));
+      tenorNote = sorted[0];
+      bassNote = sorted[1];
+    }
+
+    return {
+      soprano: sopranoNote ? _parseNoteData(sopranoNote, 'soprano') : null,
+      alto:    altoNote ? _parseNoteData(altoNote, 'alto') : null,
+      tenor:   tenorNote ? _parseNoteData(tenorNote, 'tenor') : null,
+      bass:    bassNote ? _parseNoteData(bassNote, 'bass') : null,
+    };
+  }
+
   /* ─── Transport Callbacks ────────────────────────────────────── */
   function _setupTransportCallbacks() {
+    // 1. Theo dõi từng Phách (Beat)
+    MusicTransport.onBeat(({ measure, beat }) => {
+      // Visual Cursor Tracking
+      if (_osmd?.cursor && !_osmd.cursor.isHidden) {
+        _osmd.cursor.next();
+        if (_osmd.cursor.cursorElement) {
+          const cRect = _osmd.cursor.cursorElement.getBoundingClientRect();
+          const scoreSec = document.querySelector('.learn-score-section');
+          if (scoreSec) {
+            const vRect = scoreSec.getBoundingClientRect();
+            const targetY = vRect.height * 0.32;
+            const diff = cRect.top - vRect.top - targetY;
+            if (Math.abs(diff) > 25) {
+              scoreSec.scrollBy({ top: diff, behavior: 'smooth' });
+            }
+          }
+        }
+      }
+
+      // SATB 4-Part Choir Synthesis
+      const satbBeat = _extractSatbNotesAt(measure, (beat - 1) % 4);
+      if (satbBeat && window.LearnSoundEngine) {
+        const bpm = MusicTransport.getBpm() || 76;
+        const durSec = (60 / bpm) * 0.88;
+        ['soprano', 'alto', 'tenor', 'bass'].forEach(voice => {
+          const vNote = satbBeat[voice];
+          if (vNote && !vNote.isRest) {
+            const noteStr = _pitchToNoteStr(vNote.step, vNote.octave, vNote.alter);
+            if (noteStr) {
+              LearnSoundEngine.triggerSatbNote(voice, noteStr, durSec, undefined, 0.7);
+            }
+          }
+        });
+      }
+    });
+
+    // 2. Theo dõi từng Ô nhịp (Measure)
     MusicTransport.onMeasure(({ measure }) => {
       const timeline = LearnStore.get('timeline') || [];
       const chord    = ChordTimelineNormalizer.getChordAt(timeline, measure, 1);
@@ -390,8 +554,10 @@ const LearnApp = (() => {
         EventBus.emit(LEARN_EVENTS.CHORD_CHANGED, { chord, next });
       }
 
-      // Auto-scroll score to current measure
-      _scrollToMeasure(measure);
+      // Auto-scroll score fallback nếu không dùng cursor
+      if (!_osmd?.cursor || _osmd.cursor.isHidden) {
+        _scrollToMeasure(measure);
+      }
 
       // Record practice stats
       if (window.PracticeTracker) {
@@ -459,6 +625,7 @@ const LearnApp = (() => {
         if (window.LearnSoundEngine) LearnSoundEngine.init();
         if (window.PatternEngine) PatternEngine.start();
         if (window.PracticeTracker) PracticeTracker.onPlaybackStart(MusicTransport.getBpm());
+        if (_osmd?.cursor) _osmd.cursor.show();
         await MusicTransport.play();
         _setUiStatus('playing');
       }
@@ -470,6 +637,10 @@ const LearnApp = (() => {
       MusicTransport.stop();
       if (window.PatternEngine) PatternEngine.stop();
       if (window.PracticeTracker) PracticeTracker.onPlaybackStop();
+      if (_osmd?.cursor) {
+        _osmd.cursor.reset();
+        _osmd.cursor.hide();
+      }
       _setUiStatus('ready');
 
       // Reset to first chord
@@ -594,12 +765,64 @@ const LearnApp = (() => {
 
         // Nếu chuyển sang Organ, cập nhật pattern tương ứng
         if (mode === 'piano') {
-          document.getElementById('learn-pattern-select').value = 'piano-bass-chord-4-4-v1';
+          const pSel = document.getElementById('learn-pattern-select');
+          if (pSel) pSel.value = 'piano-bass-chord-4-4-v1';
           if (window.PatternEngine) PatternEngine.setPattern('piano-bass-chord-4-4-v1');
+        } else if (mode === 'satb') {
+          const satbCard = document.getElementById('learn-satb-card');
+          if (satbCard) satbCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          const choirTab = document.querySelector('.btn-learn-tab[data-tab="choir"]');
+          if (choirTab && window.innerWidth <= 960) choirTab.click();
         }
 
         EventBus.emit(LEARN_EVENTS.MODE_CHANGED, { mode });
         LearnStore.savePreferences();
+      });
+    });
+
+    // SATB Solo buttons
+    document.querySelectorAll('.btn-voice-solo').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const voice = btn.dataset.voice;
+        const isActive = btn.classList.toggle('active');
+        if (window.LearnSoundEngine) {
+          LearnSoundEngine.setSatbSolo(voice, isActive);
+        }
+      });
+    });
+
+    // SATB Mute buttons
+    document.querySelectorAll('.btn-voice-mute').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const voice = btn.dataset.voice;
+        const isActive = btn.classList.toggle('active');
+        if (window.LearnSoundEngine) {
+          LearnSoundEngine.setSatbMute(voice, isActive);
+        }
+      });
+    });
+
+    // SATB Volume sliders
+    document.querySelectorAll('.voice-slider').forEach(slider => {
+      slider.addEventListener('input', (e) => {
+        const voice = slider.dataset.voice;
+        if (window.LearnSoundEngine) {
+          LearnSoundEngine.setSatbVolume(voice, parseFloat(e.target.value));
+        }
+      });
+    });
+
+    // Mobile Tabs Switching
+    document.querySelectorAll('.btn-learn-tab').forEach(tabBtn => {
+      tabBtn.addEventListener('click', () => {
+        const tabName = tabBtn.dataset.tab;
+        document.querySelectorAll('.btn-learn-tab').forEach(b => b.classList.remove('active'));
+        tabBtn.classList.add('active');
+        const mainEl = document.getElementById('learn-main');
+        if (mainEl) mainEl.dataset.activeTab = tabName;
+        if (tabName === 'score' && _osmd) {
+          _fitScore();
+        }
       });
     });
 

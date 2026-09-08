@@ -2024,7 +2024,7 @@
     });
 
     // Navigation nốt trước / sau
-    document.getElementById('btn-nav-prev-note')?.addEventListener('click', () => {
+    function _navPrevNote() {
       if (_selectedPosition.beatIndex > 0) {
         _selectedPosition.beatIndex--;
       } else if (_selectedPosition.measureNumber > 1) {
@@ -2035,8 +2035,9 @@
       _refreshInspectorUI();
       const cur = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
       if (cur && !cur.isRest) playSinglePitch(cur.step, cur.octave, cur.alter, 0.25);
-    });
-    document.getElementById('btn-nav-next-note')?.addEventListener('click', () => {
+    }
+
+    function _navNextNote() {
       const curSatb = _getMeasureChordsSATB(_selectedPosition.measureNumber);
       if (_selectedPosition.beatIndex < curSatb.length - 1) {
         _selectedPosition.beatIndex++;
@@ -2047,7 +2048,10 @@
       _refreshInspectorUI();
       const cur = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
       if (cur && !cur.isRest) playSinglePitch(cur.step, cur.octave, cur.alter, 0.25);
-    });
+    }
+
+    document.getElementById('btn-nav-prev-note')?.addEventListener('click', _navPrevNote);
+    document.getElementById('btn-nav-next-note')?.addEventListener('click', _navNextNote);
     document.getElementById('btn-play-single')?.addEventListener('click', () => {
       const cur = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
       if (cur && !cur.isRest) playSinglePitch(cur.step, cur.octave, cur.alter, 0.35);
@@ -2081,12 +2085,55 @@
         e.preventDefault();
         playSatbChord();
       }
-      if (e.key === '1') { _selectedPosition.voice = 'soprano'; _refreshInspectorUI(); }
-      if (e.key === '2') { _selectedPosition.voice = 'alto';    _refreshInspectorUI(); }
-      if (e.key === '3') { _selectedPosition.voice = 'tenor';   _refreshInspectorUI(); }
-      if (e.key === '4') { _selectedPosition.voice = 'bass';    _refreshInspectorUI(); }
 
-      // Arrow Up / Down for pitch
+      // Voice selection shortcuts (1: Soprano, 2: Alto, 3: Tenor, 4: Bass) with instant audio feedback
+      if (e.key === '1') {
+        _selectedPosition.voice = 'soprano';
+        _refreshInspectorUI();
+        const cur = _selectedPosition.activeVoiceMap['soprano'];
+        if (cur && !cur.isRest) playSinglePitch(cur.step, cur.octave, cur.alter, 0.25);
+      }
+      if (e.key === '2') {
+        _selectedPosition.voice = 'alto';
+        _refreshInspectorUI();
+        const cur = _selectedPosition.activeVoiceMap['alto'];
+        if (cur && !cur.isRest) playSinglePitch(cur.step, cur.octave, cur.alter, 0.25);
+      }
+      if (e.key === '3') {
+        _selectedPosition.voice = 'tenor';
+        _refreshInspectorUI();
+        const cur = _selectedPosition.activeVoiceMap['tenor'];
+        if (cur && !cur.isRest) playSinglePitch(cur.step, cur.octave, cur.alter, 0.25);
+      }
+      if (e.key === '4') {
+        _selectedPosition.voice = 'bass';
+        _refreshInspectorUI();
+        const cur = _selectedPosition.activeVoiceMap['bass'];
+        if (cur && !cur.isRest) playSinglePitch(cur.step, cur.octave, cur.alter, 0.25);
+      }
+
+      // Horizontal navigation: ArrowLeft / ArrowRight
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        _navPrevNote();
+      }
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        _navNextNote();
+      }
+
+      // Direct letter key shortcuts (C, D, E, F, G, A, B)
+      const keyUpper = e.key.toUpperCase();
+      if (['C', 'D', 'E', 'F', 'G', 'A', 'B'].includes(keyUpper)) {
+        e.preventDefault();
+        const cur = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
+        if (cur && !cur.isRest) {
+          modifyPitch(keyUpper, cur.octave, cur.alter);
+          playSinglePitch(keyUpper, cur.octave, cur.alter, 0.3);
+        }
+      }
+
+      // Arrow Up / Down for pitch stepping (+/- semitone)
       if (e.key === 'ArrowUp') {
         e.preventDefault();
         const cur = _selectedPosition.activeVoiceMap[_selectedPosition.voice];

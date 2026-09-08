@@ -27,6 +27,26 @@ const LearnSoundEngine = (() => {
   let _bassSynth     = null;
   let _organSynth    = null;
 
+  // SATB Choir Synths & Volumes
+  const _satbSynths = {
+    soprano: null,
+    alto:    null,
+    tenor:   null,
+    bass:    null
+  };
+  const _satbVolumes = {
+    soprano: null,
+    alto:    null,
+    tenor:   null,
+    bass:    null
+  };
+  const _satbState = {
+    soprano: { muted: false, solo: false, vol: -2 },
+    alto:    { muted: false, solo: false, vol: -2 },
+    tenor:   { muted: false, solo: false, vol: -2 },
+    bass:    { muted: false, solo: false, vol: -2 }
+  };
+
   /**
    * Khởi tạo các synth và routing chain
    */
@@ -84,11 +104,132 @@ const LearnSoundEngine = (() => {
         }
       }).connect(_organVolume);
 
+      // 6. SATB Choir PolySynths (Mô phỏng 4 bè Ca đoàn ấm áp, truyền cảm)
+      _satbVolumes.soprano = new Tone.Volume(-2).connect(_masterLimiter);
+      _satbVolumes.alto    = new Tone.Volume(-2).connect(_masterLimiter);
+      _satbVolumes.tenor   = new Tone.Volume(-2).connect(_masterLimiter);
+      _satbVolumes.bass    = new Tone.Volume(-1.5).connect(_masterLimiter);
+
+      _satbSynths.soprano = new Tone.PolySynth(Tone.Synth, {
+        maxPolyphony: 8,
+        oscillator: { type: 'sine' },
+        envelope: { attack: 0.04, decay: 0.3, sustain: 0.7, release: 0.8 }
+      }).connect(_satbVolumes.soprano);
+
+      _satbSynths.alto = new Tone.PolySynth(Tone.Synth, {
+        maxPolyphony: 8,
+        oscillator: { type: 'triangle' },
+        envelope: { attack: 0.04, decay: 0.3, sustain: 0.65, release: 0.8 }
+      }).connect(_satbVolumes.alto);
+
+      _satbSynths.tenor = new Tone.PolySynth(Tone.Synth, {
+        maxPolyphony: 8,
+        oscillator: { type: 'triangle8' },
+        envelope: { attack: 0.04, decay: 0.3, sustain: 0.7, release: 0.85 }
+      }).connect(_satbVolumes.tenor);
+
+      _satbSynths.bass = new Tone.PolySynth(Tone.Synth, {
+        maxPolyphony: 8,
+        oscillator: { type: 'fatsawtooth', spread: 15, count: 2 },
+        envelope: { attack: 0.05, decay: 0.35, sustain: 0.75, release: 0.9 }
+      }).connect(_satbVolumes.bass);
+
       _initialized = true;
-      console.log('[LearnSoundEngine] Audio engines initialized successfully');
+      console.log('[LearnSoundEngine] Audio engines + SATB Choir initialized successfully');
     } catch (e) {
       console.warn('[LearnSoundEngine] Init failed (waiting for user gesture):', e);
     }
+  }
+
+  /**
+   * Kiểm tra xem bè SATB có được phép phát ra âm không (dựa trên Solo & Mute)
+   */
+  function isSatbAudible(voice) {
+    const v = _satbState[voice];
+    if (!v) return false;
+
+    // Nếu có bất kỳ bè nào được SOLO, thì CHỈ các bè SOLO mới được kêu
+    const anySolo = Object.values(_satbState).some(s => s.solo);
+    if (anySolo) {
+      return v.solo;
+    }
+
+    // Nếu không ai SOLO, thì kiểm tra bè này có bị MUTE không
+    return !v.muted;
+  }
+
+  /**
+   * Phát nốt cho một bè SATB cụ thể
+   * @param {'soprano'|'alto'|'tenor'|'bass'} voice
+   * @param {string} note - Vd: "G4", "C3"
+   * @param {number} durationSec
+   * @param {number} time
+   * @param {number} velocity
+   */
+  function triggerSatbNote(voice, note, durationSec, time, velocity = 0.7) {
+    _ensureReady();
+    if (!note || durationSec <= 0) return;
+    if (!isSatbAudible(voice)) return;
+
+    const synth = _satbSynths[voice];
+    if (!synth) return;
+
+    try {
+      const dur = Math.max(0.05, durationSec);
+      const vel = Math.max(0.1, Math.min(1.0, velocity));
+      if (time !== undefined && time !== null) {
+        synth.triggerAttackRelease(note, dur, time, vel);
+      } else {
+        synth.triggerAttackRelease(note, dur, undefined, vel);
+      }
+    } catch (e) {
+      // Ignored scheduling error
+    }
+  }
+
+  /**
+   * Bật/Tắt Mute cho bè SATB
+   */
+  function setSatbMute(voice, isMuted) {
+    if (_satbState[voice]) {
+      _satbState[voice].muted = !!isMuted;
+      if (isMuted && _satbSynths[voice]) {
+        try { _satbSynths[voice].releaseAll(); } catch (e) {}
+      }
+    }
+  }
+
+  /**
+   * Bật/Tắt Solo cho bè SATB
+   */
+  function setSatbSolo(voice, isSolo) {
+    if (_satbState[voice]) {
+      _satbState[voice].solo = !!isSolo;
+      // Dừng âm thanh của các bè không còn audible
+      Object.keys(_satbState).forEach(vKey => {
+        if (!isSatbAudible(vKey) && _satbSynths[vKey]) {
+          try { _satbSynths[vKey].releaseAll(); } catch (e) {}
+        }
+      });
+    }
+  }
+
+  /**
+   * Cài đặt âm lượng riêng cho bè SATB
+   */
+  function setSatbVolume(voice, db) {
+    _ensureReady();
+    if (_satbState[voice]) {
+      _satbState[voice].vol = db;
+      const volNode = _satbVolumes[voice];
+      if (volNode) {
+        volNode.volume.value = Math.max(-60, Math.min(6, db));
+      }
+    }
+  }
+
+  function getSatbState() {
+    return JSON.parse(JSON.stringify(_satbState));
   }
 
   /**
@@ -149,6 +290,9 @@ const LearnSoundEngine = (() => {
       if (_pianoSynth) _pianoSynth.releaseAll();
       if (_bassSynth)  _bassSynth.releaseAll();
       if (_organSynth) _organSynth.releaseAll();
+      Object.values(_satbSynths).forEach(synth => {
+        if (synth) synth.releaseAll();
+      });
     } catch (e) { /* ignore */ }
   }
 
@@ -188,6 +332,12 @@ const LearnSoundEngine = (() => {
       if (_pianoVolume){ _pianoVolume.dispose(); _pianoVolume = null; }
       if (_bassVolume) { _bassVolume.dispose();  _bassVolume = null; }
       if (_organVolume){ _organVolume.dispose(); _organVolume = null; }
+      Object.keys(_satbSynths).forEach(k => {
+        if (_satbSynths[k]) { _satbSynths[k].dispose(); _satbSynths[k] = null; }
+      });
+      Object.keys(_satbVolumes).forEach(k => {
+        if (_satbVolumes[k]) { _satbVolumes[k].dispose(); _satbVolumes[k] = null; }
+      });
       if (_masterLimiter) { _masterLimiter.dispose(); _masterLimiter = null; }
       _initialized = false;
     } catch (e) { /* ignore */ }
@@ -196,6 +346,12 @@ const LearnSoundEngine = (() => {
   return {
     init,
     triggerNote,
+    triggerSatbNote,
+    setSatbMute,
+    setSatbSolo,
+    setSatbVolume,
+    getSatbState,
+    isSatbAudible,
     stopAll,
     setVolume,
     dispose

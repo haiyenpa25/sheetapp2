@@ -149,8 +149,24 @@ function learnCssTag(string $file): string {
   <div id="learn-loading" class="learn-loading-overlay hidden">Đang tải...</div>
   <div id="learn-error"   class="learn-error-banner hidden"></div>
 
+  <!-- ═══ MOBILE 3-TAB SELECTOR (Chỉ hiện trên điện thoại / màn hình nhỏ) ═══ -->
+  <nav class="learn-mobile-tabs" id="learn-mobile-tabs">
+    <button type="button" class="btn-learn-tab active" data-tab="score">
+      <span class="tab-icon">🎼</span>
+      <span class="tab-label">Bản nhạc</span>
+    </button>
+    <button type="button" class="btn-learn-tab" data-tab="keys">
+      <span class="tab-icon">🎹</span>
+      <span class="tab-label">Phím & Hợp âm</span>
+    </button>
+    <button type="button" class="btn-learn-tab" data-tab="choir">
+      <span class="tab-icon">🎤</span>
+      <span class="tab-label">Ca đoàn SATB</span>
+    </button>
+  </nav>
+
   <!-- ═══ MAIN LAYOUT ══════════════════════════════════════════════════ -->
-  <div class="learn-main">
+  <div class="learn-main" id="learn-main" data-active-tab="score">
 
     <!-- ── Center Stage (Score + Virtual Keyboard) ──────────────────── -->
     <div class="learn-center-stage">
@@ -269,6 +285,77 @@ function learnCssTag(string $file): string {
           <div class="mixer-item">
             <span>Bass</span>
             <input type="range" id="slider-vol-bass" min="-30" max="4" value="-1">
+          </div>
+        </div>
+      </div>
+
+      <!-- SATB Choir Mixer Card -->
+      <div class="learn-panel-card" id="learn-satb-card">
+        <div class="learn-panel-card-header">
+          <span class="learn-panel-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:-3px;margin-right:4px;">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+            Luyện Ca Đoàn (4 Bè SATB)
+          </span>
+          <span class="satb-badge-mode" id="satb-active-badge">4 Bè</span>
+        </div>
+        <div class="satb-mixer-body">
+          <!-- Soprano -->
+          <div class="satb-voice-row" data-voice="soprano">
+            <div class="voice-info">
+              <span class="voice-dot voice-dot-soprano"></span>
+              <span class="voice-name">Soprano (Nữ Cao)</span>
+            </div>
+            <div class="voice-actions">
+              <button type="button" class="btn-voice-btn btn-voice-solo" data-voice="soprano" title="Chỉ nghe bè này">Solo</button>
+              <button type="button" class="btn-voice-btn btn-voice-mute" data-voice="soprano" title="Tắt bè này để tự hát">Mute</button>
+            </div>
+            <div class="voice-slider-wrap">
+              <input type="range" class="voice-slider" data-voice="soprano" min="-30" max="4" value="-2">
+            </div>
+          </div>
+          <!-- Alto -->
+          <div class="satb-voice-row" data-voice="alto">
+            <div class="voice-info">
+              <span class="voice-dot voice-dot-alto"></span>
+              <span class="voice-name">Alto (Nữ Trầm)</span>
+            </div>
+            <div class="voice-actions">
+              <button type="button" class="btn-voice-btn btn-voice-solo" data-voice="alto" title="Chỉ nghe bè này">Solo</button>
+              <button type="button" class="btn-voice-btn btn-voice-mute" data-voice="alto" title="Tắt bè này để tự hát">Mute</button>
+            </div>
+            <div class="voice-slider-wrap">
+              <input type="range" class="voice-slider" data-voice="alto" min="-30" max="4" value="-2">
+            </div>
+          </div>
+          <!-- Tenor -->
+          <div class="satb-voice-row" data-voice="tenor">
+            <div class="voice-info">
+              <span class="voice-dot voice-dot-tenor"></span>
+              <span class="voice-name">Tenor (Nam Cao)</span>
+            </div>
+            <div class="voice-actions">
+              <button type="button" class="btn-voice-btn btn-voice-solo" data-voice="tenor" title="Chỉ nghe bè này">Solo</button>
+              <button type="button" class="btn-voice-btn btn-voice-mute" data-voice="tenor" title="Tắt bè này để tự hát">Mute</button>
+            </div>
+            <div class="voice-slider-wrap">
+              <input type="range" class="voice-slider" data-voice="tenor" min="-30" max="4" value="-2">
+            </div>
+          </div>
+          <!-- Bass -->
+          <div class="satb-voice-row" data-voice="bass">
+            <div class="voice-info">
+              <span class="voice-dot voice-dot-bass"></span>
+              <span class="voice-name">Bass (Nam Trầm)</span>
+            </div>
+            <div class="voice-actions">
+              <button type="button" class="btn-voice-btn btn-voice-solo" data-voice="bass" title="Chỉ nghe bè này">Solo</button>
+              <button type="button" class="btn-voice-btn btn-voice-mute" data-voice="bass" title="Tắt bè này để tự hát">Mute</button>
+            </div>
+            <div class="voice-slider-wrap">
+              <input type="range" class="voice-slider" data-voice="bass" min="-30" max="4" value="-1.5">
+            </div>
           </div>
         </div>
       </div>

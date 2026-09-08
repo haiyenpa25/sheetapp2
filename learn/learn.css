@@ -706,13 +706,50 @@ html, body {
 
 .vkb-key-label {
   position: absolute;
-  bottom: 4px;
+  bottom: 2px;
   left: 50%;
   transform: translateX(-50%);
   font-size: 8px;
   color: #888;
   pointer-events: none;
   white-space: nowrap;
+}
+
+/* Finger badges (1, 2, 3, 4, 5) */
+.vkb-finger-badge {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 800;
+  font-family: 'Fira Code', monospace;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  pointer-events: none;
+  animation: vkbPopIn 0.16s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.vkb-finger-rh {
+  background: #ffffff;
+  color: #6d28d9;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.6);
+}
+.vkb-finger-lh {
+  background: #38bdf8;
+  color: #0f172a;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.6);
+}
+.vkb-black .vkb-finger-badge {
+  bottom: 4px;
+}
+@keyframes vkbPopIn {
+  from { transform: translateX(-50%) scale(0.5); opacity: 0; }
+  to { transform: translateX(-50%) scale(1); opacity: 1; }
 }
 
 /* ─── Controls Bar ────────────────────────────────────────────────── */
@@ -1085,4 +1122,256 @@ html, body {
   background: var(--learn-accent);
   color: #fff;
 }
+
+/* ─── SATB Choir Mixer Card ───────────────────────────────────────── */
+.satb-badge-mode {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.satb-mixer-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.satb-voice-row {
+  display: grid;
+  grid-template-columns: 1fr auto 75px;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--learn-surface2);
+  border: 1px solid var(--learn-border);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition);
+}
+
+.satb-voice-row:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.voice-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.voice-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.voice-dot-soprano { background: #f43f5e; box-shadow: 0 0 6px #f43f5e; }
+.voice-dot-alto    { background: #a855f7; box-shadow: 0 0 6px #a855f7; }
+.voice-dot-tenor   { background: #3b82f6; box-shadow: 0 0 6px #3b82f6; }
+.voice-dot-bass    { background: #10b981; box-shadow: 0 0 6px #10b981; }
+
+.voice-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--learn-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.voice-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.btn-voice-btn {
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 4px;
+  border: 1px solid var(--learn-border);
+  background: var(--learn-surface);
+  color: var(--learn-text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-voice-btn:hover {
+  color: #fff;
+  border-color: #666;
+}
+
+.btn-voice-solo.active {
+  background: #f59e0b;
+  border-color: #d97706;
+  color: #000;
+  font-weight: 800;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+}
+
+.btn-voice-mute.active {
+  background: #ef4444;
+  border-color: #dc2626;
+  color: #fff;
+  font-weight: 800;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+}
+
+.voice-slider-wrap input[type="range"] {
+  width: 100%;
+  height: 4px;
+  accent-color: var(--learn-accent);
+  cursor: pointer;
+}
+
+/* ─── Mobile Tabs Bar ─────────────────────────────────────────────── */
+.learn-mobile-tabs {
+  display: none; /* Desktop hidden */
+}
+
+@media (max-width: 960px) {
+  .learn-mobile-tabs {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    height: 42px;
+    background: #13131c;
+    border-bottom: 1px solid var(--learn-border);
+    padding: 0 8px;
+    gap: 6px;
+    z-index: 95;
+    flex-shrink: 0;
+  }
+
+  .btn-learn-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 8px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    color: var(--learn-text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: nowrap;
+  }
+
+  .btn-learn-tab.active {
+    background: rgba(124, 58, 237, 0.2);
+    border-color: rgba(124, 58, 237, 0.4);
+    color: #e0e7ff;
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.25);
+  }
+
+  .btn-learn-tab .tab-icon {
+    font-size: 13px;
+  }
+
+  /* 3-Tab View Controller */
+  .learn-main {
+    flex-direction: column !important;
+    overflow: hidden !important;
+    height: calc(100vh - 56px - 42px - 60px) !important;
+  }
+
+  /* Tab 1: Bản nhạc (Score) */
+  .learn-main[data-active-tab="score"] .learn-center-stage {
+    display: flex !important;
+    flex: 1 !important;
+    height: 100% !important;
+  }
+  .learn-main[data-active-tab="score"] .learn-score-section {
+    display: flex !important;
+    flex: 1 !important;
+    height: 100% !important;
+  }
+  .learn-main[data-active-tab="score"] .learn-keyboard-section {
+    display: none !important;
+  }
+  .learn-main[data-active-tab="score"] .learn-side-panel {
+    display: none !important;
+  }
+
+  /* Tab 2: Phím & Hợp âm (Keys & Chords) */
+  .learn-main[data-active-tab="keys"] .learn-center-stage {
+    display: flex !important;
+    flex: 1 !important;
+    height: auto !important;
+  }
+  .learn-main[data-active-tab="keys"] .learn-score-section {
+    display: none !important;
+  }
+  .learn-main[data-active-tab="keys"] .learn-keyboard-section {
+    display: flex !important;
+    flex-shrink: 0 !important;
+    border-top: none !important;
+    padding: 10px 8px !important;
+  }
+  .learn-main[data-active-tab="keys"] .learn-side-panel {
+    display: flex !important;
+    flex: 1 !important;
+    overflow-y: auto !important;
+  }
+  .learn-main[data-active-tab="keys"] #learn-satb-card {
+    display: none !important;
+  }
+  .learn-main[data-active-tab="keys"] #learn-pattern-card {
+    display: flex !important;
+  }
+
+  /* Tab 3: Ca đoàn SATB (Choir) */
+  .learn-main[data-active-tab="choir"] .learn-center-stage {
+    display: none !important;
+  }
+  .learn-main[data-active-tab="choir"] .learn-side-panel {
+    display: flex !important;
+    flex: 1 !important;
+    overflow-y: auto !important;
+  }
+  .learn-main[data-active-tab="choir"] #learn-satb-card {
+    display: flex !important;
+    order: -1 !important;
+  }
+  .learn-main[data-active-tab="choir"] .chord-card-container {
+    display: none !important;
+  }
+
+  /* Controls Bar on Mobile */
+  .learn-controls-bar {
+    height: 60px !important;
+    padding: 0 8px !important;
+    gap: 6px !important;
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+  }
+  .btn-learn-play, .btn-learn-stop {
+    padding: 0 10px !important;
+    font-size: 11px !important;
+    height: 38px !important;
+  }
+  .learn-tempo-ladder {
+    display: none !important;
+  }
+  .learn-loop-group {
+    max-width: 120px !important;
+  }
+  .learn-section-select {
+    max-width: 85px !important;
+    font-size: 10px !important;
+    padding: 4px 6px !important;
+  }
+}
+
 
