@@ -283,7 +283,7 @@ const LearnApp = (() => {
       const timeline = LearnStore.get('timeline') || [];
       const firstChord = timeline[0] ?? null;
       const secondChord = timeline[1] ?? null;
-      if (window.ChordCard) ChordCard.setChord(firstChord, secondChord);
+      if (window.ChordCard) ChordCard.setChord(firstChord, secondChord, song.defaultKey);
 
       EventBus.emit(LEARN_EVENTS.READY, { songId: song.id });
 
@@ -311,7 +311,7 @@ const LearnApp = (() => {
     const next  = ChordTimelineNormalizer.getNextChord(timeline, chord);
     LearnStore.setCurrentChord(chord, next);
 
-    if (window.ChordCard) ChordCard.setChord(chord, next);
+    if (window.ChordCard) ChordCard.setChord(chord, next, _currentSong?.defaultKey);
     if (chord) EventBus.emit(LEARN_EVENTS.CHORD_CHANGED, { chord, next });
   }
 
@@ -319,11 +319,11 @@ const LearnApp = (() => {
     const patternSelect = document.getElementById('learn-pattern-select');
     if (!patternSelect || !window.PatternEngine) return;
 
-    let targetPattern = 'piano-bass-chord-4-4-v1';
+    let targetPattern = 'smart-ballad';
     if (beats === 3 && beatType === 4) {
-      targetPattern = 'piano-waltz-3-4-v1';
+      targetPattern = 'smart-waltz';
     } else if (beats === 6 && beatType === 8) {
-      targetPattern = 'piano-worship-6-8-v1';
+      targetPattern = 'smart-worship';
     }
 
     patternSelect.value = targetPattern;
@@ -505,6 +505,18 @@ const LearnApp = (() => {
   function _setupTransportCallbacks() {
     // 1. Theo dõi từng Phách (Beat)
     MusicTransport.onBeat(({ measure, beat }) => {
+      // Visual Metronome Beat Indicator update
+      const beatDots = document.querySelectorAll('.beat-dot');
+      beatDots.forEach(dot => {
+        const dotBeat = parseInt(dot.dataset.beat, 10);
+        dot.classList.toggle('active', dotBeat === beat);
+      });
+
+      // Metronome Audio Click (Ting on beat 1 downbeat, cốc on beats 2,3,4)
+      if (window.LearnSoundEngine && LearnSoundEngine.isMetronomeEnabled && LearnSoundEngine.isMetronomeEnabled()) {
+        LearnSoundEngine.playMetronomeClick(beat, beat === 1);
+      }
+
       // Visual Cursor Tracking
       if (_osmd?.cursor && !_osmd.cursor.isHidden) {
         _osmd.cursor.next();
@@ -548,7 +560,7 @@ const LearnApp = (() => {
       LearnStore.setCurrentChord(chord, next);
       LearnStore.setCurrentPosition(measure, 1);
 
-      if (window.ChordCard) ChordCard.setChord(chord, next);
+      if (window.ChordCard) ChordCard.setChord(chord, next, _currentSong?.defaultKey);
 
       if (chord) {
         EventBus.emit(LEARN_EVENTS.CHORD_CHANGED, { chord, next });
@@ -619,6 +631,7 @@ const LearnApp = (() => {
         MusicTransport.pause();
         if (window.PatternEngine) PatternEngine.pause();
         if (window.PracticeTracker) PracticeTracker.onPlaybackStop();
+        document.querySelectorAll('.beat-dot').forEach(dot => dot.classList.remove('active'));
         _setUiStatus('paused');
       } else {
         await MusicTransport.unlock();
@@ -641,11 +654,12 @@ const LearnApp = (() => {
         _osmd.cursor.reset();
         _osmd.cursor.hide();
       }
+      document.querySelectorAll('.beat-dot').forEach(dot => dot.classList.remove('active'));
       _setUiStatus('ready');
 
       // Reset to first chord
       const timeline = LearnStore.get('timeline') || [];
-      if (window.ChordCard) ChordCard.setChord(timeline[0] ?? null, timeline[1] ?? null);
+      if (window.ChordCard) ChordCard.setChord(timeline[0] ?? null, timeline[1] ?? null, _currentSong?.defaultKey);
     });
 
     // BPM decrease
@@ -755,6 +769,27 @@ const LearnApp = (() => {
       }
     });
 
+    // Metronome Click Toggle
+    const metroBtn = document.getElementById('btn-learn-metro');
+    metroBtn?.addEventListener('click', () => {
+      if (window.LearnSoundEngine) {
+        const active = LearnSoundEngine.toggleMetronome();
+        metroBtn.classList.toggle('active', active);
+      }
+    });
+
+    // Hand Practice Selector (Both / Right / Left)
+    document.querySelectorAll('.btn-hand-mode').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.btn-hand-mode').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const hand = btn.dataset.hand || 'both';
+        if (window.LearnSoundEngine) {
+          LearnSoundEngine.setHandPractice(hand);
+        }
+      });
+    });
+
     // Mode selector
     document.querySelectorAll('.btn-learn-mode').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -763,11 +798,13 @@ const LearnApp = (() => {
         document.querySelectorAll('.btn-learn-mode').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
 
-        // Nếu chuyển sang Organ, cập nhật pattern tương ứng
+        // Nếu chuyển sang Organ/Piano, đồng bộ pattern
         if (mode === 'piano') {
           const pSel = document.getElementById('learn-pattern-select');
-          if (pSel) pSel.value = 'piano-bass-chord-4-4-v1';
-          if (window.PatternEngine) PatternEngine.setPattern('piano-bass-chord-4-4-v1');
+          if (pSel && !pSel.value) {
+            pSel.value = 'smart-ballad';
+            if (window.PatternEngine) PatternEngine.setPattern('smart-ballad');
+          }
         } else if (mode === 'satb') {
           const satbCard = document.getElementById('learn-satb-card');
           if (satbCard) satbCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -901,7 +938,7 @@ const LearnApp = (() => {
 
     // EventBus listeners
     EventBus.on(LEARN_EVENTS.CHORD_CHANGED, ({ chord, next }) => {
-      if (window.ChordCard) ChordCard.setChord(chord, next);
+      if (window.ChordCard) ChordCard.setChord(chord, next, _currentSong?.defaultKey);
     });
   }
 

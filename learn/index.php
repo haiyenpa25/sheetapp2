@@ -218,10 +218,16 @@ function learnCssTag(string $file): string {
             </svg>
             BÀN PHÍM PIANO
           </span>
+          <div class="learn-hand-selector" id="learn-hand-selector" title="Chọn tay để luyện tập">
+            <span class="hand-label">Tập:</span>
+            <button type="button" class="btn-hand-mode active" data-hand="both" title="Phát cả hai tay (Bass + Hợp âm)">👐 Cả 2 tay</button>
+            <button type="button" class="btn-hand-mode" data-hand="right" title="Chỉ phát tay phải (Bạn tự bấm bass tay trái)">🖐 Tay phải</button>
+            <button type="button" class="btn-hand-mode" data-hand="left" title="Chỉ phát tay trái (Bạn tự dậm hợp âm tay phải)">🤚 Tay trái</button>
+          </div>
           <div class="vkb-legend">
-            <span class="vkb-legend-rh"><span class="legend-dot legend-dot-rh"></span> Tay phải (Hợp âm)</span>
-            <span class="vkb-legend-lh"><span class="legend-dot legend-dot-lh"></span> Tay trái (Bass)</span>
-            <span class="vkb-legend-next"><span class="legend-dot legend-dot-next"></span> Hợp âm kế tiếp</span>
+            <span class="vkb-legend-rh"><span class="legend-dot legend-dot-rh"></span> Tay phải</span>
+            <span class="vkb-legend-lh"><span class="legend-dot legend-dot-lh"></span> Tay trái</span>
+            <span class="vkb-legend-next"><span class="legend-dot legend-dot-next"></span> Kế tiếp</span>
           </div>
         </div>
         <div id="learn-virtual-keyboard">
@@ -268,12 +274,16 @@ function learnCssTag(string $file): string {
           </label>
         </div>
         <select id="learn-pattern-select" class="learn-select">
-          <option value="piano-block-4-4-v1">Piano Block (4/4 Cơ bản)</option>
-          <option value="piano-bass-chord-4-4-v1" selected>Bass + Chords (4/4 Pop/Ballad)</option>
-          <option value="piano-arpeggio-4-4-v1">Arpeggio Rải Nốt (4/4 Nhẹ nhàng)</option>
-          <option value="piano-waltz-3-4-v1">Waltz Cổ Điển (3/4 Bùm-Chát)</option>
-          <option value="piano-worship-6-8-v1">Worship Ballad (6/8 Sâu lắng)</option>
-          <option value="organ-church-4-4-v1">Organ Thánh Ca (4/4 Ngân dài)</option>
+          <option value="smart-ballad" selected>✨ Smart Ballad (Tự thích ứng nhịp)</option>
+          <option value="smart-hymn">✨ Smart Hymn (Thánh ca trang trọng)</option>
+          <option value="smart-worship">✨ Smart Worship (Rải arpeggio sâu lắng)</option>
+          <option value="smart-waltz">✨ Smart Waltz (3/4 Bùm-chát)</option>
+          <option value="piano-bass-chord-4-4-v1">Piano Bass + Chords (4/4 Cố định)</option>
+          <option value="piano-block-4-4-v1">Piano Block (4/4 Nốt chặn)</option>
+          <option value="piano-arpeggio-4-4-v1">Arpeggio 4/4 (Rải liên tục)</option>
+          <option value="piano-waltz-3-4-v1">Waltz 3/4 (Cổ điển)</option>
+          <option value="piano-worship-6-8-v1">Worship 6/8 (Nhẹ nhàng)</option>
+          <option value="organ-church-4-4-v1">Organ Thánh Đường</option>
         </select>
 
         <!-- Sound Mixer preview -->
@@ -410,6 +420,20 @@ function learnCssTag(string $file): string {
       <button class="btn-learn-bpm" id="btn-learn-bpm-dec" title="Giảm BPM">−</button>
       <span class="learn-bpm-value" id="learn-bpm-value">76</span>
       <button class="btn-learn-bpm" id="btn-learn-bpm-inc" title="Tăng BPM">+</button>
+    </div>
+
+    <!-- Metronome Click & Visual Beat -->
+    <div class="learn-metronome-box" title="Máy đếm nhịp">
+      <button type="button" id="btn-learn-metro" class="btn-learn-metro" title="Bật/Tắt tiếng gõ phách Metronome">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span id="learn-metro-label">Gõ nhịp</span>
+      </button>
+      <div class="learn-beat-indicator" id="learn-beat-indicator" title="Nhịp đập 1-2-3-4">
+        <span class="beat-dot" data-beat="1"></span>
+        <span class="beat-dot" data-beat="2"></span>
+        <span class="beat-dot" data-beat="3"></span>
+        <span class="beat-dot" data-beat="4"></span>
+      </div>
     </div>
 
     <!-- Tempo Ladder -->
