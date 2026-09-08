@@ -29,6 +29,7 @@
   };
 
   let _zoom = 1.0;
+  let _smartOverwriteMode = true;
 
   // Trạng thái SATB Audio Mixer
   const _mixerState = {
@@ -409,6 +410,35 @@
     }
     _setControlsDisabled(false);
 
+    // Cập nhật Smart QuickBar Hint & Toggle Status
+    const quickbarHint = document.getElementById('smart-quickbar-hint');
+    if (quickbarHint) {
+      const typeMapVi = {
+        whole: 'Tròn (4 phách)',
+        half: 'Trắng (2 phách)',
+        quarter: 'Đen (1 phách)',
+        eighth: 'Móc đơn (1/2)',
+        '16th': 'Móc kép (1/4)'
+      };
+      const typeVi = typeMapVi[curNote.type] || curNote.type;
+      const voiceVi = { soprano: 'Soprano', alto: 'Alto', tenor: 'Tenor', bass: 'Bass' }[voice] || voice;
+      if (curNote.isRest) {
+        quickbarHint.innerHTML = `Bè <strong>${voiceVi}</strong> · Đang chọn: <strong>Dấu lặng ${typeVi}</strong> [Bấm phím đàn hoặc C-B để điền nốt]`;
+      } else {
+        const acc = curNote.alter === 1 ? '♯' : (curNote.alter === -1 ? '♭' : '');
+        quickbarHint.innerHTML = `Bè <strong>${voiceVi}</strong> · Đang chọn: <strong>Nốt ${curNote.step}${acc}${curNote.octave} (${typeVi})</strong> [Bấm 'Tách 2 lặng' để chia nhỏ]`;
+      }
+    }
+
+    const toggleSmartBtn = document.getElementById('btn-toggle-smart-overwrite');
+    const toggleSmartLbl = document.getElementById('label-smart-overwrite-status');
+    if (toggleSmartBtn) {
+      toggleSmartBtn.classList.toggle('active', _smartOverwriteMode);
+      if (toggleSmartLbl) {
+        toggleSmartLbl.textContent = _smartOverwriteMode ? '⚡ Bảo Toàn Phách: BẬT' : '⚡ Bảo Toàn Phách: TẮT';
+      }
+    }
+
     // Step (C..B)
     document.querySelectorAll('.btn-step').forEach(btn => {
       btn.classList.toggle('active', !curNote.isRest && btn.dataset.step === curNote.step);
@@ -513,13 +543,14 @@
   }
 
   /* ─── Core Mutations: Chỉnh Sửa Nốt & Nhạc Lý ─────────────────── */
-  function modifyPitch(newStep, newOctave = null, newAlter = null) {
+  async function modifyPitch(newStep, newOctave = null, newAlter = null) {
     const curNote = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
     if (!curNote || !curNote.xmlNode) {
       showToast('Chưa chọn nốt nhạc nào để sửa!', 'error');
       return;
     }
 
+    const wasRest = curNote.isRest;
     _saveSnapshotForUndo();
     const noteEl = curNote.xmlNode;
 
@@ -568,7 +599,14 @@
     }
 
     playSinglePitch(newStep, targetOct, targetAlt, 0.4);
-    _renderOsmdFromXmlDoc();
+
+    // Nếu vừa điền nốt vào dấu lặng trong chế độ Smart:
+    // Tự động chuyển con trỏ sang phách tiếp theo để người dùng gõ nốt liên tục!
+    if (_smartOverwriteMode && wasRest) {
+      _selectedPosition.beatIndex++;
+    }
+
+    await _renderOsmdFromXmlDoc();
   }
 
   function modifyAccidental(accType) {
@@ -617,12 +655,30 @@
     modifyPitch(item.step, newOct, item.alter);
   }
 
-  function modifyDuration(newType) {
+  function _durationToType(subDuration, divisions) {
+    const mult = subDuration / (divisions || 4);
+    if (mult >= 3.5) return 'whole';
+    if (mult >= 1.75) return 'half';
+    if (mult >= 0.85) return 'quarter';
+    if (mult >= 0.4) return 'eighth';
+    if (mult >= 0.2) return '16th';
+    return '32nd';
+  }
+
+  async function modifyDuration(newType) {
     const curNote = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
     if (!curNote || !curNote.xmlNode) return;
 
     _saveSnapshotForUndo();
     const noteEl = curNote.xmlNode;
+    const divisionsEl = noteEl.closest('measure')?.querySelector('attributes > divisions');
+    const divisions = divisionsEl ? (parseInt(divisionsEl.textContent, 10) || 4) : 4;
+    const multMap = { whole: 4, half: 2, quarter: 1, eighth: 0.5, '16th': 0.25 };
+    const mult = multMap[newType] || 1;
+    let newDuration = Math.round(divisions * mult);
+    if (curNote.isDot) newDuration = Math.round(newDuration * 1.5);
+
+    const oldDuration = curNote.duration;
 
     let typeEl = noteEl.querySelector('type');
     if (!typeEl) {
@@ -631,13 +687,6 @@
     }
     typeEl.textContent = newType;
 
-    const divisionsEl = noteEl.closest('measure')?.querySelector('attributes > divisions');
-    const divisions = divisionsEl ? (parseInt(divisionsEl.textContent, 10) || 4) : 4;
-    const multMap = { whole: 4, half: 2, quarter: 1, eighth: 0.5, '16th': 0.25 };
-    const mult = multMap[newType] || 1;
-    let newDuration = Math.round(divisions * mult);
-    if (curNote.isDot) newDuration = Math.round(newDuration * 1.5);
-
     let durEl = noteEl.querySelector('duration');
     if (!durEl) {
       durEl = _xmlDoc.createElement('duration');
@@ -645,7 +694,53 @@
     }
     durEl.textContent = String(newDuration);
 
-    _renderOsmdFromXmlDoc();
+    // BẢO TOÀN PHÁCH THÔNG MINH (Smart Overwrite Padding):
+    // Nếu nốt bị giảm trường độ (ví dụ nốt đen ➔ móc đơn) và chế độ Smart đang bật:
+    // Tự động chèn các dấu lặng bù phần chênh lệch `remainder = oldDuration - newDuration`
+    if (_smartOverwriteMode && oldDuration > newDuration) {
+      let remainder = oldDuration - newDuration;
+      const voiceText = noteEl.querySelector('voice')?.textContent || '1';
+      const staffText = noteEl.querySelector('staff')?.textContent || '1';
+      let insertAfterNode = noteEl;
+
+      while (remainder > 0) {
+        let subDur = remainder;
+        if (remainder >= divisions * 2) subDur = divisions * 2;
+        else if (remainder >= divisions) subDur = divisions;
+        else if (remainder >= Math.round(divisions * 0.5)) subDur = Math.round(divisions * 0.5);
+        else if (remainder >= Math.round(divisions * 0.25)) subDur = Math.round(divisions * 0.25);
+
+        const subType = _durationToType(subDur, divisions);
+
+        const fillerRest = _xmlDoc.createElement('note');
+        fillerRest.appendChild(_xmlDoc.createElement('rest'));
+
+        const fDur = _xmlDoc.createElement('duration');
+        fDur.textContent = String(subDur);
+        fillerRest.appendChild(fDur);
+
+        const fVoice = _xmlDoc.createElement('voice');
+        fVoice.textContent = voiceText;
+        fillerRest.appendChild(fVoice);
+
+        const fType = _xmlDoc.createElement('type');
+        fType.textContent = subType;
+        fillerRest.appendChild(fType);
+
+        const fStaff = _xmlDoc.createElement('staff');
+        fStaff.textContent = staffText;
+        fillerRest.appendChild(fStaff);
+
+        insertAfterNode.parentNode.insertBefore(fillerRest, insertAfterNode.nextSibling);
+        insertAfterNode = fillerRest;
+        remainder -= subDur;
+      }
+
+      showToast('⚡ Đã đổi trường độ & tự động bù dấu lặng đủ phách', 'info', 1500);
+      _selectedPosition.beatIndex++;
+    }
+
+    await _renderOsmdFromXmlDoc();
   }
 
   function toggleDot() {
@@ -664,26 +759,178 @@
   }
 
   // Xóa nốt thành Dấu Lặng (Rest) — An toàn 100% phách
-  function deleteNoteAsRest() {
+  async function deleteNoteAsRest() {
     const curNote = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
     if (!curNote || !curNote.xmlNode) return;
 
     _saveSnapshotForUndo();
-    const noteEl = curNote.xmlNode;
-    const pitchEl = noteEl.querySelector('pitch');
-    if (pitchEl) pitchEl.remove();
+    const curEl = curNote.xmlNode;
+    const siblings = curNote._chordSiblings || [curEl];
+    const anchorNode = siblings[0] || curEl;
 
-    if (!noteEl.querySelector('rest')) {
+    // Xóa các nốt phụ trong hợp âm (chord notes) nếu có
+    for (let i = 1; i < siblings.length; i++) {
+      if (siblings[i] && siblings[i].parentNode) {
+        siblings[i].remove();
+      }
+    }
+
+    // Dọn sạch pitch, chord, stem, beam, notations, lyric, dot, accidental, tie
+    anchorNode.querySelectorAll('pitch, chord, stem, beam, notations, lyric, dot, accidental, tie, tied').forEach(el => el.remove());
+
+    if (!anchorNode.querySelector('rest')) {
       const newRest = _xmlDoc.createElement('rest');
-      noteEl.insertBefore(newRest, noteEl.firstChild);
+      const durEl = anchorNode.querySelector('duration');
+      if (durEl) anchorNode.insertBefore(newRest, durEl);
+      else anchorNode.insertBefore(newRest, anchorNode.firstChild);
     }
 
     showToast('𝄽 Đã chuyển thành dấu lặng (bảo toàn phách)', 'info', 1200);
-    _renderOsmdFromXmlDoc();
+    await _renderOsmdFromXmlDoc();
+  }
+
+  // Phân rã nốt thành các dấu lặng nhỏ để thêm nốt vào (Subdivide to Rests)
+  async function subdivideNoteToRests(factor = 2) {
+    const curNote = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
+    if (!curNote || !curNote.xmlNode) {
+      showToast('Hãy chọn vị trí nốt để phân rã!', 'error');
+      return;
+    }
+
+    const curEl = curNote.xmlNode;
+    const oldDuration = curNote.duration;
+    if (oldDuration < factor) {
+      showToast('Nốt này quá ngắn, không thể chia nhỏ hơn!', 'warn');
+      return;
+    }
+
+    _saveSnapshotForUndo();
+    const measureEl = curEl.closest('measure');
+    const divisionsEl = measureEl?.querySelector('attributes > divisions');
+    const divisions = divisionsEl ? (parseInt(divisionsEl.textContent, 10) || 4) : 4;
+
+    const subDuration = Math.max(1, Math.floor(oldDuration / factor));
+    const subType = _durationToType(subDuration, divisions);
+
+    // Xác định anchor node nếu nốt hiện tại là một phần của hợp âm
+    const siblings = curNote._chordSiblings || [curEl];
+    const anchorNode = siblings[0] || curEl;
+    const voiceText = anchorNode.querySelector('voice')?.textContent || '1';
+    const staffText = anchorNode.querySelector('staff')?.textContent || '1';
+
+    // Xóa tất cả các nốt phụ trong hợp âm (trừ anchorNode)
+    for (let i = 1; i < siblings.length; i++) {
+      if (siblings[i] && siblings[i].parentNode) {
+        siblings[i].remove();
+      }
+    }
+
+    // Biến anchorNode thành dấu lặng thứ nhất (dọn sạch pitch, chord, stem, v.v.)
+    anchorNode.querySelectorAll('pitch, chord, stem, beam, notations, lyric, dot, accidental, tie, tied').forEach(el => el.remove());
+    if (!anchorNode.querySelector('rest')) {
+      const restEl = _xmlDoc.createElement('rest');
+      const durEl = anchorNode.querySelector('duration');
+      if (durEl) anchorNode.insertBefore(restEl, durEl);
+      else anchorNode.insertBefore(restEl, anchorNode.firstChild);
+    }
+
+    let durEl = anchorNode.querySelector('duration');
+    if (!durEl) {
+      durEl = _xmlDoc.createElement('duration');
+      anchorNode.appendChild(durEl);
+    }
+    durEl.textContent = String(subDuration);
+
+    let typeEl = anchorNode.querySelector('type');
+    if (!typeEl) {
+      typeEl = _xmlDoc.createElement('type');
+      anchorNode.appendChild(typeEl);
+    }
+    typeEl.textContent = subType;
+
+    // Tạo thêm factor - 1 dấu lặng tuần tự ngay sau anchorNode
+    let prevNode = anchorNode;
+    for (let i = 1; i < factor; i++) {
+      const newRestNote = _xmlDoc.createElement('note');
+      newRestNote.appendChild(_xmlDoc.createElement('rest'));
+
+      const newDurEl = _xmlDoc.createElement('duration');
+      newDurEl.textContent = String(subDuration);
+      newRestNote.appendChild(newDurEl);
+
+      const newVoiceEl = _xmlDoc.createElement('voice');
+      newVoiceEl.textContent = voiceText;
+      newRestNote.appendChild(newVoiceEl);
+
+      const newTypeEl = _xmlDoc.createElement('type');
+      newTypeEl.textContent = subType;
+      newRestNote.appendChild(newTypeEl);
+
+      const newStaffEl = _xmlDoc.createElement('staff');
+      newStaffEl.textContent = staffText;
+      newRestNote.appendChild(newStaffEl);
+
+      prevNode.parentNode.insertBefore(newRestNote, prevNode.nextSibling);
+      prevNode = newRestNote;
+    }
+
+    showToast(`✨ Đã phân rã thành ${factor} dấu lặng! Bấm phím đàn hoặc C-B để điền nốt vào`, 'success', 2500);
+    await _renderOsmdFromXmlDoc();
+  }
+
+  // Gộp dấu lặng hiện tại với dấu lặng liền sau (Merge adjacent rests)
+  async function mergeWithNextRest() {
+    const curNote = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
+    if (!curNote || !curNote.xmlNode) return;
+
+    if (!curNote.isRest) {
+      showToast('Hãy chọn 1 dấu lặng để gộp với dấu lặng tiếp theo!', 'warn');
+      return;
+    }
+
+    const curEl = curNote.xmlNode;
+    const curVoice = curEl.querySelector('voice')?.textContent || '1';
+
+    // Tìm nốt kế tiếp trong cùng bè
+    let nextNode = curEl.nextElementSibling;
+    while (nextNode) {
+      if (nextNode.nodeName === 'note') {
+        const nv = nextNode.querySelector('voice')?.textContent || '1';
+        if (nv === curVoice) break;
+      }
+      nextNode = nextNode.nextElementSibling;
+    }
+
+    if (!nextNode || nextNode.nodeName !== 'note' || !nextNode.querySelector('rest')) {
+      showToast('Không tìm thấy dấu lặng liền sau trong cùng bè để gộp!', 'warn');
+      return;
+    }
+
+    _saveSnapshotForUndo();
+    const divisionsEl = curEl.closest('measure')?.querySelector('attributes > divisions');
+    const divisions = divisionsEl ? (parseInt(divisionsEl.textContent, 10) || 4) : 4;
+
+    const dur1 = parseInt(curEl.querySelector('duration')?.textContent, 10) || 0;
+    const dur2 = parseInt(nextNode.querySelector('duration')?.textContent, 10) || 0;
+    const combinedDur = dur1 + dur2;
+    const combinedType = _durationToType(combinedDur, divisions);
+
+    curEl.querySelector('duration').textContent = String(combinedDur);
+    let typeEl = curEl.querySelector('type');
+    if (!typeEl) {
+      typeEl = _xmlDoc.createElement('type');
+      curEl.appendChild(typeEl);
+    }
+    typeEl.textContent = combinedType;
+
+    nextNode.remove();
+
+    showToast('𝄾+𝄾 Đã gộp 2 dấu lặng thành công (bảo toàn phách)', 'success', 1500);
+    await _renderOsmdFromXmlDoc();
   }
 
   // Tách phách (Split Note): Chia đôi nốt để thêm nốt mới mà không phá vỡ ô nhịp
-  function splitCurrentNote() {
+  async function splitCurrentNote() {
     const curNote = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
     if (!curNote || !curNote.xmlNode) return;
 
@@ -695,20 +942,29 @@
       return;
     }
 
+    const divisionsEl = noteEl.closest('measure')?.querySelector('attributes > divisions');
+    const divisions = divisionsEl ? (parseInt(divisionsEl.textContent, 10) || 4) : 4;
+
     const halfDur = Math.floor(oldDuration / 2);
+    const halfType = _durationToType(halfDur, divisions);
+
     const durEl = noteEl.querySelector('duration');
     if (durEl) durEl.textContent = String(halfDur);
+    let typeEl = noteEl.querySelector('type');
+    if (typeEl) typeEl.textContent = halfType;
 
     // Tạo nốt thứ 2 nhân bản nối tiếp
     const cloneEl = noteEl.cloneNode(true);
     const cloneDurEl = cloneEl.querySelector('duration');
     if (cloneDurEl) cloneDurEl.textContent = String(halfDur);
+    const cloneTypeEl = cloneEl.querySelector('type');
+    if (cloneTypeEl) cloneTypeEl.textContent = halfType;
 
     // Chèn clone ngay sau note gốc
     noteEl.parentNode.insertBefore(cloneEl, noteEl.nextSibling);
 
     showToast('✂️ Đã tách đôi nốt thành công (bảo toàn phách)', 'success', 1500);
-    _renderOsmdFromXmlDoc();
+    await _renderOsmdFromXmlDoc();
   }
 
   // Bật/Tắt Dấu nối (Tie)
@@ -2326,7 +2582,32 @@
       }
     });
 
-    // Thao tác Thêm nốt & Sao chép & Xóa hẳn
+    // Toggle Chế độ Bảo Toàn Phách (Smart Overwrite)
+    document.getElementById('btn-toggle-smart-overwrite')?.addEventListener('click', () => {
+      _smartOverwriteMode = !_smartOverwriteMode;
+      _refreshInspectorUI();
+      showToast(_smartOverwriteMode ? '⚡ Chế độ Bảo Toàn Phách: ĐÃ BẬT' : '⚠️ Chế độ Bảo Toàn Phách: ĐÃ TẮT', 'info', 1500);
+    });
+
+    // Smart Rest Subdivide & Consolidation (Thanh QuickBar + Inspector)
+    document.getElementById('btn-subdivide-2')?.addEventListener('click', () => subdivideNoteToRests(2));
+    document.getElementById('btn-subdivide-4')?.addEventListener('click', () => subdivideNoteToRests(4));
+    document.getElementById('btn-merge-rests')?.addEventListener('click', () => mergeWithNextRest());
+    document.getElementById('quick-btn-to-rest')?.addEventListener('click', () => deleteNoteAsRest());
+    document.getElementById('quick-btn-subdivide-2')?.addEventListener('click', () => subdivideNoteToRests(2));
+    document.getElementById('quick-btn-subdivide-4')?.addEventListener('click', () => subdivideNoteToRests(4));
+    document.getElementById('quick-btn-merge-rests')?.addEventListener('click', () => mergeWithNextRest());
+
+    // Smart Quickbar action buttons
+    document.getElementById('quick-btn-insert-after')?.addEventListener('click', () => insertNoteAfter());
+    document.getElementById('quick-btn-insert-rest')?.addEventListener('click', () => insertRestAfter());
+    document.getElementById('quick-btn-duplicate')?.addEventListener('click', () => duplicateCurrentNote());
+    document.getElementById('quick-btn-hard-delete')?.addEventListener('click', () => deleteNoteCompletely());
+    document.getElementById('quick-btn-autofill')?.addEventListener('click', () => {
+      autoFillRestForMeasure(_selectedPosition.measureNumber);
+    });
+
+    // Thao tác Thêm nốt & Sao chép & Xóa hẳn (Inspector)
     document.getElementById('btn-insert-note-after')?.addEventListener('click', () => insertNoteAfter());
     document.getElementById('btn-insert-note-before')?.addEventListener('click', () => insertNoteBefore());
     document.getElementById('btn-insert-rest-after')?.addEventListener('click', () => insertRestAfter());
@@ -2517,6 +2798,34 @@
       if (e.key === 'Delete' || e.key === 'Backspace') {
         e.preventDefault();
         deleteNoteAsRest();
+        return;
+      }
+
+      // Phím X: Xóa nốt thành dấu lặng
+      if (e.key.toLowerCase() === 'x' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+        e.preventDefault();
+        deleteNoteAsRest();
+        return;
+      }
+
+      // Shift+X hoặc Alt+S: Phân rã thành 2 dấu lặng để soạn nốt
+      if ((e.shiftKey && e.key.toLowerCase() === 'x') || (e.altKey && e.key.toLowerCase() === 's')) {
+        e.preventDefault();
+        subdivideNoteToRests(2);
+        return;
+      }
+
+      // Alt+4: Phân rã thành 4 dấu lặng
+      if (e.altKey && e.key === '4') {
+        e.preventDefault();
+        subdivideNoteToRests(4);
+        return;
+      }
+
+      // Alt+M: Gộp 2 dấu lặng
+      if (e.altKey && e.key.toLowerCase() === 'm') {
+        e.preventDefault();
+        mergeWithNextRest();
         return;
       }
 
