@@ -423,19 +423,10 @@
       const typeVi = typeMapVi[curNote.type] || curNote.type;
       const voiceVi = { soprano: 'Soprano', alto: 'Alto', tenor: 'Tenor', bass: 'Bass' }[voice] || voice;
       if (curNote.isRest) {
-        quickbarHint.innerHTML = `Bè <strong>${voiceVi}</strong> · Đang chọn: <strong>Dấu lặng ${typeVi}</strong> [Bấm phím đàn hoặc C-B để điền nốt]`;
+        quickbarHint.innerHTML = `Bè <strong>${voiceVi}</strong> · Dấu lặng <strong>${typeVi}</strong>`;
       } else {
         const acc = curNote.alter === 1 ? '♯' : (curNote.alter === -1 ? '♭' : '');
-        quickbarHint.innerHTML = `Bè <strong>${voiceVi}</strong> · Đang chọn: <strong>Nốt ${curNote.step}${acc}${curNote.octave} (${typeVi})</strong> [Bấm 'Tách 2 lặng' để chia nhỏ]`;
-      }
-    }
-
-    const toggleSmartBtn = document.getElementById('btn-toggle-smart-overwrite');
-    const toggleSmartLbl = document.getElementById('label-smart-overwrite-status');
-    if (toggleSmartBtn) {
-      toggleSmartBtn.classList.toggle('active', _smartOverwriteMode);
-      if (toggleSmartLbl) {
-        toggleSmartLbl.textContent = _smartOverwriteMode ? '⚡ Bảo Toàn Phách: BẬT' : '⚡ Bảo Toàn Phách: TẮT';
+        quickbarHint.innerHTML = `Bè <strong>${voiceVi}</strong> · Nốt <strong>${curNote.step}${acc}${curNote.octave} (${typeVi})</strong>`;
       }
     }
 
@@ -487,6 +478,9 @@
 
     // Đồng bộ highlight nốt trên bản nhạc SVG
     _highlightSelectedSvgNote();
+
+    // Cập nhật trạng thái ô nhịp Realtime BÁO ĐỎ / BÁO XANH
+    _updateRealtimeMeasureUI();
   }
 
   function _setControlsDisabled(disabled) {
@@ -665,20 +659,38 @@
     return '32nd';
   }
 
+  // Lấy divisions chính xác cho ô nhịp (duyệt ngược về trước nếu ô hiện tại không khai báo attributes)
+  function _getDivisionsForMeasure(measureEl) {
+    if (measureEl) {
+      let cur = measureEl;
+      while (cur) {
+        const divEl = cur.querySelector('attributes > divisions');
+        if (divEl) {
+          const val = parseInt(divEl.textContent.trim(), 10);
+          if (val > 0) return val;
+        }
+        cur = cur.previousElementSibling;
+      }
+    }
+    const gDiv = _xmlDoc?.querySelector('divisions');
+    if (gDiv) {
+      const val = parseInt(gDiv.textContent.trim(), 10);
+      if (val > 0) return val;
+    }
+    return 2;
+  }
+
   async function modifyDuration(newType) {
     const curNote = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
     if (!curNote || !curNote.xmlNode) return;
 
     _saveSnapshotForUndo();
     const noteEl = curNote.xmlNode;
-    const divisionsEl = noteEl.closest('measure')?.querySelector('attributes > divisions');
-    const divisions = divisionsEl ? (parseInt(divisionsEl.textContent, 10) || 4) : 4;
+    const divisions = _getDivisionsForMeasure(noteEl.closest('measure'));
     const multMap = { whole: 4, half: 2, quarter: 1, eighth: 0.5, '16th': 0.25 };
     const mult = multMap[newType] || 1;
-    let newDuration = Math.round(divisions * mult);
+    let newDuration = Math.max(1, Math.round(divisions * mult));
     if (curNote.isDot) newDuration = Math.round(newDuration * 1.5);
-
-    const oldDuration = curNote.duration;
 
     let typeEl = noteEl.querySelector('type');
     if (!typeEl) {
@@ -694,52 +706,7 @@
     }
     durEl.textContent = String(newDuration);
 
-    // BẢO TOÀN PHÁCH THÔNG MINH (Smart Overwrite Padding):
-    // Nếu nốt bị giảm trường độ (ví dụ nốt đen ➔ móc đơn) và chế độ Smart đang bật:
-    // Tự động chèn các dấu lặng bù phần chênh lệch `remainder = oldDuration - newDuration`
-    if (_smartOverwriteMode && oldDuration > newDuration) {
-      let remainder = oldDuration - newDuration;
-      const voiceText = noteEl.querySelector('voice')?.textContent || '1';
-      const staffText = noteEl.querySelector('staff')?.textContent || '1';
-      let insertAfterNode = noteEl;
-
-      while (remainder > 0) {
-        let subDur = remainder;
-        if (remainder >= divisions * 2) subDur = divisions * 2;
-        else if (remainder >= divisions) subDur = divisions;
-        else if (remainder >= Math.round(divisions * 0.5)) subDur = Math.round(divisions * 0.5);
-        else if (remainder >= Math.round(divisions * 0.25)) subDur = Math.round(divisions * 0.25);
-
-        const subType = _durationToType(subDur, divisions);
-
-        const fillerRest = _xmlDoc.createElement('note');
-        fillerRest.appendChild(_xmlDoc.createElement('rest'));
-
-        const fDur = _xmlDoc.createElement('duration');
-        fDur.textContent = String(subDur);
-        fillerRest.appendChild(fDur);
-
-        const fVoice = _xmlDoc.createElement('voice');
-        fVoice.textContent = voiceText;
-        fillerRest.appendChild(fVoice);
-
-        const fType = _xmlDoc.createElement('type');
-        fType.textContent = subType;
-        fillerRest.appendChild(fType);
-
-        const fStaff = _xmlDoc.createElement('staff');
-        fStaff.textContent = staffText;
-        fillerRest.appendChild(fStaff);
-
-        insertAfterNode.parentNode.insertBefore(fillerRest, insertAfterNode.nextSibling);
-        insertAfterNode = fillerRest;
-        remainder -= subDur;
-      }
-
-      showToast('⚡ Đã đổi trường độ & tự động bù dấu lặng đủ phách', 'info', 1500);
-      _selectedPosition.beatIndex++;
-    }
-
+    showToast(`Đã đổi trường độ: ${newType}`, 'info', 1000);
     await _renderOsmdFromXmlDoc();
   }
 
@@ -1207,7 +1174,7 @@
     _renderOsmdFromXmlDoc();
   }
 
-  // Thêm Nốt Mới Ngay Sau Nốt Hiện Tại
+  // Thêm Nốt Mới Ngay Sau Nốt Hiện Tại (Tự do, không cản trở)
   async function insertNoteAfter(durType = null) {
     const curNote = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
     if (!curNote || !curNote.xmlNode) {
@@ -1218,8 +1185,7 @@
     _saveSnapshotForUndo();
     const curEl = curNote.xmlNode;
     const measureEl = curEl.closest('measure');
-    const divisionsEl = measureEl?.querySelector('attributes > divisions');
-    const divisions = divisionsEl ? (parseInt(divisionsEl.textContent, 10) || 4) : 4;
+    const divisions = _getDivisionsForMeasure(measureEl);
 
     const chosenType = durType || document.querySelector('.btn-dur-card.active')?.dataset?.dur || 'quarter';
     const multMap = { whole: 4, half: 2, quarter: 1, eighth: 0.5, '16th': 0.25 };
@@ -1275,7 +1241,15 @@
       newNote.appendChild(staffEl);
     }
 
-    curEl.parentNode.insertBefore(newNote, curEl.nextSibling);
+    // Bỏ qua các nốt chord liên kết để chèn nốt sau trọn vẹn hợp âm
+    let insertAfterNode = curEl;
+    let nextSib = curEl.nextElementSibling;
+    while (nextSib && nextSib.tagName === 'note' && nextSib.querySelector('chord')) {
+      insertAfterNode = nextSib;
+      nextSib = nextSib.nextElementSibling;
+    }
+
+    insertAfterNode.parentNode.insertBefore(newNote, insertAfterNode.nextSibling);
 
     showToast('✨ Đã thêm nốt mới thành công!', 'success', 1200);
     playSinglePitch(step, oct, alt, 0.3);
@@ -1294,8 +1268,7 @@
     _saveSnapshotForUndo();
     const curEl = curNote.xmlNode;
     const measureEl = curEl.closest('measure');
-    const divisionsEl = measureEl?.querySelector('attributes > divisions');
-    const divisions = divisionsEl ? (parseInt(divisionsEl.textContent, 10) || 4) : 4;
+    const divisions = _getDivisionsForMeasure(measureEl);
 
     const chosenType = durType || document.querySelector('.btn-dur-card.active')?.dataset?.dur || 'quarter';
     const multMap = { whole: 4, half: 2, quarter: 1, eighth: 0.5, '16th': 0.25 };
@@ -1369,8 +1342,7 @@
     _saveSnapshotForUndo();
     const curEl = curNote.xmlNode;
     const measureEl = curEl.closest('measure');
-    const divisionsEl = measureEl?.querySelector('attributes > divisions');
-    const divisions = divisionsEl ? (parseInt(divisionsEl.textContent, 10) || 4) : 4;
+    const divisions = _getDivisionsForMeasure(measureEl);
 
     const chosenType = durType || document.querySelector('.btn-dur-card.active')?.dataset?.dur || 'quarter';
     const multMap = { whole: 4, half: 2, quarter: 1, eighth: 0.5, '16th': 0.25 };
@@ -1403,7 +1375,14 @@
       newNote.appendChild(staffEl);
     }
 
-    curEl.parentNode.insertBefore(newNote, curEl.nextSibling);
+    let insertAfterNode = curEl;
+    let nextSib = curEl.nextElementSibling;
+    while (nextSib && nextSib.tagName === 'note' && nextSib.querySelector('chord')) {
+      insertAfterNode = nextSib;
+      nextSib = nextSib.nextElementSibling;
+    }
+
+    insertAfterNode.parentNode.insertBefore(newNote, insertAfterNode.nextSibling);
     showToast('𝄽 Đã thêm dấu lặng mới!', 'info', 1200);
     _selectedPosition.beatIndex++;
     await _renderOsmdFromXmlDoc();
@@ -1424,7 +1403,14 @@
     // Xóa dấu nối cũ khỏi bản clone nếu có
     cloneEl.querySelectorAll('tie, tied').forEach(t => t.remove());
 
-    curEl.parentNode.insertBefore(cloneEl, curEl.nextSibling);
+    let insertAfterNode = curEl;
+    let nextSib = curEl.nextElementSibling;
+    while (nextSib && nextSib.tagName === 'note' && nextSib.querySelector('chord')) {
+      insertAfterNode = nextSib;
+      nextSib = nextSib.nextElementSibling;
+    }
+
+    insertAfterNode.parentNode.insertBefore(cloneEl, insertAfterNode.nextSibling);
     showToast('📋 Đã nhân bản nốt thành công!', 'success', 1200);
     if (!curNote.isRest) {
       playSinglePitch(curNote.step, curNote.octave, curNote.alter, 0.3);
@@ -1443,6 +1429,16 @@
 
     _saveSnapshotForUndo();
     const curEl = curNote.xmlNode;
+
+    // Nếu nốt này là nốt gốc và có nốt chord ngay sau:
+    // Chuyển nốt chord tiếp theo thành nốt gốc (xóa thẻ <chord/>) để nốt bè kia không bị mất/lỗi
+    if (!curEl.querySelector('chord')) {
+      const nextNote = curEl.nextElementSibling;
+      if (nextNote && nextNote.tagName === 'note' && nextNote.querySelector('chord')) {
+        nextNote.querySelector('chord').remove();
+      }
+    }
+
     curEl.remove();
 
     showToast('🗑 Đã xóa bỏ nốt khỏi ô nhịp', 'info', 1200);
@@ -1579,7 +1575,7 @@
     _renderOsmdFromXmlDoc();
   }
 
-  /* ─── HỆ THỐNG KIỂM TRA & CẢNH BÁO ĐỦ Ô NHỊP (BEAT VALIDATOR) ─ */
+  /* ─── HỆ THỐNG KIỂM TRA & CẢNH BÁO ĐỦ Ô NHỊP (REALTIME BEAT VALIDATOR) ─ */
   function validateAllMeasures() {
     if (!_xmlDoc) return;
     _measureHealth = {};
@@ -1592,16 +1588,38 @@
     let underflowCount = 0;
     let overflowCount = 0;
 
-    let currentDivisions = 4;
+    let currentDivisions = 2;
     let currentBeats = 4;
     let currentBeatType = 4;
+
+    // Kiểm tra xem bài có nhịp lấy đà (pickup) ở ô đầu không
+    let pickupDiv = 0;
+    if (measures.length > 2) {
+      const m0 = measures[0];
+      let m0Div = 0;
+      m0.querySelectorAll('note').forEach(n => {
+        if (!n.querySelector('chord') && (n.querySelector('voice')?.textContent || '1') === '1') {
+          m0Div += parseInt(n.querySelector('duration')?.textContent || 0, 10);
+        }
+      });
+      const beats0 = parseInt(m0.querySelector('attributes > time > beats')?.textContent || currentBeats, 10);
+      const bType0 = parseInt(m0.querySelector('attributes > time > beat-type')?.textContent || currentBeatType, 10);
+      const div0 = parseInt(m0.querySelector('attributes > divisions')?.textContent || currentDivisions, 10);
+      const target0 = Math.round(beats0 * (4 / bType0) * div0);
+      if (m0Div < target0) {
+        pickupDiv = m0Div;
+      }
+    }
 
     measures.forEach((mEl, mIdx) => {
       const mNum = parseInt(mEl.getAttribute('number') || (mIdx + 1), 10);
 
       // Đọc time & divisions nếu ô nhịp có khai báo attributes
       const divEl = mEl.querySelector('attributes > divisions');
-      if (divEl) currentDivisions = parseInt(divEl.textContent.trim(), 10) || currentDivisions;
+      if (divEl) {
+        const dVal = parseInt(divEl.textContent.trim(), 10);
+        if (dVal > 0) currentDivisions = dVal;
+      }
 
       const beatsEl = mEl.querySelector('attributes > time > beats');
       const bTypeEl = mEl.querySelector('attributes > time > beat-type');
@@ -1612,12 +1630,15 @@
 
       const targetDivisions = Math.round(currentBeats * (4 / currentBeatType) * currentDivisions);
 
-      // Tính tổng duration của nốt nối tiếp (bỏ qua chord notes)
+      // Tính tổng duration của Voice 1 (bỏ qua chord notes vì chord cùng phách với nốt chính)
       let totalDiv = 0;
       mEl.querySelectorAll('note').forEach(n => {
         if (!n.querySelector('chord')) {
-          const d = parseInt(n.querySelector('duration')?.textContent || 0, 10);
-          totalDiv += d;
+          const v = n.querySelector('voice')?.textContent || '1';
+          if (v === '1') {
+            const d = parseInt(n.querySelector('duration')?.textContent || 0, 10);
+            totalDiv += d;
+          }
         }
       });
 
@@ -1625,10 +1646,15 @@
       let missing = 0;
       let excess = 0;
 
-      // Không xét lỗi nếu là ô nhịp lấy đà (pickup measure)
-      const isPickup = (mIdx === 0 && totalDiv < targetDivisions && measures.length > 3);
+      // Nhịp lấy đà (pickup measure) ở ô đầu tiên & ô cuối bù lấy đà
+      const isPickup = (mIdx === 0 && totalDiv < targetDivisions && measures.length > 2);
+      const isFinalPickupComplement = (mIdx === measures.length - 1 && pickupDiv > 0 && totalDiv + pickupDiv === targetDivisions);
 
-      if (!isPickup && totalDiv < targetDivisions) {
+      if (isPickup) {
+        status = 'pickup';
+      } else if (isFinalPickupComplement) {
+        status = 'pickup-final';
+      } else if (totalDiv < targetDivisions) {
         status = 'underflow';
         missing = targetDivisions - totalDiv;
         underflowCount++;
@@ -1653,6 +1679,7 @@
 
     _renderMeasureHealthBar(underflowCount, overflowCount);
     _applyMeasureSvgHighlights();
+    _updateRealtimeMeasureUI();
   }
 
   function _renderMeasureHealthBar(underflowCount, overflowCount) {
@@ -1696,62 +1723,347 @@
     });
   }
 
+  // Tô viền các ô nhịp cảnh báo (BÁO ĐỎ) trực tiếp trên SVG bằng tọa độ chính xác từ OSMD
   function _applyMeasureSvgHighlights() {
     const container = document.getElementById('osmd-editor-container');
-    if (!container) return;
+    if (!container || !_osmd || !_osmd.GraphicSheet) return;
 
-    // Tô viền các ô nhịp cảnh báo trên SVG
+    const svg = container.querySelector('svg');
+    if (!svg) return;
+
+    // Xóa tất cả các khung highlight cũ
+    svg.querySelectorAll('.measure-highlight-rect').forEach(r => r.remove());
+
+    const ml = _osmd.GraphicSheet.MeasureList;
+    if (!ml || !ml.length) return;
+
     Object.values(_measureHealth).forEach(m => {
-      if (m.status === 'ok') return;
-      // Tìm measure SVG group
-      const measureSvg = container.querySelector(`g#vf-measure-${m.measureNum}`) ||
-                         container.querySelector(`g[id*="measure_${m.measureNum}"]`);
-      if (measureSvg) {
-        measureSvg.classList.add(m.status === 'underflow' ? 'measure-warning-underflow' : 'measure-warning-overflow');
+      // Tìm index của ô nhịp trong GraphicSheet
+      let targetStaves = null;
+      for (let i = 0; i < ml.length; i++) {
+        const staves = ml[i];
+        if (staves && staves[0]) {
+          const s0 = staves[0];
+          const mNum = parseInt(s0.parentSourceMeasure?.MeasureNumberXML ?? s0.MeasureNumber, 10);
+          if (mNum === m.measureNum) {
+            targetStaves = staves;
+            break;
+          }
+        }
+      }
+
+      if (!targetStaves || !targetStaves.length) return;
+
+      const s0 = targetStaves[0];
+      const sLast = targetStaves[targetStaves.length - 1];
+      if (!s0 || !s0.PositionAndShape) return;
+
+      const x = s0.PositionAndShape.AbsolutePosition.x * 10;
+      const y = (s0.PositionAndShape.AbsolutePosition.y - 2) * 10;
+      const w = s0.PositionAndShape.Size.width * 10;
+      const sLastH = (sLast.PositionAndShape?.Size?.height || 4);
+      const bottomY = (sLast.PositionAndShape.AbsolutePosition.y + sLastH + 3) * 10;
+      const h = Math.max(50, bottomY - y);
+
+      const isError = (m.status === 'underflow' || m.status === 'overflow');
+      const isActive = (m.measureNum === _selectedPosition.measureNumber);
+
+      if (isError) {
+        // BÁO ĐỎ: Viền đỏ đứt nét và nền phớt đỏ cảnh báo sai nhịp
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('class', 'measure-highlight-rect measure-highlight-error');
+        rect.setAttribute('x', String(x));
+        rect.setAttribute('y', String(y));
+        rect.setAttribute('width', String(w));
+        rect.setAttribute('height', String(h));
+        rect.setAttribute('rx', '6');
+        rect.setAttribute('data-measure', String(m.measureNum));
+        svg.prepend(rect);
+      } else if (isActive) {
+        // Viền xanh nhẹ nhàng chỉ định ô nhịp đang thao tác
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('class', 'measure-highlight-rect measure-highlight-active');
+        rect.setAttribute('x', String(x));
+        rect.setAttribute('y', String(y));
+        rect.setAttribute('width', String(w));
+        rect.setAttribute('height', String(h));
+        rect.setAttribute('rx', '6');
+        rect.setAttribute('data-measure', String(m.measureNum));
+        svg.prepend(rect);
       }
     });
   }
 
-  // Tự động bù dấu lặng cho 1 ô nhịp đang thiếu phách
-  function autoFillRestForMeasure(measureNum) {
+  // Đồng bộ trạng thái BÁO ĐỎ / BÁO XANH trên QuickBar, Thước đo phách Inspector và Nút Lưu
+  function _updateRealtimeMeasureUI() {
+    const curMNum = _selectedPosition.measureNumber;
+    const h = _measureHealth[curMNum];
+
+    const quickbar = document.getElementById('smart-note-quickbar');
+    const qStatusText = document.getElementById('quickbar-status-text');
+    const qAutofillBtn = document.getElementById('quick-btn-autofill');
+
+    const beatCard = document.getElementById('inspector-beat-card');
+    const bIcon = document.getElementById('inspector-beat-icon');
+    const bTitle = document.getElementById('inspector-meter-title');
+    const bCounts = document.getElementById('inspector-meter-counts');
+    const bBar = document.getElementById('inspector-meter-bar');
+    const bHint = document.getElementById('inspector-meter-hint');
+    const bAutofillBtn = document.getElementById('btn-inspector-autofill');
+
+    // Nút Lưu trên header
+    const saveBtn = document.getElementById('btn-open-save-modal');
+    let totalErrors = 0;
+    Object.values(_measureHealth).forEach(m => {
+      if (m.status === 'underflow' || m.status === 'overflow') totalErrors++;
+    });
+
+    if (saveBtn) {
+      if (totalErrors > 0) {
+        saveBtn.classList.add('btn-save-has-warning');
+        saveBtn.innerHTML = `<span>⚠️ LƯU BẢN SỬA (${totalErrors} ô lỗi)</span>`;
+      } else {
+        saveBtn.classList.remove('btn-save-has-warning');
+        saveBtn.innerHTML = `<span>✓ LƯU BẢN SỬA</span>`;
+      }
+    }
+
+    if (!h) {
+      if (quickbar) {
+        quickbar.classList.add('status-ok');
+        quickbar.classList.remove('status-warning');
+      }
+      if (qAutofillBtn) qAutofillBtn.classList.add('hidden');
+      if (bAutofillBtn) bAutofillBtn.classList.add('hidden');
+      return;
+    }
+
+    const curDiv = h.divisions || 2;
+    const targetBeats = (h.target / curDiv).toFixed(1).replace('.0', '');
+    const currentBeats = (h.total / curDiv).toFixed(1).replace('.0', '');
+
+    if (h.status === 'underflow') {
+      // BÁO ĐỎ: THIẾU PHÁCH
+      if (quickbar) {
+        quickbar.classList.remove('status-ok');
+        quickbar.classList.add('status-warning');
+      }
+      if (qStatusText) {
+        qStatusText.textContent = `⛔ Ô nhịp ${curMNum}: Thiếu ${h.missingBeats} phách (${currentBeats}/${targetBeats} phách)`;
+      }
+      if (qAutofillBtn) qAutofillBtn.classList.remove('hidden');
+
+      if (beatCard) {
+        beatCard.classList.remove('status-ok');
+        beatCard.classList.add('status-warning');
+      }
+      if (bIcon) bIcon.textContent = '⛔';
+      if (bTitle) bTitle.textContent = `Ô NHỊP ${curMNum}: THIẾU ${h.missingBeats} PHÁCH`;
+      if (bCounts) bCounts.textContent = `${currentBeats} / ${targetBeats} phách`;
+      if (bBar) {
+        const pct = Math.min(100, Math.max(10, Math.round((h.total / h.target) * 100)));
+        bBar.style.width = `${pct}%`;
+      }
+      if (bHint) bHint.textContent = `⚠️ Thiếu ${h.missingBeats} phách. Bấm bù tự động hoặc thêm nốt.`;
+      if (bAutofillBtn) bAutofillBtn.classList.remove('hidden');
+
+    } else if (h.status === 'overflow') {
+      // BÁO ĐỎ: THỪA PHÁCH
+      if (quickbar) {
+        quickbar.classList.remove('status-ok');
+        quickbar.classList.add('status-warning');
+      }
+      if (qStatusText) {
+        qStatusText.textContent = `⛔ Ô nhịp ${curMNum}: Thừa ${h.excessBeats} phách (${currentBeats}/${targetBeats} phách)`;
+      }
+      if (qAutofillBtn) qAutofillBtn.classList.add('hidden');
+
+      if (beatCard) {
+        beatCard.classList.remove('status-ok');
+        beatCard.classList.add('status-warning');
+      }
+      if (bIcon) bIcon.textContent = '⛔';
+      if (bTitle) bTitle.textContent = `Ô NHỊP ${curMNum}: THỪA ${h.excessBeats} PHÁCH`;
+      if (bCounts) bCounts.textContent = `${currentBeats} / ${targetBeats} phách`;
+      if (bBar) bBar.style.width = '100%';
+      if (bHint) bHint.textContent = `⚠️ Thừa ${h.excessBeats} phách. Hãy xóa bớt hoặc giảm trường độ.`;
+      if (bAutofillBtn) bAutofillBtn.classList.add('hidden');
+
+    } else if (h.status === 'pickup') {
+      // NHỊP LẤY ĐÀ
+      if (quickbar) {
+        quickbar.classList.add('status-ok');
+        quickbar.classList.remove('status-warning');
+      }
+      if (qStatusText) {
+        qStatusText.textContent = `✓ Ô nhịp ${curMNum}: Nhịp lấy đà (${currentBeats} phách)`;
+      }
+      if (qAutofillBtn) qAutofillBtn.classList.add('hidden');
+
+      if (beatCard) {
+        beatCard.classList.add('status-ok');
+        beatCard.classList.remove('status-warning');
+      }
+      if (bIcon) bIcon.textContent = '✓';
+      if (bTitle) bTitle.textContent = `Ô NHỊP ${curMNum}: NHỊP LẤY ĐÀ`;
+      if (bCounts) bCounts.textContent = `${currentBeats} phách`;
+      if (bBar) bBar.style.width = '100%';
+      if (bHint) bHint.textContent = `Nhịp lấy đà hợp lệ theo nhạc lý`;
+      if (bAutofillBtn) bAutofillBtn.classList.add('hidden');
+
+    } else {
+      // BÁO XANH: CHUẨN NHỊP ĐỦ PHÁCH
+      if (quickbar) {
+        quickbar.classList.add('status-ok');
+        quickbar.classList.remove('status-warning');
+      }
+      if (qStatusText) {
+        qStatusText.textContent = `✓ Ô nhịp ${curMNum}: Chuẩn ${targetBeats}/${targetBeats} phách`;
+      }
+      if (qAutofillBtn) qAutofillBtn.classList.add('hidden');
+
+      if (beatCard) {
+        beatCard.classList.add('status-ok');
+        beatCard.classList.remove('status-warning');
+      }
+      if (bIcon) bIcon.textContent = '✓';
+      if (bTitle) bTitle.textContent = `Ô NHỊP ${curMNum}: ĐỦ PHÁCH`;
+      if (bCounts) bCounts.textContent = `${targetBeats} / ${targetBeats} phách`;
+      if (bBar) bBar.style.width = '100%';
+      if (bHint) bHint.textContent = `✓ Nhịp chuẩn, sẵn sàng lưu`;
+      if (bAutofillBtn) bAutofillBtn.classList.add('hidden');
+    }
+  }
+
+  // Tự động bù dấu lặng cho 1 ô nhịp đang thiếu phách (1-Click Rescue)
+  async function autoFillRestForMeasure(measureNum) {
     const h = _measureHealth[measureNum];
-    if (!h || h.status !== 'underflow' || h.missing <= 0) return;
+    if (!h || h.status !== 'underflow' || h.missing <= 0) {
+      showToast(`Ô nhịp ${measureNum} đã đủ phách, không cần bù!`, 'info');
+      return;
+    }
 
     _saveSnapshotForUndo();
     const parts = _xmlDoc.querySelectorAll('part');
+    const div = h.divisions || 2;
+
     parts.forEach(part => {
       const mEl = part.querySelector(`measure[number="${measureNum}"]`);
       if (!mEl) return;
 
-      const restNote = _xmlDoc.createElement('note');
-      restNote.appendChild(_xmlDoc.createElement('rest'));
+      let remaining = h.missing;
 
-      const durEl = _xmlDoc.createElement('duration');
-      durEl.textContent = String(h.missing);
-      restNote.appendChild(durEl);
+      while (remaining > 0) {
+        let durToAdd = 0;
+        let typeToAdd = 'quarter';
+        if (remaining >= div * 2) {
+          durToAdd = div * 2;
+          typeToAdd = 'half';
+        } else if (remaining >= div) {
+          durToAdd = div;
+          typeToAdd = 'quarter';
+        } else if (remaining >= Math.round(div / 2)) {
+          durToAdd = Math.max(1, Math.round(div / 2));
+          typeToAdd = 'eighth';
+        } else {
+          durToAdd = remaining;
+          typeToAdd = '16th';
+        }
 
-      const typeEl = _xmlDoc.createElement('type');
-      typeEl.textContent = h.missing >= h.divisions ? 'quarter' : 'eighth';
-      restNote.appendChild(typeEl);
+        const restNote = _xmlDoc.createElement('note');
+        restNote.appendChild(_xmlDoc.createElement('rest'));
 
-      mEl.appendChild(restNote);
-    });
+        const durEl = _xmlDoc.createElement('duration');
+        durEl.textContent = String(durToAdd);
+        restNote.appendChild(durEl);
 
-    showToast(`⚡ Đã bù dấu lặng cho ô nhịp ${measureNum}!`, 'success', 1500);
-    _renderOsmdFromXmlDoc();
-  }
+        const voiceEl = _xmlDoc.createElement('voice');
+        voiceEl.textContent = '1';
+        restNote.appendChild(voiceEl);
 
-  // Tự động bù dấu lặng cho TẤT CẢ các ô nhịp đang thiếu
-  function autoFillAllRests() {
-    let fixed = 0;
-    Object.values(_measureHealth).forEach(h => {
-      if (h.status === 'underflow' && h.missing > 0) {
-        autoFillRestForMeasure(h.measureNum);
-        fixed++;
+        const typeEl = _xmlDoc.createElement('type');
+        typeEl.textContent = typeToAdd;
+        restNote.appendChild(typeEl);
+
+        const staffEl = _xmlDoc.createElement('staff');
+        staffEl.textContent = '1';
+        restNote.appendChild(staffEl);
+
+        mEl.appendChild(restNote);
+        remaining -= durToAdd;
       }
     });
+
+    showToast(`⚡ Đã tự động bù dấu lặng chuẩn cho ô nhịp ${measureNum}!`, 'success', 1500);
+    await _renderOsmdFromXmlDoc();
+  }
+
+  // Tự động bù dấu lặng cho TẤT CẢ các ô nhịp đang thiếu trên toàn bản nhạc
+  async function autoFillAllRests() {
+    let fixed = 0;
+    const underflows = Object.values(_measureHealth).filter(h => h.status === 'underflow' && h.missing > 0);
+    if (!underflows.length) {
+      showToast('Tất cả ô nhịp đều đã đủ phách!', 'info');
+      return;
+    }
+
+    _saveSnapshotForUndo();
+    const parts = _xmlDoc.querySelectorAll('part');
+
+    underflows.forEach(h => {
+      const div = h.divisions || 2;
+      parts.forEach(part => {
+        const mEl = part.querySelector(`measure[number="${h.measureNum}"]`);
+        if (!mEl) return;
+
+        let remaining = h.missing;
+
+        while (remaining > 0) {
+          let durToAdd = 0;
+          let typeToAdd = 'quarter';
+          if (remaining >= div * 2) {
+            durToAdd = div * 2;
+            typeToAdd = 'half';
+          } else if (remaining >= div) {
+            durToAdd = div;
+            typeToAdd = 'quarter';
+          } else if (remaining >= Math.round(div / 2)) {
+            durToAdd = Math.max(1, Math.round(div / 2));
+            typeToAdd = 'eighth';
+          } else {
+            durToAdd = remaining;
+            typeToAdd = '16th';
+          }
+
+          const restNote = _xmlDoc.createElement('note');
+          restNote.appendChild(_xmlDoc.createElement('rest'));
+
+          const durEl = _xmlDoc.createElement('duration');
+          durEl.textContent = String(durToAdd);
+          restNote.appendChild(durEl);
+
+          const voiceEl = _xmlDoc.createElement('voice');
+          voiceEl.textContent = '1';
+          restNote.appendChild(voiceEl);
+
+          const typeEl = _xmlDoc.createElement('type');
+          typeEl.textContent = typeToAdd;
+          restNote.appendChild(typeEl);
+
+          const staffEl = _xmlDoc.createElement('staff');
+          staffEl.textContent = '1';
+          restNote.appendChild(staffEl);
+
+          mEl.appendChild(restNote);
+          remaining -= durToAdd;
+        }
+      });
+      fixed++;
+    });
+
     if (fixed > 0) {
       showToast(`⚡ Đã tự động bù dấu lặng cho ${fixed} ô nhịp!`, 'success', 2000);
+      await _renderOsmdFromXmlDoc();
     }
   }
 
@@ -2644,6 +2956,9 @@
     // Bù dấu lặng tự động & Quick fix chip
     document.getElementById('btn-auto-fix-all-rests')?.addEventListener('click', autoFillAllRests);
     document.getElementById('btn-quick-autofill')?.addEventListener('click', () => {
+      autoFillRestForMeasure(_selectedPosition.measureNumber);
+    });
+    document.getElementById('btn-inspector-autofill')?.addEventListener('click', () => {
       autoFillRestForMeasure(_selectedPosition.measureNumber);
     });
 

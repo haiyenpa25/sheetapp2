@@ -110,12 +110,20 @@ $currentUser = Auth::username() ?: 'banhat';
       </div>
 
       <!-- ==================== THANH CÔNG CỤ SOẠN NỐT THÔNG MINH (SMART NOTE QUICKBAR) ==================== -->
-      <div class="smart-note-quickbar" id="smart-note-quickbar">
+      <div class="smart-note-quickbar status-ok" id="smart-note-quickbar">
         <div class="quickbar-left">
-          <button type="button" class="btn-quick-mode active" id="btn-toggle-smart-overwrite" title="Chế độ bảo toàn phách: Khi đổi trường độ hoặc phân rã nốt sẽ tự động bù dấu lặng, không làm vỡ ô nhịp">
-            <span class="mode-pulse-dot"></span>
-            <span id="label-smart-overwrite-status" class="mode-label">⚡ Bảo Toàn Phách: BẬT</span>
+          <!-- Huy hiệu trạng thái Ô nhịp Realtime BÁO ĐỎ / BÁO XANH -->
+          <div class="quickbar-measure-badge" id="quickbar-measure-status">
+            <span class="status-indicator-dot"></span>
+            <span class="status-text" id="quickbar-status-text">✓ Ô nhịp 1: Chuẩn 3/3 phách</span>
+          </div>
+
+          <!-- Nút cứu nguy 1-click bù phách tự động khi BÁO ĐỎ -->
+          <button type="button" class="btn-quick-autofill hidden" id="quick-btn-autofill" title="Tự động bù dấu lặng chuẩn để ô nhịp đạt đủ phách">
+            <span class="btn-glyph">⚡</span>
+            <span>Bù phách tự động</span>
           </button>
+
           <div class="quickbar-divider"></div>
           <div class="quickbar-context-hint" id="smart-quickbar-hint">
             Đang chọn: <strong>Nốt Đen</strong> bè Soprano
@@ -123,35 +131,28 @@ $currentUser = Auth::username() ?: 'banhat';
         </div>
 
         <div class="quickbar-right">
-          <!-- Nhóm Xóa & Tách dấu lặng để thêm nốt -->
+          <!-- Nhóm thao tác Thêm / Xóa nốt tự do & trực quan -->
           <div class="quick-btn-group">
-            <button type="button" class="btn-quick-action" id="quick-btn-to-rest" title="Xóa nốt thành dấu lặng cùng trường độ [Phím X / Delete]">
+            <button type="button" class="btn-quick-action btn-add-note" id="quick-btn-insert-after" title="Thêm nốt mới ngay sau nốt đang chọn [Insert]">
+              <span class="btn-glyph">+</span>
+              <span>Thêm nốt</span>
+            </button>
+            <button type="button" class="btn-quick-action" id="quick-btn-insert-rest" title="Thêm dấu lặng mới [R]">
               <span class="btn-glyph">𝄽</span>
-              <span>Xóa thành lặng</span>
+              <span>Thêm lặng</span>
             </button>
-            <button type="button" class="btn-quick-action btn-highlight-cyan" id="quick-btn-subdivide-2" title="Tách nốt/lặng thành 2 dấu lặng nhỏ để gõ nốt mới vào (ví dụ nốt đen ➔ 2 lặng đơn 1/2 phách) [Alt+S]">
-              <span class="btn-glyph">𝄽➗2</span>
-              <span>Tách 2 lặng</span>
+            <button type="button" class="btn-quick-action" id="quick-btn-to-rest" title="Đổi nốt thành dấu lặng [Phím X]">
+              <span class="btn-glyph">𝄽</span>
+              <span>Thành lặng</span>
             </button>
-            <button type="button" class="btn-quick-action" id="quick-btn-subdivide-4" title="Tách nốt/lặng thành 4 dấu lặng nhỏ (ví dụ nốt đen ➔ 4 lặng kép 1/4 phách) [Alt+4]">
-              <span class="btn-glyph">𝄽➗4</span>
-              <span>Tách 4 lặng</span>
+            <button type="button" class="btn-quick-action btn-danger-soft" id="quick-btn-hard-delete" title="Xóa hẳn nốt khỏi ô nhịp [Delete]">
+              <span class="btn-glyph">🗑</span>
+              <span>Xóa nốt</span>
             </button>
-            <button type="button" class="btn-quick-action" id="quick-btn-merge-rests" title="Gộp 2 dấu lặng liền kề lại thành 1 dấu lặng lớn [Alt+M]">
-              <span class="btn-glyph">𝄾+𝄾</span>
-              <span>Gộp lặng</span>
+            <button type="button" class="btn-quick-action" id="quick-btn-duplicate" title="Nhân bản nốt này">
+              <span class="btn-glyph">📋</span>
+              <span>Nhân bản</span>
             </button>
-          </div>
-
-          <div class="quickbar-divider"></div>
-
-          <!-- Nhóm Thêm nốt & Thao tác -->
-          <div class="quick-btn-group">
-            <button type="button" class="btn-quick-action" id="quick-btn-insert-after" title="Thêm nốt mới sau nốt đang chọn [Insert]">+ Thêm sau</button>
-            <button type="button" class="btn-quick-action" id="quick-btn-insert-rest" title="Thêm dấu lặng mới">+ Thêm lặng</button>
-            <button type="button" class="btn-quick-action" id="quick-btn-duplicate" title="Nhân bản nốt này sang phách tiếp theo">📋 Nhân bản</button>
-            <button type="button" class="btn-quick-action btn-danger-soft" id="quick-btn-hard-delete" title="Xóa hẳn nốt khỏi ô nhịp [Shift+Delete]">🗑 Xóa hẳn</button>
-            <button type="button" class="btn-quick-action btn-accent-soft" id="quick-btn-autofill" title="Tự động bù dấu lặng cho ô nhịp này">⚡ Bù ô nhịp</button>
           </div>
         </div>
       </div>
@@ -324,44 +325,43 @@ $currentUser = Auth::username() ?: 'banhat';
           <button class="btn-action-tool" id="btn-pal-tuplet" title="Liên 3 (Tuplet)">³ Liên 3</button>
         </div>
 
-        <!-- SOẠN THẢO THÔNG MINH & TÁCH DẤU LẶNG -->
-        <div class="note-insert-action-box smart-subdivide-box">
-          <div class="insert-box-title">⚡ SOẠN THÔNG MINH & TÁCH DẤU LẶNG:</div>
-          <div class="insert-buttons-grid">
-            <button type="button" class="btn-insert-tool" id="btn-pal-delete-rest" title="Xóa nốt thành Dấu Lặng (Bảo toàn 100% phách) [Phím X / Delete]">
-              <span class="btn-glyph">𝄽</span>
-              <span>Xóa thành lặng</span>
-            </button>
-            <button type="button" class="btn-insert-tool btn-insert-highlight" id="btn-subdivide-2" title="Tách nốt/lặng thành 2 dấu lặng nhỏ để điền nốt mới vào (ví dụ nốt đen ➔ 2 lặng đơn 1/2 phách) [Alt+S]">
-              <span class="btn-glyph">𝄽➗2</span>
-              <span>Tách 2 lặng</span>
-            </button>
-            <button type="button" class="btn-insert-tool" id="btn-subdivide-4" title="Tách nốt/lặng thành 4 dấu lặng nhỏ (ví dụ nốt đen ➔ 4 lặng kép 1/4 phách) [Alt+4]">
-              <span class="btn-glyph">𝄽➗4</span>
-              <span>Tách 4 lặng</span>
-            </button>
-            <button type="button" class="btn-insert-tool" id="btn-merge-rests" title="Gộp 2 dấu lặng liền kề lại thành 1 dấu lặng lớn [Alt+M]">
-              <span class="btn-glyph">𝄾+𝄾</span>
-              <span>Gộp 2 lặng</span>
+        <!-- THƯỚC ĐO PHÁCH Ô NHỊP (REALTIME BEAT METER: BÁO ĐỎ / BÁO XANH) -->
+        <div class="beat-meter-card status-ok" id="inspector-beat-card">
+          <div class="beat-meter-header">
+            <div class="beat-meter-title">
+              <span class="beat-status-icon" id="inspector-beat-icon">✓</span>
+              <strong id="inspector-meter-title">Ô NHỊP 1: ĐỦ PHÁCH</strong>
+            </div>
+            <span class="beat-meter-counts" id="inspector-meter-counts">3 / 3 phách</span>
+          </div>
+
+          <div class="beat-meter-progress-track">
+            <div class="beat-meter-progress-bar" id="inspector-meter-bar" style="width: 100%;"></div>
+          </div>
+
+          <div class="beat-meter-actions">
+            <span class="beat-meter-hint" id="inspector-meter-hint">Nhịp chuẩn, sẵn sàng lưu</span>
+            <button type="button" class="btn-meter-autofill hidden" id="btn-inspector-autofill" title="Tự động bù dấu lặng chuẩn để đủ phách">
+              ⚡ Bù phách ngay
             </button>
           </div>
         </div>
 
-        <!-- THAO TÁC THÊM NỐT & SAO CHÉP -->
+        <!-- THAO TÁC THÊM NỐT, THÊM LẶNG & XÓA NỐT -->
         <div class="note-insert-action-box">
-          <div class="insert-box-title">THÊM NỐT & SAO CHÉP:</div>
+          <div class="insert-box-title">THAO TÁC THÊM & XÓA NỐT:</div>
           <div class="insert-buttons-grid">
-            <button type="button" class="btn-insert-tool" id="btn-insert-note-after" title="Thêm nốt mới ngay sau nốt đang chọn">+ Thêm sau</button>
+            <button type="button" class="btn-insert-tool btn-insert-highlight" id="btn-insert-note-after" title="Thêm nốt mới ngay sau nốt đang chọn [Insert]">+ Thêm sau</button>
             <button type="button" class="btn-insert-tool" id="btn-insert-note-before" title="Thêm nốt mới ngay trước nốt đang chọn">+ Thêm trước</button>
-            <button type="button" class="btn-insert-tool" id="btn-insert-rest-after" title="Thêm dấu lặng mới vào bè này">+ Thêm lặng</button>
+            <button type="button" class="btn-insert-tool" id="btn-insert-rest-after" title="Thêm dấu lặng mới vào bè này [R]">+ Thêm lặng</button>
             <button type="button" class="btn-insert-tool" id="btn-duplicate-note" title="Nhân bản nốt này sang phách tiếp theo">📋 Nhân bản</button>
           </div>
-        </div>
 
-        <div class="action-extra-row" style="margin-top: 5px;">
-          <button class="btn-action-tool btn-danger-tone" id="btn-hard-delete-note" title="Xóa hẳn nốt khỏi ô nhịp (Xóa bỏ nốt thừa) [Shift+Delete]">🗑 Xóa hẳn nốt</button>
-          <button class="btn-action-tool" id="btn-pal-split-note" title="Tách nốt: Chia đôi nốt giữ nguyên cao độ">✂️ Tách nốt</button>
-          <button class="btn-action-tool btn-accent-tone" id="btn-auto-fix-all-rests" title="Tự động bù dấu lặng cho toàn bộ bản nhạc">⚡ Bù tất cả</button>
+          <div class="action-extra-row" style="margin-top: 6px;">
+            <button type="button" class="btn-action-tool btn-danger-tone" id="btn-hard-delete-note" title="Xóa hẳn nốt khỏi ô nhịp [Delete]">🗑 Xóa nốt</button>
+            <button type="button" class="btn-action-tool" id="btn-pal-delete-rest" title="Đổi nốt thành Dấu Lặng [Phím X]">𝄽 Thành lặng</button>
+            <button type="button" class="btn-action-tool btn-accent-tone" id="btn-auto-fix-all-rests" title="Tự động bù dấu lặng cho toàn bộ bản nhạc">⚡ Bù tất cả</button>
+          </div>
         </div>
       </div>
 

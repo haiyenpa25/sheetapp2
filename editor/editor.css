@@ -364,69 +364,106 @@ body.editor-body {
   gap: 10px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
   flex-wrap: wrap;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
 }
 
-.quickbar-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
+.smart-note-quickbar.status-ok {
+  border-color: rgba(16, 185, 129, 0.45);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45), 0 0 12px rgba(16, 185, 129, 0.15);
 }
 
-.quickbar-right {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
+.smart-note-quickbar.status-warning {
+  border-color: rgba(239, 68, 68, 0.7);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45), 0 0 16px rgba(239, 68, 68, 0.35);
+  background: rgba(30, 16, 20, 0.96);
 }
 
-.quickbar-divider {
-  width: 1px;
-  height: 20px;
-  background: rgba(255, 255, 255, 0.12);
-  margin: 0 3px;
-}
-
-.btn-quick-mode {
+.quickbar-measure-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: rgba(16, 185, 129, 0.12);
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  color: #34d399;
-  font-size: 0.73rem;
-  font-weight: 700;
-  padding: 5px 10px;
+  gap: 7px;
+  padding: 4px 10px;
   border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  font-size: 0.76rem;
+  font-weight: 700;
+  transition: all 0.25s ease;
   user-select: none;
 }
 
-.btn-quick-mode.active {
-  background: rgba(16, 185, 129, 0.22);
-  border-color: #10b981;
-  color: #6ee7b7;
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.25);
+.smart-note-quickbar.status-ok .quickbar-measure-badge {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #34d399;
 }
 
-.btn-quick-mode:not(.active) {
-  background: rgba(100, 116, 139, 0.15);
-  border-color: rgba(100, 116, 139, 0.3);
-  color: #94a3b8;
+.smart-note-quickbar.status-warning .quickbar-measure-badge {
+  background: rgba(239, 68, 68, 0.22);
+  border: 1px solid rgba(239, 68, 68, 0.65);
+  color: #fca5a5;
 }
 
-.mode-pulse-dot {
-  width: 7px;
-  height: 7px;
+.status-indicator-dot {
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.smart-note-quickbar.status-ok .status-indicator-dot {
   background: #10b981;
   box-shadow: 0 0 6px #10b981;
 }
 
-.btn-quick-mode:not(.active) .mode-pulse-dot {
-  background: #64748b;
-  box-shadow: none;
+.smart-note-quickbar.status-warning .status-indicator-dot {
+  background: #ef4444;
+  box-shadow: 0 0 8px #ef4444;
+  animation: pulseRedDot 1.2s infinite ease-in-out;
+}
+
+@keyframes pulseRedDot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.7; }
+}
+
+.btn-quick-autofill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  border: 1px solid #fbbf24;
+  color: #ffffff;
+  font-size: 0.73rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.45);
+  transition: all 0.2s ease;
+  animation: pulseGlowBtn 1.8s infinite;
+}
+
+.btn-quick-autofill:hover {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.7);
+  transform: translateY(-1px);
+}
+
+@keyframes pulseGlowBtn {
+  0%, 100% { box-shadow: 0 0 8px rgba(245, 158, 11, 0.4); }
+  50% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.7); }
+}
+
+.btn-add-note {
+  background: rgba(59, 130, 246, 0.18) !important;
+  border-color: rgba(59, 130, 246, 0.45) !important;
+  color: #93c5fd !important;
+}
+
+.btn-add-note:hover {
+  background: #2563eb !important;
+  border-color: #3b82f6 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.5) !important;
 }
 
 .quickbar-context-hint {
@@ -625,7 +662,27 @@ body.editor-body {
   fill: rgba(59, 130, 246, 0.06);
 }
 
-/* Cảnh báo ô nhịp trên SVG */
+/* Cảnh báo ô nhịp trên SVG (OSMD & Rect Overlay) */
+.measure-highlight-rect {
+  pointer-events: none !important;
+  transition: all 0.25s ease;
+}
+
+.measure-highlight-error {
+  fill: rgba(239, 68, 68, 0.08) !important;
+  stroke: #ef4444 !important;
+  stroke-width: 2px !important;
+  stroke-dasharray: 6 4 !important;
+  filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.4));
+}
+
+.measure-highlight-active {
+  fill: rgba(59, 130, 246, 0.04) !important;
+  stroke: #3b82f6 !important;
+  stroke-width: 1.5px !important;
+  stroke-dasharray: 4 3 !important;
+}
+
 .measure-warning-underflow {
   stroke: #f59e0b !important;
   stroke-width: 2px !important;
@@ -637,6 +694,120 @@ body.editor-body {
   stroke-width: 2.2px !important;
   stroke-dasharray: 5, 2;
   fill: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* ==================== BEAT METER CARD (INSPECTOR) ==================== */
+.beat-meter-card {
+  background: #0f172a;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-top: 8px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.25s ease;
+}
+
+.beat-meter-card.status-ok {
+  background: rgba(6, 78, 59, 0.25);
+  border-color: rgba(16, 185, 129, 0.45);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.1);
+}
+
+.beat-meter-card.status-warning {
+  background: rgba(127, 29, 29, 0.25);
+  border-color: rgba(239, 68, 68, 0.65);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.25);
+}
+
+.beat-meter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.beat-meter-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.beat-meter-card.status-ok .beat-meter-title {
+  color: #34d399;
+}
+
+.beat-meter-card.status-warning .beat-meter-title {
+  color: #fca5a5;
+}
+
+.beat-meter-counts {
+  font-size: 0.8rem;
+  font-weight: 800;
+  font-family: var(--font-mono, monospace);
+  color: #f1f5f9;
+}
+
+.beat-meter-progress-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.beat-meter-progress-bar {
+  height: 100%;
+  transition: width 0.3s ease, background 0.3s ease;
+  border-radius: 4px;
+}
+
+.beat-meter-card.status-ok .beat-meter-progress-bar {
+  background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+}
+
+.beat-meter-card.status-warning .beat-meter-progress-bar {
+  background: linear-gradient(90deg, #ef4444 0%, #f87171 100%);
+}
+
+.beat-meter-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.72rem;
+}
+
+.beat-meter-hint {
+  color: #94a3b8;
+  font-size: 0.7rem;
+}
+
+.beat-meter-card.status-warning .beat-meter-hint {
+  color: #fca5a5;
+  font-weight: 600;
+}
+
+.btn-meter-autofill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border: 1px solid #fbbf24;
+  color: #ffffff;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+  transition: all 0.2s ease;
+}
+
+.btn-meter-autofill:hover {
+  background: #fbbf24;
+  color: #1e293b;
 }
 
 /* ==================== 4. NOTE INSPECTOR SIDEBAR (FOCUS-ON-NOTE) ==================== */
