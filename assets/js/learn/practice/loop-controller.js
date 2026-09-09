@@ -127,9 +127,14 @@ const LoopController = (() => {
     setLoop(true, sec.start, sec.end);
 
     // Di chuyển con trỏ phát về đầu phân đoạn
-    if (window.MusicTransport) {
-      MusicTransport.stop();
-      MusicTransport.play(sec.start);
+    if (window.LearnApp?._seekToMeasure) {
+      window.LearnApp._seekToMeasure(sec.start);
+    } else if (window.MusicTransport) {
+      if (MusicTransport.isPlaying()) {
+        MusicTransport.play(sec.start);
+      } else {
+        MusicTransport.seek(sec.start);
+      }
     }
   }
 

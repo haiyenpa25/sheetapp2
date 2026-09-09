@@ -137,15 +137,40 @@ const MusicTransport = (() => {
     else play();
   }
 
+  function seek(measure) {
+    if (!window.Tone) return;
+    const T = Tone.getTransport();
+    const target = Math.max(1, measure);
+    T.position = `${target - 1}m`;
+    const { measure: curM, beat: curB } = getMeasureBeat();
+    if (window.EventBus) {
+      EventBus.emit(LEARN_EVENTS.POSITION_CHANGED, { measure: curM, beat: curB, timeSeconds: T.seconds });
+    }
+  }
+
   /* ─── Position Query ─────────────────────────────────────────── */
   function getPositionSeconds() {
     if (!window.Tone) return 0;
     return Tone.getTransport().seconds;
   }
 
-  function getMeasureBeat() {
+  function getMeasureBeat(time = undefined) {
     if (!window.Tone) return { measure: 1, beat: 1 };
-    const pos = Tone.getTransport().position; // format "Bars:Beats:Sixteenth"
+    const T = Tone.getTransport();
+    if (time !== undefined && typeof T.getTicksAtTime === 'function') {
+      const ticks = T.getTicksAtTime(time);
+      const timeSig = Array.isArray(T.timeSignature) ? T.timeSignature[0] : (T.timeSignature || 4);
+      const ticksPerBeat = T.PPQ || 192;
+      const ticksPerBar = ticksPerBeat * timeSig;
+      const bars = Math.floor(ticks / ticksPerBar);
+      const beatTicks = ticks % ticksPerBar;
+      const beats = Math.floor(beatTicks / ticksPerBeat);
+      return {
+        measure: Math.max(1, bars + 1),
+        beat:    Math.max(1, beats + 1),
+      };
+    }
+    const pos = T.position; // format "Bars:Beats:Sixteenth"
     const parts = String(pos).split(':').map(Number);
     const bars  = parts[0] || 0; // 0-indexed bars
     const beats = parts[1] || 0; // 0-indexed beats within bar
@@ -159,7 +184,7 @@ const MusicTransport = (() => {
 
   /**
    * Đăng ký callback gọi mỗi beat.
-   * @param {Function} cb - fn({ measure, beat, timeSeconds })
+   * @param {Function} cb - fn({ measure, beat, timeSeconds, time })
    * @returns {Function} unsubscribe
    */
   function onBeat(cb) {
@@ -169,7 +194,7 @@ const MusicTransport = (() => {
 
   /**
    * Đăng ký callback gọi khi đổi measure.
-   * @param {Function} cb - fn({ measure, timeSeconds })
+   * @param {Function} cb - fn({ measure, timeSeconds, time })
    * @returns {Function} unsubscribe
    */
   function onMeasure(cb) {
@@ -191,24 +216,24 @@ const MusicTransport = (() => {
     // Schedule beat ticker using Tone.Sequence
     let lastMeasure = -1;
     T.scheduleRepeat((time) => {
-      const { measure, beat } = getMeasureBeat();
+      const { measure, beat } = getMeasureBeat(time);
       const timeSeconds = T.seconds;
 
       // Beat callbacks
       _beatCallbacks.forEach(cb => {
-        try { cb({ measure, beat, timeSeconds }); } catch (e) { /* ignore */ }
+        try { cb({ measure, beat, timeSeconds, time }); } catch (e) { /* ignore */ }
       });
 
       // Measure callbacks (fire once per measure change)
       if (measure !== lastMeasure) {
         lastMeasure = measure;
         _measureCallbacks.forEach(cb => {
-          try { cb({ measure, timeSeconds }); } catch (e) { /* ignore */ }
+          try { cb({ measure, timeSeconds, time }); } catch (e) { /* ignore */ }
         });
 
         // Emit EventBus
         if (window.EventBus) {
-          EventBus.emit(LEARN_EVENTS.POSITION_CHANGED, { measure, beat, timeSeconds });
+          EventBus.emit(LEARN_EVENTS.POSITION_CHANGED, { measure, beat, timeSeconds, time });
         }
       }
     }, `${_beatType || 4}n`); // Every beat
@@ -264,7 +289,7 @@ const MusicTransport = (() => {
   /* ─── Public API ─────────────────────────────────────────────── */
   return {
     configure, setBpm, setLoop,
-    play, pause, stop, togglePlay, playWithCountIn,
+    play, pause, stop, togglePlay, seek, playWithCountIn,
     unlock,
     onBeat, onMeasure, setupTicker,
     getPositionSeconds, getMeasureBeat,

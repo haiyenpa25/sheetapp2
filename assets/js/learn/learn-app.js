@@ -97,6 +97,84 @@ const LearnApp = (() => {
     });
   }
 
+  function _jumpCursorToMeasure(measureNum) {
+    if (!_osmd?.cursor) return;
+    _osmd.cursor.reset();
+    const targetIdx = measureNum - 1;
+    while (_osmd.cursor.iterator && _osmd.cursor.iterator.currentMeasureIndex < targetIdx && !_osmd.cursor.iterator.EndReached) {
+      _osmd.cursor.next();
+    }
+    _osmd.cursor.show();
+  }
+
+  function _findMeasureAtCoords(x, y) {
+    if (!_osmd?.graphic?.measureList) return null;
+    const list = _osmd.graphic.measureList;
+    for (let i = 0; i < list.length; i++) {
+      const staff0 = list[i][0];
+      if (!staff0?.PositionAndShape) continue;
+      const pos = staff0.PositionAndShape.AbsolutePosition;
+      const size = staff0.PositionAndShape.Size;
+      const mx = pos.x * 10;
+      const my = pos.y * 10;
+      const mw = size.width * 10;
+      const mh = Math.max(260, (size.height || 25) * 10);
+      if (x >= mx && x <= mx + mw && y >= my - 30 && y <= my + mh + 40) {
+        return i + 1;
+      }
+    }
+    return null;
+  }
+
+  function _seekToMeasure(measureNum) {
+    const meta = _getSongMeta();
+    const target = Math.max(1, Math.min(meta.totalMeasures || 999, measureNum));
+
+    // Jump visual cursor
+    _jumpCursorToMeasure(target);
+
+    // Update chord display & virtual keyboard
+    const timeline = LearnStore.get('timeline') || [];
+    const chord = ChordTimelineNormalizer.getChordAt(timeline, target, 1);
+    const next = ChordTimelineNormalizer.getNextChord(timeline, chord);
+    LearnStore.setCurrentChord(chord, next);
+    LearnStore.setCurrentPosition(target, 1);
+    if (window.ChordCard) ChordCard.setChord(chord, next, _currentSong?.defaultKey);
+    if (chord) EventBus.emit(LEARN_EVENTS.CHORD_CHANGED, { chord, next });
+
+    // Transport seek
+    if (window.MusicTransport) {
+      if (MusicTransport.isPlaying()) {
+        MusicTransport.play(target);
+      } else {
+        MusicTransport.seek(target);
+      }
+    }
+
+    _scrollToMeasure(target);
+  }
+
+  function _setupScoreClickHandler() {
+    const container = document.getElementById('learn-score-container');
+    if (!container || container._hasClickHandler) return;
+    container._hasClickHandler = true;
+
+    container.addEventListener('click', (e) => {
+      if (!_osmd?.graphic?.measureList) return;
+      const svg = container.querySelector('svg');
+      if (!svg) return;
+
+      const rect = svg.getBoundingClientRect();
+      const clickX = (e.clientX - rect.left) / _osmdZoom;
+      const clickY = (e.clientY - rect.top) / _osmdZoom;
+
+      const measureNum = _findMeasureAtCoords(clickX, clickY);
+      if (measureNum) {
+        _seekToMeasure(measureNum);
+      }
+    });
+  }
+
   /* ─── Song Loading ───────────────────────────────────────────── */
   async function _loadSongs() {
     try {
@@ -504,7 +582,7 @@ const LearnApp = (() => {
   /* ─── Transport Callbacks ────────────────────────────────────── */
   function _setupTransportCallbacks() {
     // 1. Theo dõi từng Phách (Beat)
-    MusicTransport.onBeat(({ measure, beat }) => {
+    MusicTransport.onBeat(({ measure, beat, time }) => {
       // Visual Metronome Beat Indicator update
       const beatDots = document.querySelectorAll('.beat-dot');
       beatDots.forEach(dot => {
@@ -514,7 +592,7 @@ const LearnApp = (() => {
 
       // Metronome Audio Click (Ting on beat 1 downbeat, cốc on beats 2,3,4)
       if (window.LearnSoundEngine && LearnSoundEngine.isMetronomeEnabled && LearnSoundEngine.isMetronomeEnabled()) {
-        LearnSoundEngine.playMetronomeClick(beat, beat === 1);
+        LearnSoundEngine.playMetronomeClick(beat, beat === 1, time);
       }
 
       // Visual Cursor Tracking
@@ -534,20 +612,34 @@ const LearnApp = (() => {
         }
       }
 
-      // SATB 4-Part Choir Synthesis
-      const satbBeat = _extractSatbNotesAt(measure, (beat - 1) % 4);
-      if (satbBeat && window.LearnSoundEngine) {
-        const bpm = MusicTransport.getBpm() || 76;
-        const durSec = (60 / bpm) * 0.88;
-        ['soprano', 'alto', 'tenor', 'bass'].forEach(voice => {
-          const vNote = satbBeat[voice];
-          if (vNote && !vNote.isRest) {
-            const noteStr = _pitchToNoteStr(vNote.step, vNote.octave, vNote.alter);
-            if (noteStr) {
-              LearnSoundEngine.triggerSatbNote(voice, noteStr, durSec, undefined, 0.7);
+      // Mode-specific note playback
+      const currentMode = (window.LearnStore ? LearnStore.get('mode') : null) || 'piano';
+      if (currentMode === 'satb') {
+        const satbBeat = _extractSatbNotesAt(measure, beat - 1);
+        if (satbBeat && window.LearnSoundEngine) {
+          const bpm = MusicTransport.getBpm() || 76;
+          const durSec = (60 / bpm) * 0.88;
+          ['soprano', 'alto', 'tenor', 'bass'].forEach(voice => {
+            const vNote = satbBeat[voice];
+            if (vNote && !vNote.isRest) {
+              const noteStr = _pitchToNoteStr(vNote.step, vNote.octave, vNote.alter);
+              if (noteStr) {
+                LearnSoundEngine.triggerSatbNote(voice, noteStr, durSec, time, 0.7);
+              }
             }
+          });
+        }
+      } else if (currentMode === 'melody') {
+        const satbBeat = _extractSatbNotesAt(measure, beat - 1);
+        if (satbBeat?.soprano && !satbBeat.soprano.isRest && window.LearnSoundEngine) {
+          const bpm = MusicTransport.getBpm() || 76;
+          const durSec = (60 / bpm) * 0.90;
+          const vNote = satbBeat.soprano;
+          const noteStr = _pitchToNoteStr(vNote.step, vNote.octave, vNote.alter);
+          if (noteStr) {
+            LearnSoundEngine.triggerNote('piano', noteStr, durSec, time, 0.9, 'right');
           }
-        });
+        }
       }
     });
 
@@ -604,6 +696,8 @@ const LearnApp = (() => {
 
   /* ─── Controls Binding ───────────────────────────────────────── */
   function _bindControls() {
+    _setupScoreClickHandler();
+
     // Zoom controls
     document.getElementById('btn-learn-zoom-in')?.addEventListener('click', () => {
       _zoomIn();
@@ -969,6 +1063,7 @@ const LearnApp = (() => {
     setZoom: _setZoom,
     getZoom: () => _osmdZoom,
     fitScore: _fitScore,
+    seekToMeasure: _seekToMeasure,
   };
 })();
 
