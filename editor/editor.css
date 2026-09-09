@@ -1917,4 +1917,519 @@ body.editor-body {
   }
 }
 
+/* ==================== PRO AUDIO TRANSPORT BAR & CONTROLS ==================== */
+.audio-transport-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: linear-gradient(180deg, #18202f 0%, #111827 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  z-index: 25;
+  flex-shrink: 0;
+  overflow-x: auto;
+  user-select: none;
+}
+.audio-transport-bar::-webkit-scrollbar {
+  height: 3px;
+}
+.audio-transport-bar::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 2px;
+}
 
+.transport-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.transport-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 2px;
+  flex-shrink: 0;
+}
+
+.transport-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Nút Play / Stop */
+.btn-transport {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 5px;
+  border: none;
+  font-family: var(--font-sans);
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-transport-play {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
+}
+.btn-transport-play:hover {
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.5);
+  transform: translateY(-1px);
+}
+.btn-transport-play.is-playing {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.45);
+}
+
+.btn-transport-rewind {
+  padding: 5px 8px;
+  background: #1e293b;
+  color: #cbd5e1;
+  border: 1px solid #334155;
+}
+.btn-transport-rewind:hover {
+  background: #334155;
+  color: #fff;
+}
+
+.transport-time-display {
+  font-family: var(--font-mono);
+  font-size: 0.70rem;
+  font-weight: 600;
+  color: #38bdf8;
+  background: rgba(15, 23, 42, 0.7);
+  padding: 3px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+/* Select & Toggles */
+.select-transport {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #f1f5f9;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 6px;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.select-transport:focus {
+  border-color: #38bdf8;
+}
+
+.btn-transport-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 8px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #94a3b8;
+  font-size: 0.70rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.btn-transport-toggle:hover {
+  background: #27354a;
+  color: #e2e8f0;
+}
+.btn-transport-toggle.active {
+  background: rgba(14, 165, 233, 0.18);
+  border-color: #0284c7;
+  color: #38bdf8;
+}
+
+/* Tempo Slider */
+.tempo-slider {
+  width: 65px;
+  height: 4px;
+  background: #334155;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  accent-color: #38bdf8;
+}
+.tempo-val-badge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  min-width: 46px;
+}
+
+/* Pro Action Buttons: AI Harmonizer & Rehearsal Focus */
+.btn-transport-ai {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  font-family: var(--font-sans);
+  font-size: 0.73rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
+  transition: all 0.15s ease;
+}
+.btn-transport-ai:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.5);
+}
+.ai-sparkle {
+  font-size: 0.85rem;
+  animation: ai-pulse 2s infinite ease-in-out;
+}
+@keyframes ai-pulse {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.25) rotate(15deg); }
+}
+
+.btn-transport-rehearsal {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 9px;
+  background: #1e293b;
+  border: 1px solid #475569;
+  color: #f59e0b;
+  border-radius: 5px;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.btn-transport-rehearsal:hover {
+  background: #334155;
+  color: #fbbf24;
+}
+.btn-transport-rehearsal.active {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+  border-color: #d97706;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.4);
+}
+
+/* ==================== WEB MIDI BADGE ==================== */
+.midi-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.midi-status-badge .midi-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #64748b;
+}
+.midi-status-badge.connected {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.12);
+  color: #34d399;
+}
+.midi-status-badge.connected .midi-dot {
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+  animation: midi-pulse 2s infinite;
+}
+.midi-status-badge.note-active {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(52, 211, 153, 0.6);
+}
+@keyframes midi-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+/* ==================== PRO EXPORT BUTTON & MODAL ==================== */
+.btn-export-hub {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 11px;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
+  border-radius: 6px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.btn-export-hub:hover {
+  background: #0284c7;
+  border-color: #0284c7;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+}
+
+.export-dialog {
+  max-width: 640px;
+  width: 90%;
+}
+.export-desc {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  margin-bottom: 16px;
+}
+.export-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+.export-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+.export-card:hover {
+  border-color: #6366f1;
+  background: #253248;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+.export-card-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+.export-card-info {
+  flex: 1;
+}
+.export-card-info h4 {
+  margin: 0 0 4px 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+.export-card-info p {
+  margin: 0 0 10px 0;
+  font-size: 0.78rem;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+.btn-export-action {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 5px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s ease;
+}
+.btn-export-pdf {
+  background: #ef4444;
+  color: #ffffff;
+}
+.btn-export-pdf:hover {
+  background: #dc2626;
+}
+.btn-export-xml {
+  background: #6366f1;
+  color: #ffffff;
+}
+.btn-export-xml:hover {
+  background: #4f46e5;
+}
+.btn-export-midi {
+  background: #10b981;
+  color: #ffffff;
+}
+.btn-export-midi:hover {
+  background: #059669;
+}
+
+/* ==================== AI HARMONIZER MODAL ==================== */
+.ai-harmonize-dialog {
+  max-width: 580px;
+  width: 90%;
+}
+.ai-feature-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(236, 72, 153, 0.12) 100%);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+.ai-banner-icon {
+  font-size: 2.2rem;
+  flex-shrink: 0;
+}
+.ai-banner-text strong {
+  display: block;
+  font-size: 0.95rem;
+  color: #f1f5f9;
+  margin-bottom: 4px;
+}
+.ai-banner-text p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  line-height: 1.45;
+}
+.ai-config-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.ai-config-item label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-bottom: 5px;
+}
+.ai-notice-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid #334155;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+.btn-ai-confirm {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%) !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+}
+
+/* ==================== REHEARSAL FOCUS MODE (VOICE ISOLATION) ==================== */
+.sheet-paper-container.rehearsal-mode-active svg .vf-stavenote {
+  transition: opacity 0.25s ease, filter 0.25s ease;
+}
+.sheet-paper-container.rehearsal-mode-active.focus-soprano svg .voice-soprano {
+  opacity: 1 !important;
+  filter: drop-shadow(0 0 3px #10b981);
+}
+.sheet-paper-container.rehearsal-mode-active.focus-alto svg .voice-alto {
+  opacity: 1 !important;
+  filter: drop-shadow(0 0 3px #38bdf8);
+}
+.sheet-paper-container.rehearsal-mode-active.focus-tenor svg .voice-tenor {
+  opacity: 1 !important;
+  filter: drop-shadow(0 0 3px #f59e0b);
+}
+.sheet-paper-container.rehearsal-mode-active.focus-bass svg .voice-bass {
+  opacity: 1 !important;
+  filter: drop-shadow(0 0 3px #ec4899);
+}
+
+/* ==================== OSMD CURSOR STYLING ==================== */
+#cursorImg-0,
+#cursorImg-1,
+.osmd-cursor,
+img[id^="cursorImg"] {
+  z-index: 100 !important;
+  opacity: 0.65 !important;
+  pointer-events: none !important;
+  transition: left 0.08s ease-out, top 0.08s ease-out !important;
+}
+
+/* ==================== PRINT-READY A4 VECTOR STYLES ==================== */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm 10mm 12mm 10mm;
+  }
+
+  body.editor-body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  /* Ẩn toàn bộ UI thừa của editor */
+  .editor-header,
+  .smart-note-quickbar,
+  .audio-transport-bar,
+  .note-inspector-sidebar,
+  .modal-backdrop,
+  .editor-toast,
+  .loading-overlay,
+  .drag-ghost-overlay {
+    display: none !important;
+  }
+
+  .editor-main-layout {
+    display: block !important;
+    height: auto !important;
+  }
+
+  .sheet-canvas-wrapper {
+    background: #ffffff !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  .sheet-paper-container {
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    background: #ffffff !important;
+  }
+
+  #osmd-editor-container {
+    width: 100% !important;
+  }
+
+  #osmd-editor-container svg {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Ẩn con trỏ và hitbox tương tác khi in */
+  img[id^="cursorImg"],
+  .editor-drag-hitbox,
+  .measure-visual-box {
+    display: none !important;
+  }
+}

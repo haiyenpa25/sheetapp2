@@ -22,6 +22,10 @@ $currentUser = Auth::username() ?: 'banhat';
   <link rel="stylesheet" href="editor.css?v=<?php echo time(); ?>">
   <!-- OpenSheetMusicDisplay Vendor -->
   <script src="/assets/js/vendor/opensheetmusicdisplay.min.js"></script>
+  <!-- Tone.js & Tonal Music Theory & SoundEngine -->
+  <script src="/assets/js/vendor/Tone.js"></script>
+  <script src="/assets/js/vendor/tonal.min.js"></script>
+  <script src="/assets/js/learn/audio/learn-sound-engine.js"></script>
 </head>
 <body class="editor-body">
 
@@ -61,6 +65,12 @@ $currentUser = Auth::username() ?: 'banhat';
     </div>
 
     <div class="header-right">
+      <!-- Web MIDI Connection Badge -->
+      <div id="midi-status-badge" class="midi-status-badge disconnected" title="Cắm đàn Piano/Organ qua USB hoặc Bluetooth MIDI để gõ nốt tự động">
+        <span class="midi-dot"></span>
+        <span id="midi-status-text">🎹 MIDI: Chưa cắm</span>
+      </div>
+
       <!-- Tag User -->
       <div class="user-badge" title="Tài khoản đang đăng nhập">
         <span class="user-dot"></span>
@@ -83,6 +93,12 @@ $currentUser = Auth::username() ?: 'banhat';
       <!-- Phím tắt nhanh -->
       <button id="btn-open-shortcut-modal" class="btn-shortcut-guide" title="Bảng tra cứu phím tắt">
         <span>⌨ Phím tắt</span>
+      </button>
+
+      <!-- Trung tâm Xuất bản (PDF/XML/MIDI) -->
+      <button id="btn-open-export-modal" class="btn-export-hub" title="Xuất file PDF A4, MusicXML, MIDI chuẩn phòng thu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;margin-right:4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        <span>XUẤT BẢN</span>
       </button>
 
       <!-- Nút Lưu Phiên Bản -->
@@ -154,6 +170,65 @@ $currentUser = Auth::username() ?: 'banhat';
               <span>Nhân bản</span>
             </button>
           </div>
+        </div>
+      </div>
+
+      <!-- ==================== STUDIO TRANSPORT PLAYER & PRO TOOLBAR ==================== -->
+      <div class="audio-transport-bar" id="audio-transport-bar">
+        <!-- Nhóm điều khiển phát -->
+        <div class="transport-group transport-controls">
+          <button type="button" class="btn-transport btn-transport-rewind" id="btn-transport-stop" title="Về đầu bài (Rewind / Stop)">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+          </button>
+          <button type="button" class="btn-transport btn-transport-play" id="btn-transport-play" title="Phát toàn bài kèm con trỏ di chuyển (Phím Space)">
+            <span id="transport-play-icon">▶</span>
+            <span id="transport-play-label">PHÁT BÀI</span>
+          </button>
+          <div class="transport-time-display" id="transport-time-display">00:00 / 00:00</div>
+        </div>
+
+        <div class="transport-divider"></div>
+
+        <!-- Bộ chọn Nhạc cụ & Hiệu ứng Thánh Đường -->
+        <div class="transport-group instrument-group">
+          <label for="select-playback-instrument" class="transport-label">Đàn:</label>
+          <select id="select-playback-instrument" class="select-transport" title="Chọn âm sắc nhạc cụ">
+            <option value="organ" selected>⛪ Đại Phong Cầm</option>
+            <option value="piano">🎹 Đại Dương Cầm</option>
+            <option value="choir">👥 Hợp Xướng</option>
+            <option value="strings">🎻 Dàn Dây</option>
+          </select>
+          <button type="button" id="btn-toggle-reverb" class="btn-transport-toggle active" title="Bật/Tắt Vang Thánh Đường (Cathedral Reverb)">
+            <span>⛪ Vang</span>
+          </button>
+          <button type="button" id="btn-toggle-metronome" class="btn-transport-toggle" title="Gõ nhịp Metronome (Click)">
+            <span>⏱ Gõ nhịp</span>
+          </button>
+        </div>
+
+        <div class="transport-divider"></div>
+
+        <!-- Tốc độ Tempo BPM & Lặp A-B -->
+        <div class="transport-group tempo-group">
+          <span class="transport-label">BPM:</span>
+          <input type="range" id="transport-tempo-slider" min="40" max="180" value="84" class="tempo-slider" title="Kéo để chỉnh tốc độ bài">
+          <span id="transport-tempo-val" class="tempo-val-badge">84</span>
+          <button type="button" id="btn-transport-loop" class="btn-transport-toggle" title="Bật/Tắt lặp đoạn A-B khi tập hát">
+            <span>🔁 Lặp</span>
+          </button>
+        </div>
+
+        <div class="transport-divider"></div>
+
+        <!-- Tính năng đột phá: AI Hòa Âm 4 Bè & Luyện Bè Solo -->
+        <div class="transport-group pro-actions-group">
+          <button type="button" class="btn-transport-ai" id="btn-ai-harmonize" title="Phép màu AI: Tự động phân tích Soprano và hòa âm 4 bè SATB chuẩn mực">
+            <span class="ai-sparkle">✨</span>
+            <span>AI HÒA ÂM 4 BÈ</span>
+          </button>
+          <button type="button" class="btn-transport-rehearsal" id="btn-toggle-rehearsal" title="Chế độ Luyện Bè: Phóng to và chiếu sáng bè đang chọn, giảm âm lượng 3 bè phụ">
+            <span>🎯 LUYỆN BÈ</span>
+          </button>
         </div>
       </div>
 
@@ -558,6 +633,102 @@ $currentUser = Auth::username() ?: 'banhat';
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL XUẤT BẢN CHUYÊN NGHIỆP (PRO EXPORT HUB) ==================== -->
+  <div id="export-score-modal" class="modal-backdrop hidden">
+    <div class="modal-dialog export-dialog">
+      <div class="modal-header">
+        <div class="modal-header-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;margin-right:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          <span>Trung Tâm Xuất Bản Sheet Nhạc Pro</span>
+        </div>
+        <button id="btn-close-export-modal" class="btn-modal-close" title="Đóng">&times;</button>
+      </div>
+      <div class="modal-content-export">
+        <p class="export-desc">Chọn định dạng chất lượng cao để in ấn biểu diễn hoặc nạp vào các phần mềm chuyên nghiệp:</p>
+        <div class="export-cards-grid">
+          <!-- Card PDF -->
+          <div class="export-card" id="export-card-pdf">
+            <div class="export-card-icon pdf-icon">📄</div>
+            <div class="export-card-info">
+              <h4>Xuất PDF Khổ A4 In Ấn</h4>
+              <p>Bản in Vector siêu nét, căn lề chuẩn trang in biểu diễn thánh lễ, lời ca và nốt nhạc rõ ràng.</p>
+              <button type="button" id="btn-export-pdf" class="btn-export-action btn-export-pdf">In / Lưu PDF (Ctrl+P)</button>
+            </div>
+          </div>
+
+          <!-- Card MusicXML -->
+          <div class="export-card" id="export-card-xml">
+            <div class="export-card-icon xml-icon">🎼</div>
+            <div class="export-card-info">
+              <h4>Tải MusicXML (.xml / .musicxml)</h4>
+              <p>Định dạng phổ quát mở trên MuseScore, Sibelius, Finale giữ nguyên vẹn 4 bè và lời ca.</p>
+              <button type="button" id="btn-export-xml" class="btn-export-action btn-export-xml">Tải File MusicXML</button>
+            </div>
+          </div>
+
+          <!-- Card MIDI -->
+          <div class="export-card" id="export-card-midi">
+            <div class="export-card-icon midi-icon">🎹</div>
+            <div class="export-card-info">
+              <h4>Tải File Standard MIDI (.mid)</h4>
+              <p>Chứa đầy đủ track nốt của cả 4 bè SATB, cắm trực tiếp vào đàn Organ Yamaha/Roland.</p>
+              <button type="button" id="btn-export-midi" class="btn-export-action btn-export-midi">Tải File MIDI</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL AI HÒA ÂM 4 BÈ SATB ==================== -->
+  <div id="ai-harmonize-modal" class="modal-backdrop hidden">
+    <div class="modal-dialog ai-harmonize-dialog">
+      <div class="modal-header">
+        <div class="modal-header-title">
+          <span style="font-size:1.2rem;margin-right:6px;">✨</span>
+          <span>Phép Màu AI: Tự Động Hòa Âm 4 Bè SATB</span>
+        </div>
+        <button id="btn-close-ai-modal" class="btn-modal-close" title="Đóng">&times;</button>
+      </div>
+      <div class="modal-content-ai">
+        <div class="ai-feature-banner">
+          <div class="ai-banner-icon">🎼</div>
+          <div class="ai-banner-text">
+            <strong>Tự động hòa âm ca đoàn 4 bè kinh điển</strong>
+            <p>AI sẽ phân tích nốt giai điệu (Soprano) của bài hát, nhận diện giọng điệu chính xác, xây dựng bè Bass nền tảng vững chắc và tự động điền bè Alto & Tenor chuẩn mực cổ điển (không lỗi song song 5/8).</p>
+          </div>
+        </div>
+        <div class="ai-config-grid">
+          <div class="ai-config-item">
+            <label for="select-ai-style">Phong cách hòa âm:</label>
+            <select id="select-ai-style" class="form-input-save">
+              <option value="sacred_hymn" selected>Thánh Ca Truyền Thống (Sacred Hymnal - Trầm ấm, trang trọng)</option>
+              <option value="bach_chorale">Hợp Xướng Cổ Điển Bach (Chorale Harmony - Chặt chẽ, đa âm)</option>
+              <option value="modern_worship">Thánh Ca Hiện Đại (Contemporary Praise - Thoáng đãng)</option>
+            </select>
+          </div>
+          <div class="ai-config-item">
+            <label for="select-ai-scope">Phạm vi áp dụng:</label>
+            <select id="select-ai-scope" class="form-input-save">
+              <option value="all" selected>Toàn bộ bản nhạc (Tất cả các ô nhịp)</option>
+              <option value="from_current">Từ ô nhịp hiện tại đến hết bài</option>
+            </select>
+          </div>
+        </div>
+        <div class="ai-notice-box">
+          <span class="notice-icon">💡</span>
+          <span>Bạn luôn có thể nhấn <strong>Hoàn tác (Ctrl+Z)</strong> bất kỳ lúc nào nếu muốn trở về phiên bản trước!</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-cancel-ai" class="btn-modal-cancel">Hủy bỏ</button>
+        <button id="btn-confirm-ai-harmonize" class="btn-modal-confirm btn-ai-confirm">
+          <span>⚡ BẮT ĐẦU HÒA ÂM 4 BÈ</span>
+        </button>
       </div>
     </div>
   </div>

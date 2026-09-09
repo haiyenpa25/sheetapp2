@@ -94,9 +94,47 @@
     return ch.volume * 0.25;
   }
 
-  // Phát 1 nốt đơn
+  /* ─── State Điều Khiển Phát Nhạc Pro & Nhạc Cụ Studio ──────── */
+  const _playbackState = {
+    isPlaying: false,
+    instrument: 'organ', // 'organ' | 'piano' | 'choir' | 'strings'
+    reverbWet: 0.35,
+    metronome: false,
+    rehearsalMode: false,
+    loopEnabled: false,
+    loopStartMeasure: 1,
+    loopEndMeasure: 8,
+    timer: null,
+    stepIndex: 0
+  };
+
+  function _toNoteName(step, octave, alter = 0) {
+    if (!step) return 'C4';
+    let acc = '';
+    const a = parseInt(alter, 10) || 0;
+    if (a === 1) acc = '#';
+    else if (a === -1) acc = 'b';
+    else if (a === 2) acc = '##';
+    else if (a === -2) acc = 'bb';
+    return `${step.toUpperCase()}${acc}${octave || 4}`;
+  }
+
+  // Phát 1 nốt đơn (Ưu tiên Studio SoundEngine Grand Piano / Church Organ)
   function playSinglePitch(step, octave, alter = 0, durationSec = 0.5) {
     if (!step) return;
+    const noteName = _toNoteName(step, octave, alter);
+    if (window.LearnSoundEngine) {
+      try {
+        window.LearnSoundEngine.init();
+        const inst = _playbackState.instrument === 'piano' ? 'piano' : 'organ';
+        window.LearnSoundEngine.triggerNote(inst, noteName, durationSec, undefined, 0.85);
+        return;
+      } catch (e) {
+        console.warn('[SoundEngine SingleNote]', e);
+      }
+    }
+
+    // Web Audio Fallback
     try {
       const ctx = _getAudioContext();
       const midi = _pitchToMidi(step, octave, alter);
@@ -127,10 +165,37 @@
   function playSatbChord() {
     const vMap = _selectedPosition.activeVoiceMap;
     if (!vMap) return;
-    const ctx = _getAudioContext();
-    const now = ctx.currentTime;
     const durSec = Math.max(0.6, 60 / _mixerState.tempo);
 
+    if (window.LearnSoundEngine) {
+      try {
+        window.LearnSoundEngine.init();
+        ['soprano', 'alto', 'tenor', 'bass'].forEach(v => {
+          const n = vMap[v];
+          if (n && n.step && !n.isRest) {
+            const noteName = _toNoteName(n.step, n.octave, n.alter);
+            let vel = 0.8;
+            if (_playbackState.rehearsalMode) {
+              vel = (v === _selectedPosition.voice) ? 1.0 : 0.22;
+            }
+            if (_playbackState.instrument === 'choir') {
+              window.LearnSoundEngine.triggerSatbNote(v, noteName, durSec, undefined, vel);
+            } else {
+              const inst = _playbackState.instrument === 'piano' ? 'piano' : 'organ';
+              window.LearnSoundEngine.triggerNote(inst, noteName, durSec, undefined, vel);
+            }
+          }
+        });
+        showToast('🔊 Đang phát hòa âm 4 bè SATB...', 'info', 1000);
+        return;
+      } catch (e) {
+        console.warn('[SoundEngine Chord]', e);
+      }
+    }
+
+    // Web Audio Fallback
+    const ctx = _getAudioContext();
+    const now = ctx.currentTime;
     ['soprano', 'alto', 'tenor', 'bass'].forEach(v => {
       const n = vMap[v];
       const effGain = _getVoiceEffectiveGain(v);
@@ -159,6 +224,579 @@
     });
 
     showToast('🔊 Đang phát hòa âm 4 bè SATB...', 'info', 1200);
+  }
+
+  /* ─── Score Playback Engine Với Con Trỏ OSMD Động ──────────── */
+  function toggleScorePlayback() {
+    if (_playbackState.isPlaying) {
+      pauseScorePlayback();
+    } else {
+      startScorePlayback();
+    }
+  }
+
+  function startScorePlayback() {
+    if (!_osmd) return;
+    if (window.LearnSoundEngine) {
+      window.LearnSoundEngine.init();
+    }
+
+    const cursor = _osmd.cursor;
+    if (!cursor) return;
+
+    if (cursor.iterator?.EndReached) {
+      cursor.reset();
+    }
+    cursor.show();
+
+    _playbackState.isPlaying = true;
+    _updateTransportPlayButton(true);
+    showToast('▶ Bắt đầu phát bản nhạc...', 'info', 1500);
+
+    _playbackStep();
+  }
+
+  function _playbackStep() {
+    if (!_playbackState.isPlaying || !_osmd || !_osmd.cursor) return;
+
+    const cursor = _osmd.cursor;
+    if (cursor.iterator?.EndReached) {
+      stopScorePlayback();
+      showToast('✓ Đã phát xong bài hát!', 'success', 2000);
+      return;
+    }
+
+    const gNotes = cursor.GNotesUnderCursor();
+    const tempo = _mixerState.tempo || 84;
+
+    // Tìm trường độ nhỏ nhất để tính nhịp bước tiếp theo
+    let minDur = 0.25; // default 1 phách
+    if (gNotes && gNotes.length > 0) {
+      gNotes.forEach(gn => {
+        const sn = gn.sourceNote;
+        if (sn && sn.Length && sn.Length.RealValue > 0) {
+          if (sn.Length.RealValue < minDur) {
+            minDur = sn.Length.RealValue;
+          }
+        }
+      });
+    }
+
+    const stepDurationSec = Math.max(0.12, (minDur * 4) * (60 / tempo));
+    const stepDurationMs = Math.max(120, Math.round(stepDurationSec * 1000));
+
+    // Phát âm thanh các nốt dưới con trỏ
+    if (gNotes && gNotes.length > 0) {
+      gNotes.forEach(gn => {
+        const sn = gn.sourceNote;
+        if (sn && !sn.isRest() && sn.Pitch) {
+          const stepName = ['C', 'D', 'E', 'F', 'G', 'A', 'B'][sn.Pitch.fundamentalNote] || sn.Pitch.step;
+          const oct = sn.Pitch.octave;
+          const alt = sn.Pitch.accidental || sn.Pitch.alter || 0;
+          const noteName = _toNoteName(stepName, oct, alt);
+
+          // Phân loại bè
+          const staffIdx = sn.ParentStaffEntry?.parentStaff?.idInMusicSheet || 0;
+          const voiceId = sn.VoiceEntry?.parentVoice?.VoiceId || 1;
+          let voice = 'soprano';
+          if (staffIdx === 0) {
+            voice = (voiceId === 1) ? 'soprano' : 'alto';
+          } else {
+            voice = (voiceId === 1 || voiceId === 3) ? 'tenor' : 'bass';
+          }
+
+          let vel = 0.8;
+          if (_playbackState.rehearsalMode) {
+            vel = (voice === _selectedPosition.voice) ? 1.0 : 0.2;
+          }
+
+          if (window.LearnSoundEngine) {
+            if (_playbackState.instrument === 'choir') {
+              window.LearnSoundEngine.triggerSatbNote(voice, noteName, stepDurationSec, undefined, vel);
+            } else {
+              const inst = _playbackState.instrument === 'piano' ? 'piano' : 'organ';
+              window.LearnSoundEngine.triggerNote(inst, noteName, stepDurationSec, undefined, vel);
+            }
+          }
+        }
+      });
+    }
+
+    // Metronome Click nếu bật
+    if (_playbackState.metronome && window.LearnSoundEngine) {
+      const isDownbeat = (_playbackState.stepIndex % 4 === 0);
+      window.LearnSoundEngine.playMetronomeClick(_playbackState.stepIndex, isDownbeat);
+    }
+    _playbackState.stepIndex++;
+
+    // Tự động cuộn theo dõi con trỏ màn hình
+    const cursorEl = cursor.cursorElement;
+    if (cursorEl) {
+      const wrap = document.getElementById('sheet-wrapper');
+      if (wrap) {
+        const wrapRect = wrap.getBoundingClientRect();
+        const curRect = cursorEl.getBoundingClientRect();
+        if (curRect.bottom > wrapRect.bottom - 100 || curRect.top < wrapRect.top + 60) {
+          cursorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    }
+
+    // Cập nhật vị trí hiển thị thời gian
+    _updateTransportTimeDisplay();
+
+    // Bước sang nốt tiếp theo
+    cursor.next();
+
+    // Vòng lặp A-B
+    if (_playbackState.loopEnabled) {
+      const curMeasure = (cursor.iterator?.currentMeasureIndex || 0) + 1;
+      if (curMeasure > _playbackState.loopEndMeasure) {
+        cursor.reset();
+      }
+    }
+
+    _playbackState.timer = setTimeout(_playbackStep, stepDurationMs);
+  }
+
+  function pauseScorePlayback() {
+    _playbackState.isPlaying = false;
+    if (_playbackState.timer) {
+      clearTimeout(_playbackState.timer);
+      _playbackState.timer = null;
+    }
+    _updateTransportPlayButton(false);
+    if (window.LearnSoundEngine) {
+      window.LearnSoundEngine.stopAll();
+    }
+  }
+
+  function stopScorePlayback() {
+    pauseScorePlayback();
+    if (_osmd && _osmd.cursor) {
+      _osmd.cursor.reset();
+      _osmd.cursor.show();
+    }
+    _playbackState.stepIndex = 0;
+    const timeDisplay = document.getElementById('transport-time-display');
+    if (timeDisplay) timeDisplay.textContent = '00:00 / 00:00';
+  }
+
+  function rewindScorePlayback() {
+    stopScorePlayback();
+    const wrap = document.getElementById('sheet-wrapper');
+    if (wrap) wrap.scrollTo({ top: 0, behavior: 'smooth' });
+    showToast('⏮ Đã trở về đầu bài hát', 'info', 1000);
+  }
+
+  function _updateTransportPlayButton(isPlaying) {
+    const btn = document.getElementById('btn-transport-play');
+    const icon = document.getElementById('transport-play-icon');
+    const label = document.getElementById('transport-play-label');
+    if (!btn) return;
+    if (isPlaying) {
+      btn.classList.add('is-playing');
+      if (icon) icon.textContent = '⏸';
+      if (label) label.textContent = 'TẠM DỪNG';
+    } else {
+      btn.classList.remove('is-playing');
+      if (icon) icon.textContent = '▶';
+      if (label) label.textContent = 'PHÁT BÀI';
+    }
+  }
+
+  function _updateTransportTimeDisplay() {
+    const timeDisplay = document.getElementById('transport-time-display');
+    if (!timeDisplay || !_osmd || !_osmd.cursor) return;
+    const curMeas = (_osmd.cursor.iterator?.currentMeasureIndex || 0) + 1;
+    const totalMeas = _osmd.GraphicSheet?.MeasureList?.length || 1;
+    timeDisplay.textContent = `Ô ${curMeas} / ${totalMeas}`;
+  }
+
+  /* ─── Web MIDI Plug & Play Keyboard Input ───────────────────── */
+  let _midiAccess = null;
+
+  function initWebMidi() {
+    if (!navigator.requestMIDIAccess) {
+      const badge = document.getElementById('midi-status-badge');
+      if (badge) {
+        badge.title = 'Trình duyệt không hỗ trợ Web MIDI API (Hãy dùng Google Chrome hoặc Edge)';
+      }
+      return;
+    }
+
+    navigator.requestMIDIAccess({ sysex: false }).then(
+      (midiAccess) => {
+        _midiAccess = midiAccess;
+        _updateMidiStatus();
+        _midiAccess.onstatechange = () => _updateMidiStatus();
+      },
+      (err) => {
+        console.warn('[WebMIDI] Request access error:', err);
+      }
+    );
+  }
+
+  function _updateMidiStatus() {
+    const badge = document.getElementById('midi-status-badge');
+    const textEl = document.getElementById('midi-status-text');
+    if (!badge || !_midiAccess) return;
+
+    const inputs = Array.from(_midiAccess.inputs.values());
+    if (inputs.length > 0) {
+      badge.classList.remove('disconnected');
+      badge.classList.add('connected');
+      const devName = inputs[0].name || 'Đã kết nối';
+      if (textEl) textEl.textContent = `🎹 MIDI: ${devName}`;
+      badge.title = `Đã kết nối với đàn ${devName} qua Web MIDI. Gõ phím trên đàn để nhập nốt!`;
+
+      inputs.forEach(input => {
+        input.onmidimessage = _handleMidiMessage;
+      });
+    } else {
+      badge.classList.remove('connected');
+      badge.classList.add('disconnected');
+      if (textEl) textEl.textContent = '🎹 MIDI: Chưa cắm';
+      badge.title = 'Cắm đàn Piano/Organ qua USB hoặc Bluetooth MIDI để gõ nốt trực tiếp';
+    }
+  }
+
+  function _handleMidiMessage(event) {
+    const [status, noteNumber, velocity] = event.data;
+    const command = status >> 4;
+
+    // Note On (command 9 và velocity > 0)
+    if (command === 9 && velocity > 0) {
+      const badge = document.getElementById('midi-status-badge');
+      if (badge) {
+        badge.classList.add('note-active');
+        setTimeout(() => badge.classList.remove('note-active'), 150);
+      }
+
+      // Chuyển MIDI số sang Step, Octave, Alter
+      const chromaticMap = [
+        { step: 'C', alter: 0 },
+        { step: 'C', alter: 1 },
+        { step: 'D', alter: 0 },
+        { step: 'D', alter: 1 },
+        { step: 'E', alter: 0 },
+        { step: 'F', alter: 0 },
+        { step: 'F', alter: 1 },
+        { step: 'G', alter: 0 },
+        { step: 'G', alter: 1 },
+        { step: 'A', alter: 0 },
+        { step: 'A', alter: 1 },
+        { step: 'B', alter: 0 }
+      ];
+      const item = chromaticMap[noteNumber % 12];
+      const oct = Math.floor(noteNumber / 12) - 1;
+
+      // Phát âm thanh phản hồi tức thì
+      playSinglePitch(item.step, oct, item.alter, 0.4);
+
+      // Điền hoặc đổi cao độ của nốt đang chọn
+      modifyPitch(item.step, oct, item.alter);
+    }
+  }
+
+  /* ─── Phép Màu AI: Tự Động Hòa Âm 4 Bè SATB ───────────────── */
+  function openAiHarmonizeModal() {
+    document.getElementById('ai-harmonize-modal')?.classList.remove('hidden');
+  }
+
+  function closeAiHarmonizeModal() {
+    document.getElementById('ai-harmonize-modal')?.classList.add('hidden');
+  }
+
+  async function executeAiHarmonization() {
+    if (!_xmlDoc) return;
+    const scopeEl = document.getElementById('select-ai-scope');
+    const scope = scopeEl?.value || 'all';
+
+    _pushUndoState('AI Hòa Âm 4 Bè SATB');
+    showToast('✨ AI đang phân tích giai điệu và thiết lập hòa âm 4 bè...', 'info', 2000);
+
+    try {
+      // 1. Nhận diện giọng điệu (Key)
+      const fifthsVal = parseInt(_xmlDoc.querySelector('key fifths')?.textContent || '0', 10);
+      const fifthsMap = {
+        0: 'C', 1: 'G', 2: 'D', 3: 'A', 4: 'E', 5: 'B',
+        '-1': 'F', '-2': 'Bb', '-3': 'Eb', '-4': 'Ab', '-5': 'Db'
+      };
+      const keyName = fifthsMap[fifthsVal] || 'C';
+
+      // Tập hợp các hợp âm hòa thanh kinh điển theo giọng
+      const chordsDict = {
+        C:  { I: ['C','E','G'], ii: ['D','F','A'], IV: ['F','A','C'], V: ['G','B','D'], vi: ['A','C','E'] },
+        G:  { I: ['G','B','D'], ii: ['A','C','E'], IV: ['C','E','G'], V: ['D','F#','A'], vi: ['E','G','B'] },
+        F:  { I: ['F','A','C'], ii: ['G','Bb','D'], IV: ['Bb','D','F'], V: ['C','E','G'], vi: ['D','F','A'] },
+        D:  { I: ['D','F#','A'], ii: ['E','G','B'], IV: ['G','B','D'], V: ['A','C#','E'], vi: ['B','D','F#'] },
+        Bb: { I: ['Bb','D','F'], ii: ['C','Eb','G'], IV: ['Eb','G','Bb'], V: ['F','A','C'], vi: ['G','Bb','D'] }
+      }[keyName] || {
+        I: ['C','E','G'], ii: ['D','F','A'], IV: ['F','A','C'], V: ['G','B','D'], vi: ['A','C','E']
+      };
+
+      const p1 = _xmlDoc.querySelector('part#P1') || _xmlDoc.querySelector('part');
+      if (!p1) throw new Error('Không tìm thấy dữ liệu bè trong MusicXML');
+
+      const measures = Array.from(p1.querySelectorAll('measure'));
+      const startIdx = (scope === 'from_current') ? Math.max(0, _selectedPosition.measureNumber - 1) : 0;
+
+      for (let mIdx = startIdx; mIdx < measures.length; mIdx++) {
+        const m = measures[mIdx];
+        const mNum = parseInt(m.getAttribute('number') || String(mIdx + 1), 10);
+        const satbGroup = _getMeasureChordsSATB(mNum);
+
+        satbGroup.forEach((chordGroup, beatIdx) => {
+          const s = chordGroup.soprano;
+          if (!s || s.isRest || !s.step) return;
+
+          // Chọn hợp âm phù hợp với nốt Soprano
+          let chord = chordsDict.I;
+          if (chordsDict.V.some(t => t.startsWith(s.step))) chord = chordsDict.V;
+          else if (chordsDict.IV.some(t => t.startsWith(s.step))) chord = chordsDict.IV;
+          else if (chordsDict.vi.some(t => t.startsWith(s.step))) chord = chordsDict.vi;
+          else if (chordsDict.ii.some(t => t.startsWith(s.step))) chord = chordsDict.ii;
+
+          // Bass: Nốt gốc (Root) ở quãng 2 hoặc 3
+          const bNote = chord[0];
+          const bStep = bNote[0];
+          const bOct = (bStep === 'C' || bStep === 'D' || bStep === 'E') ? 3 : 2;
+
+          // Alto: Quãng 3 hoặc 5 ở quãng 4
+          const aNote = chord[1];
+          const aStep = aNote[0];
+          const aOct = 4;
+
+          // Tenor: Nốt còn lại ở quãng 3
+          const tNote = chord[2];
+          const tStep = tNote[0];
+          const tOct = 3;
+
+          // Cập nhật vào nốt XML
+          const currSatb = _extractSatbNotesAt(mNum, beatIdx);
+          if (currSatb) {
+            if (currSatb.alto?.element) _setNotePitchInXml(currSatb.alto.element, aStep, aOct, 0);
+            if (currSatb.tenor?.element) _setNotePitchInXml(currSatb.tenor.element, tStep, tOct, 0);
+            if (currSatb.bass?.element) _setNotePitchInXml(currSatb.bass.element, bStep, bOct, 0);
+          }
+        });
+      }
+
+      await _renderOsmdFromXmlDoc();
+      closeAiHarmonizeModal();
+      playSatbChord();
+      showToast('✨ Phép màu AI: Đã tự động hòa âm 4 bè SATB hoàn hảo!', 'success', 3000);
+    } catch (err) {
+      console.error('[AIHarmonizer]', err);
+      showToast('⚠️ Lỗi hòa âm: ' + err.message, 'danger', 3000);
+    }
+  }
+
+  function _setNotePitchInXml(noteEl, step, octave, alter = 0) {
+    if (!noteEl || !_xmlDoc) return;
+    const rest = noteEl.querySelector('rest');
+    if (rest) rest.remove();
+
+    let pitchEl = noteEl.querySelector('pitch');
+    if (!pitchEl) {
+      pitchEl = _xmlDoc.createElement('pitch');
+      noteEl.insertBefore(pitchEl, noteEl.querySelector('duration') || noteEl.firstChild);
+    }
+
+    let stepEl = pitchEl.querySelector('step');
+    if (!stepEl) {
+      stepEl = _xmlDoc.createElement('step');
+      pitchEl.appendChild(stepEl);
+    }
+    stepEl.textContent = step.toUpperCase();
+
+    let octEl = pitchEl.querySelector('octave');
+    if (!octEl) {
+      octEl = _xmlDoc.createElement('octave');
+      pitchEl.appendChild(octEl);
+    }
+    octEl.textContent = String(octave);
+
+    let altEl = pitchEl.querySelector('alter');
+    if (alter !== 0) {
+      if (!altEl) {
+        altEl = _xmlDoc.createElement('alter');
+        pitchEl.appendChild(altEl);
+      }
+      altEl.textContent = String(alter);
+    } else if (altEl) {
+      altEl.remove();
+    }
+  }
+
+  /* ─── Choir Rehearsal Focus Mode (Luyện Bè Solo) ───────────── */
+  function toggleRehearsalMode() {
+    _playbackState.rehearsalMode = !_playbackState.rehearsalMode;
+    const btn = document.getElementById('btn-toggle-rehearsal');
+    const container = document.querySelector('.sheet-paper-container');
+
+    if (btn) btn.classList.toggle('active', _playbackState.rehearsalMode);
+    if (container) {
+      container.classList.toggle('rehearsal-mode-active', _playbackState.rehearsalMode);
+      ['soprano', 'alto', 'tenor', 'bass'].forEach(v => {
+        container.classList.remove(`focus-${v}`);
+      });
+      if (_playbackState.rehearsalMode) {
+        container.classList.add(`focus-${_selectedPosition.voice}`);
+      }
+    }
+
+    const voiceName = _selectedPosition.voice.toUpperCase();
+    if (_playbackState.rehearsalMode) {
+      showToast(`🎯 Đã bật Chế độ Luyện Bè: Nổi bật bè ${voiceName} (Âm lượng 100%, 3 bè phụ 20%)`, 'info', 2500);
+      playSatbChord();
+    } else {
+      showToast('Đã tắt Chế độ Luyện Bè', 'info', 1500);
+    }
+  }
+
+  /* ─── Pro Export Hub (Xuất Bản In Ấn / XML / MIDI) ─────────── */
+  function openExportModal() {
+    document.getElementById('export-score-modal')?.classList.remove('hidden');
+  }
+
+  function closeExportModal() {
+    document.getElementById('export-score-modal')?.classList.add('hidden');
+  }
+
+  function exportPdfScore() {
+    closeExportModal();
+    showToast('📄 Đang mở cửa sổ in PDF Vector A4...', 'info', 1500);
+    setTimeout(() => {
+      window.print();
+    }, 200);
+  }
+
+  function exportMusicXmlScore() {
+    if (!_xmlDoc) return;
+    try {
+      const serializer = new XMLSerializer();
+      const xmlString = serializer.serializeToString(_xmlDoc);
+      const blob = new Blob([xmlString], { type: 'application/vnd.recordare.musicxml+xml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const filename = (_currentSong?.slug || 'sheetapp-score') + '.musicxml';
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      closeExportModal();
+      showToast(`🎼 Đã tải file MusicXML (${filename}) thành công!`, 'success', 2500);
+    } catch (e) {
+      showToast('⚠️ Lỗi xuất MusicXML: ' + e.message, 'danger', 3000);
+    }
+  }
+
+  function exportMidiScore() {
+    if (!_xmlDoc) return;
+    try {
+      const midiBlob = _createStandardMidiFile();
+      const url = URL.createObjectURL(midiBlob);
+      const a = document.createElement('a');
+      const filename = (_currentSong?.slug || 'sheetapp-score') + '.mid';
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      closeExportModal();
+      showToast(`🎹 Đã tải file MIDI (${filename}) thành công!`, 'success', 2500);
+    } catch (e) {
+      showToast('⚠️ Lỗi xuất MIDI: ' + e.message, 'danger', 3000);
+    }
+  }
+
+  function _createStandardMidiFile() {
+    // Generate Standard MIDI Format 0 file
+    const ticksPerQuarter = 480;
+    const bpm = _mixerState.tempo || 84;
+    const microsecPerQuarter = Math.round(60000000 / bpm);
+
+    const trackEvents = [];
+
+    // Helper variable-length quantity
+    function writeVarLen(val) {
+      let buffer = val & 0x7f;
+      while ((val >>= 7) > 0) {
+        buffer <<= 8;
+        buffer |= 0x80;
+        buffer += (val & 0x7f);
+      }
+      const bytes = [];
+      while (true) {
+        bytes.push(buffer & 0xff);
+        if (buffer & 0x80) buffer >>= 8;
+        else break;
+      }
+      return bytes;
+    }
+
+    // Tempo event at delta 0: FF 51 03
+    trackEvents.push(0x00, 0xff, 0x51, 0x03,
+      (microsecPerQuarter >> 16) & 0xff,
+      (microsecPerQuarter >> 8) & 0xff,
+      microsecPerQuarter & 0xff
+    );
+
+    // Track Name: FF 03 [len] [chars]
+    const title = (_currentSong?.title || 'SheetApp Choral Score');
+    const titleBytes = Array.from(new TextEncoder().encode(title));
+    trackEvents.push(0x00, 0xff, 0x03, titleBytes.length, ...titleBytes);
+
+    // Collect note events from all measures
+    const p1 = _xmlDoc.querySelector('part#P1') || _xmlDoc.querySelector('part');
+    if (p1) {
+      const measures = Array.from(p1.querySelectorAll('measure'));
+      measures.forEach(m => {
+        const mNum = parseInt(m.getAttribute('number') || '1', 10);
+        const satbGroup = _getMeasureChordsSATB(mNum);
+        satbGroup.forEach(chord => {
+          ['soprano', 'alto', 'tenor', 'bass'].forEach(v => {
+            const n = chord[v];
+            if (n && !n.isRest && n.step) {
+              const midi = _pitchToMidi(n.step, n.octave, n.alter);
+              // Note On delta 0, Note Off delta ticksPerQuarter
+              trackEvents.push(0x00, 0x90, midi, 0x5a); // Note on vel 90
+              trackEvents.push(...writeVarLen(ticksPerQuarter), 0x80, midi, 0x00); // Note off
+            }
+          });
+        });
+      });
+    }
+
+    // End of Track: 00 FF 2F 00
+    trackEvents.push(0x00, 0xff, 0x2f, 0x00);
+
+    // Header Chunk: MThd, len 6, fmt 0, 1 track, ticksPerQuarter
+    const header = [
+      0x4d, 0x54, 0x68, 0x64, // 'MThd'
+      0x00, 0x00, 0x00, 0x06, // len 6
+      0x00, 0x00,             // fmt 0
+      0x00, 0x01,             // 1 track
+      (ticksPerQuarter >> 8) & 0xff, ticksPerQuarter & 0xff
+    ];
+
+    // Track Chunk: MTrk, len, events
+    const trkLen = trackEvents.length;
+    const trackHeader = [
+      0x4d, 0x54, 0x72, 0x6b, // 'MTrk'
+      (trkLen >> 24) & 0xff,
+      (trkLen >> 16) & 0xff,
+      (trkLen >> 8) & 0xff,
+      trkLen & 0xff
+    ];
+
+    const fullMidiBytes = new Uint8Array([...header, ...trackHeader, ...trackEvents]);
+    return new Blob([fullMidiBytes], { type: 'audio/midi' });
   }
 
   // Phát toàn bộ ô nhịp theo tempo BPM
@@ -3070,6 +3708,63 @@
       const cur = _selectedPosition.activeVoiceMap[_selectedPosition.voice];
       if (cur && !cur.isRest) playSinglePitch(cur.step, cur.octave, cur.alter, 0.35);
     });
+    document.getElementById('btn-play-chord')?.addEventListener('click', () => {
+      playSatbChord();
+    });
+
+    /* ─── BIND TRANSPORT & PRO STUDIO CONTROLS ─── */
+    document.getElementById('btn-transport-play')?.addEventListener('click', toggleScorePlayback);
+    document.getElementById('btn-transport-stop')?.addEventListener('click', rewindScorePlayback);
+
+    document.getElementById('select-playback-instrument')?.addEventListener('change', (e) => {
+      _playbackState.instrument = e.target.value;
+      showToast(`Nhạc cụ: ${e.target.options[e.target.selectedIndex].text}`, 'info', 1200);
+    });
+
+    document.getElementById('btn-toggle-reverb')?.addEventListener('click', function() {
+      this.classList.toggle('active');
+      const isActive = this.classList.contains('active');
+      if (window.LearnSoundEngine) {
+        window.LearnSoundEngine.setReverbWet(isActive ? 0.35 : 0.0);
+      }
+      showToast(isActive ? '⛪ Đã bật Vang Thánh Đường' : 'Đã tắt Reverb', 'info', 1000);
+    });
+
+    document.getElementById('btn-toggle-metronome')?.addEventListener('click', function() {
+      this.classList.toggle('active');
+      _playbackState.metronome = this.classList.contains('active');
+      if (window.LearnSoundEngine) {
+        window.LearnSoundEngine.setMetronomeEnabled(_playbackState.metronome);
+      }
+      showToast(_playbackState.metronome ? '⏱ Đã bật gõ nhịp Metronome' : 'Đã tắt gõ nhịp', 'info', 1000);
+    });
+
+    document.getElementById('transport-tempo-slider')?.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value, 10);
+      _mixerState.tempo = val;
+      const lbl = document.getElementById('transport-tempo-val');
+      if (lbl) lbl.textContent = `${val} BPM`;
+    });
+
+    document.getElementById('btn-transport-loop')?.addEventListener('click', function() {
+      this.classList.toggle('active');
+      _playbackState.loopEnabled = this.classList.contains('active');
+      showToast(_playbackState.loopEnabled ? '🔁 Đã bật lặp đoạn A-B' : 'Đã tắt lặp đoạn', 'info', 1000);
+    });
+
+    document.getElementById('btn-ai-harmonize')?.addEventListener('click', openAiHarmonizeModal);
+    document.getElementById('btn-close-ai-modal')?.addEventListener('click', closeAiHarmonizeModal);
+    document.getElementById('btn-cancel-ai')?.addEventListener('click', closeAiHarmonizeModal);
+    document.getElementById('btn-confirm-ai-harmonize')?.addEventListener('click', executeAiHarmonization);
+
+    document.getElementById('btn-toggle-rehearsal')?.addEventListener('click', toggleRehearsalMode);
+
+    /* ─── BIND PRO EXPORT HUB ─── */
+    document.getElementById('btn-open-export-modal')?.addEventListener('click', openExportModal);
+    document.getElementById('btn-close-export-modal')?.addEventListener('click', closeExportModal);
+    document.getElementById('btn-export-pdf')?.addEventListener('click', exportPdfScore);
+    document.getElementById('btn-export-xml')?.addEventListener('click', exportMusicXmlScore);
+    document.getElementById('btn-export-midi')?.addEventListener('click', exportMidiScore);
 
     // Phím tắt bàn phím (Keyboard Shortcuts)
     document.addEventListener('keydown', (e) => {
@@ -3149,9 +3844,14 @@
         toggleTie();
         return;
       }
+      // Space: Bật/Tắt phát toàn bài theo chuẩn DAW (Shift+Space: Nghe hợp âm tại nốt)
       if (e.key === ' ') {
         e.preventDefault();
-        playSatbChord();
+        if (e.shiftKey) {
+          playSatbChord();
+        } else {
+          toggleScorePlayback();
+        }
         return;
       }
 
@@ -3283,6 +3983,7 @@
 
     _bindEvents();
     _buildMiniPiano();
+    initWebMidi();
     await fetchSongsList();
   }
 
@@ -3296,6 +3997,16 @@
     undo,
     redo,
     autoFillAllRests,
+    toggleScorePlayback,
+    startScorePlayback,
+    pauseScorePlayback,
+    stopScorePlayback,
+    rewindScorePlayback,
+    toggleRehearsalMode,
+    executeAiHarmonization,
+    exportPdfScore,
+    exportMusicXmlScore,
+    exportMidiScore,
     saveVersion: confirmSaveVersion,
     getOsmd: () => _osmd,
     getSvgNoteMap: () => _svgNoteMap,
