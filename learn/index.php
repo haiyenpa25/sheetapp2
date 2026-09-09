@@ -274,27 +274,43 @@ function learnCssTag(string $file): string {
           </label>
         </div>
         <select id="learn-pattern-select" class="learn-select">
-          <option value="smart-ballad" selected>✨ Smart Ballad (Tự thích ứng nhịp)</option>
-          <option value="smart-hymn">✨ Smart Hymn (Thánh ca trang trọng)</option>
-          <option value="smart-worship">✨ Smart Worship (Rải arpeggio sâu lắng)</option>
-          <option value="smart-waltz">✨ Smart Waltz (3/4 Bùm-chát)</option>
-          <option value="piano-bass-chord-4-4-v1">Piano Bass + Chords (4/4 Cố định)</option>
-          <option value="piano-block-4-4-v1">Piano Block (4/4 Nốt chặn)</option>
-          <option value="piano-arpeggio-4-4-v1">Arpeggio 4/4 (Rải liên tục)</option>
-          <option value="piano-waltz-3-4-v1">Waltz 3/4 (Cổ điển)</option>
-          <option value="piano-worship-6-8-v1">Worship 6/8 (Nhẹ nhàng)</option>
-          <option value="organ-church-4-4-v1">Organ Thánh Đường</option>
+          <option value="smart-ballad" selected>🎹 Pop / Worship Ballad (4/4 Mượt Mà)</option>
+          <option value="smart-slowrock-6-8">🌊 Thánh Ca 6/8 Slow Rock (Sóng Biển)</option>
+          <option value="smart-waltz">💃 Boston / Slow Waltz (3/4 Trữ Tình)</option>
+          <option value="smart-hymn">⛪️ Thánh Ca 4 Bè (Hòa Âm Trang Trọng)</option>
+          <option value="smart-worship">✨ Arpeggio Suối Reo (Rải 16th Mượt Mà)</option>
+          <option value="smart-march">🎺 Hành Khúc / Hân Hoan (Joyful March)</option>
+          <option value="smart-rumba">🌴 Rumba Thánh Ca (Trầm Ấm Lãng Mạn)</option>
+          <option value="piano-block-4-4-v1">📦 Piano Block (Dậm Đều Từng Phách)</option>
+          <option value="organ-church-4-4-v1">🏛 Organ Đại Thánh Đường (Pedal Bass)</option>
         </select>
+
+        <!-- Density control -->
+        <div class="learn-density-control">
+          <span class="learn-sub-label">Độ dày đệm:</span>
+          <div class="btn-group-density" role="group">
+            <button type="button" class="btn-density" data-density="soft" title="Đệm êm dịu, thưa nốt">Êm dịu</button>
+            <button type="button" class="btn-density active" data-density="medium" title="Đệm tiêu chuẩn, cân bằng">Vừa</button>
+            <button type="button" class="btn-density" data-density="rich" title="Đệm dày dặn, nhiều nốt hoa mỹ">Dày dặn</button>
+          </div>
+        </div>
 
         <!-- Sound Mixer preview -->
         <div class="learn-mini-mixer">
           <div class="mixer-item">
             <span>Piano</span>
-            <input type="range" id="slider-vol-piano" min="-30" max="4" value="-2">
+            <input type="range" id="slider-vol-piano" min="-30" max="4" value="-2" title="Âm lượng Piano">
           </div>
           <div class="mixer-item">
             <span>Bass</span>
-            <input type="range" id="slider-vol-bass" min="-30" max="4" value="-1">
+            <input type="range" id="slider-vol-bass" min="-30" max="4" value="-1" title="Âm lượng Bass">
+          </div>
+          <div class="mixer-item">
+            <span style="display:flex;align-items:center;gap:4px;">
+              <input type="checkbox" id="learn-drum-toggle" checked title="Bật/Tắt Trống & Bộ gõ mộc" style="margin:0;cursor:pointer;accent-color:var(--learn-accent);">
+              Trống/Gõ
+            </span>
+            <input type="range" id="slider-vol-drum" min="-35" max="4" value="-4" title="Âm lượng Trống & Bộ gõ mộc">
           </div>
         </div>
       </div>

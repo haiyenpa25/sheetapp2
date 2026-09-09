@@ -11,8 +11,8 @@ const VirtualKeyboard = (() => {
   'use strict';
 
   /* ─── Config ─────────────────────────────────────────────────── */
-  const OCTAVES_SHOWN  = 4;   // C3 → B6
-  const FIRST_OCTAVE   = 3;
+  const OCTAVES_SHOWN  = 4;   // C2 → B5 (Bao trọn cả tay trái Bass C2-C3 và tay phải Hợp âm C4-C5)
+  const FIRST_OCTAVE   = 2;
   const NOTE_NAMES     = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
   const WHITE_NOTES    = ['C','D','E','F','G','A','B'];
   const BLACK_NOTES    = ['C#','D#','F#','G#','A#'];
@@ -48,6 +48,10 @@ const VirtualKeyboard = (() => {
    */
   function _buildRhVoicing(notes) {
     if (!notes.length) return [];
+    if (window.VoicingEngine) {
+      const midis = VoicingEngine.pickNearestInversion(notes, 4, 66);
+      if (midis && midis.length) return midis;
+    }
     return notes.map((n, i) => {
       const midi = Tonal.Note.midi(`${n}4`);
       return midi ?? 60 + i;
@@ -55,7 +59,7 @@ const VirtualKeyboard = (() => {
   }
 
   /**
-   * Build LH bass note.
+   * Build LH bass note (Octave 2 range C2-B2).
    * @param {string|null} bass  - slash bass note
    * @param {string[]}    notes - chord notes
    * @returns {number[]} MIDI numbers
@@ -192,6 +196,11 @@ const VirtualKeyboard = (() => {
 
   /* ─── Play Note (hear on click) ──────────────────────────────── */
   function _playNote(noteName, oct) {
+    const fullNote = `${noteName}${oct}`;
+    if (window.LearnSoundEngine) {
+      window.LearnSoundEngine.triggerNote('piano', fullNote, 0.5, undefined, 0.85);
+      return;
+    }
     if (!window.Tone) return;
     try {
       const synth = new Tone.Synth({

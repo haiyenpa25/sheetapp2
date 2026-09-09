@@ -27,6 +27,8 @@ const LearnSoundEngine = (() => {
   let _pianoVolume   = null;
   let _bassVolume    = null;
   let _organVolume   = null;
+  let _drumVolume    = null;
+  let _drumsEnabled  = true;
 
   // Piano Instruments: Sampler (Real Grand Piano) + PolySynth Fallback
   let _pianoSampler       = null;
@@ -38,6 +40,12 @@ const LearnSoundEngine = (() => {
   // Metronome Synth
   let _metronomeSynth   = null;
   let _metronomeEnabled = false;
+
+  // Drum & Percussion Synths
+  let _kickSynth   = null;
+  let _snareSynth  = null;
+  let _hihatSynth  = null;
+  let _shakerSynth = null;
 
   // Hand Separation Practice State: 'both' | 'left' | 'right'
   let _handPractice = 'both';
@@ -193,8 +201,40 @@ const LearnSoundEngine = (() => {
         envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.05 }
       }).connect(_masterLimiter);
 
+      // 10. Acoustic Rhythm & Drum Kit (Mộc mạc, ấm áp cho Ballad & Thánh Ca)
+      _drumVolume = new Tone.Volume(-6).connect(_masterLimiter);
+
+      // Acoustic Kick (Trầm ấm, tròn tiếng, không gắt)
+      _kickSynth = new Tone.MembraneSynth({
+        pitchDecay: 0.04,
+        octaves: 3,
+        oscillator: { type: 'sine' },
+        envelope: { attack: 0.002, decay: 0.28, sustain: 0, release: 0.2 }
+      }).connect(_drumVolume);
+
+      // Soft Snare / Brush (Mặt trống chổi mềm mại, trữ tình)
+      const snareFilter = new Tone.Filter(2800, 'lowpass').connect(_drumVolume);
+      _snareSynth = new Tone.NoiseSynth({
+        noise: { type: 'pink' },
+        envelope: { attack: 0.005, decay: 0.14, sustain: 0, release: 0.05 }
+      }).connect(snareFilter);
+
+      // Acoustic Hi-hat (Gõ nhẹ nhàng giữ phách)
+      const hihatFilter = new Tone.Filter(7000, 'highpass').connect(_drumVolume);
+      _hihatSynth = new Tone.NoiseSynth({
+        noise: { type: 'white' },
+        envelope: { attack: 0.001, decay: 0.035, sustain: 0, release: 0.02 }
+      }).connect(hihatFilter);
+
+      // Silky Shaker (Bộ gõ lắc cát mềm mại cho Ballad/Slow Rock)
+      const shakerFilter = new Tone.Filter(4500, 'bandpass').connect(_drumVolume);
+      _shakerSynth = new Tone.NoiseSynth({
+        noise: { type: 'white' },
+        envelope: { attack: 0.015, decay: 0.06, sustain: 0, release: 0.03 }
+      }).connect(shakerFilter);
+
       _initialized = true;
-      console.log('[LearnSoundEngine] Professional Audio Engine + Grand Piano + Reverb ready');
+      console.log('[LearnSoundEngine] Professional Audio Engine + Grand Piano + Reverb + Rhythm Drums ready');
     } catch (e) {
       console.warn('[LearnSoundEngine] Init failed (awaiting user gesture):', e);
     }
@@ -255,6 +295,33 @@ const LearnSoundEngine = (() => {
         _metronomeSynth.triggerAttackRelease(note, '32n', undefined, vel);
       }
     } catch (e) {}
+  }
+
+  /* ─── Drum & Percussion Triggering ───────────────────────────── */
+  function triggerDrum(type, time = undefined, velocity = 0.7) {
+    if (!_drumsEnabled) return;
+    _ensureReady();
+
+    const vel = Math.max(0.1, Math.min(1.0, velocity));
+    try {
+      if (type === 'kick' && _kickSynth) {
+        _kickSynth.triggerAttackRelease('C1', '8n', time, vel);
+      } else if ((type === 'snare' || type === 'rimshot') && _snareSynth) {
+        _snareSynth.triggerAttackRelease('16n', time, vel * 0.85);
+      } else if (type === 'hihat' && _hihatSynth) {
+        _hihatSynth.triggerAttackRelease('32n', time, vel * 0.6);
+      } else if (type === 'shaker' && _shakerSynth) {
+        _shakerSynth.triggerAttackRelease('16n', time, vel * 0.65);
+      }
+    } catch (e) {}
+  }
+
+  function setDrumsEnabled(enabled) {
+    _drumsEnabled = !!enabled;
+  }
+
+  function isDrumsEnabled() {
+    return _drumsEnabled;
   }
 
   /* ─── Note Triggering with Humanized Dynamics ────────────────── */
@@ -398,6 +465,9 @@ const LearnSoundEngine = (() => {
       case 'organ':
         if (_organVolume) _organVolume.volume.value = clampedDb;
         break;
+      case 'drum':
+        if (_drumVolume) _drumVolume.volume.value = clampedDb;
+        break;
       case 'master':
         if (window.Tone) Tone.getDestination().volume.value = clampedDb;
         break;
@@ -419,9 +489,14 @@ const LearnSoundEngine = (() => {
       if (_bassSynth)    { _bassSynth.dispose();    _bassSynth = null; }
       if (_organSynth)   { _organSynth.dispose();   _organSynth = null; }
       if (_metronomeSynth) { _metronomeSynth.dispose(); _metronomeSynth = null; }
+      if (_kickSynth)    { _kickSynth.dispose();    _kickSynth = null; }
+      if (_snareSynth)   { _snareSynth.dispose();   _snareSynth = null; }
+      if (_hihatSynth)   { _hihatSynth.dispose();   _hihatSynth = null; }
+      if (_shakerSynth)  { _shakerSynth.dispose();  _shakerSynth = null; }
       if (_pianoVolume)  { _pianoVolume.dispose();  _pianoVolume = null; }
       if (_bassVolume)   { _bassVolume.dispose();   _bassVolume = null; }
       if (_organVolume)  { _organVolume.dispose();  _organVolume = null; }
+      if (_drumVolume)   { _drumVolume.dispose();   _drumVolume = null; }
       if (_masterReverb) { _masterReverb.dispose(); _masterReverb = null; }
       if (_masterLimiter){ _masterLimiter.dispose();_masterLimiter = null; }
       Object.keys(_satbSynths).forEach(k => {
@@ -438,6 +513,9 @@ const LearnSoundEngine = (() => {
     init,
     triggerNote,
     triggerSatbNote,
+    triggerDrum,
+    setDrumsEnabled,
+    isDrumsEnabled,
     setSatbMute,
     setSatbSolo,
     setSatbVolume,

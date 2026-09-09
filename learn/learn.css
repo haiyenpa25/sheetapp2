@@ -1148,11 +1148,50 @@ html, body {
   transform: translateX(16px);
 }
 
+.learn-density-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  padding: 4px 0;
+}
+.learn-sub-label {
+  font-size: 11px;
+  color: var(--learn-text-muted);
+  font-weight: 500;
+}
+.btn-group-density {
+  display: inline-flex;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--learn-border);
+  background: rgba(0, 0, 0, 0.15);
+}
+.btn-density {
+  background: transparent;
+  border: none;
+  color: var(--learn-text-muted);
+  font-size: 11px;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-density:hover {
+  color: var(--learn-text-main);
+  background: rgba(255, 255, 255, 0.05);
+}
+.btn-density.active {
+  background: var(--learn-accent);
+  color: #fff;
+  font-weight: 600;
+}
+
 .learn-mini-mixer {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1.15fr;
   gap: 8px;
-  padding-top: 4px;
+  padding-top: 6px;
+  margin-top: 4px;
   border-top: 1px dashed var(--learn-border);
 }
 .mixer-item {
@@ -1163,6 +1202,7 @@ html, body {
 .mixer-item span {
   font-size: 10px;
   color: var(--learn-text-muted);
+  white-space: nowrap;
 }
 .mixer-item input[type="range"] {
   width: 100%;

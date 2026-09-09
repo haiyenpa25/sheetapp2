@@ -323,7 +323,7 @@ const LearnApp = (() => {
     if (beats === 3 && beatType === 4) {
       targetPattern = 'smart-waltz';
     } else if (beats === 6 && beatType === 8) {
-      targetPattern = 'smart-worship';
+      targetPattern = 'smart-slowrock-6-8';
     }
 
     patternSelect.value = targetPattern;
@@ -734,6 +734,25 @@ const LearnApp = (() => {
     });
     document.getElementById('slider-vol-bass')?.addEventListener('input', (e) => {
       if (window.LearnSoundEngine) LearnSoundEngine.setVolume('bass', parseFloat(e.target.value));
+    });
+    document.getElementById('slider-vol-drum')?.addEventListener('input', (e) => {
+      if (window.LearnSoundEngine) LearnSoundEngine.setVolume('drum', parseFloat(e.target.value));
+    });
+
+    // Drum Toggle
+    document.getElementById('learn-drum-toggle')?.addEventListener('change', (e) => {
+      if (window.LearnSoundEngine) LearnSoundEngine.setDrumsEnabled(e.target.checked);
+    });
+
+    // Arrangement Density Buttons
+    document.querySelectorAll('.btn-density[data-density]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.btn-density').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (window.PatternEngine) {
+          PatternEngine.setDensity(btn.dataset.density);
+        }
+      });
     });
 
     // Section Selector
