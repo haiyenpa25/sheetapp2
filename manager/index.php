@@ -9,14 +9,16 @@ if (session_status() === PHP_SESSION_NONE) {
 $isLoggedIn = isset($_SESSION['user_id']);
 $username   = $_SESSION['username'] ?? '';
 $userRole   = $_SESSION['role'] ?? 'viewer';
+$displayName= $_SESSION['display_name'] ?? $username;
+$instrument = $_SESSION['instrument'] ?? 'Guitar';
 ?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SheetApp Manager — Quản Lý Kho Nhạc & Cộng Tác Hợp Âm</title>
-  <meta name="description" content="Trung tâm quản lý kho nhạc, phân loại danh mục, phân quyền thành viên và không gian cộng tác sáng tạo bộ hợp âm cho ban nhạc và ca đoàn.">
+  <title>SheetApp Manager — Quản Lý Kho Nhạc, Thành Viên & Hợp Âm</title>
+  <meta name="description" content="Trung tâm quản lý kho nhạc, phân loại danh mục, tìm & chọn bài hát, đăng ký tài khoản thành viên và không gian cộng tác sáng tạo bộ hợp âm cho ban nhạc và ca đoàn.">
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 
   <!-- Typography & Google Fonts -->
@@ -24,7 +26,7 @@ $userRole   = $_SESSION['role'] ?? 'viewer';
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="manager.css?v=2.0.0">
+  <link rel="stylesheet" href="manager.css?v=2.1.0">
 </head>
 <body class="manager-body">
 
@@ -40,12 +42,15 @@ $userRole   = $_SESSION['role'] ?? 'viewer';
       </a>
     </div>
 
-    <!-- Global Search -->
+    <!-- Live Global Search with Instant Dropdown Autocomplete -->
     <div class="mgr-search-box">
       <span class="mgr-search-icon">🔍</span>
-      <input type="text" id="mgr-global-search" placeholder="Tìm bài hát, số thánh ca, tác giả (@user), hợp âm..." autocomplete="off">
+      <input type="text" id="mgr-global-search" placeholder="Gõ tìm bài hát (#001, tựa đề, lời...), bấm chọn bài..." autocomplete="off">
       <kbd class="mgr-kbd">Ctrl+K</kbd>
       <button id="mgr-search-clear" class="mgr-btn-clear hidden" title="Xóa tìm kiếm">✕</button>
+      
+      <!-- Autocomplete Dropdown List -->
+      <div id="mgr-search-dropdown" class="mgr-search-dropdown hidden"></div>
     </div>
 
     <!-- Quick Navigation & User Profile Area -->
@@ -71,12 +76,20 @@ $userRole   = $_SESSION['role'] ?? 'viewer';
                 <?= $userRole === 'admin' ? '🛡️ Quản Trị' : ($userRole === 'banhat' ? '🎸 Ban Hát' : '👁️ Thành Viên') ?>
               </span>
             </div>
+            <button class="mgr-btn mgr-btn-ghost mgr-btn-xs" id="btn-open-profile" title="Quản lý hồ sơ & đổi mật khẩu">
+              ⚙️ Hồ Sơ
+            </button>
             <button class="mgr-btn-logout" id="mgr-btn-logout" title="Đăng xuất">⏻</button>
           </div>
         <?php else: ?>
-          <button id="mgr-btn-login-modal" class="mgr-btn mgr-btn-ghost">
-            <span>🔐</span> Đăng Nhập
-          </button>
+          <div style="display: flex; gap: 0.5rem;">
+            <button id="mgr-btn-register-modal" class="mgr-btn mgr-btn-primary mgr-btn-sm">
+              <span>✨</span> Đăng Ký
+            </button>
+            <button id="mgr-btn-login-modal" class="mgr-btn mgr-btn-ghost mgr-btn-sm">
+              <span>🔐</span> Đăng Nhập
+            </button>
+          </div>
         <?php endif; ?>
       </div>
     </div>
@@ -132,7 +145,72 @@ $userRole   = $_SESSION['role'] ?? 'viewer';
 
   <!-- ================= MAIN WORKSPACE CONTAINER ================= -->
   <main class="mgr-main-container">
-    
+
+    <!-- ================= SONG SEARCH & SELECTED SONG WORKSPACE ================= -->
+    <section class="mgr-song-picker-section">
+      <div class="mgr-picker-bar">
+        <div class="mgr-picker-left">
+          <span class="picker-icon">🎯</span>
+          <div class="picker-text">
+            <strong>Tìm & Chọn Bài Hát:</strong>
+            <span class="text-muted">Chọn nhanh bất kỳ bài hát nào trong 903 bài để xem hợp âm, đổi thể loại, hoặc tạo bản phối mới</span>
+          </div>
+        </div>
+
+        <div class="mgr-picker-search-wrap">
+          <input type="text" id="mgr-picker-input" placeholder="🔍 Gõ số hoặc tên bài (VD: 001, 105, Hỡi Thánh Vương, Phục Sinh...)" autocomplete="off">
+          <div id="mgr-picker-results" class="mgr-picker-results hidden"></div>
+        </div>
+      </div>
+
+      <!-- SELECTED SONG INSPECTOR PANEL (Mở ra khi một bài được chọn) -->
+      <div id="mgr-selected-song-panel" class="mgr-selected-song-panel hidden">
+        <div class="song-panel-header">
+          <div class="song-panel-info">
+            <div class="song-panel-badges">
+              <span class="key-badge" id="sel-song-num">#001</span>
+              <span class="key-badge" id="sel-song-key">G</span>
+              <span class="cat-badge" id="sel-song-cat-badge">🎵 Thánh Ca</span>
+            </div>
+            <h2 class="song-panel-title" id="sel-song-title">HỠI THÁNH VƯƠNG, KÍP NGỰ LAI</h2>
+            <div class="song-panel-meta text-xs text-muted">
+              Mã bài: <code id="sel-song-id">thanh-ca-001</code> • File XML: <span id="sel-song-xml">storage/Thanh ca/001...xml</span>
+            </div>
+          </div>
+
+          <div class="song-panel-actions">
+            <!-- Category Changer -->
+            <div class="category-changer-wrap">
+              <label class="text-xs text-muted">Thể Loại:</label>
+              <select id="sel-song-cat-select" class="mgr-input mgr-btn-xs" style="width: auto;">
+                <!-- Populated dynamically -->
+              </select>
+              <button id="btn-save-song-cat" class="mgr-btn mgr-btn-ghost mgr-btn-xs" title="Lưu thay đổi thể loại">💾 Lưu</button>
+            </div>
+
+            <button id="btn-sel-song-fork" class="mgr-btn mgr-btn-primary mgr-btn-sm">
+              ✨ Tạo Bản Phối / Hợp Âm Mới
+            </button>
+            <a id="btn-sel-song-sheet" href="../" target="_blank" class="mgr-btn mgr-btn-ghost mgr-btn-sm">
+              📖 Mở Sheet Reader
+            </a>
+            <a id="btn-sel-song-live" href="../live-band/" target="_blank" class="mgr-btn mgr-btn-ghost mgr-btn-sm">
+              🎯 Mở Live Band
+            </a>
+            <button id="btn-close-song-panel" class="mgr-modal-close" title="Đóng bảng chi tiết">✕</button>
+          </div>
+        </div>
+
+        <!-- Chord Sets for Selected Song -->
+        <div class="song-panel-chords-section">
+          <h4 class="section-subtitle">🎸 Các Bộ Hợp Âm Đang Có Của Bài Hát Này:</h4>
+          <div class="song-panel-chords-grid" id="sel-song-chords-grid">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Workspace Tabs Navigation -->
     <nav class="mgr-tabs-bar">
       <button class="mgr-tab-btn active" data-tab="tab-repertoire">
@@ -181,7 +259,7 @@ $userRole   = $_SESSION['role'] ?? 'viewer';
               <th style="width: 90px; text-align:center;">Giọng</th>
               <th style="width: 170px;">Thể Loại</th>
               <th>Bản Phối & Hợp Âm Thành Viên (Công Khai)</th>
-              <th style="width: 220px; text-align:right;">Hành Động</th>
+              <th style="width: 240px; text-align:right;">Hành Động</th>
             </tr>
           </thead>
           <tbody id="mgr-songs-tbody">
@@ -279,8 +357,8 @@ $userRole   = $_SESSION['role'] ?? 'viewer';
     <section id="tab-users" class="mgr-tab-pane">
       <div class="mgr-section-header">
         <div>
-          <h3>👥 Quản Trị Thành Viên & Phân Quyền</h3>
-          <p class="text-muted">Kiểm soát danh sách nhạc công, phân quyền tạo hợp âm và theo dõi đóng góp.</p>
+          <h3>👥 Quản Trị Thành Viên & Phân Quyền Hệ Thống</h3>
+          <p class="text-muted">Kiểm soát danh sách tài khoản, phân quyền tạo hợp âm và theo dõi đóng góp.</p>
         </div>
         <button id="btn-add-user-modal" class="mgr-btn mgr-btn-primary">+ Tạo Tài Khoản Thành Viên</button>
       </div>
@@ -328,9 +406,15 @@ $userRole   = $_SESSION['role'] ?? 'viewer';
         <form id="form-fork-song" class="mgr-form">
           <div class="mgr-form-group">
             <label class="mgr-label">Bài hát cần tạo bản phối <span class="text-danger">*</span></label>
-            <select id="fork-song-select" class="mgr-input" required>
-              <option value="">-- Chọn bài hát từ kho --</option>
-            </select>
+            <div class="searchable-song-input-wrap">
+              <input type="text" id="fork-song-search" class="mgr-input" placeholder="🔍 Gõ tên hoặc số bài để tìm nhanh..." autocomplete="off">
+              <input type="hidden" id="fork-song-id" required>
+              <div id="fork-song-results" class="mgr-picker-results hidden"></div>
+            </div>
+            <div id="fork-selected-song-badge" class="selected-song-badge hidden">
+              <span class="badge-text" id="fork-selected-song-name">Chưa chọn bài</span>
+              <button type="button" class="btn-clear-selection" id="btn-clear-fork-song">✕ Đổi bài</button>
+            </div>
           </div>
 
           <div class="mgr-form-row">
@@ -393,11 +477,115 @@ $userRole   = $_SESSION['role'] ?? 'viewer';
     </div>
   </div>
 
-  <!-- 2. MODAL THÊM TÀI KHOẢN THÀNH VIÊN (ADMIN) -->
+  <!-- 2. MODAL ĐĂNG KÝ TÀI KHOẢN THÀNH VIÊN (SIGN UP MODAL) -->
+  <div class="mgr-modal-overlay hidden" id="modal-register">
+    <div class="mgr-modal-box" style="max-width: 480px;">
+      <div class="mgr-modal-header">
+        <h3 class="mgr-modal-title">✨ Đăng Ký Tài Khoản Nhạc Công</h3>
+        <button class="mgr-modal-close" data-close="modal-register">✕</button>
+      </div>
+      <div class="mgr-modal-body">
+        <p class="text-sm text-muted">Tạo tài khoản để bắt đầu lưu trữ, tạo bản phối hợp âm cá nhân và chia sẻ cho ban nhạc.</p>
+        <form id="form-register-user" class="mgr-form">
+          <div class="mgr-form-group">
+            <label class="mgr-label">Tên đăng nhập (username) <span class="text-danger">*</span></label>
+            <input type="text" id="reg-username" class="mgr-input" placeholder="VD: namguitar, lanpiano (viết liền không dấu)" required>
+          </div>
+          <div class="mgr-form-group">
+            <label class="mgr-label">Tên hiển thị / Biệt danh <span class="text-danger">*</span></label>
+            <input type="text" id="reg-display-name" class="mgr-input" placeholder="VD: Hoàng Nam (Guitarist)" required>
+          </div>
+          <div class="mgr-form-row">
+            <div class="mgr-form-group">
+              <label class="mgr-label">Mật khẩu <span class="text-danger">*</span></label>
+              <input type="password" id="reg-password" class="mgr-input" placeholder="Từ 4 ký tự trở lên" required>
+            </div>
+            <div class="mgr-form-group">
+              <label class="mgr-label">Nhạc cụ chính</label>
+              <select id="reg-instrument" class="mgr-input">
+                <option value="Guitar" selected>🎸 Guitar</option>
+                <option value="Piano">🎹 Piano / Organ</option>
+                <option value="Bass">🎻 Bass</option>
+                <option value="Drums">🥁 Trống</option>
+                <option value="Ca Trưởng">🎼 Ca Trưởng</option>
+                <option value="Ca Viên">🎤 Ca Viên</option>
+              </select>
+            </div>
+          </div>
+          <div class="mgr-modal-actions">
+            <button type="button" class="mgr-btn mgr-btn-ghost" data-close="modal-register">Hủy</button>
+            <button type="submit" class="mgr-btn mgr-btn-primary" id="btn-submit-register">🚀 Đăng Ký Tài Khoản</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. MODAL HỒ SƠ CÁ NHÂN & CÁC BẢN PHỐI CỦA TÔI (MY PROFILE MODAL) -->
+  <div class="mgr-modal-overlay hidden" id="modal-profile">
+    <div class="mgr-modal-box" style="max-width: 620px;">
+      <div class="mgr-modal-header">
+        <h3 class="mgr-modal-title">👤 Hồ Sơ & Bản Phối Của Tôi</h3>
+        <button class="mgr-modal-close" data-close="modal-profile">✕</button>
+      </div>
+      <div class="mgr-modal-body">
+        <div class="profile-tabs-header">
+          <button class="profile-tab-btn active" data-ptab="ptab-info">Thông Tin Cá Nhân</button>
+          <button class="profile-tab-btn" data-ptab="ptab-contributions">Bản Phối Của Tôi (<span id="my-chords-count">0</span>)</button>
+        </div>
+
+        <div id="ptab-info" class="profile-tab-content active">
+          <form id="form-update-profile" class="mgr-form">
+            <div class="mgr-form-row">
+              <div class="mgr-form-group">
+                <label class="mgr-label">Tên đăng nhập</label>
+                <input type="text" id="profile-username" class="mgr-input" disabled style="opacity: 0.7;">
+              </div>
+              <div class="mgr-form-group">
+                <label class="mgr-label">Tên hiển thị</label>
+                <input type="text" id="profile-display-name" class="mgr-input" placeholder="Tên hiển thị">
+              </div>
+            </div>
+
+            <div class="mgr-form-group">
+              <label class="mgr-label">Nhạc cụ sở trường</label>
+              <input type="text" id="profile-instrument" class="mgr-input" placeholder="Guitar, Piano, Bass...">
+            </div>
+
+            <hr style="border:none; border-top:1px solid var(--border); margin:0.5rem 0;">
+            <p class="text-xs text-muted">Đổi mật khẩu (bỏ trống nếu không muốn đổi):</p>
+
+            <div class="mgr-form-row">
+              <div class="mgr-form-group">
+                <label class="mgr-label">Mật khẩu hiện tại</label>
+                <input type="password" id="profile-current-pass" class="mgr-input" placeholder="Mật khẩu cũ">
+              </div>
+              <div class="mgr-form-group">
+                <label class="mgr-label">Mật khẩu mới</label>
+                <input type="password" id="profile-new-pass" class="mgr-input" placeholder="Mật khẩu mới">
+              </div>
+            </div>
+
+            <div class="mgr-modal-actions">
+              <button type="submit" class="mgr-btn mgr-btn-primary">💾 Lưu Hồ Sơ</button>
+            </div>
+          </form>
+        </div>
+
+        <div id="ptab-contributions" class="profile-tab-content">
+          <div id="my-contributions-list" class="my-contributions-list">
+            <p class="text-muted text-sm">Đang nạp danh sách bản phối của bạn...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. MODAL THÊM TÀI KHOẢN THÀNH VIÊN (ADMIN) -->
   <div class="mgr-modal-overlay hidden" id="modal-user">
     <div class="mgr-modal-box" style="max-width: 500px;">
       <div class="mgr-modal-header">
-        <h3 class="mgr-modal-title">👤 Tạo Tài Khoản Thành Viên Mới</h3>
+        <h3 class="mgr-modal-title">👤 Tạo Tài Khoản Thành Viên Mới (Admin)</h3>
         <button class="mgr-modal-close" data-close="modal-user">✕</button>
       </div>
       <div class="mgr-modal-body">
@@ -437,7 +625,7 @@ $userRole   = $_SESSION['role'] ?? 'viewer';
     </div>
   </div>
 
-  <!-- 3. MODAL THÊM / SỬA THỂ LOẠI (ADMIN) -->
+  <!-- 5. MODAL THÊM / SỬA THỂ LOẠI (ADMIN) -->
   <div class="mgr-modal-overlay hidden" id="modal-category">
     <div class="mgr-modal-box" style="max-width: 480px;">
       <div class="mgr-modal-header">
@@ -470,7 +658,7 @@ $userRole   = $_SESSION['role'] ?? 'viewer';
     </div>
   </div>
 
-  <!-- 4. MODAL ĐĂNG NHẬP NHANH -->
+  <!-- 6. MODAL ĐĂNG NHẬP -->
   <div class="mgr-modal-overlay hidden" id="modal-login">
     <div class="mgr-modal-box" style="max-width: 420px;">
       <div class="mgr-modal-header">
@@ -478,7 +666,7 @@ $userRole   = $_SESSION['role'] ?? 'viewer';
         <button class="mgr-modal-close" data-close="modal-login">✕</button>
       </div>
       <div class="mgr-modal-body">
-        <p class="text-sm text-muted" style="margin-bottom: 1rem;">Đăng nhập để tạo các bản phối hợp âm mang định danh cá nhân của bạn.</p>
+        <p class="text-sm text-muted" style="margin-bottom: 1rem;">Đăng nhập để tạo và chỉnh sửa các bản phối hợp âm mang định danh cá nhân của bạn.</p>
         <form id="form-mgr-login" class="mgr-form">
           <div class="mgr-form-group">
             <label class="mgr-label">Tên đăng nhập</label>
@@ -493,6 +681,10 @@ $userRole   = $_SESSION['role'] ?? 'viewer';
             <button type="submit" class="mgr-btn mgr-btn-primary" id="btn-submit-login">Đăng Nhập</button>
           </div>
         </form>
+        <div style="text-align: center; margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 0.75rem;">
+          <span class="text-xs text-muted">Chưa có tài khoản? </span>
+          <button type="button" class="mgr-btn-link" id="link-switch-to-register">✨ Đăng ký tài khoản mới ngay</button>
+        </div>
       </div>
     </div>
   </div>
@@ -501,6 +693,6 @@ $userRole   = $_SESSION['role'] ?? 'viewer';
   <div id="mgr-toast-container" class="mgr-toast-container"></div>
 
   <!-- App Logic -->
-  <script src="manager.js?v=2.0.0"></script>
+  <script src="manager.js?v=2.1.0"></script>
 </body>
 </html>

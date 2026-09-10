@@ -589,4 +589,156 @@ class ManagerService {
                 return ['success' => false, 'message' => 'Action không hợp lệ'];
         }
     }
+
+    /**
+     * Tìm kiếm bài hát siêu tốc cho Live Autocomplete Picker trên toàn bộ 903 bài
+     */
+    public static function searchSongsFast(string $keyword): array {
+        $pdo = DB::get();
+        $q = trim($keyword);
+        if ($q === '') {
+            // Trả 25 bài đầu tiên
+            $stmt = $pdo->query("
+                SELECT s.id, s.title, s.httlvnId, s.defaultKey, s.category_id,
+                       c.name as category_name, c.icon as category_icon,
+                       (SELECT COUNT(*) FROM user_chord_sets WHERE song_id = s.id AND is_public = 1) as chord_sets_count
+                FROM songs s
+                LEFT JOIN categories c ON s.category_id = c.id
+                ORDER BY s.httlvnId ASC LIMIT 25
+            ");
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        $kw = '%' . $q . '%';
+        $stmt = $pdo->prepare("
+            SELECT s.id, s.title, s.httlvnId, s.defaultKey, s.category_id,
+                   c.name as category_name, c.icon as category_icon,
+                   (SELECT COUNT(*) FROM user_chord_sets WHERE song_id = s.id AND is_public = 1) as chord_sets_count
+            FROM songs s
+            LEFT JOIN categories c ON s.category_id = c.id
+            WHERE s.title LIKE ? OR s.id LIKE ? OR CAST(s.httlvnId AS TEXT) LIKE ? OR s.lyrics_text LIKE ?
+            ORDER BY 
+                CASE 
+                    WHEN CAST(s.httlvnId AS TEXT) = ? THEN 1
+                    WHEN s.title LIKE ? THEN 2
+                    ELSE 3
+                END,
+                s.httlvnId ASC
+            LIMIT 30
+        ");
+        $stmt->execute([$kw, $kw, $kw, $kw, $q, $q . '%']);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Lấy toàn bộ thông tin chi tiết của 1 bài hát được chọn (Metadata + Master HD + Toàn bộ hợp âm thành viên)
+     */
+    public static function getSongDetails(string $songId): array {
+        $pdo = DB::get();
+
+        $stmt = $pdo->prepare("
+            SELECT s.id, s.title, s.httlvnId, s.xmlPath, s.defaultKey, s.category_id, s.lyrics_text,
+                   c.name as category_name, c.icon as category_icon, c.slug as category_slug
+            FROM songs s
+            LEFT JOIN categories c ON s.category_id = c.id
+            WHERE s.id = ?
+        ");
+        $stmt->execute([$songId]);
+        $song = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$song) return [];
+
+        // Lấy tất cả user chord sets của bài này
+        $stmtChords = $pdo->prepare("
+            SELECT cs.*, u.display_name, u.role as user_role, u.instrument as user_instrument, u.avatar_url
+            FROM user_chord_sets cs
+            LEFT JOIN users u ON cs.user_id = u.id
+            WHERE cs.song_id = ? AND cs.is_public = 1
+            ORDER BY cs.is_recommended DESC, cs.created_at DESC
+        ");
+        $stmtChords->execute([$songId]);
+        $song['user_chord_sets'] = $stmtChords->fetchAll(PDO::FETCH_ASSOC);
+
+        // Kiểm tra xem có bộ HD chuẩn không
+        $hdFile = ChordSetService::BASE_DIR . '/' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', $songId) . '/HD.json';
+        $hasHd = file_exists($hdFile);
+        $hdChords = $hasHd ? (json_decode(file_get_contents($hdFile), true) ?? []) : [];
+        $song['has_master_hd'] = $hasHd;
+        $song['master_hd_chord_count'] = count($hdChords);
+
+        // Lấy MusicXML versions
+        $stmtVers = $pdo->prepare("
+            SELECT v.*, u.display_name
+            FROM song_versions v
+            LEFT JOIN users u ON v.user_id = u.id
+            WHERE v.song_id = ?
+            ORDER BY v.created_at DESC
+        ");
+        $stmtVers->execute([$songId]);
+        $song['song_versions'] = $stmtVers->fetchAll(PDO::FETCH_ASSOC);
+
+        return $song;
+    }
+
+    /**
+     * Cập nhật thể loại cho bài hát
+     */
+    public static function updateSongCategory(string $songId, int $categoryId): array {
+        Auth::requireBanhat();
+        $pdo = DB::get();
+
+        $catCheck = $pdo->prepare("SELECT COUNT(*) FROM categories WHERE id = ?");
+        $catCheck->execute([$categoryId]);
+        if ($catCheck->fetchColumn() == 0) {
+            return ['success' => false, 'message' => 'Thể loại không tồn tại'];
+        }
+
+        $upd = $pdo->prepare("UPDATE songs SET category_id = ? WHERE id = ?");
+        $upd->execute([$categoryId, $songId]);
+        SongService::invalidateCache();
+
+        return ['success' => true, 'message' => 'Đã cập nhật thể loại bài hát thành công!'];
+    }
+
+    /**
+     * Lấy các bản phối và hợp âm do chính User hiện tại tạo ra (My Profile Workspace)
+     */
+    public static function getMyContributions(): array {
+        Auth::requireLogin();
+        $userId = Auth::userId();
+        $pdo = DB::get();
+
+        // Lấy các chord sets của user
+        $stmtChords = $pdo->prepare("
+            SELECT cs.*, s.title as song_title, s.httlvnId, s.defaultKey, c.name as category_name
+            FROM user_chord_sets cs
+            JOIN songs s ON cs.song_id = s.id
+            LEFT JOIN categories c ON s.category_id = c.id
+            WHERE cs.user_id = ?
+            ORDER BY cs.created_at DESC
+        ");
+        $stmtChords->execute([$userId]);
+        $myChordSets = $stmtChords->fetchAll(PDO::FETCH_ASSOC);
+
+        // Lấy các song versions của user
+        $stmtVers = $pdo->prepare("
+            SELECT v.*, s.title as song_title, s.httlvnId, s.defaultKey
+            FROM song_versions v
+            JOIN songs s ON v.song_id = s.id
+            WHERE v.user_id = ?
+            ORDER BY v.created_at DESC
+        ");
+        $stmtVers->execute([$userId]);
+        $myVersions = $stmtVers->fetchAll(PDO::FETCH_ASSOC);
+
+        // Lấy user profile
+        $user = $pdo->prepare("SELECT id, username, role, display_name, instrument, bio, created_at FROM users WHERE id = ?");
+        $user->execute([$userId]);
+        $profile = $user->fetch(PDO::FETCH_ASSOC);
+
+        return [
+            'profile'    => $profile,
+            'chord_sets' => $myChordSets,
+            'versions'   => $myVersions
+        ];
+    }
 }

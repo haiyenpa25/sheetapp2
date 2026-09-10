@@ -53,12 +53,32 @@ class ManagerController {
                         Response::ok(['users' => ManagerService::getUsersList()]);
                         return;
 
+                    case 'search_songs':
+                        $q = trim($_GET['q'] ?? '');
+                        Response::ok(['songs' => ManagerService::searchSongsFast($q)]);
+                        return;
+
+                    case 'song_details':
+                        $songId = trim($_GET['song_id'] ?? '');
+                        if (!$songId) { Response::error('Thiếu song_id'); return; }
+                        $details = ManagerService::getSongDetails($songId);
+                        if (empty($details)) { Response::error('Không tìm thấy bài hát'); return; }
+                        Response::ok($details);
+                        return;
+
+                    case 'my_contributions':
+                        Auth::requireLogin();
+                        Response::ok(ManagerService::getMyContributions());
+                        return;
+
                     case 'current_user':
                         Response::ok([
-                            'logged_in' => Auth::isLoggedIn(),
-                            'user_id'   => Auth::userId(),
-                            'username'  => Auth::username(),
-                            'role'      => Auth::role()
+                            'logged_in'    => Auth::isLoggedIn(),
+                            'user_id'      => Auth::userId(),
+                            'username'     => Auth::username(),
+                            'role'         => Auth::role(),
+                            'display_name' => $_SESSION['display_name'] ?? Auth::username(),
+                            'instrument'   => $_SESSION['instrument'] ?? 'Guitar'
                         ]);
                         return;
 
@@ -135,6 +155,21 @@ class ManagerController {
                     case 'manage_category':
                         $subAction = trim($body['sub_action'] ?? '');
                         $res = ManagerService::manageCategory($subAction, $body);
+                        if ($res['success']) {
+                            Response::ok([], $res['message']);
+                        } else {
+                            Response::error($res['message']);
+                        }
+                        return;
+
+                    case 'update_song_category':
+                        $songId = trim($body['song_id'] ?? '');
+                        $catId  = (int)($body['category_id'] ?? 0);
+                        if (!$songId || !$catId) {
+                            Response::error('Thiếu song_id hoặc category_id');
+                            return;
+                        }
+                        $res = ManagerService::updateSongCategory($songId, $catId);
                         if ($res['success']) {
                             Response::ok([], $res['message']);
                         } else {

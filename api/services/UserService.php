@@ -26,6 +26,53 @@ class UserService {
         return (int)DB::lastId();
     }
 
+    public static function createWithProfile(string $username, string $password, string $role, string $displayName, string $instrument): int {
+        $hash = password_hash($password, PASSWORD_DEFAULT);
+        DB::run(
+            "INSERT INTO users (username, password_hash, role, display_name, instrument) VALUES (?, ?, ?, ?, ?)",
+            [$username, $hash, $role, $displayName, $instrument]
+        );
+        return (int)DB::lastId();
+    }
+
+    public static function updateProfile(int $id, ?string $displayName, ?string $instrument, ?string $currentPassword, ?string $newPassword): array {
+        $user = DB::run("SELECT * FROM users WHERE id = ?", [$id])->fetch();
+        if (!$user) {
+            throw new Exception("Không tìm thấy tài khoản người dùng");
+        }
+
+        $fields = [];
+        $params = [];
+
+        if ($displayName !== null && $displayName !== '') {
+            $fields[] = "display_name = ?";
+            $params[] = $displayName;
+        }
+
+        if ($instrument !== null && $instrument !== '') {
+            $fields[] = "instrument = ?";
+            $params[] = $instrument;
+        }
+
+        if (!empty($newPassword)) {
+            if (empty($currentPassword) || !password_verify($currentPassword, $user['password_hash'])) {
+                throw new Exception("Mật khẩu hiện tại không chính xác");
+            }
+            if (strlen($newPassword) < 4) {
+                throw new Exception("Mật khẩu mới phải có ít nhất 4 ký tự");
+            }
+            $fields[] = "password_hash = ?";
+            $params[] = password_hash($newPassword, PASSWORD_DEFAULT);
+        }
+
+        if (!empty($fields)) {
+            $params[] = $id;
+            DB::run("UPDATE users SET " . implode(", ", $fields) . " WHERE id = ?", $params);
+        }
+
+        return DB::run("SELECT id, username, role, display_name, instrument, created_at FROM users WHERE id = ?", [$id])->fetch();
+    }
+
     public static function updateRole(int $id, string $role): void {
         DB::run("UPDATE users SET role = ? WHERE id = ?", [$role, $id]);
     }

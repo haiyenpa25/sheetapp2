@@ -1,14 +1,15 @@
 /**
- * sheet.hyb.io.vn/manager/manager.js
- * Client Controller cho Trung Tâm Quản Lý Kho Nhạc & Cộng Tác Hợp Âm
+ * sheet.hyb.io.vn/manager/manager.js — v2.1.0
+ * Comprehensive Workstation for Song Search, Selection, Custom Chords, and Account Management
  */
 'use strict';
 
 const ManagerApp = (() => {
-  // State
+  // Application State
   const state = {
     activeTab: 'tab-repertoire',
-    currentUser: { logged_in: false, user_id: null, username: '', role: 'viewer' },
+    currentUser: { logged_in: false, user_id: null, username: '', role: 'viewer', display_name: '', instrument: 'Guitar' },
+    selectedSong: null,
     stats: {},
     categories: [],
     repertoire: {
@@ -28,22 +29,35 @@ const ManagerApp = (() => {
       keyword: ''
     },
     users: [],
-    searchDebounceTimer: null
+    myContributions: {
+      chord_sets: [],
+      versions: [],
+      profile: {}
+    },
+    searchDebounceTimer: null,
+    pickerDebounceTimer: null,
+    forkDebounceTimer: null
   };
 
-  /* ================= INIT & EVENT LISTENERS ================= */
+  /* ================= INITIALIZATION & BINDING ================= */
   async function init() {
     _bindEvents();
     await _checkCurrentUser();
     await _loadInitialData();
+
+    // Check URL parameters for direct song selection (e.g. ?select=thanh-ca-001)
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectId = urlParams.get('select') || urlParams.get('song');
+    if (selectId) {
+      selectSong(selectId);
+    }
   }
 
   function _bindEvents() {
     // 1. Tab Switching
     document.querySelectorAll('.mgr-tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const targetTab = btn.dataset.tab;
-        switchTab(targetTab);
+        switchTab(btn.dataset.tab);
       });
     });
 
@@ -55,16 +69,28 @@ const ManagerApp = (() => {
       });
     });
 
-    // 2. Global Search Input
-    const searchInput = document.getElementById('mgr-global-search');
-    const clearBtn    = document.getElementById('mgr-search-clear');
+    // 2. Global Search with Autocomplete Dropdown
+    const globalSearchInput = document.getElementById('mgr-global-search');
+    const globalDropdown    = document.getElementById('mgr-search-dropdown');
+    const clearBtn          = document.getElementById('mgr-search-clear');
 
-    if (searchInput) {
-      searchInput.addEventListener('input', (e) => {
+    if (globalSearchInput) {
+      globalSearchInput.addEventListener('input', (e) => {
         const q = e.target.value.trim();
         clearBtn?.classList.toggle('hidden', q === '');
+
         clearTimeout(state.searchDebounceTimer);
-        state.searchDebounceTimer = setTimeout(() => {
+        if (q.length >= 1) {
+          state.searchDebounceTimer = setTimeout(() => {
+            _searchFast(q, globalDropdown);
+          }, 200);
+        } else {
+          globalDropdown?.classList.add('hidden');
+        }
+
+        // Also debounce table filter if search query changes
+        clearTimeout(state.repertoire.debounceTimer);
+        state.repertoire.debounceTimer = setTimeout(() => {
           state.repertoire.keyword = q;
           state.community.keyword = q;
           state.repertoire.offset = 0;
@@ -73,13 +99,13 @@ const ManagerApp = (() => {
           } else {
             loadRepertoire();
           }
-        }, 250);
+        }, 350);
       });
 
-      // Clear search
       clearBtn?.addEventListener('click', () => {
-        searchInput.value = '';
+        globalSearchInput.value = '';
         clearBtn.classList.add('hidden');
+        globalDropdown?.classList.add('hidden');
         state.repertoire.keyword = '';
         state.community.keyword = '';
         state.repertoire.offset = 0;
@@ -91,13 +117,64 @@ const ManagerApp = (() => {
       window.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
           e.preventDefault();
-          searchInput.focus();
-          searchInput.select();
+          globalSearchInput.focus();
+          globalSearchInput.select();
         }
       });
     }
 
-    // 3. Category Filter Pills
+    // 3. Dedicated Song Picker Autocomplete Input
+    const pickerInput   = document.getElementById('mgr-picker-input');
+    const pickerResults = document.getElementById('mgr-picker-results');
+    if (pickerInput) {
+      pickerInput.addEventListener('input', (e) => {
+        const q = e.target.value.trim();
+        clearTimeout(state.pickerDebounceTimer);
+        if (q.length >= 1) {
+          state.pickerDebounceTimer = setTimeout(() => {
+            _searchFast(q, pickerResults);
+          }, 180);
+        } else {
+          pickerResults?.classList.add('hidden');
+        }
+      });
+
+      pickerInput.addEventListener('focus', () => {
+        const q = pickerInput.value.trim();
+        if (q.length >= 1) {
+          _searchFast(q, pickerResults);
+        }
+      });
+    }
+
+    // Close search dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.mgr-search-box')) {
+        globalDropdown?.classList.add('hidden');
+      }
+      if (!e.target.closest('.mgr-picker-search-wrap')) {
+        pickerResults?.classList.add('hidden');
+      }
+      if (!e.target.closest('.searchable-song-input-wrap')) {
+        document.getElementById('fork-song-results')?.classList.add('hidden');
+      }
+    });
+
+    // 4. Selected Song Inspector Actions
+    document.getElementById('btn-close-song-panel')?.addEventListener('click', () => {
+      document.getElementById('mgr-selected-song-panel')?.classList.add('hidden');
+      state.selectedSong = null;
+    });
+
+    document.getElementById('btn-save-song-cat')?.addEventListener('click', _handleSaveSongCategory);
+
+    document.getElementById('btn-sel-song-fork')?.addEventListener('click', () => {
+      if (state.selectedSong) {
+        openForkModal(state.selectedSong.id, state.selectedSong.title);
+      }
+    });
+
+    // 5. Category Filter Pills
     document.getElementById('mgr-cat-pills')?.addEventListener('click', (e) => {
       const btn = e.target.closest('.mgr-pill');
       if (!btn) return;
@@ -114,7 +191,7 @@ const ManagerApp = (() => {
       renderRepertoire();
     });
 
-    // 4. Community Filters
+    // 6. Community Filters
     document.getElementById('mgr-instrument-pills')?.addEventListener('click', (e) => {
       const btn = e.target.closest('.mgr-pill');
       if (!btn) return;
@@ -138,7 +215,7 @@ const ManagerApp = (() => {
       loadCommunityChords();
     });
 
-    // 5. Pagination
+    // 7. Pagination
     document.getElementById('btn-prev-page')?.addEventListener('click', () => {
       if (state.repertoire.offset >= state.repertoire.limit) {
         state.repertoire.offset -= state.repertoire.limit;
@@ -153,37 +230,76 @@ const ManagerApp = (() => {
       }
     });
 
-    // 6. Modals Close
+    // 8. Modals Close Handlers
     document.querySelectorAll('.mgr-modal-close, [data-close]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', () => {
         const modalId = btn.dataset.close || btn.closest('.mgr-modal-overlay')?.id;
         if (modalId) closeModal(modalId);
       });
     });
 
-    // Close on overlay click
     document.querySelectorAll('.mgr-modal-overlay').forEach(modal => {
       modal.addEventListener('click', (e) => {
         if (e.target === modal) closeModal(modal.id);
       });
     });
 
-    // Quick Fork Button
-    document.getElementById('btn-quick-fork')?.addEventListener('click', () => {
-      openForkModal();
-    });
-
-    // Fork Form Submit
+    // 9. Quick Actions & Auth Modals
+    document.getElementById('btn-quick-fork')?.addEventListener('click', () => openForkModal());
     document.getElementById('form-fork-song')?.addEventListener('submit', _handleForkSubmit);
 
-    // Login Form Submit & Trigger
-    document.getElementById('mgr-btn-login-modal')?.addEventListener('click', () => {
-      openModal('modal-login');
-    });
-    document.getElementById('form-mgr-login')?.addEventListener('submit', _handleLoginSubmit);
+    // Searchable song input inside Fork modal
+    const forkSongSearch = document.getElementById('fork-song-search');
+    const forkSongResults = document.getElementById('fork-song-results');
+    if (forkSongSearch) {
+      forkSongSearch.addEventListener('input', (e) => {
+        const q = e.target.value.trim();
+        clearTimeout(state.forkDebounceTimer);
+        if (q.length >= 1) {
+          state.forkDebounceTimer = setTimeout(() => {
+            _searchFast(q, forkSongResults, (selected) => {
+              _setForkSelectedSong(selected.id, selected.title, selected.httlvnId);
+            });
+          }, 180);
+        } else {
+          forkSongResults?.classList.add('hidden');
+        }
+      });
+    }
 
-    // Logout
+    document.getElementById('btn-clear-fork-song')?.addEventListener('click', () => {
+      document.getElementById('fork-song-id').value = '';
+      document.getElementById('fork-song-search').value = '';
+      document.getElementById('fork-selected-song-badge').classList.add('hidden');
+      document.getElementById('fork-song-search').classList.remove('hidden');
+      document.getElementById('fork-song-search').focus();
+    });
+
+    // Auth Trigger
+    document.getElementById('mgr-btn-login-modal')?.addEventListener('click', () => openModal('modal-login'));
+    document.getElementById('mgr-btn-register-modal')?.addEventListener('click', () => openModal('modal-register'));
+    document.getElementById('link-switch-to-register')?.addEventListener('click', () => {
+      closeModal('modal-login');
+      openModal('modal-register');
+    });
+
+    document.getElementById('form-mgr-login')?.addEventListener('submit', _handleLoginSubmit);
+    document.getElementById('form-register-user')?.addEventListener('submit', _handleRegisterSubmit);
     document.getElementById('mgr-btn-logout')?.addEventListener('click', _handleLogout);
+
+    // Profile Modal
+    document.getElementById('btn-open-profile')?.addEventListener('click', openProfileModal);
+    document.getElementById('form-update-profile')?.addEventListener('submit', _handleUpdateProfileSubmit);
+
+    document.querySelectorAll('.profile-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const ptab = btn.dataset.ptab;
+        document.querySelectorAll('.profile-tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.profile-tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(ptab)?.classList.add('active');
+      });
+    });
 
     // Admin Modals
     document.getElementById('btn-add-user-modal')?.addEventListener('click', () => openModal('modal-user'));
@@ -200,13 +316,237 @@ const ManagerApp = (() => {
     document.getElementById('form-manage-category')?.addEventListener('submit', _handleCategorySubmit);
   }
 
+  /* ================= FAST SEARCH & AUTOCOMPLETE ENGINE ================= */
+  async function _searchFast(keyword, containerEl, onSelectCallback = null) {
+    if (!containerEl) return;
+
+    try {
+      const r = await fetch('../api/index.php?route=manager&action=search_songs&q=' + encodeURIComponent(keyword));
+      const res = await r.json();
+
+      if (res.success && res.songs && res.songs.length > 0) {
+        let html = '';
+        res.songs.forEach(song => {
+          html += `
+            <div class="search-result-item" data-id="${song.id}">
+              <div class="res-item-left">
+                <span class="res-item-num">#${song.httlvnId || '—'}</span>
+                <span class="res-item-title">${_escape(song.title)}</span>
+              </div>
+              <div class="res-item-right">
+                <span class="key-badge" style="font-size:0.75rem;">${song.defaultKey || 'G'}</span>
+                ${song.chord_sets_count > 0 ? `<span class="res-item-chords-badge">🎸 ${song.chord_sets_count} bản</span>` : ''}
+              </div>
+            </div>
+          `;
+        });
+        containerEl.innerHTML = html;
+        containerEl.classList.remove('hidden');
+
+        // Bind clicks
+        containerEl.querySelectorAll('.search-result-item').forEach(item => {
+          item.addEventListener('click', () => {
+            const sid = item.dataset.id;
+            const songObj = res.songs.find(s => s.id === sid);
+            containerEl.classList.add('hidden');
+
+            if (onSelectCallback) {
+              onSelectCallback(songObj);
+            } else {
+              selectSong(sid);
+            }
+          });
+        });
+
+      } else {
+        containerEl.innerHTML = `<div style="padding:0.85rem; text-align:center; color:var(--text-muted); font-size:0.85rem;">Không tìm thấy bài hát nào khớp với "${_escape(keyword)}"</div>`;
+        containerEl.classList.remove('hidden');
+      }
+    } catch (e) {
+      console.error('Fast search error:', e);
+    }
+  }
+
+  /* ================= SONG SELECTION & INSPECTOR ================= */
+  async function selectSong(songId) {
+    if (!songId) return;
+
+    const panel = document.getElementById('mgr-selected-song-panel');
+    if (panel) {
+      panel.classList.remove('hidden');
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Set loading indicator
+    document.getElementById('sel-song-title').textContent = 'Đang nạp chi tiết bài hát...';
+    document.getElementById('sel-song-chords-grid').innerHTML = '<div class="mgr-table-loading" style="grid-column:1/-1;"><div class="mgr-spinner"></div><p>Đang tải hợp âm của bài...</p></div>';
+
+    try {
+      const r = await fetch('../api/index.php?route=manager&action=song_details&song_id=' + encodeURIComponent(songId));
+      const song = await r.json();
+
+      if (song.success && song.id) {
+        state.selectedSong = song;
+        _renderSelectedSongPanel(song);
+      } else {
+        showToast('Không tìm thấy thông tin bài hát', 'error');
+      }
+    } catch (e) {
+      showToast('Lỗi khi nạp chi tiết bài hát', 'error');
+    }
+  }
+
+  function _renderSelectedSongPanel(song) {
+    document.getElementById('sel-song-num').textContent = `#${song.httlvnId || '—'}`;
+    document.getElementById('sel-song-key').textContent = song.defaultKey || 'G';
+    document.getElementById('sel-song-title').textContent = song.title;
+    document.getElementById('sel-song-id').textContent = song.id;
+    document.getElementById('sel-song-xml').textContent = song.xmlPath || '';
+    document.getElementById('sel-song-cat-badge').textContent = `${song.category_icon || '🎵'} ${song.category_name || 'Thánh Ca'}`;
+
+    // Links
+    document.getElementById('btn-sel-song-sheet').href = `../index.php?song=${encodeURIComponent(song.id)}`;
+    document.getElementById('btn-sel-song-live').href  = `../live-band/?song=${encodeURIComponent(song.id)}`;
+
+    // Populate Category Selector
+    const catSelect = document.getElementById('sel-song-cat-select');
+    if (catSelect && state.categories) {
+      catSelect.innerHTML = state.categories.map(c =>
+        `<option value="${c.id}" ${c.id == song.category_id ? 'selected' : ''}>${c.icon || '🎵'} ${c.name}</option>`
+      ).join('');
+    }
+
+    // Render All Chords of this Song
+    const chordsGrid = document.getElementById('sel-song-chords-grid');
+    if (!chordsGrid) return;
+
+    let html = '';
+
+    // 1. Master HD Preset
+    html += `
+      <div class="song-chord-card master-card">
+        <div class="song-chord-card-title">
+          <span>⭐ Bản Chuẩn Ban Hát (HD)</span>
+          <span class="card-badge" style="background:#fef3c7; color:#b45309;">Hội Thánh</span>
+        </div>
+        <div class="song-chord-card-meta">
+          Bộ hợp âm mẫu mực được biên tập chuẩn cho hội thánh và ban hát.
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:auto; padding-top:0.5rem;">
+          <span class="card-badge badge-chord-count">● ${song.master_hd_chord_count || 12} hợp âm</span>
+          <a href="../index.php?song=${encodeURIComponent(song.id)}&set=HD" class="mgr-btn mgr-btn-primary mgr-btn-xs">
+            👁️ Mở Sheet HD
+          </a>
+        </div>
+      </div>
+    `;
+
+    // 2. User Created Chord Sets
+    const userChords = song.user_chord_sets || [];
+    const currentUserId = state.currentUser.user_id;
+    const isAdmin = state.currentUser.role === 'admin';
+    const isBanhat = state.currentUser.role === 'banhat' || isAdmin;
+
+    userChords.forEach(c => {
+      const isOwner = currentUserId && (c.user_id == currentUserId);
+      const canManage = isOwner || isAdmin;
+      const isRec = c.is_recommended == 1;
+      const instIcon = c.instrument_type === 'piano' ? '🎹 Piano' : (c.instrument_type === 'bass' ? '🎻 Bass' : '🎸 Guitar');
+      const safeDiskName = c.username + '__' + c.set_name.replace(/[^a-zA-Z0-9_\-]/g, '_');
+
+      html += `
+        <div class="song-chord-card ${isRec ? 'card-recommended' : ''}">
+          <div class="song-chord-card-title">
+            <span>${isRec ? '⭐ ' : ''}${_escape(c.set_name)}</span>
+            <span class="card-badge">${instIcon}</span>
+          </div>
+          <div class="song-chord-card-meta">
+            👤 Soạn bởi: <strong>@${_escape(c.username)}</strong> (${_escape(c.display_name || c.username)})<br>
+            ${c.capo_fret > 0 ? `<span class="badge-capo">Capo ${c.capo_fret}</span> • ` : ''}
+            <span>${c.chord_count || 0} hợp âm</span>
+          </div>
+          ${c.notes_guide ? `<div class="card-notes-guide" style="font-size:0.75rem; padding:0.35rem 0.5rem;">"${_escape(c.notes_guide)}"</div>` : ''}
+
+          <div style="display:flex; gap:0.4rem; align-items:center; margin-top:auto; padding-top:0.5rem; border-top:1px solid var(--border);">
+            <a href="../index.php?song=${encodeURIComponent(song.id)}&set=${encodeURIComponent(safeDiskName)}" class="mgr-btn mgr-btn-primary mgr-btn-xs" style="flex:1;">
+              👁️ Mở Sheet
+            </a>
+            ${isBanhat ? `
+              <button class="mgr-btn mgr-btn-ghost mgr-btn-xs ${isRec ? 'text-accent' : ''}" 
+                      title="${isRec ? 'Bỏ ghim' : 'Ghim khuyên dùng'}"
+                      onclick="ManagerApp.toggleRecommend(${c.id})">
+                ${isRec ? '⭐' : '☆'}
+              </button>
+            ` : ''}
+            ${canManage ? `
+              <button class="mgr-btn mgr-btn-ghost mgr-btn-xs text-danger" 
+                      title="Xóa bộ này"
+                      onclick="ManagerApp.deleteUserChordSet(${c.id}, '${_escape(c.set_name)}')">
+                ✕
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    });
+
+    // 3. New Chord Set Action Card
+    html += `
+      <div class="song-chord-card" style="border: 1px dashed var(--accent); background: rgba(139, 92, 246, 0.04); align-items: center; justify-content: center; text-align: center; cursor: pointer;"
+           onclick="ManagerApp.openForkModal('${song.id}', '${_escape(song.title)}')">
+        <span style="font-size: 1.75rem;">➕</span>
+        <strong style="color: var(--accent); font-size: 0.9rem;">Tạo Bản Phối Hợp Âm Mới</strong>
+        <span class="text-xs text-muted">Nhân bản an toàn từ bản gốc để tùy biến theo phong cách của bạn</span>
+      </div>
+    `;
+
+    chordsGrid.innerHTML = html;
+  }
+
+  async function _handleSaveSongCategory() {
+    if (!state.selectedSong) return;
+
+    const catSelect = document.getElementById('sel-song-cat-select');
+    const newCatId  = parseInt(catSelect.value);
+
+    try {
+      const r = await fetch('../api/index.php?route=manager&action=update_song_category', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ song_id: state.selectedSong.id, category_id: newCatId })
+      });
+      const res = await r.json();
+
+      if (res.success) {
+        showToast('Đã cập nhật thể loại cho bài hát!', 'success');
+        const catObj = state.categories.find(c => c.id == newCatId);
+        if (catObj) {
+          document.getElementById('sel-song-cat-badge').textContent = `${catObj.icon || '🎵'} ${catObj.name}`;
+        }
+        loadRepertoire();
+        loadStats();
+      } else {
+        showToast(res.message || 'Lỗi cập nhật thể loại', 'error');
+      }
+    } catch (e) {
+      showToast('Lỗi mạng', 'error');
+    }
+  }
+
   /* ================= DATA LOADING ================= */
   async function _checkCurrentUser() {
     try {
-      const r = await fetch('../api/index.php?route=manager&action=current_user');
+      const r = await fetch('../api/index.php?route=auth&action=me');
       const res = await r.json();
-      if (res.success) {
-        state.currentUser = res;
+      if (res.success && res.loggedIn) {
+        state.currentUser = {
+          logged_in: true,
+          user_id: res.user_id,
+          username: res.username,
+          role: res.role,
+          display_name: res.display_name || res.username,
+          instrument: res.instrument || 'Guitar'
+        };
       }
     } catch (e) {}
 
@@ -234,9 +574,7 @@ const ManagerApp = (() => {
         state.stats = res;
         _renderStats(res);
       }
-    } catch (e) {
-      console.error('Error loading stats:', e);
-    }
+    } catch (e) {}
   }
 
   function _renderStats(data) {
@@ -254,7 +592,6 @@ const ManagerApp = (() => {
     if (authorChips && data.top_contributors) {
       let html = '<button class="mgr-pill active" data-author="">Tất Cả Tác Giả</button>';
       data.top_contributors.forEach(u => {
-        const name = u.display_name || u.username;
         html += `<button class="mgr-pill" data-author="${u.username}">👤 @${u.username} (${u.chord_sets_count})</button>`;
       });
       authorChips.innerHTML = html;
@@ -270,9 +607,7 @@ const ManagerApp = (() => {
         _renderCategoryPills(res.categories);
         _renderCategoriesTab(res.categories);
       }
-    } catch (e) {
-      console.error('Error loading categories:', e);
-    }
+    } catch (e) {}
   }
 
   function _renderCategoryPills(categories) {
@@ -319,14 +654,7 @@ const ManagerApp = (() => {
   async function loadRepertoire() {
     const tbody = document.getElementById('mgr-songs-tbody');
     if (tbody) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="6" class="mgr-table-loading">
-            <div class="mgr-spinner"></div>
-            <p>Đang tải danh sách bài hát...</p>
-          </td>
-        </tr>
-      `;
+      tbody.innerHTML = `<tr><td colspan="6" class="mgr-table-loading"><div class="mgr-spinner"></div><p>Đang tải danh sách bài hát...</p></td></tr>`;
     }
 
     try {
@@ -348,8 +676,7 @@ const ManagerApp = (() => {
         _updatePagination();
       }
     } catch (e) {
-      console.error('Error loading repertoire:', e);
-      if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="mgr-table-loading text-danger">Lỗi kết nối máy chủ khi nạp bài hát.</td></tr>`;
+      if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="mgr-table-loading text-danger">Lỗi nạp kho bài hát.</td></tr>`;
     }
   }
 
@@ -364,22 +691,14 @@ const ManagerApp = (() => {
     }
 
     if (songs.length === 0) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="6" class="mgr-table-loading">
-            <p>Không tìm thấy bài hát nào phù hợp với bộ lọc hiện tại.</p>
-          </td>
-        </tr>
-      `;
+      tbody.innerHTML = `<tr><td colspan="6" class="mgr-table-loading"><p>Không tìm thấy bài hát nào phù hợp với bộ lọc.</p></td></tr>`;
       return;
     }
 
     let html = '';
     songs.forEach(song => {
       const userChords = song.user_chord_sets || [];
-      const versions   = song.song_versions || [];
 
-      // Render Chord Sets Chips
       let chordChipsHtml = '';
       if (userChords.length > 0) {
         chordChipsHtml = userChords.map(c => {
@@ -389,7 +708,7 @@ const ManagerApp = (() => {
           return `
             <a href="../index.php?song=${encodeURIComponent(song.id)}&set=${encodeURIComponent(safeDiskName)}" 
                class="user-chord-chip ${isRec ? 'chip-recommended' : ''}" 
-               title="${isRec ? '⭐ Ca Trưởng Khuyên Dùng: ' : ''}${_escape(c.set_name)} (Capo ${c.capo_fret || 0}) — Soạn bởi @${_escape(c.username)}">
+               title="${isRec ? '⭐ Khuyên Dùng: ' : ''}${_escape(c.set_name)} (Capo ${c.capo_fret || 0}) — @${_escape(c.username)}">
               <span>${isRec ? '⭐' : instIcon}</span>
               <span>${_escape(c.set_name)}</span>
               <span class="chip-author">@${_escape(c.username)}</span>
@@ -397,11 +716,11 @@ const ManagerApp = (() => {
           `;
         }).join('');
       } else {
-        chordChipsHtml = '<span class="text-muted text-xs">Chưa có bản phối nào</span>';
+        chordChipsHtml = '<span class="text-muted text-xs">Chưa có bản phối</span>';
       }
 
       html += `
-        <tr>
+        <tr style="cursor:pointer;" onclick="ManagerApp.selectSong('${song.id}')">
           <td><strong style="color:var(--text-muted); font-size:0.85rem;">#${song.httlvnId || '—'}</strong></td>
           <td>
             <div class="song-title-cell">
@@ -423,13 +742,16 @@ const ManagerApp = (() => {
               ${chordChipsHtml}
             </div>
           </td>
-          <td style="text-align:right;">
+          <td style="text-align:right;" onclick="event.stopPropagation()">
             <div class="table-actions">
               <button class="mgr-btn mgr-btn-primary mgr-btn-xs" onclick="ManagerApp.openForkModal('${song.id}', '${_escape(song.title)}')">
                 ✨ Clone & Phối
               </button>
-              <a href="../index.php?song=${encodeURIComponent(song.id)}" class="mgr-btn mgr-btn-ghost mgr-btn-xs" title="Xem bản nhạc chuẩn">
-                👁️ Xem Sheet
+              <button class="mgr-btn mgr-btn-ghost mgr-btn-xs" onclick="ManagerApp.selectSong('${song.id}')">
+                🎯 Chọn Bài
+              </button>
+              <a href="../index.php?song=${encodeURIComponent(song.id)}" class="mgr-btn mgr-btn-ghost mgr-btn-xs" title="Xem Sheet">
+                👁️
               </a>
             </div>
           </td>
@@ -458,12 +780,7 @@ const ManagerApp = (() => {
   async function loadCommunityChords() {
     const grid = document.getElementById('mgr-community-grid');
     if (grid) {
-      grid.innerHTML = `
-        <div class="mgr-table-loading" style="grid-column: 1/-1;">
-          <div class="mgr-spinner"></div>
-          <p>Đang nạp các bộ hợp âm cộng đồng...</p>
-        </div>
-      `;
+      grid.innerHTML = `<div class="mgr-table-loading" style="grid-column: 1/-1;"><div class="mgr-spinner"></div><p>Đang nạp các bộ hợp âm đóng góp...</p></div>`;
     }
 
     try {
@@ -483,7 +800,6 @@ const ManagerApp = (() => {
         renderCommunityGrid(res.sets);
       }
     } catch (e) {
-      console.error('Error loading community chords:', e);
       if (grid) grid.innerHTML = `<div class="mgr-table-loading text-danger" style="grid-column:1/-1;">Lỗi nạp bộ hợp âm.</div>`;
     }
   }
@@ -495,7 +811,7 @@ const ManagerApp = (() => {
     if (sets.length === 0) {
       grid.innerHTML = `
         <div class="mgr-table-loading" style="grid-column: 1/-1;">
-          <p>Chưa có bộ hợp âm cộng đồng nào phù hợp với bộ lọc hiện tại.</p>
+          <p>Chưa có bộ hợp âm cộng đồng nào phù hợp.</p>
           <button class="mgr-btn mgr-btn-primary mgr-btn-sm" style="margin-top:0.75rem;" onclick="ManagerApp.openForkModal()">
             ✨ Tạo Bộ Hợp Âm Đầu Tiên
           </button>
@@ -528,7 +844,6 @@ const ManagerApp = (() => {
             <span class="key-badge">${_escape(set.defaultKey || 'G')}</span>
           </div>
 
-          <!-- Author Attribution Box -->
           <div class="card-author-box">
             <div class="card-author-avatar">${(set.username || 'U').substring(0, 1).toUpperCase()}</div>
             <div class="card-author-meta">
@@ -537,7 +852,6 @@ const ManagerApp = (() => {
             </div>
           </div>
 
-          <!-- Badges -->
           <div class="card-badges-row">
             <span class="card-badge">${instIcon}</span>
             <span class="card-badge badge-chord-count">● ${set.chord_count || 0} hợp âm</span>
@@ -547,12 +861,13 @@ const ManagerApp = (() => {
 
           ${set.notes_guide ? `<div class="card-notes-guide">"${_escape(set.notes_guide)}"</div>` : ''}
 
-          <!-- Actions -->
           <div class="card-actions-row">
             <a href="../index.php?song=${encodeURIComponent(set.song_id)}&set=${encodeURIComponent(safeDiskName)}" class="mgr-btn mgr-btn-primary mgr-btn-xs" style="flex:1;">
               👁️ Mở Sheet
             </a>
-
+            <button class="mgr-btn mgr-btn-ghost mgr-btn-xs" onclick="ManagerApp.selectSong('${set.song_id}')" title="Chọn bài hát này">
+              🎯 Chi Tiết
+            </button>
             ${isBanhat ? `
               <button class="mgr-btn mgr-btn-ghost mgr-btn-xs ${isRec ? 'text-accent' : ''}" 
                       title="${isRec ? 'Bỏ ghim khuyên dùng' : 'Ghim cho ban nhạc'}"
@@ -560,7 +875,6 @@ const ManagerApp = (() => {
                 ${isRec ? '⭐ Đã Ghim' : '☆ Ghim'}
               </button>
             ` : ''}
-
             ${canManage ? `
               <button class="mgr-btn mgr-btn-ghost mgr-btn-xs text-danger" 
                       title="Xóa bộ này"
@@ -592,9 +906,7 @@ const ManagerApp = (() => {
         state.users = res.users;
         renderUsersTable(res.users);
       }
-    } catch (e) {
-      console.error('Error loading users:', e);
-    }
+    } catch (e) {}
   }
 
   function renderUsersTable(users) {
@@ -643,57 +955,23 @@ const ManagerApp = (() => {
     tbody.innerHTML = html;
   }
 
-  /* ================= TAB NAVIGATION ================= */
-  function switchTab(tabId) {
-    state.activeTab = tabId;
-
-    // Update buttons
-    document.querySelectorAll('.mgr-tab-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.tab === tabId);
-    });
-
-    // Update panes
-    document.querySelectorAll('.mgr-tab-pane').forEach(pane => {
-      pane.classList.toggle('active', pane.id === tabId);
-    });
-
-    // Load tab-specific data if needed
-    if (tabId === 'tab-community') {
-      loadCommunityChords();
-    } else if (tabId === 'tab-users') {
-      loadUsers();
-    } else if (tabId === 'tab-repertoire' && state.repertoire.songs.length === 0) {
-      loadRepertoire();
-    }
-  }
-
-  /* ================= MODALS & ACTIONS ================= */
-  function openModal(modalId) {
-    const m = document.getElementById(modalId);
-    if (m) m.classList.remove('hidden');
-  }
-
-  function closeModal(modalId) {
-    const m = document.getElementById(modalId);
-    if (m) m.classList.add('hidden');
-  }
-
+  /* ================= FORK MODAL & SUBMIT ================= */
   function openForkModal(songId = '', songTitle = '') {
     if (!state.currentUser.logged_in) {
-      showToast('Vui lòng đăng nhập để tạo bản phối cá nhân!', 'info');
+      showToast('Vui lòng đăng nhập hoặc đăng ký để tạo bản phối!', 'info');
       openModal('modal-login');
       return;
     }
 
-    const select = document.getElementById('fork-song-select');
-    if (select) {
-      // Populate select options from loaded repertoire songs
-      let html = '<option value="">-- Chọn bài hát từ kho --</option>';
-      state.repertoire.songs.forEach(s => {
-        html += `<option value="${s.id}" ${s.id === songId ? 'selected' : ''}>#${s.httlvnId || ''} ${_escape(s.title)} (${s.defaultKey || ''})</option>`;
-      });
-      select.innerHTML = html;
-      if (songId) select.value = songId;
+    if (songId) {
+      _setForkSelectedSong(songId, songTitle);
+    } else if (state.selectedSong) {
+      _setForkSelectedSong(state.selectedSong.id, state.selectedSong.title, state.selectedSong.httlvnId);
+    } else {
+      document.getElementById('fork-song-id').value = '';
+      document.getElementById('fork-song-search').value = '';
+      document.getElementById('fork-selected-song-badge').classList.add('hidden');
+      document.getElementById('fork-song-search').classList.remove('hidden');
     }
 
     // Default set name
@@ -706,12 +984,20 @@ const ManagerApp = (() => {
     openModal('modal-fork');
   }
 
+  function _setForkSelectedSong(songId, title, httlvnId = '') {
+    document.getElementById('fork-song-id').value = songId;
+    document.getElementById('fork-selected-song-name').textContent = `#${httlvnId || ''} ${title}`;
+    document.getElementById('fork-selected-song-badge').classList.remove('hidden');
+    document.getElementById('fork-song-search').classList.add('hidden');
+    document.getElementById('fork-song-results')?.classList.add('hidden');
+  }
+
   async function _handleForkSubmit(e) {
     e.preventDefault();
 
-    const songId = document.getElementById('fork-song-select').value;
+    const songId = document.getElementById('fork-song-id').value;
     if (!songId) {
-      showToast('Vui lòng chọn bài hát cần tạo bản phối', 'error');
+      showToast('Vui lòng tìm và chọn bài hát cần tạo bản phối', 'error');
       return;
     }
 
@@ -745,16 +1031,19 @@ const ManagerApp = (() => {
         showToast(res.message || 'Tạo bản phối thành công!', 'success');
         closeModal('modal-fork');
 
-        // Reload data
         loadStats();
         loadRepertoire();
         loadCommunityChords();
 
-        // Redirect to editor or sheet reader after 1 second
+        // Refresh song details if currently selected
+        if (state.selectedSong && state.selectedSong.id === songId) {
+          selectSong(songId);
+        }
+
         if (res.data?.redirect_url) {
           setTimeout(() => {
             window.location.href = '../' + res.data.redirect_url;
-          }, 1200);
+          }, 1000);
         }
       } else {
         showToast(res.message || 'Lỗi khi tạo bản phối', 'error');
@@ -764,6 +1053,188 @@ const ManagerApp = (() => {
     } finally {
       if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = '🚀 Tạo Ngay & Vào Chỉnh Sửa'; }
     }
+  }
+
+  /* ================= USER AUTH & PROFILE HANDLERS ================= */
+  async function _handleRegisterSubmit(e) {
+    e.preventDefault();
+    const username    = document.getElementById('reg-username').value.trim();
+    const displayName = document.getElementById('reg-display-name').value.trim();
+    const password    = document.getElementById('reg-password').value;
+    const instrument  = document.getElementById('reg-instrument').value;
+
+    const btn = document.getElementById('btn-submit-register');
+    if (btn) { btn.disabled = true; btn.textContent = 'Đang tạo tài khoản...'; }
+
+    try {
+      const r = await fetch('../api/index.php?route=auth&action=register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, display_name: displayName, instrument })
+      });
+      const res = await r.json();
+
+      if (res.success) {
+        showToast(res.message || 'Đăng ký thành công!', 'success');
+        closeModal('modal-register');
+        setTimeout(() => window.location.reload(), 600);
+      } else {
+        showToast(res.message || 'Lỗi đăng ký tài khoản', 'error');
+      }
+    } catch (e) {
+      showToast('Lỗi mạng: ' + e.message, 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = '🚀 Đăng Ký Tài Khoản'; }
+    }
+  }
+
+  async function _handleLoginSubmit(e) {
+    e.preventDefault();
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value;
+
+    try {
+      const r = await fetch('../api/index.php?route=auth&action=login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const res = await r.json();
+      if (res.success) {
+        showToast(`Xin chào @${username}!`, 'success');
+        closeModal('modal-login');
+        setTimeout(() => window.location.reload(), 500);
+      } else {
+        showToast(res.message || 'Sai tài khoản hoặc mật khẩu', 'error');
+      }
+    } catch (e) { showToast('Lỗi mạng', 'error'); }
+  }
+
+  async function _handleLogout() {
+    try {
+      await fetch('../api/index.php?route=auth&action=logout');
+      showToast('Đã đăng xuất', 'info');
+      setTimeout(() => window.location.reload(), 400);
+    } catch (e) { window.location.reload(); }
+  }
+
+  async function openProfileModal() {
+    if (!state.currentUser.logged_in) return;
+
+    document.getElementById('profile-username').value     = state.currentUser.username;
+    document.getElementById('profile-display-name').value = state.currentUser.display_name;
+    document.getElementById('profile-instrument').value   = state.currentUser.instrument;
+    document.getElementById('profile-current-pass').value = '';
+    document.getElementById('profile-new-pass').value     = '';
+
+    openModal('modal-profile');
+    // Reset to first tab
+    document.querySelectorAll('.profile-tab-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
+    document.querySelectorAll('.profile-tab-content').forEach((c, i) => c.classList.toggle('active', i === 0));
+    await _loadMyContributions();
+  }
+
+  async function _loadMyContributions() {
+    const listEl = document.getElementById('my-contributions-list');
+    if (listEl) listEl.innerHTML = '<div class="mgr-spinner"></div>';
+
+    try {
+      const r = await fetch('../api/index.php?route=manager&action=my_contributions');
+      const res = await r.json();
+
+      if (res.success) {
+        state.myContributions = res;
+        document.getElementById('my-chords-count').textContent = (res.chord_sets?.length || 0) + (res.versions?.length || 0);
+
+        if (!res.chord_sets || res.chord_sets.length === 0) {
+          listEl.innerHTML = '<p class="text-muted text-sm">Bạn chưa tạo bản phối nào. Hãy bấm "✨ Tạo Bản Phối Mới" để bắt đầu!</p>';
+          return;
+        }
+
+        let html = '';
+        res.chord_sets.forEach(cs => {
+          const safeDiskName = cs.username + '__' + cs.set_name.replace(/[^a-zA-Z0-9_\-]/g, '_');
+          html += `
+            <div class="my-item-row">
+              <div>
+                <strong>${_escape(cs.set_name)}</strong>
+                <div class="text-xs text-muted">#${cs.httlvnId || ''} ${_escape(cs.song_title)} • ${cs.instrument_type} • Capo ${cs.capo_fret}</div>
+              </div>
+              <div style="display:flex; gap:0.5rem; align-items:center;">
+                <a href="../index.php?song=${encodeURIComponent(cs.song_id)}&set=${encodeURIComponent(safeDiskName)}" class="mgr-btn mgr-btn-primary mgr-btn-xs" target="_blank">
+                  👁️ Xem
+                </a>
+                <button class="mgr-btn mgr-btn-ghost mgr-btn-xs text-danger" onclick="ManagerApp.deleteUserChordSet(${cs.id}, '${_escape(cs.set_name)}')">
+                  🗑️
+                </button>
+              </div>
+            </div>
+          `;
+        });
+        listEl.innerHTML = html;
+      }
+    } catch (e) {}
+  }
+
+  async function _handleUpdateProfileSubmit(e) {
+    e.preventDefault();
+    const displayName = document.getElementById('profile-display-name').value.trim();
+    const instrument  = document.getElementById('profile-instrument').value.trim();
+    const currentPass = document.getElementById('profile-current-pass').value;
+    const newPass     = document.getElementById('profile-new-pass').value;
+
+    try {
+      const r = await fetch('../api/index.php?route=auth&action=update_profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          display_name: displayName,
+          instrument,
+          current_password: currentPass,
+          new_password: newPass
+        })
+      });
+      const res = await r.json();
+      if (res.success) {
+        showToast('Đã cập nhật hồ sơ cá nhân!', 'success');
+        state.currentUser.display_name = displayName;
+        state.currentUser.instrument = instrument;
+        closeModal('modal-profile');
+      } else {
+        showToast(res.message || 'Lỗi cập nhật hồ sơ', 'error');
+      }
+    } catch (e) { showToast('Lỗi mạng', 'error'); }
+  }
+
+  /* ================= COMMON UTILITIES & MODAL CONTROLS ================= */
+  function switchTab(tabId) {
+    state.activeTab = tabId;
+
+    document.querySelectorAll('.mgr-tab-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tab === tabId);
+    });
+
+    document.querySelectorAll('.mgr-tab-pane').forEach(pane => {
+      pane.classList.toggle('active', pane.id === tabId);
+    });
+
+    if (tabId === 'tab-community') {
+      loadCommunityChords();
+    } else if (tabId === 'tab-users') {
+      loadUsers();
+    } else if (tabId === 'tab-repertoire' && state.repertoire.songs.length === 0) {
+      loadRepertoire();
+    }
+  }
+
+  function openModal(modalId) {
+    const m = document.getElementById(modalId);
+    if (m) m.classList.remove('hidden');
+  }
+
+  function closeModal(modalId) {
+    const m = document.getElementById(modalId);
+    if (m) m.classList.add('hidden');
   }
 
   async function toggleRecommend(setId) {
@@ -777,13 +1248,11 @@ const ManagerApp = (() => {
       if (res.success) {
         showToast(res.message, 'success');
         loadCommunityChords();
-        loadRepertoire();
+        if (state.selectedSong) selectSong(state.selectedSong.id);
       } else {
         showToast(res.message || 'Lỗi', 'error');
       }
-    } catch (e) {
-      showToast('Lỗi mạng', 'error');
-    }
+    } catch (e) { showToast('Lỗi mạng', 'error'); }
   }
 
   async function deleteUserChordSet(setId, setName) {
@@ -801,15 +1270,15 @@ const ManagerApp = (() => {
         loadStats();
         loadCommunityChords();
         loadRepertoire();
+        if (state.selectedSong) selectSong(state.selectedSong.id);
+        _loadMyContributions();
       } else {
         showToast(res.message || 'Lỗi khi xóa', 'error');
       }
-    } catch (e) {
-      showToast('Lỗi mạng', 'error');
-    }
+    } catch (e) { showToast('Lỗi mạng', 'error'); }
   }
 
-  /* ================= ADMIN USER ACTIONS ================= */
+  /* ================= ADMIN MANAGEMENT ================= */
   async function _handleCreateUserSubmit(e) {
     e.preventDefault();
     const username = document.getElementById('new-user-username').value.trim();
@@ -822,10 +1291,7 @@ const ManagerApp = (() => {
       const r = await fetch('../api/index.php?route=manager&action=manage_user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sub_action: 'create',
-          username, password, display_name: displayName, instrument, role
-        })
+        body: JSON.stringify({ sub_action: 'create', username, password, display_name: displayName, instrument, role })
       });
       const res = await r.json();
       if (res.success) {
@@ -836,9 +1302,7 @@ const ManagerApp = (() => {
       } else {
         showToast(res.message || 'Lỗi', 'error');
       }
-    } catch (e) {
-      showToast('Lỗi mạng', 'error');
-    }
+    } catch (e) { showToast('Lỗi mạng', 'error'); }
   }
 
   async function updateUserRole(userId, role) {
@@ -947,38 +1411,7 @@ const ManagerApp = (() => {
     } catch (e) { showToast('Lỗi mạng', 'error'); }
   }
 
-  /* ================= AUTH HELPERS ================= */
-  async function _handleLoginSubmit(e) {
-    e.preventDefault();
-    const username = document.getElementById('login-username').value.trim();
-    const password = document.getElementById('login-password').value;
-
-    try {
-      const r = await fetch('../api/index.php?route=auth&action=login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      });
-      const res = await r.json();
-      if (res.success) {
-        showToast(`Xin chào @${username}! Đăng nhập thành công.`, 'success');
-        closeModal('modal-login');
-        setTimeout(() => window.location.reload(), 600);
-      } else {
-        showToast(res.message || 'Sai tài khoản hoặc mật khẩu', 'error');
-      }
-    } catch (e) { showToast('Lỗi mạng', 'error'); }
-  }
-
-  async function _handleLogout() {
-    try {
-      await fetch('../api/index.php?route=auth&action=logout');
-      showToast('Đã đăng xuất', 'info');
-      setTimeout(() => window.location.reload(), 400);
-    } catch (e) { window.location.reload(); }
-  }
-
-  /* ================= UTILITIES ================= */
+  /* ================= TOAST NOTIFICATION & ESCAPE ================= */
   function showToast(message, type = 'info') {
     const container = document.getElementById('mgr-toast-container');
     if (!container) return;
@@ -1011,9 +1444,11 @@ const ManagerApp = (() => {
   return {
     init,
     switchTab,
+    selectSong,
     openModal,
     closeModal,
     openForkModal,
+    openProfileModal,
     toggleRecommend,
     deleteUserChordSet,
     editCategory,

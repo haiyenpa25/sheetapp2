@@ -544,6 +544,15 @@ SheetApp/
   ⚠ Còn lại: SongController + CategoryController vẫn trả raw array
               (cần cascade fix ApiService + LibraryUI + AdminUI để chuẩn hóa hoàn toàn)
 
+[2026-09-10] — Nâng cấp Cổng Quản Lý v2.1.0: Đăng Ký Tài Khoản, Quản Lý Hồ Sơ & Trình Chọn Bài Hát Thông Minh
+  + Sửa: api/services/UserService.php (createWithProfile(), updateProfile())
+  + Sửa: api/controllers/AuthController.php (route 'register', 'update_profile', mở rộng metadata hồ sơ)
+  + Sửa: api/services/ManagerService.php (searchSongsFast(), getSongDetails(), updateSongCategory(), getMyContributions())
+  + Sửa: api/controllers/ManagerController.php (search_songs, song_details, my_contributions, update_song_category)
+  + Sửa: manager/index.php (Modal Đăng Ký #modal-register, Modal Hồ Sơ #modal-profile, Hero Song Picker #mgr-song-picker-section, Selected Song Inspector #mgr-selected-song-panel)
+  + Sửa: manager/manager.css (Styles cho dropdown autocomplete, hero song picker, selected song inspector, chord cards, profile tabs)
+  + Sửa: manager/manager.js (Logic fast search, selectSong inspector, save category, register submit, update profile & load contributions)
+
 [2026-09-10] — Triển khai Cổng Quản Lý Kho Nhạc & Cộng Tác Hợp Âm (/manager/)
   + Tạo: SHEETAPP2_MANAGER_DEEP_ANALYSIS_2026-09-10.md (Báo cáo phân tích chuyên sâu kiến trúc)
   + Tạo: manager/index.php, manager/manager.css, manager/manager.js (Dashboard Dark OLED Studio)
