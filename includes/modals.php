@@ -347,9 +347,15 @@
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         <h3 style="margin:0;font-size:1rem;">Hướng Dẫn Sử Dụng SheetApp</h3>
       </div>
-      <button id="btn-close-help" class="icon-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <a href="/huong-dan/" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;gap:5px;font-size:0.78rem;font-weight:700;padding:4px 10px;border-radius:6px;background:linear-gradient(135deg,#0284c7,#7c3aed);color:#fff;" title="Mở trang cẩm nang hướng dẫn toàn diện v2.0">
+          <span>📚</span>
+          <span>Cẩm Nang Toàn Diện</span>
+        </a>
+        <button id="btn-close-help" class="icon-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
     </div>
     <div style="display:flex;gap:.3rem;padding:.65rem 1rem .25rem;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;scrollbar-width:none;">
       <button class="help-tab active" data-tab="basics">📖 Cơ Bản</button>

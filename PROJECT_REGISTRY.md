@@ -51,6 +51,10 @@ SheetApp/
 │   ├── live-band.css         # Stylesheet sân khấu tối ưu tương phản & LED flasher
 │   ├── live-band.js          # App controller: Master-Follower, WakeLock, Count-In, Cue HUD
 │   └── projector.php         # Màn hình máy chiếu nhà thờ Clean Lyrics Projector [NEW]
+├── huong-dan/                ← Trung tâm Hướng dẫn sử dụng toàn diện (/huong-dan/) [NEW 2026-09]
+│   ├── index.php             # Ứng dụng cẩm nang tương tác 9 mô-đun chi tiết
+│   ├── huong-dan.css         # Stylesheet tài liệu chuyên nghiệp, responsive
+│   └── huong-dan.js          # Controller: Live Search, Role Filter, Scroll Spy, FAQ Accordion
 ├── learn/                    ← Interactive Music Learning Studio (/learn/) [NEW 2026-09]
 │   ├── index.php             # Trang chính /learn — Shell + song picker + OSMD
 │   └── learn.css             # Stylesheet premium dark cho /learn
@@ -470,6 +474,14 @@ SheetApp/
   + Sửa: includes/toolbar.php (Thêm nút '🎼 Sửa Sheet' trực tiếp trên thanh công cụ và trong dropdown menu)
   ✅ An toàn dữ liệu 100%: mọi thao tác lưu đều tạo file .xml.bak và có nút khôi phục tức thì
   ✅ Hỗ trợ sửa độc lập từng bè: Soprano, Alto (Part P1 - Khóa Sol) và Tenor, Bass (Part P2 - Khóa Fa)
+
+[2026-09-10] — Ra Mắt Trung Tâm Hướng Dẫn Sử Dụng Toàn Diện SheetApp 2.0 (/huong-dan/)
+  + Tạo: huong-dan/index.php (Cẩm nang tương tác toàn diện gồm 9 mô-đun chi tiết, cấu trúc chuẩn mực: Đọc sheet, Hợp âm & Capo, Metronome, Setlist, Live Band Studio, Smart Learning SATB, MusicXML Editor, Phím tắt & Bảng sự cố)
+  + Tạo: huong-dan/huong-dan.css (Design system giao diện tài liệu hiện đại, dark mode OLED, typography sắc nét, responsive iPad/Mobile)
+  + Tạo: huong-dan/huong-dan.js (Controller tìm kiếm live instant search không dấu, lọc theo 4 vai trò, scroll spy bám dính, FAQ accordion)
+  + Cập nhật: .htaccess (Thêm rewrite rule cho clean URL https://sheet.hyb.io.vn/huong-dan)
+  + Cập nhật: includes/modals.php (Thêm nút trực tiếp '📚 Cẩm Nang Toàn Diện' trong modal Trợ giúp)
+  ✅ Tự động kiểm thử: Đạt 200 OK trên cả /huong-dan/ và /huong-dan, test Chrome DevTools tải đủ 9 mô-đun, live search và role filter hoạt động 100%.
 
 [2026-09-10] — Chuyên Biệt Hóa Live Band: Trọng Tâm Nhạc Cụ & Phối Hợp Ban Nhạc (Instrument Sync & Teamplay)
   + Bổ sung thanh điều khiển Live Sync & Giữ nhịp (#band-sync-strip):
