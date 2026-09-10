@@ -123,7 +123,79 @@ try {
         CREATE INDEX IF NOT EXISTS idx_song_versions_user_id ON song_versions(user_id);
     ");
 
-    // 4. Tạo tài khoản mặc định (nếu chưa có)
+    // 8. Tạo bảng user_chord_sets (Bộ hợp âm người dùng tùy biến - Hiển thị công khai kèm tác quyền)
+    $pdo->exec("
+        CREATE TABLE IF NOT EXISTS user_chord_sets (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            song_id TEXT NOT NULL,
+            user_id INTEGER NOT NULL,
+            username TEXT NOT NULL,
+            set_name TEXT NOT NULL,
+            instrument_type TEXT NOT NULL DEFAULT 'guitar',
+            capo_fret INTEGER NOT NULL DEFAULT 0,
+            custom_tempo INTEGER,
+            chord_count INTEGER NOT NULL DEFAULT 0,
+            notes_guide TEXT,
+            chords_json TEXT NOT NULL DEFAULT '[]',
+            is_public INTEGER NOT NULL DEFAULT 1,
+            is_recommended INTEGER NOT NULL DEFAULT 0,
+            views_count INTEGER NOT NULL DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (song_id) REFERENCES songs(id) ON DELETE CASCADE,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+        CREATE INDEX IF NOT EXISTS idx_ucs_song_id ON user_chord_sets(song_id);
+        CREATE INDEX IF NOT EXISTS idx_ucs_user_id ON user_chord_sets(user_id);
+        CREATE INDEX IF NOT EXISTS idx_ucs_public ON user_chord_sets(is_public);
+        CREATE INDEX IF NOT EXISTS idx_ucs_recommended ON user_chord_sets(is_recommended);
+    ");
+
+    // 9. Cập nhật các cột mở rộng (Migration an toàn)
+    $addColumnIfNotExists = function(PDO $pdo, string $table, string $column, string $type) {
+        $cols = $pdo->query("PRAGMA table_info($table)")->fetchAll(PDO::FETCH_ASSOC);
+        $names = array_column($cols, 'name');
+        if (!in_array($column, $names)) {
+            $pdo->exec("ALTER TABLE $table ADD COLUMN $column $type");
+        }
+    };
+
+    // Users
+    $addColumnIfNotExists($pdo, 'users', 'display_name', 'TEXT');
+    $addColumnIfNotExists($pdo, 'users', 'instrument', 'TEXT');
+    $addColumnIfNotExists($pdo, 'users', 'avatar_url', 'TEXT');
+    $addColumnIfNotExists($pdo, 'users', 'bio', 'TEXT');
+    $addColumnIfNotExists($pdo, 'users', 'status', 'TEXT DEFAULT "active"');
+
+    // Categories
+    $addColumnIfNotExists($pdo, 'categories', 'icon', 'TEXT DEFAULT "🎵"');
+    $addColumnIfNotExists($pdo, 'categories', 'description', 'TEXT');
+    $addColumnIfNotExists($pdo, 'categories', 'display_order', 'INTEGER DEFAULT 0');
+
+    // Song Versions
+    $addColumnIfNotExists($pdo, 'song_versions', 'is_public', 'INTEGER DEFAULT 1');
+    $addColumnIfNotExists($pdo, 'song_versions', 'is_recommended', 'INTEGER DEFAULT 0');
+    $addColumnIfNotExists($pdo, 'song_versions', 'parent_song_id', 'TEXT');
+
+    // 10. Tạo các danh mục phụng vụ chuẩn (nếu chưa có)
+    $defaultCategories = [
+        ['name' => 'Thánh Ca', 'slug' => 'thanh-ca', 'icon' => '📖', 'description' => 'Thánh ca truyền thống HTTLVN 1 - 540', 'order' => 1],
+        ['name' => 'Tôn Vinh & Thờ Phượng', 'slug' => 'ton-vinh-tho-phuong', 'icon' => '🙌', 'description' => 'Ca khúc thờ phượng hiện đại, ca ngợi', 'order' => 2],
+        ['name' => 'Biệt Thánh Ca & Hợp Xướng', 'slug' => 'biet-thanh-ca', 'icon' => '🎼', 'description' => 'Bài thánh ca biểu diễn hợp xướng 4 bè SATB', 'order' => 3],
+        ['name' => 'Giáng Sinh & Phục Sinh', 'slug' => 'giang-sinh-phuc-sinh', 'icon' => '✨', 'description' => 'Thánh ca theo mùa lễ phụng vụ lớn', 'order' => 4],
+        ['name' => 'Giới Trẻ & Thiếu Nhi', 'slug' => 'gioi-tre-thieu-nhi', 'icon' => '🎸', 'description' => 'Bài hát sinh hoạt, thanh niên và thiếu nhi', 'order' => 5],
+    ];
+
+    foreach ($defaultCategories as $cat) {
+        $exists = $pdo->prepare("SELECT COUNT(*) FROM categories WHERE slug = ?");
+        $exists->execute([$cat['slug']]);
+        if ($exists->fetchColumn() == 0) {
+            $ins = $pdo->prepare("INSERT INTO categories (name, slug, icon, description, display_order) VALUES (?, ?, ?, ?, ?)");
+            $ins->execute([$cat['name'], $cat['slug'], $cat['icon'], $cat['description'], $cat['order']]);
+        }
+    }
+
+    // 11. Tạo tài khoản mặc định (nếu chưa có)
     $stmt = $pdo->query("SELECT COUNT(*) FROM users");
     $count = $stmt->fetchColumn();
 
@@ -132,12 +204,12 @@ try {
         $defaultPass = '123456';
         $hash = password_hash($defaultPass, PASSWORD_DEFAULT);
         
-        $insert = $pdo->prepare("INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)");
-        $insert->execute([$defaultUser, $hash, 'admin']);
+        $insert = $pdo->prepare("INSERT INTO users (username, password_hash, role, display_name, instrument) VALUES (?, ?, ?, ?, ?)");
+        $insert->execute([$defaultUser, $hash, 'admin', 'Ban Hát Chính', 'All']);
         echo "<p>Đã tạo tài khoản mặc định: <b>{$defaultUser}</b> / <b>{$defaultPass}</b> (Quyền: Admin)</p>";
     }
 
-    // 5. Khoá tải file SQLite qua .htaccess
+    // 12. Khoá tải file SQLite qua .htaccess
     $htaccessPath = __DIR__ . '/../storage/data/.htaccess';
     $htaccessRule = "<FilesMatch \"\\.(sqlite|json|db)$\">\nOrder allow,deny\nDeny from all\n</FilesMatch>";
     

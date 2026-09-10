@@ -4,6 +4,7 @@ Options -Indexes
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteRule ^huong-dan/?$ huong-dan/index.php [L,QSA]
+    RewriteRule ^manager/?$ manager/index.php [L,QSA]
 </IfModule>
 
 # ─── Security ──────────────────────────────────────────────────────

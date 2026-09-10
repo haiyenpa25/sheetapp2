@@ -39,9 +39,14 @@ SheetApp/
 ├── CODE_MAP.md               ← Bản đồ tri thức codebase (tự sinh bởi Gitnexus)
 ├── INFO.md                   ← Tài liệu tổng quan, sprint plan, keyboard shortcuts
 ├── sync.sh                   ← Auto-sync script (cập nhật CODE_MAP.md & push GitHub)
-├── SHEETAPP2_LIVE_BAND_DEEP_ANALYSIS_2026-09-10.md ← Báo cáo phân tích chuyên sâu & nâng cao tính năng Live Band Studio
+├── SHEETAPP2_LIVE_BAND_DEEP_ANALYSIS_2026-09-10.md ← Báo cáo phân tích chuyên sâu Live Band Studio
+├── SHEETAPP2_MANAGER_DEEP_ANALYSIS_2026-09-10.md   ← Báo cáo phân tích chuyên sâu Manager Portal
 │
 ├── index.php                 ← Entry point HTML (PHP partial includes)
+├── manager/                  ← Cổng Quản Lý Kho Nhạc & Không Gian Cộng Tác Hợp Âm (/manager/) [NEW 2026-09]
+│   ├── index.php             # Dashboard Dark OLED Studio cho quản lý & thành viên
+│   ├── manager.css           # Stylesheet responsive, KPI cards, table & modal
+│   └── manager.js            # Controller: Tab, Live Search, Clone/Fork, Attribution, Admin
 ├── editor/                   ← Trình biên tập sheet nhạc MusicXML 4 bè SATB (/editor/)
 │   ├── index.php             # Giao diện chính của Editor
 │   ├── editor.css            # Stylesheet chuyên dụng Studio Dark Mode
@@ -538,6 +543,16 @@ SheetApp/
   ~ Sửa: CODING_STANDARDS.md  (thêm §4.2 ngoại lệ fetch() static asset)
   ⚠ Còn lại: SongController + CategoryController vẫn trả raw array
               (cần cascade fix ApiService + LibraryUI + AdminUI để chuẩn hóa hoàn toàn)
+
+[2026-09-10] — Triển khai Cổng Quản Lý Kho Nhạc & Cộng Tác Hợp Âm (/manager/)
+  + Tạo: SHEETAPP2_MANAGER_DEEP_ANALYSIS_2026-09-10.md (Báo cáo phân tích chuyên sâu kiến trúc)
+  + Tạo: manager/index.php, manager/manager.css, manager/manager.js (Dashboard Dark OLED Studio)
+  + Tạo: api/services/ManagerService.php & api/controllers/ManagerController.php (Backend API)
+  + Sửa: api/init_db.php (Thêm bảng user_chord_sets, migration cột mở rộng users, categories, song_versions)
+  + Sửa: api/index.php (Đăng ký route 'manager')
+  + Sửa: .htaccess (Thêm RewriteRule cho manager/)
+  + Sửa: includes/modals.php (Thêm nút liên kết Cổng Quản Lý trong Help modal)
+  + Sửa: assets/js/chord-canvas.js (Hiển thị tên tác giả đẹp mắt cho bản phối và nút mở /manager/)
 
 [2026-05-15] — Triển khai hệ thống tài liệu 3 file từ docs-templates/
   + Tạo: AI_AGENT.md (root), CODING_STANDARDS.md (root), PROJECT_REGISTRY.md (root)

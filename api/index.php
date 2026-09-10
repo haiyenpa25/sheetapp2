@@ -114,6 +114,12 @@ try {
             $controller->handleRequest($method);
             break;
 
+        case 'manager':
+            require_once __DIR__ . '/controllers/ManagerController.php';
+            $controller = new ManagerController();
+            $controller->handleRequest($method);
+            break;
+
         default:
             Response::notFound("Endpoint /api/{$route} không tồn tại.");
             break;

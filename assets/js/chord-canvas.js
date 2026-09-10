@@ -1053,11 +1053,22 @@ const ChordCanvas = (() => {
 
     const canCreate = window.Auth?.isBanhat?.() ?? false;
 
-    selector.innerHTML = sets.map(s =>
-      `<option value="${s}" ${s === _currentSet ? 'selected' : ''}>${
-        s === 'HD' ? '⭐ HD (Ưu tiên)' : (s === 'default' ? 'TLH (gốc)' : s)
-      }</option>`
-    ).join('') + (canCreate ? `<option value="__create_new_set__" style="color: var(--accent,#6d28d9); font-weight: bold;">➕ Tạo Bộ Hợp Âm Mới...</option>` : '');
+    selector.innerHTML = sets.map(s => {
+      let label = s;
+      if (s === 'HD') {
+        label = '⭐ HD (Ưu tiên)';
+      } else if (s === 'default') {
+        label = 'TLH (gốc)';
+      } else if (s.includes('__')) {
+        const parts = s.split('__');
+        const author = parts[0];
+        const cleanName = parts.slice(1).join('__').replace(/_/g, ' ');
+        label = `🎸 ${cleanName} (@${author})`;
+      }
+      return `<option value="${s}" ${s === _currentSet ? 'selected' : ''}>${label}</option>`;
+    }).join('') 
+    + (canCreate ? `<option value="__create_new_set__" style="color: var(--accent,#6d28d9); font-weight: bold;">➕ Tạo Bộ Hợp Âm Mới...</option>` : '')
+    + `<option value="__open_manager__" style="color: var(--cyan,#06b6d4);">📂 Mở Quản Lý / Bản Phối...</option>`;
 
     if (!selector.dataset.boundCreateHandler) {
       selector.dataset.boundCreateHandler = 'true';
@@ -1066,6 +1077,9 @@ const ChordCanvas = (() => {
         if (val === '__create_new_set__') {
           selector.value = _currentSet;
           showNewSetModal();
+        } else if (val === '__open_manager__') {
+          selector.value = _currentSet;
+          window.open('/manager/', '_blank');
         }
       });
     }

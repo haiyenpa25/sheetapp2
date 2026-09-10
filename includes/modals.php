@@ -348,6 +348,10 @@
         <h3 style="margin:0;font-size:1rem;">Hướng Dẫn Sử Dụng SheetApp</h3>
       </div>
       <div style="display:flex;align-items:center;gap:8px;">
+        <a href="/manager/" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;gap:5px;font-size:0.78rem;font-weight:700;padding:4px 10px;border-radius:6px;background:rgba(139,92,246,0.15);color:#a78bfa;border:1px solid rgba(139,92,246,0.3);" title="Mở trang Quản Lý Kho Nhạc & Bản Phối Thành Viên">
+          <span>📂</span>
+          <span>Cổng Quản Lý</span>
+        </a>
         <a href="/huong-dan/" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;gap:5px;font-size:0.78rem;font-weight:700;padding:4px 10px;border-radius:6px;background:linear-gradient(135deg,#0284c7,#7c3aed);color:#fff;" title="Mở trang cẩm nang hướng dẫn toàn diện v2.0">
           <span>📚</span>
           <span>Cẩm Nang Toàn Diện</span>
