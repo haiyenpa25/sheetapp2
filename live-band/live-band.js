@@ -67,6 +67,24 @@ const LiveBandApp = (() => {
   let _selectedSatbPart   = 'all';       // 'all' | 'soprano' | 'alto' | 'tenor' | 'bass'
   let _isInkActive        = false;
 
+  // Band Live Sync & Instruments State
+  let _tapTimestamps           = [];
+  let _metronomeAudioCtx       = null;
+  let _isMetronomeAudioEnabled = false;
+  let _beatPulserInterval      = null;
+  let _currentBeat             = 1;
+  let _currentBandState        = 'normal';
+
+  const BAND_STATES = {
+    break:  { label: 'BREAK / NGẮT PHÁCH 1', icon: '🛑', color: '#ef4444' },
+    build:  { label: 'BUILD-UP / DỒN NHỊP', icon: '🌊', color: '#3b82f6' },
+    drop:   { label: 'ĐỆM ÊM / GIẢM VOLUME', icon: '🤫', color: '#8b5cf6' },
+    drive:  { label: 'CAO TRÀO / FULL DRIVE', icon: '🔥', color: '#f97316' },
+    solo:   { label: 'SOLO TIME (HẠ NỀN)', icon: '🎸', color: '#eab308' },
+    end:    { label: 'DỨT KẾT / OUTRO', icon: '🏁', color: '#64748b' },
+    normal: { label: 'CHƠI BÌNH THƯỜNG', icon: '🎵', color: '#10b981' }
+  };
+
   /* ── Initialization ───────────────────────────────────────── */
   async function init() {
     _clientId = _getOrCreateClientId();
@@ -79,6 +97,9 @@ const LiveBandApp = (() => {
     _initOSMD();
     _bindUI();
     _initWakeLock();
+
+    // Start Master Visual Beat Pulser
+    _startVisualBeatPulser();
 
     // Initialize Bluetooth Foot Pedal & Web MIDI Engine
     window.PedalMidiEngine?.init?.((action) => _handlePedalAction(action));
@@ -406,6 +427,27 @@ const LiveBandApp = (() => {
         setSatbPart(part);
       });
     });
+
+    // Band Live Sync & Tempo Pulser (Instruments & Teamplay)
+    document.getElementById('btn-tap-tempo')?.addEventListener('click', _handleTapTempo);
+    document.getElementById('btn-toggle-metronome-audio')?.addEventListener('click', _toggleMetronomeAudio);
+
+    // Dynamic Band Energy State Buttons (1-Touch)
+    document.querySelectorAll('.btn-band-state').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const stateKey = e.currentTarget.getAttribute('data-state');
+        if (stateKey) setBandState(stateKey);
+      });
+    });
+
+    // Section Transition Quick Cues & 2-Bar Heads-Up Warning
+    document.querySelectorAll('.btn-quick-cue').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const secName = e.currentTarget.getAttribute('data-section');
+        if (secName) cueSectionTransition(secName);
+      });
+    });
+    document.getElementById('btn-cue-2bars-warning')?.addEventListener('click', cue2BarsWarning);
 
     // Viewport Scroll Listener (Throttled)
     _bindScrollObserver();
@@ -775,6 +817,7 @@ const LiveBandApp = (() => {
     if (state.music && state.music.bpm) {
       _currentBpm = state.music.bpm;
       _updateBpmUI(_currentBpm);
+      _startVisualBeatPulser();
     }
 
     // 4. Measure Position
@@ -822,6 +865,12 @@ const LiveBandApp = (() => {
     }
     if (state.inkClear) {
       window.StageInkEngine?.clearAll?.(false);
+    }
+
+    // 9. Band Dynamic Energy State Sync (Teamplay)
+    if (state.bandState && state.bandState.key) {
+      _applyBandStateUI(state.bandState.key);
+      showCueBanner(`⚡ LỆNH BAN NHẠC: ${state.bandState.label}`, state.bandState.icon || '⚡', 3500);
     }
   }
 
@@ -871,8 +920,10 @@ const LiveBandApp = (() => {
   function hostAdjustBpm(delta) {
     _currentBpm = Math.max(40, Math.min(240, _currentBpm + delta));
     _updateBpmUI(_currentBpm);
+    _startVisualBeatPulser();
     broadcastState({
-      music: { bpm: _currentBpm }
+      music: { bpm: _currentBpm },
+      song: { bpm: _currentBpm }
     });
   }
 
@@ -1056,6 +1107,9 @@ const LiveBandApp = (() => {
     _updateKeyUI();
     _updateBpmUI(_currentBpm);
     _updateGuitarCapoHint();
+    _updateBassHud();
+    _updatePianoHud();
+    _startVisualBeatPulser();
 
     // Make sure container is visible so OSMD can measure container width properly
     _applyViewMode();
@@ -1147,16 +1201,22 @@ const LiveBandApp = (() => {
     const txt = `Tông: ${effectiveKey} (${_currentTranspose >= 0 ? '+' : ''}${_currentTranspose})`;
     if (keyBadge) keyBadge.textContent = txt;
     if (hostKeyBadge) hostKeyBadge.textContent = `${effectiveKey} (${_currentTranspose >= 0 ? '+' : ''}${_currentTranspose})`;
+
+    _updateGuitarCapoHint();
+    _updateBassHud();
+    _updatePianoHud();
   }
 
   function _updateBpmUI(bpm) {
     const bpmBadge = document.getElementById('nav-song-bpm');
     const hostBpmVal = document.getElementById('host-bpm-val');
     const drummerBpm = document.getElementById('drummer-bpm-display');
+    const bandBpm = document.getElementById('band-tempo-bpm');
 
     if (bpmBadge) bpmBadge.textContent = `${bpm} BPM`;
     if (hostBpmVal) hostBpmVal.textContent = `${bpm} BPM`;
     if (drummerBpm) drummerBpm.textContent = `${bpm} BPM`;
+    if (bandBpm) bandBpm.textContent = `${bpm} BPM`;
   }
 
   function _formatTransposeText(t) {
@@ -1282,7 +1342,7 @@ const LiveBandApp = (() => {
     if (select) select.value = newRole;
 
     const iconEl = document.getElementById('role-pill-icon');
-    const roleIcons = { leader: '👑', guitar: '🎸', piano: '🎹', vocal: '🎤', drummer: '🥁', viewer: '👀' };
+    const roleIcons = { leader: '👑', guitar: '🎸', bass: '🎸', piano: '🎹', vocal: '🎤', drummer: '🥁', viewer: '👀' };
     if (iconEl) iconEl.textContent = roleIcons[newRole] || '🎵';
 
     // Show/Hide Host Command Console
@@ -1291,8 +1351,16 @@ const LiveBandApp = (() => {
 
     // Show/Hide Role-Specific HUDs
     document.getElementById('hud-guitar')?.classList.toggle('hidden', newRole !== 'guitar');
+    document.getElementById('hud-bass')?.classList.toggle('hidden', newRole !== 'bass');
+    document.getElementById('hud-piano')?.classList.toggle('hidden', newRole !== 'piano');
     document.getElementById('hud-drummer')?.classList.toggle('hidden', newRole !== 'drummer');
     document.getElementById('hud-vocal')?.classList.toggle('hidden', newRole !== 'vocal');
+
+    if (newRole === 'bass') {
+      _updateBassHud();
+    } else if (newRole === 'piano') {
+      _updatePianoHud();
+    }
 
     // Drummer Flasher LED loop
     if (newRole === 'drummer') {
@@ -1331,28 +1399,324 @@ const LiveBandApp = (() => {
     }
   }
 
-  /* ── Drummer Flasher LED ──────────────────────────────────── */
-  function _startDrummerFlasher() {
-    _stopDrummerFlasher();
-    let beat = 1;
-    const intervalMs = (60 / _currentBpm) * 1000;
+  /* ── Master Beat Pulser & Metronome Audio ─────────────────── */
+  function _handleTapTempo() {
+    const now = performance.now();
+    if (_tapTimestamps.length > 0 && (now - _tapTimestamps[_tapTimestamps.length - 1]) > 2000) {
+      _tapTimestamps = [];
+    }
+    _tapTimestamps.push(now);
 
-    _drummerBeatInterval = setInterval(() => {
-      document.querySelectorAll('#drummer-beat-leds .beat-led').forEach(el => {
+    const tapBtn = document.getElementById('btn-tap-tempo');
+    if (tapBtn) {
+      tapBtn.style.transform = 'scale(0.92)';
+      setTimeout(() => { if (tapBtn) tapBtn.style.transform = ''; }, 100);
+    }
+
+    if (_tapTimestamps.length >= 2) {
+      const intervals = [];
+      for (let i = 1; i < _tapTimestamps.length; i++) {
+        intervals.push(_tapTimestamps[i] - _tapTimestamps[i - 1]);
+      }
+      const recent = intervals.slice(-4);
+      const avg = recent.reduce((a, b) => a + b, 0) / recent.length;
+      if (avg > 0) {
+        let calculated = Math.round(60000 / avg);
+        calculated = Math.max(40, Math.min(240, calculated));
+        _currentBpm = calculated;
+        _updateBpmUI(_currentBpm);
+        _startVisualBeatPulser();
+
+        if (_mode === 'host' || _role === 'leader') {
+          broadcastState({
+            music: { bpm: _currentBpm },
+            song: { bpm: _currentBpm }
+          });
+        }
+      }
+    }
+  }
+
+  function _toggleMetronomeAudio() {
+    _isMetronomeAudioEnabled = !_isMetronomeAudioEnabled;
+    const btn = document.getElementById('btn-toggle-metronome-audio');
+    if (btn) {
+      btn.classList.toggle('active', _isMetronomeAudioEnabled);
+      btn.textContent = _isMetronomeAudioEnabled ? '🔊 Click: Bật' : '🔇 Click: Tắt';
+    }
+    if (_isMetronomeAudioEnabled) {
+      _initMetronomeAudioContext();
+      showCueBanner('🔊 Đã bật Click nhịp tai nghe', '🎧', 1800);
+    } else {
+      showCueBanner('🔇 Đã tắt Click nhịp tai nghe', 'ℹ️', 1500);
+    }
+  }
+
+  function _initMetronomeAudioContext() {
+    if (!_metronomeAudioCtx) {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioContextClass) {
+        _metronomeAudioCtx = new AudioContextClass();
+      }
+    }
+    if (_metronomeAudioCtx && _metronomeAudioCtx.state === 'suspended') {
+      _metronomeAudioCtx.resume();
+    }
+  }
+
+  function _playMetronomeClick(isBeatOne) {
+    if (!_isMetronomeAudioEnabled || !_metronomeAudioCtx) return;
+    try {
+      if (_metronomeAudioCtx.state === 'suspended') {
+        _metronomeAudioCtx.resume();
+      }
+      const osc = _metronomeAudioCtx.createOscillator();
+      const gain = _metronomeAudioCtx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.value = isBeatOne ? 960 : 540;
+
+      const now = _metronomeAudioCtx.currentTime;
+      gain.gain.setValueAtTime(isBeatOne ? 0.4 : 0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + (isBeatOne ? 0.05 : 0.035));
+
+      osc.connect(gain);
+      gain.connect(_metronomeAudioCtx.destination);
+
+      osc.start(now);
+      osc.stop(now + (isBeatOne ? 0.05 : 0.035));
+    } catch (e) {}
+  }
+
+  function _startVisualBeatPulser() {
+    _stopVisualBeatPulser();
+    const intervalMs = (60 / Math.max(40, _currentBpm)) * 1000;
+
+    _beatPulserInterval = setInterval(() => {
+      const isBeatOne = (_currentBeat === 1);
+
+      // Flash Strip LEDs
+      document.querySelectorAll('#stage-beat-pulser .pulse-led').forEach(el => {
         const b = parseInt(el.getAttribute('data-beat'));
-        if (b === beat) {
-          el.classList.add('flash');
-          setTimeout(() => el.classList.remove('flash'), 120);
+        if (b === _currentBeat) {
+          el.classList.add(isBeatOne ? 'flash-beat-1' : 'flash-beat-sub');
+          setTimeout(() => el.classList.remove('flash-beat-1', 'flash-beat-sub'), 110);
         }
       });
-      beat = beat >= 4 ? 1 : beat + 1;
+
+      // Flash Drummer HUD LEDs
+      document.querySelectorAll('#drummer-beat-leds .beat-led').forEach(el => {
+        const b = parseInt(el.getAttribute('data-beat'));
+        if (b === _currentBeat) {
+          el.classList.add('flash');
+          setTimeout(() => el.classList.remove('flash'), 110);
+        }
+      });
+
+      // Play audio click if enabled
+      _playMetronomeClick(isBeatOne);
+
+      _currentBeat = (_currentBeat >= 4) ? 1 : _currentBeat + 1;
     }, intervalMs);
   }
 
+  function _stopVisualBeatPulser() {
+    if (_beatPulserInterval) {
+      clearInterval(_beatPulserInterval);
+      _beatPulserInterval = null;
+    }
+  }
+
+  function _startDrummerFlasher() {
+    _startVisualBeatPulser();
+  }
+
   function _stopDrummerFlasher() {
-    if (_drummerBeatInterval) {
-      clearInterval(_drummerBeatInterval);
-      _drummerBeatInterval = null;
+    // Keep running master visual beat pulser
+  }
+
+  /* ── Band Dynamic Energy States (Teamplay Actions) ───────── */
+  function setBandState(stateKey, broadcast = true) {
+    const st = BAND_STATES[stateKey] || BAND_STATES.normal;
+    _currentBandState = stateKey;
+
+    _applyBandStateUI(stateKey);
+    showCueBanner(`⚡ LỆNH BAN NHẠC: ${st.label}`, st.icon, 3500);
+
+    if (broadcast && (_mode === 'host' || _role === 'leader')) {
+      broadcastState({
+        bandState: {
+          key: stateKey,
+          label: st.label,
+          icon: st.icon
+        }
+      });
+    }
+  }
+
+  function _applyBandStateUI(stateKey) {
+    const st = BAND_STATES[stateKey] || BAND_STATES.normal;
+    const textEl = document.getElementById('band-state-text');
+    const pillEl = document.getElementById('band-current-state-pill');
+    if (textEl) textEl.textContent = st.label;
+    if (pillEl) {
+      pillEl.style.borderColor = st.color;
+      pillEl.style.boxShadow = `0 0 16px ${st.color}40`;
+    }
+
+    document.querySelectorAll('.btn-band-state').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-state') === stateKey);
+    });
+  }
+
+  /* ── Section Transitions & 2-Bar Warning Cue ──────────────── */
+  function cueSectionTransition(sectionName) {
+    showCueBanner(`⚡ CHUYỂN KHÚC: ${sectionName.toUpperCase()}!`, '⚡', 3500);
+
+    if (_sections && _sections.length > 0) {
+      const match = _sections.find(s => s.name && s.name.toLowerCase().includes(sectionName.toLowerCase()));
+      if (match && match.start_measure > 0) {
+        _currentMeasure = match.start_measure;
+        window.MusicalPosition?.scrollToMeasure?.(match.start_measure, true);
+        if (_mode === 'host' || _role === 'leader') {
+          broadcastState({
+            position: { measure: match.start_measure, sectionId: match.id },
+            cue: { text: `⚡ CHUYỂN KHÚC: ${match.name.toUpperCase()} (Ô ${match.start_measure})`, icon: '⚡' }
+          });
+          return;
+        }
+      }
+    }
+
+    if (_mode === 'host' || _role === 'leader') {
+      broadcastState({
+        cue: { text: `⚡ CHUYỂN KHÚC: ${sectionName.toUpperCase()}!`, icon: '⚡' }
+      });
+    }
+  }
+
+  function cue2BarsWarning() {
+    const cueBtn = document.getElementById('btn-cue-2bars-warning');
+    if (cueBtn) {
+      cueBtn.classList.add('active');
+      setTimeout(() => cueBtn.classList.remove('active'), 1500);
+    }
+
+    showCueBanner('⚠️ CHUẨN BỊ CHUYỂN KHÚC SAU 2 Ô NHỊP!', '⚠️', 4500);
+
+    if (_mode === 'host' || _role === 'leader') {
+      broadcastState({
+        cue: {
+          text: '⚠️ CHUẨN BỊ CHUYỂN KHÚC SAU 2 Ô NHỊP!',
+          icon: '⚠️',
+          durationMs: 4500
+        }
+      });
+    }
+  }
+
+  /* ── Bass HUD updater ──────────────────────────────────────── */
+  function _updateBassHud(currentChordText = null) {
+    let effKey = _currentBaseKey;
+    if (window.TransposeEngine && _currentTranspose !== 0) {
+      effKey = window.TransposeEngine.transposeKey(_currentBaseKey, _currentTranspose) || _currentBaseKey;
+    }
+
+    const scaleRootsMap = {
+      'C':  ['C', 'D', 'E', 'F', 'G', 'A', 'B'],
+      'G':  ['G', 'A', 'B', 'C', 'D', 'E', 'F#'],
+      'D':  ['D', 'E', 'F#', 'G', 'A', 'B', 'C#'],
+      'A':  ['A', 'B', 'C#', 'D', 'E', 'F#', 'G#'],
+      'E':  ['E', 'F#', 'G#', 'A', 'B', 'C#', 'D#'],
+      'B':  ['B', 'C#', 'D#', 'E', 'F#', 'G#', 'A#'],
+      'F':  ['F', 'G', 'A', 'Bb', 'C', 'D', 'E'],
+      'Bb': ['Bb', 'C', 'D', 'Eb', 'F', 'G', 'A'],
+      'Eb': ['Eb', 'F', 'G', 'Ab', 'Bb', 'C', 'D'],
+      'Ab': ['Ab', 'Bb', 'C', 'Db', 'Eb', 'F', 'G'],
+      'Db': ['Db', 'Eb', 'F', 'Gb', 'Ab', 'Bb', 'C'],
+      'Am': ['A', 'B', 'C', 'D', 'E', 'F', 'G'],
+      'Em': ['E', 'F#', 'G', 'A', 'B', 'C', 'D'],
+      'Dm': ['D', 'E', 'F', 'G', 'A', 'Bb', 'C'],
+      'Bm': ['B', 'C#', 'D', 'E', 'F#', 'G', 'A'],
+      'F#m':['F#', 'G#', 'A', 'B', 'C#', 'D', 'E'],
+      'Gm': ['G', 'A', 'Bb', 'C', 'D', 'Eb', 'F'],
+      'Cm': ['C', 'D', 'Eb', 'F', 'G', 'Ab', 'Bb']
+    };
+
+    const roots = scaleRootsMap[effKey] || ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+    const scaleChipsEl = document.getElementById('bass-scale-chips');
+    if (scaleChipsEl) {
+      scaleChipsEl.innerHTML = roots.map((r, i) => `
+        <span class="bass-root-chip ${i === 0 ? 'active' : ''}">${r}</span>
+      `).join('');
+    }
+
+    let bassNote = roots[0];
+    let isSlash = false;
+    let hintText = 'Nốt gốc cơ bản';
+
+    if (currentChordText) {
+      const parts = currentChordText.split('/');
+      if (parts.length === 2 && parts[1].trim()) {
+        bassNote = parts[1].trim();
+        isSlash = true;
+        hintText = `Hợp âm đảo: Bass bấm nốt ${bassNote}`;
+      } else {
+        const rootMatch = currentChordText.match(/^[A-G][#b]?/);
+        if (rootMatch) {
+          bassNote = rootMatch[0];
+        }
+      }
+    }
+
+    const rootEl = document.getElementById('bass-root-note');
+    const hintEl = document.getElementById('bass-slash-hint');
+    if (rootEl) rootEl.textContent = bassNote;
+    if (hintEl) {
+      hintEl.textContent = hintText;
+      hintEl.style.color = isSlash ? '#f59e0b' : '#94a3b8';
+    }
+  }
+
+  /* ── Piano / Keyboard HUD updater ─────────────────────────── */
+  function _updatePianoHud() {
+    let effKey = _currentBaseKey;
+    if (window.TransposeEngine && _currentTranspose !== 0) {
+      effKey = window.TransposeEngine.transposeKey(_currentBaseKey, _currentTranspose) || _currentBaseKey;
+    }
+
+    const voicingsMap = {
+      'C':  ['Cmaj7', 'Dm7', 'Em7', 'Fmaj7', 'G7', 'Am7', 'Bm7b5'],
+      'G':  ['Gmaj7', 'Am7', 'Bm7', 'Cmaj7', 'D7', 'Em7', 'F#m7b5'],
+      'D':  ['Dmaj7', 'Em7', 'F#m7', 'Gmaj7', 'A7', 'Bm7', 'C#m7b5'],
+      'A':  ['Amaj7', 'Bm7', 'C#m7', 'Dmaj7', 'E7', 'F#m7', 'G#m7b5'],
+      'E':  ['Emaj7', 'F#m7', 'G#m7', 'Amaj7', 'B7', 'C#m7', 'D#m7b5'],
+      'F':  ['Fmaj7', 'Gm7', 'Am7', 'Bbmaj7', 'C7', 'Dm7', 'Em7b5'],
+      'Bb': ['Bbmaj7', 'Cm7', 'Dm7', 'Ebmaj7', 'F7', 'Gm7', 'Am7b5'],
+      'Eb': ['Ebmaj7', 'Fm7', 'Gm7', 'Abmaj7', 'Bb7', 'Cm7', 'Dm7b5'],
+      'Am': ['Am7', 'Bm7b5', 'Cmaj7', 'Dm7', 'Em7', 'Fmaj7', 'G7'],
+      'Em': ['Em7', 'F#m7b5', 'Gmaj7', 'Am7', 'Bm7', 'Cmaj7', 'D7'],
+      'Dm': ['Dm7', 'Em7b5', 'Fmaj7', 'Gm7', 'Am7', 'Bbmaj7', 'C7']
+    };
+
+    const voicings = voicingsMap[effKey] || ['Cmaj7', 'Dm7', 'Em7', 'Fmaj7', 'G7', 'Am7', 'Bm7b5'];
+    const voicingChipsEl = document.getElementById('piano-voicing-chips');
+    if (voicingChipsEl) {
+      voicingChipsEl.innerHTML = voicings.map(v => `
+        <span class="piano-voicing-chip">${v}</span>
+      `).join('');
+    }
+
+    const progEl = document.getElementById('piano-progression-text');
+    if (progEl) {
+      progEl.textContent = effKey.endsWith('m') ? 'i - iv - V7 - VI' : 'I - IV - V7 - vi';
+    }
+
+    const padEl = document.getElementById('piano-pad-sync-badge');
+    if (padEl) {
+      const isPadOn = window.AmbientPadEngine?.isPlaying?.();
+      padEl.textContent = isPadOn ? `🎹 Pad: Tông ${effKey} [BẬT]` : '🎹 Pad: Tắt';
+      padEl.style.color = isPadOn ? '#c084fc' : '#94a3b8';
     }
   }
 
@@ -1692,7 +2056,12 @@ const LiveBandApp = (() => {
     resetTimer,
     toggleAbLoop,
     toggleInkMode,
-    setSatbPart
+    setSatbPart,
+    setBandState,
+    cueSectionTransition,
+    cue2BarsWarning,
+    handleTapTempo: _handleTapTempo,
+    toggleMetronomeAudio: _toggleMetronomeAudio
   };
 })();
 

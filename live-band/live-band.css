@@ -1444,3 +1444,590 @@ body.stage-dark {
   color: #e0f2fe;
   box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
 }
+
+/* ══════════════════════════════════════════════════════════════
+   BAND LIVE SYNC & TEMPO PULSER STRIP (INSTRUMENTS & TEAMPLAY)
+   ══════════════════════════════════════════════════════════════ */
+.band-sync-strip {
+  background: linear-gradient(180deg, #0d0d17 0%, #08080f 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  padding: 8px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  z-index: 40;
+}
+
+/* Row 1: Tempo Sync & Dynamic Energy States */
+.band-sync-strip > .band-tempo-sync-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sync-box-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+/* Master Visual Beat Pulser */
+.band-beat-pulser {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.pulse-led {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.08s ease, background 0.08s ease, box-shadow 0.08s ease;
+}
+
+.pulse-led .led-num {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* Beat 1: Strong Accent (Fiery Amber / Red) */
+.pulse-led.flash-beat-1 {
+  background: #f59e0b !important;
+  border-color: #fbbf24 !important;
+  box-shadow: 0 0 16px #f59e0b, 0 0 30px #ef4444 !important;
+  transform: scale(1.22);
+}
+.pulse-led.flash-beat-1 .led-num {
+  color: #000 !important;
+  font-weight: 900 !important;
+}
+
+/* Beats 2, 3, 4: Sub Beats (Bright Cyan) */
+.pulse-led.flash-beat-sub {
+  background: #06b6d4 !important;
+  border-color: #22d3ee !important;
+  box-shadow: 0 0 12px #06b6d4 !important;
+  transform: scale(1.12);
+}
+.pulse-led.flash-beat-sub .led-num {
+  color: #000 !important;
+  font-weight: 800 !important;
+}
+
+.band-bpm-badge {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 4px 10px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+/* TAP TEMPO Tactile Button */
+.btn-tap-tempo {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(234, 88, 12, 0.2));
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  color: #fbbf24;
+  font-weight: 800;
+  font-size: 0.78rem;
+  padding: 5px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  white-space: nowrap;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.btn-tap-tempo:active {
+  transform: scale(0.94);
+  background: #f59e0b;
+  color: #000;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.7);
+}
+
+/* Click Audio Toggle */
+.btn-click-audio {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #cbd5e1;
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 5px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.btn-click-audio.active {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #10b981;
+  color: #6ee7b7;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+}
+
+/* Center: Active Dynamic Energy State Badge */
+.band-state-center {
+  display: flex;
+  align-items: center;
+}
+
+.band-current-state-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1.5px solid rgba(16, 185, 129, 0.35);
+  padding: 4px 14px;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.band-current-state-pill .state-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+}
+
+.state-title-prefix {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #94a3b8;
+}
+
+.band-current-state-pill .state-text {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+/* Dynamic Band State Buttons (1-Touch) */
+.band-dynamic-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.btn-band-state {
+  font-weight: 800;
+  font-size: 0.76rem;
+  padding: 5px 11px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+  user-select: none;
+}
+
+.btn-band-state:hover {
+  transform: translateY(-1px);
+}
+
+.btn-band-state:active {
+  transform: scale(0.95);
+}
+
+/* State Color Styles */
+.btn-band-state.state-break {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+}
+.btn-band-state.state-break:hover, .btn-band-state.state-break.active {
+  background: #ef4444;
+  color: #fff;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.6);
+}
+
+.btn-band-state.state-build {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.4);
+  color: #93c5fd;
+}
+.btn-band-state.state-build:hover, .btn-band-state.state-build.active {
+  background: #3b82f6;
+  color: #fff;
+  box-shadow: 0 0 16px rgba(59, 130, 246, 0.6);
+}
+
+.btn-band-state.state-drop {
+  background: rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.4);
+  color: #c4b5fd;
+}
+.btn-band-state.state-drop:hover, .btn-band-state.state-drop.active {
+  background: #8b5cf6;
+  color: #fff;
+  box-shadow: 0 0 16px rgba(139, 92, 246, 0.6);
+}
+
+.btn-band-state.state-drive {
+  background: rgba(249, 115, 22, 0.15);
+  border-color: rgba(249, 115, 22, 0.4);
+  color: #fdba74;
+}
+.btn-band-state.state-drive:hover, .btn-band-state.state-drive.active {
+  background: #f97316;
+  color: #fff;
+  box-shadow: 0 0 16px rgba(249, 115, 22, 0.6);
+}
+
+.btn-band-state.state-solo {
+  background: rgba(234, 179, 8, 0.15);
+  border-color: rgba(234, 179, 8, 0.4);
+  color: #fde047;
+}
+.btn-band-state.state-solo:hover, .btn-band-state.state-solo.active {
+  background: #eab308;
+  color: #000;
+  box-shadow: 0 0 16px rgba(234, 179, 8, 0.6);
+}
+
+.btn-band-state.state-end {
+  background: rgba(100, 116, 139, 0.15);
+  border-color: rgba(100, 116, 139, 0.4);
+  color: #cbd5e1;
+}
+.btn-band-state.state-end:hover, .btn-band-state.state-end.active {
+  background: #64748b;
+  color: #fff;
+  box-shadow: 0 0 16px rgba(100, 116, 139, 0.6);
+}
+
+/* Secondary Row: Section Transition Substrip */
+.band-section-sync-substrip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.substrip-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.substrip-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #38bdf8;
+  white-space: nowrap;
+}
+
+.section-quick-cues {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.btn-quick-cue {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-quick-cue:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: #38bdf8;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.btn-quick-cue.highlight-chorus {
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #fde68a;
+  background: rgba(245, 158, 11, 0.1);
+}
+.btn-quick-cue.highlight-chorus:hover {
+  background: #f59e0b;
+  color: #000;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.5);
+}
+
+.btn-quick-cue.highlight-outro {
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.1);
+}
+.btn-quick-cue.highlight-outro:hover {
+  background: #ef4444;
+  color: #fff;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+}
+
+.btn-cue-2bars {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(245, 158, 11, 0.2));
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  color: #fca5a5;
+  font-weight: 800;
+  font-size: 0.74rem;
+  padding: 4px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.btn-cue-2bars:hover, .btn-cue-2bars.active {
+  background: #ef4444;
+  color: #fff;
+  box-shadow: 0 0 18px rgba(239, 68, 68, 0.7);
+  transform: scale(1.03);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ROLE-SPECIFIC HUDS (BASS MASTER & PIANO / KEYBOARD)
+   ══════════════════════════════════════════════════════════════ */
+/* Bass HUD */
+.hud-bass {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1.5px solid rgba(56, 189, 248, 0.35);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  border-radius: var(--stage-radius-md);
+  padding: 8px 18px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.bass-hud-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.bass-hud-badge {
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+  background: #0284c7;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.bass-active-box {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.bass-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #94a3b8;
+}
+
+.bass-root-note {
+  font-family: 'Fira Code', monospace;
+  font-size: 1.7rem;
+  font-weight: 900;
+  color: #38bdf8;
+  text-shadow: 0 0 14px rgba(56, 189, 248, 0.6);
+  line-height: 1;
+}
+
+.bass-slash-hint {
+  font-size: 0.76rem;
+  color: #f59e0b;
+  font-weight: 700;
+}
+
+.bass-hud-center {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bass-scale-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #94a3b8;
+}
+
+.bass-scale-chips {
+  display: flex;
+  gap: 5px;
+}
+
+.bass-root-chip {
+  font-family: 'Fira Code', monospace;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e2e8f0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.bass-root-chip.active {
+  background: #38bdf8;
+  color: #000;
+  border-color: #38bdf8;
+  font-weight: 900;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+}
+
+.bass-hud-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bass-tuning-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #94a3b8;
+}
+
+.bass-strings-guide {
+  display: flex;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.bass-strings-guide strong {
+  color: #f59e0b;
+}
+
+/* Piano HUD */
+.hud-piano {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(24, 24, 42, 0.95);
+  border: 1.5px solid rgba(168, 85, 247, 0.35);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  border-radius: var(--stage-radius-md);
+  padding: 8px 18px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.piano-hud-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.piano-hud-badge {
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+  background: #7c3aed;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.piano-active-key-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.piano-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #94a3b8;
+}
+
+.piano-progression-text {
+  font-family: 'Fira Code', monospace;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #c084fc;
+}
+
+.piano-hud-center {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.piano-voicings-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #94a3b8;
+}
+
+.piano-voicing-chips {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.piano-voicing-chip {
+  font-family: 'Fira Code', monospace;
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  color: #e9d5ff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.piano-hud-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.piano-pad-status-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #94a3b8;
+}
+
+.piano-pad-sync-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #d8b4fe;
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  padding: 3px 10px;
+  border-radius: 6px;
+}

@@ -471,6 +471,19 @@ SheetApp/
   ✅ An toàn dữ liệu 100%: mọi thao tác lưu đều tạo file .xml.bak và có nút khôi phục tức thì
   ✅ Hỗ trợ sửa độc lập từng bè: Soprano, Alto (Part P1 - Khóa Sol) và Tenor, Bass (Part P2 - Khóa Fa)
 
+[2026-09-10] — Chuyên Biệt Hóa Live Band: Trọng Tâm Nhạc Cụ & Phối Hợp Ban Nhạc (Instrument Sync & Teamplay)
+  + Bổ sung thanh điều khiển Live Sync & Giữ nhịp (#band-sync-strip):
+    - Visual Beat Pulser: 4 đèn LED nhấp nháy trực quan theo nhịp (đèn 1 sáng rực cam/đỏ, đèn 2-4 sáng xanh cyan).
+    - Tap Tempo tương tác: Chạm 3-4 nhịp ngón tay để bắt tempo bài hát tức thì, broadcast tốc độ cho toàn ban.
+    - Metronome Click Audio: Tích hợp Web Audio synthesizer phát tiếng click nhịp cho tai nghe in-ear (960Hz phách 1, 540Hz phách thường).
+    - 6 Lệnh Trạng Thái Năng Lượng Ban Nhạc (1-Touch Dynamic States): 🛑 BREAK, 🌊 BUILD-UP, 🤫 ĐỆM ÊM, 🔥 CAO TRÀO, 🎸 SOLO TIME, 🏁 DỨT KẾT với banner cảnh báo toàn màn hình đồng bộ mọi thiết bị.
+    - Chuyển Khúc & Báo Trước 2 Ô Nhịp: Quick-jump & broadcast hiệu lệnh chuyển đoạn (Intro, Verse, Chorus, Solo, Bridge, Outro) kèm nút báo hiệu 2 ô nhịp.
+  + Thêm Heads-Up Displays (HUD) chuyên dụng cho nhạc công:
+    - 🎸 BASS MASTER HUD (#hud-bass): Nốt gốc (Root Note) kích thước lớn, nhận diện hợp âm đảo (Slash Chords C/E -> E, G/B -> B), bảng nốt âm giai theo tông và sơ đồ dây bass.
+    - 🎹 PIANO / KEYBOARD HUD (#hud-piano): Vòng hòa thanh số La Mã (I-IV-V-vi), bảng hợp âm 7 mở rộng theo tông và trạng thái đồng bộ Ambient Pad.
+  ~ Sửa: live-band/index.php, live-band/live-band.css, live-band/live-band.js.
+  ✅ Kiểm thử cú pháp: PHP 8.1 lint sạch, Node.js syntax check 100% đạt, các ID và hàm được kết nối toàn diện.
+
 [2026-09-10] — Triển Khai Giai Đoạn 2: Tập Luyện Thông Minh & Cộng Tác Sân Khấu Live Band Studio
   + Tạo: assets/js/performance/stage-ink-engine.js (Bút vẽ Apple Pencil / S-Pen, Catmull-Rom smoothing, live vector broadcast)
   ~ Sửa: live-band/index.php (Tích hợp canvas vẽ ink, toolbar bút Ca Trưởng, thanh vòng lặp A-B loop, bộ chọn tách bè SATB)

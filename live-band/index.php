@@ -77,15 +77,16 @@ function liveBandCssTag(string $file): string {
       </button>
 
       <!-- Role Selector Pill -->
-      <div class="stage-pill-badge role-pill" title="Đổi vai trò hiển thị trên sân khấu">
+      <div class="stage-pill-badge role-pill" title="Đổi vai trò nhạc cụ trên sân khấu">
         <span id="role-pill-icon">🎸</span>
         <select id="stage-role-select" class="nav-role-dropdown" aria-label="Vai trò biểu diễn">
-          <option value="leader">👑 Ca Trưởng (Host)</option>
+          <option value="leader">👑 Trưởng Ban / Band Leader</option>
           <option value="guitar" selected>🎸 Guitar (Hợp âm & Capo)</option>
-          <option value="piano">🎹 Piano / Organ (2 Tay SATB)</option>
-          <option value="vocal">🎤 Ca Đoàn (Lời To)</option>
-          <option value="drummer">🥁 Trống (Visual Nhịp)</option>
-          <option value="viewer">👀 Khán Giả / Thành Viên</option>
+          <option value="bass">🎸 Bass (Root & Slash Notes)</option>
+          <option value="piano">🎹 Keyboard / Piano (Hợp âm & Dẫn)</option>
+          <option value="drummer">🥁 Trống / Drums (Visual Metronome)</option>
+          <option value="viewer">👀 Nhạc công / Thành viên</option>
+          <option value="vocal">🎤 Vocal / Ca Sĩ</option>
         </select>
       </div>
     </div>
@@ -146,6 +147,62 @@ function liveBandCssTag(string $file): string {
       </button>
     </div>
   </header>
+
+  <!-- ══════════════ 1.5. BAND LIVE SYNC & TEMPO PULSER STRIP ══════════════ -->
+  <div id="band-sync-strip" class="band-sync-strip">
+    <!-- Left: Master Visual Beat Pulser -->
+    <div class="band-tempo-sync-box">
+      <div class="sync-box-label">GIỮ NHỊP:</div>
+      <div class="band-beat-pulser" id="stage-beat-pulser">
+        <div class="pulse-led" data-beat="1"><span class="led-num">1</span></div>
+        <div class="pulse-led" data-beat="2"><span class="led-num">2</span></div>
+        <div class="pulse-led" data-beat="3"><span class="led-num">3</span></div>
+        <div class="pulse-led" data-beat="4"><span class="led-num">4</span></div>
+      </div>
+      <span id="band-tempo-bpm" class="band-bpm-badge">80 BPM</span>
+      <button id="btn-tap-tempo" class="btn-tap-tempo" title="Chạm nhịp ngón tay 3-4 lần để bắt Tempo bài hát">👆 TAP TEMPO</button>
+      <button id="btn-toggle-metronome-audio" class="btn-click-audio" title="Bật/Tắt tiếng click nhịp cho tai nghe">🔊 Click: Bật</button>
+    </div>
+
+    <!-- Center: Active Dynamic Energy State Badge -->
+    <div class="band-state-center">
+      <div class="band-current-state-pill" id="band-current-state-pill">
+        <span class="state-dot"></span>
+        <span class="state-title-prefix">TRẠNG THÁI:</span>
+        <span id="band-state-text" class="state-text">CHƠI BÌNH THƯỜNG</span>
+      </div>
+    </div>
+
+    <!-- Right: Fast Dynamic Energy State Buttons (1-Touch) -->
+    <div class="band-dynamic-actions" id="band-dynamic-actions">
+      <button class="btn-band-state state-break" data-state="break" title="🛑 BREAK: Toàn ban ngắt nốt cùng lúc phách 1">🛑 BREAK</button>
+      <button class="btn-band-state state-build" data-state="build" title="🌊 BUILD-UP: Dồn nhịp, tăng dần volume">🌊 BUILD-UP</button>
+      <button class="btn-band-state state-drop" data-state="drop" title="🤫 DROP / ĐỆM ÊM: Chỉ 1 nhạc cụ đệm, hạ nhỏ">🤫 ĐỆM ÊM</button>
+      <button class="btn-band-state state-drive" data-state="drive" title="🔥 FULL DRIVE: Quạt mạnh, cao trào, full ban">🔥 CAO TRÀO</button>
+      <button class="btn-band-state state-solo" data-state="solo" title="🎸 SOLO TIME: Nhường đất diễn cho solo">🎸 SOLO</button>
+      <button class="btn-band-state state-end" data-state="end" title="🏁 DỨT / KẾT: Kết thúc dứt khoát">🏁 DỨT KẾT</button>
+    </div>
+
+    <!-- Secondary Row: Section Transition & 2-Bar Heads-Up Warning Bar -->
+    <div class="band-section-sync-substrip">
+      <div class="substrip-left">
+        <span class="substrip-label">CHUYỂN KHÚC:</span>
+        <div class="section-quick-cues" id="band-section-quick-cues">
+          <button class="btn-quick-cue" data-section="Intro" title="Báo vào khúc Mở đầu (Intro)">⚡ Intro</button>
+          <button class="btn-quick-cue" data-section="Lời (Verse)" title="Báo vào Lời (Verse)">⚡ Verse</button>
+          <button class="btn-quick-cue highlight-chorus" data-section="Điệp Khúc" title="Báo vào Điệp Khúc (Chorus)">⚡ Điệp Khúc</button>
+          <button class="btn-quick-cue" data-section="Giang Tấu / Solo" title="Báo vào Giang Tấu / Solo">⚡ Solo</button>
+          <button class="btn-quick-cue" data-section="Bridge" title="Báo vào Bridge">⚡ Bridge</button>
+          <button class="btn-quick-cue highlight-outro" data-section="Kết (Outro)" title="Báo vào Kết bài">⚡ Outro</button>
+        </div>
+      </div>
+      <div class="substrip-right">
+        <button id="btn-cue-2bars-warning" class="btn-cue-2bars" title="Phát lệnh cảnh báo toàn ban: CHUẨN BỊ CHUYỂN KHÚC SAU 2 Ô NHỊP">
+          ⚠️ BÁO TRƯỚC 2 Ô NHỊP
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- ══════════════ 2. HOST MASTER COMMAND CONSOLE ══════════════ -->
   <!-- Chỉ hiển thị khi vai trò là Leader hoặc người dùng là Host -->
@@ -256,6 +313,54 @@ function liveBandCssTag(string $file): string {
       </div>
       <div class="hud-guitar-chords" id="guitar-key-chords">
         <!-- Chords in current key -->
+      </div>
+    </div>
+
+    <!-- Bass HUD (Root Notes, Slash Chords, Scale Degree Roots) -->
+    <div id="hud-bass" class="hud-panel hud-bass hidden">
+      <div class="bass-hud-left">
+        <span class="bass-hud-badge">🎸 BASS MASTER</span>
+        <div class="bass-active-box">
+          <span class="bass-label">NỐT GỐC (ROOT):</span>
+          <span id="bass-root-note" class="bass-root-note">C</span>
+          <span id="bass-slash-hint" class="bass-slash-hint">Nốt gốc cơ bản</span>
+        </div>
+      </div>
+      <div class="bass-hud-center">
+        <span class="bass-scale-label">BỘ NỐT BASS THEO TÔNG:</span>
+        <div id="bass-scale-chips" class="bass-scale-chips">
+          <!-- Điền tự động theo tông: C - D - E - F - G - A - B -->
+        </div>
+      </div>
+      <div class="bass-hud-right">
+        <span class="bass-tuning-label">DÂY BASS:</span>
+        <div class="bass-strings-guide">
+          <span class="bass-str">4: <strong>E</strong></span>
+          <span class="bass-str">3: <strong>A</strong></span>
+          <span class="bass-str">2: <strong>D</strong></span>
+          <span class="bass-str">1: <strong>G</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Keyboard / Piano HUD (Harmonic Progression, Voicings, Ambient Pad) -->
+    <div id="hud-piano" class="hud-panel hud-piano hidden">
+      <div class="piano-hud-left">
+        <span class="piano-hud-badge">🎹 PIANO / KEYBOARD</span>
+        <div class="piano-active-key-box">
+          <span class="piano-label">VÒNG HÒA THANH:</span>
+          <span id="piano-progression-text" class="piano-progression-text">I - IV - V - vi</span>
+        </div>
+      </div>
+      <div class="piano-hud-center">
+        <span class="piano-voicings-label">HỢP ÂM MỞ RỘNG (VOICINGS):</span>
+        <div id="piano-voicing-chips" class="piano-voicing-chips">
+          <!-- Cmaj7, Dm7, Em7, Fmaj7, G7, Am7, Bm7b5 -->
+        </div>
+      </div>
+      <div class="piano-hud-right">
+        <span class="piano-pad-status-label">AMBIENT PAD SYNC:</span>
+        <span id="piano-pad-sync-badge" class="piano-pad-sync-badge">🎹 Pad: Tắt</span>
       </div>
     </div>
 
