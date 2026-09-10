@@ -49,7 +49,8 @@ SheetApp/
 ├── live-band/                ← Dedicated Live Band & Rehearsal Studio (/live-band/) [NEW 2026-09]
 │   ├── index.php             # Giao diện sân khấu Stage Dark Mode cho Ca Trưởng & Ban Nhạc
 │   ├── live-band.css         # Stylesheet sân khấu tối ưu tương phản & LED flasher
-│   └── live-band.js          # App controller: Master-Follower, WakeLock, Count-In, Cue HUD
+│   ├── live-band.js          # App controller: Master-Follower, WakeLock, Count-In, Cue HUD
+│   └── projector.php         # Màn hình máy chiếu nhà thờ Clean Lyrics Projector [NEW]
 ├── learn/                    ← Interactive Music Learning Studio (/learn/) [NEW 2026-09]
 │   ├── index.php             # Trang chính /learn — Shell + song picker + OSMD
 │   └── learn.css             # Stylesheet premium dark cho /learn
@@ -228,6 +229,18 @@ SheetApp/
 | `setlist-ui.js` | Setlist UI, chọn Tông & Tempo tập | `setlist:changed` | `song:loaded` |
 | `library-ui.js` | Song list UI | `song:selected` | - |
 | `app-ui.js` | Toolbar, zoom, fullscreen | `transpose:changed`, `zoom:changed` | `song:loaded` |
+
+### Live Band & Performance Modules (`assets/js/performance/`)
+
+| File | Chức năng chính | Ghi chú |
+|------|-----------------|---------|
+| `live-transport.js` | Quản lý kết nối transport polling, heartbeat, presence roster | Tự động phát sinh UUID và emit `roster`, `state` |
+| `ambient-pad-engine.js` | Bộ tổng hợp âm Ambient Pad Drone Web Audio (Root + 5th) | Smooth Crossfade 4s, hỗ trợ In-Ear Stereo Split |
+| `pedal-midi-engine.js` | Bàn đạp chân Bluetooth (AirTurn/PageFlip/Donner) & Web MIDI | Lắng nghe phím và MIDI CC64, hiển thị Toast phản hồi |
+| `musical-position.js` | Ánh xạ vị trí ô nhịp (Measure mapping) cho OSMD | Cuộn chuẩn xác đa kích thước màn hình |
+| `count-in-engine.js` | Bộ đếm nhịp vào bài 4 phách (Visual & Web Audio Synth) | Tần số kép 920Hz / 540Hz |
+| `cue-engine.js` | Quản lý phát lệnh sân khấu Neon Banner | Cues: Điệp khúc, Cao trào, Nhỏ dần, Lặp lại |
+| `qr-helper.js` | Vẽ mã QR Code kích thước tùy biến lên HTML5 Canvas | Hỗ trợ full màn hình để quét nhanh |
 
 ---
 
@@ -456,6 +469,15 @@ SheetApp/
   + Sửa: includes/toolbar.php (Thêm nút '🎼 Sửa Sheet' trực tiếp trên thanh công cụ và trong dropdown menu)
   ✅ An toàn dữ liệu 100%: mọi thao tác lưu đều tạo file .xml.bak và có nút khôi phục tức thì
   ✅ Hỗ trợ sửa độc lập từng bè: Soprano, Alto (Part P1 - Khóa Sol) và Tenor, Bass (Part P2 - Khóa Fa)
+
+[2026-09-10] — Triển Khai Giai Đoạn 1: Nâng Cao Tính Năng Sân Khấu Live Band Studio
+  + Tạo: assets/js/performance/ambient-pad-engine.js (Web Audio continuous worship drone synth, 4 layers, crossfade 4s, In-Ear stereo split)
+  + Tạo: assets/js/performance/pedal-midi-engine.js (Bluetooth foot pedal & Web MIDI engine, macro dispatch, floating HUD feedback)
+  + Tạo: live-band/projector.php (Màn hình máy chiếu nhà thờ Clean Lyrics Projector, tự động bắt nhịp theo Ca Trưởng, không có nốt nhạc)
+  ~ Sửa: live-band/index.php (Tích hợp nút Pad, Countdown Timer, link Projector, Audio Settings modal, Timer modal)
+  ~ Sửa: live-band/live-band.css (Styles cho Pad, Timer, In-Ear split, range sliders, và toast pedal)
+  ~ Sửa: live-band/live-band.js (Controller tích hợp Ambient Pad, Foot pedal actions, Service timer, stereo split)
+  ✅ Đã tự động kiểm thử DevTools: Ambient Pad hoạt động, đếm ngược đếm đúng, bàn đạp phản hồi, máy chiếu kết nối phòng.
 
 [2026-09-10] — Lập Báo cáo Phân tích Chuyên Sâu & Nâng Cao Tính Năng Live Band Studio
   + Tạo: SHEETAPP2_LIVE_BAND_DEEP_ANALYSIS_2026-09-10.md (Báo cáo master 10 trụ cột WOW: Ambient Pad, Stereo Split In-Ear, MIDI Pedal, Clean Lyrics Cast...)

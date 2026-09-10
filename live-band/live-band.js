@@ -52,6 +52,14 @@ const LiveBandApp = (() => {
   let _drummerBeatInterval = null;
   let _cueDismissTimer    = null;
 
+  // Advanced Stage Features State
+  let _isPadActive        = false;
+  let _padAutoKey         = true;
+  let _timerInterval      = null;
+  let _timerMode          = 'off';       // 'off' | 'countdown' | 'stopwatch'
+  let _timerRemainingSec  = 0;
+  let _timerStopwatchSec  = 0;
+
   /* ── Initialization ───────────────────────────────────────── */
   async function init() {
     _clientId = _getOrCreateClientId();
@@ -64,6 +72,10 @@ const LiveBandApp = (() => {
     _initOSMD();
     _bindUI();
     _initWakeLock();
+
+    // Initialize Bluetooth Foot Pedal & Web MIDI Engine
+    window.PedalMidiEngine?.init?.((action) => _handlePedalAction(action));
+
     await _loadSongCatalog();
 
     // Check URL parameters for ?room=, ?song=, ?role=
@@ -274,6 +286,61 @@ const LiveBandApp = (() => {
 
     // Snap to Host Button
     document.getElementById('btn-snap-to-host')?.addEventListener('click', snapToHost);
+
+    // ── Advanced Stage UI Bindings ──
+    // Ambient Pad
+    document.getElementById('btn-stage-pad')?.addEventListener('click', toggleAmbientPad);
+    document.getElementById('btn-host-pad-toggle')?.addEventListener('click', toggleAmbientPad);
+    document.getElementById('pad-volume-slider')?.addEventListener('input', (e) => {
+      const val = parseInt(e.target.value) || 0;
+      document.getElementById('pad-volume-val')?.replaceChildren(document.createTextNode(`${val}%`));
+      window.AmbientPadEngine?.setVolume(val / 100);
+    });
+    document.getElementById('toggle-stereo-split')?.addEventListener('change', (e) => {
+      window.AmbientPadEngine?.setStereoSplit(e.target.checked);
+      showCueBanner(e.target.checked ? '🎧 Đã bật In-Ear Split (L: Click / R: Nhạc)' : '🎧 Đã chuyển Stereo Chuẩn', '🎧', 2500);
+    });
+    document.getElementById('toggle-pad-autokey')?.addEventListener('change', (e) => {
+      _padAutoKey = e.target.checked;
+    });
+
+    // Projector View Open
+    document.getElementById('btn-stage-projector')?.addEventListener('click', () => {
+      const code = _roomCode || 'STAGE';
+      window.open(`/live-band/projector.php?room=${encodeURIComponent(code)}`, '_blank');
+    });
+
+    // Stage Audio & Hardware Settings Modal
+    document.getElementById('btn-stage-audio-settings')?.addEventListener('click', _showAudioSettingsModal);
+    document.getElementById('btn-close-audio-settings')?.addEventListener('click', _hideAudioSettingsModal);
+    document.getElementById('btn-test-pedal-action')?.addEventListener('click', () => {
+      window.PedalMidiEngine?.dispatchAction('next', 'Thử Nghiệm');
+    });
+
+    // Countdown Timer Settings Modal
+    document.getElementById('btn-stage-timer')?.addEventListener('click', _showTimerModal);
+    document.getElementById('btn-close-timer-modal')?.addEventListener('click', _hideTimerModal);
+    document.querySelectorAll('.timer-preset-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const mins = parseInt(e.currentTarget.getAttribute('data-minutes')) || 5;
+        startCountdown(mins);
+        _hideTimerModal();
+      });
+    });
+    document.getElementById('btn-start-countdown')?.addEventListener('click', () => {
+      const input = document.getElementById('timer-custom-minutes');
+      const mins = parseInt(input?.value) || 10;
+      startCountdown(mins);
+      _hideTimerModal();
+    });
+    document.getElementById('btn-start-stopwatch')?.addEventListener('click', () => {
+      startStopwatch();
+      _hideTimerModal();
+    });
+    document.getElementById('btn-reset-timer')?.addEventListener('click', () => {
+      resetTimer();
+      _hideTimerModal();
+    });
 
     // Viewport Scroll Listener (Throttled)
     _bindScrollObserver();
@@ -923,6 +990,16 @@ const LiveBandApp = (() => {
     // Load Sections & Roadmap
     await _loadSections(songId);
 
+    // Auto-update Ambient Pad key if active
+    if (_isPadActive && _padAutoKey && window.AmbientPadEngine) {
+      let effKey = _currentBaseKey;
+      if (window.TransposeEngine && _currentTranspose !== 0) {
+        effKey = window.TransposeEngine.transposeKey(_currentBaseKey, _currentTranspose) || _currentBaseKey;
+      }
+      window.AmbientPadEngine.playKey(effKey, true);
+      _updatePadUI(true, effKey);
+    }
+
     // Re-apply view mode for active role
     _applyViewMode();
   }
@@ -931,6 +1008,16 @@ const LiveBandApp = (() => {
     _currentTranspose = val;
     _updateKeyUI();
     _updateGuitarCapoHint();
+
+    // Auto-update Ambient Pad key if active
+    if (_isPadActive && _padAutoKey && window.AmbientPadEngine) {
+      let effKey = _currentBaseKey;
+      if (window.TransposeEngine && _currentTranspose !== 0) {
+        effKey = window.TransposeEngine.transposeKey(_currentBaseKey, _currentTranspose) || _currentBaseKey;
+      }
+      window.AmbientPadEngine.playKey(effKey, true);
+      _updatePadUI(true, effKey);
+    }
 
     if (_osmd && _osmd.Sheet && opensheetmusicdisplay.TransposeCalculator) {
       try {
@@ -1286,6 +1373,142 @@ const LiveBandApp = (() => {
     } catch (e) {}
   }
 
+  /* ── Ambient Pad Synth Controller ─────────────────────────── */
+  function toggleAmbientPad() {
+    if (!window.AmbientPadEngine) return;
+    let effectiveKey = _currentBaseKey;
+    if (window.TransposeEngine && _currentTranspose !== 0) {
+      effectiveKey = window.TransposeEngine.transposeKey(_currentBaseKey, _currentTranspose) || _currentBaseKey;
+    }
+
+    const isNowPlaying = window.AmbientPadEngine.toggle(effectiveKey);
+    _isPadActive = isNowPlaying;
+    _updatePadUI(isNowPlaying, effectiveKey);
+    showCueBanner(isNowPlaying ? `🎹 Bật Ambient Pad: Tông ${effectiveKey}` : '🎹 Đã tắt Ambient Pad', '🎹', 2000);
+  }
+
+  function _updatePadUI(isActive, key) {
+    const navPill = document.getElementById('btn-stage-pad');
+    const navLabel = document.getElementById('nav-pad-label');
+    const hostBtnText = document.getElementById('host-pad-btn-text');
+
+    if (navPill) navPill.classList.toggle('active', isActive);
+    if (navLabel) navLabel.textContent = isActive ? `Pad: ${key}` : 'Pad: Tắt';
+    if (hostBtnText) hostBtnText.textContent = isActive ? `Tắt Pad (${key})` : 'Bật Pad Drone';
+  }
+
+  /* ── Foot Pedal & MIDI Action Handler ─────────────────────── */
+  function _handlePedalAction(action) {
+    if (action === 'next') {
+      const activeChip = document.querySelector('.roadmap-chip.active');
+      const nextChip = activeChip ? activeChip.nextElementSibling : document.querySelector('.roadmap-chip');
+      if (nextChip && nextChip.classList.contains('roadmap-chip')) {
+        nextChip.click();
+      } else {
+        const targetM = _currentMeasure + 4;
+        _currentMeasure = targetM;
+        window.MusicalPosition?.scrollToMeasure?.(targetM, true);
+        if (_mode === 'host') broadcastState({ position: { measure: targetM } });
+      }
+    } else if (action === 'prev') {
+      const activeChip = document.querySelector('.roadmap-chip.active');
+      const prevChip = activeChip ? activeChip.previousElementSibling : null;
+      if (prevChip && prevChip.classList.contains('roadmap-chip')) {
+        prevChip.click();
+      } else {
+        const targetM = Math.max(1, _currentMeasure - 4);
+        _currentMeasure = targetM;
+        window.MusicalPosition?.scrollToMeasure?.(targetM, true);
+        if (_mode === 'host') broadcastState({ position: { measure: targetM } });
+      }
+    } else if (action === 'countin') {
+      if (_mode === 'host') {
+        hostTriggerCountIn();
+      } else {
+        _triggerVisualCountIn({ bpm: _currentBpm, beats: 4 });
+      }
+    } else if (action === 'chorus') {
+      if (_mode === 'host') hostSendCue('chorus');
+    } else if (action === 'snap') {
+      snapToHost();
+    }
+  }
+
+  /* ── Service Countdown Timer Controller ───────────────────── */
+  function startCountdown(minutes) {
+    clearInterval(_timerInterval);
+    _timerMode = 'countdown';
+    _timerRemainingSec = minutes * 60;
+    _tickTimer();
+    _timerInterval = setInterval(_tickTimer, 1000);
+    showCueBanner(`⏱️ Bắt đầu đếm ngược ${minutes} phút`, '⏱️', 2000);
+  }
+
+  function startStopwatch() {
+    clearInterval(_timerInterval);
+    _timerMode = 'stopwatch';
+    _timerStopwatchSec = 0;
+    _tickTimer();
+    _timerInterval = setInterval(_tickTimer, 1000);
+    showCueBanner('⏱️ Bắt đầu bấm giờ sân khấu', '⏱️', 2000);
+  }
+
+  function resetTimer() {
+    clearInterval(_timerInterval);
+    _timerInterval = null;
+    _timerMode = 'off';
+    _timerRemainingSec = 0;
+    _timerStopwatchSec = 0;
+    const label = document.getElementById('nav-timer-label');
+    const pill = document.getElementById('btn-stage-timer');
+    if (label) label.textContent = '00:00';
+    if (pill) pill.classList.remove('urgent');
+    showCueBanner('⏱️ Đã đặt lại đồng hồ', '⏱️', 1500);
+  }
+
+  function _tickTimer() {
+    const label = document.getElementById('nav-timer-label');
+    const pill = document.getElementById('btn-stage-timer');
+    if (!label) return;
+
+    if (_timerMode === 'countdown') {
+      if (_timerRemainingSec > 0) {
+        _timerRemainingSec--;
+        const m = Math.floor(_timerRemainingSec / 60);
+        const s = _timerRemainingSec % 60;
+        label.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        if (pill) pill.classList.toggle('urgent', _timerRemainingSec <= 60);
+      } else {
+        label.textContent = '00:00';
+        if (pill) pill.classList.add('urgent');
+        clearInterval(_timerInterval);
+        showCueBanner('🔔 ĐÃ ĐẾN GIỜ KHAI LỄ / BIỂU DIỄN!', '🔔', 5000);
+      }
+    } else if (_timerMode === 'stopwatch') {
+      _timerStopwatchSec++;
+      const m = Math.floor(_timerStopwatchSec / 60);
+      const s = _timerStopwatchSec % 60;
+      label.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+  }
+
+  /* ── Modals Triggers ──────────────────────────────────────── */
+  function _showAudioSettingsModal() {
+    document.getElementById('modal-stage-audio-settings')?.classList.remove('hidden');
+  }
+
+  function _hideAudioSettingsModal() {
+    document.getElementById('modal-stage-audio-settings')?.classList.add('hidden');
+  }
+
+  function _showTimerModal() {
+    document.getElementById('modal-stage-timer-settings')?.classList.remove('hidden');
+  }
+
+  function _hideTimerModal() {
+    document.getElementById('modal-stage-timer-settings')?.classList.add('hidden');
+  }
+
   /* ── Public API ───────────────────────────────────────────── */
   return {
     init,
@@ -1302,7 +1525,10 @@ const LiveBandApp = (() => {
     hostNextSong,
     snapToHost,
     showRoomModal,
-    hideRoomModal
+    hideRoomModal,
+    toggleAmbientPad,
+    startCountdown,
+    resetTimer
   };
 })();
 

@@ -101,6 +101,18 @@ function liveBandCssTag(string $file): string {
     </div>
 
     <div class="nav-right">
+      <!-- Ambient Pad Pill -->
+      <button id="btn-stage-pad" class="stage-pill-badge pad-pill" title="Đệm nền Ambient Pad vô tận (Worship Drone)">
+        <span class="pad-wave-icon">🎹</span>
+        <span id="nav-pad-label">Pad: Tắt</span>
+      </button>
+
+      <!-- Countdown Timer Pill -->
+      <button id="btn-stage-timer" class="stage-pill-badge timer-pill" title="Đồng hồ đếm ngược giờ lễ (Chạm để cài đặt)">
+        <span>⏱️</span>
+        <span id="nav-timer-label">00:00</span>
+      </button>
+
       <!-- Member Roster Pill -->
       <button id="btn-stage-roster" class="stage-pill-badge roster-pill" title="Thành viên đang online trong phòng">
         <span>👥</span>
@@ -111,6 +123,16 @@ function liveBandCssTag(string $file): string {
       <button id="btn-stage-wakelock" class="stage-pill-badge wakelock-pill active" title="Màn hình luôn sáng chống tắt (WakeLock)">
         <span class="wakelock-icon">💡</span>
         <span class="wakelock-text">Sáng</span>
+      </button>
+
+      <!-- Projector External View Button -->
+      <button id="btn-stage-projector" class="stage-icon-btn" title="Mở Màn Hình Máy Chiếu Lời Ca (Projector View)">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </button>
+
+      <!-- Stage Audio & Hardware Settings Button -->
+      <button id="btn-stage-audio-settings" class="stage-icon-btn" title="Cài đặt Âm Thanh Sân Khấu (In-Ear Split, Pad, Bàn Đạp Chân)">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
 
       <!-- Fullscreen Button -->
@@ -159,6 +181,14 @@ function liveBandCssTag(string $file): string {
         <button id="btn-host-countin-trigger" class="btn-host-countin-trigger" title="Đếm nhịp chuẩn bị 1-2-3-4 cho toàn ban nhạc">
           <span class="countin-fire-icon">🔥</span>
           <span>ĐẾM NHỊP VÀO</span>
+        </button>
+      </div>
+
+      <!-- Section 3b: Ambient Pad Quick Toggle -->
+      <div class="host-console-group host-pad-group">
+        <button id="btn-host-pad-toggle" class="btn-host-pill pad-toggle-btn" title="Bật/Tắt âm nền Ambient Pad theo Tông">
+          <span>🎹</span>
+          <span id="host-pad-btn-text">Bật Pad Drone</span>
         </button>
       </div>
 
@@ -407,6 +437,99 @@ function liveBandCssTag(string $file): string {
     </div>
   </div>
 
+  <!-- ══════════════ 8. STAGE AUDIO & HARDWARE SETTINGS MODAL ══════════════ -->
+  <div id="modal-stage-audio-settings" class="stage-modal-overlay hidden">
+    <div class="stage-modal-card" style="max-width: 560px;">
+      <div class="stage-modal-header">
+        <div class="modal-header-title">
+          <span class="modal-icon">⚙️</span>
+          <h3>Cài Đặt Âm Thanh & Thiết Bị Sân Khấu</h3>
+        </div>
+        <button id="btn-close-audio-settings" class="stage-modal-close">&times;</button>
+      </div>
+      <div class="stage-modal-body">
+        
+        <!-- Section 1: In-Ear Stereo Split Matrix -->
+        <div class="settings-group-box">
+          <div class="settings-group-title">🎧 Tai Nghe In-Ear Stereo Split (Tách Kênh Sân Khấu)</div>
+          <p class="settings-group-desc">Xuất âm thanh riêng biệt: Kênh Trái (L) chỉ nghe Click nhịp và hiệu lệnh Cue; Kênh Phải (R) chỉ nghe nhạc đệm Ambient Pad không lọt tiếng click ra dàn loa lớn.</p>
+          <div class="toggle-setting-row">
+            <label for="toggle-stereo-split" class="setting-label">Bật Chế Độ Tách Kênh (L: Click / R: Nhạc)</label>
+            <input type="checkbox" id="toggle-stereo-split" class="stage-toggle-checkbox">
+          </div>
+        </div>
+
+        <!-- Section 2: Ambient Pad Synth Settings -->
+        <div class="settings-group-box">
+          <div class="settings-group-title">🎹 Đệm Nền Ambient Pad Drone</div>
+          <p class="settings-group-desc">Tự động phát sóng âm nền ấm áp theo Tông bài hát để kết nối liền mạch các bài hát, loại bỏ khoảng lặng chết.</p>
+          <div class="form-row">
+            <label class="setting-label">Âm lượng Pad:</label>
+            <div class="slider-with-val">
+              <input type="range" id="pad-volume-slider" min="0" max="100" value="65" class="stage-range-slider">
+              <span id="pad-volume-val" class="slider-val-badge">65%</span>
+            </div>
+          </div>
+          <div class="toggle-setting-row mt-half">
+            <label for="toggle-pad-autokey" class="setting-label">Tự động đổi tông Pad theo bài hát</label>
+            <input type="checkbox" id="toggle-pad-autokey" class="stage-toggle-checkbox" checked>
+          </div>
+        </div>
+
+        <!-- Section 3: Bluetooth Foot Pedal Guide -->
+        <div class="settings-group-box">
+          <div class="settings-group-title">🦶 Bàn Đạp Chân (Bluetooth Foot Pedal & MIDI)</div>
+          <p class="settings-group-desc">Tương thích các dòng AirTurn, PageFlip, Donner, Coda STOMP hoặc bàn phím Bluetooth. Không cần chạm tay vào màn hình.</p>
+          <div class="pedal-key-guide">
+            <div class="pedal-guide-item"><span>Pedal Phải / PageDown / Mũi tên phải:</span> <strong>Tiến ô nhịp / Sang đoạn kế</strong></div>
+            <div class="pedal-guide-item"><span>Pedal Trái / PageUp / Mũi tên trái:</span> <strong>Lùi ô nhịp / Đoạn trước</strong></div>
+            <div class="pedal-guide-item"><span>Phím Cách (Spacebar):</span> <strong>Kích hoạt Đếm Nhịp Vào (Count-In)</strong></div>
+          </div>
+          <div class="mt-half text-center">
+            <button id="btn-test-pedal-action" class="btn btn-outline btn-xs">Kiểm tra giẫm Pedal thử nghiệm</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ 9. SERVICE COUNTDOWN TIMER MODAL ══════════════ -->
+  <div id="modal-stage-timer-settings" class="stage-modal-overlay hidden">
+    <div class="stage-modal-card" style="max-width: 440px;">
+      <div class="stage-modal-header">
+        <div class="modal-header-title">
+          <span class="modal-icon">⏱️</span>
+          <h3>Đồng Hồ Đếm Thời Gian Sân Khấu</h3>
+        </div>
+        <button id="btn-close-timer-modal" class="stage-modal-close">&times;</button>
+      </div>
+      <div class="stage-modal-body">
+        <p class="settings-group-desc">Cài đặt giờ đếm ngược trước giờ khai lễ hoặc theo dõi thời lượng buổi biểu diễn.</p>
+        
+        <div class="timer-quick-presets">
+          <button class="btn btn-sm btn-secondary timer-preset-btn" data-minutes="5">5 Phút</button>
+          <button class="btn btn-sm btn-secondary timer-preset-btn" data-minutes="10">10 Phút</button>
+          <button class="btn btn-sm btn-secondary timer-preset-btn" data-minutes="15">15 Phút</button>
+          <button class="btn btn-sm btn-secondary timer-preset-btn" data-minutes="30">30 Phút</button>
+        </div>
+
+        <div class="form-row mt-1">
+          <label for="timer-custom-minutes" class="form-label">Hoặc nhập số phút đếm ngược:</label>
+          <div class="input-with-action">
+            <input type="number" id="timer-custom-minutes" class="form-input text-center font-bold" min="1" max="180" value="10">
+            <button id="btn-start-countdown" class="btn btn-primary">Bắt Đầu Đếm</button>
+          </div>
+        </div>
+
+        <div class="modal-actions-row mt-1">
+          <button id="btn-start-stopwatch" class="btn btn-outline w-full">⏱️ Chuyển Sang Đếm Xuôi (Bấm Giờ)</button>
+          <button id="btn-reset-timer" class="btn btn-danger w-full mt-half">Dừng / Đặt Lại</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /#live-band-app -->
 
 <!-- ══════════════ VENDORS & DEPENDENCIES ══════════════ -->
@@ -439,6 +562,8 @@ echo liveBandJsTag('assets/js/lyric-extractor.js', true);
 echo liveBandJsTag('assets/js/performance/cue-engine.js', true);
 echo liveBandJsTag('assets/js/performance/count-in-engine.js', true);
 echo liveBandJsTag('assets/js/performance/arrangement-engine.js', true);
+echo liveBandJsTag('assets/js/performance/ambient-pad-engine.js', true);
+echo liveBandJsTag('assets/js/performance/pedal-midi-engine.js', true);
 echo liveBandJsTag('live-band/live-band.js', true);
 ?>
 

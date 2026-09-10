@@ -1163,22 +1163,142 @@ body.stage-dark {
 .mt-half { margin-top: 0.5rem; }
 .mt-1 { margin-top: 1rem; }
 
-/* ── Responsive Ergonomics ───────────────────────────────── */
-@media (max-width: 768px) {
-  .stage-navbar {
-    padding: 0 0.5rem;
-  }
-  .stage-song-pill {
-    max-width: 180px;
-  }
-  .nav-song-bpm, .roster-pill {
-    display: none;
-  }
-  .host-console-inner {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .cue-buttons-wrap {
-    justify-content: space-between;
-  }
+/* ── Advanced Stage Features (Pad, In-Ear, Pedal, Timer) ── */
+.pad-pill {
+  border-color: rgba(168, 85, 247, 0.4);
+  color: #c084fc;
+}
+.pad-pill.active {
+  background: rgba(168, 85, 247, 0.22);
+  border-color: #a855f7;
+  color: #f3e8ff;
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.35);
+}
+.pad-pill.active .pad-wave-icon {
+  animation: padPulse 1.8s ease-in-out infinite alternate;
+}
+@keyframes padPulse {
+  0% { transform: scale(1); filter: drop-shadow(0 0 2px #c084fc); }
+  100% { transform: scale(1.18); filter: drop-shadow(0 0 8px #a855f7); }
+}
+
+.timer-pill {
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+}
+.timer-pill.urgent {
+  border-color: #ef4444;
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.2);
+  animation: timerBlink 1s infinite alternate;
+}
+@keyframes timerBlink {
+  0% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
+/* Floating Pedal Action Feedback Toast */
+.pedal-feedback-toast {
+  position: fixed;
+  bottom: 84px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid #38bdf8;
+  box-shadow: 0 0 24px rgba(56, 189, 248, 0.35);
+  color: #f0f9ff;
+  padding: 8px 18px;
+  border-radius: 24px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  z-index: 500;
+  pointer-events: none;
+  opacity: 0;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.pedal-feedback-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Stage Audio & Hardware Settings Modal Elements */
+.settings-group-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--stage-border);
+  border-radius: var(--stage-radius-sm);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+.settings-group-title {
+  font-weight: 800;
+  font-size: 0.92rem;
+  color: #fff;
+  margin-bottom: 0.35rem;
+}
+.settings-group-desc {
+  font-size: 0.78rem;
+  color: var(--stage-text-muted);
+  line-height: 1.45;
+  margin-bottom: 0.75rem;
+}
+.toggle-setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+.setting-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+.stage-toggle-checkbox {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--stage-accent);
+  cursor: pointer;
+}
+.slider-with-val {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.stage-range-slider {
+  flex: 1;
+  accent-color: #a855f7;
+  cursor: pointer;
+}
+.slider-val-badge {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #d8b4fe;
+  min-width: 40px;
+  text-align: right;
+}
+.pedal-key-guide {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.8rem;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 0.75rem;
+  border-radius: var(--stage-radius-sm);
+}
+.pedal-guide-item {
+  display: flex;
+  justify-content: space-between;
+  color: var(--stage-text-muted);
+}
+.pedal-guide-item strong {
+  color: #38bdf8;
+}
+.timer-quick-presets {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 0.75rem;
+}
+.timer-preset-btn {
+  flex: 1;
+  font-weight: 700;
+  border-radius: var(--stage-radius-sm);
 }
