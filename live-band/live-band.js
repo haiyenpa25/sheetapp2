@@ -64,13 +64,14 @@ const LiveBandApp = (() => {
     _initOSMD();
     _bindUI();
     _initWakeLock();
-    _loadSongCatalog();
+    await _loadSongCatalog();
 
-    // Auto-join from URL parameter ?room=CODE or ?live=CODE
-    _checkUrlAutoJoin();
+    // Check URL parameters for ?room=, ?song=, ?role=
+    await _checkUrlAutoParams();
 
-    // Initial role styling
-    setRole(_role, false);
+    // Initial role styling if not already set by URL
+    const roleParam = new URLSearchParams(window.location.search).get('role');
+    setRole(roleParam || _role, false);
     console.log('[LiveBandApp] Initialized successfully. Client ID:', _clientId);
   }
 
@@ -464,13 +465,29 @@ const LiveBandApp = (() => {
     showCueBanner('👋 Đã rời phòng Live', 'ℹ️', 2500);
   }
 
-  function _checkUrlAutoJoin() {
+  async function _checkUrlAutoParams() {
     const params = new URLSearchParams(window.location.search);
+
+    // 1. Role parameter
+    const role = params.get('role');
+    if (role && ['leader', 'guitar', 'piano', 'vocal', 'drummer', 'viewer'].includes(role)) {
+      _role = role;
+    }
+
+    // 2. Song parameter
+    const songId = params.get('song');
+    if (songId) {
+      const dropdown = document.getElementById('host-song-dropdown');
+      if (dropdown) dropdown.value = songId;
+      await _loadSong(songId, 0);
+    }
+
+    // 3. Room auto-join
     const code = params.get('room') || params.get('live');
     if (code) {
       setTimeout(() => {
         joinRoom(code.toUpperCase());
-      }, 300);
+      }, 200);
     }
   }
 
@@ -1256,7 +1273,7 @@ const LiveBandApp = (() => {
         _setlist.items.forEach(async (it) => {
           if (it.song_id && !_cachedXmls.has(it.song_id)) {
             try {
-              const r = await fetch(`storage/Thanh ca/${it.song_id}.xml`);
+              const r = await fetch(`/storage/Thanh ca/${it.song_id}.xml`);
               if (r.ok) _cachedXmls.set(it.song_id, await r.text());
             } catch (e) {}
           }
