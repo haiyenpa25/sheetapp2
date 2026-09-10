@@ -213,6 +213,37 @@ function liveBandCssTag(string $file): string {
         <span class="roadmap-empty-hint">Chưa có phân đoạn bài hát</span>
       </div>
     </div>
+
+    <!-- Rehearsal A-B Loop Bar & Collaborative Ink -->
+    <div id="host-rehearsal-loop-bar" class="host-rehearsal-loop-bar">
+      <div class="loop-bar-left">
+        <button id="btn-toggle-ab-loop" class="btn-host-pill loop-pill-btn" title="Bật/Tắt vòng lặp tập dượt A-B">
+          <span>🔁</span>
+          <span id="loop-btn-label">Vòng Lặp A-B: Tắt</span>
+        </button>
+        <div class="loop-inputs-wrap">
+          <label>Từ Ô:</label>
+          <input type="number" id="loop-start-measure" class="loop-measure-input" value="1" min="1" max="200">
+          <label>Đến Ô:</label>
+          <input type="number" id="loop-end-measure" class="loop-measure-input" value="16" min="1" max="200">
+          <button id="btn-set-loop-current" class="btn-host-step" title="Đặt đoạn 8 ô nhịp quanh vị trí hiện tại">📍 8 Ô Hiện Tại</button>
+        </div>
+      </div>
+      <!-- Collaborative Ink Toolbar (Ca Trưởng) -->
+      <div class="host-ink-toolbar" id="host-ink-toolbar">
+        <button id="btn-toggle-ink" class="btn-host-pill ink-toggle-btn" title="Bật/Tắt chế độ vẽ chú thích Apple Pencil/S-Pen">
+          <span>✏️</span>
+          <span id="ink-toggle-label">Bút Chú Thích</span>
+        </button>
+        <div id="ink-tools-group" class="ink-tools-group hidden">
+          <button class="btn-ink-tool active" data-tool="pen" data-color="#ef4444" title="Bút đỏ">🔴</button>
+          <button class="btn-ink-tool" data-tool="pen" data-color="#f59e0b" title="Bút vàng">🟡</button>
+          <button class="btn-ink-tool" data-tool="highlighter" title="Dạ quang">🖍️</button>
+          <button class="btn-ink-tool" data-tool="eraser" title="Tẩy nét">🧹</button>
+          <button id="btn-ink-clear-all" class="btn-ink-tool" title="Xóa tất cả nét vẽ">🗑️</button>
+        </div>
+      </div>
+    </div>
   </aside>
 
   <!-- ══════════════ 3. ROLE-SPECIFIC HEADS-UP DISPLAY (HUD) ══════════════ -->
@@ -242,16 +273,26 @@ function liveBandCssTag(string $file): string {
       </div>
     </div>
 
-    <!-- Vocal HUD Switcher -->
+    <!-- Vocal HUD Switcher & SATB Part RehearsalMix -->
     <div id="hud-vocal" class="hud-panel hud-vocal hidden">
       <div class="vocal-controls-wrap">
-        <span class="vocal-status-text">🎤 Chế độ Ca Đoàn:</span>
+        <span class="vocal-status-text">🎤 Ca Đoàn:</span>
         <button id="btn-vocal-toggle-view" class="btn-vocal-toggle active" data-view="lyrics">
-          📄 Chuyển Xem: Lời Nhạc Lớn (Teleprompter)
+          📄 Chuyển Xem: Lời Lớn (Teleprompter)
         </button>
         <div class="vocal-font-scaler">
           <button id="btn-vocal-font-dec" class="font-scale-btn" title="Giảm cỡ chữ">A−</button>
           <button id="btn-vocal-font-inc" class="font-scale-btn" title="Tăng cỡ chữ">A+</button>
+        </div>
+      </div>
+      <div class="vocal-satb-selector">
+        <span class="satb-label">🎧 Tách Bè Solo:</span>
+        <div class="satb-btn-group" id="satb-btn-group">
+          <button class="btn-satb-part active" data-part="all" title="Nghe đầy đủ 4 bè">👑 Tất Cả (Tutti)</button>
+          <button class="btn-satb-part" data-part="soprano" title="Tô sáng và tăng âm lượng bè Soprano">Soprano (Nữ Cao)</button>
+          <button class="btn-satb-part" data-part="alto" title="Tô sáng và tăng âm lượng bè Alto">Alto (Nữ Trầm)</button>
+          <button class="btn-satb-part" data-part="tenor" title="Tô sáng và tăng âm lượng bè Tenor">Tenor (Nam Cao)</button>
+          <button class="btn-satb-part" data-part="bass" title="Tô sáng và tăng âm lượng bè Bass">Bass (Nam Trầm)</button>
         </div>
       </div>
     </div>
@@ -274,6 +315,7 @@ function liveBandCssTag(string $file): string {
     <!-- OSMD Sheet Music Container -->
     <div id="stage-sheet-wrapper" class="stage-sheet-wrapper hidden">
       <div id="stage-osmd-container" class="stage-osmd-container"></div>
+      <canvas id="stage-annotation-layer" class="stage-annotation-layer"></canvas>
     </div>
 
     <!-- Vocal Teleprompter View Container -->
@@ -564,6 +606,7 @@ echo liveBandJsTag('assets/js/performance/count-in-engine.js', true);
 echo liveBandJsTag('assets/js/performance/arrangement-engine.js', true);
 echo liveBandJsTag('assets/js/performance/ambient-pad-engine.js', true);
 echo liveBandJsTag('assets/js/performance/pedal-midi-engine.js', true);
+echo liveBandJsTag('assets/js/performance/stage-ink-engine.js', true);
 echo liveBandJsTag('live-band/live-band.js', true);
 ?>
 

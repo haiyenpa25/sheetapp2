@@ -60,6 +60,13 @@ const LiveBandApp = (() => {
   let _timerRemainingSec  = 0;
   let _timerStopwatchSec  = 0;
 
+  // Phase 2 Rehearsal State
+  let _isLoopActive       = false;
+  let _loopStartMeasure   = 1;
+  let _loopEndMeasure     = 16;
+  let _selectedSatbPart   = 'all';       // 'all' | 'soprano' | 'alto' | 'tenor' | 'bass'
+  let _isInkActive        = false;
+
   /* ── Initialization ───────────────────────────────────────── */
   async function init() {
     _clientId = _getOrCreateClientId();
@@ -75,6 +82,16 @@ const LiveBandApp = (() => {
 
     // Initialize Bluetooth Foot Pedal & Web MIDI Engine
     window.PedalMidiEngine?.init?.((action) => _handlePedalAction(action));
+
+    // Initialize Collaborative Stage Ink Engine (Apple Pencil / S-Pen)
+    window.StageInkEngine?.init?.('stage-annotation-layer', 'stage-osmd-container', {
+      onBroadcast: (stroke) => {
+        if (_mode === 'host') broadcastState({ inkStroke: stroke });
+      },
+      onClear: () => {
+        if (_mode === 'host') broadcastState({ inkClear: true });
+      }
+    });
 
     await _loadSongCatalog();
 
@@ -342,6 +359,54 @@ const LiveBandApp = (() => {
       _hideTimerModal();
     });
 
+    // ── Phase 2 UI Bindings ──
+    // A-B Rehearsal Loop
+    document.getElementById('btn-toggle-ab-loop')?.addEventListener('click', toggleAbLoop);
+    document.getElementById('loop-start-measure')?.addEventListener('change', (e) => {
+      _loopStartMeasure = Math.max(1, parseInt(e.target.value) || 1);
+    });
+    document.getElementById('loop-end-measure')?.addEventListener('change', (e) => {
+      _loopEndMeasure = Math.max(_loopStartMeasure + 1, parseInt(e.target.value) || (_loopStartMeasure + 8));
+    });
+    document.getElementById('btn-set-loop-current')?.addEventListener('click', () => {
+      _loopStartMeasure = Math.max(1, _currentMeasure);
+      _loopEndMeasure = _currentMeasure + 8;
+      const startInp = document.getElementById('loop-start-measure');
+      const endInp = document.getElementById('loop-end-measure');
+      if (startInp) startInp.value = _loopStartMeasure;
+      if (endInp) endInp.value = _loopEndMeasure;
+      showCueBanner(`📍 Đặt đoạn lặp: Ô ${_loopStartMeasure} ➔ ${_loopEndMeasure}`, '📍', 2000);
+    });
+
+    // Collaborative Stage Ink Toolbar
+    document.getElementById('btn-toggle-ink')?.addEventListener('click', toggleInkMode);
+    document.querySelectorAll('.btn-ink-tool').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.btn-ink-tool').forEach(b => b.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+        const tool = e.currentTarget.getAttribute('data-tool');
+        const color = e.currentTarget.getAttribute('data-color');
+        if (tool && window.StageInkEngine) {
+          window.StageInkEngine.setTool(tool);
+          if (color) window.StageInkEngine.setColor(color);
+        }
+      });
+    });
+    document.getElementById('btn-ink-clear-all')?.addEventListener('click', () => {
+      if (confirm('Bạn có chắc muốn xóa tất cả nét vẽ trên bản nhạc?')) {
+        window.StageInkEngine?.clearAll(true);
+        showCueBanner('🧹 Đã xóa tất cả nét vẽ', '🧹', 1500);
+      }
+    });
+
+    // SATB Voice Part Selection
+    document.querySelectorAll('.btn-satb-part').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const part = e.currentTarget.getAttribute('data-part') || 'all';
+        setSatbPart(part);
+      });
+    });
+
     // Viewport Scroll Listener (Throttled)
     _bindScrollObserver();
   }
@@ -380,6 +445,17 @@ const LiveBandApp = (() => {
             if (now - lastSent > 280) {
               const m = window.MusicalPosition?.getVisibleMeasure?.() || 1;
               if (m !== _currentMeasure) {
+                // Check A-B Loop boundaries
+                if (_isLoopActive && m >= _loopEndMeasure) {
+                  _currentMeasure = _loopStartMeasure;
+                  lastSent = now;
+                  window.MusicalPosition?.scrollToMeasure?.(_loopStartMeasure, true);
+                  showCueBanner(`🔁 Vòng lại đoạn A (Ô ${_loopStartMeasure})`, '🔁', 1500);
+                  broadcastState({ position: { measure: _loopStartMeasure } });
+                  ticking = false;
+                  return;
+                }
+
                 _currentMeasure = m;
                 lastSent = now;
                 broadcastState({
@@ -391,6 +467,10 @@ const LiveBandApp = (() => {
           } else if (_mode === 'join') {
             // Follower scrolling check
             const currentVisMeasure = window.MusicalPosition?.getVisibleMeasure?.() || 1;
+            if (_isLoopActive && currentVisMeasure >= _loopEndMeasure) {
+              window.MusicalPosition?.scrollToMeasure?.(_loopStartMeasure, true);
+            }
+
             if (Math.abs(currentVisMeasure - _hostMeasure) > 2) {
               _isDetached = true;
               _updateSnapButton(true, currentVisMeasure, _hostMeasure);
@@ -723,6 +803,25 @@ const LiveBandApp = (() => {
         beats: 4,
         startAtServer: startAt
       });
+    }
+
+    // 7. A-B Rehearsal Loop Sync
+    if (state.loop) {
+      _isLoopActive = !!state.loop.active;
+      _loopStartMeasure = state.loop.start || 1;
+      _loopEndMeasure = state.loop.end || 16;
+      const loopBtn = document.getElementById('btn-toggle-ab-loop');
+      const loopLabel = document.getElementById('loop-btn-label');
+      if (loopBtn) loopBtn.classList.toggle('active', _isLoopActive);
+      if (loopLabel) loopLabel.textContent = _isLoopActive ? `Vòng Lặp: Ô ${_loopStartMeasure}-${_loopEndMeasure}` : 'Vòng Lặp A-B: Tắt';
+    }
+
+    // 8. Collaborative Stage Ink Sync
+    if (state.inkStroke) {
+      window.StageInkEngine?.renderRemoteStroke?.(state.inkStroke);
+    }
+    if (state.inkClear) {
+      window.StageInkEngine?.clearAll?.(false);
     }
   }
 
@@ -1509,6 +1608,68 @@ const LiveBandApp = (() => {
     document.getElementById('modal-stage-timer-settings')?.classList.add('hidden');
   }
 
+  /* ── Phase 2: A-B Rehearsal Looping Controller ────────────── */
+  function toggleAbLoop() {
+    _isLoopActive = !_isLoopActive;
+    const loopBtn = document.getElementById('btn-toggle-ab-loop');
+    const loopLabel = document.getElementById('loop-btn-label');
+
+    const startInp = document.getElementById('loop-start-measure');
+    const endInp = document.getElementById('loop-end-measure');
+    if (startInp) _loopStartMeasure = Math.max(1, parseInt(startInp.value) || 1);
+    if (endInp) _loopEndMeasure = Math.max(_loopStartMeasure + 1, parseInt(endInp.value) || (_loopStartMeasure + 8));
+
+    if (loopBtn) loopBtn.classList.toggle('active', _isLoopActive);
+    if (loopLabel) loopLabel.textContent = _isLoopActive ? `Vòng Lặp: Ô ${_loopStartMeasure}-${_loopEndMeasure}` : 'Vòng Lặp A-B: Tắt';
+
+    if (_isLoopActive) {
+      showCueBanner(`🔁 Bật Vòng Lặp Tập: Ô ${_loopStartMeasure} ➔ ${_loopEndMeasure}`, '🔁', 2500);
+      _currentMeasure = _loopStartMeasure;
+      window.MusicalPosition?.scrollToMeasure?.(_loopStartMeasure, true);
+    } else {
+      showCueBanner('🔁 Đã tắt Vòng Lặp Tập A-B', 'ℹ️', 1500);
+    }
+
+    if (_mode === 'host') {
+      broadcastState({
+        loop: {
+          active: _isLoopActive,
+          start: _loopStartMeasure,
+          end: _loopEndMeasure
+        },
+        position: { measure: _currentMeasure }
+      });
+    }
+  }
+
+  /* ── Phase 2: Collaborative Stage Ink Controller ─────────── */
+  function toggleInkMode() {
+    _isInkActive = !_isInkActive;
+    const btn = document.getElementById('btn-toggle-ink');
+    const tools = document.getElementById('ink-tools-group');
+
+    if (btn) btn.classList.toggle('active', _isInkActive);
+    if (tools) tools.classList.toggle('hidden', !_isInkActive);
+
+    window.StageInkEngine?.setEnabled(_isInkActive);
+    showCueBanner(_isInkActive ? '✏️ Bật Bút Vẽ Chú Thích (Apple Pencil / Chạm)' : '✏️ Tắt Bút Chú Thích', '✏️', 1800);
+  }
+
+  /* ── Phase 2: SATB Vocal Part RehearsalMix Controller ────── */
+  function setSatbPart(part) {
+    _selectedSatbPart = part;
+    document.querySelectorAll('.btn-satb-part').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('data-part') === part);
+    });
+
+    const satbLabel = document.querySelector('.satb-label');
+    if (satbLabel) {
+      satbLabel.textContent = part === 'all' ? '🎧 Tách Bè Solo:' : `🎧 Bè [${part.toUpperCase()}]: +3dB Solo`;
+    }
+
+    showCueBanner(part === 'all' ? '👑 Đã chọn: Tất Cả Bè (Tutti)' : `🎤 Đã chọn: Bè ${part.toUpperCase()} (+3dB Solo)`, '🎤', 2000);
+  }
+
   /* ── Public API ───────────────────────────────────────────── */
   return {
     init,
@@ -1528,7 +1689,10 @@ const LiveBandApp = (() => {
     hideRoomModal,
     toggleAmbientPad,
     startCountdown,
-    resetTimer
+    resetTimer,
+    toggleAbLoop,
+    toggleInkMode,
+    setSatbPart
   };
 })();
 

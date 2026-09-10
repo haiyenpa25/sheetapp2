@@ -240,6 +240,7 @@ SheetApp/
 | `musical-position.js` | Ánh xạ vị trí ô nhịp (Measure mapping) cho OSMD | Cuộn chuẩn xác đa kích thước màn hình |
 | `count-in-engine.js` | Bộ đếm nhịp vào bài 4 phách (Visual & Web Audio Synth) | Tần số kép 920Hz / 540Hz |
 | `cue-engine.js` | Quản lý phát lệnh sân khấu Neon Banner | Cues: Điệp khúc, Cao trào, Nhỏ dần, Lặp lại |
+| `stage-ink-engine.js` | Động cơ bút vẽ Apple Pencil & Vector Ink đồng bộ thời gian thực | Hỗ trợ Pen, Highlighter, Eraser, Catmull-Rom |
 | `qr-helper.js` | Vẽ mã QR Code kích thước tùy biến lên HTML5 Canvas | Hỗ trợ full màn hình để quét nhanh |
 
 ---
@@ -469,6 +470,13 @@ SheetApp/
   + Sửa: includes/toolbar.php (Thêm nút '🎼 Sửa Sheet' trực tiếp trên thanh công cụ và trong dropdown menu)
   ✅ An toàn dữ liệu 100%: mọi thao tác lưu đều tạo file .xml.bak và có nút khôi phục tức thì
   ✅ Hỗ trợ sửa độc lập từng bè: Soprano, Alto (Part P1 - Khóa Sol) và Tenor, Bass (Part P2 - Khóa Fa)
+
+[2026-09-10] — Triển Khai Giai Đoạn 2: Tập Luyện Thông Minh & Cộng Tác Sân Khấu Live Band Studio
+  + Tạo: assets/js/performance/stage-ink-engine.js (Bút vẽ Apple Pencil / S-Pen, Catmull-Rom smoothing, live vector broadcast)
+  ~ Sửa: live-band/index.php (Tích hợp canvas vẽ ink, toolbar bút Ca Trưởng, thanh vòng lặp A-B loop, bộ chọn tách bè SATB)
+  ~ Sửa: live-band/live-band.css (Styles cho thanh A-B loop bar, ink canvas, palette bút vẽ, nút tách bè SATB)
+  ~ Sửa: live-band/live-band.js (Controller xử lý A-B loop bounds, SATB RehearsalMix solo, broadcast nét vẽ ink thời gian thực)
+  ✅ Đã tự động kiểm thử DevTools: Vòng lặp A-B kích hoạt, bút vẽ vector ghi nhận stroke, tách bè Alto hoạt động.
 
 [2026-09-10] — Triển Khai Giai Đoạn 1: Nâng Cao Tính Năng Sân Khấu Live Band Studio
   + Tạo: assets/js/performance/ambient-pad-engine.js (Web Audio continuous worship drone synth, 4 layers, crossfade 4s, In-Ear stereo split)

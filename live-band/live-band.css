@@ -1302,3 +1302,145 @@ body.stage-dark {
   font-weight: 700;
   border-radius: var(--stage-radius-sm);
 }
+
+/* ── Phase 2: A-B Rehearsal Loop Bar ── */
+.host-rehearsal-loop-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.35);
+  border-top: 1px solid var(--stage-border);
+  padding: 8px 16px;
+}
+.loop-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.loop-pill-btn {
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #6ee7b7;
+}
+.loop-pill-btn.active {
+  background: rgba(16, 185, 129, 0.25);
+  border-color: #10b981;
+  color: #a7f3d0;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.35);
+}
+.loop-inputs-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--stage-text-muted);
+}
+.loop-measure-input {
+  width: 52px;
+  padding: 4px 6px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--stage-border);
+  border-radius: 4px;
+  color: #fff;
+  font-weight: 700;
+}
+
+/* ── Collaborative Ink Canvas Layer & Toolbar ── */
+.stage-sheet-wrapper {
+  position: relative;
+}
+.stage-annotation-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 15;
+}
+.host-ink-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ink-toggle-btn.active {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: #ef4444;
+  color: #fca5a5;
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.3);
+}
+.ink-tools-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 6px;
+  border-radius: 20px;
+  border: 1px solid var(--stage-border);
+}
+.btn-ink-tool {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-ink-tool:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+.btn-ink-tool.active {
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.2);
+  transform: scale(1.1);
+}
+
+/* ── SATB Vocal Part Selector ── */
+.vocal-satb-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.satb-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #38bdf8;
+}
+.satb-btn-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.btn-satb-part {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--stage-border);
+  color: var(--stage-text-muted);
+  border-radius: 14px;
+  padding: 4px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-satb-part:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+.btn-satb-part.active {
+  background: rgba(56, 189, 248, 0.22);
+  border-color: #38bdf8;
+  color: #e0f2fe;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+}
