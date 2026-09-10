@@ -39,6 +39,7 @@ SheetApp/
 ├── CODE_MAP.md               ← Bản đồ tri thức codebase (tự sinh bởi Gitnexus)
 ├── INFO.md                   ← Tài liệu tổng quan, sprint plan, keyboard shortcuts
 ├── sync.sh                   ← Auto-sync script (cập nhật CODE_MAP.md & push GitHub)
+├── SHEETAPP2_LIVE_BAND_DEEP_ANALYSIS_2026-09-10.md ← Báo cáo phân tích chuyên sâu & nâng cao tính năng Live Band Studio
 │
 ├── index.php                 ← Entry point HTML (PHP partial includes)
 ├── editor/                   ← Trình biên tập sheet nhạc MusicXML 4 bè SATB (/editor/)
@@ -455,6 +456,10 @@ SheetApp/
   + Sửa: includes/toolbar.php (Thêm nút '🎼 Sửa Sheet' trực tiếp trên thanh công cụ và trong dropdown menu)
   ✅ An toàn dữ liệu 100%: mọi thao tác lưu đều tạo file .xml.bak và có nút khôi phục tức thì
   ✅ Hỗ trợ sửa độc lập từng bè: Soprano, Alto (Part P1 - Khóa Sol) và Tenor, Bass (Part P2 - Khóa Fa)
+
+[2026-09-10] — Lập Báo cáo Phân tích Chuyên Sâu & Nâng Cao Tính Năng Live Band Studio
+  + Tạo: SHEETAPP2_LIVE_BAND_DEEP_ANALYSIS_2026-09-10.md (Báo cáo master 10 trụ cột WOW: Ambient Pad, Stereo Split In-Ear, MIDI Pedal, Clean Lyrics Cast...)
+  ~ Cập nhật: live-band/live-band.js (Hỗ trợ URL routing ?song=, ?role=, ?room=)
 
 [2026-05-15] — Audit round 2: AuthController SQL + UserController response format
   ~ Sửa: api/controllers/AuthController.php  (SQL trong Controller → dùng UserService::findByUsername())
