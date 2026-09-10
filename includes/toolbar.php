@@ -38,6 +38,32 @@
       <span id="capo-badge" class="capo-badge hidden" style="display:none">Capo 0</span>
     </div>
 
+    <!-- Cụm Thu Phóng & Khóa Zoom (Zoom Pill) -->
+    <div class="band-pill zoom-pill" role="group" aria-label="Thu phóng bản nhạc" title="Thu phóng bản nhạc (Zoom & Khóa View)">
+      <button id="btn-zoom-out" class="icon-btn-pill" title="Thu nhỏ bản nhạc (−)" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+      <select id="zoom-slider" class="select-zoom-pill" disabled title="Chọn tỷ lệ thu phóng">
+        <option value="50">50%</option>
+        <option value="65">65%</option>
+        <option value="80">80%</option>
+        <option value="90">90%</option>
+        <option value="100" selected>100%</option>
+        <option value="115">115%</option>
+        <option value="130">130%</option>
+        <option value="150">150%</option>
+        <option value="175">175%</option>
+        <option value="200">200%</option>
+      </select>
+      <button id="btn-zoom-in" class="icon-btn-pill" title="Phóng to bản nhạc (+)" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+      <button id="btn-lock-zoom" class="icon-btn-pill btn-lock-zoom" title="Khóa tỷ lệ zoom (khi đổi bài giữ nguyên)">
+        <span class="lock-icon">🔓</span>
+      </button>
+      <span id="zoom-value-label" style="display:none">100%</span>
+    </div>
+
     <!-- Cụm Bản Phối Hợp Âm (Chord Set Pill) -->
     <div class="band-pill chord-set-pill" id="chord-set-bar" role="group" aria-label="Chọn bản phối hợp âm" title="Bản phối hợp âm">
       <span class="pill-icon" style="font-size: 0.95rem;">🎸</span>
@@ -144,19 +170,8 @@
           Bộ Trộn Âm (Mixer)
         </button>
 
-        <!-- NHÓM 2: HIỂN THỊ & THU PHÓNG -->
-        <div class="menu-section-header">HIỂN THỊ & THU PHÓNG</div>
-        <div class="menu-row-item" style="padding: 4px 10px; display: flex; align-items: center; justify-content: space-between;">
-          <span style="font-size: 0.76rem; color: var(--text-secondary);">Thu phóng (Zoom):</span>
-          <div style="display: flex; align-items: center; gap: 4px;">
-            <select id="zoom-slider" class="select-toolbar" style="height: 26px; font-size: 0.75rem;" disabled>
-              <option value="50">50%</option><option value="70">70%</option><option value="85">85%</option>
-              <option value="100" selected>100%</option><option value="115">115%</option><option value="130">130%</option><option value="150">150%</option>
-            </select>
-            <button id="btn-lock-zoom" class="icon-btn-xs zoom-lock-btn" title="Khóa tỷ lệ View">🔓</button>
-            <span id="zoom-value-label" style="display:none">100%</span>
-          </div>
-        </div>
+        <!-- NHÓM 2: HIỂN THỊ & GỌN NHẸ -->
+        <div class="menu-section-header">HIỂN THỊ & GỌN NHẸ</div>
 
         <button id="btn-compact-mode" class="btn btn-ghost btn-sm btn-menu-item" title="Bật/Tắt chế độ Gọn Nhẹ">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14h6v6H4zm10 0h6v6h-6zM4 4h6v6H4zm10 0h6v6h-6z"/></svg>

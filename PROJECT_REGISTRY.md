@@ -544,6 +544,13 @@ SheetApp/
   ⚠ Còn lại: SongController + CategoryController vẫn trả raw array
               (cần cascade fix ApiService + LibraryUI + AdminUI để chuẩn hóa hoàn toàn)
 
+[2026-09-11] — Đưa Zoom & Khóa Zoom Ra Ngoài Toolbar, Tối Ưu Toàn Diện Trên iPad & Điện Thoại
+  + Sửa: includes/toolbar.php (Tạo Zoom Pill chuyên dụng [− 100% + 🔒] ngay trên toolbar, loại bỏ ID trùng lặp trong dropdown)
+  + Sửa: includes/sheet_viewer.php (Tích hợp cụm thu phóng & khóa zoom [− 100% + 🔒] ngay trên Floating Gig HUD khi biểu diễn)
+  + Sửa: assets/js/toolbar-controller.js (Hỗ trợ nút bước zoom +/−, đồng bộ trạng thái khóa zoom giữa toolbar và Gig HUD, tap-to-reset transpose)
+  + Sửa: assets/js/app.js & assets/js/song-loader.js (Đồng bộ nhãn zoom trên Floating Gig HUD khi zoom thay đổi)
+  + Sửa: assets/css/layout.css (Tối ưu iPad portrait 768px dạng 1 dòng không tràn viền, tối ưu Điện thoại <= 680px dạng 2 dòng thông minh với dải pill cuộn ngang)
+
 [2026-09-11] — Tinh gọn & Tối Ưu Hóa Trang Chủ Cho Ban Nhạc Biểu Diễn (Pro-Band Homepage Optimization)
   + Sửa: includes/toolbar.php (Hợp nhất 2 thanh công cụ thành Pro-Band Toolbar 48px duy nhất: Song Pill + Transpose Pill + Chord Set Pill + Scroll Pill + Biểu Diễn + More Options dropdown)
   + Sửa: includes/sheet_viewer.php (Loại bỏ thanh page-bar 50px gây rối màn hình; bổ sung 2 vùng Edge-Tap lật trang không chạm và Floating Gig HUD)

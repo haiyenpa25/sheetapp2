@@ -217,6 +217,8 @@ const SongLoader = (() => {
     }
     const lbl = document.getElementById('zoom-value-label');
     if (lbl) lbl.textContent = pct + '%';
+    const gigZoom = document.getElementById('gig-hud-zoom');
+    if (gigZoom) gigZoom.textContent = pct + '%';
   }
 
   function _autoFitZoom() {

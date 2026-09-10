@@ -115,9 +115,19 @@
       <span id="gig-hud-key" class="gig-hud-key">--</span>
     </div>
     <div class="gig-hud-actions">
+      <!-- Cụm Dịch Tông -->
       <button id="btn-gig-trans-down" class="btn-gig-action" title="Hạ 1 nửa cung (Phím [ )">−</button>
       <span id="gig-hud-trans" class="gig-hud-trans-val" title="Tông đang dịch">0</span>
       <button id="btn-gig-trans-up" class="btn-gig-action" title="Tăng 1 nửa cung (Phím ] )">+</button>
+      
+      <!-- Cụm Thu Phóng & Khóa Zoom (GIG MODE) -->
+      <div class="gig-hud-zoom-wrap" title="Thu phóng & Khóa View trong Biểu Diễn">
+        <button id="btn-gig-zoom-out" class="btn-gig-action" title="Thu nhỏ zoom">−</button>
+        <span id="gig-hud-zoom" class="gig-hud-zoom-val" title="Tỷ lệ zoom hiện tại">100%</span>
+        <button id="btn-gig-zoom-in" class="btn-gig-action" title="Phóng to zoom">+</button>
+        <button id="btn-gig-lock-zoom" class="btn-gig-action btn-gig-lock" title="Khóa tỷ lệ zoom (khi đổi bài giữ nguyên)">🔓</button>
+      </div>
+
       <button id="btn-gig-scroll-toggle" class="btn-gig-action btn-gig-scroll" title="Bật/Tắt cuộn (Space)">▼ Cuộn</button>
       <button id="btn-gig-exit" class="btn-gig-action btn-gig-exit" title="Thoát Biểu Diễn (Esc)">✕ Thoát</button>
     </div>

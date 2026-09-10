@@ -20,6 +20,9 @@ const ToolbarController = (() => {
       { e.currentTarget.blur(); App?.transposeBy?.(-1); });
     document.getElementById('btn-transpose-reset')?.addEventListener('click', e =>
       { e.currentTarget.blur(); App?.resetTranspose?.(); });
+    // Tap vào số hiển thị để reset nhanh về 0
+    document.getElementById('transpose-display')?.addEventListener('click', e =>
+      { App?.resetTranspose?.(); });
 
     document.getElementById('capo-select')?.addEventListener('change', e => {
       const newCapo = parseInt(e.target.value) || 0;
@@ -36,42 +39,75 @@ const ToolbarController = (() => {
       el.addEventListener(evt, e => App?.setZoom?.(parseInt(e.target.value, 10)));
     }
 
-    const lockBtn = document.getElementById('btn-lock-zoom');
-    if (lockBtn) {
-      _initLockZoomUI(lockBtn);
-      lockBtn.addEventListener('click', () => _toggleLockZoom(lockBtn));
-    }
+    const stepZoom = (delta) => {
+      const curPct = Math.round((Store.get('currentZoom') || 1.0) * 100);
+      const steps = [50, 65, 80, 90, 100, 115, 130, 150, 175, 200];
+      let target;
+      if (delta > 0) {
+        target = steps.find(s => s > curPct + 2) || steps[steps.length - 1];
+      } else {
+        target = [...steps].reverse().find(s => s < curPct - 2) || steps[0];
+      }
+      App?.setZoom?.(target);
+    };
+
+    // Zoom buttons trên Toolbar chính
+    document.getElementById('btn-zoom-out')?.addEventListener('click', () => stepZoom(-1));
+    document.getElementById('btn-zoom-in')?.addEventListener('click', () => stepZoom(+1));
+
+    // Zoom buttons trên Floating HUD (Biểu Diễn Sân Khấu)
+    document.getElementById('btn-gig-zoom-out')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      stepZoom(-1);
+    });
+    document.getElementById('btn-gig-zoom-in')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      stepZoom(+1);
+    });
+
+    _initLockZoomUI();
+    document.getElementById('btn-lock-zoom')?.addEventListener('click', () => _toggleLockZoom());
+    document.getElementById('btn-gig-lock-zoom')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      _toggleLockZoom();
+    });
   }
 
-  function _initLockZoomUI(lockBtn) {
+  function _initLockZoomUI() {
     const isLocked = localStorage.getItem('sheetapp_zoom_locked') === 'true';
-    if (isLocked) {
-      lockBtn.classList.add('locked');
-      lockBtn.innerHTML = '<span class="lock-icon">🔒</span>';
-      lockBtn.title = 'Khóa tỷ lệ View ĐANG BẬT (Bấm để mở khóa)';
-    } else {
-      lockBtn.classList.remove('locked');
-      lockBtn.innerHTML = '<span class="lock-icon">🔓</span>';
-      lockBtn.title = 'Khóa tỷ lệ zoom (khi đổi bài khác sẽ giữ nguyên tỷ lệ này)';
-    }
+    _updateLockButtonsUI(isLocked);
   }
 
-  function _toggleLockZoom(lockBtn) {
+  function _updateLockButtonsUI(isLocked) {
+    const btns = [
+      document.getElementById('btn-lock-zoom'),
+      document.getElementById('btn-gig-lock-zoom')
+    ];
+    btns.forEach(btn => {
+      if (!btn) return;
+      if (isLocked) {
+        btn.classList.add('locked');
+        btn.innerHTML = '<span class="lock-icon">🔒</span>';
+        btn.title = 'Khóa tỷ lệ View ĐANG BẬT (Bấm để mở khóa)';
+      } else {
+        btn.classList.remove('locked');
+        btn.innerHTML = '<span class="lock-icon">🔓</span>';
+        btn.title = 'Khóa tỷ lệ zoom (khi đổi bài khác sẽ giữ nguyên tỷ lệ này)';
+      }
+    });
+  }
+
+  function _toggleLockZoom() {
     const wasLocked = localStorage.getItem('sheetapp_zoom_locked') === 'true';
     const isLocked = !wasLocked;
     localStorage.setItem('sheetapp_zoom_locked', isLocked ? 'true' : 'false');
+    _updateLockButtonsUI(isLocked);
 
     if (isLocked) {
       const currentPct = Math.round((Store.get('currentZoom') || 1.0) * 100);
       localStorage.setItem('sheetapp_locked_zoom_val', String(currentPct));
-      lockBtn.classList.add('locked');
-      lockBtn.innerHTML = '<span class="lock-icon">🔒</span>';
-      lockBtn.title = 'Khóa tỷ lệ View ĐANG BẬT (Bấm để mở khóa)';
       App?.showToast?.(`🔒 Đã khóa view ở tỷ lệ ${currentPct}%. Đổi bài sẽ giữ nguyên zoom.`, 'success');
     } else {
-      lockBtn.classList.remove('locked');
-      lockBtn.innerHTML = '<span class="lock-icon">🔓</span>';
-      lockBtn.title = 'Khóa tỷ lệ zoom (khi đổi bài khác sẽ giữ nguyên tỷ lệ này)';
       App?.showToast?.('🔓 Đã mở khóa tỷ lệ view.', 'info');
     }
   }

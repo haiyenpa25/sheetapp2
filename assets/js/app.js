@@ -134,6 +134,8 @@ const App = (() => {
     }
     const lbl = document.getElementById('zoom-value-label');
     if (lbl) lbl.textContent = percent + '%';
+    const gigZoom = document.getElementById('gig-hud-zoom');
+    if (gigZoom) gigZoom.textContent = percent + '%';
     await OSMDRenderer.setZoom(zoom);
     SessionTracker?.setZoom?.(zoom);
     // INTENTIONAL: Không gọi thủ công onOSMDRendered nữa vì OSMDRenderer.setZoom đã tự kích hoạt thông qua onReady callback.
