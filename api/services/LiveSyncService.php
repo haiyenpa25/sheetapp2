@@ -173,7 +173,7 @@ class LiveSyncService {
         ];
     }
 
-    public static function pollRoom(string $room, int $clientRevision = 0): array {
+    public static function pollRoom(string $room, int $clientRevision = 0, string $clientId = '', string $role = ''): array {
         if (empty($room)) {
             return ['success' => false, 'error' => 'Thiếu mã phòng'];
         }
@@ -195,6 +195,44 @@ class LiveSyncService {
             return ['success' => true, 'active' => false, 'message' => 'Phòng đã hết hạn'];
         }
 
+        // Presence & Roster Tracking
+        $now = time();
+        $roster = ['total' => 0, 'roles' => []];
+        $dirty = false;
+
+        if (!isset($data['members']) || !is_array($data['members'])) {
+            $data['members'] = [];
+        }
+
+        if (!empty($clientId)) {
+            $prev = $data['members'][$clientId] ?? null;
+            if (!$prev || ($now - ($prev['lastSeen'] ?? 0)) >= 4 || ($prev['role'] ?? '') !== $role) {
+                $data['members'][$clientId] = [
+                    'role'     => $role ?: 'viewer',
+                    'lastSeen' => $now
+                ];
+                $dirty = true;
+            }
+        }
+
+        foreach ($data['members'] as $cId => $mInfo) {
+            $lastSeen = (int)($mInfo['lastSeen'] ?? 0);
+            if ($now - $lastSeen > 15) {
+                unset($data['members'][$cId]);
+                $dirty = true;
+            } else {
+                $r = $mInfo['role'] ?? 'viewer';
+                $roster['total']++;
+                $roster['roles'][$r] = ($roster['roles'][$r] ?? 0) + 1;
+            }
+        }
+
+        $data['roster'] = $roster;
+
+        if ($dirty) {
+            @file_put_contents($file, json_encode($data, JSON_UNESCAPED_UNICODE), LOCK_EX);
+        }
+
         $currentRev = (int)($data['revision'] ?? 1);
 
         // Fast Polling optimization: nếu client đã có revision mới nhất, trả về modified = false siêu nhẹ
@@ -204,6 +242,7 @@ class LiveSyncService {
                 'active'     => $data['active'] ?? true,
                 'modified'   => false,
                 'revision'   => $currentRev,
+                'roster'     => $roster,
                 'serverTime' => microtime(true)
             ];
         }
@@ -213,6 +252,7 @@ class LiveSyncService {
             'active'     => $data['active'] ?? true,
             'modified'   => true,
             'revision'   => $currentRev,
+            'roster'     => $roster,
             'serverTime' => microtime(true),
             'data'       => self::sanitizeForFollower($data)
         ];

@@ -11,13 +11,15 @@ class LiveSyncController {
             $action = $_GET['action'] ?? '';
 
             if ($method === 'GET') {
-                $room = trim($_GET['room'] ?? '');
-                $rev  = isset($_GET['rev']) ? (int)$_GET['rev'] : 0;
+                $room     = trim($_GET['room'] ?? '');
+                $rev      = isset($_GET['rev']) ? (int)$_GET['rev'] : 0;
+                $clientId = trim($_GET['clientId'] ?? '');
+                $role     = trim($_GET['role'] ?? '');
                 if (!$room) {
                     Response::error('Thiếu tham số room', 400);
                     return;
                 }
-                $res = LiveSyncService::pollRoom($room, $rev);
+                $res = LiveSyncService::pollRoom($room, $rev, $clientId, $role);
                 Response::ok($res);
                 return;
             }

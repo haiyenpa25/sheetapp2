@@ -53,6 +53,18 @@
       Cài Đặt Ngoại Tuyến (App)
     </button>
 
+    <!-- LIVE BAND STUDIO BUTTON -->
+    <a href="/live-band/" class="btn btn-sm w-full" style="background: linear-gradient(135deg, #7c3aed, #6d28d9); color: #fff; border: none; margin-bottom: 0.5rem; text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 700;" title="Mở phòng biểu diễn đồng bộ ban nhạc">
+      <span style="margin-right: 6px; font-size: 1rem;">📡</span>
+      Live Band Studio
+    </a>
+
+    <!-- LEARN STUDIO BUTTON -->
+    <a href="/learn/" class="btn btn-sm w-full" style="background: linear-gradient(135deg, #4f46e5, #4338ca); color: #fff; border: none; margin-bottom: 0.5rem; text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 700;" title="Phòng tập đàn, đệm hát và hợp âm tương tác">
+      <span style="margin-right: 6px; font-size: 1rem;">🎹</span>
+      Học Đàn & Đệm (Learn)
+    </a>
+
     <!-- OMR UPLOAD BUTTON -->
     <button id="btn-omr-upload" class="btn btn-sm w-full hidden" style="background: linear-gradient(135deg, #2563eb, #1e40af); color: #fff; border: none; margin-bottom: 0.5rem;" title="Upload ảnh/PDF để AI nhận diện thành MusicXML">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>

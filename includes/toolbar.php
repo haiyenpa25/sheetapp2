@@ -123,11 +123,11 @@
       </button>
     </div>
 
-    <!-- 📡 LIVE SYNC BUTTON -->
+    <!-- 📡 LIVE BAND STUDIO BUTTON -->
     <div class="control-group">
-      <button id="btn-live-sync" class="btn btn-ghost btn-sm" title="📡 Đồng Bộ Biểu Diễn Live Ban Nhạc">
+      <button id="btn-live-sync" class="btn btn-ghost btn-sm" title="Mở Live Band Studio (/live-band/)" onclick="(function(){ var sid = window.App?.getCurrentSongId?.(); window.location.href = sid ? ('/live-band/?song=' + sid) : '/live-band/'; })()">
         <span style="font-size: 0.9rem;">📡</span>
-        <span class="btn-text">Live Sync</span>
+        <span class="btn-text">Live Band</span>
       </button>
       <span id="live-sync-badge" class="live-badge hidden" style="margin-left: 4px;"></span>
     </div>

@@ -24,11 +24,15 @@ class PollingTransport extends LiveTransport {
     this.consecutiveErrors = 0;
     this.isConnected = false;
     this.isPolling = false;
+    this.clientId = '';
+    this.role = '';
   }
 
   connect(room, options = {}) {
     this.room = room;
     this.hostToken = options.hostToken || '';
+    this.clientId = options.clientId || '';
+    this.role = options.role || '';
     this.revision = 0;
     this.consecutiveErrors = 0;
     this.isConnected = true;
@@ -37,6 +41,10 @@ class PollingTransport extends LiveTransport {
 
   subscribe(callback) {
     this.subscriber = callback;
+  }
+
+  setRole(newRole) {
+    this.role = newRole;
   }
 
   async send(room, hostToken, payload) {
@@ -62,7 +70,7 @@ class PollingTransport extends LiveTransport {
 
       const t1 = Date.now();
       try {
-        const res = await window.ApiService.liveSync.poll(this.room, this.revision);
+        const res = await window.ApiService.liveSync.poll(this.room, this.revision, this.clientId, this.role);
         const t2 = Date.now();
 
         if (res && res.serverTime && window.TransportClock) {
@@ -84,10 +92,14 @@ class PollingTransport extends LiveTransport {
             return;
           }
 
+          if (res.roster && this.subscriber) {
+            this.subscriber({ type: 'roster', roster: res.roster });
+          }
+
           if (res.modified && res.data) {
             this.revision = Math.max(this.revision, res.revision || 0);
             if (this.subscriber) {
-              this.subscriber({ type: 'state', state: res.data, revision: this.revision, serverTime: res.serverTime });
+              this.subscriber({ type: 'state', state: res.data, revision: this.revision, serverTime: res.serverTime, roster: res.roster });
             }
           }
         }

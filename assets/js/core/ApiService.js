@@ -106,7 +106,12 @@ const ApiService = (() => {
 
   const liveSync = {
     create: (room, data = {})         => _json('POST', 'api/index.php?route=live_sync&action=create', { room, ...data }),
-    poll:   (room, rev = 0)           => _request(`api/index.php?route=live_sync&room=${encodeURIComponent(room)}&rev=${rev}`),
+    poll:   (room, rev = 0, clientId = '', role = '') => {
+      let u = `api/index.php?route=live_sync&room=${encodeURIComponent(room)}&rev=${rev}`;
+      if (clientId) u += `&clientId=${encodeURIComponent(clientId)}`;
+      if (role) u += `&role=${encodeURIComponent(role)}`;
+      return _request(u);
+    },
     update: (room, hostToken, data)   => _json('POST', 'api/index.php?route=live_sync', { room, hostToken, ...data }),
     close:  (room, hostToken)         => _json('POST', 'api/index.php?route=live_sync&action=close', { room, hostToken }),
   };

@@ -1,0 +1,446 @@
+<?php
+/**
+ * live-band/index.php — SheetApp Live Band Studio
+ * 
+ * Standalone Live Performance & Rehearsal Command Center
+ * Route: https://sheet.hyb.io.vn/live-band/
+ */
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once __DIR__ . '/../api/core/Auth.php';
+$currentUser = Auth::username() ?: 'Ca Trưởng';
+
+// Cache-bust helpers
+function liveBandJsTag(string $file, bool $defer = true): string {
+    $path = __DIR__ . '/../' . $file;
+    $v    = file_exists($path) ? filemtime($path) : time();
+    $d    = $defer ? ' defer' : '';
+    return "<script src=\"/{$file}?v={$v}\"{$d}></script>\n";
+}
+function liveBandCssTag(string $file): string {
+    $path = file_exists(__DIR__ . '/../assets/css/' . $file)
+        ? __DIR__ . '/../assets/css/' . $file
+        : __DIR__ . '/' . $file;
+    $v = file_exists($path) ? filemtime($path) : time();
+    if (file_exists(__DIR__ . '/../assets/css/' . $file)) {
+        return "<link rel=\"stylesheet\" href=\"/assets/css/{$file}?v={$v}\">\n";
+    }
+    return "<link rel=\"stylesheet\" href=\"/live-band/{$file}?v={$v}\">\n";
+}
+?>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Live Band Studio — SheetApp Biểu Diễn Trực Tiếp</title>
+  <meta name="description" content="Hệ thống đồng bộ biểu diễn trực tiếp cho Ca Trưởng, Ban Nhạc và Ca Đoàn. Chuyển bài tức thì, dịch giọng toàn ban, nhảy phân đoạn và đếm nhịp chuẩn bị.">
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0a14">
+  <link rel="apple-touch-icon" href="/assets/img/icon-192.png">
+  <link rel="icon" href="/favicon.ico">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Fira+Code:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Base & Live Band Styles -->
+  <?php echo liveBandCssTag('base.css'); ?>
+  <link rel="stylesheet" href="/live-band/live-band.css?v=<?php echo file_exists(__DIR__.'/live-band.css') ? filemtime(__DIR__.'/live-band.css') : time(); ?>">
+
+  <!-- Preload OSMD -->
+  <link rel="preload" href="/assets/js/vendor/opensheetmusicdisplay.min.js" as="script">
+</head>
+<body class="stage-dark">
+
+<div id="live-band-app" class="live-band-layout" data-mode="off" data-role="viewer">
+
+  <!-- ══════════════ 1. STAGE TOP NAVBAR ══════════════ -->
+  <header class="stage-navbar">
+    <div class="nav-left">
+      <a href="/" class="stage-brand" title="Về trang chủ SheetApp">
+        <span class="stage-brand-icon">📡</span>
+        <span class="stage-brand-text">LIVE BAND</span>
+      </a>
+
+      <!-- Room Badge / Trigger Modal -->
+      <button id="btn-stage-room-badge" class="stage-pill-badge room-badge disconnected" title="Bấm để xem mã phòng hoặc mở phòng mới">
+        <span class="pulse-indicator"></span>
+        <span id="nav-room-label">CHƯA VÀO PHÒNG</span>
+      </button>
+
+      <!-- Role Selector Pill -->
+      <div class="stage-pill-badge role-pill" title="Đổi vai trò hiển thị trên sân khấu">
+        <span id="role-pill-icon">🎸</span>
+        <select id="stage-role-select" class="nav-role-dropdown" aria-label="Vai trò biểu diễn">
+          <option value="leader">👑 Ca Trưởng (Host)</option>
+          <option value="guitar" selected>🎸 Guitar (Hợp âm & Capo)</option>
+          <option value="piano">🎹 Piano / Organ (2 Tay SATB)</option>
+          <option value="vocal">🎤 Ca Đoàn (Lời To)</option>
+          <option value="drummer">🥁 Trống (Visual Nhịp)</option>
+          <option value="viewer">👀 Khán Giả / Thành Viên</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Active Song Information -->
+    <div class="nav-center">
+      <div class="stage-song-pill" id="stage-song-pill">
+        <span class="song-status-dot"></span>
+        <span id="nav-song-title" class="nav-song-title">Đang chờ Ca Trưởng chọn bài...</span>
+        <span id="nav-song-key" class="nav-key-badge" title="Tông đang chơi">Tông: C</span>
+        <span id="nav-song-bpm" class="nav-bpm-badge" title="Tốc độ nhịp">80 BPM</span>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <!-- Member Roster Pill -->
+      <button id="btn-stage-roster" class="stage-pill-badge roster-pill" title="Thành viên đang online trong phòng">
+        <span>👥</span>
+        <span id="nav-roster-count">1</span>
+      </button>
+
+      <!-- Screen WakeLock Pill -->
+      <button id="btn-stage-wakelock" class="stage-pill-badge wakelock-pill active" title="Màn hình luôn sáng chống tắt (WakeLock)">
+        <span class="wakelock-icon">💡</span>
+        <span class="wakelock-text">Sáng</span>
+      </button>
+
+      <!-- Fullscreen Button -->
+      <button id="btn-stage-fullscreen" class="stage-icon-btn" title="Toàn màn hình sân khấu">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+      </button>
+
+      <!-- Main Room Control Modal Button -->
+      <button id="btn-open-room-modal" class="btn btn-primary btn-sm stage-action-btn" title="Mở phòng hoặc chia sẻ mã QR">
+        📡 Phòng Live
+      </button>
+    </div>
+  </header>
+
+  <!-- ══════════════ 2. HOST MASTER COMMAND CONSOLE ══════════════ -->
+  <!-- Chỉ hiển thị khi vai trò là Leader hoặc người dùng là Host -->
+  <aside id="host-command-console" class="host-command-console hidden">
+    <div class="host-console-inner">
+      <!-- Section 1: Song & Setlist Switcher -->
+      <div class="host-console-group host-song-group">
+        <button id="btn-host-prev-song" class="btn-host-nav" title="Bài trước trong Setlist">⏮</button>
+        <div class="host-song-select-wrap">
+          <select id="host-song-dropdown" class="host-song-dropdown" aria-label="Chọn bài hát">
+            <option value="">-- Chọn bài hát phát sóng --</option>
+          </select>
+        </div>
+        <button id="btn-host-next-song" class="btn-host-nav" title="Bài tiếp theo trong Setlist">⏭</button>
+        <button id="btn-host-pick-setlist" class="btn-host-pill" title="Nạp Setlist chương trình">📋 Setlist</button>
+      </div>
+
+      <!-- Section 2: Master Transpose Controls -->
+      <div class="host-console-group host-transpose-group">
+        <span class="group-label">Dịch Giọng:</span>
+        <button id="btn-host-transpose-down" class="btn-host-step" title="Hạ 1 nửa cung (semitone)">−</button>
+        <span id="host-key-val" class="host-key-badge">C (0)</span>
+        <button id="btn-host-transpose-up" class="btn-host-step" title="Tăng 1 nửa cung (semitone)">+</button>
+      </div>
+
+      <!-- Section 3: Metronome & Count-in -->
+      <div class="host-console-group host-tempo-group">
+        <div class="tempo-stepper">
+          <button id="btn-host-bpm-dec" class="btn-host-step">−5</button>
+          <span id="host-bpm-val" class="host-bpm-val">80 BPM</span>
+          <button id="btn-host-bpm-inc" class="btn-host-step">+5</button>
+        </div>
+        <button id="btn-host-countin-trigger" class="btn-host-countin-trigger" title="Đếm nhịp chuẩn bị 1-2-3-4 cho toàn ban nhạc">
+          <span class="countin-fire-icon">🔥</span>
+          <span>ĐẾM NHỊP VÀO</span>
+        </button>
+      </div>
+
+      <!-- Section 4: Cue Commander -->
+      <div class="host-console-group host-cue-group">
+        <span class="group-label">Hiệu Lệnh Sân Khấu:</span>
+        <div class="cue-buttons-wrap">
+          <button class="btn-cue-trigger btn-cue-chorus" data-cue="chorus" title="Nhắc vào Điệp Khúc">⚡ Điệp Khúc</button>
+          <button class="btn-cue-trigger btn-cue-repeat" data-cue="repeat" title="Lặp lại đoạn này">🔁 Lặp Lại</button>
+          <button class="btn-cue-trigger btn-cue-soft" data-cue="soft" title="Hát êm (Piano)">🤫 Nhỏ Dần</button>
+          <button class="btn-cue-trigger btn-cue-loud" data-cue="loud" title="Quạt mạnh / Cao trào (Forte)">🔥 Cao Trào</button>
+          <button class="btn-cue-trigger btn-cue-outro" data-cue="outro" title="Chuẩn bị Kết bài">🛑 Chuẩn Bị Kết</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section Roadmap Chips Bar -->
+    <div id="host-roadmap-bar" class="host-roadmap-bar">
+      <div class="roadmap-label">Phân Đoạn:</div>
+      <div id="host-roadmap-chips" class="roadmap-chips-list">
+        <!-- Sẽ được điền động theo bài hát: [Intro] [Lời 1] [Điệp khúc] [Outro] -->
+        <span class="roadmap-empty-hint">Chưa có phân đoạn bài hát</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══════════════ 3. ROLE-SPECIFIC HEADS-UP DISPLAY (HUD) ══════════════ -->
+  <div id="stage-role-hud" class="stage-role-hud">
+    <!-- Guitar HUD -->
+    <div id="hud-guitar" class="hud-panel hud-guitar hidden">
+      <div class="hud-guitar-capo" id="guitar-capo-display">
+        <span class="capo-badge">🎸 GỢI Ý CAPO</span>
+        <span id="guitar-capo-text" class="capo-text">Tone C → Không cần kẹp Capo (Bấm thế C tiêu chuẩn)</span>
+      </div>
+      <div class="hud-guitar-chords" id="guitar-key-chords">
+        <!-- Chords in current key -->
+      </div>
+    </div>
+
+    <!-- Drummer / Metronome HUD -->
+    <div id="hud-drummer" class="hud-panel hud-drummer hidden">
+      <div class="drummer-flasher-wrap">
+        <span class="drummer-label">PHÁCH NHỊP:</span>
+        <div class="beat-led-group" id="drummer-beat-leds">
+          <div class="beat-led" data-beat="1">1</div>
+          <div class="beat-led" data-beat="2">2</div>
+          <div class="beat-led" data-beat="3">3</div>
+          <div class="beat-led" data-beat="4">4</div>
+        </div>
+        <div class="drummer-bpm-display" id="drummer-bpm-display">80 BPM</div>
+      </div>
+    </div>
+
+    <!-- Vocal HUD Switcher -->
+    <div id="hud-vocal" class="hud-panel hud-vocal hidden">
+      <div class="vocal-controls-wrap">
+        <span class="vocal-status-text">🎤 Chế độ Ca Đoàn:</span>
+        <button id="btn-vocal-toggle-view" class="btn-vocal-toggle active" data-view="lyrics">
+          📄 Chuyển Xem: Lời Nhạc Lớn (Teleprompter)
+        </button>
+        <div class="vocal-font-scaler">
+          <button id="btn-vocal-font-dec" class="font-scale-btn" title="Giảm cỡ chữ">A−</button>
+          <button id="btn-vocal-font-inc" class="font-scale-btn" title="Tăng cỡ chữ">A+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ 4. MAIN STAGE CANVAS AREA ══════════════ -->
+  <main id="stage-viewport" class="stage-viewport">
+    
+    <!-- Empty State (Khi chưa chọn bài) -->
+    <div id="stage-empty-state" class="stage-empty-state">
+      <div class="empty-icon-pulse">📡</div>
+      <h2 class="empty-title">Chào Mừng Đến Live Band Studio</h2>
+      <p class="empty-subtitle">Sẵn sàng đồng bộ trực tiếp giữa Ca Trưởng, Nhạc Công và Ca Đoàn.</p>
+      <div class="empty-actions">
+        <button id="btn-empty-start-host" class="btn btn-primary btn-lg">👑 Mở Phòng Ca Trưởng (Host)</button>
+        <button id="btn-empty-join-room" class="btn btn-secondary btn-lg">🔗 Tham Gia Phòng (Join)</button>
+      </div>
+    </div>
+
+    <!-- OSMD Sheet Music Container -->
+    <div id="stage-sheet-wrapper" class="stage-sheet-wrapper hidden">
+      <div id="stage-osmd-container" class="stage-osmd-container"></div>
+    </div>
+
+    <!-- Vocal Teleprompter View Container -->
+    <div id="stage-lyric-wrapper" class="stage-lyric-wrapper hidden">
+      <div id="stage-lyric-content" class="stage-lyric-content">
+        <!-- Nội dung lời bài hát chữ lớn được render tại đây -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Snap to Host Floating Button -->
+  <button id="btn-snap-to-host" class="btn-snap-to-host hidden" title="Bấm để cuộn ngay về vị trí Ca Trưởng đang đứng">
+    <span class="snap-icon">🔄</span>
+    <span id="snap-label">Quay về Ca Trưởng (Đang ở Ô 1)</span>
+  </button>
+
+  <!-- Floating Live Cue Alert Banner -->
+  <div id="stage-cue-banner" class="stage-cue-banner hidden">
+    <div class="cue-banner-box">
+      <span class="cue-banner-icon" id="cue-banner-icon">⚡</span>
+      <div class="cue-banner-text" id="cue-banner-text">Chuẩn bị vào Điệp Khúc</div>
+    </div>
+  </div>
+
+  <!-- Giant Visual Count-In Overlay -->
+  <div id="stage-countin-overlay" class="stage-countin-overlay hidden">
+    <div class="countin-center-box">
+      <div class="countin-number" id="countin-giant-number">4</div>
+      <div class="countin-subtext" id="countin-subtext">CHUẨN BỊ VÀO BÀI...</div>
+      <div class="countin-dots" id="countin-dots">
+        <span class="countin-dot active"></span>
+        <span class="countin-dot"></span>
+        <span class="countin-dot"></span>
+        <span class="countin-dot"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ 5. MODAL ROOM MANAGEMENT & QR CODE ══════════════ -->
+  <div id="modal-live-room" class="stage-modal-overlay hidden">
+    <div class="stage-modal-card">
+      <div class="stage-modal-header">
+        <div class="modal-header-title">
+          <span class="modal-icon">📡</span>
+          <h3>Quản Lý Phòng Biểu Diễn Trực Tiếp</h3>
+        </div>
+        <button id="btn-close-room-modal" class="stage-modal-close">&times;</button>
+      </div>
+
+      <div class="stage-modal-tabs">
+        <button class="modal-tab-btn active" data-target="#tab-host-panel">👑 Mở Phòng (Ca Trưởng)</button>
+        <button class="modal-tab-btn" data-target="#tab-join-panel">🔗 Tham Gia (Nhạc Công)</button>
+      </div>
+
+      <div class="stage-modal-body">
+        
+        <!-- TAB 1: HOST PANEL -->
+        <div id="tab-host-panel" class="modal-tab-pane active">
+          <div id="host-setup-view">
+            <p class="modal-help-text">Mở phòng phát sóng. Toàn bộ máy thành viên sẽ tự động nhận bài, đổi tông và cuộn theo vị trí của bạn.</p>
+            <div class="form-row">
+              <label for="host-room-input" class="form-label">Mã phòng mong muốn:</label>
+              <div class="input-with-action">
+                <input type="text" id="host-room-input" class="form-input text-uppercase font-bold" placeholder="VD: BAND-2026" maxlength="16">
+                <button id="btn-submit-create-host" class="btn btn-primary">Mở Phòng Ngay</button>
+              </div>
+              <small class="text-muted">Để trống để hệ thống tự sinh mã phòng ngẫu nhiên.</small>
+            </div>
+          </div>
+
+          <div id="host-active-view" class="hidden">
+            <div class="active-room-box">
+              <div class="active-room-label">MÃ PHÒNG PHÁT SÓNG</div>
+              <div id="display-room-code" class="display-room-code">BAND-2026</div>
+              <div class="active-room-status">● Đang phát sóng thời gian thực</div>
+            </div>
+
+            <!-- QR Code Section -->
+            <div class="qr-preview-container">
+              <canvas id="stage-qr-canvas" width="220" height="220"></canvas>
+              <div class="qr-hint">Quét mã bằng Camera điện thoại/iPad để tham gia tức thì</div>
+              <button id="btn-fullscreen-qr" class="btn btn-outline btn-xs mt-half">🔍 Phóng to QR toàn màn hình</button>
+            </div>
+
+            <!-- Share Link Box -->
+            <div class="share-link-group">
+              <label class="form-label">Link tham gia 1-chạm:</label>
+              <div class="input-with-action">
+                <input type="text" id="share-link-input" class="form-input text-sm" readonly>
+                <button id="btn-copy-share-link" class="btn btn-secondary">📋 Sao chép</button>
+              </div>
+            </div>
+
+            <!-- Member Roster List -->
+            <div class="roster-preview-group">
+              <div class="roster-header-row">
+                <span class="font-bold text-sm">Thành viên kết nối: <span id="modal-roster-total">1</span></span>
+                <span id="modal-roster-details" class="text-xs text-muted">👑 Ca Trưởng</span>
+              </div>
+            </div>
+
+            <div class="modal-actions-row">
+              <button id="btn-host-leave-room" class="btn btn-danger w-full">🛑 Đóng Phòng / Rời Khỏi</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: JOIN PANEL -->
+        <div id="tab-join-panel" class="modal-tab-pane">
+          <p class="modal-help-text">Nhập mã phòng do Ca Trưởng cung cấp hoặc quét mã QR để đồng bộ màn hình biểu diễn.</p>
+          <div class="form-row">
+            <label for="join-room-input" class="form-label">Nhập Mã Phòng:</label>
+            <div class="input-with-action">
+              <input type="text" id="join-room-input" class="form-input text-uppercase font-bold" placeholder="Nhập mã (VD: BAND-2026)">
+              <button id="btn-submit-join-room" class="btn btn-success">🔗 Tham Gia</button>
+            </div>
+          </div>
+
+          <div id="join-active-status" class="hidden mt-1">
+            <div class="active-room-box" style="border-color: #10b981;">
+              <div class="active-room-label" style="color: #10b981;">ĐÃ KẾT NỐI VÀO PHÒNG</div>
+              <div id="display-joined-room" class="display-room-code" style="color: #10b981;">BAND-2026</div>
+              <div class="active-room-status" style="color: #10b981;">● Đang tự động đồng bộ theo Ca Trưởng</div>
+            </div>
+            <button id="btn-follower-leave-room" class="btn btn-danger w-full mt-1">👋 Rời Khỏi Phòng</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ 6. FULLSCREEN QR MODAL ══════════════ -->
+  <div id="modal-fullscreen-qr-overlay" class="fullscreen-qr-overlay hidden">
+    <div class="fullscreen-qr-card">
+      <button id="btn-close-fs-qr" class="fullscreen-qr-close">&times;</button>
+      <h2 class="fs-qr-title">Quét Mã Tham Gia Ban Nhạc</h2>
+      <div class="fs-qr-room-badge" id="fs-qr-room-code">BAND-2026</div>
+      <canvas id="fs-qr-canvas" width="340" height="340"></canvas>
+      <p class="fs-qr-caption">Mở Camera trên iPad / Điện thoại quét mã để vào phòng tự động</p>
+    </div>
+  </div>
+
+  <!-- ══════════════ 7. SETLIST PICKER MODAL (FOR HOST) ══════════════ -->
+  <div id="modal-pick-setlist" class="stage-modal-overlay hidden">
+    <div class="stage-modal-card" style="max-width: 520px;">
+      <div class="stage-modal-header">
+        <div class="modal-header-title">
+          <span class="modal-icon">📋</span>
+          <h3>Chọn Setlist Biểu Diễn</h3>
+        </div>
+        <button id="btn-close-setlist-modal" class="stage-modal-close">&times;</button>
+      </div>
+      <div class="stage-modal-body">
+        <p class="modal-help-text">Chọn chương trình lễ hoặc buổi diễn để nạp nhanh danh sách bài hát vào bàn điều khiển Ca Trưởng.</p>
+        <div id="setlist-picker-list" class="setlist-picker-list">
+          <div class="text-muted text-center py-1">Đang tải danh sách setlist...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /#live-band-app -->
+
+<!-- ══════════════ VENDORS & DEPENDENCIES ══════════════ -->
+<script src="/assets/js/vendor/opensheetmusicdisplay.min.js" onerror="
+  var s=document.createElement('script');
+  s.src='https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.6/build/opensheetmusicdisplay.min.js';
+  document.head.appendChild(s);"></script>
+
+<script src="/assets/js/vendor/Tone.js" defer onerror="
+  var s=document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js';
+  document.head.appendChild(s);"></script>
+
+<script src="/assets/js/vendor/tonal.min.js" defer onerror="
+  var s=document.createElement('script');
+  s.src='https://cdn.jsdelivr.net/npm/tonal/browser/tonal.min.js';
+  document.head.appendChild(s);"></script>
+
+<!-- Core Application Shared Infrastructure -->
+<?php
+echo liveBandJsTag('assets/js/core/EventBus.js', false);
+echo liveBandJsTag('assets/js/core/Store.js', false);
+echo liveBandJsTag('assets/js/core/ApiService.js', false);
+echo liveBandJsTag('assets/js/performance/qr-helper.js', true);
+echo liveBandJsTag('assets/js/performance/transport-clock.js', true);
+echo liveBandJsTag('assets/js/performance/live-transport.js', true);
+echo liveBandJsTag('assets/js/performance/musical-position.js', true);
+echo liveBandJsTag('assets/js/transpose-engine.js', true);
+echo liveBandJsTag('assets/js/lyric-extractor.js', true);
+echo liveBandJsTag('assets/js/performance/cue-engine.js', true);
+echo liveBandJsTag('assets/js/performance/count-in-engine.js', true);
+echo liveBandJsTag('assets/js/performance/arrangement-engine.js', true);
+echo liveBandJsTag('live-band/live-band.js', true);
+?>
+
+</body>
+</html>

@@ -45,6 +45,10 @@ SheetApp/
 │   ├── index.php             # Giao diện chính của Editor
 │   ├── editor.css            # Stylesheet chuyên dụng Studio Dark Mode
 │   └── editor.js             # Logic SATB Note Editor, Audio Synth, Undo/Redo
+├── live-band/                ← Dedicated Live Band & Rehearsal Studio (/live-band/) [NEW 2026-09]
+│   ├── index.php             # Giao diện sân khấu Stage Dark Mode cho Ca Trưởng & Ban Nhạc
+│   ├── live-band.css         # Stylesheet sân khấu tối ưu tương phản & LED flasher
+│   └── live-band.js          # App controller: Master-Follower, WakeLock, Count-In, Cue HUD
 ├── learn/                    ← Interactive Music Learning Studio (/learn/) [NEW 2026-09]
 │   ├── index.php             # Trang chính /learn — Shell + song picker + OSMD
 │   └── learn.css             # Stylesheet premium dark cho /learn
