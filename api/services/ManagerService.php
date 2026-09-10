@@ -527,6 +527,19 @@ class ManagerService {
                 $del->execute([$userId]);
                 return ['success' => true, 'message' => 'Đã xóa tài khoản'];
 
+            case 'toggle_status':
+                $userId = (int)($data['user_id'] ?? 0);
+                if (!$userId || $userId === Auth::userId()) {
+                    return ['success' => false, 'message' => 'Không thể khóa tài khoản của chính bạn'];
+                }
+                $currStatus = $pdo->prepare("SELECT status FROM users WHERE id = ?");
+                $currStatus->execute([$userId]);
+                $s = $currStatus->fetchColumn();
+                $newStatus = ($s === 'locked') ? 'active' : 'locked';
+                $upd = $pdo->prepare("UPDATE users SET status = ? WHERE id = ?");
+                $upd->execute([$newStatus, $userId]);
+                return ['success' => true, 'status' => $newStatus, 'message' => $newStatus === 'locked' ? 'Đã khóa tài khoản' : 'Đã kích hoạt lại tài khoản'];
+
             default:
                 return ['success' => false, 'message' => 'Action không hợp lệ'];
         }
@@ -739,6 +752,148 @@ class ManagerService {
             'profile'    => $profile,
             'chord_sets' => $myChordSets,
             'versions'   => $myVersions
+        ];
+    }
+
+    /**
+     * Lấy danh sách các phiên bản MusicXML Fork (Tab 3)
+     */
+    public static function getVersionsList(array $filters = []): array {
+        $pdo = DB::get();
+
+        $where = ["1=1"];
+        $params = [];
+
+        if (!empty($filters['song_id'])) {
+            $where[] = "v.song_id = ?";
+            $params[] = $filters['song_id'];
+        }
+
+        if (!empty($filters['user_id'])) {
+            $where[] = "v.user_id = ?";
+            $params[] = (int)$filters['user_id'];
+        }
+
+        if (!empty($filters['username'])) {
+            $where[] = "v.username = ?";
+            $params[] = $filters['username'];
+        }
+
+        if (!empty($filters['recommended_only'])) {
+            $where[] = "v.is_recommended = 1";
+        }
+
+        if (!empty($filters['keyword'])) {
+            $kw = '%' . $filters['keyword'] . '%';
+            $where[] = "(v.version_name LIKE ? OR s.title LIKE ? OR s.httlvnId LIKE ? OR v.username LIKE ? OR u.display_name LIKE ?)";
+            $params[] = $kw;
+            $params[] = $kw;
+            $params[] = $kw;
+            $params[] = $kw;
+            $params[] = $kw;
+        }
+
+        $limit = isset($filters['limit']) ? max(1, min(200, (int)$filters['limit'])) : 60;
+        $offset = isset($filters['offset']) ? max(0, (int)$filters['offset']) : 0;
+
+        $sql = "
+            SELECT v.*,
+                   s.title as song_title, s.httlvnId, s.defaultKey, s.xmlPath as master_xml_path,
+                   u.display_name, u.role as user_role, u.instrument as user_instrument
+            FROM song_versions v
+            JOIN songs s ON v.song_id = s.id
+            LEFT JOIN users u ON v.user_id = u.id
+            WHERE " . implode(' AND ', $where) . "
+            ORDER BY v.is_recommended DESC, v.created_at DESC
+            LIMIT {$limit} OFFSET {$offset}
+        ";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        $versions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Đếm tổng số để phân trang
+        $countSql = "
+            SELECT COUNT(*)
+            FROM song_versions v
+            JOIN songs s ON v.song_id = s.id
+            LEFT JOIN users u ON v.user_id = u.id
+            WHERE " . implode(' AND ', $where);
+        $stmtCount = $pdo->prepare($countSql);
+        $stmtCount->execute($params);
+        $total = (int)$stmtCount->fetchColumn();
+
+        return [
+            'versions' => $versions,
+            'total'    => $total,
+            'limit'    => $limit,
+            'offset'   => $offset
+        ];
+    }
+
+    /**
+     * Xóa một phiên bản MusicXML Fork
+     */
+    public static function deleteVersion(int $versionId): array {
+        Auth::requireLogin();
+        $pdo = DB::get();
+        $userId = Auth::userId();
+        $isAdmin = Auth::isAdmin();
+
+        $stmt = $pdo->prepare("SELECT * FROM song_versions WHERE id = ?");
+        $stmt->execute([$versionId]);
+        $version = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$version) {
+            return ['success' => false, 'message' => 'Phiên bản không tồn tại'];
+        }
+
+        if (!$isAdmin && $version['user_id'] != $userId) {
+            return ['success' => false, 'message' => 'Bạn không có quyền xóa phiên bản này'];
+        }
+
+        // Xóa file MusicXML trên đĩa nếu tồn tại và nằm trong storage
+        if (!empty($version['xml_path'])) {
+            $absPath = __DIR__ . '/../../' . ltrim($version['xml_path'], '/\\');
+            if (file_exists($absPath) && strpos(realpath($absPath), realpath(__DIR__ . '/../../storage')) === 0) {
+                // Tuyệt đối không xóa file trong storage/Thanh ca/
+                if (strpos($absPath, 'storage/Thanh ca/') === false) {
+                    @unlink($absPath);
+                    $bakFile = $absPath . '.bak';
+                    if (file_exists($bakFile)) @unlink($bakFile);
+                }
+            }
+        }
+
+        $delStmt = $pdo->prepare("DELETE FROM song_versions WHERE id = ?");
+        $delStmt->execute([$versionId]);
+
+        return ['success' => true, 'message' => 'Đã xóa phiên bản MusicXML thành công'];
+    }
+
+    /**
+     * Bật/Tắt ghim khuyên dùng cho phiên bản MusicXML
+     */
+    public static function toggleVersionRecommend(int $versionId): array {
+        Auth::requireBanhat();
+        $pdo = DB::get();
+
+        $stmt = $pdo->prepare("SELECT is_recommended FROM song_versions WHERE id = ?");
+        $stmt->execute([$versionId]);
+        $curr = $stmt->fetchColumn();
+
+        if ($curr === false) {
+            return ['success' => false, 'message' => 'Phiên bản không tồn tại'];
+        }
+
+        $newVal = $curr == 1 ? 0 : 1;
+        $upStmt = $pdo->prepare("UPDATE song_versions SET is_recommended = ? WHERE id = ?");
+        $upStmt->execute([$newVal, $versionId]);
+
+        return [
+            'success' => true,
+            'is_recommended' => $newVal,
+            'message' => $newVal == 1 ? 'Đã ghim khuyên dùng cho phiên bản này' : 'Đã bỏ ghim khuyên dùng'
         ];
     }
 }

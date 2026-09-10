@@ -120,6 +120,7 @@ function learnCssTag(string $file): string {
       </svg>
     </button>
 
+    <span class="learn-status-badge learn-midi-badge" id="learn-midi-badge" title="Trạng thái kết nối bàn phím MIDI / Piano điện">🎹 MIDI: Đang quét...</span>
     <span class="learn-status-badge" id="learn-status-badge">Sẵn sàng</span>
   </header>
 
@@ -438,6 +439,14 @@ function learnCssTag(string $file): string {
       <button class="btn-learn-bpm" id="btn-learn-bpm-inc" title="Tăng BPM">+</button>
     </div>
 
+    <!-- Wait Mode (Chờ bấm đúng) -->
+    <button id="btn-toggle-wait-mode" class="btn-learn-wait-mode" title="Chế độ chờ: Nhạc tạm dừng tại từng hợp âm, chỉ chạy tiếp khi bạn bấm đúng nốt trên đàn!">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;">
+        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+      </svg>
+      <span id="learn-wait-mode-label">Chờ bấm đúng: TẮT</span>
+    </button>
+
     <!-- Metronome Click & Visual Beat -->
     <div class="learn-metronome-box" title="Máy đếm nhịp">
       <button type="button" id="btn-learn-metro" class="btn-learn-metro" title="Bật/Tắt tiếng gõ phách Metronome">
@@ -504,6 +513,8 @@ echo learnJsTag('assets/js/learn/audio/learn-sound-engine.js', true);
 echo learnJsTag('assets/js/learn/accompaniment/pattern-engine.js', true);
 echo learnJsTag('assets/js/learn/practice/loop-controller.js', true);
 echo learnJsTag('assets/js/learn/practice/practice-tracker.js', true);
+echo learnJsTag('assets/js/learn/midi/midi-input-engine.js', true);
+echo learnJsTag('assets/js/learn/practice/chord-judge.js', true);
 echo learnJsTag('assets/js/learn/ui/virtual-keyboard.js', true);
 echo learnJsTag('assets/js/learn/ui/chord-card.js', true);
 echo learnJsTag('assets/js/learn/learn-app.js', true);

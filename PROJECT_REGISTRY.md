@@ -544,6 +544,21 @@ SheetApp/
   ⚠ Còn lại: SongController + CategoryController vẫn trả raw array
               (cần cascade fix ApiService + LibraryUI + AdminUI để chuẩn hóa hoàn toàn)
 
+[2026-09-11] — Triển khai Giai Đoạn 9 /learn/: Web MIDI Hardware Engine, Intelligent Chord Judge & Chế Độ Đợi Phím (Wait Mode)
+  + Tạo: assets/js/learn/midi/midi-input-engine.js (Web MIDI API handler, tracking note-on/off, simulation API, status badge)
+  + Tạo: assets/js/learn/practice/chord-judge.js (Intelligent chord matcher, hỗ trợ mọi thể đảo, slash-chord bass check)
+  + Sửa: assets/js/learn/ui/virtual-keyboard.js (setUserActiveNotes, flashSuccess, flashError, click-to-simulate MIDI)
+  + Sửa: assets/js/learn/learn-app.js (Tích hợp _waitMode, pause transport tại hợp âm mới, chờ người học bấm đúng, audio chime, resume)
+  + Sửa: learn/learn.css (Styles cho .btn-learn-wait-mode, .learn-midi-badge, .vkb-user-played, flash animations)
+  + Sửa: learn/index.php (Thêm nút Wait Mode trên thanh điều khiển và MIDI status badge trên header)
+
+[2026-09-11] — Hoàn thiện Cổng Quản Lý v2.2.0: Quản Lý Phiên Bản MusicXML (Tab 3), Quản Trị Viên & Tinh Gọn Thể Loại
+  + Sửa: api/services/ManagerService.php (getVersionsList, deleteVersion, toggleVersionRecommend, toggle_status)
+  + Sửa: api/controllers/ManagerController.php (route 'versions', 'delete_version', 'toggle_version_recommend')
+  + Sửa: manager/index.php (Tab 3 Bản Chuyển Soạn SATB, Inspector MusicXML forks list, Modal Reset Mật Khẩu)
+  + Sửa: manager/manager.css (Styles cho .mgr-versions-grid, .version-card, .song-version-badge)
+  + Sửa: manager/manager.js (loadVersions, renderVersionsGrid, deleteVersion, toggleVersionRecommend, filterByCategory, resetUserPass modal, toggleUserStatus)
+
 [2026-09-10] — Nâng cấp Cổng Quản Lý v2.1.0: Đăng Ký Tài Khoản, Quản Lý Hồ Sơ & Trình Chọn Bài Hát Thông Minh
   + Sửa: api/services/UserService.php (createWithProfile(), updateProfile())
   + Sửa: api/controllers/AuthController.php (route 'register', 'update_profile', mở rộng metadata hồ sơ)

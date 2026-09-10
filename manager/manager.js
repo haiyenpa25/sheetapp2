@@ -28,6 +28,12 @@ const ManagerApp = (() => {
       recommendedOnly: false,
       keyword: ''
     },
+    versions: {
+      items: [],
+      author: '',
+      recommendedOnly: false,
+      keyword: ''
+    },
     users: [],
     myContributions: {
       chord_sets: [],
@@ -93,9 +99,12 @@ const ManagerApp = (() => {
         state.repertoire.debounceTimer = setTimeout(() => {
           state.repertoire.keyword = q;
           state.community.keyword = q;
+          state.versions.keyword = q;
           state.repertoire.offset = 0;
           if (state.activeTab === 'tab-community') {
             loadCommunityChords();
+          } else if (state.activeTab === 'tab-versions') {
+            loadVersions();
           } else {
             loadRepertoire();
           }
@@ -108,9 +117,11 @@ const ManagerApp = (() => {
         globalDropdown?.classList.add('hidden');
         state.repertoire.keyword = '';
         state.community.keyword = '';
+        state.versions.keyword = '';
         state.repertoire.offset = 0;
         loadRepertoire();
         loadCommunityChords();
+        loadVersions();
       });
 
       // Shortcut Ctrl+K
@@ -314,6 +325,25 @@ const ManagerApp = (() => {
       openModal('modal-category');
     });
     document.getElementById('form-manage-category')?.addEventListener('submit', _handleCategorySubmit);
+
+    // Tab 3 MusicXML Versions triggers
+    document.getElementById('btn-tab-create-version')?.addEventListener('click', () => {
+      openForkModal('', '', 'score_version');
+    });
+
+    document.getElementById('btn-sel-song-xml-fork')?.addEventListener('click', () => {
+      if (state.selectedSong) {
+        openForkModal(state.selectedSong.id, state.selectedSong.title, 'score_version');
+      }
+    });
+
+    document.getElementById('chk-ver-recommended-only')?.addEventListener('change', (e) => {
+      state.versions.recommendedOnly = e.target.checked;
+      loadVersions();
+    });
+
+    // Reset password modal form
+    document.getElementById('form-reset-pass')?.addEventListener('submit', _handleResetPassSubmit);
   }
 
   /* ================= FAST SEARCH & AUTOCOMPLETE ENGINE ================= */
@@ -501,6 +531,66 @@ const ManagerApp = (() => {
     `;
 
     chordsGrid.innerHTML = html;
+
+    // 4. Render MusicXML Fork Versions for Selected Song
+    const versGrid = document.getElementById('sel-song-versions-grid');
+    if (versGrid) {
+      const versions = song.song_versions || [];
+      let vHtml = '';
+      if (versions.length > 0) {
+        versions.forEach(v => {
+          const isOwner = currentUserId && (v.user_id == currentUserId);
+          const canManage = isOwner || isAdmin;
+          const isRec = v.is_recommended == 1;
+          vHtml += `
+            <div class="song-chord-card ${isRec ? 'card-recommended' : ''}" style="border-left: 3px solid var(--cyan);">
+              <div class="song-chord-card-title">
+                <span>${isRec ? '⭐ ' : ''}${_escape(v.version_name)}</span>
+                <span class="song-version-badge">📑 MusicXML</span>
+              </div>
+              <div class="song-chord-card-meta">
+                👤 Soạn bởi: <strong>@${_escape(v.username)}</strong> (${_escape(v.display_name || v.username)})<br>
+                <span>Cập nhật: ${(v.updated_at || v.created_at || '').substring(0, 10)}</span>
+              </div>
+              ${v.description ? `<div class="card-notes-guide" style="font-size:0.75rem; padding:0.35rem 0.5rem;">"${_escape(v.description)}"</div>` : ''}
+
+              <div style="display:flex; gap:0.4rem; align-items:center; margin-top:auto; padding-top:0.5rem; border-top:1px solid var(--border);">
+                <a href="../editor/?song=${encodeURIComponent(song.id)}&version=${v.id}" target="_blank" class="mgr-btn mgr-btn-primary mgr-btn-xs" style="flex:1;" title="Mở Visual Editor để chỉnh nốt SATB">
+                  ✏️ Sửa Nốt (SATB)
+                </a>
+                <a href="../index.php?song=${encodeURIComponent(song.id)}&version=${v.id}" target="_blank" class="mgr-btn mgr-btn-ghost mgr-btn-xs" title="Xem trên Sheet Reader">
+                  👁️ Xem Sheet
+                </a>
+                ${isBanhat ? `
+                  <button class="mgr-btn mgr-btn-ghost mgr-btn-xs ${isRec ? 'text-accent' : ''}" 
+                          title="${isRec ? 'Bỏ ghim' : 'Ghim khuyên dùng'}"
+                          onclick="ManagerApp.toggleVersionRecommend(${v.id})">
+                    ${isRec ? '⭐' : '☆'}
+                  </button>
+                ` : ''}
+                ${canManage ? `
+                  <button class="mgr-btn mgr-btn-ghost mgr-btn-xs text-danger" 
+                          title="Xóa bản fork này"
+                          onclick="ManagerApp.deleteVersion(${v.id}, '${_escape(v.version_name)}')">
+                    ✕
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        });
+      } else {
+        vHtml += `
+          <div style="grid-column: 1 / -1; padding: 0.75rem; background: var(--bg-surface-elevated); border: 1px dashed var(--border); border-radius: var(--radius-md); font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; justify-content: space-between;">
+            <span>Bài hát này chưa có bản fork MusicXML nào. Bấm nút bên cạnh để nhân bản phân bè SATB độc lập.</span>
+            <button class="mgr-btn mgr-btn-ghost mgr-btn-xs" onclick="ManagerApp.openForkModal('${song.id}', '${_escape(song.title)}', 'score_version')">
+              + Tạo Bản Fork SATB
+            </button>
+          </div>
+        `;
+      }
+      versGrid.innerHTML = vHtml;
+    }
   }
 
   async function _handleSaveSongCategory() {
@@ -562,7 +652,8 @@ const ManagerApp = (() => {
       loadStats(),
       loadCategories(),
       loadRepertoire(),
-      loadCommunityChords()
+      loadCommunityChords(),
+      loadVersions()
     ]);
   }
 
@@ -629,7 +720,7 @@ const ManagerApp = (() => {
     let html = '';
     categories.forEach(c => {
       html += `
-        <div class="cat-card">
+        <div class="cat-card" style="cursor:pointer;" onclick="ManagerApp.filterByCategory(${c.id})">
           <div class="cat-card-header">
             <span class="cat-card-icon">${c.icon || '🎵'}</span>
             <div>
@@ -638,16 +729,31 @@ const ManagerApp = (() => {
             </div>
           </div>
           <div class="cat-card-desc">${_escape(c.description || 'Chưa có mô tả')}</div>
-          ${isAdmin ? `
-            <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:auto; padding-top:0.5rem; border-top:1px solid var(--border);">
-              <button class="mgr-btn mgr-btn-ghost mgr-btn-xs" onclick="ManagerApp.editCategory(${c.id}, '${_escape(c.name)}', '${_escape(c.icon)}', '${_escape(c.description || '')}')">✏️ Sửa</button>
-              ${c.id !== 1 ? `<button class="mgr-btn mgr-btn-ghost mgr-btn-xs text-danger" onclick="ManagerApp.deleteCategory(${c.id})">🗑️ Xóa</button>` : ''}
-            </div>
-          ` : ''}
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:auto; padding-top:0.5rem; border-top:1px solid var(--border);" onclick="event.stopPropagation()">
+            <button class="mgr-btn mgr-btn-primary mgr-btn-xs" onclick="ManagerApp.filterByCategory(${c.id})">
+              🎼 Xem Danh Sách (${c.song_count || 0})
+            </button>
+            ${isAdmin ? `
+              <div style="display:flex; gap:0.4rem;">
+                <button class="mgr-btn mgr-btn-ghost mgr-btn-xs" onclick="ManagerApp.editCategory(${c.id}, '${_escape(c.name)}', '${_escape(c.icon)}', '${_escape(c.description || '')}')">✏️ Sửa</button>
+                ${c.id !== 1 ? `<button class="mgr-btn mgr-btn-ghost mgr-btn-xs text-danger" onclick="ManagerApp.deleteCategory(${c.id})">🗑️ Xóa</button>` : ''}
+              </div>
+            ` : ''}
+          </div>
         </div>
       `;
     });
     grid.innerHTML = html;
+  }
+
+  function filterByCategory(categoryId) {
+    switchTab('tab-repertoire');
+    state.repertoire.categoryId = categoryId;
+    state.repertoire.offset = 0;
+    document.querySelectorAll('#mgr-cat-pills .mgr-pill').forEach(pill => {
+      pill.classList.toggle('active', pill.dataset.catId == categoryId);
+    });
+    loadRepertoire();
   }
 
   /* ================= REPERTOIRE (TAB 1) ================= */
@@ -890,6 +996,189 @@ const ManagerApp = (() => {
     grid.innerHTML = html;
   }
 
+  /* ================= VERSIONS (TAB 3) ================= */
+  async function loadVersions() {
+    const grid = document.getElementById('mgr-versions-grid');
+    if (grid) {
+      grid.innerHTML = `<div class="mgr-table-loading" style="grid-column:1/-1;"><div class="mgr-spinner"></div><p>Đang tải danh sách bản phối MusicXML...</p></div>`;
+    }
+
+    try {
+      const params = new URLSearchParams({
+        route: 'manager',
+        action: 'versions',
+        username: state.versions.author || '',
+        recommended: state.versions.recommendedOnly ? '1' : '0',
+        q: state.versions.keyword || ''
+      });
+
+      const r = await fetch('../api/index.php?' + params.toString());
+      const res = await r.json();
+      if (res.success && res.versions) {
+        state.versions.items = res.versions;
+        renderVersionsGrid(res.versions);
+        _renderVersionAuthorChips(res.versions);
+        const kpiVers = document.getElementById('kpi-total-vers');
+        if (kpiVers && res.total !== undefined) kpiVers.textContent = res.total;
+      } else {
+        if (grid) grid.innerHTML = `<div class="mgr-table-loading text-danger" style="grid-column:1/-1;">Lỗi nạp danh sách phiên bản.</div>`;
+      }
+    } catch (e) {
+      if (grid) grid.innerHTML = `<div class="mgr-table-loading text-danger" style="grid-column:1/-1;">Lỗi mạng khi nạp phiên bản.</div>`;
+    }
+  }
+
+  function _renderVersionAuthorChips(versions) {
+    const container = document.getElementById('mgr-version-author-chips');
+    if (!container) return;
+
+    const authors = new Set();
+    versions.forEach(v => { if (v.username) authors.add(v.username); });
+
+    let html = `<button class="mgr-pill ${!state.versions.author ? 'active' : ''}" data-ver-author="">Tất Cả Tác Giả</button>`;
+    authors.forEach(auth => {
+      const isActive = state.versions.author === auth;
+      html += `<button class="mgr-pill ${isActive ? 'active' : ''}" data-ver-author="${auth}">@${auth}</button>`;
+    });
+    container.innerHTML = html;
+
+    container.querySelectorAll('.mgr-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        container.querySelectorAll('.mgr-pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.versions.author = btn.dataset.verAuthor || '';
+        loadVersions();
+      });
+    });
+  }
+
+  function renderVersionsGrid(versions) {
+    const grid = document.getElementById('mgr-versions-grid');
+    if (!grid) return;
+
+    if (versions.length === 0) {
+      grid.innerHTML = `
+        <div class="mgr-table-loading" style="grid-column: 1/-1;">
+          <p>Chưa có bản phối MusicXML nào phù hợp với bộ lọc.</p>
+          <button class="mgr-btn mgr-btn-primary mgr-btn-sm" style="margin-top:0.75rem;" onclick="ManagerApp.openForkModal('', '', 'score_version')">
+            ✨ Tạo Bản Fork Đầu Tiên
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    const currentUserId = state.currentUser.user_id;
+    const isAdmin = state.currentUser.role === 'admin';
+    const isBanhat = state.currentUser.role === 'banhat' || isAdmin;
+
+    let html = '';
+    versions.forEach(v => {
+      const isOwner = currentUserId && (v.user_id == currentUserId);
+      const canManage = isOwner || isAdmin;
+      const isRec = v.is_recommended == 1;
+      const dateFormatted = v.created_at ? v.created_at.substring(0, 10) : '';
+
+      html += `
+        <div class="version-card ${isRec ? 'card-recommended' : ''}">
+          <div class="card-header-row">
+            <div>
+              <div class="card-song-title">#${v.httlvnId || ''} ${_escape(v.song_title)}</div>
+              <div class="card-set-name" style="color:var(--cyan);">${isRec ? '⭐ ' : ''}${_escape(v.version_name)}</div>
+            </div>
+            <span class="key-badge">${_escape(v.defaultKey || 'G')}</span>
+          </div>
+
+          <div class="card-author-box">
+            <div class="card-author-avatar" style="background:linear-gradient(135deg, var(--cyan), var(--blue));">
+              ${(v.username || 'U').substring(0, 1).toUpperCase()}
+            </div>
+            <div class="card-author-meta">
+              <span class="card-author-name">${_escape(v.display_name || v.username)}</span>
+              <span class="card-author-desc">@${_escape(v.username)} • ${v.user_role === 'admin' ? '🛡️ Quản Trị' : '🎼 Ca Trưởng / Nhạc Trưởng'}</span>
+            </div>
+          </div>
+
+          <div class="card-badges-row">
+            <span class="song-version-badge">📑 MusicXML SATB</span>
+            <span class="card-badge">📅 ${dateFormatted}</span>
+            <span class="card-badge" style="color:var(--text-muted); font-size:0.72rem;">Mã: ${v.song_id}</span>
+          </div>
+
+          ${v.description ? `<div class="card-notes-guide">"${_escape(v.description)}"</div>` : ''}
+
+          <div class="card-actions-row">
+            <a href="../editor/?song=${encodeURIComponent(v.song_id)}&version=${v.id}" target="_blank" class="mgr-btn mgr-btn-primary mgr-btn-xs" style="flex:1;" title="Mở Visual Editor để chỉnh nốt SATB">
+              ✏️ Sửa Editor
+            </a>
+            <a href="../index.php?song=${encodeURIComponent(v.song_id)}&version=${v.id}" target="_blank" class="mgr-btn mgr-btn-ghost mgr-btn-xs" title="Xem trên Sheet Reader">
+              👁️ Sheet
+            </a>
+            <button class="mgr-btn mgr-btn-ghost mgr-btn-xs" onclick="ManagerApp.selectSong('${v.song_id}')" title="Chọn bài hát gốc">
+              🎯 Bài Gốc
+            </button>
+            ${isBanhat ? `
+              <button class="mgr-btn mgr-btn-ghost mgr-btn-xs ${isRec ? 'text-accent' : ''}" 
+                      title="${isRec ? 'Bỏ ghim khuyên dùng' : 'Ghim cho ban nhạc'}"
+                      onclick="ManagerApp.toggleVersionRecommend(${v.id})">
+                ${isRec ? '⭐' : '☆'}
+              </button>
+            ` : ''}
+            ${canManage ? `
+              <button class="mgr-btn mgr-btn-ghost mgr-btn-xs text-danger" 
+                      title="Xóa bản fork này"
+                      onclick="ManagerApp.deleteVersion(${v.id}, '${_escape(v.version_name)}')">
+                ✕
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    });
+
+    grid.innerHTML = html;
+  }
+
+  async function deleteVersion(versionId, versionName) {
+    if (!confirm(`Bạn có chắc muốn xóa bản phối MusicXML "${versionName}" không? Thao tác này không thể hoàn tác.`)) return;
+
+    try {
+      const r = await fetch('../api/index.php?route=manager&action=delete_version', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ version_id: versionId })
+      });
+      const res = await r.json();
+      if (res.success) {
+        showToast('Đã xóa phiên bản MusicXML', 'success');
+        loadStats();
+        loadVersions();
+        if (state.selectedSong) selectSong(state.selectedSong.id);
+        _loadMyContributions();
+      } else {
+        showToast(res.message || 'Lỗi khi xóa', 'error');
+      }
+    } catch (e) { showToast('Lỗi mạng', 'error'); }
+  }
+
+  async function toggleVersionRecommend(versionId) {
+    try {
+      const r = await fetch('../api/index.php?route=manager&action=toggle_version_recommend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ version_id: versionId })
+      });
+      const res = await r.json();
+      if (res.success) {
+        showToast(res.message, 'success');
+        loadVersions();
+        if (state.selectedSong) selectSong(state.selectedSong.id);
+      } else {
+        showToast(res.message || 'Lỗi', 'error');
+      }
+    } catch (e) { showToast('Lỗi mạng', 'error'); }
+  }
+
   /* ================= USERS MANAGEMENT (TAB 5) ================= */
   async function loadUsers() {
     if (state.currentUser.role !== 'admin') return;
@@ -931,6 +1220,7 @@ const ManagerApp = (() => {
             <span class="mgr-user-role role-${u.role}">
               ${u.role === 'admin' ? '🛡️ Quản Trị' : (u.role === 'banhat' ? '🎸 Ban Hát' : '👁️ Viewer')}
             </span>
+            ${u.status === 'locked' ? '<span class="key-badge" style="margin-left:4px; font-size:0.68rem; background:rgba(239,68,68,0.15); color:#ef4444;">🔒 Khóa</span>' : ''}
           </td>
           <td>${_escape(u.instrument || '—')}</td>
           <td><strong>${u.chord_sets_count || 0}</strong> bộ hợp âm</td>
@@ -944,8 +1234,13 @@ const ManagerApp = (() => {
                   <option value="viewer" ${u.role === 'viewer' ? 'selected' : ''}>Viewer</option>
                   <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
                 </select>
-                <button class="mgr-btn mgr-btn-ghost mgr-btn-xs" onclick="ManagerApp.resetUserPass(${u.id}, '${u.username}')">🔑 Pass</button>
-                <button class="mgr-btn mgr-btn-ghost mgr-btn-xs text-danger" onclick="ManagerApp.deleteUser(${u.id}, '${u.username}')">✕</button>
+                <button class="mgr-btn mgr-btn-ghost mgr-btn-xs" onclick="ManagerApp.resetUserPass(${u.id}, '${_escape(u.username)}')">🔑 Pass</button>
+                <button class="mgr-btn mgr-btn-ghost mgr-btn-xs ${u.status === 'locked' ? 'text-success' : 'text-danger'}" 
+                        title="${u.status === 'locked' ? 'Mở khóa tài khoản' : 'Khóa tài khoản'}"
+                        onclick="ManagerApp.toggleUserStatus(${u.id}, '${_escape(u.username)}')">
+                  ${u.status === 'locked' ? '🔓 Mở' : '🔒 Khóa'}
+                </button>
+                <button class="mgr-btn mgr-btn-ghost mgr-btn-xs text-danger" onclick="ManagerApp.deleteUser(${u.id}, '${_escape(u.username)}')">✕</button>
               ` : '<span class="text-muted text-xs">(Bạn)</span>'}
             </div>
           </td>
@@ -956,7 +1251,7 @@ const ManagerApp = (() => {
   }
 
   /* ================= FORK MODAL & SUBMIT ================= */
-  function openForkModal(songId = '', songTitle = '') {
+  function openForkModal(songId = '', songTitle = '', preferredType = 'chord_set') {
     if (!state.currentUser.logged_in) {
       showToast('Vui lòng đăng nhập hoặc đăng ký để tạo bản phối!', 'info');
       openModal('modal-login');
@@ -974,11 +1269,21 @@ const ManagerApp = (() => {
       document.getElementById('fork-song-search').classList.remove('hidden');
     }
 
+    // Set preferred fork type
+    const typeSelect = document.getElementById('fork-type-select');
+    if (typeSelect) {
+      typeSelect.value = preferredType;
+    }
+
     // Default set name
     const setNameInput = document.getElementById('fork-set-name');
-    if (setNameInput && !setNameInput.value) {
+    if (setNameInput) {
       const inst = document.getElementById('fork-instrument-select')?.value || 'Guitar';
-      setNameInput.value = `Bản ${inst} của @${state.currentUser.username}`;
+      if (preferredType === 'score_version') {
+        setNameInput.value = `Bản phối SATB của @${state.currentUser.username}`;
+      } else {
+        setNameInput.value = `Bản ${inst} của @${state.currentUser.username}`;
+      }
     }
 
     openModal('modal-fork');
@@ -1220,6 +1525,10 @@ const ManagerApp = (() => {
 
     if (tabId === 'tab-community') {
       loadCommunityChords();
+    } else if (tabId === 'tab-versions') {
+      loadVersions();
+    } else if (tabId === 'tab-categories') {
+      loadCategories();
     } else if (tabId === 'tab-users') {
       loadUsers();
     } else if (tabId === 'tab-repertoire' && state.repertoire.songs.length === 0) {
@@ -1318,9 +1627,21 @@ const ManagerApp = (() => {
     } catch (e) { showToast('Lỗi mạng', 'error'); }
   }
 
-  async function resetUserPass(userId, username) {
-    const newPass = prompt(`Nhập mật khẩu mới cho @${username}:`);
-    if (!newPass) return;
+  function resetUserPass(userId, username) {
+    const idInput = document.getElementById('reset-pass-user-id');
+    const nameLabel = document.getElementById('reset-pass-target-username');
+    const passInput = document.getElementById('reset-pass-new-password');
+    if (idInput) idInput.value = userId;
+    if (nameLabel) nameLabel.textContent = '@' + username;
+    if (passInput) passInput.value = '';
+    openModal('modal-reset-pass');
+  }
+
+  async function _handleResetPassSubmit(e) {
+    e.preventDefault();
+    const userId = document.getElementById('reset-pass-user-id')?.value;
+    const newPass = document.getElementById('reset-pass-new-password')?.value;
+    if (!userId || !newPass) return;
 
     try {
       const r = await fetch('../api/index.php?route=manager&action=manage_user', {
@@ -1329,8 +1650,29 @@ const ManagerApp = (() => {
         body: JSON.stringify({ sub_action: 'reset_password', user_id: userId, new_password: newPass })
       });
       const res = await r.json();
-      if (res.success) showToast(`Đã đổi mật khẩu cho @${username}`, 'success');
-      else showToast(res.message || 'Lỗi', 'error');
+      if (res.success) {
+        showToast(res.message || 'Đã đổi mật khẩu thành công!', 'success');
+        closeModal('modal-reset-pass');
+      } else {
+        showToast(res.message || 'Lỗi đổi mật khẩu', 'error');
+      }
+    } catch (e) { showToast('Lỗi mạng', 'error'); }
+  }
+
+  async function toggleUserStatus(userId, username) {
+    try {
+      const r = await fetch('../api/index.php?route=manager&action=manage_user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sub_action: 'toggle_status', user_id: userId })
+      });
+      const res = await r.json();
+      if (res.success) {
+        showToast(res.message, 'success');
+        loadUsers();
+      } else {
+        showToast(res.message || 'Lỗi cập nhật trạng thái', 'error');
+      }
     } catch (e) { showToast('Lỗi mạng', 'error'); }
   }
 
@@ -1451,10 +1793,15 @@ const ManagerApp = (() => {
     openProfileModal,
     toggleRecommend,
     deleteUserChordSet,
+    loadVersions,
+    deleteVersion,
+    toggleVersionRecommend,
+    filterByCategory,
     editCategory,
     deleteCategory,
     updateUserRole,
     resetUserPass,
+    toggleUserStatus,
     deleteUser,
     showToast
   };

@@ -48,6 +48,19 @@ class ManagerController {
                         Response::ok(['categories' => ManagerService::manageCategory('list', [])]);
                         return;
 
+                    case 'versions':
+                        $filters = [
+                            'song_id'          => trim($_GET['song_id'] ?? ''),
+                            'user_id'          => !empty($_GET['user_id']) ? (int)$_GET['user_id'] : null,
+                            'username'         => trim($_GET['username'] ?? ''),
+                            'recommended_only' => !empty($_GET['recommended']) ? 1 : 0,
+                            'keyword'          => trim($_GET['q'] ?? ''),
+                            'limit'            => !empty($_GET['limit']) ? (int)$_GET['limit'] : 60,
+                            'offset'           => !empty($_GET['offset']) ? (int)$_GET['offset'] : 0,
+                        ];
+                        Response::ok(ManagerService::getVersionsList($filters));
+                        return;
+
                     case 'users':
                         Auth::requireAdmin();
                         Response::ok(['users' => ManagerService::getUsersList()]);
@@ -172,6 +185,34 @@ class ManagerController {
                         $res = ManagerService::updateSongCategory($songId, $catId);
                         if ($res['success']) {
                             Response::ok([], $res['message']);
+                        } else {
+                            Response::error($res['message']);
+                        }
+                        return;
+
+                    case 'delete_version':
+                        $versionId = (int)($body['version_id'] ?? 0);
+                        if (!$versionId) {
+                            Response::error('Thiếu version_id');
+                            return;
+                        }
+                        $res = ManagerService::deleteVersion($versionId);
+                        if ($res['success']) {
+                            Response::ok([], $res['message']);
+                        } else {
+                            Response::error($res['message']);
+                        }
+                        return;
+
+                    case 'toggle_version_recommend':
+                        $versionId = (int)($body['version_id'] ?? 0);
+                        if (!$versionId) {
+                            Response::error('Thiếu version_id');
+                            return;
+                        }
+                        $res = ManagerService::toggleVersionRecommend($versionId);
+                        if ($res['success']) {
+                            Response::ok($res, $res['message']);
                         } else {
                             Response::error($res['message']);
                         }

@@ -132,8 +132,17 @@ const VirtualKeyboard = (() => {
       el.appendChild(label);
     }
 
-    // Click to hear
-    el.addEventListener('click', () => _playNote(noteName, oct));
+    // Click to hear and simulate MIDI note
+    el.addEventListener('click', () => {
+      _playNote(noteName, oct);
+      if (window.MidiInputEngine) {
+        const fullNote = `${noteName}${oct}`;
+        MidiInputEngine.simulateNoteOn(fullNote);
+        setTimeout(() => {
+          if (window.MidiInputEngine) MidiInputEngine.simulateNoteOff(fullNote);
+        }, 1000);
+      }
+    });
 
     return el;
   }
@@ -253,18 +262,61 @@ const VirtualKeyboard = (() => {
     _updateHighlights();
   }
 
+  let _userPlayedKeys = new Set();
+
+  function setUserActiveNotes(noteNames = []) {
+    // Clear previous user played highlights
+    _userPlayedKeys.forEach(keyId => {
+      const el = _keyEls.get(keyId);
+      if (el) el.classList.remove('vkb-user-played');
+    });
+    _userPlayedKeys.clear();
+
+    noteNames.forEach(keyId => {
+      const el = _keyEls.get(keyId);
+      if (el) {
+        el.classList.add('vkb-user-played');
+        _userPlayedKeys.add(keyId);
+      }
+    });
+  }
+
+  function flashSuccess() {
+    if (!_container) return;
+    _container.classList.add('vkb-flash-success');
+    setTimeout(() => {
+      _container?.classList.remove('vkb-flash-success');
+    }, 600);
+  }
+
+  function flashError() {
+    if (!_container) return;
+    _container.classList.add('vkb-flash-error');
+    setTimeout(() => {
+      _container?.classList.remove('vkb-flash-error');
+    }, 600);
+  }
+
   function clear() {
-    _rhNotes = []; _lhNotes = []; _nextNotes = [];
-    _updateHighlights();
+    setChord(null, null);
+    setUserActiveNotes([]);
   }
 
   function destroy() {
+    clear();
     if (_container) _container.innerHTML = '';
-    _keyEls.clear();
     _container = null;
   }
 
-  return { mount, setChord, clear, destroy };
+  return { 
+    mount, 
+    setChord, 
+    clear, 
+    destroy,
+    setUserActiveNotes,
+    flashSuccess,
+    flashError
+  };
 })();
 
 if (typeof window !== 'undefined') {

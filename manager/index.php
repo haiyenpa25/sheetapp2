@@ -208,6 +208,19 @@ $instrument = $_SESSION['instrument'] ?? 'Guitar';
             <!-- Rendered via JS -->
           </div>
         </div>
+
+        <!-- MusicXML Fork Versions for Selected Song -->
+        <div class="song-panel-chords-section" style="margin-top: 1.25rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.5rem;">
+            <h4 class="section-subtitle" style="margin:0;">📑 Các Phiên Bản MusicXML Đã Fork:</h4>
+            <button id="btn-sel-song-xml-fork" class="mgr-btn mgr-btn-ghost mgr-btn-xs">
+              + Nhân Bản MusicXML (SATB)
+            </button>
+          </div>
+          <div class="song-panel-chords-grid" id="sel-song-versions-grid">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
       </div>
     </section>
 
@@ -329,12 +342,35 @@ $instrument = $_SESSION['instrument'] ?? 'Guitar';
       <div class="mgr-info-callout">
         <span class="mgr-callout-icon">💡</span>
         <div class="mgr-callout-text">
-          <strong>Cơ chế Fork MusicXML Chuyên Sâu:</strong> Đây là các bản nốt nhạc độc lập được nhân bản từ bản gốc Master, cho phép Ca Trưởng hoặc Nhạc Trưởng phân chia 4 bè SATB, đổi ô nhịp hoặc soạn bè dạo riêng mà không ảnh hưởng tới bản gốc của hội thánh.
+          <strong>Cơ chế Fork MusicXML Chuyên Sâu:</strong> Đây là các bản nốt nhạc độc lập được nhân bản từ bản gốc Master, cho phép Ca Trưởng hoặc Nhạc Trưởng phân chia 4 bè SATB, đổi ô nhịp hoặc soạn bè dạo riêng bằng Visual Editor mà không ảnh hưởng tới bản gốc của hội thánh.
+        </div>
+      </div>
+
+      <!-- Filter Bar for Versions -->
+      <div class="mgr-pane-filter-bar">
+        <div class="mgr-filter-group">
+          <span class="mgr-filter-title">Tác giả:</span>
+          <div class="mgr-pill-row" id="mgr-version-author-chips">
+            <button class="mgr-pill active" data-ver-author="">Tất Cả Tác Giả</button>
+          </div>
+        </div>
+
+        <div class="mgr-pane-filter-right" style="display:flex; align-items:center; gap:0.75rem;">
+          <label class="mgr-switch-label">
+            <input type="checkbox" id="chk-ver-recommended-only">
+            <span>⭐ Chỉ bản Ca Trưởng khuyên dùng</span>
+          </label>
+          <button id="btn-tab-create-version" class="mgr-btn mgr-btn-primary mgr-btn-sm">
+            <span>✨</span> Tạo Bản Fork Mới
+          </button>
         </div>
       </div>
 
       <div class="mgr-versions-grid" id="mgr-versions-grid">
-        <!-- Rendered via JS -->
+        <div class="mgr-table-loading" style="grid-column: 1/-1;">
+          <div class="mgr-spinner"></div>
+          <p>Đang nạp danh sách bản phối MusicXML...</p>
+        </div>
       </div>
     </section>
 
@@ -689,10 +725,34 @@ $instrument = $_SESSION['instrument'] ?? 'Guitar';
     </div>
   </div>
 
+  <!-- 7. MODAL RESET MẬT KHẨU (ADMIN) -->
+  <div class="mgr-modal-overlay hidden" id="modal-reset-pass">
+    <div class="mgr-modal-box" style="max-width: 420px;">
+      <div class="mgr-modal-header">
+        <h3 class="mgr-modal-title">🔑 Đổi Mật Khẩu Thành Viên</h3>
+        <button class="mgr-modal-close" data-close="modal-reset-pass">✕</button>
+      </div>
+      <div class="mgr-modal-body">
+        <p class="text-sm text-muted">Đặt mật khẩu mới cho tài khoản <strong id="reset-pass-target-username">...</strong></p>
+        <form id="form-reset-pass" class="mgr-form">
+          <input type="hidden" id="reset-pass-user-id">
+          <div class="mgr-form-group">
+            <label class="mgr-label">Mật khẩu mới <span class="text-danger">*</span></label>
+            <input type="password" id="reset-pass-new-password" class="mgr-input" placeholder="Từ 4 ký tự trở lên" required>
+          </div>
+          <div class="mgr-modal-actions">
+            <button type="button" class="mgr-btn mgr-btn-ghost" data-close="modal-reset-pass">Hủy</button>
+            <button type="submit" class="mgr-btn mgr-btn-primary">Lưu Mật Khẩu</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST CONTAINER -->
   <div id="mgr-toast-container" class="mgr-toast-container"></div>
 
   <!-- App Logic -->
-  <script src="manager.js?v=2.1.0"></script>
+  <script src="manager.js?v=2.2.0"></script>
 </body>
 </html>

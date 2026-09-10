@@ -27,6 +27,12 @@ const LearnApp = (() => {
   let _songsList        = [];
   let _initialized      = false;
 
+  // Stage 9: Wait Mode & MIDI
+  let _waitMode          = false;
+  let _isWaitingForChord = false;
+  let _targetWaitChord   = null;
+  let _waitResumeTimer   = null;
+
   /* ─── OSMD Setup & Zoom ───────────────────────────────────────── */
   function _initOsmd() {
     const container = document.getElementById('learn-score-container');
@@ -129,6 +135,12 @@ const LearnApp = (() => {
   function _seekToMeasure(measureNum) {
     const meta = _getSongMeta();
     const target = Math.max(1, Math.min(meta.totalMeasures || 999, measureNum));
+
+    // Cancel any active wait-mode pauses when manually seeking
+    if (_waitResumeTimer) clearTimeout(_waitResumeTimer);
+    _isWaitingForChord = false;
+    _targetWaitChord = null;
+    _notifyWaitStatus();
 
     // Jump visual cursor
     _jumpCursorToMeasure(target);
@@ -259,6 +271,12 @@ const LearnApp = (() => {
       MusicTransport.stop();
       if (window.PatternEngine) PatternEngine.stop();
     }
+
+    // Reset wait mode transient state
+    if (_waitResumeTimer) clearTimeout(_waitResumeTimer);
+    _isWaitingForChord = false;
+    _targetWaitChord = null;
+    _notifyWaitStatus();
 
     _currentSong = song;
     _currentTranspose = 0; // Reset Transpose về 0
@@ -579,6 +597,86 @@ const LearnApp = (() => {
     };
   }
 
+  /* ─── Stage 9: Wait Mode & MIDI Evaluation ─────────────────── */
+  function _notifyWaitStatus(chordSym = null, isSuccess = false) {
+    const btn = document.getElementById('btn-toggle-wait-mode');
+    if (!btn) return;
+
+    if (!_waitMode) {
+      btn.innerHTML = '<span>⏸ Đợi Phím</span>';
+      btn.classList.remove('active', 'waiting-for-chord');
+      return;
+    }
+
+    btn.classList.add('active');
+    if (isSuccess) {
+      btn.innerHTML = `<span>✅ Chuẩn: <strong>${_targetWaitChord || chordSym || ''}</strong></span>`;
+      btn.classList.remove('waiting-for-chord');
+    } else if (chordSym) {
+      btn.innerHTML = `<span>⏸ Bấm: <strong>${chordSym}</strong></span>`;
+      btn.classList.add('waiting-for-chord');
+    } else {
+      btn.innerHTML = '<span>⏸ Đợi Phím (BẬT)</span>';
+      btn.classList.remove('waiting-for-chord');
+    }
+  }
+
+  function _checkWaitChordMatch() {
+    if (!_isWaitingForChord || !_targetWaitChord) return;
+    if (!window.ChordJudge || !window.MidiInputEngine) return;
+
+    const activeMidis = MidiInputEngine.getActiveNotes();
+    if (!activeMidis || activeMidis.length === 0) return;
+
+    const result = ChordJudge.judge(_targetWaitChord, activeMidis);
+    if (result.match === 'exact') {
+      const matchedChord = _targetWaitChord;
+      _isWaitingForChord = false;
+
+      // Visual feedback
+      if (window.VirtualKeyboard && VirtualKeyboard.flashSuccess) {
+        VirtualKeyboard.flashSuccess();
+      }
+
+      // Audio feedback chime
+      try {
+        if (window.Tone && Tone.context.state === 'running') {
+          const synth = new Tone.PolySynth(Tone.Synth, {
+            oscillator: { type: 'sine' },
+            envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 0.3 }
+          }).toDestination();
+          synth.volume.value = -10;
+          synth.triggerAttackRelease(['C5', 'G5'], '16n');
+        }
+      } catch (e) {}
+
+      _notifyWaitStatus(matchedChord, true);
+
+      // Record practice stats
+      if (window.PracticeTracker && PracticeTracker.recordChordAccuracy) {
+        PracticeTracker.recordChordAccuracy(matchedChord, true);
+      }
+
+      // Resume transport after pedagogical pause
+      if (_waitResumeTimer) clearTimeout(_waitResumeTimer);
+      _waitResumeTimer = setTimeout(() => {
+        _targetWaitChord = null;
+        if (_waitMode) {
+          _notifyWaitStatus();
+          if (window.PatternEngine) PatternEngine.start();
+          if (window.MusicTransport && !MusicTransport.isPlaying() && LearnStore.get('uiStatus') === 'playing') {
+            MusicTransport.play();
+          }
+        }
+      }, 400);
+    } else if (result.match === 'partial') {
+      const btn = document.getElementById('btn-toggle-wait-mode');
+      if (btn && _waitMode) {
+        btn.innerHTML = `<span>⚠️ Thiếu: <strong>${_targetWaitChord}</strong> (${result.matchedCount}/${result.requiredCount})</span>`;
+      }
+    }
+  }
+
   /* ─── Transport Callbacks ────────────────────────────────────── */
   function _setupTransportCallbacks() {
     // 1. Theo dõi từng Phách (Beat)
@@ -609,6 +707,28 @@ const LearnApp = (() => {
               scoreSec.scrollBy({ top: diff, behavior: 'smooth' });
             }
           }
+        }
+      }
+
+      // Check chord changes on this beat for ChordCard, Keyboard & Wait Mode
+      const timeline = LearnStore.get('timeline') || [];
+      const chordOnBeat = timeline.find(e => e.measure === measure && e.beat === beat);
+      if (chordOnBeat) {
+        const nextChord = ChordTimelineNormalizer.getNextChord(timeline, chordOnBeat);
+        LearnStore.setCurrentChord(chordOnBeat, nextChord);
+        LearnStore.setCurrentPosition(measure, beat);
+        if (window.ChordCard) ChordCard.setChord(chordOnBeat, nextChord, _currentSong?.defaultKey);
+        EventBus.emit(LEARN_EVENTS.CHORD_CHANGED, { chord: chordOnBeat, next: nextChord });
+
+        // Wait Mode pause on chord transition
+        if (_waitMode && (chordOnBeat.transposedSymbol || chordOnBeat.symbol)) {
+          const chordSym = chordOnBeat.transposedSymbol || chordOnBeat.symbol;
+          _targetWaitChord = chordSym;
+          _isWaitingForChord = true;
+          MusicTransport.pause();
+          if (window.PatternEngine) PatternEngine.pause();
+          _notifyWaitStatus(chordSym);
+          _checkWaitChordMatch();
         }
       }
 
@@ -721,8 +841,12 @@ const LearnApp = (() => {
         try { await Tone.start(); } catch (e) {}
       }
 
-      if (MusicTransport.isPlaying()) {
+      if (MusicTransport.isPlaying() || _isWaitingForChord) {
         MusicTransport.pause();
+        if (_waitResumeTimer) clearTimeout(_waitResumeTimer);
+        _isWaitingForChord = false;
+        _targetWaitChord = null;
+        _notifyWaitStatus();
         if (window.PatternEngine) PatternEngine.pause();
         if (window.PracticeTracker) PracticeTracker.onPlaybackStop();
         document.querySelectorAll('.beat-dot').forEach(dot => dot.classList.remove('active'));
@@ -742,6 +866,10 @@ const LearnApp = (() => {
     // Stop
     document.getElementById('btn-learn-stop')?.addEventListener('click', () => {
       MusicTransport.stop();
+      if (_waitResumeTimer) clearTimeout(_waitResumeTimer);
+      _isWaitingForChord = false;
+      _targetWaitChord = null;
+      _notifyWaitStatus();
       if (window.PatternEngine) PatternEngine.stop();
       if (window.PracticeTracker) PracticeTracker.onPlaybackStop();
       if (_osmd?.cursor) {
@@ -860,6 +988,22 @@ const LearnApp = (() => {
     document.getElementById('btn-learn-loop-toggle')?.addEventListener('click', () => {
       if (window.LoopController) {
         LoopController.setLoop(!LoopController.isLooping());
+      }
+    });
+
+    // Stage 9: Wait Mode Toggle Button
+    const waitModeBtn = document.getElementById('btn-toggle-wait-mode');
+    waitModeBtn?.addEventListener('click', () => {
+      _waitMode = !_waitMode;
+      _notifyWaitStatus();
+      if (!_waitMode && _isWaitingForChord) {
+        _isWaitingForChord = false;
+        _targetWaitChord = null;
+        if (_waitResumeTimer) clearTimeout(_waitResumeTimer);
+        if (window.PatternEngine) PatternEngine.start();
+        if (window.MusicTransport && !MusicTransport.isPlaying() && LearnStore.get('uiStatus') === 'playing') {
+          MusicTransport.play();
+        }
       }
     });
 
@@ -1052,6 +1196,24 @@ const LearnApp = (() => {
     // EventBus listeners
     EventBus.on(LEARN_EVENTS.CHORD_CHANGED, ({ chord, next }) => {
       if (window.ChordCard) ChordCard.setChord(chord, next, _currentSong?.defaultKey);
+    });
+
+    // Stage 9: Initialize Web MIDI Hardware Engine
+    if (window.MidiInputEngine) {
+      MidiInputEngine.init();
+      MidiInputEngine.onMidiEvent((evt) => {
+        if (evt.type === 'note_on' || evt.type === 'active_notes_changed') {
+          if (_waitMode && _isWaitingForChord) {
+            _checkWaitChordMatch();
+          }
+        }
+      });
+    }
+
+    EventBus.on('LEARN_MIDI_NOTES_CHANGED', () => {
+      if (_waitMode && _isWaitingForChord) {
+        _checkWaitChordMatch();
+      }
     });
   }
 
