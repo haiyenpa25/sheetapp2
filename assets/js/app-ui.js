@@ -102,13 +102,24 @@ const AppUI = (() => {
 
   function updateTransposeDisplay(currentTranspose) {
     const disp = document.getElementById('transpose-display');
-    if (!disp) return;
-    disp.textContent = currentTranspose === 0 ? '0'
-                     : currentTranspose > 0   ? `+${currentTranspose}`
-                     : `${currentTranspose}`;
-    disp.style.color = currentTranspose === 0 ? 'var(--text-muted)'
-                     : currentTranspose > 0 ? 'var(--success)'
-                     : 'var(--danger)';
+    if (disp) {
+      disp.textContent = currentTranspose === 0 ? '0'
+                       : currentTranspose > 0   ? `+${currentTranspose}`
+                       : `${currentTranspose}`;
+      disp.style.color = currentTranspose === 0 ? 'var(--text-muted)'
+                       : currentTranspose > 0 ? 'var(--success)'
+                       : 'var(--danger)';
+    }
+
+    const gigTrans = document.getElementById('gig-hud-trans');
+    if (gigTrans) {
+      gigTrans.textContent = currentTranspose === 0 ? '0'
+                           : currentTranspose > 0   ? `+${currentTranspose}`
+                           : `${currentTranspose}`;
+      gigTrans.style.color = currentTranspose === 0 ? 'rgba(255,255,255,0.7)'
+                           : currentTranspose > 0 ? '#4ade80'
+                           : '#f87171';
+    }
 
     // Sync Capo select: Capo ngăn = số tông tăng
     // Tăng 2 tông → kẹp ngăn 2 để đàn thế bấm gốc
@@ -139,55 +150,61 @@ const AppUI = (() => {
   /**
    * updateCapoBadge — Hiển thị gợi ý capo TỐI ƯU (riêng biệt với capo select)
    * Chỉ quản lý phần tử #capo-badge, KHÔNG đụng vào #capo-hint (do updateTransposeDisplay quản lý)
-   *
-   * Lý thuyết: capoValue ≠ currentTranspose
-   * VD: Transpose +3 (Bb) — capo tối ưu có thể là 1 (đàn A shapes thay vì G shapes)
-   * Nhưng điều này là "gợi ý nâng cao", hiện riêng để tránh nhầm lẫn.
    */
   function updateCapoBadge(capoValue) {
     const badge = document.getElementById('capo-badge');
-    // KHÔNG ghi đè hint (capo-hint) — hint do updateTransposeDisplay() quản lý
-    // KHÔNG thay đổi capo-select — select do transposeDisplay sync
     if (!badge) return;
-    if (capoValue > 0) {
-      // Chỉ hiện badge nếu gợi ý KHÁC với transpose hiện tại (tránh hiện thừa)
-      // Badge ẩn — tính năng này tạm thời tắt để tránh conflict UX
-      badge.style.display = 'none';
-    } else {
-      badge.style.display = 'none';
-    }
+    badge.style.display = 'none';
   }
 
   function updateSongInfo(song, transpose) {
+    if (!song) return;
     const titleEl = document.getElementById('song-title');
     const keyEl   = document.getElementById('song-key');
-    if (titleEl) {
-       let prefix = '';
-       if (document.querySelector('.toolbar-left')?.classList.contains('in-setlist')) {
-           const setlist = window.SetlistUI?.getCurrentSetlist?.();
-           const idx = window.SetlistUI?.getCurrentIndex?.();
-           if (setlist && setlist.items && idx !== undefined && idx >= 0) {
-               prefix = `[Bài ${idx + 1}/${setlist.items.length}] `;
-               titleEl.style.color = 'var(--accent)';
-           }
-       } else {
-           titleEl.style.color = '';
-       }
-       titleEl.textContent = prefix + song.title;
+    const gigTitleEl = document.getElementById('gig-hud-title');
+    const gigKeyEl   = document.getElementById('gig-hud-key');
+
+    let prefix = '';
+    if (document.querySelector('.toolbar-left')?.classList.contains('in-setlist')) {
+        const setlist = window.SetlistUI?.getCurrentSetlist?.();
+        const idx = window.SetlistUI?.getCurrentIndex?.();
+        if (setlist && setlist.items && idx !== undefined && idx >= 0) {
+            prefix = `[Bài ${idx + 1}/${setlist.items.length}] `;
+            if (titleEl) titleEl.style.color = 'var(--accent)';
+        }
+    } else {
+        if (titleEl) titleEl.style.color = '';
     }
-    
-    if (keyEl) {
-      // Luôn ẩn badge trên toolbar — thông tin giọng đã hiển thị ở Lyric View header và Page Bar
-      // Vẫn cập nhật textContent để lyric-extractor.js đọc được
-      if (song.defaultKey && transpose !== 0 && window.TransposeEngine) {
-        const newKey = TransposeEngine.transposeChord(song.defaultKey, transpose);
-        keyEl.textContent = newKey || song.defaultKey; // Lyric view dùng textContent này
-      } else if (song.defaultKey) {
-        keyEl.textContent = song.defaultKey;
+
+    const fullTitle = prefix + (song.title || '');
+    if (titleEl) titleEl.textContent = fullTitle;
+    if (gigTitleEl) gigTitleEl.textContent = fullTitle;
+
+    // Calculate effective key
+    let displayKey = '';
+    const baseKey = song.defaultKey || window.SongInfoBar?.getSongKey?.() || '';
+    const tVal = (typeof transpose === 'number') ? transpose : (window.Store?.get?.('currentTranspose') || 0);
+
+    if (baseKey) {
+      if (tVal !== 0 && window.TransposeEngine?.transposeChord) {
+        displayKey = TransposeEngine.transposeChord(baseKey, tVal) || baseKey;
       } else {
-        keyEl.textContent = '';
+        displayKey = baseKey;
       }
-      keyEl.style.display = 'none'; // Luôn ẩn trên toolbar
+    }
+
+    if (keyEl) {
+      keyEl.textContent = displayKey || '--';
+      keyEl.style.display = displayKey ? 'inline-block' : 'none';
+      if (tVal !== 0 && baseKey) {
+        keyEl.title = `Tông gốc: ${baseKey} (đang dịch ${tVal > 0 ? '+' : ''}${tVal})`;
+      } else if (baseKey) {
+        keyEl.title = `Tông gốc: ${baseKey}`;
+      }
+    }
+
+    if (gigKeyEl) {
+      gigKeyEl.textContent = displayKey || '--';
     }
   }
 
@@ -196,19 +213,66 @@ const AppUI = (() => {
     const isOn  = body.classList.toggle('sheet-only-mode');
     const btnFS = document.getElementById('btn-fullscreen');
 
-    // Icon: expand (off) ↔ compress (on)
-    const SVG_EXPAND   = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>`;
-    const SVG_COMPRESS = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>`;
+    if (isOn) {
+      const curSong = window.Store?.get?.('currentSong');
+      const curTrans = window.Store?.get?.('currentTranspose') || 0;
+      if (curSong) updateSongInfo(curSong, curTrans);
+      updateTransposeDisplay(curTrans);
+      showToast('Chế độ Biểu Diễn — Chạm 2 mép để lật trang, nhấn Thoát hoặc Esc', 'info');
+    }
 
-    if (btnFS) btnFS.innerHTML = isOn ? SVG_COMPRESS : SVG_EXPAND;
-    if (isOn) showToast('Sheet toàn màn hình — nhấn Esc hoặc nút góc để thoát', 'info');
+    if (btnFS) {
+      const icon = btnFS.querySelector('.gig-icon');
+      const text = btnFS.querySelector('.gig-text');
+      if (text) text.textContent = isOn ? 'Thu Nhỏ' : 'Biểu Diễn';
+      if (icon) icon.textContent = isOn ? '✕' : '⚡';
+    }
   }
 
-  // Wire exit button (Esc xử lý tập trung trong _bindKeyboard của app.js)
+  // Wire exit button & gig controls (Esc xử lý tập trung trong _bindKeyboard của app.js)
   (function _initSheetOnly() {
-    document.getElementById('btn-exit-sheet-only')?.addEventListener('click', () => {
-      // Gọi toggleFullscreen để reset icon nút + xóa class
+    const exitGig = () => {
       if (document.body.classList.contains('sheet-only-mode')) toggleFullscreen();
+    };
+
+    document.getElementById('btn-exit-sheet-only')?.addEventListener('click', exitGig);
+    document.getElementById('btn-gig-exit')?.addEventListener('click', exitGig);
+
+    // Gig HUD Transpose buttons
+    document.getElementById('btn-gig-trans-down')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      window.App?.transposeBy?.(-1);
+    });
+    document.getElementById('btn-gig-trans-up')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      window.App?.transposeBy?.(+1);
+    });
+
+    // Gig HUD Auto-Scroll button
+    document.getElementById('btn-gig-scroll-toggle')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.getElementById('btn-auto-scroll')?.click();
+    });
+
+    // Hands-free Edge-Tap page navigation
+    document.getElementById('edge-tap-prev')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (window.PageNav?.goToPrev) {
+        window.PageNav.goToPrev();
+      } else {
+        const wrap = document.getElementById('sheet-viewer-wrapper');
+        wrap?.scrollBy({ top: -Math.round(window.innerHeight * 0.75), behavior: 'smooth' });
+      }
+    });
+
+    document.getElementById('edge-tap-next')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (window.PageNav?.goToNext) {
+        window.PageNav.goToNext();
+      } else {
+        const wrap = document.getElementById('sheet-viewer-wrapper');
+        wrap?.scrollBy({ top: Math.round(window.innerHeight * 0.75), behavior: 'smooth' });
+      }
     });
   })();
 

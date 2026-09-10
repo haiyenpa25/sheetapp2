@@ -544,6 +544,13 @@ SheetApp/
   ⚠ Còn lại: SongController + CategoryController vẫn trả raw array
               (cần cascade fix ApiService + LibraryUI + AdminUI để chuẩn hóa hoàn toàn)
 
+[2026-09-11] — Tinh gọn & Tối Ưu Hóa Trang Chủ Cho Ban Nhạc Biểu Diễn (Pro-Band Homepage Optimization)
+  + Sửa: includes/toolbar.php (Hợp nhất 2 thanh công cụ thành Pro-Band Toolbar 48px duy nhất: Song Pill + Transpose Pill + Chord Set Pill + Scroll Pill + Biểu Diễn + More Options dropdown)
+  + Sửa: includes/sheet_viewer.php (Loại bỏ thanh page-bar 50px gây rối màn hình; bổ sung 2 vùng Edge-Tap lật trang không chạm và Floating Gig HUD)
+  + Sửa: includes/sidebar.php (Chuyển 2 nút cồng kềnh Live Band & Học Đàn xuống chân sidebar trong khối Tiện Ích Phụ Trợ)
+  + Sửa: assets/css/layout.css (Thiết kế hệ thống Unified Toolbar, Band Pills, Gig Mode Fullscreen, Floating HUD, Edge-Tap Touch Zones và xử lý ẩn gọn khi collapse)
+  + Sửa: assets/js/app-ui.js (Kết nối Floating Gig HUD, Edge-Tap page navigation, cập nhật real-time song key badge khi dịch giọng và đồng bộ chế độ biểu diễn)
+
 [2026-09-11] — Triển khai Giai Đoạn 9 /learn/: Web MIDI Hardware Engine, Intelligent Chord Judge & Chế Độ Đợi Phím (Wait Mode)
   + Tạo: assets/js/learn/midi/midi-input-engine.js (Web MIDI API handler, tracking note-on/off, simulation API, status badge)
   + Tạo: assets/js/learn/practice/chord-judge.js (Intelligent chord matcher, hỗ trợ mọi thể đảo, slash-chord bass check)

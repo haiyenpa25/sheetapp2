@@ -53,17 +53,7 @@
       Cài Đặt Ngoại Tuyến (App)
     </button>
 
-    <!-- LIVE BAND STUDIO BUTTON -->
-    <a href="/live-band/" class="btn btn-sm w-full" style="background: linear-gradient(135deg, #7c3aed, #6d28d9); color: #fff; border: none; margin-bottom: 0.5rem; text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 700;" title="Mở phòng biểu diễn đồng bộ ban nhạc">
-      <span style="margin-right: 6px; font-size: 1rem;">📡</span>
-      Live Band Studio
-    </a>
 
-    <!-- LEARN STUDIO BUTTON -->
-    <a href="/learn/" class="btn btn-sm w-full" style="background: linear-gradient(135deg, #4f46e5, #4338ca); color: #fff; border: none; margin-bottom: 0.5rem; text-decoration: none; display: flex; align-items: center; justify-content: center; font-weight: 700;" title="Phòng tập đàn, đệm hát và hợp âm tương tác">
-      <span style="margin-right: 6px; font-size: 1rem;">🎹</span>
-      Học Đàn & Đệm (Learn)
-    </a>
 
     <!-- OMR UPLOAD BUTTON -->
     <button id="btn-omr-upload" class="btn btn-sm w-full hidden" style="background: linear-gradient(135deg, #2563eb, #1e40af); color: #fff; border: none; margin-bottom: 0.5rem;" title="Upload ảnh/PDF để AI nhận diện thành MusicXML">
@@ -129,6 +119,24 @@
           <div id="setlist-search-results" class="song-list hidden setlist-search-results"></div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- TIỆN ÍCH PHỤ TRỢ (Góc dưới cùng sidebar) -->
+  <div class="sidebar-footer-tools" style="border-top: 1px solid var(--border); padding: 8px 12px; background: var(--bg-surface); flex-shrink: 0;">
+    <div style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px;">Tiện Ích Phụ Trợ</div>
+    <div style="display: flex; gap: 6px;">
+      <a href="/learn/" class="sidebar-mini-link" style="flex: 1; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 6px 8px; border-radius: 6px; background: rgba(79, 70, 229, 0.12); color: #818cf8; border: 1px solid rgba(79, 70, 229, 0.25); font-size: 0.75rem; font-weight: 600;" title="Góc tự tập đàn, điệu đệm & MIDI ở nhà">
+        <span>🎹</span>
+        <span>Học Đàn</span>
+      </a>
+      <a href="/live-band/" class="sidebar-mini-link" style="flex: 1; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 6px 8px; border-radius: 6px; background: rgba(124, 58, 237, 0.12); color: #a78bfa; border: 1px solid rgba(124, 58, 237, 0.25); font-size: 0.75rem; font-weight: 600;" title="Phòng biểu diễn đồng bộ ban nhạc & máy chiếu nhà thờ">
+        <span>📡</span>
+        <span>Live Band</span>
+      </a>
+      <a href="/manager/" target="_blank" class="sidebar-mini-link" style="padding: 6px 10px; text-decoration: none; display: flex; align-items: center; justify-content: center; border-radius: 6px; background: rgba(255, 255, 255, 0.06); color: var(--text-secondary); border: 1px solid var(--border); font-size: 0.75rem; font-weight: 600;" title="Cổng Quản Lý Kho Nhạc & Bản Phối (/manager/)">
+        <span>⚙️</span>
+      </a>
     </div>
   </div>
 </aside>
