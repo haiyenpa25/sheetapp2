@@ -72,11 +72,19 @@
         <option value="default">TLH (gốc)</option>
       </select>
       <span id="chord-set-count" class="chord-set-count"></span>
-      <button id="btn-new-chord-set" class="icon-btn-pill" title="Quản lý / Tạo bản phối mới (/manager/)" onclick="ChordCanvas.showNewSetModal()">
-        <span style="font-size: 0.85rem;">✏️</span>
+
+      <!-- Nút Điền Hợp Âm — toggle chế độ điền/sửa hợp âm trực tiếp trên sheet -->
+      <button id="btn-add-chord-mode-bar" class="btn-chord-edit-pill btn-chord-edit" title="Điền / Sửa hợp âm trực tiếp trên sheet (phím C)" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chord-edit-icon"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        <span class="chord-edit-text">Điền HÂ</span>
       </button>
+
+      <!-- Nút Tạo bộ hợp âm mới -->
+      <button id="btn-new-chord-set" class="icon-btn-pill" title="Tạo bản phối mới" onclick="ChordCanvas.showNewSetModal()">
+        <span style="font-size: 0.85rem;">➕</span>
+      </button>
+
       <!-- Giữ lại các ID ẩn để JS cũ hoạt động 100% -->
-      <button id="btn-add-chord-mode-bar" style="display:none;" disabled></button>
       <button id="btn-chord-highlight" style="display:none;" disabled></button>
       <button id="btn-delete-chord-set" style="display:none;" onclick="ChordCanvas.confirmDeleteSet()"></button>
       <button id="btn-clear-all-chords" style="display:none;"></button>
@@ -195,6 +203,10 @@
 
         <!-- NHÓM 3: BẢN PHỐI & BIÊN TẬP -->
         <div class="menu-section-header">BẢN PHỐI & BIÊN TẬP</div>
+        <button id="btn-menu-chord-edit" class="btn btn-ghost btn-sm btn-menu-item" title="Điền / Chỉnh sửa hợp âm trực tiếp trên sheet (phím C)" onclick="window.ChordCanvas?.toggleAddMode?.()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Điền Hợp Âm Trực Tiếp (phím C)
+        </button>
         <button id="btn-song-versions" class="btn btn-ghost btn-sm btn-menu-item" disabled title="Chọn phiên bản MusicXML">
           <span style="font-size: 0.85rem;">👥</span>
           <span id="btn-version-label">Bản Gốc</span>

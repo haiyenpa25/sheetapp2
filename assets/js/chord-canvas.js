@@ -190,7 +190,10 @@ const ChordCanvas = (() => {
   function toggleAddMode() {
     // Kiểm tra quyền — cần ít nhất role "banhat"
     if (!_editEnabled && !window.Auth?.isBanhat?.()) {
-      window.App?.showToast?.('⚠️ Cần đăng nhập với quyền Ban Hát để thêm hợp âm', 'error');
+      window.App?.showToast?.('⚠️ Vui lòng đăng nhập tài khoản Ban Hát để điền hợp âm', 'info');
+      if (typeof window.Auth?.openModal === 'function') {
+        window.Auth.openModal();
+      }
       return;
     }
     setAddMode(!_editEnabled);
@@ -1000,6 +1003,13 @@ const ChordCanvas = (() => {
   }
 
   function showNewSetModal() {
+    if (!window.Auth?.isBanhat?.()) {
+      window.App?.showToast?.('⚠️ Vui lòng đăng nhập tài khoản Ban Hát để tạo bản phối mới', 'info');
+      if (typeof window.Auth?.openModal === 'function') {
+        window.Auth.openModal();
+      }
+      return;
+    }
     ChordCanvasUI.showNewSetModal({ onCreate: (name) => createSet(name) });
   }
 

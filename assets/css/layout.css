@@ -855,7 +855,7 @@ body.dark-mode .transpose-value {
 }
 
 .chord-set-pill {
-  max-width: 240px;
+  max-width: 320px;
 }
 
 .chord-set-select {
@@ -866,7 +866,7 @@ body.dark-mode .transpose-value {
   color: #d97706;
   outline: none;
   cursor: pointer;
-  max-width: 155px;
+  max-width: 140px;
   text-overflow: ellipsis;
 }
 
@@ -882,6 +882,63 @@ body.dark-mode .chord-set-select {
 .chord-set-count {
   font-size: 0.68rem;
   color: var(--text-muted);
+}
+
+/* Nút Điền Hợp Âm trong Chord Set Pill */
+.btn-chord-edit-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 7px;
+  height: 25px;
+  border-radius: 4px;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.08);
+  color: #059669;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-chord-edit-pill .chord-edit-icon {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+body.dark-mode .btn-chord-edit-pill {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(52, 211, 153, 0.4);
+  color: #34d399;
+}
+
+.btn-chord-edit-pill:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.22);
+  border-color: #10b981;
+  color: #047857;
+}
+
+body.dark-mode .btn-chord-edit-pill:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.25);
+  border-color: #34d399;
+  color: #6ee7b7;
+}
+
+.btn-chord-edit-pill.active {
+  background: #10b981 !important;
+  color: #ffffff !important;
+  border-color: #059669 !important;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.45);
+}
+
+.btn-chord-edit-pill:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  border-color: var(--border);
+  color: var(--text-muted);
+  background: transparent;
 }
 
 .btn-pill-scroll {
@@ -1177,6 +1234,14 @@ body.sheet-only-mode .gig-floating-hud {
   }
   .chord-set-count {
     display: none !important;
+  }
+  .btn-chord-edit-pill .chord-edit-text {
+    display: none !important;
+  }
+  .btn-chord-edit-pill {
+    padding: 0 4px !important;
+    min-width: 24px;
+    justify-content: center;
   }
   .select-scroll-speed {
     display: none !important;

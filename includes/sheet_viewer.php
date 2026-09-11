@@ -136,8 +136,8 @@
   <!-- Floating Chord Edit Hint (ngoài page-bar) -->
   <div id="chord-edit-hint" class="chord-edit-hint hidden" role="status">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="hint-icon"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-    <span>Chế độ nhập hợp âm — Click vào nốt nhạc để thêm hoặc sửa</span>
-    <button class="hint-close-btn" onclick="window.ChordCanvas?.setAddMode(false)" title="Thoát chế độ nhập">Xong</button>
+    <span>Chế độ điền hợp âm — Click vào nốt nhạc (+) để thêm hoặc click hợp âm để sửa</span>
+    <button class="hint-close-btn" onclick="window.ChordCanvas?.setAddMode(false)" title="Thoát chế độ điền hợp âm">✓ Hoàn tất</button>
   </div>
 
   <!-- Song Info Strip — Single Row Consolidate -->

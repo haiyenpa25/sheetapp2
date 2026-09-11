@@ -117,13 +117,13 @@ const Auth = (() => {
     const canEditChords = _canEditChords(); // banhat + admin
     const loggedIn      = isLoggedIn();
 
-    // Thêm hợp âm — cần quyền Ban Hát trở lên
+    // Thêm hợp âm — nút toolbar luôn hiển thị cho người dùng biết tính năng
     document.getElementById('btn-add-chord-mode')?.classList.toggle('hidden', !canEditChords);
-    document.getElementById('btn-add-chord-mode-bar')?.classList.toggle('hidden', !canEditChords);
+    document.getElementById('btn-add-chord-mode-bar')?.classList.remove('hidden');
     // Nổi bật hợp âm — TấT CẢ người dùng đều được dùng (chỉ xem, không sửa)
     document.getElementById('btn-chord-highlight')?.classList.remove('hidden');
-    // Tạo bộ hợp âm mới — cần quyền Ban Hát trở lên
-    document.getElementById('btn-new-chord-set')?.classList.toggle('hidden', !canEditChords);
+    // Tạo bộ hợp âm mới — giữ hiển thị
+    document.getElementById('btn-new-chord-set')?.classList.remove('hidden');
     // Ghi chú — Admin only
     document.getElementById('btn-add-annotate-mode')?.classList.toggle('hidden', !canEdit);
 
@@ -209,7 +209,7 @@ const Auth = (() => {
   }
 
   return {
-    init, checkSession, isAdmin, isLoggedIn,
+    init, checkSession, isAdmin, isLoggedIn, openModal, closeModal,
     isBanhat: () => _canEditChords(),
     getUser: () => _currentUser,
     getRole: () => _role
