@@ -7,6 +7,7 @@ const Auth = (() => {
 
   let _currentUser = null;
   let _role = 'viewer'; // viewer | banhat | admin
+  let _chordCode = null;
 
   async function checkSession() {
     try {
@@ -14,15 +15,18 @@ const Auth = (() => {
       if (data.loggedIn) {
         _currentUser = data.username;
         _role = data.role;
+        _chordCode = data.chord_code || null;
       } else {
         _currentUser = null;
         _role = 'viewer';
+        _chordCode = null;
       }
       _updateUI();
       return _role;
     } catch (err) {
       console.error("Auth:", err);
       _role = 'viewer';
+      _chordCode = null;
       return _role;
     }
   }
@@ -33,6 +37,7 @@ const Auth = (() => {
       if (data.success) {
         _currentUser = data.username;
         _role = data.role;
+        _chordCode = data.chord_code || null;
         _updateUI();
         closeModal();
         window.App?.showToast?.('Đăng nhập thành công', 'success');
@@ -53,6 +58,7 @@ const Auth = (() => {
     await window.ApiService.auth.logout();
     _currentUser = null;
     _role = 'viewer';
+    _chordCode = null;
     _updateUI();
     closeModal();
     window.App?.showToast?.('Đã đăng xuất', 'info');
@@ -212,7 +218,9 @@ const Auth = (() => {
     init, checkSession, isAdmin, isLoggedIn, openModal, closeModal,
     isBanhat: () => _canEditChords(),
     getUser: () => _currentUser,
-    getRole: () => _role
+    getRole: () => _role,
+    getChordCode: () => _chordCode,
+    getMusicianInfo: () => ({ username: _currentUser, role: _role, chordCode: _chordCode })
   };
 })();
 

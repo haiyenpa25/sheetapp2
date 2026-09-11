@@ -188,7 +188,7 @@ const ChordCanvas = (() => {
   }
 
   function toggleAddMode() {
-    // Kiểm tra quyền — cần ít nhất role "banhat"
+    // Kiểm tra quyền — cần ít nhất role "banhat" hoặc "admin"
     if (!_editEnabled && !window.Auth?.isBanhat?.()) {
       window.App?.showToast?.('⚠️ Vui lòng đăng nhập tài khoản Ban Hát để điền hợp âm', 'info');
       if (typeof window.Auth?.openModal === 'function') {
@@ -196,7 +196,66 @@ const ChordCanvas = (() => {
       }
       return;
     }
+
+    if (!_editEnabled) {
+      const songId = window.App?.getCurrentSongId?.();
+      const myChordCode = (window.Auth?.getChordCode?.() || '').toUpperCase();
+      const isAdmin = window.Auth?.isAdmin?.() ?? false;
+      const curSetUpper = (_currentSet || '').toUpperCase();
+
+      // Trường hợp 1: Đang ở bộ TLH gốc (bất biến)
+      if (_currentSet === 'default' || curSetUpper === 'TLH') {
+        const targetSet = myChordCode || 'HD';
+        if (typeof ChordCanvasUI?.showCloneConfirmModal === 'function') {
+          ChordCanvasUI.showCloneConfirmModal({
+            sourceSet: 'TLH (Gốc)',
+            targetSet: targetSet,
+            onConfirm: async () => {
+              await _cloneAndStartEditing(songId, 'default', targetSet);
+            }
+          });
+        } else {
+          window.App?.showToast?.('⚠️ Bản TLH (Gốc) là bất biến, không thể sửa trực tiếp!', 'warning');
+        }
+        return;
+      }
+
+      // Trường hợp 2: Đang xem bộ của người khác (và không phải Super Admin)
+      if (!isAdmin && myChordCode && curSetUpper !== myChordCode) {
+        if (typeof ChordCanvasUI?.showCloneConfirmModal === 'function') {
+          ChordCanvasUI.showCloneConfirmModal({
+            sourceSet: _currentSet,
+            targetSet: myChordCode,
+            onConfirm: async () => {
+              await _cloneAndStartEditing(songId, _currentSet, myChordCode);
+            }
+          });
+        } else {
+          window.App?.showToast?.(`⚠️ Bộ "${_currentSet}" thuộc quyền sở hữu riêng của nhạc công khác!`, 'warning');
+        }
+        return;
+      }
+    }
+
     setAddMode(!_editEnabled);
+  }
+
+  async function _cloneAndStartEditing(songId, sourceSet, targetSet) {
+    if (!songId || !targetSet) return;
+    try {
+      window.App?.showToast?.(`Đang sao chép từ "${sourceSet}" sang "${targetSet}"...`, 'info');
+      const res = await window.ApiService.chordSets.clone(songId, sourceSet, targetSet);
+      if (res.success) {
+        await switchSet(targetSet);
+        setAddMode(true);
+        await _refreshSetDropdown();
+        window.App?.showToast?.(`✨ Đã sao chép sang bộ riêng "${targetSet}"! Bắt đầu chỉnh sửa.`, 'success');
+      } else {
+        window.App?.showToast?.('Lỗi sao chép: ' + (res.message || res.error || ''), 'error');
+      }
+    } catch(err) {
+      window.App?.showToast?.('Lỗi kết nối khi sao chép bộ hợp âm', 'error');
+    }
   }
 
   /* ─── Highlight Mode ─────────────────────────────────────────── */
@@ -939,7 +998,22 @@ const ChordCanvas = (() => {
 
   async function _saveCustomSet() {
     const songId = window.App?.getCurrentSongId?.();
-    if (!songId || _currentSet === 'default') return;
+    if (!songId) return;
+
+    if (_currentSet === 'default') {
+      window.App?.showToast?.('❌ Bản TLH gốc là bất biến, không thể lưu đè!', 'error');
+      return;
+    }
+
+    const myChordCode = (window.Auth?.getChordCode?.() || '').toUpperCase();
+    const isAdmin = window.Auth?.isAdmin?.() ?? false;
+    const curSetUpper = (_currentSet || '').toUpperCase();
+
+    if (!isAdmin && myChordCode && curSetUpper !== myChordCode) {
+      window.App?.showToast?.(`❌ Bạn chỉ có quyền lưu vào bộ hợp âm cá nhân (${myChordCode})!`, 'error');
+      return;
+    }
+
     const arr = Object.entries(_customChords).map(([k, chord]) => {
       const [measureIdx, noteIdx] = k.split('_').map(Number);
       return { measureIdx, noteIdx, chord };
@@ -1015,10 +1089,17 @@ const ChordCanvas = (() => {
 
   async function deleteSet(name) {
     // RULE: TLH (default) và HD đều bị lock — không cho xóa
-    if (!name || name === 'default' || name === 'HD') {
-      window.App?.showToast?.('Bộ này được bảo vệ, không thể xóa!', 'error');
+    if (!name || name === 'default' || name === 'TLH' || name === 'HD') {
+      window.App?.showToast?.('Bộ này được bảo vệ chuẩn, không thể xóa!', 'error');
       return;
     }
+    const myChordCode = (window.Auth?.getChordCode?.() || '').toUpperCase();
+    const isAdmin = window.Auth?.isAdmin?.() ?? false;
+    if (!isAdmin && name.toUpperCase() !== myChordCode) {
+      window.App?.showToast?.(`Bạn chỉ được quyền xóa bộ hợp âm cá nhân của mình (${myChordCode})!`, 'error');
+      return;
+    }
+
     const songId = window.App?.getCurrentSongId?.();
     if (!songId) return;
     try {
@@ -1037,7 +1118,7 @@ const ChordCanvas = (() => {
 
     const songId = window.App?.getCurrentSongId?.();
     if (!songId) {
-      selector.innerHTML = '<option value="HD" selected>⭐ HD (Ưu tiên)</option><option value="default">TLH (gốc)</option>';
+      selector.innerHTML = '<option value="HD" selected>⭐ HD (Hoài Dinh)</option><option value="default">TLH (Gốc) 🔒</option>';
       selector.disabled = true; return;
     }
 
@@ -1061,24 +1142,42 @@ const ChordCanvas = (() => {
       countBadge.style.color = chordCount > 0 ? 'var(--success,#16a34a)' : 'var(--text-muted,#9ca3af)';
     }
 
-    const canCreate = window.Auth?.isBanhat?.() ?? false;
+    const myChordCode = (window.Auth?.getChordCode?.() || '').toUpperCase();
+    const isAdmin     = window.Auth?.isAdmin?.()   ?? false;
+    const isLoggedIn  = window.Auth?.isLoggedIn?.() ?? false;
+    const canCreate   = window.Auth?.isBanhat?.() ?? false;
+
+    const KNOWN_CODES = {
+      'HD': 'Hoài Dinh (HD)',
+      'NAM': 'Hoàng Nam (NAM)',
+      'LAN': 'Hà Lan (LAN)',
+      'ADMIN': 'Ban Nhạc Admin'
+    };
 
     selector.innerHTML = sets.map(s => {
+      const sUpper = s.toUpperCase();
       let label = s;
-      if (s === 'HD') {
-        label = '⭐ HD (Ưu tiên)';
-      } else if (s === 'default') {
-        label = 'TLH (gốc)';
+      if (s === 'default' || sUpper === 'TLH') {
+        label = 'TLH (Gốc) 🔒 [Bất biến]';
+      } else if (myChordCode && sUpper === myChordCode) {
+        label = `⭐ Bộ của tôi (${s}) [Được sửa]`;
+      } else if (KNOWN_CODES[sUpper]) {
+        label = `${KNOWN_CODES[sUpper]} 👁️`;
+      } else if (sUpper === 'HD') {
+        label = '⭐ HD (Hoài Dinh) 👁️';
       } else if (s.includes('__')) {
         const parts = s.split('__');
         const author = parts[0];
         const cleanName = parts.slice(1).join('__').replace(/_/g, ' ');
         label = `🎸 ${cleanName} (@${author})`;
+      } else {
+        label = `🎸 Bộ ${s}`;
       }
       return `<option value="${s}" ${s === _currentSet ? 'selected' : ''}>${label}</option>`;
     }).join('') 
     + (canCreate ? `<option value="__create_new_set__" style="color: var(--accent,#6d28d9); font-weight: bold;">➕ Tạo Bộ Hợp Âm Mới...</option>` : '')
-    + `<option value="__open_manager__" style="color: var(--cyan,#06b6d4);">📂 Mở Quản Lý / Bản Phối...</option>`;
+    + `<option value="__open_members__" style="color: var(--emerald,#10b981); font-weight: bold;">👥 Quản Lý Nhạc Công & Hợp Âm (/members/)...</option>`
+    + `<option value="__open_manager__" style="color: var(--cyan,#06b6d4);">📂 Mở Quản Lý Kho Nhạc (/manager/)...</option>`;
 
     if (!selector.dataset.boundCreateHandler) {
       selector.dataset.boundCreateHandler = 'true';
@@ -1087,6 +1186,9 @@ const ChordCanvas = (() => {
         if (val === '__create_new_set__') {
           selector.value = _currentSet;
           showNewSetModal();
+        } else if (val === '__open_members__') {
+          selector.value = _currentSet;
+          window.open('/members/', '_blank');
         } else if (val === '__open_manager__') {
           selector.value = _currentSet;
           window.open('/manager/', '_blank');
@@ -1094,10 +1196,8 @@ const ChordCanvas = (() => {
       });
     }
 
-    const isAdmin    = window.Auth?.isAdmin?.()   ?? false;
-    const isLoggedIn = window.Auth?.isLoggedIn?.() ?? false;
     // RULE: TLH và HD đều lock — nút xóa chỉ hiện khi set khác default + HD
-    const isDeletable = _currentSet !== 'default' && _currentSet !== 'HD' && isAdmin;
+    const isDeletable = _currentSet !== 'default' && _currentSet !== 'HD' && (isAdmin || (myChordCode && _currentSet.toUpperCase() === myChordCode));
     if (deleteBtn) deleteBtn.style.display = isDeletable ? 'inline-flex' : 'none';
     const newBtn = document.getElementById('btn-new-chord-set');
     if (newBtn) newBtn.classList.toggle('hidden', !isLoggedIn);

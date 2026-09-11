@@ -14,6 +14,12 @@ try {
             username TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
             role TEXT NOT NULL DEFAULT 'viewer',
+            display_name TEXT,
+            instrument TEXT,
+            chord_code TEXT,
+            avatar_url TEXT,
+            bio TEXT,
+            status TEXT DEFAULT 'active',
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     ");

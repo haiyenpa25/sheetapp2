@@ -68,12 +68,24 @@ class ChordSetService {
     }
 
     public static function saveSet(string $songId, string $name, array $chords): bool {
+        // RULE: Không cho phép ghi đè lên bộ gốc TLH / default
+        if ($name === 'default' || $name === 'TLH') {
+            return false;
+        }
         $file = self::getSetFile($songId, $name);
         $json = json_encode($chords, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
         return file_put_contents($file, $json) !== false;
     }
 
+    public static function cloneSet(string $songId, string $sourceName, string $targetName): bool {
+        $sourceChords = self::loadSet($songId, $sourceName);
+        return self::saveSet($songId, $targetName, $sourceChords);
+    }
+
     public static function deleteSet(string $songId, string $name): void {
+        if ($name === 'default' || $name === 'TLH' || $name === 'HD') {
+            return;
+        }
         $file = self::getSetFile($songId, $name);
         if (file_exists($file)) unlink($file);
     }

@@ -34,6 +34,7 @@ const ApiService = (() => {
     list:   (songId)             => _request(`api/index.php?route=chord_sets&action=list&songId=${encodeURIComponent(songId)}`),
     load:   (songId, name)       => _request(`api/index.php?route=chord_sets&action=load&songId=${encodeURIComponent(songId)}&name=${encodeURIComponent(name)}`),
     save:   (songId, name, chords) => _json('POST', 'api/index.php?route=chord_sets', { action:'save', songId, name, chords }),
+    clone:  (songId, source, target) => _json('POST', 'api/index.php?route=chord_sets', { action:'clone', songId, source, target, sourceName: source, targetName: target, name: target }),
     delete: (songId, name)       => _json('POST', 'api/index.php?route=chord_sets', { action:'delete', songId, name }),
   };
 

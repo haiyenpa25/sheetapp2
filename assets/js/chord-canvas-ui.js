@@ -441,5 +441,66 @@ const ChordCanvasUI = (() => {
     overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
   }
 
-  return { getScale, getTextSize, getDotSize, applyAbsolute, createPopup, showNewSetModal, showDeleteConfirmModal };
+  /* ─── Modal Xác nhận sao chép sang bộ cá nhân ─────────────── */
+  function showCloneConfirmModal({ sourceSet, targetSet, onConfirm, onCancel }) {
+    const isDark = document.body.classList.contains('dark-theme') || !document.body.classList.contains('light-mode');
+    const bgCard = isDark ? '#1e293b' : '#ffffff';
+    const textPrimary = isDark ? '#f8fafc' : '#0f172a';
+    const textSecondary = isDark ? '#94a3b8' : '#64748b';
+    const borderColor = isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0';
+
+    const isBaseSet = (!sourceSet || sourceSet === 'default' || sourceSet === 'TLH' || sourceSet.includes('TLH') || sourceSet.includes('Gốc'));
+    const sourceLabel = isBaseSet ? 'TLH (Gốc)' : sourceSet;
+
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:99999;padding:16px;';
+    overlay.innerHTML = `
+      <div style="background:${bgCard};color:${textPrimary};border:1px solid ${borderColor};border-radius:14px;padding:1.5rem;max-width:440px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.4);">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.75rem;">
+          <div style="width:36px;height:36px;border-radius:8px;background:rgba(16,185,129,0.15);color:#10b981;display:flex;align-items:center;justify-content:center;font-size:18px;">🛡️</div>
+          <div>
+            <div style="font-size:1rem;font-weight:700;line-height:1.2;">Bảo Vệ Bản Phối Hợp Âm</div>
+            <div style="font-size:0.75rem;color:${textSecondary};">Phân quyền nhạc công & bản gốc</div>
+          </div>
+        </div>
+
+        <div style="font-size:0.85rem;color:${textSecondary};line-height:1.5;margin-bottom:1.25rem;">
+          ${isBaseSet 
+            ? `Bản <strong>TLH (Gốc)</strong> là bản chuẩn bất biến của hệ thống và không thể sửa trực tiếp.`
+            : `Bộ hợp âm <strong>${sourceLabel}</strong> thuộc quyền sở hữu riêng của nhạc công khác.`}
+          <br><br>
+          Hệ thống sẽ <strong>sao chép toàn bộ hợp âm hiện tại</strong> sang bộ cá nhân <strong><span style="color:#10b981;font-weight:700;">${targetSet}</span></strong> của bạn để bạn tự do chỉnh sửa và lưu trữ.
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+          <button id="cc-clone-cancel" class="btn btn-ghost btn-sm" style="border-radius:8px;">Hủy</button>
+          <button id="cc-clone-ok" class="btn btn-primary btn-sm" style="background:#10b981;border-color:#10b981;border-radius:8px;font-weight:600;padding:6px 14px;">
+            ✨ Sao Chép Sang "${targetSet}" & Sửa
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    const cleanup = () => overlay.remove();
+    overlay.querySelector('#cc-clone-cancel').onclick = () => {
+      cleanup();
+      if (typeof onCancel === 'function') onCancel();
+    };
+    overlay.querySelector('#cc-clone-ok').onclick = () => {
+      cleanup();
+      if (typeof onConfirm === 'function') onConfirm();
+    };
+    overlay.onclick = e => {
+      if (e.target === overlay) {
+        cleanup();
+        if (typeof onCancel === 'function') onCancel();
+      }
+    };
+  }
+
+  return { getScale, getTextSize, getDotSize, applyAbsolute, createPopup, showNewSetModal, showDeleteConfirmModal, showCloneConfirmModal };
 })();
+
+window.ChordCanvasUI = ChordCanvasUI;

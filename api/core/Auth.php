@@ -33,6 +33,10 @@ class Auth {
         return $_SESSION['role'] ?? 'viewer';
     }
 
+    public static function chordCode(): string {
+        return $_SESSION['chord_code'] ?? '';
+    }
+
     public static function requireAdmin(): void {
         if (!self::isAdmin()) {
             Response::forbidden('Chỉ Admin mới có quyền thực hiện');

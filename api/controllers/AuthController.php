@@ -24,13 +24,15 @@ class AuthController {
                     $_SESSION['role']         = $user['role'];
                     $_SESSION['display_name'] = $user['display_name'] ?? $user['username'];
                     $_SESSION['instrument']   = $user['instrument'] ?? 'Guitar';
+                    $_SESSION['chord_code']   = $user['chord_code'] ?? '';
 
                     Response::ok([
                         'user_id'      => $user['id'],
                         'role'         => $user['role'],
                         'username'     => $user['username'],
                         'display_name' => $user['display_name'] ?? $user['username'],
-                        'instrument'   => $user['instrument'] ?? 'Guitar'
+                        'instrument'   => $user['instrument'] ?? 'Guitar',
+                        'chord_code'   => $user['chord_code'] ?? ''
                     ], 'Đăng nhập thành công!');
                 } else {
                     Response::error('Sai tài khoản hoặc mật khẩu', 401);
@@ -69,19 +71,22 @@ class AuthController {
 
                 try {
                     // Mặc định tài khoản tạo mới có quyền 'banhat' để được tạo và tùy biến hợp âm
-                    $newId = UserService::createWithProfile($username, $password, 'banhat', $displayName, $instrument);
+                    $chordCode = strtoupper(substr($username, 0, 4));
+                    $newId = UserService::createWithProfile($username, $password, 'banhat', $displayName, $instrument, $chordCode);
                     $_SESSION['user_id']      = $newId;
                     $_SESSION['username']     = $username;
                     $_SESSION['role']         = 'banhat';
                     $_SESSION['display_name'] = $displayName;
                     $_SESSION['instrument']   = $instrument;
+                    $_SESSION['chord_code']   = $chordCode;
 
                     Response::ok([
                         'user_id'      => $newId,
                         'username'     => $username,
                         'display_name' => $displayName,
                         'role'         => 'banhat',
-                        'instrument'   => $instrument
+                        'instrument'   => $instrument,
+                        'chord_code'   => $chordCode
                     ], "Đăng ký tài khoản @{$username} thành công!");
                 } catch (Throwable $e) {
                     Response::error('Lỗi tạo tài khoản: ' . $e->getMessage(), 500);
@@ -116,13 +121,16 @@ class AuthController {
             case 'me':
                 if (Auth::isLoggedIn()) {
                     $u = UserService::findByUsername(Auth::username());
+                    $chordCode = $u['chord_code'] ?? ($_SESSION['chord_code'] ?? '');
+                    $_SESSION['chord_code'] = $chordCode;
                     Response::ok([
                         'loggedIn'     => true,
                         'user_id'      => Auth::userId(),
                         'username'     => Auth::username(),
                         'role'         => $_SESSION['role'] ?? 'viewer',
                         'display_name' => $u['display_name'] ?? Auth::username(),
-                        'instrument'   => $u['instrument'] ?? 'Guitar'
+                        'instrument'   => $u['instrument'] ?? 'Guitar',
+                        'chord_code'   => $chordCode
                     ]);
                 } else {
                     Response::ok(['loggedIn' => false, 'role' => 'viewer']);

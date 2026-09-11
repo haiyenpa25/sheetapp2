@@ -6,17 +6,24 @@ require_once __DIR__ . '/../core/DB.php';
 
 class UserService {
     public static function getAll(): array {
-        return DB::query("SELECT id, username, role, created_at FROM users ORDER BY created_at DESC");
+        return DB::query("SELECT id, username, role, display_name, instrument, chord_code, avatar_url, bio, status, created_at FROM users ORDER BY created_at DESC");
     }
 
     /**
-     * T\u00ecm user theo username (d\u00f9ng cho AuthController login).
-     * Tr\u1ea3 false n\u1ebfu kh\u00f4ng t\u00ecm th\u1ea5y.
+     * Tìm user theo username (dùng cho AuthController login).
+     * Trả false nếu không tìm thấy.
      */
     public static function findByUsername(string $username): array|false {
         return DB::run(
-            "SELECT id, username, password_hash, role FROM users WHERE username = ?",
+            "SELECT id, username, password_hash, role, display_name, instrument, chord_code, avatar_url, bio, status FROM users WHERE username = ?",
             [$username]
+        )->fetch();
+    }
+
+    public static function findById(int $id): array|false {
+        return DB::run(
+            "SELECT id, username, role, display_name, instrument, chord_code, avatar_url, bio, status, created_at FROM users WHERE id = ?",
+            [$id]
         )->fetch();
     }
 
@@ -26,13 +33,30 @@ class UserService {
         return (int)DB::lastId();
     }
 
-    public static function createWithProfile(string $username, string $password, string $role, string $displayName, string $instrument): int {
+    public static function createWithProfile(string $username, string $password, string $role, string $displayName, string $instrument, ?string $chordCode = null): int {
         $hash = password_hash($password, PASSWORD_DEFAULT);
+        $chordCode = !empty($chordCode) ? strtoupper(trim($chordCode)) : null;
         DB::run(
-            "INSERT INTO users (username, password_hash, role, display_name, instrument) VALUES (?, ?, ?, ?, ?)",
-            [$username, $hash, $role, $displayName, $instrument]
+            "INSERT INTO users (username, password_hash, role, display_name, instrument, chord_code) VALUES (?, ?, ?, ?, ?, ?)",
+            [$username, $hash, $role, $displayName, $instrument, $chordCode]
         );
         return (int)DB::lastId();
+    }
+
+    public static function updateMusician(int $id, string $displayName, string $instrument, string $chordCode, string $role, ?string $password = null): void {
+        $chordCode = strtoupper(trim($chordCode));
+        if (!empty($password)) {
+            $hash = password_hash($password, PASSWORD_DEFAULT);
+            DB::run(
+                "UPDATE users SET display_name = ?, instrument = ?, chord_code = ?, role = ?, password_hash = ? WHERE id = ?",
+                [$displayName, $instrument, $chordCode, $role, $hash, $id]
+            );
+        } else {
+            DB::run(
+                "UPDATE users SET display_name = ?, instrument = ?, chord_code = ?, role = ? WHERE id = ?",
+                [$displayName, $instrument, $chordCode, $role, $id]
+            );
+        }
     }
 
     public static function updateProfile(int $id, ?string $displayName, ?string $instrument, ?string $currentPassword, ?string $newPassword): array {
@@ -70,7 +94,7 @@ class UserService {
             DB::run("UPDATE users SET " . implode(", ", $fields) . " WHERE id = ?", $params);
         }
 
-        return DB::run("SELECT id, username, role, display_name, instrument, created_at FROM users WHERE id = ?", [$id])->fetch();
+        return DB::run("SELECT id, username, role, display_name, instrument, chord_code, created_at FROM users WHERE id = ?", [$id])->fetch();
     }
 
     public static function updateRole(int $id, string $role): void {
