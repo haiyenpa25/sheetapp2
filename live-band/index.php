@@ -96,6 +96,7 @@ function liveBandCssTag(string $file): string {
       <div class="stage-song-pill" id="stage-song-pill">
         <span class="song-status-dot"></span>
         <span id="nav-song-title" class="nav-song-title">Đang chờ Ca Trưởng chọn bài...</span>
+        <span id="nav-song-set" class="nav-key-badge" style="background:rgba(124,58,237,0.2);color:#c4b5fd;border:1px solid rgba(124,58,237,0.4);" title="Bộ hợp âm biểu diễn">Bộ: HD</span>
         <span id="nav-song-key" class="nav-key-badge" title="Tông đang chơi">Tông: C</span>
         <span id="nav-song-bpm" class="nav-bpm-badge" title="Tốc độ nhịp">80 BPM</span>
       </div>
@@ -212,10 +213,15 @@ function liveBandCssTag(string $file): string {
       <div class="host-console-group host-song-group">
         <button id="btn-host-prev-song" class="btn-host-nav" title="Bài trước trong Setlist">⏮</button>
         <div class="host-song-select-wrap">
+          <input type="search" id="host-song-search" class="host-song-search" placeholder="🔍 Tìm số bài (#90) hoặc tên..." autocomplete="off" title="Lọc nhanh trong 903 bài">
           <select id="host-song-dropdown" class="host-song-dropdown" aria-label="Chọn bài hát">
             <option value="">-- Chọn bài hát phát sóng --</option>
           </select>
         </div>
+        <select id="host-chord-set-select" class="host-chord-set-select" title="Bộ hợp âm phát sóng cho toàn ban nhạc">
+          <option value="HD" selected>⭐ HD</option>
+          <option value="default">TLH (Gốc)</option>
+        </select>
         <button id="btn-host-next-song" class="btn-host-nav" title="Bài tiếp theo trong Setlist">⏭</button>
         <button id="btn-host-pick-setlist" class="btn-host-pill" title="Nạp Setlist chương trình">📋 Setlist</button>
       </div>
@@ -700,6 +706,7 @@ function liveBandCssTag(string $file): string {
 echo liveBandJsTag('assets/js/core/EventBus.js', false);
 echo liveBandJsTag('assets/js/core/Store.js', false);
 echo liveBandJsTag('assets/js/core/ApiService.js', false);
+echo liveBandJsTag('assets/js/chord-canvas-xml.js', false);
 echo liveBandJsTag('assets/js/performance/qr-helper.js', true);
 echo liveBandJsTag('assets/js/performance/transport-clock.js', true);
 echo liveBandJsTag('assets/js/performance/live-transport.js', true);

@@ -23,6 +23,7 @@ const LearnApp = (() => {
   let _xmlDoc           = null;
   let _currentSong      = null;
   let _rawChordData     = [];
+  let _rawXmlString     = '';
   let _currentTranspose = 0; // Luôn bắt đầu = 0 theo Core Rule
   let _songsList        = [];
   let _initialized      = false;
@@ -322,18 +323,42 @@ const LearnApp = (() => {
 
       if (!xmlRes.ok) throw new Error(`XML fetch failed: ${xmlRes.status}`);
       const xml = await xmlRes.text();
+      _rawXmlString = xml;
 
-      // Parse XML
+      // Inject custom chords (HD, ADMIN, etc.) into MusicXML before rendering OSMD
+      let effectiveXml = xml;
+      if (window.ChordCanvasXML?.cloneAndInjectChords && initialSet !== 'default' && initialSet.toUpperCase() !== 'TLH') {
+        const chordsMap = {};
+        if (Array.isArray(chordData)) {
+          chordData.forEach(item => {
+            if (item && item.chord) {
+              chordsMap[`${item.measureIdx}_${item.noteIdx}`] = item.chord;
+            }
+          });
+        }
+        if (Object.keys(chordsMap).length > 0) {
+          effectiveXml = window.ChordCanvasXML.cloneAndInjectChords(xml, chordsMap);
+        }
+      }
+
+      // Parse XML for timeline
       const parser = new DOMParser();
-      _xmlDoc = parser.parseFromString(xml, 'application/xml');
+      _xmlDoc = parser.parseFromString(effectiveXml, 'application/xml');
       _rawChordData = chordData || [];
 
-      // Render OSMD
+      // Render OSMD with full chord annotations
       _hideLoading();
       _showLoading('Đang render sheet nhạc...');
       if (!_osmd) _osmd = _initOsmd();
       if (_osmd) {
-        await _osmd.load(xml);
+        await _osmd.load(effectiveXml);
+        if (_currentTranspose !== 0 && opensheetmusicdisplay.TransposeCalculator) {
+          try {
+            _osmd.TransposeCalculator = new opensheetmusicdisplay.TransposeCalculator();
+            _osmd.Sheet.Transpose = _currentTranspose;
+            _osmd.updateGraphic();
+          } catch(e) {}
+        }
         await _osmd.render();
         if (_osmd.cursor) {
           _osmd.cursor.reset();
@@ -1004,6 +1029,14 @@ const LearnApp = (() => {
         _currentTranspose--;
         const valEl = document.getElementById('learn-trans-val');
         if (valEl) valEl.textContent = _currentTranspose > 0 ? `+${_currentTranspose}` : `${_currentTranspose}`;
+        if (_osmd && _osmd.Sheet && opensheetmusicdisplay.TransposeCalculator) {
+          try {
+            _osmd.TransposeCalculator = new opensheetmusicdisplay.TransposeCalculator();
+            _osmd.Sheet.Transpose = _currentTranspose;
+            _osmd.updateGraphic();
+            _osmd.render();
+          } catch(e) {}
+        }
         _rebuildTimeline();
         _updateUrlAndBackLink();
       }
@@ -1015,6 +1048,14 @@ const LearnApp = (() => {
         _currentTranspose++;
         const valEl = document.getElementById('learn-trans-val');
         if (valEl) valEl.textContent = _currentTranspose > 0 ? `+${_currentTranspose}` : `${_currentTranspose}`;
+        if (_osmd && _osmd.Sheet && opensheetmusicdisplay.TransposeCalculator) {
+          try {
+            _osmd.TransposeCalculator = new opensheetmusicdisplay.TransposeCalculator();
+            _osmd.Sheet.Transpose = _currentTranspose;
+            _osmd.updateGraphic();
+            _osmd.render();
+          } catch(e) {}
+        }
         _rebuildTimeline();
         _updateUrlAndBackLink();
       }
@@ -1027,6 +1068,38 @@ const LearnApp = (() => {
       if (_currentSong) {
         _showLoading(`Đang tải bộ hợp âm ${profile}...`);
         _rawChordData = await _loadChordSet(_currentSong.id, profile);
+
+        // Re-inject chords and re-render OSMD with new chord set
+        if (_rawXmlString && _osmd) {
+          let effectiveXml = _rawXmlString;
+          if (window.ChordCanvasXML?.cloneAndInjectChords && profile !== 'default' && profile.toUpperCase() !== 'TLH') {
+            const chordsMap = {};
+            if (Array.isArray(_rawChordData)) {
+              _rawChordData.forEach(item => {
+                if (item && item.chord) {
+                  chordsMap[`${item.measureIdx}_${item.noteIdx}`] = item.chord;
+                }
+              });
+            }
+            if (Object.keys(chordsMap).length > 0) {
+              effectiveXml = window.ChordCanvasXML.cloneAndInjectChords(_rawXmlString, chordsMap);
+            }
+          }
+          const parser = new DOMParser();
+          _xmlDoc = parser.parseFromString(effectiveXml, 'application/xml');
+          try {
+            await _osmd.load(effectiveXml);
+            if (_currentTranspose !== 0 && opensheetmusicdisplay.TransposeCalculator) {
+              _osmd.TransposeCalculator = new opensheetmusicdisplay.TransposeCalculator();
+              _osmd.Sheet.Transpose = _currentTranspose;
+              _osmd.updateGraphic();
+            }
+            await _osmd.render();
+          } catch (err) {
+            console.warn('[LearnApp] OSMD re-render error:', err);
+          }
+        }
+
         _rebuildTimeline();
         _updateUrlAndBackLink(_currentSong.id, profile, _currentTranspose);
         _hideLoading();

@@ -498,6 +498,7 @@ function learnCssTag(string $file): string {
 echo learnJsTag('assets/js/core/EventBus.js', false);
 echo learnJsTag('assets/js/core/Store.js',    false);
 echo learnJsTag('assets/js/core/ApiService.js', false);
+echo learnJsTag('assets/js/chord-canvas-xml.js', false);
 ?>
 
 <!-- /learn modules -->

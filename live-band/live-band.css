@@ -332,6 +332,40 @@ body.stage-dark {
   color: #fff;
 }
 
+.host-song-search {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--stage-border);
+  color: #f8fafc;
+  font-size: 0.76rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  width: 140px;
+  outline: none;
+  transition: border-color 0.15s, width 0.2s;
+}
+
+.host-song-search:focus {
+  border-color: #8b5cf6;
+  width: 170px;
+}
+
+.host-chord-set-select {
+  background: rgba(124, 58, 237, 0.18);
+  border: 1px solid rgba(124, 58, 237, 0.4);
+  color: #c4b5fd;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  outline: none;
+}
+
+.host-chord-set-select option {
+  background: #1e1b4b;
+  color: #f8fafc;
+}
+
 .btn-host-pill {
   background: rgba(139, 92, 246, 0.2);
   border: 1px solid rgba(139, 92, 246, 0.4);

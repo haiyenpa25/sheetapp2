@@ -32,6 +32,7 @@ const LiveBandApp = (() => {
   let _currentXmlString   = '';
   let _currentBaseKey     = 'C';
   let _currentTranspose   = 0;
+  let _currentChordSet    = 'HD';
   let _currentBpm         = 80;
   let _currentMeasure     = 1;
   let _hostMeasure        = 1;
@@ -293,6 +294,42 @@ const LiveBandApp = (() => {
     document.getElementById('host-song-dropdown')?.addEventListener('change', (e) => {
       if (_mode === 'host' && e.target.value) {
         hostSelectSong(e.target.value);
+      }
+    });
+
+    // Quick Song Search in Host Console
+    document.getElementById('host-song-search')?.addEventListener('input', (e) => {
+      const q = (e.target.value || '').trim().toLowerCase();
+      const dropdown = document.getElementById('host-song-dropdown');
+      if (!dropdown) return;
+      if (!q) {
+        dropdown.innerHTML = '<option value="">-- Chọn bài hát phát sóng --</option>' +
+          _songsList.map(s => `<option value="${s.id}">${s.httlvnId ? s.httlvnId + '. ' : ''}${s.title}</option>`).join('');
+        return;
+      }
+      const filtered = _songsList.filter(s => {
+        const idStr = String(s.id || '').toLowerCase();
+        const titleStr = String(s.title || '').toLowerCase();
+        const numStr = String(s.httlvnId || '');
+        return idStr.includes(q) || titleStr.includes(q) || numStr === q;
+      });
+      dropdown.innerHTML = `<option value="">-- Tìm thấy ${filtered.length} bài --</option>` +
+        filtered.map(s => `<option value="${s.id}">${s.httlvnId ? s.httlvnId + '. ' : ''}${s.title}</option>`).join('');
+      if (filtered.length === 1 && _mode === 'host') {
+        dropdown.value = filtered[0].id;
+        hostSelectSong(filtered[0].id);
+      }
+    });
+
+    // Host Chord Set Selector
+    document.getElementById('host-chord-set-select')?.addEventListener('change', (e) => {
+      if (_currentSongId) {
+        _currentChordSet = e.target.value;
+        if (_mode === 'host') {
+          hostSelectSong(_currentSongId, _currentChordSet);
+        } else {
+          _loadSong(_currentSongId, _currentTranspose, _currentChordSet);
+        }
       }
     });
     document.getElementById('btn-host-prev-song')?.addEventListener('click', hostPrevSong);
@@ -663,12 +700,14 @@ const LiveBandApp = (() => {
       _role = role;
     }
 
-    // 2. Song parameter
+    // 2. Song & Chord Set parameter
     const songId = params.get('song');
+    const chordSet = params.get('set') || 'HD';
+    const trans = parseInt(params.get('trans') || '0', 10);
     if (songId) {
       const dropdown = document.getElementById('host-song-dropdown');
       if (dropdown) dropdown.value = songId;
-      await _loadSong(songId, 0);
+      await _loadSong(songId, isNaN(trans) ? 0 : trans, chordSet);
     }
 
     // 3. Room auto-join
@@ -798,12 +837,16 @@ const LiveBandApp = (() => {
   async function _applyRemoteState(state) {
     if (!state || _mode === 'host') return;
 
-    // 1. Song Change
+    // 1. Song Change & Chord Set Sync
     const targetSongId = state.song?.songId || state.songId;
-    if (targetSongId && targetSongId !== _currentSongId) {
+    const targetChordSet = state.song?.chordSet || state.chordSet || 'HD';
+    if (targetSongId && (targetSongId !== _currentSongId || targetChordSet !== _currentChordSet)) {
       const title = state.song?.songTitle || targetSongId;
-      showCueBanner(`📡 Ca Trưởng chuyển bài: ${title}`, '🎵', 3000);
-      await _loadSong(targetSongId, state.music?.transpose ?? 0);
+      showCueBanner(`📡 Ca Trưởng chuyển bài: ${title} (${targetChordSet})`, '🎵', 3000);
+      await _loadSong(targetSongId, state.music?.transpose ?? 0, targetChordSet);
+    } else if (state.song?.chordSet && state.song.chordSet !== _currentChordSet) {
+      // Chỉ đổi bộ hợp âm
+      await _loadSong(_currentSongId, _currentTranspose, state.song.chordSet);
     }
 
     // 2. Transpose Change
@@ -901,14 +944,15 @@ const LiveBandApp = (() => {
   }
 
   /* ── Host Tactical Actions ────────────────────────────────── */
-  async function hostSelectSong(songId) {
+  async function hostSelectSong(songId, chordSet = null) {
     if (!songId) return;
     const song = _songsList.find(s => s.id === songId);
     _currentSongTitle = song?.title || songId;
+    if (chordSet) _currentChordSet = chordSet;
 
-    await _loadSong(songId, _currentTranspose);
+    await _loadSong(songId, _currentTranspose, _currentChordSet);
     broadcastState({
-      song: { songId, songTitle: _currentSongTitle },
+      song: { songId, songTitle: _currentSongTitle, chordSet: _currentChordSet },
       position: { measure: 1 }
     });
   }
@@ -1051,6 +1095,48 @@ const LiveBandApp = (() => {
     }
   }
 
+  /* ── Dynamic Chord Set Selector for Host ─────────────────── */
+  async function _refreshHostChordSetSelect(songId, currentSet) {
+    const sel = document.getElementById('host-chord-set-select');
+    if (!sel) return;
+
+    let available = ['HD', 'default'];
+    try {
+      const res = await window.ApiService?.chordSets?.list?.(songId);
+      if (res && res.success && Array.isArray(res.sets) && res.sets.length > 0) {
+        available = res.sets;
+      }
+    } catch (e) {}
+
+    if (!available.includes('HD')) available.unshift('HD');
+    if (!available.includes('default')) available.push('default');
+
+    const target = currentSet || _currentChordSet || 'HD';
+    const targetUpper = target.toUpperCase();
+
+    sel.innerHTML = available.map(s => {
+      const sUpper = s.toUpperCase();
+      let label = s;
+      if (s === 'default' || sUpper === 'TLH') label = 'TLH (Gốc) 🔒';
+      else if (sUpper === 'HD') label = '⭐ HD';
+      else if (sUpper === 'ADMIN') label = 'Admin';
+      else if (sUpper === 'BH') label = 'Ban Hát';
+      else label = s;
+      const isSel = (sUpper === targetUpper) || (target === 'default' && s === 'default');
+      return `<option value="${s}" ${isSel ? 'selected' : ''}>${label}</option>`;
+    }).join('');
+
+    // Đảm bảo target có trong option nếu chưa có
+    const hasTarget = Array.from(sel.options).some(o => o.value.toUpperCase() === targetUpper);
+    if (!hasTarget && target !== 'default' && targetUpper !== 'TLH') {
+      const opt = document.createElement('option');
+      opt.value = target;
+      opt.textContent = target;
+      opt.selected = true;
+      sel.appendChild(opt);
+    }
+  }
+
   /* ── Song Loading & Rendering ─────────────────────────────── */
   async function _loadSongCatalog() {
     try {
@@ -1065,9 +1151,10 @@ const LiveBandApp = (() => {
     } catch (e) {}
   }
 
-  async function _loadSong(songId, transpose = 0) {
+  async function _loadSong(songId, transpose = 0, chordSet = null) {
     _currentSongId = songId;
     _currentTranspose = transpose;
+    if (chordSet) _currentChordSet = chordSet;
 
     const emptyState = document.getElementById('stage-empty-state');
     const sheetWrapper = document.getElementById('stage-sheet-wrapper');
@@ -1075,8 +1162,8 @@ const LiveBandApp = (() => {
 
     if (emptyState) emptyState.classList.add('hidden');
 
-    let xml = _cachedXmls.get(songId);
-    if (!xml) {
+    let rawXml = _cachedXmls.get(songId);
+    if (!rawXml) {
       try {
         const songObj = _songsList.find(s => s.id === songId);
         let path = songObj?.xmlPath || `storage/Thanh ca/${songId}.xml`;
@@ -1085,15 +1172,43 @@ const LiveBandApp = (() => {
         }
         const res = await fetch(path);
         if (res.ok) {
-          xml = await res.text();
-          _cachedXmls.set(songId, xml);
+          rawXml = await res.text();
+          _cachedXmls.set(songId, rawXml);
         }
       } catch (err) {
         console.warn('Error fetching XML for song:', songId, err);
       }
     }
 
-    _currentXmlString = xml || '';
+    // Nạp bộ hợp âm cá nhân (HD, ADMIN, ...) và inject vào XML trước khi render OSMD
+    let effectiveXml = rawXml || '';
+    if (rawXml && window.ChordCanvasXML?.cloneAndInjectChords && _currentChordSet !== 'default' && _currentChordSet.toUpperCase() !== 'TLH') {
+      try {
+        const chordRes = await window.ApiService?.chordSets?.load(songId, _currentChordSet);
+        if (chordRes && chordRes.success && Array.isArray(chordRes.chords)) {
+          const chordsMap = {};
+          chordRes.chords.forEach(c => {
+            if (c && c.chord) {
+              chordsMap[`${c.measureIdx}_${c.noteIdx}`] = c.chord;
+            }
+          });
+          if (Object.keys(chordsMap).length > 0) {
+            effectiveXml = window.ChordCanvasXML.cloneAndInjectChords(rawXml, chordsMap);
+          }
+        }
+      } catch (err) {
+        console.warn('[LiveBand] Load chords error:', err);
+      }
+    }
+
+    _currentXmlString = effectiveXml || '';
+
+    // Cập nhật nhãn bộ hợp âm trên Stage Pill
+    const setBadge = document.getElementById('nav-song-set');
+    if (setBadge) setBadge.textContent = `Bộ: ${_currentChordSet}`;
+
+    // Cập nhật dropdown chọn bộ hợp âm của Host
+    _refreshHostChordSetSelect(songId, _currentChordSet);
 
     // Update Song Title Pill
     const songObj = _songsList.find(s => s.id === songId);
