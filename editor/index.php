@@ -193,8 +193,8 @@ $currentUser = Auth::username() ?: 'banhat';
         <div class="transport-group instrument-group">
           <label for="select-playback-instrument" class="transport-label">Đàn:</label>
           <select id="select-playback-instrument" class="select-transport" title="Chọn âm sắc nhạc cụ">
-            <option value="organ" selected>⛪ Đại Phong Cầm</option>
-            <option value="piano">🎹 Đại Dương Cầm</option>
+            <option value="piano" selected>🎹 Đại Dương Cầm</option>
+            <option value="organ">⛪ Đại Phong Cầm</option>
             <option value="choir">👥 Hợp Xướng</option>
             <option value="strings">🎻 Dàn Dây</option>
           </select>
@@ -590,10 +590,11 @@ $currentUser = Auth::username() ?: 'banhat';
           <div class="shortcut-col">
             <div class="shortcut-block">
               <h4>1. Chọn Bè SATB</h4>
-              <div class="shortcut-row"><kbd>1</kbd><span>Bè 1 Soprano</span></div>
-              <div class="shortcut-row"><kbd>2</kbd><span>Bè 2 Alto</span></div>
-              <div class="shortcut-row"><kbd>3</kbd><span>Bè 3 Tenor</span></div>
-              <div class="shortcut-row"><kbd>4</kbd><span>Bè 4 Bass</span></div>
+              <div class="shortcut-row"><kbd>Alt + 1</kbd><span>Bè 1 Soprano</span></div>
+              <div class="shortcut-row"><kbd>Alt + 2</kbd><span>Bè 2 Alto</span></div>
+              <div class="shortcut-row"><kbd>Alt + 3</kbd><span>Bè 3 Tenor</span></div>
+              <div class="shortcut-row"><kbd>Alt + 4</kbd><span>Bè 4 Bass</span></div>
+              <div class="shortcut-row"><kbd>V</kbd> / <kbd>Shift + V</kbd><span>Chuyển bè kế tiếp / trước</span></div>
             </div>
 
             <div class="shortcut-block">
@@ -613,15 +614,15 @@ $currentUser = Auth::username() ?: 'banhat';
               <div class="shortcut-row"><kbd>C D E F G A B</kbd><span>Đổi cao độ (hoặc đổi lặng thành nốt)</span></div>
               <div class="shortcut-row"><kbd>↑</kbd> / <kbd>↓</kbd><span>Tăng / giảm nửa cung (Semitone)</span></div>
               <div class="shortcut-row"><kbd>Shift + ↑ / ↓</kbd><span>Tăng / giảm 1 quãng 8 (Octave)</span></div>
-              <div class="shortcut-row"><kbd>Kéo chuột</kbd><span>Kéo thẳng đứng trên nốt để đổi cao độ</span></div>
+              <div class="shortcut-row"><kbd>Kéo chuột 60 FPS</kbd><span>Kéo thẳng đứng trên nốt để đổi cao độ</span></div>
               <div class="shortcut-row"><kbd>Piano Ảo</kbd><span>Bấm phím đàn để đổi cao độ tức thì</span></div>
             </div>
 
             <div class="shortcut-block">
               <h4>4. Thao Tác & Điều Hướng</h4>
-              <div class="shortcut-row"><kbd>←</kbd> / <kbd>→</kbd><span>Đi tới nốt trước / sau</span></div>
-              <div class="shortcut-row"><kbd>Space</kbd><span>Nghe thử hợp âm 4 bè tại nốt</span></div>
-              <div class="shortcut-row"><kbd>X</kbd> / <kbd>Delete</kbd><span>Xóa nốt thành dấu lặng</span></div>
+              <div class="shortcut-row"><kbd>←</kbd> / <kbd>→</kbd> hoặc <kbd>Tab</kbd><span>Đi tới nốt trước / sau</span></div>
+              <div class="shortcut-row"><kbd>Space</kbd><span>Nghe toàn bài / Shift+Space: Hợp âm</span></div>
+              <div class="shortcut-row"><kbd>X</kbd> / <kbd>Delete</kbd> / <kbd>R</kbd><span>Đổi nốt thành dấu lặng</span></div>
               <div class="shortcut-row"><kbd>Alt + S</kbd> / <kbd>Shift + X</kbd><span>Tách nốt thành 2 dấu lặng để soạn</span></div>
               <div class="shortcut-row"><kbd>Alt + 4</kbd><span>Tách nốt thành 4 dấu lặng để soạn</span></div>
               <div class="shortcut-row"><kbd>Alt + M</kbd><span>Gộp 2 dấu lặng liền kề</span></div>

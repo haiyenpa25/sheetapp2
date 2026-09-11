@@ -608,30 +608,50 @@ body.editor-body {
 
 /* ==================== VERTICAL DRAG GHOST OVERLAY ==================== */
 .drag-ghost-overlay {
-  position: absolute;
+  position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 60;
+  z-index: 9999;
 }
 .drag-ghost-badge {
-  position: absolute;
-  padding: 2px 7px;
-  background: #3b82f6;
+  position: fixed;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, #1d4ed8, #2563eb);
   color: #fff;
-  border-radius: 5px;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
+  border-radius: 6px;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.82rem;
   font-weight: 700;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
-  transform: translate(-50%, -130%);
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -140%);
   pointer-events: none;
+  z-index: 10000;
+  will-change: left, top;
 }
 .drag-guide-line {
-  position: absolute;
-  width: 1.5px;
-  background: rgba(59, 130, 246, 0.6);
+  position: fixed;
+  width: 2px;
+  background: linear-gradient(to bottom, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.8), rgba(59, 130, 246, 0.15));
+  pointer-events: none;
+  z-index: 9999;
+  will-change: left;
+}
+
+/* Nốt đang được kéo (Optimistic 60 FPS Drag) */
+.is-dragging-note {
+  will-change: transform;
+  filter: drop-shadow(0 0 10px rgba(59, 130, 246, 1)) !important;
+  opacity: 0.96;
+  user-select: none;
   pointer-events: none;
 }
+.is-dragging-note path, .is-dragging-note ellipse {
+  fill: #2563eb !important;
+  stroke: #60a5fa !important;
+  stroke-width: 2.5px !important;
+}
+
 .selected-note-item path, .selected-note-item ellipse {
   stroke: #60a5fa !important;
   stroke-width: 1.5px !important;
