@@ -109,6 +109,7 @@ const SongLoader = (() => {
       if (window.HistoryManager) HistoryManager.trackView(song);
 
       document.getElementById('btn-print')?.removeAttribute('disabled');
+      _syncSidebarNavLinks(song.id, profileOverride || window.ChordCanvas?.getCurrentSet?.() || 'HD');
       EventBus.emit('song:loaded', { song, xml });
 
     } catch (err) {
@@ -408,7 +409,20 @@ const SongLoader = (() => {
     }
   }
 
-  return { load, commitTranspose, saveModifiedXML };
+  function _syncSidebarNavLinks(songId, chordSet) {
+    if (!songId) return;
+    const set = chordSet || window.ChordCanvas?.getCurrentSet?.() || 'HD';
+    document.querySelectorAll('.sidebar-mini-link').forEach(link => {
+      const href = link.getAttribute('href');
+      if (href && (href.startsWith('/learn') || href.includes('/learn/'))) {
+        link.href = `/learn/?song=${encodeURIComponent(songId)}&set=${encodeURIComponent(set)}`;
+      } else if (href && (href.startsWith('/live-band') || href.includes('/live-band/'))) {
+        link.href = `/live-band/?song=${encodeURIComponent(songId)}&set=${encodeURIComponent(set)}`;
+      }
+    });
+  }
+
+  return { load, commitTranspose, saveModifiedXML, syncSidebarNavLinks: _syncSidebarNavLinks };
 })();
 
 window.SongLoader = SongLoader;

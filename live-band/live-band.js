@@ -1270,6 +1270,13 @@ const LiveBandApp = (() => {
 
     // Re-apply view mode for active role
     _applyViewMode();
+
+    // Đồng bộ nút thương hiệu (stage-brand) quay về trang chủ với đúng bài & bộ hợp âm
+    const brandLink = document.querySelector('.stage-brand');
+    if (brandLink && songId) {
+      brandLink.href = `/?song=${encodeURIComponent(songId)}&set=${encodeURIComponent(_currentChordSet || 'HD')}`;
+      brandLink.title = `Quay về SheetApp với bài "${_currentSongTitle || songId}"`;
+    }
   }
 
   function _setTranspose(val, isHostAction = false) {

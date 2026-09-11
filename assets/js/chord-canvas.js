@@ -1058,6 +1058,7 @@ const ChordCanvas = (() => {
     _prevSet = name;
     _updateSetUI();
     window.URLState?.update?.({ set: name });
+    window.SongLoader?.syncSidebarNavLinks?.(window.App?.getCurrentSongId?.(), name);
   }
 
   async function createSet(name) {
