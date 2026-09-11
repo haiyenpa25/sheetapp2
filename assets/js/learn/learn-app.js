@@ -279,25 +279,29 @@ const LearnApp = (() => {
     _notifyWaitStatus();
 
     _currentSong = song;
-    _currentTranspose = 0; // Reset Transpose về 0
 
-    // Save to localStorage and update browser URL without full reload
-    try {
-      localStorage.setItem('sheetapp_learn_last_song', song.id);
-      const newUrl = new URL(window.location);
-      newUrl.searchParams.set('song', song.id);
-      window.history.replaceState({}, '', newUrl);
-    } catch (e) {}
+    // Check if transpose was passed via URL or state
+    const pendingTrans = LearnStore.get('_pendingTransParam');
+    _currentTranspose = (typeof pendingTrans === 'number') ? pendingTrans : 0;
+    LearnStore.set('_pendingTransParam', null);
+
+    // Check if chord set was requested via URL or previous store
+    const pendingSet = LearnStore.get('_pendingSetParam');
+    const initialSet = pendingSet || LearnStore.get('chordSet') || 'HD';
+    LearnStore.set('_pendingSetParam', null);
 
     const transValEl = document.getElementById('learn-trans-val');
-    if (transValEl) transValEl.textContent = '0';
+    if (transValEl) transValEl.textContent = _currentTranspose > 0 ? `+${_currentTranspose}` : `${_currentTranspose}`;
 
     // Update state
     LearnStore.resetForSong(song.id, song.title);
-    LearnStore.set('chordSet', 'HD');
-    LearnStore.set('transpose', 0);
+    LearnStore.set('chordSet', initialSet);
+    LearnStore.set('transpose', _currentTranspose);
     _setUiStatus('preparing');
     _showLoading(`Đang tải "${song.title}"...`);
+
+    // Save and sync browser URL + Back-to-SheetApp link
+    _updateUrlAndBackLink(song.id, initialSet, _currentTranspose);
 
     // Update song label
     const label = document.getElementById('learn-song-label');
@@ -307,12 +311,13 @@ const LearnApp = (() => {
     if (metaLabel) metaLabel.textContent = `Tông gốc: ${song.defaultKey || 'C'} • #${song.httlvnId || song.id}`;
 
     try {
-      // Fetch XML + chord set concurrently (mặc định HD)
-      const chordProfile = LearnStore.get('chordSet') || 'HD';
+      // Refresh available chord sets for this song and fetch XML + chords concurrently
+      _refreshChordSetDropdown(song.id, initialSet);
+
       const xmlUrl = song.xmlPath.startsWith('/') ? song.xmlPath : '/' + song.xmlPath;
       const [xmlRes, chordData] = await Promise.all([
         fetch(xmlUrl),
-        _loadChordSet(song.id, chordProfile),
+        _loadChordSet(song.id, initialSet),
       ]);
 
       if (!xmlRes.ok) throw new Error(`XML fetch failed: ${xmlRes.status}`);
@@ -435,6 +440,95 @@ const LearnApp = (() => {
         const res2 = await ApiService.chordSets.load(songId, 'default');
         return res2?.chords ?? [];
       } catch { return []; }
+    }
+  }
+
+  /* ─── URL & Back-to-App Synchronization ──────────────────────── */
+  function _updateUrlAndBackLink(songId, chordSet, transpose) {
+    const sId = songId || _currentSong?.id;
+    const cSet = chordSet || LearnStore.get('chordSet') || 'HD';
+    const trans = typeof transpose === 'number' ? transpose : _currentTranspose;
+
+    if (!sId) return;
+
+    try {
+      localStorage.setItem('sheetapp_learn_last_song', sId);
+      const newUrl = new URL(window.location);
+      newUrl.searchParams.set('song', sId);
+      newUrl.searchParams.set('set', cSet);
+      if (trans !== 0) {
+        newUrl.searchParams.set('trans', trans);
+      } else {
+        newUrl.searchParams.delete('trans');
+      }
+      window.history.replaceState({}, '', newUrl);
+    } catch (e) {}
+
+    // Đồng bộ nút "Quay về SheetApp" với đúng bài đang tập & bộ hợp âm
+    const backBtn = document.querySelector('.learn-back-btn');
+    if (backBtn) {
+      backBtn.href = `/?song=${encodeURIComponent(sId)}&set=${encodeURIComponent(cSet)}`;
+      backBtn.title = `Quay về SheetApp đánh live bài "${_currentSong?.title || sId}"`;
+    }
+  }
+
+  /* ─── Dynamic Chord Sets Dropdown ────────────────────────────── */
+  async function _refreshChordSetDropdown(songId, currentProfile) {
+    const selectEl = document.getElementById('learn-chord-set-select');
+    if (!selectEl) return;
+
+    let availableSets = ['HD', 'default'];
+    try {
+      if (window.ApiService?.chordSets?.list) {
+        const res = await ApiService.chordSets.list(songId);
+        if (res && res.success && Array.isArray(res.sets) && res.sets.length > 0) {
+          availableSets = res.sets;
+        }
+      }
+    } catch (e) {
+      console.warn('[LearnApp] Could not fetch chord sets:', e);
+    }
+
+    if (!availableSets.includes('HD')) availableSets.unshift('HD');
+    if (!availableSets.includes('default')) availableSets.push('default');
+
+    const KNOWN_LABELS = {
+      'HD': '⭐ Hoài Dinh (HD)',
+      'ADMIN': 'Admin (ADMIN)',
+      'BH': 'Ban Hát (BH)',
+      'NAM': 'Hoàng Nam (NAM)',
+      'LAN': 'Hà Lan (LAN)',
+      'TLH': 'TLH (Gốc) 🔒 [Bản chuẩn]',
+      'default': 'TLH (Gốc) 🔒 [Bản chuẩn]'
+    };
+
+    const targetSet = currentProfile || LearnStore.get('chordSet') || 'HD';
+    const targetSetUpper = targetSet.toUpperCase();
+
+    selectEl.innerHTML = availableSets.map(s => {
+      const sUpper = s.toUpperCase();
+      let label = s;
+      if (s === 'default' || sUpper === 'TLH') {
+        label = 'TLH (Gốc) 🔒 [Bản chuẩn]';
+      } else if (KNOWN_LABELS[sUpper]) {
+        label = KNOWN_LABELS[sUpper];
+      } else if (s.includes('__')) {
+        const parts = s.split('__');
+        label = `🎸 ${parts.slice(1).join('__').replace(/_/g, ' ')} (@${parts[0]})`;
+      } else {
+        label = `🎸 Bộ ${s}`;
+      }
+      const isSelected = (sUpper === targetSetUpper) || (targetSet === 'default' && s === 'default');
+      return `<option value="${s}" ${isSelected ? 'selected' : ''}>${label}</option>`;
+    }).join('');
+
+    const hasTarget = Array.from(selectEl.options).some(o => o.value.toUpperCase() === targetSetUpper);
+    if (!hasTarget && targetSet !== 'default' && targetSetUpper !== 'TLH') {
+      const opt = document.createElement('option');
+      opt.value = targetSet;
+      opt.textContent = KNOWN_LABELS[targetSetUpper] || `Bộ ${targetSet}`;
+      opt.selected = true;
+      selectEl.appendChild(opt);
     }
   }
 
@@ -911,6 +1005,7 @@ const LearnApp = (() => {
         const valEl = document.getElementById('learn-trans-val');
         if (valEl) valEl.textContent = _currentTranspose > 0 ? `+${_currentTranspose}` : `${_currentTranspose}`;
         _rebuildTimeline();
+        _updateUrlAndBackLink();
       }
     });
 
@@ -921,6 +1016,7 @@ const LearnApp = (() => {
         const valEl = document.getElementById('learn-trans-val');
         if (valEl) valEl.textContent = _currentTranspose > 0 ? `+${_currentTranspose}` : `${_currentTranspose}`;
         _rebuildTimeline();
+        _updateUrlAndBackLink();
       }
     });
 
@@ -932,6 +1028,7 @@ const LearnApp = (() => {
         _showLoading(`Đang tải bộ hợp âm ${profile}...`);
         _rawChordData = await _loadChordSet(_currentSong.id, profile);
         _rebuildTimeline();
+        _updateUrlAndBackLink(_currentSong.id, profile, _currentTranspose);
         _hideLoading();
       }
     });
@@ -1186,11 +1283,22 @@ const LearnApp = (() => {
     // Load songs
     _loadSongs();
 
-    // Check URL for song param
+    // Check URL for song, chord set, and transpose params
     const urlParams = new URLSearchParams(window.location.search);
     const songParam = urlParams.get('song') ?? urlParams.get('id');
     if (songParam) {
       LearnStore.set('_pendingSongParam', songParam);
+    }
+    const setParam = urlParams.get('set');
+    if (setParam) {
+      LearnStore.set('_pendingSetParam', setParam);
+    }
+    const transParam = urlParams.get('trans');
+    if (transParam !== null) {
+      const parsedTrans = parseInt(transParam, 10);
+      if (!isNaN(parsedTrans)) {
+        LearnStore.set('_pendingTransParam', parsedTrans);
+      }
     }
 
     // EventBus listeners

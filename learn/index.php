@@ -69,7 +69,7 @@ function learnCssTag(string $file): string {
 
   <!-- ═══ HEADER ═══════════════════════════════════════════════════ -->
   <header class="learn-header">
-    <a href="/" class="learn-back-btn" title="Quay về SheetApp">
+    <a href="/" class="learn-back-btn" id="learn-back-btn" title="Quay về SheetApp">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
         <path d="M19 12H5M12 19l-7-7 7-7"/>
       </svg>
@@ -94,9 +94,8 @@ function learnCssTag(string $file): string {
       <div class="learn-tool-item">
         <label for="learn-chord-set-select" class="learn-tool-label">Hợp âm:</label>
         <select id="learn-chord-set-select" class="learn-tool-select" title="Chọn bộ hợp âm">
-          <option value="HD" selected>HD (Mặc định)</option>
-          <option value="TLH">TLH</option>
-          <option value="default">Cơ bản</option>
+          <option value="HD" selected>⭐ Hoài Dinh (HD)</option>
+          <option value="TLH">TLH (Gốc) 🔒 [Bản chuẩn]</option>
         </select>
       </div>
 
