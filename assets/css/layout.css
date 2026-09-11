@@ -997,6 +997,68 @@ body.dark-mode .btn-chord-edit-pill:hover:not(:disabled) {
   font-size: 0.9rem;
 }
 
+/* User Toolbar Button & Pill */
+.btn-toolbar-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 5px 9px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.btn-toolbar-user:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(124, 58, 237, 0.4);
+  color: var(--text-primary);
+}
+.btn-toolbar-user.logged-in {
+  background: rgba(124, 58, 237, 0.15);
+  border-color: rgba(124, 58, 237, 0.4);
+  color: #c4b5fd;
+}
+.user-pill-icon {
+  font-size: 0.85rem;
+}
+.user-pill-name {
+  font-weight: 600;
+}
+.user-pill-role {
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.user-pill-role.role-admin {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+.user-pill-role.role-banhat {
+  background: rgba(124, 58, 237, 0.2);
+  color: #c4b5fd;
+  border: 1px solid rgba(124, 58, 237, 0.35);
+}
+.auth-quick-chip {
+  transition: transform 0.15s ease, filter 0.15s ease, background 0.15s ease;
+  user-select: none;
+}
+.auth-quick-chip:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.15);
+}
+.auth-quick-chip:active {
+  transform: scale(0.96);
+}
+
 /* More Options Dropdown styling */
 .menu-section-header {
   font-size: 0.65rem;
@@ -1330,6 +1392,17 @@ body.sheet-only-mode .gig-floating-hud {
   .btn-gig-mode .gig-text {
     display: inline;
     font-size: 0.7rem;
+  }
+  .btn-toolbar-user {
+    padding: 3px 6px;
+    font-size: 0.72rem;
+    height: 32px;
+  }
+  .btn-toolbar-user .user-pill-name {
+    max-width: 48px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .nav-arrows .icon-btn {
     width: 28px;

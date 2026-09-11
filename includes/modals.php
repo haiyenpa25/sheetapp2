@@ -132,32 +132,117 @@
   </div>
 </div>
 
-<!-- ===== AUTH MODAL ===== -->
+<!-- ===== AUTH & WELCOME MODAL ===== -->
 <div id="auth-modal" class="modal-overlay hidden">
-  <div class="modal-box" style="max-width: 320px;">
-    <div class="modal-header">
-      <h3>🔒 Đăng Nhập</h3>
-      <button id="btn-close-auth" class="icon-btn">
+  <div class="modal-box" style="max-width: 420px; border: 1px solid rgba(124, 58, 237, 0.35); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(124, 58, 237, 0.15);">
+    <div class="modal-header" style="padding: 1.1rem 1.25rem 0.9rem; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(124, 58, 237, 0.12) 0%, transparent 100%);">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="width: 36px; height: 36px; border-radius: 9px; background: linear-gradient(135deg, #7c3aed, #4f46e5); display: flex; align-items: center; justify-content: center; font-size: 1.15rem; box-shadow: 0 3px 10px rgba(124, 58, 237, 0.4); flex-shrink: 0;">
+          🎵
+        </div>
+        <div>
+          <h3 style="margin: 0; font-size: 1rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.2px;">Chào Mừng Đến SheetApp 2.0</h3>
+          <p style="margin: 2px 0 0; font-size: 0.74rem; color: var(--text-muted);">Sheet nhạc Thánh Ca & Hợp âm Ban Nhạc</p>
+        </div>
+      </div>
+      <button id="btn-close-auth" class="icon-btn" title="Đóng & sử dụng quyền Khách" style="border-radius: 8px;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <div class="modal-body">
-      <div id="auth-login-form">
-        <div class="form-row">
-          <label class="form-label">Tài khoản</label>
-          <input id="auth-username-input" type="text" class="form-input" placeholder="Tên đăng nhập" autocomplete="username">
+
+    <div class="modal-body" style="padding: 1.15rem; gap: 0.9rem;">
+      <!-- KHUNG CHƯA ĐĂNG NHẬP: LỰA CHỌN KHÁCH HOẶC ĐĂNG NHẬP -->
+      <div id="auth-login-form" style="display: flex; flex-direction: column; gap: 0.85rem;">
+        
+        <!-- LỰA CHỌN 1: DÀNH CHO KHÁCH / CA VIÊN (KHÔNG CẦN TÀI KHOẢN) -->
+        <div class="auth-guest-card" style="padding: 12px 14px; border-radius: 10px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); display: flex; flex-direction: column; gap: 7px;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #60a5fa;">Dành Cho Ca Viên &amp; Khách</span>
+            <span style="font-size: 0.67rem; padding: 2px 6px; border-radius: 4px; background: rgba(59, 130, 246, 0.2); color: #93c5fd; font-weight: 600;">Miễn phí • Không cần pass</span>
+          </div>
+          <button type="button" id="btn-enter-as-guest" class="btn w-full" style="padding: 9px 12px; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; font-size: 0.86rem; font-weight: 700; border-radius: 8px; border: 1px solid rgba(147, 197, 253, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; box-shadow: 0 3px 10px rgba(37, 99, 235, 0.35); transition: all 0.2s;">
+            <span>👁️</span>
+            <span>Vào Ngay Dưới Quyền Khách (Chỉ Xem)</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width: 15px; height: 15px; margin-left: 2px;"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+          <p style="margin: 0; font-size: 0.72rem; color: var(--text-muted); line-height: 1.4;">
+            ✓ Xem 903 bài &amp; hợp âm đầy đủ &nbsp;•&nbsp; ✓ Nghe audio 4 bè &nbsp;•&nbsp; ✓ Tự tập đàn
+          </p>
         </div>
-        <div class="form-row mt-1">
-          <label class="form-label">Mật khẩu</label>
-          <input id="auth-password-input" type="password" class="form-input" placeholder="Mật khẩu" autocomplete="current-password">
+
+        <!-- PHÂN CÁCH -->
+        <div style="display: flex; align-items: center; gap: 8px; margin: 2px 0;">
+          <div style="flex: 1; height: 1px; background: var(--border);"></div>
+          <span style="font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">Hoặc Đăng Nhập Nhạc Công</span>
+          <div style="flex: 1; height: 1px; background: var(--border);"></div>
         </div>
-        <p id="auth-error" class="text-sm text-danger mt-half hidden"></p>
-        <button id="btn-do-login" class="btn btn-primary w-full mt-1">Đăng Nhập</button>
+
+        <!-- FORM ĐĂNG NHẬP -->
+        <div style="display: flex; flex-direction: column; gap: 7px;">
+          <div>
+            <label class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 3px; display: block;">Tài khoản</label>
+            <input id="auth-username-input" type="text" class="form-input" placeholder="Tên đăng nhập (VD: hoaidinh, admin...)" autocomplete="username" style="font-size: 0.82rem; padding: 7px 10px;">
+          </div>
+          <div>
+            <label class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 3px; display: block;">Mật khẩu</label>
+            <input id="auth-password-input" type="password" class="form-input" placeholder="Mật khẩu" autocomplete="current-password" style="font-size: 0.82rem; padding: 7px 10px;">
+          </div>
+          <p id="auth-error" class="text-sm text-danger hidden" style="margin: 0; font-size: 0.75rem;"></p>
+          <button id="btn-do-login" class="btn btn-primary w-full" style="padding: 8px 12px; font-size: 0.85rem; font-weight: 700; margin-top: 3px;">
+            🔒 Đăng Nhập (Để Sửa Hợp Âm Riêng)
+          </button>
+        </div>
+
+        <!-- CHỌN NHANH TÀI KHOẢN (1-TAP QUICK LOGIN) -->
+        <div style="margin-top: 4px; padding-top: 8px; border-top: 1px dashed var(--border);">
+          <div style="font-size: 0.69rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
+            <span>⚡ Chọn nhanh tài khoản ban nhạc:</span>
+            <span style="font-size: 0.65rem; color: var(--text-muted);">Pass: 123456</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
+            <button type="button" class="auth-quick-chip" data-user="hoaidinh" data-pass="123456" title="Tài khoản Hoài Dinh (Bộ HD)" style="padding: 6px 4px; border-radius: 6px; background: rgba(124, 58, 237, 0.12); border: 1px solid rgba(124, 58, 237, 0.3); color: #c4b5fd; font-size: 0.72rem; font-weight: 600; cursor: pointer; text-align: center;">
+              🎸 Hoài Dinh<br><span style="font-size: 0.64rem; color: #a78bfa; font-weight: 700;">[Bộ HD]</span>
+            </button>
+            <button type="button" class="auth-quick-chip" data-user="admin" data-pass="123456" title="Tài khoản Quản Trị Viên" style="padding: 6px 4px; border-radius: 6px; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; font-size: 0.72rem; font-weight: 600; cursor: pointer; text-align: center;">
+              👑 Admin<br><span style="font-size: 0.64rem; color: #f87171; font-weight: 700;">[Quản Trị]</span>
+            </button>
+            <button type="button" class="auth-quick-chip" data-user="banhat" data-pass="123456" title="Tài khoản Ban Hát (Bộ BH)" style="padding: 6px 4px; border-radius: 6px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); color: #6ee7b7; font-size: 0.72rem; font-weight: 600; cursor: pointer; text-align: center;">
+              🎹 Ban Hát<br><span style="font-size: 0.64rem; color: #34d399; font-weight: 700;">[Bộ BH]</span>
+            </button>
+          </div>
+        </div>
       </div>
-      <div id="auth-logged-in" class="hidden text-center">
-        <p class="text-muted mb-1">Đang đăng nhập với quyền <strong id="auth-role-display"></strong></p>
-        <p id="auth-perm-summary" class="text-xs text-muted" style="line-height:1.7; margin-bottom:.75rem; text-align:left; padding:.5rem .75rem; background:var(--bg-overlay); border-radius:var(--radius-sm); border:1px solid var(--border);"></p>
-        <button id="btn-do-logout" class="btn btn-danger w-full">Đăng Xuất</button>
+
+      <!-- KHUNG ĐÃ ĐĂNG NHẬP: THÔNG TIN TÀI KHOẢN & QUYỀN HẠN -->
+      <div id="auth-logged-in" class="hidden" style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="padding: 12px; border-radius: 8px; background: rgba(124, 58, 237, 0.1); border: 1px solid rgba(124, 58, 237, 0.3); display: flex; align-items: center; gap: 12px;">
+          <div style="width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #4f46e5); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; font-weight: 800; flex-shrink: 0;" id="auth-avatar-letter">
+            U
+          </div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+              <span id="auth-logged-user-title">@user</span>
+              <span id="auth-role-display-pill" style="font-size: 0.66rem; padding: 2px 6px; border-radius: 4px; font-weight: 700; text-transform: uppercase;"></span>
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">
+              Mã bộ hợp âm cá nhân: <strong id="auth-chord-code-display" style="color: #a78bfa;">--</strong>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding: 10px 12px; border-radius: 8px; background: var(--bg-overlay); border: 1px solid var(--border);">
+          <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Quyền Hạn Hiện Tại:</div>
+          <p id="auth-perm-summary" style="margin: 0; font-size: 0.76rem; color: var(--text-secondary); line-height: 1.5;"></p>
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-top: 4px;">
+          <button type="button" id="btn-continue-logged-in" class="btn btn-primary" style="flex: 2; padding: 8px 12px; font-size: 0.85rem; font-weight: 700;">
+            ✓ Tiếp Tục Dùng
+          </button>
+          <button type="button" id="btn-do-logout" class="btn btn-danger" style="flex: 1; padding: 8px 12px; font-size: 0.85rem; font-weight: 600;">
+            Đăng Xuất
+          </button>
+        </div>
       </div>
     </div>
   </div>

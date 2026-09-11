@@ -111,6 +111,13 @@
 
   <!-- 3. CỤM PHẢI: BIỂU DIỄN & MENU CÔNG CỤ -->
   <div class="toolbar-right">
+    <!-- NÚT TÀI KHOẢN & PHÂN QUYỀN NHẠC CÔNG (USER PILL) -->
+    <button id="btn-toolbar-auth" class="btn-toolbar-user" title="Đăng nhập / Phân quyền nhạc công">
+      <span class="user-pill-icon">👤</span>
+      <span id="toolbar-auth-name" class="user-pill-name">Khách</span>
+      <span id="toolbar-auth-badge" class="user-pill-role hidden"></span>
+    </button>
+
     <!-- NÚT SÂN KHẤU / BIỂU DIỄN (BAND GIG MODE) -->
     <button id="btn-fullscreen" class="btn-gig-mode" title="Vào chế độ Biểu Diễn Toàn Màn Hình (Phím F)">
       <span class="gig-icon">⚡</span>
