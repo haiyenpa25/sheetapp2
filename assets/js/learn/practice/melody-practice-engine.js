@@ -92,43 +92,79 @@ const MelodyPracticeEngine = (() => {
 
       measures.forEach((measureEl, mIdx) => {
         const measureNo = parseInt(measureEl.getAttribute('number') || (mIdx + 1), 10);
-        const notes = measureEl.querySelectorAll('note');
+        const notes = Array.from(measureEl.querySelectorAll('note'));
+
+        // Gom các note thành từng cụm nốt đồng thời (Chord clusters)
+        // Trong MusicXML bè thánh ca/hợp xướng, Soprano (giai điệu chính) và Alto (bè hai)
+        // thường nằm chung Voice 1 ở Staff 1. Note đầu là bè trầm, note có <chord/> là bè cao (Soprano).
+        const clusters = [];
+        let currentCluster = [];
 
         notes.forEach(noteEl => {
-          // Bỏ qua nốt luyến (chord tags của nốt đệm bè phía dưới)
-          const isChord = noteEl.querySelector('chord') !== null;
-          if (isChord) return;
-
-          // Lọc giọng 1 hoặc staff 1 (Soprano / Bè cao nhất khoá Sol)
-          const voiceEl = noteEl.querySelector('voice');
-          const voiceVal = voiceEl ? voiceEl.textContent.trim() : '1';
+          // Lọc chỉ lấy staff 1 (khoá Sol) và voice 1 (bè chính)
           const staffEl = noteEl.querySelector('staff');
           const staffVal = staffEl ? staffEl.textContent.trim() : '1';
+          const voiceEl = noteEl.querySelector('voice');
+          const voiceVal = voiceEl ? voiceEl.textContent.trim() : '1';
 
-          // Chỉ lấy giọng 1 ở khuông khoá Sol
-          if (voiceVal !== '1' && staffVal !== '1') return;
+          // Bỏ qua nếu là bè khoá Fa (staff 2) hoặc phụ bè voice 2
+          if (staffVal !== '1' || voiceVal !== '1') return;
 
-          // Kiểm tra nốt nghỉ
-          const isRest = noteEl.querySelector('rest') !== null;
-          if (isRest) return; // Không đưa nốt nghỉ vào danh sách cần gõ
+          const isChord = noteEl.querySelector('chord') !== null;
+          if (!isChord) {
+            if (currentCluster.length > 0) {
+              clusters.push(currentCluster);
+            }
+            currentCluster = [noteEl];
+          } else {
+            currentCluster.push(noteEl);
+          }
+        });
+        if (currentCluster.length > 0) {
+          clusters.push(currentCluster);
+        }
 
-          const pitchEl = noteEl.querySelector('pitch');
-          if (!pitchEl) return;
+        // Xử lý từng cụm nốt: lấy nốt cao nhất (Soprano / Giai điệu chính)
+        clusters.forEach(cluster => {
+          let lyric = '';
+          const pitchedNotes = [];
 
-          const step = pitchEl.querySelector('step')?.textContent.trim().toUpperCase() || 'C';
-          const alter = parseInt(pitchEl.querySelector('alter')?.textContent.trim() || '0', 10);
-          const octave = parseInt(pitchEl.querySelector('octave')?.textContent.trim() || '4', 10);
+          cluster.forEach(noteEl => {
+            // Lấy ca từ (lyrics) từ bất kỳ note nào trong cụm có chứa lời ca
+            if (!lyric) {
+              const lyricEl = noteEl.querySelector('lyric text');
+              if (lyricEl) lyric = lyricEl.textContent.trim();
+            }
 
-          // Ca từ đi kèm (nếu có)
-          const lyricEl = noteEl.querySelector('lyric text');
-          const lyric = lyricEl ? lyricEl.textContent.trim() : '';
+            // Bỏ qua nốt nghỉ
+            if (noteEl.querySelector('rest')) return;
 
-          const origMidi = _calcMidi(step, alter, octave);
-          const transMidi = origMidi + _transpose;
+            const pitchEl = noteEl.querySelector('pitch');
+            if (!pitchEl) return;
+
+            const step = pitchEl.querySelector('step')?.textContent.trim().toUpperCase() || 'C';
+            const alter = parseInt(pitchEl.querySelector('alter')?.textContent.trim() || '0', 10);
+            const octave = parseInt(pitchEl.querySelector('octave')?.textContent.trim() || '4', 10);
+            const origMidi = _calcMidi(step, alter, octave);
+
+            pitchedNotes.push({
+              step,
+              alter,
+              octave,
+              origMidi
+            });
+          });
+
+          if (pitchedNotes.length === 0) return;
+
+          // Luôn lấy nốt có cao độ cao nhất (Max MIDI) trong cụm - đây chính là Giai Điệu (Soprano)
+          const topNote = pitchedNotes.reduce((max, n) => (n.origMidi > max.origMidi ? n : max), pitchedNotes[0]);
+
+          const transMidi = topNote.origMidi + _transpose;
 
           // Tính pitch name sau khi transpose
-          let effPitch = _toPitchName(step, alter, octave);
-          let effVietnamese = _toVietnamese(step, alter, octave);
+          let effPitch = _toPitchName(topNote.step, topNote.alter, topNote.octave);
+          let effVietnamese = _toVietnamese(topNote.step, topNote.alter, topNote.octave);
           if (window.Tonal && _transpose !== 0) {
             try {
               effPitch = Tonal.Note.fromMidi(transMidi) || effPitch;
@@ -143,10 +179,10 @@ const MelodyPracticeEngine = (() => {
             id: `m${measureNo}_n${globalNoteIdx++}`,
             measureIndex: mIdx,
             measureNo,
-            step,
-            alter,
-            octave,
-            origMidi,
+            step: topNote.step,
+            alter: topNote.alter,
+            octave: topNote.octave,
+            origMidi: topNote.origMidi,
             midi: transMidi,
             pitchName: effPitch,
             vietnameseName: effVietnamese,

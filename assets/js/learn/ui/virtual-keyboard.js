@@ -124,6 +124,12 @@ const VirtualKeyboard = (() => {
     el.dataset.keyId = keyId;
     _keyEls.set(keyId, el);
 
+    // Lưu đồng thời tên nốt giáng (Enharmonic flat: Eb = D#, Ab = G#, etc.)
+    const flatMap = { 'C#': 'Db', 'D#': 'Eb', 'F#': 'Gb', 'G#': 'Ab', 'A#': 'Bb' };
+    if (flatMap[noteName]) {
+      _keyEls.set(`${flatMap[noteName]}${oct}`, el);
+    }
+
     // Label C notes
     if (noteName === 'C') {
       const label = document.createElement('span');
@@ -333,10 +339,10 @@ const VirtualKeyboard = (() => {
 
     // Highlight target note with glowing badge
     const targetKey = currentNote.pitchName;
-    const targetEl = _keyEls.get(targetKey);
+    const targetEl = _keyEls.get(targetKey) || (currentNote.midi ? _keyEls.get(_midiToNoteName(currentNote.midi)) : null);
     if (targetEl) {
       targetEl.classList.add('vkb-melody-target');
-      _melodyTargetKey = targetKey;
+      _melodyTargetKey = targetEl.dataset.keyId || targetKey;
 
       let badge = targetEl.querySelector('.vkb-melody-badge');
       if (!badge) {
@@ -351,16 +357,20 @@ const VirtualKeyboard = (() => {
     // Outline next note preview
     if (nextNote) {
       const nextKey = nextNote.pitchName;
-      const nextEl = _keyEls.get(nextKey);
-      if (nextEl && nextKey !== targetKey) {
+      const nextEl = _keyEls.get(nextKey) || (nextNote.midi ? _keyEls.get(_midiToNoteName(nextNote.midi)) : null);
+      if (nextEl && nextEl !== targetEl) {
         nextEl.classList.add('vkb-melody-next');
-        _melodyNextKey = nextKey;
+        _melodyNextKey = nextEl.dataset.keyId || nextKey;
       }
     }
   }
 
   function flashNoteHit(noteName, isCorrect = true) {
-    const el = _keyEls.get(noteName);
+    let el = _keyEls.get(noteName);
+    if (!el && window.Tonal && typeof noteName === 'string') {
+      const midi = Tonal.Note.midi(noteName);
+      if (midi != null) el = _keyEls.get(_midiToNoteName(midi));
+    }
     if (el) {
       const cls = isCorrect ? 'vkb-hit-success' : 'vkb-hit-wrong';
       el.classList.add(cls);
