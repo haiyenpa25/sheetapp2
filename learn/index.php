@@ -209,6 +209,37 @@ function learnCssTag(string $file): string {
         </div>
       </section>
 
+      <!-- Melody HUD Banner (Luyện Giai Điệu Dẫn Đường) -->
+      <div class="learn-melody-hud" id="learn-melody-hud-bar">
+        <div class="melody-hud-left">
+          <span class="melody-hud-label">NỐT GIAI ĐIỆU:</span>
+          <div class="melody-note-pill current" id="melody-hud-current" title="Nốt hiện tại cần đánh">
+            <span class="note-vn" id="melody-vn-cur">Đô</span>
+            <span class="note-intl" id="melody-intl-cur">C4</span>
+          </div>
+          <span class="melody-hud-arrow">➔</span>
+          <div class="melody-note-pill next" id="melody-hud-next" title="Nốt kế tiếp">
+            <span class="note-vn" id="melody-vn-next">Rê</span>
+            <span class="note-intl" id="melody-intl-next">D4</span>
+          </div>
+        </div>
+
+        <div class="melody-hud-center">
+          <span class="melody-lyric-icon">💬</span>
+          <span class="melody-lyric-text" id="melody-hud-lyric">Sẵn sàng bắt đầu giai điệu...</span>
+        </div>
+
+        <div class="melody-hud-right">
+          <span class="melody-status-chip" id="melody-hud-status">Chờ phím</span>
+          <span class="melody-hud-counter" id="melody-hud-counter">0 / 0</span>
+          <div class="melody-nav-group">
+            <button type="button" class="btn-melody-hud-nav" id="btn-melody-prev" title="Nốt trước">◀</button>
+            <button type="button" class="btn-melody-hud-nav" id="btn-melody-next" title="Nốt sau">▶</button>
+            <button type="button" class="btn-melody-hud-nav" id="btn-melody-reset" title="Quay về nốt đầu">↺</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Virtual Keyboard across bottom of score -->
       <section class="learn-keyboard-section" id="learn-keyboard-section">
         <div class="learn-keyboard-header">
@@ -245,17 +276,17 @@ function learnCssTag(string $file): string {
           <svg viewBox="0 0 24 24" fill="currentColor" class="mode-icon"><path d="M20 5H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 10H9v-5h2v5zm4 0h-2v-5h2v5zm4 0h-2v-5h2v5z"/></svg>
           Piano
         </button>
-        <button class="btn-learn-mode"        data-mode="chord"  title="Tập Hợp âm">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mode-icon"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          Hợp âm
-        </button>
-        <button class="btn-learn-mode"        data-mode="satb"   title="Luyện giọng SATB">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mode-icon"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-          SATB
-        </button>
-        <button class="btn-learn-mode"        data-mode="melody" title="Tập Giai điệu">
+        <button class="btn-learn-mode"        data-mode="melody" title="Tập Nốt Giai Điệu (Giọng 1)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mode-icon"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-          Melody
+          Giai Điệu
+        </button>
+        <button class="btn-learn-mode"        data-mode="chord"  title="Tập Đệm Hợp Âm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mode-icon"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Đệm Hát
+        </button>
+        <button class="btn-learn-mode"        data-mode="satb"   title="Luyện giọng Ca Đoàn SATB">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mode-icon"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          Ca Đoàn
         </button>
       </div>
 
@@ -273,16 +304,42 @@ function learnCssTag(string $file): string {
             <span class="learn-toggle-slider"></span>
           </label>
         </div>
+
+        <!-- Meter Filter Tabs -->
+        <div class="learn-meter-tabs" id="learn-meter-tabs">
+          <button type="button" class="btn-meter-tab active" data-meter="auto" title="Tự động theo nhịp bài hát">⭐ Theo bài</button>
+          <button type="button" class="btn-meter-tab" data-meter="4/4" title="Điệu 4/4">4/4</button>
+          <button type="button" class="btn-meter-tab" data-meter="3/4" title="Điệu 3/4">3/4</button>
+          <button type="button" class="btn-meter-tab" data-meter="6/8" title="Điệu 6/8">6/8</button>
+          <button type="button" class="btn-meter-tab" data-meter="2/4" title="Điệu 2/4">2/4</button>
+          <button type="button" class="btn-meter-tab" data-meter="all" title="Mọi điệu">Tất cả</button>
+        </div>
+
         <select id="learn-pattern-select" class="learn-select">
-          <option value="smart-ballad" selected>🎹 Pop / Worship Ballad (4/4 Mượt Mà)</option>
-          <option value="smart-slowrock-6-8">🌊 Thánh Ca 6/8 Slow Rock (Sóng Biển)</option>
-          <option value="smart-waltz">💃 Boston / Slow Waltz (3/4 Trữ Tình)</option>
-          <option value="smart-hymn">⛪️ Thánh Ca 4 Bè (Hòa Âm Trang Trọng)</option>
-          <option value="smart-worship">✨ Arpeggio Suối Reo (Rải 16th Mượt Mà)</option>
-          <option value="smart-march">🎺 Hành Khúc / Hân Hoan (Joyful March)</option>
-          <option value="smart-rumba">🌴 Rumba Thánh Ca (Trầm Ấm Lãng Mạn)</option>
-          <option value="piano-block-4-4-v1">📦 Piano Block (Dậm Đều Từng Phách)</option>
-          <option value="organ-church-4-4-v1">🏛 Organ Đại Thánh Đường (Pedal Bass)</option>
+          <optgroup label="Nhịp 4/4 & Chung">
+            <option value="smart-ballad" selected>🎹 Pop / Worship Ballad (4/4 Mượt Mà)</option>
+            <option value="smart-rumba">🌴 Rumba Thánh Ca (Trầm Ấm Lãng Mạn)</option>
+            <option value="smart-worship">✨ Arpeggio Suối Reo (Rải 16th Mượt Mà)</option>
+            <option value="smart-disco">🎉 Praise / Disco Hân Hoan (4/4 Sôi Động)</option>
+            <option value="piano-block-4-4-v1">📦 Piano Block (Dậm Đều Từng Phách)</option>
+          </optgroup>
+          <optgroup label="Nhịp 3/4 (Boston / Waltz)">
+            <option value="smart-boston">💃 Boston Trữ Tình (3/4 Chậm Rãi Nhẹ Nhàng)</option>
+            <option value="smart-waltz">🍷 Slow Waltz (3/4 Quý Phái Mềm Mại)</option>
+            <option value="smart-joyful-waltz">⛪ Joyful Valse (3/4 Vui Tươi Mừng Lễ)</option>
+          </optgroup>
+          <optgroup label="Nhịp 6/8 (Slow Rock / Ballad 6/8)">
+            <option value="smart-slowrock-6-8">🌊 Thánh Ca 6/8 Slow Rock (Sóng Biển Dập Dềnh)</option>
+            <option value="smart-ballad-6-8">🕊 Ballad 6/8 Nhẹ Nhàng Âm Vang</option>
+          </optgroup>
+          <optgroup label="Nhịp 2/4 (Hành Khúc / Polka)">
+            <option value="smart-march">🎺 Hành Khúc / March 1-2 (Trang Nghiêm Tiến Lên)</option>
+            <option value="smart-fox">🦊 Fox / Polka 2/4 (Nhanh Vui Rộn Rã)</option>
+          </optgroup>
+          <optgroup label="Trang Trọng & Nhà Thờ (Mọi Nhịp)">
+            <option value="smart-hymn">⛪ Thánh Ca 4 Bè (Hòa Âm Trang Trọng)</option>
+            <option value="organ-church-4-4-v1">🏛 Organ Đại Thánh Đường (Pedal Bass)</option>
+          </optgroup>
         </select>
 
         <!-- Density control -->
@@ -311,6 +368,61 @@ function learnCssTag(string $file): string {
               Trống/Gõ
             </span>
             <input type="range" id="slider-vol-drum" min="-35" max="4" value="-4" title="Âm lượng Trống & Bộ gõ mộc">
+          </div>
+        </div>
+      </div>
+
+      <!-- Melody Practice Card -->
+      <div class="learn-panel-card" id="learn-melody-card">
+        <div class="learn-panel-card-header">
+          <span class="learn-panel-card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:-3px;margin-right:4px;">
+              <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+            </svg>
+            Tập Đánh Nốt Giai Điệu
+          </span>
+          <span class="melody-mode-badge" id="melody-badge-state">Giọng 1</span>
+        </div>
+        <div class="melody-card-body">
+          <p class="melody-desc">
+            Trích xuất nốt giọng 1 (khoá Sol) từ sheet nhạc. Bàn phím ảo và con trỏ sẽ dẫn đường từng nốt theo thời gian thực.
+          </p>
+
+          <div class="melody-toggle-row">
+            <div class="melody-toggle-label">
+              <span class="title">Chờ đánh đúng nốt</span>
+              <span class="sub">Chỉ đi tiếp khi bạn bấm trúng nốt</span>
+            </div>
+            <label class="learn-toggle-switch">
+              <input type="checkbox" id="melody-wait-toggle" checked>
+              <span class="learn-toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="melody-toggle-row">
+            <div class="melody-toggle-label">
+              <span class="title">Âm thanh mẫu Piano</span>
+              <span class="sub">Tự động đàn mẫu nốt khi tới lượt</span>
+            </div>
+            <label class="learn-toggle-switch">
+              <input type="checkbox" id="melody-preview-toggle" checked>
+              <span class="learn-toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="melody-stats-bar">
+            <div class="stat-box">
+              <span class="stat-label">Tổng nốt</span>
+              <span class="stat-val" id="melody-stat-total">0</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Chính xác</span>
+              <span class="stat-val text-success" id="melody-stat-accuracy">100%</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Đã đánh</span>
+              <span class="stat-val text-accent" id="melody-stat-hits">0</span>
+            </div>
           </div>
         </div>
       </div>
@@ -515,6 +627,7 @@ echo learnJsTag('assets/js/learn/practice/loop-controller.js', true);
 echo learnJsTag('assets/js/learn/practice/practice-tracker.js', true);
 echo learnJsTag('assets/js/learn/midi/midi-input-engine.js', true);
 echo learnJsTag('assets/js/learn/practice/chord-judge.js', true);
+echo learnJsTag('assets/js/learn/practice/melody-practice-engine.js', true);
 echo learnJsTag('assets/js/learn/ui/virtual-keyboard.js', true);
 echo learnJsTag('assets/js/learn/ui/chord-card.js', true);
 echo learnJsTag('assets/js/learn/learn-app.js', true);

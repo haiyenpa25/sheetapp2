@@ -402,6 +402,14 @@ const LearnApp = (() => {
       // Setup transport callbacks
       _setupTransportCallbacks();
 
+      // Trích xuất nốt giai điệu giọng 1 cho chế độ Melody Practice
+      if (window.MelodyPracticeEngine) {
+        MelodyPracticeEngine.extractFromXml(_xmlDoc, _currentTranspose);
+        if (LearnStore.get('mode') === 'melody') {
+          MelodyPracticeEngine.setActive(true, _osmd);
+        }
+      }
+
       _hideLoading();
       _setUiStatus('ready');
 
@@ -416,7 +424,7 @@ const LearnApp = (() => {
     } catch (e) {
       _hideLoading();
       _setUiStatus('idle');
-      console.error('[LearnApp] Load song failed:', e);
+      console.error('[LearnApp] Load song failed:', e, e.stack);
       _showError('Lỗi tải bài: ' + e.message);
     }
   }
@@ -441,16 +449,64 @@ const LearnApp = (() => {
     if (chord) EventBus.emit(LEARN_EVENTS.CHORD_CHANGED, { chord, next });
   }
 
+  function _filterPatternOptionsByMeter(filterMeter, beats, beatType) {
+    const patternSelect = document.getElementById('learn-pattern-select');
+    if (!patternSelect) return;
+
+    const optgroups = patternSelect.querySelectorAll('optgroup');
+    let effectiveFilter = filterMeter;
+    if (filterMeter === 'auto') {
+      if (beats === 3) effectiveFilter = '3/4';
+      else if (beats === 6) effectiveFilter = '6/8';
+      else if (beats === 2) effectiveFilter = '2/4';
+      else effectiveFilter = '4/4';
+    }
+
+    let firstMatchVal = null;
+
+    optgroups.forEach(og => {
+      const label = og.label || '';
+      const isHymnOrAll = label.includes('Mọi Nhịp') || label.includes('Trang Trọng');
+      const matches = (effectiveFilter === 'all') || isHymnOrAll || label.includes(effectiveFilter);
+
+      og.style.display = matches ? '' : 'none';
+      Array.from(og.querySelectorAll('option')).forEach(opt => {
+        opt.hidden = !matches;
+        if (matches && !firstMatchVal) {
+          firstMatchVal = opt.value;
+        }
+      });
+    });
+
+    // Nếu option hiện tại bị ẩn trong filter này, tự chuyển sang option hợp lệ đầu tiên
+    const currentOpt = patternSelect.querySelector(`option[value="${patternSelect.value}"]`);
+    if (currentOpt && currentOpt.hidden && firstMatchVal) {
+      patternSelect.value = firstMatchVal;
+      if (window.PatternEngine) PatternEngine.setPattern(firstMatchVal);
+    }
+  }
+
   function _autoSelectPattern(beats, beatType) {
     const patternSelect = document.getElementById('learn-pattern-select');
     if (!patternSelect || !window.PatternEngine) return;
 
     let targetPattern = 'smart-ballad';
-    if (beats === 3 && beatType === 4) {
-      targetPattern = 'smart-waltz';
-    } else if (beats === 6 && beatType === 8) {
-      targetPattern = 'smart-slowrock-6-8';
+    if (window.PatternLibrary?.getRecommendedFor) {
+      const rec = PatternLibrary.getRecommendedFor(beats, beatType);
+      targetPattern = (typeof rec === 'string') ? rec : (rec?.patterns?.[0]?.id || 'smart-ballad');
+    } else {
+      if (beats === 3) targetPattern = 'smart-boston';
+      else if (beats === 6) targetPattern = 'smart-slowrock-6-8';
+      else if (beats === 2) targetPattern = 'smart-march';
     }
+
+    // Đồng bộ nút tab filter
+    const autoTab = document.querySelector('.btn-meter-tab[data-meter="auto"]');
+    if (autoTab) {
+      document.querySelectorAll('.btn-meter-tab').forEach(t => t.classList.remove('active'));
+      autoTab.classList.add('active');
+    }
+    _filterPatternOptionsByMeter('auto', beats, beatType);
 
     patternSelect.value = targetPattern;
     PatternEngine.setPattern(targetPattern);
@@ -1038,6 +1094,7 @@ const LearnApp = (() => {
           } catch(e) {}
         }
         _rebuildTimeline();
+        if (window.MelodyPracticeEngine) MelodyPracticeEngine.setTranspose(_currentTranspose);
         _updateUrlAndBackLink();
       }
     });
@@ -1057,6 +1114,7 @@ const LearnApp = (() => {
           } catch(e) {}
         }
         _rebuildTimeline();
+        if (window.MelodyPracticeEngine) MelodyPracticeEngine.setTranspose(_currentTranspose);
         _updateUrlAndBackLink();
       }
     });
@@ -1111,6 +1169,37 @@ const LearnApp = (() => {
       if (window.PatternEngine) {
         PatternEngine.setPattern(e.target.value);
       }
+    });
+
+    // Meter Filter Tabs
+    document.querySelectorAll('.btn-meter-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.btn-meter-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const meta = _getSongMeta();
+        _filterPatternOptionsByMeter(btn.dataset.meter, meta.beats, meta.beatType);
+      });
+    });
+
+    // Melody Controls (Wait toggle, Piano preview, Nav buttons)
+    document.getElementById('melody-wait-toggle')?.addEventListener('change', (e) => {
+      if (window.MelodyPracticeEngine) MelodyPracticeEngine.setWaitForNote(e.target.checked);
+    });
+
+    document.getElementById('melody-preview-toggle')?.addEventListener('change', (e) => {
+      if (window.MelodyPracticeEngine) MelodyPracticeEngine.setPianoSound(e.target.checked);
+    });
+
+    document.getElementById('btn-melody-prev')?.addEventListener('click', () => {
+      if (window.MelodyPracticeEngine) MelodyPracticeEngine.prevNote();
+    });
+
+    document.getElementById('btn-melody-next')?.addEventListener('click', () => {
+      if (window.MelodyPracticeEngine) MelodyPracticeEngine.nextNote();
+    });
+
+    document.getElementById('btn-melody-reset')?.addEventListener('click', () => {
+      if (window.MelodyPracticeEngine) MelodyPracticeEngine.reset();
     });
 
     // Accompaniment Toggle (Mute/Unmute)
@@ -1232,11 +1321,21 @@ const LearnApp = (() => {
             pSel.value = 'smart-ballad';
             if (window.PatternEngine) PatternEngine.setPattern('smart-ballad');
           }
+          if (window.MelodyPracticeEngine) MelodyPracticeEngine.setActive(false);
         } else if (mode === 'satb') {
           const satbCard = document.getElementById('learn-satb-card');
           if (satbCard) satbCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
           const choirTab = document.querySelector('.btn-learn-tab[data-tab="choir"]');
           if (choirTab && window.innerWidth <= 960) choirTab.click();
+          if (window.MelodyPracticeEngine) MelodyPracticeEngine.setActive(false);
+        } else if (mode === 'melody') {
+          const melodyCard = document.getElementById('learn-melody-card');
+          if (melodyCard) melodyCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          if (window.MelodyPracticeEngine) {
+            MelodyPracticeEngine.setActive(true, _osmd);
+          }
+        } else {
+          if (window.MelodyPracticeEngine) MelodyPracticeEngine.setActive(false);
         }
 
         EventBus.emit(LEARN_EVENTS.MODE_CHANGED, { mode });
@@ -1353,10 +1452,7 @@ const LearnApp = (() => {
     // Bind controls
     _bindControls();
 
-    // Load songs
-    _loadSongs();
-
-    // Check URL for song, chord set, and transpose params
+    // Check URL for song, chord set, and transpose params BEFORE loading songs
     const urlParams = new URLSearchParams(window.location.search);
     const songParam = urlParams.get('song') ?? urlParams.get('id');
     if (songParam) {
@@ -1374,6 +1470,9 @@ const LearnApp = (() => {
       }
     }
 
+    // Load songs
+    _loadSongs();
+
     // EventBus listeners
     EventBus.on(LEARN_EVENTS.CHORD_CHANGED, ({ chord, next }) => {
       if (window.ChordCard) ChordCard.setChord(chord, next, _currentSong?.defaultKey);
@@ -1383,7 +1482,14 @@ const LearnApp = (() => {
     if (window.MidiInputEngine) {
       MidiInputEngine.init();
       MidiInputEngine.onMidiEvent((evt) => {
-        if (evt.type === 'note_on' || evt.type === 'active_notes_changed') {
+        if (evt.type === 'note_on') {
+          if (window.MelodyPracticeEngine && MelodyPracticeEngine.isActive()) {
+            MelodyPracticeEngine.checkPlayedNote(evt.midi || evt.note);
+          }
+          if (_waitMode && _isWaitingForChord) {
+            _checkWaitChordMatch();
+          }
+        } else if (evt.type === 'active_notes_changed') {
           if (_waitMode && _isWaitingForChord) {
             _checkWaitChordMatch();
           }

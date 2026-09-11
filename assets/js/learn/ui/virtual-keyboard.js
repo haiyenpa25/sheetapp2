@@ -206,6 +206,18 @@ const VirtualKeyboard = (() => {
   /* ─── Play Note (hear on click) ──────────────────────────────── */
   function _playNote(noteName, oct) {
     const fullNote = `${noteName}${oct}`;
+
+    // Nếu đang ở chế độ Luyện Nốt Giai Điệu: Gửi nốt sang MelodyPracticeEngine để chấm điểm
+    if (window.MelodyPracticeEngine?.isActive?.()) {
+      window.MelodyPracticeEngine.checkPlayedNote(fullNote);
+      return;
+    }
+
+    // Nếu đang ở chế độ Luyện Hợp Âm
+    if (window.ChordJudge?.checkUserNote) {
+      window.ChordJudge.checkUserNote(fullNote);
+    }
+
     if (window.LearnSoundEngine) {
       window.LearnSoundEngine.triggerNote('piano', fullNote, 0.5, undefined, 0.85);
       return;
@@ -297,8 +309,70 @@ const VirtualKeyboard = (() => {
     }, 600);
   }
 
+  let _melodyTargetKey = null;
+  let _melodyNextKey = null;
+
+  function setMelodyGuide(currentNote, nextNote = null) {
+    // Clear previous melody highlights
+    if (_melodyTargetKey) {
+      const el = _keyEls.get(_melodyTargetKey);
+      if (el) {
+        el.classList.remove('vkb-melody-target');
+        const b = el.querySelector('.vkb-melody-badge');
+        if (b) b.remove();
+      }
+      _melodyTargetKey = null;
+    }
+    if (_melodyNextKey) {
+      const el = _keyEls.get(_melodyNextKey);
+      if (el) el.classList.remove('vkb-melody-next');
+      _melodyNextKey = null;
+    }
+
+    if (!currentNote) return;
+
+    // Highlight target note with glowing badge
+    const targetKey = currentNote.pitchName;
+    const targetEl = _keyEls.get(targetKey);
+    if (targetEl) {
+      targetEl.classList.add('vkb-melody-target');
+      _melodyTargetKey = targetKey;
+
+      let badge = targetEl.querySelector('.vkb-melody-badge');
+      if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'vkb-melody-badge';
+        targetEl.appendChild(badge);
+      }
+      badge.textContent = currentNote.vietnameseName || currentNote.pitchName;
+      badge.title = `Nốt cần đánh: ${currentNote.vietnameseName} (${currentNote.pitchName})`;
+    }
+
+    // Outline next note preview
+    if (nextNote) {
+      const nextKey = nextNote.pitchName;
+      const nextEl = _keyEls.get(nextKey);
+      if (nextEl && nextKey !== targetKey) {
+        nextEl.classList.add('vkb-melody-next');
+        _melodyNextKey = nextKey;
+      }
+    }
+  }
+
+  function flashNoteHit(noteName, isCorrect = true) {
+    const el = _keyEls.get(noteName);
+    if (el) {
+      const cls = isCorrect ? 'vkb-hit-success' : 'vkb-hit-wrong';
+      el.classList.add(cls);
+      setTimeout(() => el.classList.remove(cls), 500);
+    }
+    if (isCorrect) flashSuccess();
+    else flashError();
+  }
+
   function clear() {
     setChord(null, null);
+    setMelodyGuide(null, null);
     setUserActiveNotes([]);
   }
 
@@ -311,6 +385,8 @@ const VirtualKeyboard = (() => {
   return { 
     mount, 
     setChord, 
+    setMelodyGuide,
+    flashNoteHit,
     clear, 
     destroy,
     setUserActiveNotes,

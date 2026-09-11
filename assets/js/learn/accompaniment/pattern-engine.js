@@ -413,6 +413,142 @@ const PatternEngine = (() => {
     }
   }
 
+  /**
+   * 9. Smart Boston 3/4 (Boston trữ tình sâu lắng)
+   */
+  function _scheduleBoston(timeline, measureNo, audioTime, secPerBeat, firstChord) {
+    const c1 = ChordTimelineNormalizer.getChordAt(timeline, measureNo, 1) || firstChord;
+    if (c1) {
+      _playBassNote(c1, audioTime, secPerBeat * 2.8, 0.92);
+      _playChordVoicing(c1, audioTime + 0.015, secPerBeat * 0.95, 0.68);
+      _triggerDrum('kick', audioTime, 0.55);
+      _triggerDrum('shaker', audioTime, 0.50);
+    }
+
+    const c2 = ChordTimelineNormalizer.getChordAt(timeline, measureNo, 2) || c1;
+    if (c2) {
+      _playArpeggioStep(c2, audioTime + secPerBeat, 1, secPerBeat * 0.9, 0.62);
+      _playChordVoicing(c2, audioTime + secPerBeat + 0.01, secPerBeat * 0.8, 0.58);
+      _triggerDrum('shaker', audioTime + secPerBeat, 0.45);
+    }
+
+    const c3 = ChordTimelineNormalizer.getChordAt(timeline, measureNo, 3) || c2;
+    if (c3) {
+      _playArpeggioStep(c3, audioTime + 2 * secPerBeat, 2, secPerBeat * 0.9, 0.65);
+      _playChordVoicing(c3, audioTime + 2 * secPerBeat + 0.01, secPerBeat * 0.8, 0.60);
+      _triggerDrum('shaker', audioTime + 2 * secPerBeat, 0.48);
+    }
+  }
+
+  /**
+   * 10. Smart Joyful Waltz 3/4 (Valse hân hoan rộn ràng mừng lễ)
+   */
+  function _scheduleJoyfulWaltz(timeline, measureNo, audioTime, secPerBeat, firstChord) {
+    const c1 = ChordTimelineNormalizer.getChordAt(timeline, measureNo, 1) || firstChord;
+    if (c1) {
+      _playBassNote(c1, audioTime, secPerBeat * 0.9, 0.95);
+      _triggerDrum('kick', audioTime, 0.80);
+      _triggerDrum('hihat', audioTime, 0.60);
+    }
+
+    const c2 = ChordTimelineNormalizer.getChordAt(timeline, measureNo, 2) || c1;
+    if (c2) {
+      _playChordVoicing(c2, audioTime + secPerBeat, secPerBeat * 0.65, 0.76);
+      _triggerDrum('snare', audioTime + secPerBeat, 0.65);
+      _triggerDrum('hihat', audioTime + secPerBeat, 0.55);
+    }
+
+    const c3 = ChordTimelineNormalizer.getChordAt(timeline, measureNo, 3) || c2;
+    if (c3) {
+      _playChordVoicing(c3, audioTime + 2 * secPerBeat, secPerBeat * 0.65, 0.72);
+      _triggerDrum('hihat', audioTime + 2 * secPerBeat, 0.55);
+    }
+  }
+
+  /**
+   * 11. Smart Disco / Praise 4/4 (Hân hoan & sôi nổi)
+   */
+  function _scheduleDisco(timeline, measureNo, audioTime, secPerBeat, beatsPerMeasure, firstChord) {
+    for (let b = 1; b <= beatsPerMeasure; b++) {
+      const bTime = audioTime + (b - 1) * secPerBeat;
+      const c = ChordTimelineNormalizer.getChordAt(timeline, measureNo, b) || firstChord;
+      if (!c) continue;
+
+      // Four-on-the-floor kick
+      _triggerDrum('kick', bTime, 0.85);
+
+      // Bass: Root on beat, Octave on offbeat
+      _playBassNote(c, bTime, secPerBeat * 0.45, 0.90);
+      _playAlternatingBass(c, bTime + secPerBeat * 0.5, secPerBeat * 0.45, 0.78);
+
+      // Open hi-hat on offbeat
+      _triggerDrum('hihat', bTime + secPerBeat * 0.5, 0.70);
+
+      // Snare on 2 and 4
+      if (b === 2 || b === 4) {
+        _triggerDrum('snare', bTime, 0.80);
+        _playChordVoicing(c, bTime, secPerBeat * 0.7, 0.82);
+      } else {
+        _playChordVoicing(c, bTime, secPerBeat * 0.5, 0.65);
+      }
+    }
+  }
+
+  /**
+   * 12. Smart Fox / Polka 2/4 (Tươi vui rộn rã)
+   */
+  function _scheduleFoxPolka(timeline, measureNo, audioTime, secPerBeat, firstChord) {
+    const c1 = ChordTimelineNormalizer.getChordAt(timeline, measureNo, 1) || firstChord;
+    const c2 = ChordTimelineNormalizer.getChordAt(timeline, measureNo, 2) || c1;
+
+    // Beat 1: Bass Root + Kick
+    if (c1) {
+      _playBassNote(c1, audioTime, secPerBeat * 0.45, 0.92);
+      _triggerDrum('kick', audioTime, 0.85);
+
+      // Offbeat 1.5: Chord Staccato + Hihat
+      _playChordVoicing(c1, audioTime + secPerBeat * 0.5, secPerBeat * 0.4, 0.75);
+      _triggerDrum('hihat', audioTime + secPerBeat * 0.5, 0.65);
+    }
+
+    // Beat 2: Bass 5th + Snare
+    if (c2) {
+      _playAlternatingBass(c2, audioTime + secPerBeat, secPerBeat * 0.45, 0.85);
+      _triggerDrum('snare', audioTime + secPerBeat, 0.80);
+
+      // Offbeat 2.5: Chord Staccato + Hihat
+      _playChordVoicing(c2, audioTime + secPerBeat * 1.5, secPerBeat * 0.4, 0.72);
+      _triggerDrum('hihat', audioTime + secPerBeat * 1.5, 0.60);
+    }
+  }
+
+  /**
+   * 13. Smart Ballad 6/8 (Trang nghiêm trầm hùng)
+   */
+  function _scheduleBallad68(timeline, measureNo, audioTime, bpm, firstChord) {
+    const stepDur = (60 / bpm) * 0.5;
+    const c1 = ChordTimelineNormalizer.getChordAt(timeline, measureNo, 1) || firstChord;
+    const c4 = ChordTimelineNormalizer.getChordAt(timeline, measureNo, 4) || c1;
+
+    if (c1) {
+      _playBassNote(c1, audioTime, stepDur * 3.0, 0.90);
+      _playChordVoicing(c1, audioTime + 0.015, stepDur * 2.8, 0.75);
+      _triggerDrum('kick', audioTime, 0.75);
+      _triggerDrum('shaker', audioTime, 0.55);
+      _playArpeggioStep(c1, audioTime + 2 * stepDur, 1, stepDur * 0.9, 0.58);
+      _triggerDrum('shaker', audioTime + 2 * stepDur, 0.45);
+    }
+
+    if (c4) {
+      _playAlternatingBass(c4, audioTime + 3 * stepDur, stepDur * 3.0, 0.82);
+      _playChordVoicing(c4, audioTime + 3 * stepDur + 0.015, stepDur * 2.8, 0.72);
+      _triggerDrum('snare', audioTime + 3 * stepDur, 0.70);
+      _triggerDrum('shaker', audioTime + 3 * stepDur, 0.55);
+      _playArpeggioStep(c4, audioTime + 5 * stepDur, 2, stepDur * 0.9, 0.55);
+      _triggerDrum('shaker', audioTime + 5 * stepDur, 0.45);
+    }
+  }
+
   /* ─── Main Scheduling Dispatcher ─── */
   function _scheduleMeasure(measureNo, audioTime, bpm) {
     if (!_enabled || !window.VoicingEngine || !window.LearnSoundEngine) return;
@@ -426,49 +562,65 @@ const PatternEngine = (() => {
     const patternId = _activePatternId || 'smart-ballad';
     const firstChordInMeasure = ChordTimelineNormalizer.getChordAt(timeline, measureNo, 1);
 
-    // 1. Nhịp 6/8 hoặc Style Smart Slow Rock
-    if ((beatsPerMeasure === 6 && beatType === 8) || patternId === 'smart-slowrock-6-8') {
+    // 1. Nhóm 6/8
+    if (patternId === 'smart-slowrock-6-8' || ((beatsPerMeasure === 6 && beatType === 8) && patternId !== 'smart-ballad-6-8')) {
       _scheduleSlowRock68(timeline, measureNo, audioTime, bpm, firstChordInMeasure);
       return;
     }
+    if (patternId === 'smart-ballad-6-8') {
+      _scheduleBallad68(timeline, measureNo, audioTime, bpm, firstChordInMeasure);
+      return;
+    }
 
-    // 2. Nhịp 3/4 hoặc Style Smart Waltz
+    // 2. Nhóm 3/4
+    if (patternId === 'smart-boston') {
+      _scheduleBoston(timeline, measureNo, audioTime, secPerBeat, firstChordInMeasure);
+      return;
+    }
+    if (patternId === 'smart-joyful-waltz') {
+      _scheduleJoyfulWaltz(timeline, measureNo, audioTime, secPerBeat, firstChordInMeasure);
+      return;
+    }
     if (beatsPerMeasure === 3 || patternId === 'smart-waltz') {
       _scheduleWaltz34(timeline, measureNo, audioTime, secPerBeat, firstChordInMeasure);
       return;
     }
 
-    // 3. Style Smart Worship (Arpeggio Suối Reo 16th)
-    if (patternId === 'smart-worship') {
-      _scheduleWorshipArpeggio(timeline, measureNo, audioTime, secPerBeat, beatsPerMeasure, firstChordInMeasure);
+    // 3. Nhóm 2/4
+    if (patternId === 'smart-fox') {
+      _scheduleFoxPolka(timeline, measureNo, audioTime, secPerBeat, firstChordInMeasure);
       return;
     }
-
-    // 4. Style Smart March (Hành khúc hân hoan)
-    if (patternId === 'smart-march') {
+    if (patternId === 'smart-march' || (beatsPerMeasure === 2 && beatType === 4 && patternId !== 'smart-ballad')) {
       _scheduleMarch(timeline, measureNo, audioTime, secPerBeat, beatsPerMeasure, firstChordInMeasure);
       return;
     }
 
-    // 5. Style Smart Rumba
+    // 4. Nhóm 4/4 đặc thù
+    if (patternId === 'smart-disco') {
+      _scheduleDisco(timeline, measureNo, audioTime, secPerBeat, beatsPerMeasure, firstChordInMeasure);
+      return;
+    }
+    if (patternId === 'smart-worship') {
+      _scheduleWorshipArpeggio(timeline, measureNo, audioTime, secPerBeat, beatsPerMeasure, firstChordInMeasure);
+      return;
+    }
     if (patternId === 'smart-rumba') {
       _scheduleRumba(timeline, measureNo, audioTime, secPerBeat, firstChordInMeasure);
       return;
     }
-
-    // 6. Style Smart Hymn / Organ Thánh Đường
-    if (patternId === 'smart-hymn' || patternId === 'organ-church-4-4-v1') {
-      _scheduleHymn(timeline, measureNo, audioTime, secPerBeat, beatsPerMeasure, firstChordInMeasure, patternId === 'organ-church-4-4-v1');
-      return;
-    }
-
-    // 7. Piano Block
     if (patternId === 'piano-block-4-4-v1') {
       _scheduleBlock(timeline, measureNo, audioTime, secPerBeat, beatsPerMeasure, firstChordInMeasure);
       return;
     }
 
-    // 8. Default: Smart Ballad 4/4
+    // 5. Organ / Hymn
+    if (patternId === 'smart-hymn' || patternId === 'organ-church-4-4-v1') {
+      _scheduleHymn(timeline, measureNo, audioTime, secPerBeat, beatsPerMeasure, firstChordInMeasure, patternId === 'organ-church-4-4-v1');
+      return;
+    }
+
+    // 6. Mặc định: Smart Ballad 4/4
     _scheduleBallad44(timeline, measureNo, audioTime, secPerBeat, beatsPerMeasure, firstChordInMeasure);
   }
 
