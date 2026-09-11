@@ -81,7 +81,7 @@ const PatternEngine = (() => {
     return Math.max(0.15, Math.min(1.0, vel + delta));
   }
 
-  function _playBassNote(chordEvent, time, durationSec, velocity = 0.85, instrument = 'bass', octave = 2) {
+  function _playBassNote(chordEvent, time, durationSec, velocity = 0.85, instrument = 'piano', octave = 2) {
     if (!window.LearnSoundEngine || !chordEvent) return;
     const symbol = chordEvent.transposedSymbol || chordEvent.symbol;
     const parsed = VoicingEngine.parseChord(symbol, chordEvent.bass);
@@ -91,7 +91,7 @@ const PatternEngine = (() => {
     LearnSoundEngine.triggerNote(instrument, note, durationSec, time, vel, 'left');
   }
 
-  function _playAlternatingBass(chordEvent, time, durationSec, velocity = 0.75, instrument = 'bass') {
+  function _playAlternatingBass(chordEvent, time, durationSec, velocity = 0.75, instrument = 'piano') {
     if (!window.LearnSoundEngine || !chordEvent) return;
     const symbol = chordEvent.transposedSymbol || chordEvent.symbol;
     const parsed = VoicingEngine.parseChord(symbol, chordEvent.bass);
@@ -151,7 +151,8 @@ const PatternEngine = (() => {
       const ticks = T.getTicksAtTime(audioTime);
       const timeSig = Array.isArray(T.timeSignature) ? T.timeSignature[0] : (T.timeSignature || 4);
       const ticksPerBar = (T.PPQ || 192) * timeSig;
-      const bar = Math.round(ticks / ticksPerBar);
+      // Cộng 10 ticks margin để triệt tiêu sai số floating point (767.9999999994325) của Tone.js clock
+      const bar = Math.floor((ticks + 10) / ticksPerBar);
       return Math.max(1, bar + 1);
     }
     return window.MusicTransport ? MusicTransport.getMeasureBeat().measure : 1;
@@ -560,7 +561,18 @@ const PatternEngine = (() => {
     const beatType = window.LearnStore?.get('_beatType') || 4;
     const secPerBeat = 60 / Math.max(20, bpm);
     const patternId = _activePatternId || 'smart-ballad';
-    const firstChordInMeasure = ChordTimelineNormalizer.getChordAt(timeline, measureNo, 1);
+    
+    // Tìm hợp âm đầu ô nhịp; nếu ô nhịp chưa có (lấy đà hoặc ngân dài), tự động kế thừa hợp âm liền kề trước đó
+    let firstChordInMeasure = ChordTimelineNormalizer.getChordAt(timeline, measureNo, 1);
+    if (!firstChordInMeasure) {
+      for (let m = measureNo - 1; m >= 1; m--) {
+        firstChordInMeasure = ChordTimelineNormalizer.getChordAt(timeline, m, 1);
+        if (firstChordInMeasure) break;
+      }
+    }
+    if (!firstChordInMeasure && timeline.length > 0) {
+      firstChordInMeasure = timeline[0];
+    }
 
     // 1. Nhóm 6/8
     if (patternId === 'smart-slowrock-6-8' || ((beatsPerMeasure === 6 && beatType === 8) && patternId !== 'smart-ballad-6-8')) {

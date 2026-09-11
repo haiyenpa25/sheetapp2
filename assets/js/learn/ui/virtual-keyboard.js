@@ -138,16 +138,9 @@ const VirtualKeyboard = (() => {
       el.appendChild(label);
     }
 
-    // Click to hear and simulate MIDI note
+    // Click phát âm thanh piano và đánh giá nốt chính xác
     el.addEventListener('click', () => {
       _playNote(noteName, oct);
-      if (window.MidiInputEngine) {
-        const fullNote = `${noteName}${oct}`;
-        MidiInputEngine.simulateNoteOn(fullNote);
-        setTimeout(() => {
-          if (window.MidiInputEngine) MidiInputEngine.simulateNoteOff(fullNote);
-        }, 1000);
-      }
     });
 
     return el;

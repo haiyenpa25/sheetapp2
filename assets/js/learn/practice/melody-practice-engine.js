@@ -323,6 +323,9 @@ const MelodyPracticeEngine = (() => {
     }
   }
 
+  let _lastCheckTime = 0;
+  let _lastCheckedNote = '';
+
   /**
    * So khớp nốt học viên vừa đánh (từ Bàn phím ảo hoặc thiết bị MIDI cắm ngoài)
    * @param {string|number} inputNote - Ký hiệu nốt (vd: 'G4', 'E4') hoặc số MIDI
@@ -330,6 +333,15 @@ const MelodyPracticeEngine = (() => {
    */
   function checkPlayedNote(inputNote) {
     if (!_isActive || !_melodyNotes.length) return false;
+
+    // Chống dội phím / double-trigger trong 60ms
+    const now = Date.now();
+    const noteKey = String(inputNote);
+    if (noteKey === _lastCheckedNote && (now - _lastCheckTime) < 60) {
+      return false;
+    }
+    _lastCheckTime = now;
+    _lastCheckedNote = noteKey;
 
     const targetNote = _melodyNotes[_currentIdx];
     if (!targetNote) return false;
@@ -358,7 +370,8 @@ const MelodyPracticeEngine = (() => {
 
       // Phát âm thanh piano vang trong trẻo
       if (window.LearnSoundEngine) {
-        LearnSoundEngine.triggerNote('piano', targetNote.pitchName, 0.6, undefined, 0.9, 'right');
+        const soundPitch = isExactMatch ? targetNote.pitchName : (playedPitchName || targetNote.pitchName);
+        LearnSoundEngine.triggerNote('piano', soundPitch, 0.6, undefined, 0.9, 'right');
       }
 
       // Hiệu ứng phím sáng rực xanh lá
@@ -389,6 +402,11 @@ const MelodyPracticeEngine = (() => {
       // ĐÁNH SAI NỐT
       _hitScore.wrong++;
       _hitScore.streak = 0;
+
+      // Phát âm thanh chân thực của nốt vừa đánh (để học viên biết mình bấm nhầm nốt gì)
+      if (window.LearnSoundEngine && playedPitchName) {
+        LearnSoundEngine.triggerNote('piano', playedPitchName, 0.45, undefined, 0.72, 'right');
+      }
 
       // Cập nhật thống kê và HUD
       _updateUIHUD();

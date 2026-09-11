@@ -162,8 +162,9 @@ const MusicTransport = (() => {
       const timeSig = Array.isArray(T.timeSignature) ? T.timeSignature[0] : (T.timeSignature || 4);
       const ticksPerBeat = T.PPQ || 192;
       const ticksPerBar = ticksPerBeat * timeSig;
-      const bars = Math.floor(ticks / ticksPerBar);
-      const beatTicks = ticks % ticksPerBar;
+      // Cộng 10 ticks margin để triệt tiêu sai số floating point (e.g. 767.9999999994325)
+      const bars = Math.floor((ticks + 10) / ticksPerBar);
+      const beatTicks = (ticks + 10) % ticksPerBar;
       const beats = Math.floor(beatTicks / ticksPerBeat);
       return {
         measure: Math.max(1, bars + 1),
