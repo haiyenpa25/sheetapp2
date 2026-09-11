@@ -248,10 +248,24 @@
     if (elPreviewTag) elPreviewTag.textContent = elInputChordCode.value.toUpperCase() || 'MÃ';
   });
 
+  document.getElementById('create-role')?.addEventListener('change', e => {
+    const isViewer = e.target.value === 'viewer';
+    elInputChordCode.disabled = isViewer;
+    if (isViewer) {
+      elInputChordCode.value = '';
+      if (elPreviewTag) elPreviewTag.textContent = '❌';
+    } else {
+      const code = suggestChordCode(elInputDispName.value, elInputUsername.value);
+      elInputChordCode.value = code;
+      if (elPreviewTag) elPreviewTag.textContent = code;
+    }
+  });
+
   /* ─── 4. CREATE MODAL ────────────────────────────────────────── */
   elBtnOpenCreate?.addEventListener('click', () => {
     elFormCreate.reset();
     delete elInputChordCode.dataset.userModified;
+    elInputChordCode.disabled = false;
     if (elPreviewTag) elPreviewTag.textContent = 'HD';
     elModalCreate?.classList.remove('hidden');
     elInputUsername?.focus();
@@ -262,13 +276,14 @@
     const btn = document.getElementById('btn-submit-create');
     btn.disabled = true;
 
+    const role = document.getElementById('create-role').value;
     const payload = {
       username: elInputUsername.value.trim(),
       password: document.getElementById('create-password').value,
       display_name: elInputDispName.value.trim(),
       instrument: document.getElementById('create-instrument').value.trim() || 'Guitar',
-      chord_code: elInputChordCode.value.trim().toUpperCase(),
-      role: document.getElementById('create-role').value
+      chord_code: role === 'viewer' ? '' : elInputChordCode.value.trim().toUpperCase(),
+      role: role
     };
 
     try {
@@ -304,23 +319,31 @@
     elEditInst.value = member.instrument || 'Guitar';
     elEditChordCode.value = member.chord_code || '';
     elEditRole.value = member.role || 'banhat';
+    elEditChordCode.disabled = (member.role === 'viewer');
     elEditPassword.value = '';
 
     elModalEdit?.classList.remove('hidden');
     elEditDispName.focus();
   }
 
+  elEditRole?.addEventListener('change', e => {
+    const isViewer = e.target.value === 'viewer';
+    elEditChordCode.disabled = isViewer;
+    if (isViewer) elEditChordCode.value = '';
+  });
+
   elFormEdit?.addEventListener('submit', async e => {
     e.preventDefault();
     const btn = document.getElementById('btn-submit-edit');
     btn.disabled = true;
 
+    const role = elEditRole.value;
     const payload = {
       id: elEditId.value,
       display_name: elEditDispName.value.trim(),
       instrument: elEditInst.value.trim(),
-      chord_code: elEditChordCode.value.trim().toUpperCase(),
-      role: elEditRole.value
+      chord_code: role === 'viewer' ? '' : elEditChordCode.value.trim().toUpperCase(),
+      role: role
     };
     if (elEditPassword.value) {
       payload.password = elEditPassword.value;

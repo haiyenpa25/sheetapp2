@@ -206,13 +206,12 @@ try {
     $count = $stmt->fetchColumn();
 
     if ($count == 0) {
-        $defaultUser = 'banhat';
-        $defaultPass = '123456';
-        $hash = password_hash($defaultPass, PASSWORD_DEFAULT);
-        
-        $insert = $pdo->prepare("INSERT INTO users (username, password_hash, role, display_name, instrument) VALUES (?, ?, ?, ?, ?)");
-        $insert->execute([$defaultUser, $hash, 'admin', 'Ban Hát Chính', 'All']);
-        echo "<p>Đã tạo tài khoản mặc định: <b>{$defaultUser}</b> / <b>{$defaultPass}</b> (Quyền: Admin)</p>";
+        $defaultPass = password_hash('123456', PASSWORD_DEFAULT);
+        $insert = $pdo->prepare("INSERT INTO users (username, password_hash, role, display_name, instrument, chord_code) VALUES (?, ?, ?, ?, ?, ?)");
+        $insert->execute(['admin', $defaultPass, 'admin', 'Quản Trị Viên', 'Admin / Tổng Chỉ Huy', 'ADMIN']);
+        $insert->execute(['hoaidinh', $defaultPass, 'banhat', 'Hoài Dinh', 'Piano / Đệm Hát', 'HD']);
+        $insert->execute(['banhat', $defaultPass, 'banhat', 'Ban Hát', 'Guitar', 'BH']);
+        echo "<p>Đã tạo các tài khoản mặc định: admin, hoaidinh, banhat (mật khẩu: 123456)</p>";
     }
 
     // 12. Khoá tải file SQLite qua .htaccess

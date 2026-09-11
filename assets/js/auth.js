@@ -123,25 +123,32 @@ const Auth = (() => {
     const canEditChords = _canEditChords(); // banhat + admin
     const loggedIn      = isLoggedIn();
 
-    // Thêm hợp âm — nút toolbar luôn hiển thị cho người dùng biết tính năng
+    // Thêm hợp âm — CHỈ hiển thị khi đã đăng nhập có quyền banhat/admin
     document.getElementById('btn-add-chord-mode')?.classList.toggle('hidden', !canEditChords);
-    document.getElementById('btn-add-chord-mode-bar')?.classList.remove('hidden');
-    // Nổi bật hợp âm — TấT CẢ người dùng đều được dùng (chỉ xem, không sửa)
+    document.getElementById('btn-add-chord-mode-bar')?.classList.toggle('hidden', !canEditChords);
+    document.getElementById('btn-menu-chord-edit')?.classList.toggle('hidden', !canEditChords);
+    
+    // Nổi bật hợp âm — TẤT CẢ người dùng đều được dùng (chỉ xem, không sửa)
     document.getElementById('btn-chord-highlight')?.classList.remove('hidden');
-    // Tạo bộ hợp âm mới — giữ hiển thị
-    document.getElementById('btn-new-chord-set')?.classList.remove('hidden');
+    
+    // Tạo bộ hợp âm mới — CHỈ hiển thị khi đã đăng nhập
+    document.getElementById('btn-new-chord-set')?.classList.toggle('hidden', !canEditChords);
+    
     // Ghi chú — Admin only
     document.getElementById('btn-add-annotate-mode')?.classList.toggle('hidden', !canEdit);
 
     // FAB items
     document.getElementById('fab-chord')?.classList.toggle('hidden', !canEditChords);
     document.getElementById('fab-annotate')?.classList.toggle('hidden', !canEdit);
-    // FAB highlight — tất cẢ đều thấy
+    // FAB highlight — tất CẢ đều thấy
     document.getElementById('fab-highlight')?.classList.remove('hidden');
 
-    // Nút thùng rác chord set — admin only
+    // Nút thùng rác chord set — chỉ hiện khi có quyền
     const delBtn = document.getElementById('btn-delete-chord-set');
-    if (delBtn && !canEdit) delBtn.style.display = 'none';
+    if (delBtn && !canEditChords) delBtn.style.display = 'none';
+
+    // Cập nhật lại dropdown bản phối để ẩn/hiện tùy chọn tạo mới
+    window.ChordCanvas?.refreshSetDropdown?.();
 
     // Tắt mode khi mất quyền
     if (!canEditChords) {
@@ -215,7 +222,7 @@ const Auth = (() => {
   }
 
   return {
-    init, checkSession, isAdmin, isLoggedIn, openModal, closeModal,
+    init, checkSession, login: doLogin, logout: doLogout, isAdmin, isLoggedIn, openModal, closeModal,
     isBanhat: () => _canEditChords(),
     getUser: () => _currentUser,
     getRole: () => _role,

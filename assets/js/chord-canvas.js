@@ -220,8 +220,8 @@ const ChordCanvas = (() => {
         return;
       }
 
-      // Trường hợp 2: Đang xem bộ của người khác (và không phải Super Admin)
-      if (!isAdmin && myChordCode && curSetUpper !== myChordCode) {
+      // Trường hợp 2: Đang xem bộ của người khác (bản phối của người nào người đó sửa, kể cả admin)
+      if (myChordCode && curSetUpper !== myChordCode) {
         if (typeof ChordCanvasUI?.showCloneConfirmModal === 'function') {
           ChordCanvasUI.showCloneConfirmModal({
             sourceSet: _currentSet,
@@ -1009,7 +1009,7 @@ const ChordCanvas = (() => {
     const isAdmin = window.Auth?.isAdmin?.() ?? false;
     const curSetUpper = (_currentSet || '').toUpperCase();
 
-    if (!isAdmin && myChordCode && curSetUpper !== myChordCode) {
+    if (myChordCode && curSetUpper !== myChordCode) {
       window.App?.showToast?.(`❌ Bạn chỉ có quyền lưu vào bộ hợp âm cá nhân (${myChordCode})!`, 'error');
       return;
     }
@@ -1078,10 +1078,15 @@ const ChordCanvas = (() => {
 
   function showNewSetModal() {
     if (!window.Auth?.isBanhat?.()) {
-      window.App?.showToast?.('⚠️ Vui lòng đăng nhập tài khoản Ban Hát để tạo bản phối mới', 'info');
+      window.App?.showToast?.('⚠️ Vui lòng đăng nhập tài khoản Nhạc công để tạo bản phối', 'info');
       if (typeof window.Auth?.openModal === 'function') {
         window.Auth.openModal();
       }
+      return;
+    }
+    const myChordCode = (window.Auth?.getChordCode?.() || '').toUpperCase();
+    if (myChordCode) {
+      createSet(myChordCode);
       return;
     }
     ChordCanvasUI.showNewSetModal({ onCreate: (name) => createSet(name) });
@@ -1151,33 +1156,34 @@ const ChordCanvas = (() => {
       'HD': 'Hoài Dinh (HD)',
       'NAM': 'Hoàng Nam (NAM)',
       'LAN': 'Hà Lan (LAN)',
-      'ADMIN': 'Ban Nhạc Admin'
+      'BH': 'Ban Hát (BH)',
+      'ADMIN': 'Admin (ADMIN)'
     };
 
     selector.innerHTML = sets.map(s => {
       const sUpper = s.toUpperCase();
       let label = s;
       if (s === 'default' || sUpper === 'TLH') {
-        label = 'TLH (Gốc) 🔒 [Bất biến]';
-      } else if (myChordCode && sUpper === myChordCode) {
+        label = 'TLH (Gốc) 🔒 [Bản chuẩn]';
+      } else if (isLoggedIn && myChordCode && sUpper === myChordCode) {
         label = `⭐ Bộ của tôi (${s}) [Được sửa]`;
       } else if (KNOWN_CODES[sUpper]) {
-        label = `${KNOWN_CODES[sUpper]} 👁️`;
+        label = `${KNOWN_CODES[sUpper]} 👁️ [Chỉ xem]`;
       } else if (sUpper === 'HD') {
-        label = '⭐ HD (Hoài Dinh) 👁️';
+        label = '⭐ HD (Hoài Dinh) 👁️ [Chỉ xem]';
       } else if (s.includes('__')) {
         const parts = s.split('__');
         const author = parts[0];
         const cleanName = parts.slice(1).join('__').replace(/_/g, ' ');
-        label = `🎸 ${cleanName} (@${author})`;
+        label = `🎸 ${cleanName} (@${author}) [Chỉ xem]`;
       } else {
-        label = `🎸 Bộ ${s}`;
+        label = `🎸 Bộ ${s} [Chỉ xem]`;
       }
       return `<option value="${s}" ${s === _currentSet ? 'selected' : ''}>${label}</option>`;
     }).join('') 
-    + (canCreate ? `<option value="__create_new_set__" style="color: var(--accent,#6d28d9); font-weight: bold;">➕ Tạo Bộ Hợp Âm Mới...</option>` : '')
-    + `<option value="__open_members__" style="color: var(--emerald,#10b981); font-weight: bold;">👥 Quản Lý Nhạc Công & Hợp Âm (/members/)...</option>`
-    + `<option value="__open_manager__" style="color: var(--cyan,#06b6d4);">📂 Mở Quản Lý Kho Nhạc (/manager/)...</option>`;
+    + (canCreate ? `<option value="__create_new_set__" style="color: var(--accent,#6d28d9); font-weight: bold;">➕ Tạo Bộ Hợp Âm Mới (${myChordCode || 'Cá nhân'})...</option>` : '')
+    + (canCreate ? `<option value="__open_members__" style="color: var(--emerald,#10b981); font-weight: bold;">👥 Quản Lý Nhạc Công & Hợp Âm (/members/)...</option>` : '')
+    + (canCreate ? `<option value="__open_manager__" style="color: var(--cyan,#06b6d4);">📂 Mở Quản Lý Kho Nhạc (/manager/)...</option>` : '');
 
     if (!selector.dataset.boundCreateHandler) {
       selector.dataset.boundCreateHandler = 'true';

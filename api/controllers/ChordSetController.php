@@ -47,32 +47,40 @@ class ChordSetController {
                 if ($action !== 'clone' && !$name) { Response::error('Thiếu name'); return; }
 
                 if ($action === 'save') {
-                    $chords = $body['chords'] ?? [];
-                    if (!is_array($chords)) { Response::error('chords phải là array'); return; }
-
-                    if ($name === 'default' || $name === 'TLH') {
-                        Response::forbidden('Hợp âm bản gốc TLH là bất biến, không thể chỉnh sửa!');
+                    if (!Auth::isLoggedIn()) {
+                        Response::unauthorized('Vui lòng đăng nhập để lưu hợp âm');
                         return;
                     }
 
-                    // Ownership Guard:
-                    // Admin có toàn quyền chỉnh sửa bất kỳ bộ nào.
-                    // Nếu là banhat thường: Chỉ được sửa nếu $name khớp với mã hợp âm của mình (hoặc username của mình)
-                    if (!Auth::isAdmin()) {
-                        $myChordCode = Auth::chordCode();
-                        $myUsername  = Auth::username();
-                        $isOwner = false;
-                        if ($myChordCode && strcasecmp($name, $myChordCode) === 0) {
-                            $isOwner = true;
-                        } elseif ($myUsername && strcasecmp($name, $myUsername) === 0) {
-                            $isOwner = true;
-                        }
-
-                        if (!$isOwner) {
-                            Response::forbidden("Bạn chỉ có quyền chỉnh sửa bộ hợp âm cá nhân của riêng mình (" . ($myChordCode ?: $myUsername) . ")!");
-                            return;
-                        }
+                    if (!Auth::isBanhat() && !Auth::isAdmin()) {
+                        Response::forbidden('Tài khoản khách chỉ được xem, không có quyền điền hoặc sửa hợp âm!');
+                        return;
                     }
+
+                    if ($name === 'default' || $name === 'TLH') {
+                        Response::forbidden('Hợp âm bản gốc TLH là bất biến chuẩn mực, không thể chỉnh sửa!');
+                        return;
+                    }
+
+                    // STRICT OWNERSHIP RULE:
+                    // Mỗi người chỉ sửa bản phối của người đó (admin sửa ADMIN, hoaidinh sửa HD).
+                    $myChordCode = Auth::chordCode();
+                    $myUsername  = Auth::username();
+                    $isOwner = false;
+                    if ($myChordCode && strcasecmp($name, $myChordCode) === 0) {
+                        $isOwner = true;
+                    } elseif ($myUsername && strcasecmp($name, $myUsername) === 0) {
+                        $isOwner = true;
+                    }
+
+                    if (!$isOwner) {
+                        $ownerSet = $myChordCode ?: $myUsername;
+                        Response::forbidden("Bản phối của người nào người đó sửa. Bạn chỉ có quyền chỉnh sửa bộ hợp âm cá nhân của mình ({$ownerSet})!");
+                        return;
+                    }
+
+                    $chords = $body['chords'] ?? [];
+                    if (!is_array($chords)) { Response::error('chords phải là array'); return; }
 
                     $ok = ChordSetService::saveSet($songId, $name, $chords);
                     $ok ? Response::ok(['message' => 'Đã lưu ' . count($chords) . ' hợp âm vào bộ ' . $name])
@@ -81,20 +89,31 @@ class ChordSetController {
                 }
 
                 if ($action === 'clone') {
+                    if (!Auth::isLoggedIn()) {
+                        Response::unauthorized('Vui lòng đăng nhập để tạo hoặc sao chép bản phối');
+                        return;
+                    }
+
+                    if (!Auth::isBanhat() && !Auth::isAdmin()) {
+                        Response::forbidden('Tài khoản khách không có quyền tạo hoặc sao chép bản phối!');
+                        return;
+                    }
+
+                    $myChordCode = Auth::chordCode();
+                    $myUsername  = Auth::username();
                     $source = trim($body['source'] ?? $body['sourceName'] ?? 'HD');
-                    $target = trim($body['target'] ?? $body['targetName'] ?? $name ?? Auth::chordCode());
+                    $target = trim($body['target'] ?? $body['targetName'] ?? $name ?? $myChordCode ?? $myUsername);
+
                     if (!$target) {
                         Response::error('Thiếu tên bộ hợp âm đích');
                         return;
                     }
 
-                    if (!Auth::isAdmin()) {
-                        $myChordCode = Auth::chordCode();
-                        $myUsername  = Auth::username();
-                        if (strcasecmp($target, $myChordCode) !== 0 && strcasecmp($target, $myUsername) !== 0) {
-                            Response::forbidden('Chỉ có thể nhân bản sang bộ hợp âm cá nhân của chính bạn!');
-                            return;
-                        }
+                    // Nhạc công chỉ được tạo/clone sang bộ mang mã của chính mình
+                    if (strcasecmp($target, $myChordCode) !== 0 && strcasecmp($target, $myUsername) !== 0) {
+                        $ownerSet = $myChordCode ?: $myUsername;
+                        Response::forbidden("Bạn chỉ có thể tạo hoặc sao chép sang bộ hợp âm cá nhân của chính mình ({$ownerSet})!");
+                        return;
                     }
 
                     $ok = ChordSetService::cloneSet($songId, $source, $target);
