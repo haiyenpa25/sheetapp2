@@ -28,7 +28,7 @@ const LearnSoundEngine = (() => {
   let _bassVolume    = null;
   let _organVolume   = null;
   let _drumVolume    = null;
-  let _drumsEnabled  = true;
+  let _drumsEnabled  = false; // Tắt trống mặc định cho Thánh ca, người dùng có thể bật chủ động
 
   // Piano Instruments: Sampler (Real Grand Piano) + PolySynth Fallback
   let _pianoSampler       = null;
@@ -101,7 +101,7 @@ const LearnSoundEngine = (() => {
       _bassVolume  = new Tone.Volume(-1).connect(_masterLimiter); // Bass giữ punchy, trực tiếp
       _organVolume = new Tone.Volume(-3).connect(_masterReverb);
 
-      // 4. Acoustic Grand Piano Multi-Sampler (Salamander Grand Piano samples)
+      // 4. Acoustic Grand Piano Multi-Sampler (Tải nội bộ cực nhanh từ /assets/audio/piano/)
       try {
         _pianoSampler = new Tone.Sampler({
           urls: {
@@ -112,13 +112,13 @@ const LearnSoundEngine = (() => {
             C5: 'C5.mp3',
             C6: 'C6.mp3'
           },
-          baseUrl: 'https://tonejs.github.io/audio/salamander/',
+          baseUrl: '/assets/audio/piano/',
           onload: () => {
             _pianoSamplerLoaded = true;
-            console.log('[LearnSoundEngine] Acoustic Grand Piano multi-samples loaded successfully');
+            console.log('[LearnSoundEngine] Acoustic Grand Piano samples loaded from local storage');
           },
           onerror: (err) => {
-            console.warn('[LearnSoundEngine] Sampler failed, using warm PolySynth fallback', err);
+            console.warn('[LearnSoundEngine] Local sampler failed, fallback sang warm PolySynth', err);
             _pianoSamplerLoaded = false;
           }
         }).connect(_pianoVolume);
@@ -126,16 +126,16 @@ const LearnSoundEngine = (() => {
         _pianoSamplerLoaded = false;
       }
 
-      // 5. Warm Piano PolySynth (Fallback tức thì + phản hồi siêu nhạy)
-      _pianoFilter = new Tone.Filter(4200, 'lowpass').connect(_pianoVolume);
+      // 5. Warm Piano PolySynth (Fallback tức thì + âm sắc mộc mạc giàu overtone)
+      _pianoFilter = new Tone.Filter(3800, 'lowpass').connect(_pianoVolume);
       _pianoSynth = new Tone.PolySynth(Tone.Synth, {
         maxPolyphony: 24,
-        oscillator: { type: 'triangle' },
+        oscillator: { type: 'sine4' }, // Âm sắc ấm áp, tròn tiếng như tiếng búa nỉ đập dây
         envelope: {
-          attack: 0.005,
-          decay: 1.2,
-          sustain: 0.18,
-          release: 1.2
+          attack: 0.008,
+          decay: 1.5,
+          sustain: 0.15,
+          release: 1.4
         }
       }).connect(_pianoFilter);
 
@@ -242,6 +242,9 @@ const LearnSoundEngine = (() => {
 
   function _ensureReady() {
     if (!_initialized) init();
+    if (window.Tone && Tone.context && Tone.context.state === 'suspended') {
+      Tone.context.resume().catch(() => {});
+    }
   }
 
   /* ─── Hand Practice Separation ───────────────────────────────── */
@@ -532,10 +535,28 @@ const LearnSoundEngine = (() => {
     setReverbWet,
     stopAll,
     setVolume,
-    dispose
+    dispose,
+    unlockAudioContext: () => {
+      if (window.Tone && Tone.context && Tone.context.state !== 'running') {
+        Tone.start().catch(() => {});
+      }
+    }
   };
 })();
 
 if (typeof window !== 'undefined') {
   window.LearnSoundEngine = LearnSoundEngine;
+
+  // Tự động mở khóa AudioContext ngay khi người dùng chạm hoặc click chuột lần đầu
+  const _unlockWebAudio = () => {
+    if (window.Tone && Tone.context && Tone.context.state !== 'running') {
+      Tone.start().catch(() => {});
+    }
+    document.removeEventListener('pointerdown', _unlockWebAudio);
+    document.removeEventListener('touchstart', _unlockWebAudio);
+    document.removeEventListener('keydown', _unlockWebAudio);
+  };
+  document.addEventListener('pointerdown', _unlockWebAudio, { passive: true });
+  document.addEventListener('touchstart', _unlockWebAudio, { passive: true });
+  document.addEventListener('keydown', _unlockWebAudio, { passive: true });
 }

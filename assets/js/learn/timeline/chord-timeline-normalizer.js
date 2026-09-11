@@ -316,14 +316,32 @@ const ChordTimelineNormalizer = (() => {
    * @param {number}   [transpose=0] - Current transpose semitones
    * @returns {ChordTimelineEvent[]}
    */
-  function normalize(xmlDoc, chordMap, transpose = 0) {
+  function normalize(xmlDoc, chordMap, transpose = 0, profileName = '') {
     if (!xmlDoc) return [];
+
+    // 1. Luôn trích xuất hợp âm chuẩn gốc từ MusicXML (Ground Truth)
+    const xmlHarmonies = _extractHarmoniesFromXml(xmlDoc, transpose);
+
+    // 2. Nếu người dùng chọn TLH (bản chuẩn gốc) hoặc không có chordMap -> dùng 100% hợp âm XML
+    const isExplicitTlh = (typeof profileName === 'string' && profileName.toUpperCase() === 'TLH');
+    if (isExplicitTlh || !chordMap) {
+      return xmlHarmonies;
+    }
 
     const chordLookup = _buildChordLookup(chordMap);
 
-    // Fallback nếu không có custom chord nào trong DB
+    // 3. Nếu không có custom chord nào trong profile -> dùng hợp âm XML
     if (chordLookup.size === 0) {
-      return _extractHarmoniesFromXml(xmlDoc, transpose);
+      return xmlHarmonies;
+    }
+
+    // 4. Phát hiện profile thử nghiệm dở dang / sparse stubs:
+    // Nếu XML có từ 6 hợp âm chuẩn trở lên, nhưng profile tùy biến chỉ có <= 5 hợp âm rải rác
+    // (như 872 profile HD/ADMIN rác trong DB), việc dùng profile này sẽ làm nát 80% bài hát.
+    // Hệ thống tự động ưu tiên 100% hợp âm chuẩn MusicXML để âm thanh luôn du dương, chính xác.
+    if (xmlHarmonies.length >= 6 && chordLookup.size <= 5 && chordLookup.size < xmlHarmonies.length * 0.5) {
+      console.warn(`[ChordTimelineNormalizer] Profile "${profileName || 'custom'}" chỉ có ${chordLookup.size} hợp âm trong khi XML có ${xmlHarmonies.length} hợp âm chuẩn. Tự động ưu tiên bản chuẩn MusicXML.`);
+      return xmlHarmonies;
     }
 
     const events = [];
@@ -332,12 +350,11 @@ const ChordTimelineNormalizer = (() => {
     let globalDivisions = 1;
     let globalBeats     = 4;
     let globalBeatType  = 4;
+    const measuresWithCustomChords = new Set();
 
     measures.forEach((measureEl, measureIdx) => {
-      // MeasureNumberXML (canonical identifier, từ XML attribute)
       const xmlNum = parseInt(measureEl.getAttribute('number') || (measureIdx + 1), 10);
 
-      // Update running meter/divisions if measure has attributes
       const attrDiv = measureEl.querySelector('attributes > divisions');
       if (attrDiv) globalDivisions = parseInt(attrDiv.textContent, 10);
       const meterEl = measureEl.querySelector('time');
@@ -346,20 +363,18 @@ const ChordTimelineNormalizer = (() => {
         globalBeatType = parseInt(meterEl.querySelector('beat-type')?.textContent || '4', 10);
       }
 
-      const divisionsPerBeat = globalDivisions * (4 / globalBeatType);
-
-      if (!chordLookup.has(measureIdx)) return; // No chords this measure
+      if (!chordLookup.has(measureIdx)) return;
 
       const chordEntries = chordLookup.get(measureIdx);
+      measuresWithCustomChords.add(xmlNum);
 
-      // Walk notes in this measure to build noteIdx → beat mapping
       const noteBeats = _buildNoteBeatsMap(measureEl, globalDivisions, globalBeatType);
 
       chordEntries.forEach((entry, i) => {
         const beatAtNote = noteBeats.get(entry.noteIdx) ?? 1;
         const nextBeat   = i + 1 < chordEntries.length
           ? (noteBeats.get(chordEntries[i + 1].noteIdx) ?? globalBeats + 1)
-          : (globalBeats + 1); // End of measure
+          : (globalBeats + 1);
 
         const durationBeats = Math.max(0.5, nextBeat - beatAtNote);
         const sanitized = _sanitizeSymbol(entry.symbol);
@@ -381,7 +396,22 @@ const ChordTimelineNormalizer = (() => {
       });
     });
 
-    return events;
+    // 5. Smart Gap Fill: Nếu profile có hợp âm nhưng bỏ sót một số ô nhịp,
+    // tự động bổ sung hợp âm từ MusicXML cho các ô nhịp bị khuyết để không bị giữ hợp âm cũ quá lâu.
+    if (xmlHarmonies.length > 0) {
+      xmlHarmonies.forEach(xmlEvt => {
+        if (!measuresWithCustomChords.has(xmlEvt.measure)) {
+          events.push({
+            ...xmlEvt,
+            source: 'musicxml-harmony-fill'
+          });
+        }
+      });
+      // Sắp xếp lại theo measure và beat
+      events.sort((a, b) => a.measure !== b.measure ? a.measure - b.measure : a.beat - b.beat);
+    }
+
+    return events.length > 0 ? events : xmlHarmonies;
   }
 
   /**

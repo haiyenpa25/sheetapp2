@@ -364,7 +364,7 @@ function learnCssTag(string $file): string {
           </div>
           <div class="mixer-item">
             <span style="display:flex;align-items:center;gap:4px;">
-              <input type="checkbox" id="learn-drum-toggle" checked title="Bật/Tắt Trống & Bộ gõ mộc" style="margin:0;cursor:pointer;accent-color:var(--learn-accent);">
+              <input type="checkbox" id="learn-drum-toggle" title="Bật/Tắt Trống & Bộ gõ mộc" style="margin:0;cursor:pointer;accent-color:var(--learn-accent);">
               Trống/Gõ
             </span>
             <input type="range" id="slider-vol-drum" min="-35" max="4" value="-4" title="Âm lượng Trống & Bộ gõ mộc">

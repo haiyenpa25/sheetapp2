@@ -204,6 +204,11 @@ const VirtualKeyboard = (() => {
 
   /* ─── Play Note (hear on click) ──────────────────────────────── */
   function _playNote(noteName, oct) {
+    // Kích hoạt AudioContext tức thì trong user gesture
+    if (window.Tone && Tone.context && Tone.context.state !== 'running') {
+      Tone.context.resume().catch(() => {});
+    }
+
     const fullNote = `${noteName}${oct}`;
 
     // Nếu đang ở chế độ Luyện Nốt Giai Điệu: Gửi nốt sang MelodyPracticeEngine để chấm điểm

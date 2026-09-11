@@ -325,9 +325,21 @@ const LearnApp = (() => {
       const xml = await xmlRes.text();
       _rawXmlString = xml;
 
-      // Inject custom chords (HD, ADMIN, etc.) into MusicXML before rendering OSMD
+      // Parse original XML first to get Ground Truth harmonies
+      const parser = new DOMParser();
+      const originalDoc = parser.parseFromString(xml, 'application/xml');
+      const xmlHarmonies = window.ChordTimelineNormalizer ? window.ChordTimelineNormalizer._extractHarmoniesFromXml(originalDoc, 0) : [];
+
+      // Kiểm tra tính đầy đủ của chordData: Nếu XML có >= 6 hợp âm chuẩn mà chordData chỉ có <= 5 hợp âm nháp,
+      // KHÔNG inject để tránh xoá sạch 17+ hợp âm chuẩn của sheet nhạc!
+      const isStubProfile = (xmlHarmonies.length >= 6 && (!chordData || chordData.length <= 5));
+      const shouldInjectChords = window.ChordCanvasXML?.cloneAndInjectChords 
+        && initialSet !== 'default' 
+        && initialSet.toUpperCase() !== 'TLH'
+        && !isStubProfile;
+
       let effectiveXml = xml;
-      if (window.ChordCanvasXML?.cloneAndInjectChords && initialSet !== 'default' && initialSet.toUpperCase() !== 'TLH') {
+      if (shouldInjectChords) {
         const chordsMap = {};
         if (Array.isArray(chordData)) {
           chordData.forEach(item => {
@@ -341,10 +353,9 @@ const LearnApp = (() => {
         }
       }
 
-      // Parse XML for timeline
-      const parser = new DOMParser();
-      _xmlDoc = parser.parseFromString(effectiveXml, 'application/xml');
-      _rawChordData = chordData || [];
+      // Parse effective XML for rendering and timeline
+      _xmlDoc = shouldInjectChords ? parser.parseFromString(effectiveXml, 'application/xml') : originalDoc;
+      _rawChordData = isStubProfile ? [] : (chordData || []);
 
       // Render OSMD with full chord annotations
       _hideLoading();
@@ -430,12 +441,14 @@ const LearnApp = (() => {
   }
 
   function _rebuildTimeline() {
-    if (!_xmlDoc || !_rawChordData) return;
+    if (!_xmlDoc) return;
 
+    const currentProfile = LearnStore.get('chordSet') || 'HD';
     const timeline = ChordTimelineNormalizer.normalize(
       _xmlDoc,
-      _rawChordData,
-      _currentTranspose
+      _rawChordData || [],
+      _currentTranspose,
+      currentProfile
     );
     LearnStore.setTimeline(timeline);
     LearnStore.set('transpose', _currentTranspose);
@@ -570,6 +583,7 @@ const LearnApp = (() => {
       console.warn('[LearnApp] Could not fetch chord sets:', e);
     }
 
+    if (!availableSets.includes('TLH')) availableSets.unshift('TLH');
     if (!availableSets.includes('HD')) availableSets.unshift('HD');
     if (!availableSets.includes('default')) availableSets.push('default');
 
@@ -579,8 +593,8 @@ const LearnApp = (() => {
       'BH': 'Ban Hát (BH)',
       'NAM': 'Hoàng Nam (NAM)',
       'LAN': 'Hà Lan (LAN)',
-      'TLH': 'TLH (Gốc) 🔒 [Bản chuẩn]',
-      'default': 'TLH (Gốc) 🔒 [Bản chuẩn]'
+      'TLH': '🎼 TLH (Gốc) 🔒 [Bản chuẩn 100% hợp âm]',
+      'default': '🎼 TLH (Gốc) 🔒 [Bản chuẩn 100% hợp âm]'
     };
 
     const targetSet = currentProfile || LearnStore.get('chordSet') || 'HD';
@@ -1221,9 +1235,13 @@ const LearnApp = (() => {
     });
 
     // Drum Toggle
-    document.getElementById('learn-drum-toggle')?.addEventListener('change', (e) => {
-      if (window.LearnSoundEngine) LearnSoundEngine.setDrumsEnabled(e.target.checked);
-    });
+    const drumToggle = document.getElementById('learn-drum-toggle');
+    if (drumToggle) {
+      drumToggle.checked = window.LearnSoundEngine ? window.LearnSoundEngine.isDrumsEnabled() : false;
+      drumToggle.addEventListener('change', (e) => {
+        if (window.LearnSoundEngine) LearnSoundEngine.setDrumsEnabled(e.target.checked);
+      });
+    }
 
     // Arrangement Density Buttons
     document.querySelectorAll('.btn-density[data-density]').forEach(btn => {

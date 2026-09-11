@@ -139,6 +139,7 @@ const PatternEngine = (() => {
 
   function _triggerDrum(type, time, velocity = 0.65) {
     if (!window.LearnSoundEngine) return;
+    if (!window.LearnSoundEngine.isDrumsEnabled()) return; // Tôn trọng trạng thái bật/tắt trống
     const mult = _density === 'soft' ? 0.75 : (_density === 'rich' ? 1.15 : 1.0);
     LearnSoundEngine.triggerDrum(type, time, velocity * mult);
   }
@@ -669,6 +670,20 @@ const PatternEngine = (() => {
     if (window.LearnSoundEngine) LearnSoundEngine.stopAll();
   }
 
+  function setDrums(enabled) {
+    if (window.LearnSoundEngine) LearnSoundEngine.setDrumsEnabled(enabled);
+  }
+
+  function isDrums() {
+    return window.LearnSoundEngine ? LearnSoundEngine.isDrumsEnabled() : false;
+  }
+
+  function toggleDrums() {
+    const next = !isDrums();
+    setDrums(next);
+    return next;
+  }
+
   return {
     init,
     setPattern,
@@ -677,6 +692,9 @@ const PatternEngine = (() => {
     getDensity,
     setEnabled,
     isEnabled,
+    setDrums,
+    isDrums,
+    toggleDrums,
     start,
     stop,
     pause
