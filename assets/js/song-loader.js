@@ -197,7 +197,8 @@ const SongLoader = (() => {
       if (!result.success) throw new Error(result.message || 'Lỗi không xác định');
       Store.set('originalXml', newXml);
       if ('caches' in window) {
-        caches.open('sheetapp-musicxml-v4').then(c => c.delete(song.xmlPath)).catch(() => {});
+        const xmlCacheName = (typeof window !== 'undefined' && window.__SW_CACHE__) || 'sheetapp-musicxml-v5';
+        caches.open(xmlCacheName).then(c => c.delete(song.xmlPath)).catch(() => {});
       }
       if (window.ServiceWorkerManager?.clearXmlCache) {
         window.ServiceWorkerManager.clearXmlCache(song.xmlPath);

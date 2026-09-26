@@ -327,7 +327,7 @@ class SetlistService {
         ]);
 
         DomainEvents::record(
-            'assignment.created',
+            'plan.role_assigned',
             $actorId,
             'assignment',
             (string)$assignId,

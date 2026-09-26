@@ -19,6 +19,7 @@ $failures = [];
 $total = 0;
 
 function check(bool $condition, string $message, string $details = ''): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     global $failures, $total;
     $total++;
     if ($condition) {
@@ -100,6 +101,7 @@ echo "  - Số kiểm tra thất bại: " . count($failures) . "\n";
 if (count($failures) === 0) {
     echo "  - Trạng thái: ✅ TẤT CẢ KIỂM TRA CHORD SET GUARD ĐỀU ĐẠT (PASS)\n";
     echo "--------------------------------------------------------\n\n";
+    echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";
     exit(0);
 } else {
     echo "  - Trạng thái: ❌ CÓ LỖI XẢY RA\n";

@@ -68,6 +68,7 @@ $failures = [];
 $totalTests = 0;
 
 function assertRule(string $scenarioId, bool $condition, string $ruleDescription, string $failureDetails = ''): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     global $failures, $totalTests;
     $totalTests++;
     if ($condition) {
@@ -312,6 +313,7 @@ echo "  - Số test thất bại: " . count($failures) . "\n";
 if (count($failures) === 0) {
     echo "  - Trạng thái: ✅ TẤT CẢ 9 KỊCH BẢN CORE RULES ĐẠT CHUẨN (PASS)\n";
     echo "--------------------------------------------------------\n\n";
+    echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";
     exit(0);
 } else {
     echo "  - Trạng thái: ❌ CÓ LỖI XẢY RA TRONG CORE RULES\n";

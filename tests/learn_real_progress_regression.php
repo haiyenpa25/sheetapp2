@@ -15,6 +15,7 @@ $failures = [];
 $step = 0;
 
 function check(bool $condition, string $message): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     global $failures, $step;
     $step++;
     echo ($condition ? "  ✅ PASS" : "  ❌ FAIL") . " [Scenario $step]: $message\n";
@@ -200,5 +201,6 @@ if (!empty($failures)) {
 } else {
     echo "🎉 KẾT QUẢ: Tất cả 6/6 kịch bản kiểm thử Epic 3.6 ĐẠT CHUẨN (PASS)!\n";
     echo "--------------------------------------------------------\n";
+    echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";
     exit(0);
 }

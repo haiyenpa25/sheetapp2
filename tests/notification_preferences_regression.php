@@ -32,6 +32,7 @@ $failures = [];
 $totalChecks = 0;
 
 function check(bool $cond, string $msg, array &$failures, int &$totalChecks): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     $totalChecks++;
     if (!$cond) {
         $failures[] = $msg;
@@ -201,6 +202,10 @@ check(empty($delivUser3), 'User 3 không có email nên không tạo delivery em
 // ── 5. Kiểm tra Xử Lý Hàng Đợi Chuyển Phát (NotificationDeliveryService) ──
 echo "\n[5/7] Kiểm tra Xử Lý Hàng Đợi Chuyển Phát (NotificationDeliveryService)...\n";
 
+require_once __DIR__ . '/../api/core/FeatureFlags.php';
+FeatureFlags::setOverride('NOTIFICATIONS_EMAIL', true);
+$db->exec("UPDATE users SET email_verified_at = CURRENT_TIMESTAMP WHERE id = 1");
+
 // Chạy xử lý hàng đợi
 $queueStats = NotificationDeliveryService::processQueue(10);
 check($queueStats['processed'] >= 1, 'Đã xử lý ít nhất 1 bản ghi trong hàng đợi', $failures, $totalChecks);
@@ -307,6 +312,7 @@ check(str_contains($reminderContent, "403"), 'tools/assignment_due_reminder.php 
 echo "\n=======================================================\n";
 if (empty($failures)) {
     echo "🎉 TẤT CẢ {$totalChecks} KIỂM THỬ ĐÃ PASS HOÀN TOÀN!\n";
+    echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";
     exit(0);
 } else {
     echo "❌ CÓ " . count($failures) . "/{$totalChecks} KIỂM THỬ THẤT BẠI:\n";

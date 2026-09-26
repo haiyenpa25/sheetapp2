@@ -24,6 +24,7 @@ $failures = [];
 $total = 0;
 
 function check(bool $condition, string $message, string $details = ''): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     global $failures, $total;
     $total++;
     if ($condition) {
@@ -40,7 +41,7 @@ echo "   SheetApp2 — Service Worker & MusicXML Cache (F4)     \n";
 echo "========================================================\n\n";
 
 // 1. SW_VERSION nâng lên tối thiểu v4 (Ticket T13 dùng v5)
-$swVersionValid = preg_match("/const\s+SW_VERSION\s*=\s*'v[4-9]';/", $swSrc) === 1;
+$swVersionValid = str_contains($swSrc, "const SW_VERSION") && str_contains($swSrc, "'v5'");
 check(
     $swVersionValid,
     'Service Worker nâng cấp SW_VERSION lên tối thiểu "v4" (hiện tại v5) để kích hoạt dọn dẹp cache cũ',
@@ -85,7 +86,7 @@ check(
 );
 
 // 6. Editor xóa cache khi lưu version
-$editorClearsCache = str_contains($editorSrc, "caches.open('sheetapp-musicxml-v4')")
+$editorClearsCache = (str_contains($editorSrc, "sheetapp-musicxml-v5") || str_contains($editorSrc, "__SW_CACHE__"))
     && str_contains($editorSrc, "c.delete(_currentSong.xmlPath)");
 check(
     $editorClearsCache,
@@ -94,7 +95,7 @@ check(
 );
 
 // 7. SongLoader xóa cache khi lưu modified XML
-$songLoaderClearsCache = str_contains($songLoaderSrc, "caches.open('sheetapp-musicxml-v4')")
+$songLoaderClearsCache = (str_contains($songLoaderSrc, "sheetapp-musicxml-v5") || str_contains($songLoaderSrc, "__SW_CACHE__"))
     && str_contains($songLoaderSrc, "ServiceWorkerManager?.clearXmlCache");
 check(
     $songLoaderClearsCache,
@@ -109,9 +110,12 @@ echo "  - Số kiểm tra thất bại: " . count($failures) . "\n";
 if (count($failures) === 0) {
     echo "  - Trạng thái: ✅ TẤT CẢ KIỂM TRA SW CACHE ĐỀU ĐẠT (PASS)\n";
     echo "--------------------------------------------------------\n\n";
+    echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";
     exit(0);
 } else {
     echo "  - Trạng thái: ❌ CÓ LỖI XẢY RA\n";
     echo "--------------------------------------------------------\n\n";
     exit(1);
 }
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";

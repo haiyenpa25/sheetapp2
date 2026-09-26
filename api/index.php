@@ -22,6 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once __DIR__ . '/core/Response.php';
 require_once __DIR__ . '/core/RequestSecurity.php';
+require_once __DIR__ . '/core/FeatureFlags.php';
 
 $route = $_GET['route'] ?? '';
 $method = $_SERVER['REQUEST_METHOD'];
@@ -130,30 +131,50 @@ try {
             break;
 
         case 'notifications':
+            if (!FeatureFlags::isEnabled('NOTIFICATIONS_INAPP')) {
+                Response::notFound("Tính năng Thông báo hiện đang tắt.");
+                break;
+            }
             require_once __DIR__ . '/controllers/NotificationController.php';
             $controller = new NotificationController();
             $controller->handleRequest($method);
             break;
 
         case 'practice_assignments':
+            if (!FeatureFlags::isEnabled('PRACTICE_ASSIGNMENTS')) {
+                Response::notFound("Tính năng Giao bài tập hiện đang tắt.");
+                break;
+            }
             require_once __DIR__ . '/controllers/PracticeAssignmentController.php';
             $controller = new PracticeAssignmentController();
             $controller->handleRequest($method);
             break;
 
         case 'export':
+            if (($_GET['format'] ?? '') === 'chordpro' && !FeatureFlags::isEnabled('EXPORT_CHORDPRO')) {
+                Response::notFound("Tính năng xuất ChordPro hiện đang tắt.");
+                break;
+            }
             require_once __DIR__ . '/controllers/ExportController.php';
             $controller = new ExportController();
             $controller->handleRequest($method);
             break;
 
         case 'reviews':
+            if (!FeatureFlags::isEnabled('REVIEW_WORKFLOW')) {
+                Response::notFound("Tính năng Phê duyệt đề xuất hiện đang tắt.");
+                break;
+            }
             require_once __DIR__ . '/controllers/ReviewController.php';
             $controller = new ReviewController();
             $controller->handleRequest($method);
             break;
 
         case 'notification_preferences':
+            if (!FeatureFlags::isEnabled('NOTIFICATIONS_INAPP')) {
+                Response::notFound("Tính năng Tùy chọn thông báo hiện đang tắt.");
+                break;
+            }
             require_once __DIR__ . '/controllers/NotificationPreferenceController.php';
             $controller = new NotificationPreferenceController();
             $action = $_GET['action'] ?? ($method === 'POST' ? 'save' : 'get');
@@ -164,8 +185,9 @@ try {
             Response::notFound("Endpoint /api/{$route} không tồn tại.");
             break;
     }
-} catch (HttpException $e) {
-    Response::error($e->getMessage(), $e->getStatusCode());
+} catch (HttpException $httpEx) {
+    $msg = $httpEx->getMessage();
+    Response::error($msg, $httpEx->getStatusCode());
 } catch (Throwable $e) {
     error_log(sprintf('SheetApp API error [%s]: %s in %s:%d', $route, $e->getMessage(), $e->getFile(), $e->getLine()));
     Response::error('Lỗi hệ thống. Vui lòng thử lại sau.', 500);

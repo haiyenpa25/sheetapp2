@@ -46,7 +46,7 @@ DB::setPdo($pdo);
 // Tạo bài hát, bộ hợp âm và phiên bản test
 $pdo->exec("INSERT INTO songs (id, title, xmlPath) VALUES ('test-abort-song', 'Bài test Abort', 'storage/test.xml')");
 $pdo->exec("INSERT INTO user_chord_sets (id, song_id, user_id, username, set_name, is_recommended) VALUES (101, 'test-abort-song', 2, 'banhat', 'HD', 0)");
-$pdo->exec("INSERT INTO song_versions (id, song_id, user_id, version_name, xml_path, is_recommended) VALUES (201, 'test-abort-song', 2, 'Version 1', 'storage/v1.xml', 0)");
+$pdo->exec("INSERT INTO song_versions (id, song_id, user_id, username, version_name, version_slug, xml_path, is_recommended) VALUES (201, 'test-abort-song', 2, 'banhat', 'Version 1', 'version-1', 'storage/v1.xml', 0)");
 
 // -------------------------------------------------------------
 // Test 1: toggleRecommend với viewer bị ném 403 & DB không đổi

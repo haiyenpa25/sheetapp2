@@ -16,6 +16,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/fixtures/test_db_fixture.php';
 
 function check(bool $condition, string $message): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     if (!$condition) {
         fwrite(STDERR, "FAIL: {$message}\n");
         exit(1);
@@ -219,3 +220,5 @@ check(strpos($modalSrc, 'window.ServicePlanAssignModal = ServicePlanAssignModal'
 @unlink($auditLogFile);
 
 echo "\nAll Service Plan & Team Assignment regression checks PASSED! (6/6)\n";
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";

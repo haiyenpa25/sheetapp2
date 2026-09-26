@@ -24,7 +24,7 @@ const App = (() => {
     SheetAudioPlayer.init();
     AutoScroller.init();
     PageNav.init();
-    if (window.Auth)             Auth.init();
+    if (window.Auth)             window.Auth.init();
     LibraryUI.init();
     if (window.SetlistUI)        SetlistUI.init();
     if (window.Importer)         Importer.init();
@@ -32,11 +32,11 @@ const App = (() => {
     if (window.PerformanceNotes) PerformanceNotes.init();
     if (window.SongInfoBar)      SongInfoBar.init();
     if (window.Metronome)        Metronome.init();
-    if (window.ArrangementEngine) ArrangementEngine.init();
-    if (window.CueEngine)        CueEngine.init();
+    if (window.ArrangementEngine) window.ArrangementEngine.init();
+    if (window.CueEngine)        window.CueEngine.init();
     if (window.LiveSession)      LiveSession.init();
-    if (window.PerformanceEngine) PerformanceEngine.init();
-    if (window.LiveSync)         LiveSync.init();
+    if (window.PerformanceEngine) window.PerformanceEngine.init();
+    if (window.LiveSync)         window.LiveSync.init();
 
     ToolbarController.init();
     KeyboardHandler.init();

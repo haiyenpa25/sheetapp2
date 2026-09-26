@@ -404,6 +404,15 @@ function learnCssTag(string $file): string {
 
 <!-- Core infrastructure (shared với app chính) -->
 <?php
+require_once __DIR__ . '/../api/core/Config.php';
+require_once __DIR__ . '/../api/core/FeatureFlags.php';
+?>
+<script>
+  window.SHEETAPP_CACHE_VERSION = <?= json_encode(Config::SHEETAPP_CACHE_VERSION) ?>;
+  window.__SW_CACHE__ = <?= json_encode(Config::SHEETAPP_CACHE_NAME) ?>;
+  window.__FEATURES__ = <?= json_encode(FeatureFlags::all(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+</script>
+<?php
 echo learnJsTag('assets/js/core/FeatureFlags.js', false);
 echo learnJsTag('assets/js/core/AppShell.js', false);
 echo learnJsTag('assets/js/core/ModalManager.js', false);

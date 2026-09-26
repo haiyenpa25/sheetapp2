@@ -10,6 +10,7 @@ require_once $root . '/api/core/LoginRateLimiter.php';
 
 $failures = [];
 function checkSessionSecurity(bool $condition, string $message): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     global $failures;
     echo ($condition ? 'PASS: ' : 'FAIL: ') . $message . PHP_EOL;
     if (!$condition) $failures[] = $message;
@@ -37,3 +38,5 @@ if ($failures !== []) {
     exit(1);
 }
 echo "\nAll session/rate-limit regression tests passed.\n";
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";

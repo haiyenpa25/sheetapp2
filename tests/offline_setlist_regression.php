@@ -16,6 +16,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/fixtures/test_db_fixture.php';
 
 function check(bool $condition, string $message): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     if (!$condition) {
         fwrite(STDERR, "FAIL: {$message}\n");
         exit(1);
@@ -141,7 +142,7 @@ check(str_contains($osmSrc, 'removePackage'), "Hỗ trợ hàm removePackage()")
 check(str_contains($osmSrc, 'getOfflineSetlist'), "Hỗ trợ hàm getOfflineSetlist()");
 check(str_contains($osmSrc, 'getOfflineSong'), "Hỗ trợ hàm getOfflineSong()");
 check(str_contains($osmSrc, 'getOfflineChords'), "Hỗ trợ hàm getOfflineChords()");
-check(str_contains($osmSrc, 'sheetapp-musicxml-v4'), "Lưu cache vào CacheStorage 'sheetapp-musicxml-v4'");
+check(str_contains($osmSrc, 'sheetapp-musicxml-v5') || str_contains($osmSrc, '__SW_CACHE__'), "Lưu cache vào CacheStorage 'sheetapp-musicxml-v5'");
 
 // 5.2 ApiService.js
 $apiSrc = file_get_contents($root . '/assets/js/core/ApiService.js') ?: '';
@@ -166,8 +167,10 @@ check(str_contains($chordCanvasSrc, 'OfflineSetlistManager?.hasOfflineChords'), 
 
 // ─── TEST 6: Service Worker v4 Compatibility ──────────────────────
 $swSrc = file_get_contents($root . '/sw.js') ?: '';
-check(str_contains($swSrc, 'sheetapp-musicxml-${SW_VERSION}') || str_contains($swSrc, "sheetapp-musicxml-v4"), "sw.js dùng CacheStorage version 'sheetapp-musicxml-v4'");
+check(str_contains($swSrc, 'sheetapp-musicxml-${SW_VERSION}') || str_contains($swSrc, "sheetapp-musicxml-v5"), "sw.js dùng CacheStorage version 'sheetapp-musicxml-v5'");
 check(str_contains($swSrc, "networkFirstWithQuota"), "sw.js dùng networkFirstWithQuota cho MusicXML");
 check(str_contains($swSrc, "caches.match(request)"), "sw.js hỗ trợ offline fallback cho MusicXML");
 
 echo "\nAll Offline Setlist regression checks PASSED! (6/6)\n";
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";

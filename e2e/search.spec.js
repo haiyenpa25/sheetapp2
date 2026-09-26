@@ -49,6 +49,7 @@ test.describe('E2E-05: Kiểm tra tìm kiếm FTS5 và thẻ highlight <mark> tr
 
     // 3. Gõ "chua" vào ô tìm kiếm
     await searchInput.fill('chua');
+    await searchInput.dispatchEvent('input');
 
     // 4. Chờ debounce 200ms và kết quả tìm kiếm cập nhật
     await page.waitForTimeout(500);

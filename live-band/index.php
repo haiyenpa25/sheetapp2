@@ -241,6 +241,15 @@ function liveBandCssTag(string $file): string {
 
 <!-- Core Application Shared Infrastructure -->
 <?php
+require_once __DIR__ . '/../api/core/Config.php';
+require_once __DIR__ . '/../api/core/FeatureFlags.php';
+?>
+<script>
+  window.SHEETAPP_CACHE_VERSION = <?= json_encode(Config::SHEETAPP_CACHE_VERSION) ?>;
+  window.__SW_CACHE__ = <?= json_encode(Config::SHEETAPP_CACHE_NAME) ?>;
+  window.__FEATURES__ = <?= json_encode(FeatureFlags::all(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+</script>
+<?php
 echo liveBandJsTag('assets/js/core/FeatureFlags.js', false);
 echo liveBandJsTag('assets/js/core/AppShell.js', false);
 echo liveBandJsTag('assets/js/core/ModalManager.js', false);

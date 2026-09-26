@@ -66,6 +66,11 @@ class ReviewService {
                 throw new InvalidArgumentException("Bộ hợp âm không tồn tại");
             }
 
+            // Bảo vệ tính toàn vẹn: song_id của bộ hợp âm phải khớp chính xác với song_id được gửi lên (F4)
+            if ($chordSet['song_id'] !== $songId) {
+                Response::abort(422, "Bộ hợp âm #{$targetId} thuộc về bài '{$chordSet['song_id']}', không khớp với bài '{$songId}'");
+            }
+
             // Kiểm tra quyền sở hữu (hoặc admin/leader)
             if ((int)$chordSet['user_id'] !== $userId && !Auth::isAdmin() && !Auth::isLeader()) {
                 throw new DomainException("Chỉ chủ sở hữu bộ hợp âm mới có quyền gửi đề xuất");
@@ -93,6 +98,11 @@ class ReviewService {
 
             if (!$version) {
                 throw new InvalidArgumentException("Phiên bản bài hát không tồn tại");
+            }
+
+            // Bảo vệ tính toàn vẹn: song_id của phiên bản phải khớp chính xác với song_id được gửi lên (F4)
+            if ($version['song_id'] !== $songId) {
+                Response::abort(422, "Phiên bản #{$targetId} thuộc về bài '{$version['song_id']}', không khớp với bài '{$songId}'");
             }
 
             if ((int)$version['user_id'] !== $userId && !Auth::isAdmin() && !Auth::isLeader()) {

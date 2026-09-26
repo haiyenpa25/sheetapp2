@@ -18,6 +18,7 @@ if (PHP_SAPI !== 'cli') {
 }
 
 function check(bool $condition, string $message): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     if (!$condition) {
         fwrite(STDERR, "FAIL: {$message}\n");
         exit(1);
@@ -278,3 +279,5 @@ check(!file_exists($safeTestFile), "Đã xóa file dữ liệu phòng test an to
 echo "\n=======================================================\n";
 echo "SUCCESS: Tất cả 6 bài kiểm tra Live Sync v2 ĐẠT 100%!\n";
 echo "=======================================================\n";
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";

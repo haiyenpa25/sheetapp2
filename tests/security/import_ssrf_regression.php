@@ -46,3 +46,4 @@ if ($failed > 0) {
 }
 
 echo "\nAll import SSRF regression tests passed.\n";
+echo "\nSUITE_COMPLETE total=15\n";

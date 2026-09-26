@@ -166,11 +166,12 @@ class NotificationService {
                         'plan.published',
                         'Chương trình Phụng vụ đã phát hành',
                         "Chương trình '{$planTitle}' vừa được phát hành. Nhiệm vụ của bạn: {$userRole}.",
-                        "/?setlist={$setlistId}"
+                        "?setlist={$setlistId}"
                     );
                 }
                 break;
 
+            case 'plan.role_assigned':
             case 'assignment.created':
                 $targetUserId = (int)($payload['user_id'] ?? 0);
                 $setlistId    = (int)($payload['setlist_id'] ?? 0);
@@ -180,11 +181,37 @@ class NotificationService {
                     self::notifyUser(
                         $targetUserId,
                         $eventId,
-                        'assignment.created',
+                        'plan.role_assigned',
                         'Bạn có nhiệm vụ mới trong Phụng vụ',
                         "Bạn vừa được phân công vai trò {$roleName}.",
-                        $setlistId > 0 ? "/?setlist={$setlistId}" : ''
+                        $setlistId > 0 ? "?setlist={$setlistId}" : ''
                     );
+                }
+                break;
+
+            case 'practice.assigned':
+                $userIds = [];
+                if (!empty($payload['user_ids']) && is_array($payload['user_ids'])) {
+                    $userIds = array_map('intval', $payload['user_ids']);
+                } elseif (!empty($payload['user_id'])) {
+                    $userIds = [(int)$payload['user_id']];
+                }
+
+                $title = $payload['title'] ?? 'Bài tập luyện hát mới';
+                $assignmentId = (string)$subjectId;
+                $link = 'learn/index.php?assignment=' . $assignmentId;
+
+                foreach ($userIds as $uid) {
+                    if ($uid > 0) {
+                        self::notifyUser(
+                            $uid,
+                            $eventId,
+                            'practice.assigned',
+                            'Bạn có bài tập luyện mới',
+                            "Bạn vừa được giao bài tập '{$title}'. Hãy vào tập luyện nhé!",
+                            $link
+                        );
+                    }
                 }
                 break;
 
@@ -199,7 +226,7 @@ class NotificationService {
                         'assignment.due_soon',
                         'Nhắc nhở: Bài tập sắp tới hạn',
                         "Bài tập '{$songTitle}' của bạn sắp tới hạn vào {$dueAt}. Hãy hoàn thành sớm nhé!",
-                        '/learn/?assignment=' . ($payload['assignment_id'] ?? '')
+                        'learn/index.php?assignment=' . ($payload['assignment_id'] ?? '')
                     );
                 }
                 break;
@@ -214,7 +241,7 @@ class NotificationService {
                         'review.submitted',
                         'Có đề xuất hợp âm mới cần duyệt',
                         "Thành viên vừa gửi đề xuất duyệt hợp âm cho bài '{$songId}'.",
-                        '/manager/#tab-reviews'
+                        'manager/index.php#tab-reviews'
                     );
                 }
                 break;
@@ -234,7 +261,7 @@ class NotificationService {
                         $isApproved 
                             ? "Đề xuất hợp âm cho bài '{$songId}' đã được Ca Trưởng phê duyệt."
                             : "Đề xuất hợp âm cho bài '{$songId}' chưa được phê duyệt. Lý do: " . ($payload['reason'] ?? 'Cần hoàn thiện thêm'),
-                        '/manager/#tab-community'
+                        'manager/index.php#tab-community'
                     );
                 }
                 break;

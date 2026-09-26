@@ -1,7 +1,7 @@
 # CODE_MAP.md — Gitnexus Codebase Knowledge Graph & Map (SheetApp)
 
 > **GITNEXUS SECOND BRAIN CODE MAP**
-> Bản đồ tri thức toàn bộ hệ thống SheetApp. Cập nhật tự động: 2026-09-26 11:50:33
+> Bản đồ tri thức toàn bộ hệ thống SheetApp. Cập nhật tự động: 2026-09-26 13:51:22
 > AI Agent BẮT BUỘC tra cứu sơ đồ phụ thuộc dưới đây trước khi chỉnh sửa file.
 
 ---
@@ -48,7 +48,6 @@ graph TD
 - **SessionController.php**: Handler cho route `session`
 - **SetlistController.php**: Handler cho route `setlist`
 - **SongController.php**: Handler cho route `song`
-- **TenantController.php**: Handler cho route `tenant`
 - **UserController.php**: Handler cho route `user`
 
 ### 2.3 Services (`api/services/`)
@@ -82,7 +81,6 @@ graph TD
 - **SongSearchHelper.php**: Xử lý logic & truy vấn SQLite cho `SongSearchHelper.php`
 - **SongService.php**: Xử lý logic & truy vấn SQLite cho `Song`
 - **SongVersionHelper.php**: Xử lý logic & truy vấn SQLite cho `SongVersionHelper.php`
-- **TenantProvisioningService.php**: Xử lý logic & truy vấn SQLite cho `TenantProvisioning`
 - **TransposeHelper.php**: Xử lý logic & truy vấn SQLite cho `TransposeHelper.php`
 - **UserService.php**: Xử lý logic & truy vấn SQLite cho `User`
 
@@ -202,5 +200,5 @@ graph TD
 
 ---
 
-## 5 · FILE REGISTRY INDEX (2303 files total)
-Total indexed files: 2303
+## 5 · FILE REGISTRY INDEX (2358 files total)
+Total indexed files: 2358

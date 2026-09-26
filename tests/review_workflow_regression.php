@@ -42,6 +42,7 @@ $failures = [];
 $totalChecks = 0;
 
 function check(bool $cond, string $msg, array &$failures, int &$totalChecks): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     $totalChecks++;
     if (!$cond) {
         $failures[] = $msg;
@@ -368,16 +369,21 @@ check($withReq['status'] === 'withdrawn', 'review_requests.status = withdrawn', 
 loginAs(3, 'member', 'viewer');
 // Ghi nhận output buffer vì Response::forbidden echo JSON
 ob_start();
-$bypassRes = ManagerService::toggleRecommend(101);
+try {
+    $bypassRes = ManagerService::toggleRecommend(101);
+} catch (HttpException $e) {
+    $bypassRes = ['success' => false, 'error' => $e->getMessage()];
+}
 $bufferOutput = ob_get_clean();
 $jsonResponse = json_decode($bufferOutput, true);
-$isForbidden = ($jsonResponse && isset($jsonResponse['success']) && $jsonResponse['success'] === false);
+$isForbidden = ($bypassRes && isset($bypassRes['success']) && $bypassRes['success'] === false) || ($jsonResponse && isset($jsonResponse['success']) && $jsonResponse['success'] === false);
 check($isForbidden, 'Anti-Bypass Guard: Viewer gọi toggleRecommend nhận 403 Forbidden', $failures, $totalChecks);
 
 // Tổng kết
 echo "\n=======================================================\n";
 if (empty($failures)) {
     echo "🎉 TẤT CẢ {$totalChecks} KIỂM THỬ ĐÃ PASS HOÀN TOÀN!\n";
+    echo "\nSUITE_COMPLETE total={$totalChecks}\n";
     exit(0);
 } else {
     echo "❌ CÓ " . count($failures) . "/{$totalChecks} KIỂM THỬ THẤT BẠI:\n";
@@ -386,3 +392,5 @@ if (empty($failures)) {
     }
     exit(1);
 }
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";

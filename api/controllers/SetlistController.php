@@ -44,6 +44,12 @@ class SetlistController {
                 }
 
                 if ($action === 'usage_report') {
+                    require_once __DIR__ . '/../core/FeatureFlags.php';
+                    if (!FeatureFlags::isEnabled('USAGE_REPORT')) {
+                        Response::notFound('Tính năng báo cáo phụng vụ hiện đang tắt');
+                        return;
+                    }
+                    Auth::requireLeader();
                     $from = !empty($_GET['from']) ? trim($_GET['from']) : null;
                     $to = !empty($_GET['to']) ? trim($_GET['to']) : null;
                     $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 20;
@@ -52,6 +58,7 @@ class SetlistController {
                 }
 
                 if ($action === 'check_recent_usage') {
+                    Auth::requireLogin();
                     $songId = trim($_GET['song_id'] ?? '');
                     if (empty($songId)) {
                         Response::error('Thiếu song_id', 400);

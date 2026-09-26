@@ -232,7 +232,8 @@
 
         // Xóa cache Service Worker cho MusicXML khi lưu phiên bản mới
         if ('caches' in window) {
-          caches.open('sheetapp-musicxml-v4').then(c => {
+          const xmlCacheName = (typeof window !== 'undefined' && window.__SW_CACHE__) || 'sheetapp-musicxml-v5';
+          caches.open(xmlCacheName).then(c => {
             if (_currentSong?.xmlPath) c.delete(_currentSong.xmlPath);
             if (data.data?.xml_path) c.delete(data.data.xml_path);
           }).catch(() => {});

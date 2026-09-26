@@ -6,6 +6,7 @@ $failures = [];
 require_once $root . '/api/import_helpers.php';
 
 function check(bool $condition, string $message): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     global $failures;
     if (!$condition) {
         $failures[] = $message;
@@ -143,3 +144,5 @@ if ($failures !== []) {
 }
 
 echo "\nAll XSS output regression tests passed.\n";
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";

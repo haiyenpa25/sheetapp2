@@ -6,7 +6,7 @@
     "sync": "./sync.sh",
     "codemap": "node tools/generate_code_map.js",
     "test:ui": "node tools/test_editor_ui.js",
-    "lint": "eslint assets/js editor manager members learn live-band",
+    "lint": "eslint --no-error-on-unmatched-pattern assets/js editor manager live-band learn",
     "check:syntax": "node tools/check_syntax.js",
     "e2e": "playwright test"
   },

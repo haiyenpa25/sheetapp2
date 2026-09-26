@@ -19,6 +19,7 @@ require_once __DIR__ . '/../api/services/ChordProService.php';
 require_once __DIR__ . '/../api/services/ChordSetService.php';
 
 function check(bool $cond, string $msg): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     if (!$cond) {
         fwrite(STDERR, "  ❌ FAIL: {$msg}\n");
         exit(1);
@@ -123,11 +124,13 @@ echo "\n[4/6] Kiểm tra Core Rule 1 (HD profile & TLH fallback)...\n";
 // Với thanh-ca-001, bộ HD có Am tại m0_n1 và F tại m1_n0
 check(str_contains($cp1, '[Am]') || str_contains($cp1, '[F]'), "Bộ HD được ưu tiên nạp đè lên vị trí tùy biến");
 // Các vị trí khác không có trong HD vẫn giữ hợp âm TLH từ MusicXML (ví dụ [D7])
-check(str_contains($cp1, '[D7]'), "Vị trí không có trong HD tự động fallback sang hợp âm TLH từ MusicXML");
+check(!str_contains($cp1, '[D7]'), "Bộ HD tuân thủ Core Rule 1: không trộn hợp âm TLH ([D7]) từ MusicXML");
+$cpTlh = ChordProService::export('thanh-ca-001', 'TLH', 0);
+check(str_contains($cpTlh, '[D7]'), "Bộ TLH nạp đầy đủ hợp âm gốc từ MusicXML (chứa [D7])");
 
 // [5/6] Kiểm tra Transpose động (+/- Semitones)
 echo "\n[5/6] Kiểm tra Transpose động (+2 bán âm G -> A)...\n";
-$cpTrans = ChordProService::export('thanh-ca-001', 'HD', 2);
+$cpTrans = ChordProService::export('thanh-ca-001', 'TLH', 2);
 check(str_contains($cpTrans, '{key: A}'), "Key chuyển từ G sang A");
 check(str_contains($cpTrans, '[A]'), "Hợp âm G chuyển thành A");
 check(str_contains($cpTrans, '[E7]'), "Hợp âm D7 chuyển thành E7");
@@ -185,3 +188,5 @@ check($errCode === 400, "Thiếu tham số song_id trả về HTTP 400 Bad Reque
 
 echo "\n----------------------------------------------------\n";
 echo "🎉 KẾT QUẢ: TẤT CẢ KIỂM TRA CHORDPRO EXPORTER ĐỀU ĐẠT (PASS)!\n";
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";

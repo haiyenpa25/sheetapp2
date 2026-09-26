@@ -56,8 +56,7 @@ return function(PDO $pdo): void {
             transpose_key INTEGER DEFAULT 0,
             bpm INTEGER DEFAULT 100,
             beats_per_measure INTEGER DEFAULT 4,
-            FOREIGN KEY (setlist_id) REFERENCES setlists(id) ON DELETE CASCADE,
-            FOREIGN KEY (song_id) REFERENCES songs(id) ON DELETE CASCADE
+            FOREIGN KEY (setlist_id) REFERENCES setlists(id) ON DELETE CASCADE
         );
     ");
 

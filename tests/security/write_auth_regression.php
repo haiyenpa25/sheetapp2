@@ -25,3 +25,4 @@ if ($failures !== []) {
     exit(1);
 }
 echo "\nAll write-auth regression tests passed.\n";
+echo "\nSUITE_COMPLETE total=7\n";

@@ -262,6 +262,13 @@
       });
     }
 
+    // Kiểm tra cờ tính năng
+    if (window.FeatureFlags && !window.FeatureFlags.get('PRACTICE_ASSIGNMENTS')) {
+      const openBtn = document.getElementById('btn-learn-assignments');
+      if (openBtn) openBtn.style.display = 'none';
+      return;
+    }
+
     // Tự động tải số lượng khi mở trang
     if (window.__IS_LOGGED_IN__) {
       loadAssignments();

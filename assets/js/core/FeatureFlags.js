@@ -34,6 +34,11 @@
         return stored === 'true' || stored === '1';
       }
     } catch (e) {}
+
+    if (typeof window !== 'undefined' && window.__FEATURES__ && typeof window.__FEATURES__[key] !== 'undefined') {
+      return Boolean(window.__FEATURES__[key]);
+    }
+
     return DEFAULT_FLAGS[key] ?? false;
   }
 

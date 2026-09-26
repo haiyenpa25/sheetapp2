@@ -17,6 +17,7 @@ $method = new ReflectionMethod(SongService::class, 'resolveManagedXmlPath');
 $failures = [];
 
 function checkPath(bool $condition, string $message): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     global $failures;
     echo ($condition ? 'PASS: ' : 'FAIL: ') . $message . PHP_EOL;
     if (!$condition) {
@@ -41,3 +42,5 @@ if ($failures !== []) {
 }
 
 echo "\nAll managed-path regression tests passed.\n";
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";

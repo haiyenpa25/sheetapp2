@@ -5,6 +5,7 @@ $root = dirname(__DIR__, 2);
 $failures = [];
 
 function check(bool $condition, string $message): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     global $failures;
     if (!$condition) {
         $failures[] = $message;
@@ -62,3 +63,5 @@ if ($failures !== []) {
 }
 
 echo "\nAll authentication regression tests passed.\n";
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";

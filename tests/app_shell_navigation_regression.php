@@ -14,6 +14,7 @@
 declare(strict_types=1);
 
 function check(bool $condition, string $message): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     if (!$condition) {
         fwrite(STDERR, "FAIL: {$message}\n");
         exit(1);
@@ -72,3 +73,5 @@ check(str_contains($navContent, 'huong-dan') || str_contains($jsContent, 'huong-
 check(str_contains($navContent, 'htmlspecialchars') || str_contains($jsContent, 'SafeHtml'), 'Auth widget trong App Shell được escape an toàn');
 
 echo "\n>>> ALL 6/6 APP SHELL NAVIGATION REGRESSION CHECKS PASSED!\n";
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";

@@ -22,6 +22,7 @@ $passed = 0;
 $failed = 0;
 
 function check(bool $cond, string $msg): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     global $passed, $failed;
     if ($cond) {
         echo "  ✅ PASS: {$msg}\n";
@@ -165,4 +166,6 @@ echo "--------------------------------------------------------\n";
 if ($failed > 0) {
     exit(1);
 }
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";
 exit(0);

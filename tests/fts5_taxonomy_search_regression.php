@@ -18,6 +18,7 @@ if (PHP_SAPI !== 'cli') {
 }
 
 function check(bool $condition, string $message): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     if (!$condition) {
         fwrite(STDERR, "FAIL: {$message}\n");
         exit(1);
@@ -205,3 +206,5 @@ if (!empty($apiResult)) {
 echo "\n=======================================================\n";
 echo "SUCCESS: Tất cả 6 bài kiểm tra FTS5 Search & Taxonomy ĐẠT 100%!\n";
 echo "=======================================================\n";
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";

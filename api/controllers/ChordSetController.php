@@ -71,14 +71,44 @@ class ChordSetController {
                         return;
                     }
 
-                    // STRICT OWNERSHIP RULE:
-                    // Mỗi người chỉ sửa bản phối của người đó (admin sửa ADMIN, hoaidinh sửa HD).
-                    $myChordCode = Auth::chordCode();
-                    $myUsername  = Auth::username();
+                    // Xử lý bộ HD chuẩn mực: D12 & B4
+                    if (strcasecmp($name, 'HD') === 0) {
+                        $canEditHd = Auth::isAdmin() || ($myChordCode && strcasecmp($myChordCode, 'HD') === 0);
+                        if (!$canEditHd) {
+                            Response::forbidden('Bạn không có quyền chỉnh sửa trực tiếp bộ hợp âm chuẩn HD. Vui lòng gửi Đề xuất (Review)!');
+                            return;
+                        }
+
+                        $chords = $body['chords'] ?? [];
+                        if (!is_array($chords) || empty($chords)) {
+                            Response::error('chords phải là array và không được rỗng (Core Rule 1)');
+                            return;
+                        }
+
+                        try {
+                            $ok = ChordSetService::writeHd(
+                                $songId,
+                                $chords,
+                                Auth::userId(),
+                                Auth::username(),
+                                "Cập nhật trực tiếp bộ HD bởi @" . (Auth::username() ?: 'system')
+                            );
+                            $ok ? Response::ok(['message' => 'Đã lưu ' . count($chords) . ' hợp âm vào bộ HD và ghi nhận lịch sử'])
+                                : Response::error('Lỗi khi ghi bộ hợp âm HD');
+                        } catch (Throwable $e) {
+                            Response::error($e->getMessage());
+                        }
+                        return;
+                    }
+
+                    // STRICT OWNERSHIP RULE cho các bộ cá nhân khác:
+                    // Mỗi người chỉ sửa bản phối của người đó (admin sửa ADMIN, tác giả sửa bộ của mình).
                     $isOwner = false;
                     if ($myChordCode && strcasecmp($name, $myChordCode) === 0) {
                         $isOwner = true;
                     } elseif ($myUsername && strcasecmp($name, $myUsername) === 0) {
+                        $isOwner = true;
+                    } elseif (Auth::isAdmin()) {
                         $isOwner = true;
                     }
 

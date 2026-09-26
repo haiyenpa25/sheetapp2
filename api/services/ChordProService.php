@@ -29,6 +29,7 @@ class ChordProService {
      * @return string Văn bản ChordPro hoàn chỉnh
      */
     public static function export(string $songId, string $chordSet = 'HD', int $transpose = 0, ?string $overrideXml = null): string {
+        $transpose = max(-12, min(12, $transpose));
         $pdo = DB::get();
 
         // 1. Tìm thông tin bài hát
@@ -70,13 +71,14 @@ class ChordProService {
         $customChords = ChordSetService::loadSet($songId, $chordSet);
         $customMap = [];
         foreach ($customChords as $cc) {
-            $m = (int)($cc['measureIdx'] ?? 0);
-            $n = (int)($cc['noteIdx'] ?? 0);
+            $m = (int)($cc['measureIdx'] ?? ($cc['measure'] ?? 0));
+            $n = (int)($cc['noteIdx'] ?? ($cc['noteIndex'] ?? 0));
             $c = trim((string)($cc['chord'] ?? ''));
             if ($c !== '') {
                 $customMap["{$m}_{$n}"] = $c;
             }
         }
+        $hasCustomChords = !empty($customMap);
 
         // 5. Trích xuất metadata bài hát
         $title = $song['title'] ?? (string)$xml->{'work'}->{'work-title'} ?: (string)$xml->{'movement-title'} ?: $songId;
@@ -138,11 +140,16 @@ class ChordProService {
                     }
                     $nIdx++;
 
-                    // Xác định hợp âm tại vị trí nốt này:
-                    // Ưu tiên 1: Hợp âm tùy biến trong bộ chordSet
-                    // Ưu tiên 2: Fallback hợp âm TLH gốc trong XML (Core Rule 1)
+                    // Xác định hợp âm tại vị trí nốt này (CORE RULE 1 - Ticket F6):
+                    // - Nếu bộ tùy biến (HD hoặc cá nhân) có ≥ 1 hợp âm, CHỈ DÙNG hợp âm của bộ đó.
+                    //   Tuyệt đối KHÔNG fallback trộn từng nốt với hợp âm TLH gốc trong XML gây lệch sheet.
+                    // - Chỉ khi bộ tùy biến rỗng hoàn toàn mới sử dụng hợp âm TLH gốc.
                     $posKey = "{$mIdx}_{$nIdx}";
-                    $activeChord = $customMap[$posKey] ?? $pendingXmlHarmony;
+                    if ($hasCustomChords) {
+                        $activeChord = $customMap[$posKey] ?? null;
+                    } else {
+                        $activeChord = $pendingXmlHarmony;
+                    }
                     $pendingXmlHarmony = null;
 
                     if ($activeChord !== null && $activeChord !== '' && $transpose !== 0) {

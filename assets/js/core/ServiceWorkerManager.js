@@ -13,7 +13,8 @@ const ServiceWorkerManager = (() => {
     const doRegister = async () => {
       try {
         const appBase = (typeof window.__APP_BASE__ === 'string') ? window.__APP_BASE__ : '';
-        const swUrl = (appBase ? appBase : '') + '/sw.js';
+        const swVer = (typeof window !== 'undefined' && window.SHEETAPP_CACHE_VERSION) ? window.SHEETAPP_CACHE_VERSION : 'v5';
+        const swUrl = (appBase ? appBase : '') + '/sw.js?v=' + encodeURIComponent(swVer);
         const swScope = (appBase ? appBase : '') + '/';
         const reg = await navigator.serviceWorker.register(swUrl, { scope: swScope });
 

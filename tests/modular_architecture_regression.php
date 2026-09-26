@@ -18,6 +18,7 @@
 declare(strict_types=1);
 
 function check(bool $condition, string $message): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     if (!$condition) {
         fwrite(STDERR, "FAIL: {$message}\n");
         exit(1);
@@ -261,3 +262,5 @@ foreach ($coordinatorCalls as $subFile => $badCall) {
 }
 
 echo "\nAll modular architecture regression tests passed.\n";
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";

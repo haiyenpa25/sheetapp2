@@ -8,6 +8,7 @@ $controllers = glob($root . '/api/controllers/*Controller.php') ?: [];
 $failures = [];
 
 function checkErrorSecurity(bool $condition, string $message): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     global $failures;
     echo ($condition ? 'PASS: ' : 'FAIL: ') . $message . PHP_EOL;
     if (!$condition) $failures[] = $message;
@@ -38,3 +39,5 @@ if ($failures !== []) {
     exit(1);
 }
 echo "\nAll error-disclosure regression tests passed.\n";
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";

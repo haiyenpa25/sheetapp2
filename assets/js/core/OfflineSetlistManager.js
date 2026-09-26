@@ -3,7 +3,7 @@
  *
  * Quản lý Gói Setlist Offline Đáng Tin Cậy (Epic 3.2):
  * 1. Tải và đồng bộ trọn vẹn Package Manifest (Setlist, Songs metadata, Chord Sets JSON).
- * 2. Pre-cache các file MusicXML vào CacheStorage ('sheetapp-musicxml-v4').
+ * 2. Pre-cache các file MusicXML vào CacheStorage ('sheetapp-musicxml-v5').
  * 3. Kiểm tra tính toàn vẹn (Integrity & Checksum verification) — Chỉ báo sẵn sàng khi đủ 100% asset.
  * 4. Tra cứu dự phòng (Offline Fallback) khi thiết bị mất mạng hoặc tắt Wi-Fi.
  * 5. Cập nhật và thu hồi (xóa) gói để giải phóng bộ nhớ.
@@ -11,7 +11,7 @@
 'use strict';
 
 const OfflineSetlistManager = (() => {
-  const CACHE_NAME = 'sheetapp-musicxml-v4';
+  const CACHE_NAME = (typeof window !== 'undefined' && window.__SW_CACHE__) || 'sheetapp-musicxml-v5';
   const INDEX_KEY = 'sheetapp_offline_index';
   const PKG_PREFIX = 'sheetapp_offline_setlist_';
 

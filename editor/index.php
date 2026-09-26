@@ -7,6 +7,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 require_once __DIR__ . '/../api/core/Auth.php';
+require_once __DIR__ . '/../api/core/Config.php';
 $currentUser = Auth::username() ?: 'banhat';
 $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
 $appBase = rtrim(dirname($scriptDir), '/');
@@ -16,7 +17,11 @@ if ($appBase === '/' || $appBase === '\\') $appBase = '';
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <script>if (typeof window !== 'undefined' && typeof window.__APP_BASE__ === 'undefined') { window.__APP_BASE__ = <?= json_encode($appBase, JSON_UNESCAPED_SLASHES) ?>; }</script>
+  <script>
+    if (typeof window !== 'undefined' && typeof window.__APP_BASE__ === 'undefined') { window.__APP_BASE__ = <?= json_encode($appBase, JSON_UNESCAPED_SLASHES) ?>; }
+    window.SHEETAPP_CACHE_VERSION = <?= json_encode(Config::SHEETAPP_CACHE_VERSION) ?>;
+    window.__SW_CACHE__ = <?= json_encode(Config::SHEETAPP_CACHE_NAME) ?>;
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>SheetApp · Biên Tập Nốt Nhạc (4 Bè SATB)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">

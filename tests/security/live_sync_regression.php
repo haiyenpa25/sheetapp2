@@ -12,6 +12,7 @@ $roomFile = $tmpDir . '/' . strtolower($room) . '.json';
 $failures = [];
 
 function checkLive(bool $condition, string $message): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     global $failures;
     echo ($condition ? 'PASS: ' : 'FAIL: ') . $message . PHP_EOL;
     if (!$condition) {
@@ -53,3 +54,5 @@ if ($failures !== []) {
 }
 
 echo "\nAll Live Sync regression tests passed.\n";
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";

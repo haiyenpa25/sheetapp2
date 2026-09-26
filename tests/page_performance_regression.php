@@ -14,6 +14,7 @@
 declare(strict_types=1);
 
 function check(bool $condition, string $message): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     if (!$condition) {
         fwrite(STDERR, "FAIL: {$message}\n");
         exit(1);
@@ -180,3 +181,5 @@ $modularTestFile = $root . '/tests/modular_architecture_regression.php';
 check(file_exists($modularTestFile), "Checkpoint G2: modular_architecture_regression.php exists");
 
 echo "\nAll Page Performance & Checkpoint G2 regression checks PASSED! (6/6)\n";
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";

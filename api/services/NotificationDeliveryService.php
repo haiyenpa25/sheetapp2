@@ -13,26 +13,50 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../core/DB.php';
+require_once __DIR__ . '/../core/FeatureFlags.php';
 require_once __DIR__ . '/NotificationPreferenceService.php';
 
 class NotificationDeliveryService {
     public const MAX_ATTEMPTS = 3;
 
     /**
+     * Kiểm tra xem bảng notification_deliveries đã có cột next_attempt_at chưa
+     */
+    public static function hasNextAttemptColumn(?PDO $pdo = null): bool {
+        static $hasCol = null;
+        if ($hasCol !== null) {
+            return $hasCol;
+        }
+
+        try {
+            $db = $pdo ?: DB::get();
+            $cols = $db->query("PRAGMA table_info(notification_deliveries)")->fetchAll(PDO::FETCH_ASSOC);
+            $names = array_column($cols, 'name');
+            $hasCol = in_array('next_attempt_at', $names, true);
+        } catch (Throwable $e) {
+            $hasCol = false;
+        }
+        return $hasCol;
+    }
+
+    /**
      * Xử lý hàng đợi chuyển phát
-     * @return array Thống kê kết quả: ['processed' => int, 'sent' => int, 'deferred' => int, 'failed' => int]
+     * @return array Thống kê kết quả: ['processed' => int, 'sent' => int, 'deferred' => int, 'failed' => int, 'skipped' => int]
      */
     public static function processQueue(int $limit = 50): array {
         $pdo = DB::get();
+        $hasCol = self::hasNextAttemptColumn($pdo);
 
+        $whereNext = $hasCol ? "AND (d.next_attempt_at IS NULL OR d.next_attempt_at <= datetime('now'))" : "";
         $stmt = $pdo->prepare("
             SELECT d.id, d.notification_id, d.user_id, d.channel, d.attempts,
                    n.title, n.body, n.link,
-                   u.email, u.display_name, u.username
+                   u.email, u.email_verified_at, u.display_name, u.username
             FROM notification_deliveries d
             JOIN notifications n ON n.id = d.notification_id
             JOIN users u ON u.id = d.user_id
             WHERE d.status = 'queued' AND d.attempts < ?
+              {$whereNext}
             ORDER BY d.created_at ASC
             LIMIT ?
         ");
@@ -54,18 +78,36 @@ class NotificationDeliveryService {
             $userId  = (int)$item['user_id'];
             $channel = $item['channel'];
 
-            // 1. Kiểm tra khung giờ yên lặng (Quiet Hours)
+            // 1. Kiểm tra khung giờ yên lặng (Quiet Hours) - Không gây tắc nghẽn hàng đợi
             if (NotificationPreferenceService::isInQuietHours($userId)) {
-                // Tạm hoãn, để nguyên trạng thái queued cho lần quét tiếp theo
+                $resumeTime = NotificationPreferenceService::getQuietHoursResumeTime($userId);
+                if ($hasCol && $resumeTime) {
+                    $upd = $pdo->prepare("UPDATE notification_deliveries SET next_attempt_at = ?, last_error = 'Hoãn do trong giờ yên lặng' WHERE id = ?");
+                    $upd->execute([$resumeTime, $delivId]);
+                }
                 $stats['deferred']++;
                 continue;
             }
 
             // 2. Chuyển phát theo kênh
             if ($channel === 'email') {
-                $email = $item['email'] ?? '';
+                // Kiểm tra Feature Flag B6
+                if (!FeatureFlags::isEnabled('NOTIFICATIONS_EMAIL')) {
+                    self::updateDeliveryStatus($delivId, 'skipped', 'Tính năng gửi Email đang tạm tắt (Feature Flag B6)');
+                    $stats['skipped']++;
+                    continue;
+                }
+
+                $email = trim($item['email'] ?? '');
                 if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     self::updateDeliveryStatus($delivId, 'skipped', 'Không có địa chỉ email hợp lệ');
+                    $stats['skipped']++;
+                    continue;
+                }
+
+                // Kiểm tra xác thực email (phải qua link token hết hạn)
+                if (empty($item['email_verified_at'])) {
+                    self::updateDeliveryStatus($delivId, 'skipped', 'Địa chỉ email chưa được xác thực (email_verified_at rỗng)');
                     $stats['skipped']++;
                     continue;
                 }
@@ -88,7 +130,14 @@ class NotificationDeliveryService {
                     $stats['failed']++;
                 }
             } elseif ($channel === 'push') {
-                // Kênh Web Push: Lưu vết chuyển phát thành công/skipped cho stub
+                // Kiểm tra Feature Flag B6
+                if (!FeatureFlags::isEnabled('NOTIFICATIONS_PUSH')) {
+                    self::updateDeliveryStatus($delivId, 'skipped', 'Tính năng Web Push đang tạm tắt (Feature Flag B6)');
+                    $stats['skipped']++;
+                    continue;
+                }
+
+                // Stub Web Push khi được bật
                 self::updateDeliveryStatus($delivId, 'sent', null);
                 $stats['sent']++;
             } else {
@@ -136,6 +185,47 @@ class NotificationDeliveryService {
     }
 
     /**
+     * Chuẩn hóa và làm sạch tiêu đề email, chống CRLF Injection & mã hoá RFC 2047
+     */
+    public static function buildSmtpHeaders(
+        string $from,
+        string $toEmail,
+        string $toName,
+        string $subject
+    ): string {
+        $safeFrom    = str_replace(["\r", "\n"], '', $from);
+        $safeToEmail = str_replace(["\r", "\n"], '', $toEmail);
+        $safeToName  = str_replace(["\r", "\n"], '', $toName);
+        $safeSubject = str_replace(["\r", "\n"], '', $subject);
+
+        // Mã hóa Base64 RFC 2047 cho tên hiển thị và subject có dấu / Unicode
+        $encodedName    = '=?UTF-8?B?' . base64_encode($safeToName) . '?=';
+        $encodedSubject = '=?UTF-8?B?' . base64_encode($safeSubject) . '?=';
+
+        $headers  = "From: SheetApp Phụng Vụ <{$safeFrom}>\r\n";
+        $headers .= "To: {$encodedName} <{$safeToEmail}>\r\n";
+        $headers .= "Subject: {$encodedSubject}\r\n";
+        $headers .= "MIME-Version: 1.0\r\n";
+        $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+        $headers .= "Content-Transfer-Encoding: 8bit\r\n";
+        $headers .= "\r\n";
+
+        return $headers;
+    }
+
+    /**
+     * Áp dụng Dot-stuffing theo RFC 5321 (Section 4.5.2)
+     */
+    public static function applyDotStuffing(string $content): string {
+        $normalized = str_replace(["\r\n", "\r"], "\n", $content);
+        $lines = explode("\n", $normalized);
+        $stuffed = array_map(static function(string $line): string {
+            return str_starts_with($line, '.') ? '.' . $line : $line;
+        }, $lines);
+        return implode("\r\n", $stuffed);
+    }
+
+    /**
      * Gửi email thông báo (Hỗ trợ SMTP cấu hình qua ENV hoặc Mock File Log an toàn)
      */
     public static function sendEmail(
@@ -166,8 +256,8 @@ class NotificationDeliveryService {
 
         $logEntry = [
             'timestamp'  => date('c'),
-            'to'         => "{$recipientName} <{$recipientEmail}>",
-            'subject'    => $fullSubject,
+            'to'         => str_replace(["\r", "\n"], '', "{$recipientName} <{$recipientEmail}>"),
+            'subject'    => str_replace(["\r", "\n"], '', $fullSubject),
             'body'       => $body,
             'link'       => $fullLink
         ];
@@ -179,9 +269,27 @@ class NotificationDeliveryService {
     }
 
     /**
-     * Gửi qua SMTP Socket đơn giản thuần PHP (không cần thư viện ngoài)
+     * Đọc phản hồi từ SMTP Socket và xác thực mã trạng thái
      */
-    private static function sendViaSmtp(
+    private static function expectSmtpResponse($socket, array $expectedCodes, string $step): string {
+        $response = '';
+        while (($line = fgets($socket, 512)) !== false) {
+            $response .= $line;
+            if (strlen($line) >= 4 && substr($line, 3, 1) === ' ') {
+                break;
+            }
+        }
+        $code = (int)substr($response, 0, 3);
+        if (!in_array($code, $expectedCodes, true)) {
+            throw new RuntimeException("SMTP {$step} thất bại (mã phản hồi {$code}): " . trim($response));
+        }
+        return $response;
+    }
+
+    /**
+     * Gửi qua SMTP Socket an toàn (STARTTLS, mã phản hồi chuẩn, CRLF protection, dot-stuffing)
+     */
+    public static function sendViaSmtp(
         string $toEmail,
         string $toName,
         string $subject,
@@ -192,6 +300,7 @@ class NotificationDeliveryService {
         $user = getenv('SMTP_USER') ?: '';
         $pass = getenv('SMTP_PASS') ?: '';
         $from = getenv('SMTP_FROM') ?: 'no-reply@sheet.hyb.io.vn';
+        $useTls = (getenv('SMTP_STARTTLS') === 'true') || ($port === 587);
 
         try {
             $socket = @fsockopen($host, $port, $errno, $errstr, 5);
@@ -199,41 +308,72 @@ class NotificationDeliveryService {
                 return ['success' => false, 'error' => "Không kết nối được SMTP ({$host}:{$port}): {$errstr}"];
             }
 
-            $read = fgets($socket, 512);
+            // 1. Chào hỏi kết nối
+            self::expectSmtpResponse($socket, [220], 'CONNECT');
 
+            // 2. EHLO khởi đầu
             fputs($socket, "EHLO " . gethostname() . "\r\n");
-            $read = fgets($socket, 512);
+            self::expectSmtpResponse($socket, [250], 'EHLO');
 
-            if ($user && $pass) {
-                fputs($socket, "AUTH LOGIN\r\n");
-                fgets($socket, 512);
-                fputs($socket, base64_encode($user) . "\r\n");
-                fgets($socket, 512);
-                fputs($socket, base64_encode($pass) . "\r\n");
-                fgets($socket, 512);
+            // 3. STARTTLS nếu được cấu hình hoặc cổng 587
+            if ($useTls) {
+                fputs($socket, "STARTTLS\r\n");
+                self::expectSmtpResponse($socket, [220], 'STARTTLS');
+
+                $crypto = @stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
+                if (!$crypto) {
+                    fclose($socket);
+                    return ['success' => false, 'error' => 'Kích hoạt STARTTLS thất bại'];
+                }
+
+                // Gửi lại EHLO sau khi nâng cấp TLS
+                fputs($socket, "EHLO " . gethostname() . "\r\n");
+                self::expectSmtpResponse($socket, [250], 'EHLO_POST_TLS');
             }
 
-            fputs($socket, "MAIL FROM: <{$from}>\r\n");
-            fgets($socket, 512);
-            fputs($socket, "RCPT TO: <{$toEmail}>\r\n");
-            fgets($socket, 512);
+            // 4. Xác thực nếu có user/pass
+            if ($user && $pass) {
+                fputs($socket, "AUTH LOGIN\r\n");
+                self::expectSmtpResponse($socket, [334], 'AUTH_LOGIN');
+
+                fputs($socket, base64_encode($user) . "\r\n");
+                self::expectSmtpResponse($socket, [334], 'AUTH_USER');
+
+                fputs($socket, base64_encode($pass) . "\r\n");
+                self::expectSmtpResponse($socket, [235], 'AUTH_PASS');
+            }
+
+            // 5. MAIL FROM
+            $safeFrom = str_replace(["\r", "\n"], '', $from);
+            fputs($socket, "MAIL FROM: <{$safeFrom}>\r\n");
+            self::expectSmtpResponse($socket, [250], 'MAIL_FROM');
+
+            // 6. RCPT TO
+            $safeTo = str_replace(["\r", "\n"], '', $toEmail);
+            fputs($socket, "RCPT TO: <{$safeTo}>\r\n");
+            self::expectSmtpResponse($socket, [250], 'RCPT_TO');
+
+            // 7. DATA
             fputs($socket, "DATA\r\n");
-            fgets($socket, 512);
+            self::expectSmtpResponse($socket, [354], 'DATA');
 
-            $headers  = "From: SheetApp Phụng Vụ <{$from}>\r\n";
-            $headers .= "To: {$toName} <{$toEmail}>\r\n";
-            $headers .= "Subject: {$subject}\r\n";
-            $headers .= "MIME-Version: 1.0\r\n";
-            $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
-            $headers .= "\r\n";
+            // 8. Headers & Body (Dot-stuffing)
+            $headers = self::buildSmtpHeaders($safeFrom, $safeTo, $toName, $subject);
+            $stuffedBody = self::applyDotStuffing($htmlBody);
 
-            fputs($socket, $headers . $htmlBody . "\r\n.\r\n");
-            fgets($socket, 512);
+            fputs($socket, $headers . $stuffedBody . "\r\n.\r\n");
+            self::expectSmtpResponse($socket, [250], 'SEND_DATA');
+
+            // 9. QUIT
             fputs($socket, "QUIT\r\n");
+            self::expectSmtpResponse($socket, [221], 'QUIT');
             fclose($socket);
 
             return ['success' => true];
         } catch (Throwable $e) {
+            if (isset($socket) && is_resource($socket)) {
+                @fclose($socket);
+            }
             return ['success' => false, 'error' => $e->getMessage()];
         }
     }

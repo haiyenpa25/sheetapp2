@@ -19,6 +19,7 @@
 declare(strict_types=1);
 
 function check(bool $condition, string $message): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     if (!$condition) {
         fwrite(STDERR, "FAIL: {$message}\n");
         exit(1);
@@ -98,3 +99,5 @@ check(str_contains($learnPhp, 'MidiEngine.js') && str_contains($learnPhp, 'SongL
 check(str_contains($managerPhp, 'ApiService.js'), 'Trụ cột Quản Lý nhúng ApiService.js');
 
 echo "\n>>> ALL 7/7 SHARED JS PLATFORM REGRESSION CHECKS PASSED!\n";
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";

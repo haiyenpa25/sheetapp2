@@ -180,6 +180,66 @@ class ChordSetService {
     }
 
     /**
+     * Ghi bộ hợp âm chuẩn HD duy nhất (Single Entry Point cho mọi hành vi cập nhật HD):
+     * - Luôn bọc trong transaction.
+     * - Luôn lưu snapshot bản HD hiện tại vào chord_set_history trước khi ghi đè.
+     * - Lưu bản mới vào user_chord_sets và file đĩa.
+     */
+    public static function writeHd(
+        string $songId,
+        array $chords,
+        ?int $userId = null,
+        ?string $username = null,
+        ?string $changeReason = null,
+        ?int $reviewRequestId = null
+    ): bool {
+        if (empty($chords)) {
+            throw new InvalidArgumentException("Không thể lưu: Bộ hợp âm HD không được rỗng (Core Rule 1)");
+        }
+
+        $pdo = DB::get();
+        $isOuterTransaction = $pdo->inTransaction();
+        if (!$isOuterTransaction) {
+            $pdo->beginTransaction();
+        }
+
+        try {
+            // 1. Snapshot HD hiện tại vào lịch sử
+            $currentHd = self::loadSet($songId, 'HD');
+            $currentHdJson = json_encode($currentHd, JSON_UNESCAPED_UNICODE);
+
+            $insHist = $pdo->prepare("
+                INSERT INTO chord_set_history (
+                    song_id, set_name, chords_json, created_by, review_request_id, change_reason, created_at
+                ) VALUES (?, 'HD', ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            ");
+            $insHist->execute([
+                $songId,
+                $currentHdJson,
+                $userId,
+                $reviewRequestId,
+                $changeReason ?: ("Cập nhật trực tiếp bộ HD bởi @" . ($username ?: 'system'))
+            ]);
+
+            // 2. Lưu bộ HD mới
+            $ok = self::saveSet($songId, 'HD', $chords, $userId, 'HD');
+            if (!$ok) {
+                throw new RuntimeException("Lỗi khi lưu bộ hợp âm HD vào hệ thống");
+            }
+
+            if (!$isOuterTransaction) {
+                $pdo->commit();
+            }
+            return true;
+        } catch (Throwable $e) {
+            if (!$isOuterTransaction && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
+        }
+    }
+
+    /**
      * Sao chép bản phối (Clone)
      */
     public static function cloneSet(string $songId, string $sourceName, string $targetName, ?int $userId = null, ?string $username = null): bool {

@@ -90,35 +90,42 @@ class PracticeAssignmentCreationHelper {
                     ]);
                     $assignmentId = (int)$pdo->lastInsertId();
 
-                    // Ghi nhận sự kiện domain
+                    // Gán target cho từng ca viên trong ban và thu thập user_ids để gửi thông báo (F5)
+                    $targetUserIds = [];
+                    foreach ($assignees as $assignee) {
+                        $targetUserId = (int)$assignee['user_id'];
+                        $targetUserIds[] = $targetUserId;
+                        $voicePart = $assignee['voice_part'] ?? null;
+                        if (!$voicePart && !empty($assignee['role'])) {
+                            // Tự suy đoán nếu role chứa S/A/T/B
+                            if (preg_match('/\b(S|A|T|B|Soprano|Alto|Tenor|Bass)\b/i', $assignee['role'], $m)) {
+                                $voicePart = strtoupper(substr($m[1], 0, 1));
+                            }
+                        }
+
+                        $pdo->prepare("
+                            INSERT OR IGNORE INTO practice_assignment_targets (
+                                assignment_id, user_id, voice_part, status
+                            ) VALUES (?, ?, ?, 'assigned')
+                        ")->execute([$assignmentId, $targetUserId, $voicePart]);
+                    }
+
+                    // Ghi nhận sự kiện miền practice.assigned với đầy đủ danh sách user_ids
                     DomainEvents::record(
-                        'assignment.created',
+                        'practice.assigned',
                         $actorId,
                         'practice_assignment',
                         (string)$assignmentId,
-                        ['plan_id' => $planId, 'song_id' => $songId, 'title' => $title]
+                        [
+                            'plan_id'  => $planId,
+                            'song_id'  => $songId,
+                            'title'    => $title,
+                            'user_ids' => $targetUserIds
+                        ]
                     );
+
+                    $createdAssignments[] = $assignmentId;
                 }
-
-                // Gán target cho từng ca viên trong ban
-                foreach ($assignees as $assignee) {
-                    $targetUserId = (int)$assignee['user_id'];
-                    $voicePart = $assignee['voice_part'] ?? null;
-                    if (!$voicePart && !empty($assignee['role'])) {
-                        // Tự suy đoán nếu role chứa S/A/T/B
-                        if (preg_match('/\b(S|A|T|B|Soprano|Alto|Tenor|Bass)\b/i', $assignee['role'], $m)) {
-                            $voicePart = strtoupper(substr($m[1], 0, 1));
-                        }
-                    }
-
-                    $pdo->prepare("
-                        INSERT OR IGNORE INTO practice_assignment_targets (
-                            assignment_id, user_id, voice_part, status
-                        ) VALUES (?, ?, ?, 'assigned')
-                    ")->execute([$assignmentId, $targetUserId, $voicePart]);
-                }
-
-                $createdAssignments[] = $assignmentId;
             }
 
             $pdo->commit();
@@ -157,10 +164,11 @@ class PracticeAssignmentCreationHelper {
         $threshold = isset($data['completion_threshold']) ? (float)$data['completion_threshold'] : null;
         $notes = trim($data['notes'] ?? '');
 
-        // Xác định danh sách target user IDs
+        // Xác định danh sách target user IDs (hỗ trợ cả user_ids và target_user_ids)
         $targetUserIds = [];
-        if (!empty($data['user_ids']) && is_array($data['user_ids'])) {
-            $targetUserIds = array_map('intval', $data['user_ids']);
+        $rawUserIds = $data['user_ids'] ?? $data['target_user_ids'] ?? [];
+        if (!empty($rawUserIds) && is_array($rawUserIds)) {
+            $targetUserIds = array_map('intval', $rawUserIds);
         } elseif (!empty($data['voice_part'])) {
             $vPart = trim($data['voice_part']);
             $uStmt = $pdo->prepare("SELECT id FROM users WHERE voice_part = ? AND status = 'active'");
@@ -202,7 +210,7 @@ class PracticeAssignmentCreationHelper {
             }
 
             DomainEvents::record(
-                'assignment.created',
+                'practice.assigned',
                 $actorId,
                 'practice_assignment',
                 (string)$assignmentId,

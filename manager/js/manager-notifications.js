@@ -66,10 +66,21 @@
     const tbody = document.getElementById('tbody-notif-matrix');
     if (!tbody) return;
 
+    const emailEnabled = window.FeatureFlags ? window.FeatureFlags.get('NOTIFICATIONS_EMAIL') : false;
+    const pushEnabled  = window.FeatureFlags ? window.FeatureFlags.get('NOTIFICATIONS_PUSH') : false;
+
     const rows = Object.entries(matrix).map(([type, item]) => {
       const inappChecked = item.channels?.inapp ? 'checked' : '';
       const emailChecked = item.channels?.email ? 'checked' : '';
       const pushChecked  = item.channels?.push ? 'checked' : '';
+
+      const emailCell = emailEnabled
+        ? `<input type="checkbox" class="notif-pref-chk" data-event="${_escape(type)}" data-channel="email" ${emailChecked}>`
+        : `<span class="text-xs text-muted" style="opacity:0.6;" title="Tính năng gửi Email tạm thời chưa kích hoạt">Tạm tắt</span>`;
+
+      const pushCell = pushEnabled
+        ? `<input type="checkbox" class="notif-pref-chk" data-event="${_escape(type)}" data-channel="push" ${pushChecked}>`
+        : `<span class="text-xs text-muted" style="opacity:0.6;" title="Tính năng Web Push tạm thời chưa kích hoạt">Tạm tắt</span>`;
 
       return `
         <tr>
@@ -81,10 +92,10 @@
             <input type="checkbox" class="notif-pref-chk" data-event="${_escape(type)}" data-channel="inapp" ${inappChecked}>
           </td>
           <td style="text-align:center;">
-            <input type="checkbox" class="notif-pref-chk" data-event="${_escape(type)}" data-channel="email" ${emailChecked}>
+            ${emailCell}
           </td>
           <td style="text-align:center;">
-            <input type="checkbox" class="notif-pref-chk" data-event="${_escape(type)}" data-channel="push" ${pushChecked}>
+            ${pushCell}
           </td>
         </tr>
       `;

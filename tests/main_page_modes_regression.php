@@ -16,6 +16,7 @@
 declare(strict_types=1);
 
 function check(bool $condition, string $message): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     if (!$condition) {
         fwrite(STDERR, "FAIL: {$message}\n");
         exit(1);
@@ -103,3 +104,5 @@ $setlistUiJs = file_get_contents($root . '/assets/js/setlist-ui.js');
 check(str_contains($setlistUiJs, 'btn-toggle-inline-create-setlist'), 'setlist-ui.js kết nối nút tạo setlist nội tuyến');
 
 echo "\n>>> ALL 7/7 MAIN PAGE MODES & MODAL CONSOLIDATION REGRESSION CHECKS PASSED!\n";
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";

@@ -6,6 +6,7 @@ $dbPath = tempnam(sys_get_temp_dir(), 'sheetapp-learning-');
 $failures = [];
 
 function check(bool $condition, string $message): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     global $failures;
     echo ($condition ? 'PASS: ' : 'FAIL: ') . $message . "\n";
     if (!$condition) $failures[] = $message;
@@ -53,3 +54,5 @@ if ($failures !== []) {
 }
 
 echo "\nAll learning ownership regression tests passed.\n";
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";

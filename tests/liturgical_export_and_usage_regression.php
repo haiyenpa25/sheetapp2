@@ -15,6 +15,7 @@ require_once __DIR__ . '/../api/services/ChordProService.php';
 require_once __DIR__ . '/../api/services/SongService.php';
 
 function check(bool $condition, string $message): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     if (!$condition) {
         echo "  ❌ FAIL: {$message}\n";
         exit(1);
@@ -80,7 +81,11 @@ echo "\n[3/5] Kiểm tra API Cảnh Báo Lặp Bài (action=check_recent_usage).
 
 // 3.1: Kiểm tra bài đã được sử dụng gần đây (thanh-ca-001)
 $chCheck1 = curl_init("{$baseUrl}/api/index.php?route=setlists&action=check_recent_usage&song_id=thanh-ca-001&weeks=10");
-curl_setopt_array($chCheck1, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 10]);
+$phpBin = PHP_BINARY ?: 'php';
+$root = dirname(__DIR__);
+putenv('SHEETAPP_E2E=1');
+$sessId = trim((string)shell_exec(escapeshellcmd($phpBin) . ' ' . escapeshellarg($root . '/tools/create_test_session.php') . ' admin admin'));
+curl_setopt_array($chCheck1, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 10, CURLOPT_COOKIE => "PHPSESSID={$sessId}"]);
 $res1 = json_decode((string)curl_exec($chCheck1), true);
 curl_close($chCheck1);
 
@@ -93,7 +98,7 @@ check(!empty($data1['warning_message']), "Có thông điệp cảnh báo rõ rà
 
 // 3.2: Kiểm tra bài chưa từng được dùng (thanh-ca-700)
 $chCheck2 = curl_init("{$baseUrl}/api/index.php?route=setlists&action=check_recent_usage&song_id=thanh-ca-700&weeks=4");
-curl_setopt_array($chCheck2, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 10]);
+curl_setopt_array($chCheck2, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 10, CURLOPT_COOKIE => "PHPSESSID={$sessId}"]);
 $res2 = json_decode((string)curl_exec($chCheck2), true);
 curl_close($chCheck2);
 
@@ -105,7 +110,7 @@ check($data2['warning'] === false, "Bài chưa từng dùng không phát sinh wa
 echo "\n[4/5] Kiểm tra API Báo Cáo Sử Dụng Bài (action=usage_report)...\n";
 
 $chRep = curl_init("{$baseUrl}/api/index.php?route=setlists&action=usage_report");
-curl_setopt_array($chRep, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 10]);
+curl_setopt_array($chRep, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 10, CURLOPT_COOKIE => "PHPSESSID={$sessId}"]);
 $resRep = json_decode((string)curl_exec($chRep), true);
 curl_close($chRep);
 
@@ -165,3 +170,5 @@ check(str_contains($managerIndexHtml, 'manager-usage.js'), "Manager nạp module
 
 echo "\n----------------------------------------------------\n";
 echo "🎉 KẾT QUẢ: TẤT CẢ KIỂM TRA CHO EPIC 4.3 ĐỀU ĐẠT (PASS 100%)!\n";
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";

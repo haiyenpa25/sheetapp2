@@ -18,6 +18,7 @@ require_once __DIR__ . '/../api/services/LiveSyncService.php';
 require_once __DIR__ . '/../api/services/PracticeService.php';
 
 function check(bool $condition, string $message): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     if (!$condition) {
         fwrite(STDERR, "FAIL: {$message}\n");
         exit(1);
@@ -126,3 +127,5 @@ $inkContent = file_get_contents($inkPath);
 check(str_contains($inkContent, 'renderRemoteStroke'), 'StageInkEngine có hàm renderRemoteStroke');
 
 echo "\n>>> ALL 5/5 FEATURE FLAGS & CAPABILITIES REGRESSION CHECKS PASSED!\n";
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";

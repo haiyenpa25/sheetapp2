@@ -68,6 +68,22 @@ const ManagerApp = (() => {
     window.ManagerNotifications?.init(ctx);
 
     _bindEvents();
+
+    if (window.FeatureFlags) {
+      if (!window.FeatureFlags.get('REVIEW_WORKFLOW')) {
+        const revNav = document.getElementById('mgr-nav-tab-reviews');
+        if (revNav) revNav.style.display = 'none';
+        const revTab = document.getElementById('tab-reviews');
+        if (revTab) revTab.style.display = 'none';
+      }
+      if (!window.FeatureFlags.get('USAGE_REPORT')) {
+        const usageNav = document.getElementById('mgr-nav-tab-usage');
+        if (usageNav) usageNav.style.display = 'none';
+        const usageTab = document.getElementById('tab-usage');
+        if (usageTab) usageTab.style.display = 'none';
+      }
+    }
+
     await window.ManagerUsers?.checkCurrentUser?.();
     await _loadInitialData();
 

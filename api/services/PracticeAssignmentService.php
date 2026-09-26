@@ -404,7 +404,7 @@ class PracticeAssignmentService {
         }
 
         // Lấy target tương ứng
-        if ($isLeader) {
+        if ($isLeader || Auth::isAdmin()) {
             $tStmt = $pdo->prepare("
                 SELECT t.*, u.username, u.display_name, u.voice_part as user_default_voice
                 FROM practice_assignment_targets t
@@ -420,7 +420,16 @@ class PracticeAssignmentService {
                 LIMIT 1
             ");
             $tStmt->execute([$assignmentId, $userId]);
-            $assignment['my_target'] = $tStmt->fetch(PDO::FETCH_ASSOC);
+            $myTarget = $tStmt->fetch(PDO::FETCH_ASSOC);
+
+            // BẢO VỆ CHỐNG IDOR (Ticket F5):
+            // Chỉ người tạo bài tập hoặc thành viên nằm trong danh sách targets mới được phép xem chi tiết
+            $isCreator = ((int)$assignment['created_by'] === $userId);
+            if (!$myTarget && !$isCreator) {
+                Response::abort(403, 'Bạn không có quyền xem thông tin chi tiết bài tập này (chỉ dành cho người được giao hoặc người tạo)');
+            }
+
+            $assignment['my_target'] = $myTarget ?: null;
         }
 
         return $assignment;

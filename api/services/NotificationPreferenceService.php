@@ -19,7 +19,8 @@ class NotificationPreferenceService {
 
     public const EVENT_TYPES = [
         'plan.published'       => 'Chương trình phụng vụ mới',
-        'assignment.created'   => 'Được giao bài tập mới',
+        'plan.role_assigned'   => 'Phân công nhiệm vụ phụng vụ',
+        'practice.assigned'    => 'Được giao bài tập mới',
         'assignment.due_soon'  => 'Nhắc bài tập sắp tới hạn',
         'review.decided'       => 'Kết quả xét duyệt hợp âm',
         'review.submitted'     => 'Có đề xuất hợp âm mới cần duyệt'
@@ -85,6 +86,11 @@ class NotificationPreferenceService {
             }
         }
 
+        // Tương thích ngược: alias assignment.created trỏ sang practice.assigned
+        if (isset($matrix['practice.assigned'])) {
+            $matrix['assignment.created'] = &$matrix['practice.assigned'];
+        }
+
         return [
             'user_id'           => $userId,
             'email'             => $userMeta['email'] ?? null,
@@ -113,6 +119,10 @@ class NotificationPreferenceService {
             $eventType = $item['event_type'] ?? '';
             $channel   = $item['channel'] ?? '';
             $enabled   = !empty($item['enabled']) ? 1 : 0;
+
+            if ($eventType === 'assignment.created') {
+                $eventType = 'practice.assigned';
+            }
 
             if (isset(self::EVENT_TYPES[$eventType]) && in_array($channel, self::CHANNELS, true)) {
                 $stmt->execute([$userId, $eventType, $channel, $enabled]);
@@ -200,6 +210,15 @@ class NotificationPreferenceService {
             return (int)$val === 1;
         }
 
+        // Tương thích ngược: nếu chưa có cấu hình cho event mới, đọc alias assignment.created
+        if (in_array($eventType, ['practice.assigned', 'plan.role_assigned'], true)) {
+            $stmt->execute([$userId, 'assignment.created', $channel]);
+            $fallbackVal = $stmt->fetchColumn();
+            if ($fallbackVal !== false) {
+                return (int)$fallbackVal === 1;
+            }
+        }
+
         // Lấy mặc định nếu chưa lưu
         $defaults = self::getDefaultPreferences();
         return ($defaults[$eventType][$channel] ?? 1) === 1;
@@ -230,6 +249,34 @@ class NotificationPreferenceService {
         } else {
             // Qua đêm: ví dụ 22:00 đến 07:00
             return ($currentStr >= $startStr || $currentStr < $endStr);
+        }
+    }
+
+    /**
+     * Tính toán thời điểm kết thúc giờ yên lặng để lên lịch thử lại (UTC)
+     */
+    public static function getQuietHoursResumeTime(int $userId, ?DateTimeInterface $now = null): ?string {
+        $pdo = DB::get();
+        $stmt = $pdo->prepare("SELECT quiet_hours_start, quiet_hours_end FROM users WHERE id = ?");
+        $stmt->execute([$userId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$row || empty($row['quiet_hours_start']) || empty($row['quiet_hours_end'])) {
+            return null;
+        }
+
+        $endStr = $row['quiet_hours_end'];
+        $tz = new DateTimeZone('Asia/Ho_Chi_Minh');
+        $nowObj = $now ? new DateTime($now->format('Y-m-d H:i:s'), $now->getTimezone()) : new DateTime('now', $tz);
+        $nowObj->setTimezone($tz);
+
+        $endToday = new DateTime($nowObj->format('Y-m-d') . ' ' . $endStr . ':00', $tz);
+        if ($nowObj < $endToday) {
+            return $endToday->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s');
+        } else {
+            $endTomorrow = clone $endToday;
+            $endTomorrow->modify('+1 day');
+            return $endTomorrow->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s');
         }
     }
 

@@ -21,6 +21,7 @@ $failures = [];
 $totalTests = 0;
 
 function assertCondition(bool $cond, string $msg, array &$failures, int &$totalTests): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     $totalTests++;
     if (!$cond) {
         $failures[] = $msg;
@@ -125,4 +126,6 @@ if (!empty($failures)) {
 }
 
 echo "✅ TẤT CẢ KIỂM TRA HỒI QUY UI F6–F11 ĐÃ ĐẠT (PASS 100%)\n";
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";
 exit(0);

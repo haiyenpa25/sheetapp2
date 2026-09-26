@@ -19,6 +19,7 @@ $songId = trim($_GET['song'] ?? ($_GET['song_id'] ?? ($_GET['id'] ?? '')));
 $chordSet = trim($_GET['set'] ?? ($_GET['chord_set'] ?? 'HD'));
 if ($chordSet === '') $chordSet = 'HD';
 $transpose = isset($_GET['t']) ? (int)$_GET['t'] : (isset($_GET['transpose']) ? (int)$_GET['transpose'] : 0);
+$transpose = max(-12, min(12, $transpose));
 $cols = isset($_GET['cols']) ? (int)$_GET['cols'] : 1;
 if ($cols !== 2) $cols = 1;
 $showChords = !isset($_GET['chords']) || $_GET['chords'] !== '0';
@@ -233,7 +234,7 @@ $pageTitle = htmlspecialchars($title) . ' — Lời & Hợp âm';
           <?php if ($timeSig !== ''): ?>
             <span class="meta-pill">Nhịp: <strong><?= htmlspecialchars($timeSig) ?></strong></span>
           <?php endif; ?>
-          <span class="meta-pill">Bộ hợp âm: <strong><?= $chordSet === 'HD' ? 'HD' : 'TLH' ?></strong></span>
+          <span class="meta-pill">Bộ hợp âm: <strong><?= ($chordSet === 'default' || $chordSet === 'TLH') ? 'TLH' : htmlspecialchars($chordSet) ?></strong></span>
         </div>
         <?php if ($composer !== ''): ?>
           <div class="composer" style="font-style:italic;">Tác giả: <?= htmlspecialchars($composer) ?></div>

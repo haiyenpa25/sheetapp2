@@ -40,100 +40,100 @@ class ReviewActionHelper {
             throw new DomainException("Đề xuất này đã được xử lý trước đó (Trạng thái: {$req['status']})");
         }
 
+        // Quyết định B5: Leader không được tự duyệt đề xuất của chính mình, trừ Quản trị viên (Admin)
+        if ((int)$req['submitted_by'] === $reviewerId && !Auth::isAdmin()) {
+            Response::abort(403, "Người gửi đề xuất không được tự phê duyệt đề xuất của chính mình (Quyết định B5)");
+        }
+
         $songId = $req['song_id'];
         $targetId = (int)$req['target_id'];
         $reviewType = $req['review_type'];
         $targetType = $req['target_type'];
 
-        // ── 1. Xử lý theo loại đề xuất ───────────────────────────────
-        if ($reviewType === 'recommend') {
-            // Gắn cờ Khuyên Dùng (is_recommended = 1)
-            if ($targetType === 'chord_set') {
-                $up = $pdo->prepare("
-                    UPDATE user_chord_sets 
-                    SET is_recommended = 1, review_status = 'approved', approved_by = ?, approved_at = CURRENT_TIMESTAMP 
-                    WHERE id = ?
-                ");
-                $up->execute([$reviewerId, $targetId]);
-            } else {
-                $up = $pdo->prepare("
-                    UPDATE song_versions 
-                    SET is_recommended = 1, review_status = 'approved', approved_by = ?, approved_at = CURRENT_TIMESTAMP 
-                    WHERE id = ?
-                ");
-                $up->execute([$reviewerId, $targetId]);
-            }
-        } elseif ($reviewType === 'update_hd') {
-            // Cập nhật vào bộ HD chính thức
-            $proposedChords = json_decode((string)$req['proposed_snapshot_json'], true);
-            if (!is_array($proposedChords) || empty($proposedChords)) {
-                // CORE RULE 1: Không cho phép đề xuất làm rỗng bộ HD
-                throw new DomainException("Không thể duyệt: Bộ hợp âm đề xuất rỗng (Vi phạm Core Rule 1)");
-            }
-
-            // CORE RULE 4: Lưu snapshot bản HD hiện tại vào chord_set_history trước khi ghi đè để hoàn tác
-            $currentHd = ChordSetService::loadSet($songId, 'HD');
-            $currentHdJson = json_encode($currentHd, JSON_UNESCAPED_UNICODE);
-
-            $insHist = $pdo->prepare("
-                INSERT INTO chord_set_history (
-                    song_id, set_name, chords_json, created_by, review_request_id, change_reason, created_at
-                ) VALUES (?, 'HD', ?, ?, ?, ?, CURRENT_TIMESTAMP)
-            ");
-            $insHist->execute([
-                $songId,
-                $currentHdJson,
-                $reviewerId,
-                $reviewId,
-                "Cập nhật từ Đề xuất #{$reviewId} của người dùng #" . $req['submitted_by']
-            ]);
-
-            // Cập nhật hợp âm mới vào bộ HD
-            $saved = ChordSetService::saveSet($songId, 'HD', $proposedChords, $reviewerId, 'HD');
-            if (!$saved) {
-                throw new RuntimeException("Không thể lưu cập nhật vào bộ HD");
-            }
-
-            // Cập nhật target review_status
-            $pdo->prepare("
-                UPDATE user_chord_sets 
-                SET review_status = 'approved', approved_by = ?, approved_at = CURRENT_TIMESTAMP 
-                WHERE id = ?
-            ")->execute([$reviewerId, $targetId]);
+        $isOuterTx = $pdo->inTransaction();
+        if (!$isOuterTx) {
+            $pdo->beginTransaction();
         }
 
-        // ── 2. Cập nhật review_requests ─────────────────────────────
-        $pdo->prepare("
-            UPDATE review_requests 
-            SET status = 'approved', reviewer_id = ?, review_note = ?, decided_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP 
-            WHERE id = ?
-        ")->execute([$reviewerId, $reviewNote, $reviewId]);
+        try {
+            // ── 1. Xử lý theo loại đề xuất ───────────────────────────────
+            if ($reviewType === 'recommend') {
+                // Gắn cờ Khuyên Dùng (is_recommended = 1)
+                if ($targetType === 'chord_set') {
+                    $up = $pdo->prepare("
+                        UPDATE user_chord_sets 
+                        SET is_recommended = 1, review_status = 'approved', approved_by = ?, approved_at = CURRENT_TIMESTAMP 
+                        WHERE id = ?
+                    ");
+                    $up->execute([$reviewerId, $targetId]);
+                } else {
+                    $up = $pdo->prepare("
+                        UPDATE song_versions 
+                        SET is_recommended = 1, review_status = 'approved', approved_by = ?, approved_at = CURRENT_TIMESTAMP 
+                        WHERE id = ?
+                    ");
+                    $up->execute([$reviewerId, $targetId]);
+                }
+            } elseif ($reviewType === 'update_hd') {
+                // Cập nhật vào bộ HD chính thức
+                $proposedChords = json_decode((string)$req['proposed_snapshot_json'], true);
+                if (!is_array($proposedChords) || empty($proposedChords)) {
+                    // CORE RULE 1: Không cho phép đề xuất làm rỗng bộ HD
+                    throw new DomainException("Không thể duyệt: Bộ hợp âm đề xuất rỗng (Vi phạm Core Rule 1)");
+                }
 
-        // ── 3. Audit & Domain Event ──────────────────────────────────
-        AuditLogger::log('review_approve', $reviewerId, $reviewId, [
-            'review_type' => $reviewType,
-            'target_type' => $targetType,
-            'target_id'   => $targetId,
-            'song_id'     => $songId
-        ]);
+                // CORE RULE 4: Lưu snapshot và ghi bộ HD duy nhất qua writeHd
+                ChordSetService::writeHd(
+                    $songId,
+                    $proposedChords,
+                    $reviewerId,
+                    'HD',
+                    "Cập nhật từ Đề xuất #{$reviewId} của người dùng #" . $req['submitted_by'],
+                    $reviewId
+                );
 
-        DomainEvents::record('review.decided', $reviewerId, 'review_request', (string)$reviewId, [
-            'decision'     => 'approved',
-            'submitted_by' => $req['submitted_by'],
-            'song_id'      => $songId,
-            'review_type'  => $reviewType
-        ]);
+                // Cập nhật target review_status
+                $pdo->prepare("
+                    UPDATE user_chord_sets 
+                    SET review_status = 'approved', approved_by = ?, approved_at = CURRENT_TIMESTAMP 
+                    WHERE id = ?
+                ")->execute([$reviewerId, $targetId]);
+            }
 
-        // Gửi thông báo trực tiếp cho người đề xuất
-        NotificationService::create(
-            (int)$req['submitted_by'],
-            null,
-            "🎉 Đề xuất được phê duyệt!",
-            "Đề xuất của bạn cho bài hát '{$songId}' đã được Ca Trưởng phê duyệt." . ($reviewNote ? " Ghi chú: {$reviewNote}" : ""),
-            "manager/index.php#tab-community"
-        );
+            // ── 2. Cập nhật review_requests ─────────────────────────────
+            $pdo->prepare("
+                UPDATE review_requests 
+                SET status = 'approved', reviewer_id = ?, review_note = ?, decided_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP 
+                WHERE id = ?
+            ")->execute([$reviewerId, $reviewNote, $reviewId]);
 
-        return ['success' => true, 'status' => 'approved'];
+            // ── 3. Audit & Domain Event ──────────────────────────────────
+            AuditLogger::log('review_approve', $reviewerId, $reviewId, [
+                'review_type' => $reviewType,
+                'target_type' => $targetType,
+                'target_id'   => $targetId,
+                'song_id'     => $songId
+            ]);
+
+            // Phát sự kiện miền: DomainEvents tự động gọi NotificationService::fanOut để gửi thông báo 1 lần duy nhất
+            DomainEvents::record('review.decided', $reviewerId, 'review_request', (string)$reviewId, [
+                'decision'     => 'approved',
+                'submitted_by' => $req['submitted_by'],
+                'song_id'      => $songId,
+                'review_type'  => $reviewType
+            ]);
+
+            if (!$isOuterTx) {
+                $pdo->commit();
+            }
+
+            return ['success' => true, 'status' => 'approved'];
+        } catch (Throwable $e) {
+            if (!$isOuterTx && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
+        }
     }
 
     /**
@@ -165,41 +165,50 @@ class ReviewActionHelper {
         $targetType = $req['target_type'];
         $targetId = (int)$req['target_id'];
 
-        // Cập nhật target review_status
-        if ($targetType === 'chord_set') {
-            $pdo->prepare("UPDATE user_chord_sets SET review_status = 'rejected' WHERE id = ?")->execute([$targetId]);
-        } else {
-            $pdo->prepare("UPDATE song_versions SET review_status = 'rejected' WHERE id = ?")->execute([$targetId]);
+        $isOuterTx = $pdo->inTransaction();
+        if (!$isOuterTx) {
+            $pdo->beginTransaction();
         }
 
-        // Cập nhật review_requests
-        $pdo->prepare("
-            UPDATE review_requests 
-            SET status = 'rejected', reviewer_id = ?, review_note = ?, decided_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP 
-            WHERE id = ?
-        ")->execute([$reviewerId, $trimmedNote, $reviewId]);
+        try {
+            // Cập nhật target review_status
+            if ($targetType === 'chord_set') {
+                $pdo->prepare("UPDATE user_chord_sets SET review_status = 'rejected' WHERE id = ?")->execute([$targetId]);
+            } else {
+                $pdo->prepare("UPDATE song_versions SET review_status = 'rejected' WHERE id = ?")->execute([$targetId]);
+            }
 
-        AuditLogger::log('review_reject', $reviewerId, $reviewId, [
-            'reason'       => $trimmedNote,
-            'submitted_by' => $req['submitted_by']
-        ]);
+            // Cập nhật review_requests
+            $pdo->prepare("
+                UPDATE review_requests 
+                SET status = 'rejected', reviewer_id = ?, review_note = ?, decided_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP 
+                WHERE id = ?
+            ")->execute([$reviewerId, $trimmedNote, $reviewId]);
 
-        DomainEvents::record('review.decided', $reviewerId, 'review_request', (string)$reviewId, [
-            'decision'     => 'rejected',
-            'submitted_by' => $req['submitted_by'],
-            'song_id'      => $req['song_id'],
-            'reason'       => $trimmedNote
-        ]);
+            AuditLogger::log('review_reject', $reviewerId, $reviewId, [
+                'reason'       => $trimmedNote,
+                'submitted_by' => $req['submitted_by']
+            ]);
 
-        NotificationService::create(
-            (int)$req['submitted_by'],
-            null,
-            "Đề xuất chưa được duyệt",
-            "Đề xuất cho bài hát '{$req['song_id']}' chưa được duyệt. Lý do: {$trimmedNote}",
-            "manager/index.php#tab-community"
-        );
+            // Phát sự kiện miền: DomainEvents tự động gọi NotificationService::fanOut để gửi thông báo 1 lần duy nhất
+            DomainEvents::record('review.decided', $reviewerId, 'review_request', (string)$reviewId, [
+                'decision'     => 'rejected',
+                'submitted_by' => $req['submitted_by'],
+                'song_id'      => $req['song_id'],
+                'reason'       => $trimmedNote
+            ]);
 
-        return ['success' => true, 'status' => 'rejected'];
+            if (!$isOuterTx) {
+                $pdo->commit();
+            }
+
+            return ['success' => true, 'status' => 'rejected'];
+        } catch (Throwable $e) {
+            if (!$isOuterTx && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
+        }
     }
 
     /**
@@ -267,28 +276,37 @@ class ReviewActionHelper {
             throw new DomainException("Dữ liệu lịch sử không hợp lệ hoặc rỗng (Vi phạm Core Rule 1)");
         }
 
-        // Lưu bản HD hiện tại trước khi hoàn tác
-        $currentHd = ChordSetService::loadSet($songId, 'HD');
-        $pdo->prepare("
-            INSERT INTO chord_set_history (
-                song_id, set_name, chords_json, created_by, change_reason, created_at
-            ) VALUES (?, 'HD', ?, ?, ?, CURRENT_TIMESTAMP)
-        ")->execute([
-            $songId,
-            json_encode($currentHd, JSON_UNESCAPED_UNICODE),
-            $actorId,
-            "Sao lưu tự động trước khi Hoàn tác về bản ghi #{$historyId}"
-        ]);
+        $isOuterTx = $pdo->inTransaction();
+        if (!$isOuterTx) {
+            $pdo->beginTransaction();
+        }
 
-        // Ghi đè hợp âm từ lịch sử vào bộ HD
-        ChordSetService::saveSet($songId, 'HD', $targetChords, $actorId, 'HD');
+        try {
+            // Lưu bản HD hiện tại trước khi hoàn tác và ghi đè targetChords qua writeHd
+            ChordSetService::writeHd(
+                $songId,
+                $targetChords,
+                $actorId,
+                'HD',
+                "Sao lưu tự động trước khi Hoàn tác về bản ghi #{$historyId}"
+            );
 
-        AuditLogger::log('review_rollback_hd', $actorId, $historyId, [
-            'song_id' => $songId,
-            'source_history_id' => $historyId
-        ]);
+            AuditLogger::log('review_rollback_hd', $actorId, $historyId, [
+                'song_id' => $songId,
+                'source_history_id' => $historyId
+            ]);
 
-        return ['success' => true, 'song_id' => $songId];
+            if (!$isOuterTx) {
+                $pdo->commit();
+            }
+
+            return ['success' => true, 'song_id' => $songId];
+        } catch (Throwable $e) {
+            if (!$isOuterTx && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
+        }
     }
 
     /**

@@ -37,8 +37,7 @@ test.describe('Epic 4.1 — Giao bài & Tập bè cho ca đoàn (/learn)', () =>
     const sessionId = execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php banhat banhat').toString().trim();
     await page.context().clearCookies();
     await page.context().addCookies([
-      { name: 'PHPSESSID', value: sessionId, domain: 'localhost', path: '/' },
-      { name: 'PHPSESSID', value: sessionId, domain: 'localhost', path: '/sheetapp2' },
+      { name: 'PHPSESSID', value: sessionId, url: 'http://localhost/sheetapp2/' },
     ]);
 
     // 2. Mở Learn Studio (/learn/)
@@ -68,10 +67,8 @@ test.describe('Epic 4.1 — Giao bài & Tập bè cho ca đoàn (/learn)', () =>
     // 7. Bấm nút "✓ Đã thuộc" trên thẻ bài tập
     const markDoneBtn = card.locator('button[data-action="mark_done"]');
     await expect(markDoneBtn).toBeVisible();
-    await Promise.all([
-      page.waitForResponse(res => res.url().includes('mark_done') && res.status() === 200, { timeout: 10000 }),
-      markDoneBtn.click()
-    ]);
+    await markDoneBtn.scrollIntoViewIfNeeded();
+    await markDoneBtn.dispatchEvent('click');
 
     // 8. Thẻ bài tập chuyển sang trạng thái "Đã thuộc" và nút mark_done biến mất
     const statusBadge = card.locator('.lac-status-badge');

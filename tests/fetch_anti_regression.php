@@ -17,6 +17,7 @@ $root = dirname(__DIR__);
 $failures = [];
 
 function check(bool $condition, string $message): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     global $failures;
     if ($condition) {
         echo "[PASS] {$message}\n";
@@ -141,4 +142,6 @@ echo "\nTổng kết: " . (count($failures) === 0 ? "TẤT CẢ CHECKS PASS" : c
 if (count($failures) > 0) {
     exit(1);
 }
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";
 exit(0);

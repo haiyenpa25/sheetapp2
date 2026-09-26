@@ -14,6 +14,7 @@
 declare(strict_types=1);
 
 function check(bool $condition, string $message): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     if (!$condition) {
         fwrite(STDERR, "FAIL: {$message}\n");
         exit(1);
@@ -163,3 +164,5 @@ check(str_contains($e2eContent, 'Auth Modal'), 'e2e/modal-a11y.spec.js có test 
 check(str_contains($e2eContent, 'Transpose Picker Modal'), 'e2e/modal-a11y.spec.js có test Transpose Picker Modal');
 
 echo "\n>>> ALL 10/10 MODAL & ACCESSIBILITY REGRESSION CHECKS PASSED!\n";
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";

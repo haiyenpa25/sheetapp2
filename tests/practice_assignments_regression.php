@@ -31,6 +31,7 @@ $passedChecks = 0;
 $failedChecks = [];
 
 function check(bool $cond, string $msg): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     global $totalChecks, $passedChecks, $failedChecks;
     $totalChecks++;
     if ($cond) {
@@ -205,4 +206,6 @@ if (!empty($failedChecks)) {
 }
 
 echo "🎉 KẾT QUẢ: TẤT CẢ KIỂM TRA ĐỀU ĐẠT (PASS)!\n";
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";
 exit(0);

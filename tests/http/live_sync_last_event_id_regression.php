@@ -17,6 +17,7 @@ $baseUrl = rtrim($baseUrl, '/');
 
 $failures = [];
 function check(bool $condition, string $message): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     global $failures;
     if ($condition) {
         echo "[PASS] {$message}\n";
@@ -125,6 +126,7 @@ array_map('unlink', glob("$tempDir/*.*"));
 echo "\n----------------------------------------\n";
 if (empty($failures)) {
     echo "KẾT QUẢ: TẤT CẢ KIỂM TRA ĐỀU ĐẠT (PASS).\n";
+    echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";
     exit(0);
 } else {
     echo "KẾT QUẢ: " . count($failures) . " KIỂM TRA THẤT BẠI (FAIL).\n";

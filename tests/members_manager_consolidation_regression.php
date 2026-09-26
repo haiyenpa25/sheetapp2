@@ -25,6 +25,7 @@ $passCount = 0;
 $failCount = 0;
 
 function assertCondition(string $name, bool $condition, string $detail = ''): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     global $testCount, $passCount, $failCount;
     $testCount++;
     if ($condition) {
@@ -276,4 +277,5 @@ echo "  - Thất bại: {$failCount}\n";
 echo "  - Trạng thái: " . ($failCount === 0 ? "✅ TẤT CẢ 7 TIÊU CHÍ ĐẠT CHUẨN (PASS)" : "❌ CÓ {$failCount} TIÊU CHÍ THẤT BẠI") . "\n";
 echo "--------------------------------------------------------\n\n";
 
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";
 exit($failCount === 0 ? 0 : 1);

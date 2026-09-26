@@ -32,6 +32,7 @@ class ReviewController {
             // ── 1. GET Requests ──────────────────────────────────────
             if ($method === 'GET') {
                 if ($action === 'hd_history') {
+                    Auth::requireLogin();
                     $songId = trim($_GET['song_id'] ?? '');
                     if ($songId === '') {
                         Response::error('Thiếu mã bài hát (song_id)', 400);

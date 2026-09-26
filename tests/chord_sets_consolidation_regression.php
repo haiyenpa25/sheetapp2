@@ -16,6 +16,7 @@
 declare(strict_types=1);
 
 function check(bool $condition, string $message): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     if (!$condition) {
         fwrite(STDERR, "FAIL: {$message}\n");
         exit(1);
@@ -136,3 +137,5 @@ $outText = implode("\n", $output);
 check(str_contains($outText, '903'), 'Công cụ đối soát phát hiện đủ 903 bài thánh ca');
 
 echo "\n>>> ALL 7/7 CHORD SETS CONSOLIDATION REGRESSION CHECKS PASSED!\n";
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";

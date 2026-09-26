@@ -57,6 +57,7 @@ function httpStatus(string $url, string $method = 'GET'): int {
 $failures = [];
 
 function assertBlocked(string $url, string $description): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     global $failures;
     $status = httpStatus($url);
     $isBlocked = in_array($status, [403, 404], true);
@@ -140,4 +141,6 @@ if (!empty($failures)) {
 }
 
 echo "KẾT QUẢ: TẤT CẢ KIỂM TRA ĐỀU ĐẠT (PASS).\n";
+
+echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";
 exit(0);

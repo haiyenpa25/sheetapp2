@@ -29,6 +29,7 @@ $failures = [];
 $totalChecks = 0;
 
 function check(bool $cond, string $msg, array &$failures, int &$totalChecks): void {
+    $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;
     $totalChecks++;
     if (!$cond) {
         $failures[] = $msg;
@@ -195,6 +196,7 @@ echo "Tổng số kiểm tra: {$totalChecks}\n";
 echo "Số lỗi: " . count($failures) . "\n";
 if (empty($failures)) {
     echo "🎉 KẾT QUẢ: TẤT CẢ KIỂM TRA ĐỀU ĐẠT (PASS)!\n";
+    echo "\nSUITE_COMPLETE total=" . ($GLOBALS['suiteTotalChecks'] ?? 0) . "\n";
     exit(0);
 } else {
     echo "❌ KẾT QUẢ: CÓ " . count($failures) . " KIỂM TRA THẤT BẠI!\n";

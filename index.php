@@ -201,6 +201,13 @@ if (!function_exists('jsTag')) {
 }
 
 // ── 1. CORE Infrastructure (không defer — cần sớm nhất) ──
+require_once __DIR__ . '/api/core/Config.php';
+require_once __DIR__ . '/api/core/FeatureFlags.php';
+echo "<script>
+  window.SHEETAPP_CACHE_VERSION = " . json_encode(Config::SHEETAPP_CACHE_VERSION) . ";
+  window.__SW_CACHE__ = " . json_encode(Config::SHEETAPP_CACHE_NAME) . ";
+  window.__FEATURES__ = " . json_encode(FeatureFlags::all(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) . ";
+</script>\n";
 echo jsTag('core/FeatureFlags.js', false);
 echo jsTag('core/SafeHtml.js',     false);
 echo jsTag('core/ApiService.js',   false);
