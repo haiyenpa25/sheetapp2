@@ -190,17 +190,17 @@ $pageTitle = 'Booklet Phụng Vụ — ' . htmlspecialchars($setlist['title']);
         <div>
           <header class="cover-header">
             <div class="cover-sub">Chương Trình Phụng Vụ / Thờ Phượng</div>
-            <h1 class="cover-title"><?= htmlspecialchars($setlist['title']) ?></h1>
+            <h1 class="cover-title"><?= htmlspecialchars((string)($setlist['title'] ?? 'Chương trình')) ?></h1>
             <?php if (!empty($setlist['theme'])): ?>
-              <div class="cover-theme">🏷 Chủ đề: <?= htmlspecialchars($setlist['theme']) ?></div>
+              <div class="cover-theme">🏷 Chủ đề: <?= htmlspecialchars((string)$setlist['theme']) ?></div>
             <?php endif; ?>
             <div class="cover-meta">
-              <span>📅 Ngày: <strong><?= htmlspecialchars($setlist['scheduled_date']) ?></strong></span>
+              <span>📅 Ngày: <strong><?= htmlspecialchars((string)($setlist['scheduled_date'] ?: date('d/m/Y'))) ?></strong></span>
               <?php if (!empty($setlist['service_time'])): ?>
-                <span>⏰ Giờ: <strong><?= htmlspecialchars($setlist['service_time']) ?></strong></span>
+                <span>⏰ Giờ: <strong><?= htmlspecialchars((string)$setlist['service_time']) ?></strong></span>
               <?php endif; ?>
               <?php if (!empty($setlist['leader_name'])): ?>
-                <span>👤 Trưởng ban / Hướng dẫn: <strong><?= htmlspecialchars($setlist['leader_name']) ?></strong></span>
+                <span>👤 Trưởng ban / Hướng dẫn: <strong><?= htmlspecialchars((string)$setlist['leader_name']) ?></strong></span>
               <?php endif; ?>
             </div>
           </header>

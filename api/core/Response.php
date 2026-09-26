@@ -34,6 +34,15 @@ class Response {
         self::error($msg, 401);
     }
 
+    public static function badRequest(string $msg = 'Yêu cầu không hợp lệ'): void {
+        self::error($msg, 400);
+    }
+
+    public static function created(mixed $data = [], ?string $message = null): void {
+        http_response_code(201);
+        self::ok($data, $message ?? 'Đã tạo thành công');
+    }
+
     public static function serverError(Throwable $error, string $context = 'API'): void {
         error_log(sprintf(
             'SheetApp %s error: %s in %s:%d',

@@ -979,3 +979,59 @@
 {"timestamp":"2026-09-26T13:29:50+02:00","action":"practice_assignment_create_adhoc","actor_id":10,"target_id":3,"ip":"CLI","details":{"song_id":"003-ngoi-gie-ho-va","targets":1}}
 {"timestamp":"2026-09-26T13:29:50+02:00","action":"practice_assignment_create_adhoc","actor_id":10,"target_id":4,"ip":"CLI","details":{"song_id":"004-ha-le-lu-gia","targets":1}}
 {"timestamp":"2026-09-26T13:29:51+02:00","action":"service_plan_create","actor_id":1,"target_id":1,"ip":"CLI","details":{"title":"Thánh Lễ Chúa Nhật","scheduled_date":"2026-10-04","status":"draft"}}
+{"timestamp":"2026-09-26T13:36:46+02:00","action":"service_plan_delete","actor_id":7,"target_id":34,"ip":"::1","details":[]}
+{"timestamp":"2026-09-26T13:36:48+02:00","action":"service_plan_delete","actor_id":7,"target_id":33,"ip":"::1","details":[]}
+{"timestamp":"2026-09-26T13:36:51+02:00","action":"service_plan_delete","actor_id":7,"target_id":32,"ip":"::1","details":[]}
+{"timestamp":"2026-09-26T13:36:54+02:00","action":"service_plan_delete","actor_id":7,"target_id":31,"ip":"::1","details":[]}
+{"timestamp":"2026-09-26T13:36:57+02:00","action":"service_plan_delete","actor_id":7,"target_id":30,"ip":"::1","details":[]}
+{"timestamp":"2026-09-26T13:37:04+02:00","action":"service_plan_delete","actor_id":7,"target_id":29,"ip":"::1","details":[]}
+{"timestamp":"2026-09-26T13:37:07+02:00","action":"service_plan_delete","actor_id":7,"target_id":28,"ip":"::1","details":[]}
+{"timestamp":"2026-09-26T13:37:09+02:00","action":"service_plan_delete","actor_id":7,"target_id":27,"ip":"::1","details":[]}
+{"timestamp":"2026-09-26T13:37:13+02:00","action":"service_plan_delete","actor_id":7,"target_id":59,"ip":"::1","details":[]}
+{"timestamp":"2026-09-26T13:37:15+02:00","action":"service_plan_delete","actor_id":7,"target_id":43,"ip":"::1","details":[]}
+{"timestamp":"2026-09-26T13:37:18+02:00","action":"service_plan_delete","actor_id":7,"target_id":26,"ip":"::1","details":[]}
+{"timestamp":"2026-09-26T13:37:21+02:00","action":"service_plan_delete","actor_id":7,"target_id":25,"ip":"::1","details":[]}
+{"timestamp":"2026-09-26T13:44:50+02:00","action":"service_plan_create","actor_id":2,"target_id":1,"ip":"CLI","details":{"title":"Chúa Nhật Phục Sinh","scheduled_date":"2026-04-12","status":"draft"}}
+{"timestamp":"2026-09-26T13:45:26+02:00","action":"service_plan_create","actor_id":10,"target_id":1,"ip":"CLI","details":{"title":"Thánh Lễ Chúa Nhật Phụng Vụ","scheduled_date":"2026-10-01","status":"draft"}}
+{"timestamp":"2026-09-26T13:45:26+02:00","action":"assignment_create","actor_id":10,"target_id":1,"ip":"CLI","details":{"assignment_id":1,"user_id":11,"role":"Ca viên Bè S","notes":null}}
+{"timestamp":"2026-09-26T13:45:26+02:00","action":"assignment_create","actor_id":10,"target_id":1,"ip":"CLI","details":{"assignment_id":2,"user_id":12,"role":"Ca viên Bè A","notes":null}}
+{"timestamp":"2026-09-26T13:45:26+02:00","action":"practice_assignment_create_from_plan","actor_id":10,"target_id":1,"ip":"CLI","details":{"assignments_count":2}}
+{"timestamp":"2026-09-26T13:45:26+02:00","action":"practice_assignment_create_from_plan","actor_id":10,"target_id":1,"ip":"CLI","details":{"assignments_count":2}}
+{"timestamp":"2026-09-26T13:45:26+02:00","action":"practice_assignment_create_adhoc","actor_id":10,"target_id":3,"ip":"CLI","details":{"song_id":"003-ngoi-gie-ho-va","targets":1}}
+{"timestamp":"2026-09-26T13:45:26+02:00","action":"practice_assignment_create_adhoc","actor_id":10,"target_id":4,"ip":"CLI","details":{"song_id":"004-ha-le-lu-gia","targets":1}}
+{"timestamp":"2026-09-26T13:45:27+02:00","action":"review_submit","actor_id":3,"target_id":1,"ip":"CLI","details":{"target_type":"chord_set","target_id":101,"song_id":"test-song-rev","review_type":"recommend"}}
+{"timestamp":"2026-09-26T13:45:27+02:00","action":"review_submit","actor_id":3,"target_id":2,"ip":"CLI","details":{"target_type":"chord_set","target_id":101,"song_id":"test-song-rev","review_type":"update_hd"}}
+{"timestamp":"2026-09-26T13:45:27+02:00","action":"review_submit","actor_id":3,"target_id":3,"ip":"CLI","details":{"target_type":"chord_set","target_id":101,"song_id":"test-song-rev","review_type":"recommend"}}
+{"timestamp":"2026-09-26T13:45:27+02:00","action":"review_approve","actor_id":4,"target_id":3,"ip":"CLI","details":{"review_type":"recommend","target_type":"chord_set","target_id":101,"song_id":"test-song-rev"}}
+{"timestamp":"2026-09-26T13:45:27+02:00","action":"review_submit","actor_id":3,"target_id":4,"ip":"CLI","details":{"target_type":"chord_set","target_id":102,"song_id":"test-song-rev","review_type":"update_hd"}}
+{"timestamp":"2026-09-26T13:45:27+02:00","action":"review_approve","actor_id":1,"target_id":4,"ip":"CLI","details":{"review_type":"update_hd","target_type":"chord_set","target_id":102,"song_id":"test-song-rev"}}
+{"timestamp":"2026-09-26T13:45:27+02:00","action":"review_rollback_hd","actor_id":1,"target_id":1,"ip":"CLI","details":{"song_id":"test-song-rev","source_history_id":1}}
+{"timestamp":"2026-09-26T13:45:27+02:00","action":"review_submit","actor_id":3,"target_id":5,"ip":"CLI","details":{"target_type":"chord_set","target_id":101,"song_id":"test-song-rev","review_type":"recommend"}}
+{"timestamp":"2026-09-26T13:45:27+02:00","action":"review_reject","actor_id":4,"target_id":5,"ip":"CLI","details":{"reason":"Hợp âm ô nhịp 2 bị chói giọng với bè Nữ, vui lòng chỉnh lại","submitted_by":3}}
+{"timestamp":"2026-09-26T13:45:27+02:00","action":"review_submit","actor_id":3,"target_id":6,"ip":"CLI","details":{"target_type":"chord_set","target_id":101,"song_id":"test-song-rev","review_type":"recommend"}}
+{"timestamp":"2026-09-26T13:45:27+02:00","action":"review_withdraw","actor_id":3,"target_id":6,"ip":"CLI","details":[]}
+{"timestamp":"2026-09-26T13:45:27+02:00","action":"user_create","actor_id":1,"target_id":104,"ip":"CLI","details":{"username":"test_leader_user","role":"leader","chord_code":"LEAD","instrument":"Chỉ huy \/ Piano","voice_part":"T"}}
+{"timestamp":"2026-09-26T13:45:27+02:00","action":"user_profile_update","actor_id":1,"target_id":104,"ip":"CLI","details":{"display_name":"Ca Trưởng Đổi Bè","instrument":"Organ","chord_code":"LEAD","role":"leader","voice_part":"S","password_changed":false}}
+{"timestamp":"2026-09-26T13:45:31+02:00","action":"service_plan_create","actor_id":1,"target_id":1,"ip":"CLI","details":{"title":"Thánh Lễ Chúa Nhật","scheduled_date":"2026-10-04","status":"draft"}}
+{"timestamp":"2026-09-26T13:49:40+02:00","action":"service_plan_create","actor_id":2,"target_id":1,"ip":"CLI","details":{"title":"Chúa Nhật Phục Sinh","scheduled_date":"2026-04-12","status":"draft"}}
+{"timestamp":"2026-09-26T13:50:12+02:00","action":"service_plan_create","actor_id":10,"target_id":1,"ip":"CLI","details":{"title":"Thánh Lễ Chúa Nhật Phụng Vụ","scheduled_date":"2026-10-01","status":"draft"}}
+{"timestamp":"2026-09-26T13:50:12+02:00","action":"assignment_create","actor_id":10,"target_id":1,"ip":"CLI","details":{"assignment_id":1,"user_id":11,"role":"Ca viên Bè S","notes":null}}
+{"timestamp":"2026-09-26T13:50:12+02:00","action":"assignment_create","actor_id":10,"target_id":1,"ip":"CLI","details":{"assignment_id":2,"user_id":12,"role":"Ca viên Bè A","notes":null}}
+{"timestamp":"2026-09-26T13:50:12+02:00","action":"practice_assignment_create_from_plan","actor_id":10,"target_id":1,"ip":"CLI","details":{"assignments_count":2}}
+{"timestamp":"2026-09-26T13:50:12+02:00","action":"practice_assignment_create_from_plan","actor_id":10,"target_id":1,"ip":"CLI","details":{"assignments_count":2}}
+{"timestamp":"2026-09-26T13:50:12+02:00","action":"practice_assignment_create_adhoc","actor_id":10,"target_id":3,"ip":"CLI","details":{"song_id":"003-ngoi-gie-ho-va","targets":1}}
+{"timestamp":"2026-09-26T13:50:12+02:00","action":"practice_assignment_create_adhoc","actor_id":10,"target_id":4,"ip":"CLI","details":{"song_id":"004-ha-le-lu-gia","targets":1}}
+{"timestamp":"2026-09-26T13:50:13+02:00","action":"review_submit","actor_id":3,"target_id":1,"ip":"CLI","details":{"target_type":"chord_set","target_id":101,"song_id":"test-song-rev","review_type":"recommend"}}
+{"timestamp":"2026-09-26T13:50:13+02:00","action":"review_submit","actor_id":3,"target_id":2,"ip":"CLI","details":{"target_type":"chord_set","target_id":101,"song_id":"test-song-rev","review_type":"update_hd"}}
+{"timestamp":"2026-09-26T13:50:13+02:00","action":"review_submit","actor_id":3,"target_id":3,"ip":"CLI","details":{"target_type":"chord_set","target_id":101,"song_id":"test-song-rev","review_type":"recommend"}}
+{"timestamp":"2026-09-26T13:50:13+02:00","action":"review_approve","actor_id":4,"target_id":3,"ip":"CLI","details":{"review_type":"recommend","target_type":"chord_set","target_id":101,"song_id":"test-song-rev"}}
+{"timestamp":"2026-09-26T13:50:13+02:00","action":"review_submit","actor_id":3,"target_id":4,"ip":"CLI","details":{"target_type":"chord_set","target_id":102,"song_id":"test-song-rev","review_type":"update_hd"}}
+{"timestamp":"2026-09-26T13:50:13+02:00","action":"review_approve","actor_id":1,"target_id":4,"ip":"CLI","details":{"review_type":"update_hd","target_type":"chord_set","target_id":102,"song_id":"test-song-rev"}}
+{"timestamp":"2026-09-26T13:50:13+02:00","action":"review_rollback_hd","actor_id":1,"target_id":1,"ip":"CLI","details":{"song_id":"test-song-rev","source_history_id":1}}
+{"timestamp":"2026-09-26T13:50:13+02:00","action":"review_submit","actor_id":3,"target_id":5,"ip":"CLI","details":{"target_type":"chord_set","target_id":101,"song_id":"test-song-rev","review_type":"recommend"}}
+{"timestamp":"2026-09-26T13:50:13+02:00","action":"review_reject","actor_id":4,"target_id":5,"ip":"CLI","details":{"reason":"Hợp âm ô nhịp 2 bị chói giọng với bè Nữ, vui lòng chỉnh lại","submitted_by":3}}
+{"timestamp":"2026-09-26T13:50:13+02:00","action":"review_submit","actor_id":3,"target_id":6,"ip":"CLI","details":{"target_type":"chord_set","target_id":101,"song_id":"test-song-rev","review_type":"recommend"}}
+{"timestamp":"2026-09-26T13:50:13+02:00","action":"review_withdraw","actor_id":3,"target_id":6,"ip":"CLI","details":[]}
+{"timestamp":"2026-09-26T13:50:14+02:00","action":"user_create","actor_id":1,"target_id":108,"ip":"CLI","details":{"username":"test_leader_user","role":"leader","chord_code":"LEAD","instrument":"Chỉ huy \/ Piano","voice_part":"T"}}
+{"timestamp":"2026-09-26T13:50:14+02:00","action":"user_profile_update","actor_id":1,"target_id":108,"ip":"CLI","details":{"display_name":"Ca Trưởng Đổi Bè","instrument":"Organ","chord_code":"LEAD","role":"leader","voice_part":"S","password_changed":false}}
+{"timestamp":"2026-09-26T13:50:17+02:00","action":"service_plan_create","actor_id":1,"target_id":1,"ip":"CLI","details":{"title":"Thánh Lễ Chúa Nhật","scheduled_date":"2026-10-04","status":"draft"}}
