@@ -63,8 +63,7 @@ class AuthPolicy {
         Auth::requireLogin();
         $role = Auth::role();
         if (!self::can($role, $capability)) {
-            Response::forbidden("Bạn không có quyền thực hiện thao tác này ({$capability})");
-            exit;
+            Response::abort(403, "Bạn không có quyền thực hiện thao tác này ({$capability})");
         }
     }
 

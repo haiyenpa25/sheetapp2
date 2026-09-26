@@ -1,17 +1,12 @@
 <?php
 /**
- * api/core/DB.php — Singleton PDO wrapper with Multi-Tenant & Master Repertoire Support
- * Tuân thủ thiết kế ADR-005 (Database-per-Tenant SQLite kết hợp Master Repertoire)
+ * api/core/DB.php — Singleton PDO wrapper
  */
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/TenantContext.php';
-
 class DB {
     private static ?PDO $pdo = null;
-    private static ?PDO $masterPdo = null;
-    private static array $tenantPool = [];
 
     public static function get(): PDO {
         // 1. Mock PDO được gán trước (dành cho Unit / Integration Tests với in-memory DB)
@@ -19,17 +14,7 @@ class DB {
             return self::$pdo;
         }
 
-        // 2. Nếu đang trong ngữ cảnh đa hội thánh (TenantContext active)
-        $tenantSlug = TenantContext::getTenant();
-        if ($tenantSlug !== null) {
-            if (!isset(self::$tenantPool[$tenantSlug])) {
-                $dbPath = TenantContext::getTenantDbPath($tenantSlug);
-                self::$tenantPool[$tenantSlug] = self::createConnection($dbPath);
-            }
-            return self::$tenantPool[$tenantSlug];
-        }
-
-        // 3. Mặc định: Single-Tenant DB từ Config
+        // 2. Single-Tenant DB từ Config
         require_once __DIR__ . '/Config.php';
         $file = Config::get('DB_PATH');
         self::$pdo = self::createConnection($file);
@@ -59,24 +44,6 @@ class DB {
         return $pdo;
     }
 
-    /**
-     * Kết nối CSDL Thư Viện Chung Master Repertoire (Read-Only) — ADR-005
-     */
-    public static function getMaster(): PDO {
-        if (self::$masterPdo !== null) {
-            return self::$masterPdo;
-        }
-
-        $masterPath = dirname(__DIR__, 2) . '/storage/data/master_repertoire.sqlite';
-        if (file_exists($masterPath)) {
-            self::$masterPdo = self::createConnection($masterPath, true);
-            return self::$masterPdo;
-        }
-
-        // Nếu chưa tách riêng file master, fallback về CSDL hiện hành
-        return self::get();
-    }
-
     public static function pdo(): PDO {
         return self::get();
     }
@@ -85,18 +52,8 @@ class DB {
         self::$pdo = $pdo;
     }
 
-    public static function setMasterPdo(?PDO $pdo): void {
-        self::$masterPdo = $pdo;
-    }
-
-    public static function closeTenantPool(): void {
-        self::$tenantPool = [];
-    }
-
     public static function resetConnections(): void {
         self::$pdo = null;
-        self::$masterPdo = null;
-        self::$tenantPool = [];
     }
 
     // Shorthand helpers

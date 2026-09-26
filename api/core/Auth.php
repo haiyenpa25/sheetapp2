@@ -59,31 +59,27 @@ class Auth {
 
     public static function requireAdmin(): void {
         if (!self::isAdmin()) {
-            Response::forbidden('Chỉ Admin mới có quyền thực hiện');
-            exit;
+            Response::abort(403, 'Chỉ Admin mới có quyền thực hiện');
         }
     }
 
     /** Yêu cầu quyền Ca Trưởng hoặc Admin */
     public static function requireLeader(): void {
         if (!self::isLeader()) {
-            Response::forbidden('Cần quyền Ca Trưởng để thực hiện');
-            exit;
+            Response::abort(403, 'Cần quyền Ca Trưởng để thực hiện');
         }
     }
 
     /** Yêu cầu ít nhất là Ban Hát */
     public static function requireBanhat(): void {
         if (!self::isBanhat()) {
-            Response::forbidden('Cần quyền Ban Hát để thực hiện');
-            exit;
+            Response::abort(403, 'Cần quyền Ban Hát để thực hiện');
         }
     }
 
     public static function requireLogin(): void {
         if (!self::isLoggedIn()) {
-            Response::unauthorized('Cần đăng nhập');
-            exit;
+            Response::abort(401, 'Cần đăng nhập');
         }
     }
 }

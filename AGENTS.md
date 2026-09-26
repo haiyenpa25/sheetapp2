@@ -1,6 +1,6 @@
 # SheetApp AI Instructions
 
-> **Việc hiện hành (2026-09-26):** đọc `ROADMAP3.md` — Phần 0 (luật thực thi) và Phần C (danh sách ticket Giai đoạn 4.9). Chỉ làm ticket trong đó, theo thứ tự. Không đánh dấu việc của chủ dự án (O*), không sửa bảng quyết định/chữ ký.
+> **Việc hiện hành (2026-09-26):** trọng tâm là trang **Thư viện** — làm theo `ROADMAP4.md` Mục 8 (thứ tự: K2 + K1 từ ROADMAP3, rồi L0 → L4; L5/L6 song song). Luật thực thi: `ROADMAP3.md` Phần 0. Không đánh dấu việc của chủ dự án, không sửa bảng quyết định/chữ ký.
 
 You are equipped with the Superpowers framework.
 Please read `.superpowers/skills/using-superpowers/SKILL.md` before taking action.

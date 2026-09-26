@@ -27,8 +27,7 @@ $route = $_GET['route'] ?? '';
 $method = $_SERVER['REQUEST_METHOD'];
 
 if (RequestSecurity::requiresOriginCheck($method) && !RequestSecurity::isSameOrigin($_SERVER)) {
-    Response::forbidden('Yêu cầu khác nguồn bị từ chối');
-    exit;
+    Response::abort(403, 'Yêu cầu khác nguồn bị từ chối');
 }
 
 try {
@@ -161,16 +160,12 @@ try {
             $controller->handle($action);
             break;
 
-        case 'tenants':
-            require_once __DIR__ . '/controllers/TenantController.php';
-            $controller = new TenantController();
-            $controller->handleRequest($method);
-            break;
-
         default:
             Response::notFound("Endpoint /api/{$route} không tồn tại.");
             break;
     }
+} catch (HttpException $e) {
+    Response::error($e->getMessage(), $e->getStatusCode());
 } catch (Throwable $e) {
     error_log(sprintf('SheetApp API error [%s]: %s in %s:%d', $route, $e->getMessage(), $e->getFile(), $e->getLine()));
     Response::error('Lỗi hệ thống. Vui lòng thử lại sau.', 500);

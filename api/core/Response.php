@@ -17,6 +17,11 @@ class Response {
         echo json_encode($data, $flags);
     }
 
+    public static function abort(int $code, string $msg = ''): never {
+        require_once __DIR__ . '/HttpException.php';
+        throw new HttpException($code, $msg);
+    }
+
     public static function error(string $message, int $code = 400): void {
         http_response_code($code);
         echo json_encode(['success' => false, 'error' => $message], JSON_UNESCAPED_UNICODE);

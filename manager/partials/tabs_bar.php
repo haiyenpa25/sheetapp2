@@ -24,8 +24,4 @@
         <span class="tab-icon">📥</span> Chờ Duyệt
         <span class="mgr-tab-badge" id="tab-reviews-count" style="display:none;background:#ef4444;color:#fff;">0</span>
       </button>
-      <button class="mgr-tab-btn" data-tab="tab-tenants" id="mgr-nav-tab-tenants" style="display:none;">
-        <span class="tab-icon">🏛️</span> Đa Hội Thánh
-        <span class="mgr-tab-badge" id="tab-tenants-count" style="display:none;background:#3b82f6;color:#fff;">0</span>
-      </button>
     </nav>

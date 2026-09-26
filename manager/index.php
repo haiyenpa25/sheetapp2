@@ -55,8 +55,6 @@ $instrument = $_SESSION['instrument'] ?? 'Guitar';
     <?php require_once __DIR__ . '/partials/tab_usage.php'; ?>
 
     <?php require_once __DIR__ . '/partials/tab_reviews.php'; ?>
-
-    <?php require_once __DIR__ . '/partials/tab_tenants.php'; ?>
   </main>
 
   <?php require_once __DIR__ . '/partials/modals.php'; ?>
@@ -77,7 +75,6 @@ $instrument = $_SESSION['instrument'] ?? 'Guitar';
   <script src="js/manager-usage.js?v=2.2.0"></script>
   <script src="js/manager-reviews.js?v=2.2.0"></script>
   <script src="js/manager-notifications.js?v=2.2.0"></script>
-  <script src="js/manager-tenants.js?v=2.2.0"></script>
   <script src="manager.js?v=2.2.0"></script>
 </body>
 </html>

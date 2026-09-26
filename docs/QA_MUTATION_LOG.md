@@ -14,6 +14,7 @@ Mục tiêu: Đảm bảo bộ test tự động (Automated Regression Test Suit
 | **3** | Đổi fallback HD thành `default` khi xoá set cá nhân | `assets/js/chord-canvas.js:460` | `tests/core_rules_regression.php` | ❌ FAIL (CR3-b) | ✅ PASS (9/9 checks) |
 | **4** | Đổi lại route SSE thành `livesync` (thay vì `live_sync`) | `assets/js/performance/live-transport.js:201` | `tests/http/live_sync_route_http_regression.php` | ❌ FAIL (2 checks) | ✅ PASS (6/6 checks) |
 | **5** | Đổi `Response::ok` về dạng cũ `['data' => $data]` | `api/core/Response.php:6` | `tests/security/response_contract_regression.php` | ❌ FAIL (4 checks) | ✅ PASS (4/4 checks) |
+| **6** | Bỏ `Response::abort` trong `toggleRecommend` | `api/services/ManagerService.php:392` | `tests/security/authorization_abort_regression.php` | ❌ FAIL (is_rec=1) | ✅ PASS (9/9 checks) |
 
 ---
 
@@ -135,6 +136,17 @@ Mục tiêu: Đảm bảo bộ test tự động (Automated Regression Test Suit
   4 response contract regression test(s) failed.
   ```
 - **Kết luận:** Hợp đồng API Response Envelope chuẩn hóa (`success: true`, payload trực tiếp hoặc merged) được bảo vệ toàn vẹn. Sau khi hoàn tác, test PASS.
+
+---
+
+### 6. Mutation 6: Bỏ `Response::abort` trong `ManagerService::toggleRecommend`
+- **Hành động phá:** Thay `Response::abort(403, ...)` bằng `Response::forbidden(...)` mà không có return/exit tại `api/services/ManagerService.php:392`.
+- **Lệnh kiểm thử:** `php tests/security/authorization_abort_regression.php`
+- **Kết quả khi phá (FAIL):**
+  ```text
+  [FAIL:B] [toggleRecommend_viewer_blocked] Viewer gọi toggleRecommend bị ném HttpException(403) và is_recommended vẫn là 0 (thực tế: is_rec=1)
+  ```
+- **Kết luận:** Kiểm thử hành vi đã chặn đứng lỗ hổng thực thi tiếp diễn sau `forbidden`, đảm bảo mọi vi phạm quyền đều ném `HttpException(403)` và dừng ngay lập tức. Sau khi hoàn tác, test PASS 9/9 checks.
 
 ---
 

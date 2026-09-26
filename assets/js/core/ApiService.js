@@ -304,17 +304,10 @@ const ApiService = (() => {
     save: (payload) => _json('POST', 'api/index.php?route=notification_preferences&action=save', payload),
   };
 
-  const tenants = {
-    list:   () => _request('api/index.php?route=tenants&action=list'),
-    stats:  (slug) => _request(`api/index.php?route=tenants&action=stats&slug=${encodeURIComponent(slug)}`),
-    create: (payload) => _json('POST', 'api/index.php?route=tenants&action=create', payload),
-    backup: (payload) => _json('POST', 'api/index.php?route=tenants&action=backup', payload),
-  };
-
   return {
     resolveUrl,
     getBaseUrl: _getBaseUrl,
-    songs, chordSets, sessions, annotations, setlists, servicePlans: setlists, categories, saveXml, omr, importer, practice, manager, users, auth, liveSync, arrangements, notifications, practiceAssignments, export: exportService, reviews, notificationPreferences, tenants, errors, reportError: errors.report
+    songs, chordSets, sessions, annotations, setlists, servicePlans: setlists, categories, saveXml, omr, importer, practice, manager, users, auth, liveSync, arrangements, notifications, practiceAssignments, export: exportService, reviews, notificationPreferences, errors, reportError: errors.report
   };
 })();
 

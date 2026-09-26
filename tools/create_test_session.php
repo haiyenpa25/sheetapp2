@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-if (PHP_SAPI !== 'cli') {
+if (PHP_SAPI !== 'cli' || getenv('SHEETAPP_E2E') !== '1') {
     http_response_code(403);
-    exit('CLI only');
+    exit("Chỉ chạy qua CLI với SHEETAPP_E2E=1\n");
 }
 
 $username = $argv[1] ?? 'banhat';

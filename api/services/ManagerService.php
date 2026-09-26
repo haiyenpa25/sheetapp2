@@ -389,7 +389,7 @@ class ManagerService {
      */
     public static function toggleRecommend(int $setId): array {
         if (!AuthPolicy::can(Auth::role(), 'review_chord_set') && !Auth::isLeader() && !Auth::isAdmin()) {
-            Response::forbidden('Chỉ Ca Trưởng hoặc Quản Trị Viên mới có quyền ghim/bỏ ghim khuyên dùng');
+            Response::abort(403, 'Chỉ Ca Trưởng hoặc Quản Trị Viên mới có quyền ghim/bỏ ghim khuyên dùng');
         }
         $pdo = DB::get();
 
@@ -570,7 +570,7 @@ class ManagerService {
      */
     public static function toggleVersionRecommend(int $versionId): array {
         if (!AuthPolicy::can(Auth::role(), 'review_chord_set') && !Auth::isLeader() && !Auth::isAdmin()) {
-            Response::forbidden('Chỉ Ca Trưởng hoặc Quản Trị Viên mới có quyền ghim/bỏ ghim khuyên dùng');
+            Response::abort(403, 'Chỉ Ca Trưởng hoặc Quản Trị Viên mới có quyền ghim/bỏ ghim khuyên dùng');
         }
         $pdo = DB::get();
 

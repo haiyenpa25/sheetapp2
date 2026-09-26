@@ -1,9 +1,17 @@
 # ── CSDL & Data cá nhân (không push) ──
-storage/data/*.sqlite
-storage/data/*.db
-storage/data/songs.json.bak
-storage/data/sessions/
-storage/data/live_sync/
+storage/data/
+storage/logs/
+storage/users/
+storage/backups/
+storage/tenants/
+*.sqlite*
+test-results/
+playwright-report/
+dashboard/
+.ua/
+storage/omr_workspace/
+archive/
+storage/config/features.json
 
 # ── Bộ hợp âm HD (data riêng từng server) ──
 data/chord_sets/

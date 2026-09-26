@@ -124,9 +124,31 @@ $totalSuiteFiles = count($regressionSuites) + count($httpSuites) + count($secSui
 
 $testSummaryFile = $root . '/storage/logs/test_summary.json';
 $testSummary = (file_exists($testSummaryFile)) ? json_decode((string)file_get_contents($testSummaryFile), true) : null;
-$totalChecks = (int)($testSummary['total_checks_passed'] ?? 1191);
-$recordedSuites = (int)($testSummary['total_suites'] ?? $totalSuiteFiles);
-$testStatus  = (string)($testSummary['status'] ?? 'ALL PASS');
+
+if (!$testSummary || !is_array($testSummary)) {
+    $testsMetrics = [
+        'total_suites' => $totalSuiteFiles,
+        'total_checks_recorded' => 0,
+        'behavioral_checks' => 0,
+        'static_checks' => 0,
+        'behavioral_ratio_pct' => 0.0,
+        'status' => 'UNKNOWN'
+    ];
+} else {
+    $totalPassed = (int)($testSummary['total_checks_passed'] ?? 0);
+    $behavioralPassed = (int)($testSummary['behavioral_checks_passed'] ?? 0);
+    $staticPassed = (int)($testSummary['static_checks_passed'] ?? 0);
+    $ratio = ($totalPassed > 0) ? round(($behavioralPassed / $totalPassed) * 100, 1) : 0.0;
+
+    $testsMetrics = [
+        'total_suites' => (int)($testSummary['total_suites'] ?? $totalSuiteFiles),
+        'total_checks_recorded' => $totalPassed,
+        'behavioral_checks' => $behavioralPassed,
+        'static_checks' => $staticPassed,
+        'behavioral_ratio_pct' => $ratio,
+        'status' => (string)($testSummary['status'] ?? 'UNKNOWN')
+    ];
+}
 
 $metricsData = [
     'timestamp' => date('Y-m-d H:i:s'),
@@ -143,13 +165,7 @@ $metricsData = [
         'total_count' => count($knownModals),
         'list' => $knownModals
     ],
-    'tests' => [
-        'total_suites' => $recordedSuites,
-        'total_checks_recorded' => $totalChecks,
-        'behavioral_checks' => $totalChecks,
-        'behavioral_ratio_pct' => 100.0,
-        'status' => $testStatus
-    ]
+    'tests' => $testsMetrics
 ];
 
 if ($isJson) {
