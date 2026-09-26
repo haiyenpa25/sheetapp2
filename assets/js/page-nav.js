@@ -158,3 +158,5 @@ const PageNav = (() => {
 
   return { init, computePages, goToPage, goToNext, goToPrev, reset, getTotalPages, getCurrentPage };
 })();
+
+window.PageNav = PageNav;

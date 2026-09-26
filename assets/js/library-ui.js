@@ -11,16 +11,31 @@ const LibraryUI = (() => {
   let onSelectCb   = null;
   let onDeleteCb   = null;
   let _searchDebounce = null;
+  let _searchSeq = 0;
+  let _lastRenderedSongs = [];
 
   const listEl     = () => document.getElementById('song-list');
   const searchEl   = () => document.getElementById('search-input');
   const categoryEl = () => document.getElementById('category-filter');
 
   function init() {
+    if (window.HistoryManager?.init) {
+      window.HistoryManager.init(() => _buildRecentlyViewed());
+    }
     // Search — debounce 200ms
     searchEl()?.addEventListener('input', () => {
       clearTimeout(_searchDebounce);
       _searchDebounce = setTimeout(_onSearch, 200);
+    });
+    // Enter mở kết quả đầu tiên (Ticket L0-7)
+    searchEl()?.addEventListener('keydown', async (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        clearTimeout(_searchDebounce);
+        await _onSearch();
+        const first = listEl()?.querySelector('.song-item');
+        if (first?.dataset?.id) { selectSong(first.dataset.id); searchEl()?.blur(); }
+      }
     });
 
     loadSongs();
@@ -144,6 +159,7 @@ const LibraryUI = (() => {
   }
 
   function render(list, opts = {}) {
+    _lastRenderedSongs = Array.isArray(list) ? list : [];
     const el = listEl();
     if (!el) return;
 
@@ -268,6 +284,7 @@ const LibraryUI = (() => {
   }
 
   async function _onSearch() {
+    const seq    = ++_searchSeq;
     const q      = (searchEl()?.value || '').trim();
     const cat    = categoryEl()?.value || '';
     const season = document.getElementById('season-filter')?.value || '';
@@ -284,10 +301,17 @@ const LibraryUI = (() => {
     if (q || season || theme) {
       try {
         const res = await window.ApiService?.songs?.search?.(q, { season, theme });
+        if (seq !== _searchSeq) return;
         if (res && (res.success || Array.isArray(res))) {
           let list = Array.isArray(res) ? res : (res.data || []);
           if (cat) list = list.filter(s => s.category === cat);
-          list = _sortSongs(list);
+          const numM = q.match(/^(?:#|bài\s+|bai\s+|stt\s+)?(\d+)$/i);
+          if (numM) {
+            const target = parseInt(numM[1], 10);
+            list.sort((a, b) => (Number(a.httlvnId) === target ? -1 : Number(b.httlvnId) === target ? 1 : (Number(a.httlvnId) || 0) - (Number(b.httlvnId) || 0)));
+          } else {
+            list = _sortSongs(list);
+          }
           render(list, {
             emptyMsg: q ? `Không tìm thấy "${q}"` : 'Không có bài hát phù hợp',
             emptyHint: 'Thử đổi mùa phụng vụ hoặc từ khóa khác'
@@ -299,6 +323,8 @@ const LibraryUI = (() => {
       }
     }
 
+    if (seq !== _searchSeq) return;
+
     // Client-side fallback & memory filtering
     const qLower = q.toLowerCase();
     const qUnacc = _removeAccents(qLower);
@@ -309,17 +335,21 @@ const LibraryUI = (() => {
     if (theme) filtered = filtered.filter(s => (s.theme || '').toLowerCase().includes(theme.toLowerCase()));
 
     if (q) {
+      const numM = q.match(/^(?:#|bài\s+|bai\s+|stt\s+)?(\d+)$/i);
+      const target = numM ? parseInt(numM[1], 10) : null;
       filtered = filtered.filter(s => {
-        const titleLower = (s.title || '').toLowerCase();
-        const titleUnacc = _removeAccents(titleLower);
-        const titleMatch = titleLower.includes(qLower) || titleUnacc.includes(qUnacc);
-        const isNum = /^\d+$/.test(q);
-        if (isNum && s.httlvnId === parseInt(q, 10)) return true;
-        return titleMatch;
+        if (target !== null && Number(s.httlvnId) === target) return true;
+        const tLower = (s.title || '').toLowerCase();
+        return tLower.includes(qLower) || _removeAccents(tLower).includes(qUnacc);
       });
+      if (target !== null) {
+        filtered.sort((a, b) => (Number(a.httlvnId) === target ? -1 : Number(b.httlvnId) === target ? 1 : (Number(a.httlvnId) || 0) - (Number(b.httlvnId) || 0)));
+      } else {
+        filtered = _sortSongs(filtered);
+      }
+    } else {
+      filtered = _sortSongs(filtered);
     }
-
-    filtered = _sortSongs(filtered);
     render(filtered, {
       emptyMsg: q ? `Không tìm thấy "${q}"` : 'Không có bài hát',
       emptyHint: q ? 'Thử từ khóa khác' : ''
@@ -482,7 +512,11 @@ const LibraryUI = (() => {
       }
     }
 
-    let song = songs.find(s => String(s.id) === String(songId));
+    let song = songs.find(s => String(s.id) === String(songId))
+            || _lastRenderedSongs.find(s => String(s.id) === String(songId));
+    if (song && !songs.some(s => String(s.id) === String(song.id))) {
+      songs.push(song);
+    }
     if (!song && window.OfflineSetlistManager?.getOfflineSong) {
       song = window.OfflineSetlistManager.getOfflineSong(songId);
       if (song && !songs.some(s => String(s.id) === String(song.id))) {
@@ -574,7 +608,11 @@ const LibraryUI = (() => {
   function onDelete(cb) { onDeleteCb = cb; }
   function getSongs()   { return songs; }
   function getActiveSong() { return songs.find(s => String(s.id) === String(activeSongId)) || null; }
-  function getSongObj(id) { return songs.find(s => String(s.id) === String(id)) || null; }
+  function getSongObj(id) {
+    return songs.find(s => String(s.id) === String(id))
+        || _lastRenderedSongs.find(s => String(s.id) === String(id))
+        || null;
+  }
 
   return { init, loadSongs, render, selectSong, addSong, deleteSong, onSelect, onDelete, getSongs, getActiveSong, getSongObj };
 })();

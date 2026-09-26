@@ -31,7 +31,6 @@ const SongLoader = (() => {
     _resetCapoUI();
     SheetAudioPlayer.stop();
     if (window.AutoScroller) AutoScroller.stop();
-    if (window.ChordCanvas?.resetSet) ChordCanvas.resetSet();
     if (window.InstrumentMixer?.clearState) InstrumentMixer.clearState();
 
     // AnnotationCanvas không ảnh hưởng đến render — fire-and-forget
@@ -109,6 +108,7 @@ const SongLoader = (() => {
 
       _enableAudioControls();
       AppUI.showOSMD();
+      AppUI.enableControls(true);
       _updateVersionsUI(song);
 
       // Task 2.8 (F13 fix): Không gọi lại refreshSetDropdown() ở đây vì ChordCanvas.loadSong() đã tự nạp.
@@ -227,7 +227,7 @@ const SongLoader = (() => {
     if (!window.TransposeEngine) return;
     const set    = window.ChordCanvas?.getCurrentSet?.() || 'HD';
     const chords = window.ChordCanvas?.getCustomChords?.();
-    let list = (set !== 'default' && chords) ? Object.values(chords) : TransposeEngine.extractChordsFromXML(xml);
+    let list = (set !== 'default' && chords && Object.keys(chords).length > 0) ? Object.values(chords) : TransposeEngine.extractChordsFromXML(xml);
     const transpose = Store.get('currentTranspose');
     AppUI.updateCapoBadge(TransposeEngine.suggestBestCapo(list.map(c => TransposeEngine.transposeChord(c, transpose))));
   }
@@ -316,8 +316,8 @@ const SongLoader = (() => {
     const key   = window.SongInfoBar?.getSongKey?.() || '';
     const set   = window.ChordCanvas?.getCurrentSet?.() || 'HD';
     const cnt   = Object.keys(window.ChordCanvas?.getCustomChords?.() ?? {}).length;
-    const setLbl = set === 'default' ? 'TLH (gốc)' : (set === 'HD' ? '⭐ HD (Ưu tiên)' : set);
-    const cntLbl = set !== 'default' ? ` (${cnt > 0 ? cnt + ' hợp âm' : 'chưa có'})` : '';
+    const setLbl = set === 'default' ? 'TLH (gốc)' : (set === 'HD' ? '⭐ HD' : set);
+    const cntLbl = set !== 'default' ? (cnt > 0 ? ` (${cnt} hợp âm)` : ' (chưa có · đang hiện TLH)') : '';
     AppUI.showToast(`🎵 ${song.title}${key ? ' · '+key : ''} · ${setLbl}${cntLbl}`, 'info');
   }
 

@@ -7,7 +7,7 @@ const ChordCanvasXML = (() => {
 
   /* ─── Read XML chords ─────────────────────────── */
   function readXmlChords() {
-    const xml = window.OSMDRenderer?.getCurrentXml?.() || window.App?.getOriginalXml?.();
+    const xml = window.Store?.get?.('originalXml') || window.App?.getOriginalXml?.() || window.OSMDRenderer?.getCurrentXml?.();
     if (!xml) return {};
     const doc   = new DOMParser().parseFromString(xml, 'text/xml');
     const parts = doc.querySelectorAll('part');
@@ -44,7 +44,7 @@ const ChordCanvasXML = (() => {
   }
 
   function buildAbsMap() {
-    const xml = window.OSMDRenderer?.getCurrentXml?.() || window.App?.getOriginalXml?.();
+    const xml = window.Store?.get?.('originalXml') || window.App?.getOriginalXml?.() || window.OSMDRenderer?.getCurrentXml?.();
     if (!xml) return {};
     const doc = new DOMParser().parseFromString(xml, 'text/xml');
     const measures = doc.querySelectorAll('part')[0]?.querySelectorAll('measure');

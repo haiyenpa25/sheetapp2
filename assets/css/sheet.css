@@ -710,11 +710,11 @@ body.dark-mode .hint-icon { color: #34d399; }
 
 
 /* ---- STAGE DARK MODE ---- */
-body.dark-mode .sheet-viewer-wrapper {
-  background: #111827;
-}
-body.dark-mode .osmd-container {
-  filter: invert(0.93) hue-rotate(180deg);
+body.dark-mode .sheet-viewer-wrapper,
+body.dark-mode .sheet-area,
+body.dark-mode .osmd-container,
+body.dark-mode #osmd-container {
+  background: #0B0B0C !important;
   box-shadow: 0 4px 25px rgba(0,0,0,0.6);
 }
 body.dark-mode .page-bar {
@@ -1276,6 +1276,8 @@ body.dark-mode .lvi-word-only {
 .si-chord-set     { border-color: #d1d5db; color: #6b7280; background: #f9fafb; }
 .si-chord-has     { border-color: #86efac; color: #15803d; background: #f0fdf4; }
 .si-chord-empty   { border-color: #d1d5db; color: #9ca3af; background: #f9fafb; font-style: italic; }
+.si-chord-fallback{ border-color: #fdba74; color: #c2410c; background: #fff7ed; font-weight: 600; }
+.si-chord-sparse  { border-color: #fde047; color: #a16207; background: #fefce8; font-weight: 600; }
 .si-notes {
   border-color: #fca5a5;
   color: #b91c1c;
@@ -1504,15 +1506,82 @@ body.dark-mode .si-btn-edit {
   border-color: #3b3b50;
   color: #9ca3af;
 }
-body.dark-mode .sheet-viewer-wrapper { background: #0c0c14 !important; }
-body.dark-mode .osmd-container {
-  background: #1a1a24 !important;
-  box-shadow: 0 4px 32px rgba(0,0,0,.5) !important;
+/* ---- TICKET L0-5: CHẾ ĐỘ TỐI THẬT (TRUE SVG DARK MODE) ---- */
+:root {
+  --dark-sheet-bg: #0B0B0C;
+  --dark-sheet-ink: #E8E2D0;
+  --dark-sheet-chord: #FBBF24;
 }
-/* Invert sheet lightly for dark mode (không full invert tránh lộn màu hợp âm) */
+
+body.dark-mode .sheet-viewer-wrapper,
+body.dark-mode #sheet-area,
+body.dark-mode .osmd-container,
+body.dark-mode #osmd-container,
 body.dark-mode #osmd-container svg {
-  filter: invert(0.88) hue-rotate(185deg) brightness(0.92);
+  background: #0B0B0C !important;
+  background-color: #0B0B0C !important;
 }
+
+/* Bỏ hoàn toàn mọi filter invert trên SVG và container */
+body.dark-mode #osmd-container,
+body.dark-mode .osmd-container,
+body.dark-mode #osmd-container svg {
+  filter: none !important;
+}
+
+/* Nốt, khuông, thanh nhịp màu ngà #E8E2D0 */
+body.dark-mode #osmd-container svg line {
+  stroke: #E8E2D0 !important;
+}
+body.dark-mode #osmd-container svg path {
+  fill: #E8E2D0 !important;
+  stroke: #E8E2D0 !important;
+}
+body.dark-mode #osmd-container svg ellipse,
+body.dark-mode #osmd-container svg polygon {
+  fill: #E8E2D0 !important;
+  stroke: #E8E2D0 !important;
+}
+body.dark-mode #osmd-container svg rect:not([fill="none"]):not([fill="transparent"]):not([fill="#ffffff"]):not([fill="white"]) {
+  fill: #E8E2D0 !important;
+  stroke: #E8E2D0 !important;
+}
+body.dark-mode #osmd-container svg rect[fill="#ffffff"],
+body.dark-mode #osmd-container svg rect[fill="white"] {
+  fill: #0B0B0C !important;
+  stroke: none !important;
+}
+
+/* Lời bài hát & tiêu đề màu ngà #E8E2D0 */
+body.dark-mode #osmd-container svg text:not(.osmd-chord-symbol):not(.osmd-chord-text):not([data-chord-symbol="true"]),
+body.dark-mode #osmd-container svg text:not(.osmd-chord-symbol):not(.osmd-chord-text):not([data-chord-symbol="true"]) tspan {
+  fill: #E8E2D0 !important;
+  color: #E8E2D0 !important;
+}
+
+/* Hợp âm màu hổ phách #FBBF24 */
+body.dark-mode #osmd-container svg .osmd-chord-symbol,
+body.dark-mode #osmd-container svg [data-chord-symbol="true"],
+body.dark-mode #osmd-container svg .osmd-chord-text,
+body.dark-mode #osmd-container svg [data-chord-text="true"],
+body.dark-mode #osmd-container svg text[font-family*="OSMDChordFont"],
+body.dark-mode #osmd-container svg text[font-family*="OSMDChordFont"] tspan {
+  fill: #FBBF24 !important;
+  color: #FBBF24 !important;
+  stroke: none !important;
+}
+
+/* Lớp hợp âm custom của ChordCanvas */
+body.dark-mode .cc-custom-chord-text {
+  color: #FBBF24 !important;
+}
+body.dark-mode .cc-custom-chord-text.edit-mode,
+body.dark-mode .cc-dot-selected {
+  background: rgba(20, 20, 30, 0.95) !important;
+  border-color: #FBBF24 !important;
+  color: #FBBF24 !important;
+}
+
 body.dark-mode .sidebar { background: var(--bg-sidebar, #12121a) !important; }
 body.dark-mode .song-item:hover { background: #1e1e2e !important; }
 body.dark-mode .song-item.active { background: #2d1f52 !important; }

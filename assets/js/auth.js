@@ -350,14 +350,8 @@ const Auth = (() => {
       }
     }, true);
 
-    checkSession().then(() => {
-      // Tự động hiện Welcome Modal hỏi đăng nhập / dùng quyền khách trong phiên lần đầu
-      setTimeout(() => {
-        if (!_currentUser && !sessionStorage.getItem('sheetapp_guest_chosen')) {
-          openModal();
-        }
-      }, 450);
-    });
+    // Ticket L0-9 (Quyết định L-D4): Mặc định vào như khách, không tự động hiện modal chào mừng / đăng nhập mỗi phiên
+    checkSession();
   }
 
   function _showForceChangePasswordModal() {

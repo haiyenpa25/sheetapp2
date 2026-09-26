@@ -74,6 +74,7 @@ const AppUI = (() => {
 
   function enableControls(enabled) {
     ['btn-transpose-up','btn-transpose-down','btn-transpose-reset',
+     'btn-zoom-in', 'btn-zoom-out',
      'zoom-slider', 'btn-session-panel','btn-print',
      'btn-prev-song','btn-next-song', 'btn-mixer',
      'btn-add-annotate-mode','btn-add-chord-mode','btn-add-chord-mode-bar',

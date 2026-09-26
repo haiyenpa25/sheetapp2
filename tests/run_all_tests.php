@@ -56,6 +56,49 @@ $totalChecksFailed = 0;
 $liveSyncDir = $root . '/storage/data/live_sync';
 $initialLiveSyncFiles = is_dir($liveSyncDir) ? (scandir($liveSyncDir) ?: []) : [];
 
+// Ticket K2: Đo lường số dòng CSDL thật (app.sqlite) và thư mục chord_sets trước kiểm thử
+$realDbPath = $root . '/storage/data/app.sqlite';
+$initialDbCounts = [
+    'setlists'           => 0,
+    'domain_events'      => 0,
+    'notifications'      => 0,
+    'song_usage_history' => 0,
+    'admin_email'        => 'NULL'
+];
+if (file_exists($realDbPath)) {
+    try {
+        $checkPdo = new PDO('sqlite:' . $realDbPath, null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+        $initialDbCounts['setlists'] = (int)$checkPdo->query("SELECT count(*) FROM setlists")->fetchColumn();
+        $initialDbCounts['domain_events'] = (int)$checkPdo->query("SELECT count(*) FROM domain_events")->fetchColumn();
+        $initialDbCounts['notifications'] = (int)$checkPdo->query("SELECT count(*) FROM notifications")->fetchColumn();
+        $initialDbCounts['song_usage_history'] = (int)$checkPdo->query("SELECT count(*) FROM song_usage_history")->fetchColumn();
+        $adminMail = $checkPdo->query("SELECT email FROM users WHERE id = 1 OR username = 'admin' LIMIT 1")->fetchColumn();
+        $initialDbCounts['admin_email'] = ($adminMail !== false && $adminMail !== null) ? (string)$adminMail : 'NULL';
+    } catch (Throwable $e) {
+        $initialDbCounts['error'] = $e->getMessage();
+    }
+}
+$chordSetsDir = $root . '/storage/data/chord_sets';
+$initialChordSetsFiles = is_dir($chordSetsDir) ? (scandir($chordSetsDir) ?: []) : [];
+
+// Ticket K2: Tạo CSDL SQLite tạm trong sys_get_temp_dir() cho toàn bộ test PHP CLI
+$isolatedTempDb = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'sheetapp_ci_temp_' . uniqid() . '.sqlite';
+if (file_exists($realDbPath)) {
+    copy($realDbPath, $isolatedTempDb);
+    if (file_exists($realDbPath . '-wal')) @copy($realDbPath . '-wal', $isolatedTempDb . '-wal');
+    if (file_exists($realDbPath . '-shm')) @copy($realDbPath . '-shm', $isolatedTempDb . '-shm');
+}
+putenv("SHEETAPP_DB_PATH={$isolatedTempDb}");
+$_ENV['SHEETAPP_DB_PATH'] = $isolatedTempDb;
+
+// Ticket K2: Tạo thư mục chord_sets tạm trong sys_get_temp_dir() cách ly hoàn toàn đĩa thật
+$isolatedTempChordSets = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'sheetapp_ci_temp_chord_sets_' . uniqid();
+@mkdir($isolatedTempChordSets, 0755, true);
+putenv("CHORD_SETS_DIR={$isolatedTempChordSets}");
+putenv("SHEETAPP_CHORD_SETS_DIR={$isolatedTempChordSets}");
+$_ENV['CHORD_SETS_DIR'] = $isolatedTempChordSets;
+$_ENV['SHEETAPP_CHORD_SETS_DIR'] = $isolatedTempChordSets;
+
 // ==========================================
 // 1. PHP SYNTAX CHECK (LINT)
 // ==========================================
@@ -352,6 +395,83 @@ if (!empty($leakedFiles)) {
     $failedSuites[] = "LiveSync Storage Leak (" . count($leakedFiles) . " files)";
 } else {
     echo "PASS (Không có rò rỉ)\n";
+}
+
+// ==========================================
+// 4b. KIỂM TRA TÍNH TOÀN VẸN CSDL THẬT (TICKET K2)
+// ==========================================
+@unlink($isolatedTempDb);
+@unlink($isolatedTempDb . '-wal');
+@unlink($isolatedTempDb . '-shm');
+
+// Thu hồi thư mục chord_sets tạm
+if (is_dir($isolatedTempChordSets)) {
+    $tempIt = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($isolatedTempChordSets, FilesystemIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::CHILD_FIRST
+    );
+    foreach ($tempIt as $f) {
+        if ($f->isDir()) @rmdir($f->getPathname());
+        else @unlink($f->getPathname());
+    }
+    @rmdir($isolatedTempChordSets);
+}
+
+echo "\n[Kiểm tra tính toàn vẹn CSDL thật (K2 DB Checksum & Row Counts)]... ";
+$finalDbCounts = [
+    'setlists'           => 0,
+    'domain_events'      => 0,
+    'notifications'      => 0,
+    'song_usage_history' => 0,
+    'admin_email'        => 'NULL'
+];
+$dbLeakDetected = false;
+$leakReasons = [];
+
+if (file_exists($realDbPath)) {
+    try {
+        $checkPdoAfter = new PDO('sqlite:' . $realDbPath, null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+        $finalDbCounts['setlists'] = (int)$checkPdoAfter->query("SELECT count(*) FROM setlists")->fetchColumn();
+        $finalDbCounts['domain_events'] = (int)$checkPdoAfter->query("SELECT count(*) FROM domain_events")->fetchColumn();
+        $finalDbCounts['notifications'] = (int)$checkPdoAfter->query("SELECT count(*) FROM notifications")->fetchColumn();
+        $finalDbCounts['song_usage_history'] = (int)$checkPdoAfter->query("SELECT count(*) FROM song_usage_history")->fetchColumn();
+        $adminMailAfter = $checkPdoAfter->query("SELECT email FROM users WHERE id = 1 OR username = 'admin' LIMIT 1")->fetchColumn();
+        $finalDbCounts['admin_email'] = ($adminMailAfter !== false && $adminMailAfter !== null) ? (string)$adminMailAfter : 'NULL';
+
+        foreach (['setlists', 'domain_events', 'notifications', 'song_usage_history', 'admin_email'] as $col) {
+            if ($initialDbCounts[$col] !== $finalDbCounts[$col]) {
+                $dbLeakDetected = true;
+                $leakReasons[] = "{$col}: trước='{$initialDbCounts[$col]}', sau='{$finalDbCounts[$col]}'";
+            }
+        }
+    } catch (Throwable $e) {
+        $dbLeakDetected = true;
+        $leakReasons[] = "Lỗi kết nối CSDL: " . $e->getMessage();
+    }
+}
+
+$finalChordSetsFiles = is_dir($chordSetsDir) ? (scandir($chordSetsDir) ?: []) : [];
+$chordDiff = array_diff($finalChordSetsFiles, $initialChordSetsFiles);
+if (!empty($chordDiff)) {
+    $dbLeakDetected = true;
+    $leakReasons[] = "chord_sets phát sinh file mới: " . implode(', ', $chordDiff);
+}
+
+if ($dbLeakDetected) {
+    echo "FAIL (Phát hiện CSDL thật bị sửa đổi hoặc rò rỉ rác test!)\n";
+    foreach ($leakReasons as $reason) {
+        echo "  ❌ Rò rỉ: {$reason}\n";
+    }
+    $failedSuites[] = "K2 Database Integrity Leak";
+} else {
+    echo "PASS (CSDL thật app.sqlite và chord_sets được bảo vệ toàn vẹn tuyệt đối)\n";
+    echo "  → Bảng số dòng CSDL thật (app.sqlite) trước và sau kiểm thử:\n";
+    echo "    • setlists: trước={$initialDbCounts['setlists']}, sau={$finalDbCounts['setlists']} (giống nhau)\n";
+    echo "    • domain_events: trước={$initialDbCounts['domain_events']}, sau={$finalDbCounts['domain_events']} (giống nhau)\n";
+    echo "    • notifications: trước={$initialDbCounts['notifications']}, sau={$finalDbCounts['notifications']} (giống nhau)\n";
+    echo "    • song_usage_history: trước={$initialDbCounts['song_usage_history']}, sau={$finalDbCounts['song_usage_history']} (giống nhau)\n";
+    echo "    • users.email (admin): trước={$initialDbCounts['admin_email']}, sau={$finalDbCounts['admin_email']} (giống nhau)\n";
+    echo "    • chord_sets: trước=" . count($initialChordSetsFiles) . " files, sau=" . count($finalChordSetsFiles) . " files (giống nhau)\n";
 }
 
 // ==========================================

@@ -228,7 +228,7 @@ echo "\n[6/8] Kiểm tra Cập Nhật Bản HD & Hoàn Tác Snapshot (CR1 & CR4)
 
 // Chuẩn bị môi trường file HD cho bài test-song-rev
 $testSongSafe = 'test-song-rev';
-$hdDir = ChordSetService::BASE_DIR . '/' . $testSongSafe;
+$hdDir = ChordSetService::getBaseDir() . '/' . $testSongSafe;
 if (!is_dir($hdDir)) @mkdir($hdDir, 0755, true);
 $hdFile = $hdDir . '/HD.json';
 
@@ -378,6 +378,11 @@ $bufferOutput = ob_get_clean();
 $jsonResponse = json_decode($bufferOutput, true);
 $isForbidden = ($bypassRes && isset($bypassRes['success']) && $bypassRes['success'] === false) || ($jsonResponse && isset($jsonResponse['success']) && $jsonResponse['success'] === false);
 check($isForbidden, 'Anti-Bypass Guard: Viewer gọi toggleRecommend nhận 403 Forbidden', $failures, $totalChecks);
+
+if (isset($hdDir) && is_dir($hdDir)) {
+    foreach (glob($hdDir . '/*') as $f) @unlink($f);
+    @rmdir($hdDir);
+}
 
 // Tổng kết
 echo "\n=======================================================\n";

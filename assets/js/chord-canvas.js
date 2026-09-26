@@ -150,27 +150,24 @@ const ChordCanvas = (() => {
         const r = await window.ApiService.chordSets.load(songId, initialSet);
         if (token !== _chordLoadToken) return;
         if (r && r.success && r.chords) {
-          r.chords.forEach(({ measureIdx, noteIdx, chord }) => {
-            _customChords[`${measureIdx}_${noteIdx}`] = chord;
-          });
-        } else if (window.OfflineSetlistManager?.hasOfflineChords?.(songId, initialSet)) {
-          const chords = window.OfflineSetlistManager.getOfflineChords(songId, initialSet) || [];
-          chords.forEach(({ measureIdx, noteIdx, chord }) => {
-            _customChords[`${measureIdx}_${noteIdx}`] = chord;
-          });
+          r.chords.forEach(({ measureIdx, noteIdx, chord }) => { _customChords[`${measureIdx}_${noteIdx}`] = chord; });
+        } else {
+          _loadOfflineChords(songId, initialSet);
         }
       } catch(e) {
         if (token !== _chordLoadToken) return;
-        if (window.OfflineSetlistManager?.hasOfflineChords?.(songId, initialSet)) {
-          const chords = window.OfflineSetlistManager.getOfflineChords(songId, initialSet) || [];
-          chords.forEach(({ measureIdx, noteIdx, chord }) => {
-            _customChords[`${measureIdx}_${noteIdx}`] = chord;
-          });
-        }
+        _loadOfflineChords(songId, initialSet);
       }
     }
 
     _refreshSetDropdown();
+  }
+
+  function _loadOfflineChords(songId, set) {
+    if (window.OfflineSetlistManager?.hasOfflineChords?.(songId, set)) {
+      const chords = window.OfflineSetlistManager.getOfflineChords(songId, set) || [];
+      chords.forEach(({ measureIdx, noteIdx, chord }) => { _customChords[`${measureIdx}_${noteIdx}`] = chord; });
+    }
   }
 
   function clearSong() { _clear(); setAddMode(false); }
@@ -282,6 +279,7 @@ const ChordCanvas = (() => {
     if (!notes.length) return;
 
     _noteEls = notes;
+    window.OSMDRenderer?.tagChordSymbols?.();
     
     if (!_styleBlockEl) {
       _styleBlockEl = document.getElementById('cc-custom-style');
@@ -293,24 +291,19 @@ const ChordCanvas = (() => {
     }
     let styleBlock = _styleBlockEl;
 
-    if (_currentSet === 'default') {
+    const customCount = Object.keys(_customChords || {}).length;
+    const xmlChordMap = (typeof ChordCanvasXML !== 'undefined' && ChordCanvasXML.readXmlChords) ? ChordCanvasXML.readXmlChords() : {};
+    const xmlCount = Object.keys(xmlChordMap).length;
+    const isFallbackToTlh = (_currentSet !== 'default' && customCount === 0 && xmlCount > 0);
+
+    if (_currentSet === 'default' || isFallbackToTlh) {
       styleBlock.textContent = '';
     } else {
-      const chordColor = window.DisplaySettings?.getChordPrefs?.()?.color || '#dc2626';
-      styleBlock.textContent = `
-        #osmd-container svg g.vf-chordsymbol text,
-        #osmd-container svg g.vf-chordsymbol tspan,
-        #osmd-container svg text[fill="${chordColor}"],
-        #osmd-container svg text[fill="${chordColor}"] tspan {
-          fill: transparent !important;
-          stroke: transparent !important;
-          user-select: none;
-        }
-      `;
+      styleBlock.textContent = `body #osmd-container svg .osmd-chord-symbol, body.dark-mode #osmd-container svg .osmd-chord-symbol, body #osmd-container svg [data-chord-symbol="true"], body.dark-mode #osmd-container svg [data-chord-symbol="true"], body #osmd-container svg .osmd-chord-text, body.dark-mode #osmd-container svg .osmd-chord-text, body #osmd-container svg [data-chord-text="true"], body.dark-mode #osmd-container svg [data-chord-text="true"], #osmd-container svg g.vf-chordsymbol text, #osmd-container svg g.vf-chordsymbol tspan { fill: transparent !important; stroke: transparent !important; user-select: none; }`;
     }
 
-    const rawChordMap = _currentSet === 'default'
-      ? ChordCanvasXML.readXmlChords()
+    const rawChordMap = (_currentSet === 'default' || isFallbackToTlh)
+      ? xmlChordMap
       : (window.ChordCanvasTranspose?.applyTranspose?.(_customChords) || _customChords);
 
     const mapped = window.ChordCanvasDots ? window.ChordCanvasDots.mapNotes(notes, rawChordMap) : [];
@@ -338,7 +331,7 @@ const ChordCanvas = (() => {
       window.ChordCanvasDots?.placeDot(m, chordTextPositions, {
         editEnabled: _editEnabled,
         highlightEnabled: _highlightMode,
-        currentSet: _currentSet,
+        currentSet: (_currentSet === 'default' || isFallbackToTlh) ? 'default' : _currentSet,
         onShowPopup: (anchor, mi, ni, chord) => window.ChordCanvasEdit?.showPopup(anchor, mi, ni, chord)
       });
     });
@@ -494,12 +487,15 @@ const ChordCanvas = (() => {
     } catch(e) {}
 
     const chordCount = Object.keys(_customChords).length;
-    const countText  = _currentSet !== 'default'
-      ? (chordCount > 0 ? `● ${chordCount} hợp âm` : '○ Chưa có')
-      : '';
+    const isFallback = (_currentSet === 'HD' && chordCount === 0);
+    const countText  = isFallback
+      ? '○ HD chưa có · đang hiện TLH'
+      : (_currentSet !== 'default' ? (chordCount > 0 ? `● ${chordCount} hợp âm` : '○ Chưa có') : '');
     if (countBadge) {
       countBadge.textContent = countText;
-      countBadge.style.color = chordCount > 0 ? 'var(--success,#16a34a)' : 'var(--text-muted,#9ca3af)';
+      countBadge.style.color = isFallback
+        ? 'var(--warning,#d97706)'
+        : (chordCount > 0 ? 'var(--success,#16a34a)' : 'var(--text-muted,#9ca3af)');
     }
 
     const myChordCode = (window.Auth?.getChordCode?.() || '').toUpperCase();
@@ -507,33 +503,19 @@ const ChordCanvas = (() => {
     const isLoggedIn  = window.Auth?.isLoggedIn?.() ?? false;
     const canCreate   = window.Auth?.isBanhat?.() ?? false;
 
-    const KNOWN_CODES = {
-      'HD': 'Hoài Dinh (HD)',
-      'NAM': 'Hoàng Nam (NAM)',
-      'LAN': 'Hà Lan (LAN)',
-      'BH': 'Ban Hát (BH)',
-      'ADMIN': 'Admin (ADMIN)'
-    };
+    const KNOWN_CODES = { 'HD': 'Hoài Dinh (HD)', 'NAM': 'Hoàng Nam (NAM)', 'LAN': 'Hà Lan (LAN)', 'BH': 'Ban Hát (BH)', 'ADMIN': 'Admin (ADMIN)' };
 
     selector.innerHTML = sets.map(s => {
       const sUpper = s.toUpperCase();
       let label = s;
-      if (s === 'default' || sUpper === 'TLH') {
-        label = 'TLH (Gốc) 🔒 [Bản chuẩn]';
-      } else if (isLoggedIn && myChordCode && sUpper === myChordCode) {
-        label = `⭐ Bộ của tôi (${s}) [Được sửa]`;
-      } else if (KNOWN_CODES[sUpper]) {
-        label = `${KNOWN_CODES[sUpper]} 👁️ [Chỉ xem]`;
-      } else if (sUpper === 'HD') {
-        label = '⭐ HD (Hoài Dinh) 👁️ [Chỉ xem]';
-      } else if (s.includes('__')) {
+      if (s === 'default' || sUpper === 'TLH') label = 'TLH (Gốc) 🔒 [Bản chuẩn]';
+      else if (isLoggedIn && myChordCode && sUpper === myChordCode) label = `⭐ Bộ của tôi (${s}) [Được sửa]`;
+      else if (KNOWN_CODES[sUpper]) label = `${KNOWN_CODES[sUpper]} 👁️ [Chỉ xem]`;
+      else if (sUpper === 'HD') label = '⭐ HD (Hoài Dinh) 👁️ [Chỉ xem]';
+      else if (s.includes('__')) {
         const parts = s.split('__');
-        const author = parts[0];
-        const cleanName = parts.slice(1).join('__').replace(/_/g, ' ');
-        label = `🎸 ${cleanName} (@${author}) [Chỉ xem]`;
-      } else {
-        label = `🎸 Bộ ${s} [Chỉ xem]`;
-      }
+        label = `🎸 ${parts.slice(1).join('__').replace(/_/g, ' ')} (@${parts[0]}) [Chỉ xem]`;
+      } else label = `🎸 Bộ ${s} [Chỉ xem]`;
       const safeVal = window.SafeHtml ? window.SafeHtml.escape(s) : s;
       const safeLabel = window.SafeHtml ? window.SafeHtml.escape(label) : label;
       return `<option value="${safeVal}" ${s === _currentSet ? 'selected' : ''}>${safeLabel}</option>`;
@@ -544,9 +526,7 @@ const ChordCanvas = (() => {
 
     if (!selector.dataset.boundCreateHandler) {
       selector.dataset.boundCreateHandler = 'true';
-      selector.addEventListener('change', (e) => {
-        handleSelectChange(e.target.value);
-      });
+      selector.addEventListener('change', (e) => handleSelectChange(e.target.value));
     }
 
     const isDeletable = _currentSet !== 'default' && _currentSet !== 'HD' && (isAdmin || (myChordCode && _currentSet.toUpperCase() === myChordCode));
@@ -560,7 +540,9 @@ const ChordCanvas = (() => {
   }
 
   function resetSet() {
-    switchSet('default');
+    _currentSet   = 'HD';
+    _prevSet      = 'HD';
+    _customChords = {};
   }
 
   /* ─── Exports ────────────────────────────────────────────────── */
@@ -586,7 +568,27 @@ const ChordCanvas = (() => {
     getCurrentSet: () => _currentSet,
     getCustomChords: () => _customChords,
     setCustomChords: (c) => { _customChords = c; },
+    getXmlChordCount: () => {
+      const xmlChords = (typeof ChordCanvasXML !== 'undefined' && ChordCanvasXML.readXmlChords) ? ChordCanvasXML.readXmlChords() : {};
+      return Object.keys(xmlChords).length;
+    },
+    getChordStatus: () => {
+      const customCount = Object.keys(_customChords || {}).length;
+      const xmlChords = (typeof ChordCanvasXML !== 'undefined' && ChordCanvasXML.readXmlChords) ? ChordCanvasXML.readXmlChords() : {};
+      const xmlCount = Object.keys(xmlChords).length;
+      const isFallback = (_currentSet !== 'default' && customCount === 0 && xmlCount > 0);
+      const isSparse = (_currentSet !== 'default' && customCount > 0 && xmlCount > 0 && customCount < 0.3 * xmlCount);
+      return {
+        currentSet: _currentSet,
+        customCount,
+        xmlCount,
+        isFallback,
+        isSparse
+      };
+    },
     getNoteEls: () => _noteEls,
     build: _build
   };
 })();
+
+window.ChordCanvas = ChordCanvas;

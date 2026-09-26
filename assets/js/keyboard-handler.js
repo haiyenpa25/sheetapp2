@@ -52,6 +52,17 @@ const KeyboardHandler = (() => {
   }
 
 
+  function _turnPageOrScroll(direction) {
+    const wrapper = document.querySelector('.sheet-viewer-wrapper') || document.documentElement;
+    if (window.PageNav && PageNav.getTotalPages() > 1) {
+      if (direction > 0) PageNav.goToNext();
+      else PageNav.goToPrev();
+    } else if (wrapper) {
+      const scrollAmount = wrapper.clientHeight * 0.75;
+      wrapper.scrollBy({ top: direction * scrollAmount, behavior: 'smooth' });
+    }
+  }
+
   function _onKey(e) {
     // Bỏ qua khi đang nhập liệu
     const tag = document.activeElement?.tagName?.toLowerCase();
@@ -66,16 +77,25 @@ const KeyboardHandler = (() => {
     const xml = Store.get('originalXml');
 
     switch (e.key) {
-      // BUG-8 fix: Nếu đang trong Setlist → dùng Setlist navigation, không nhảy library
+      // Ticket L0-8: Bàn đạp an toàn: ArrowDown/ArrowUp = lật trang / cuộn trang.
+      // Đổi bài chỉ bằng nút giao diện hoặc Shift + ArrowDown / ArrowUp.
       case 'ArrowDown':
         e.preventDefault();
-        if (window.SetlistUI?.getCurrentSetlist?.()) { SetlistUI.next(); }
-        else { App?.navigateNext?.(); }
+        if (e.shiftKey) {
+          if (window.SetlistUI?.getCurrentSetlist?.()) { SetlistUI.next(); }
+          else { App?.navigateNext?.(); }
+        } else {
+          _turnPageOrScroll(+1);
+        }
         break;
       case 'ArrowUp':
         e.preventDefault();
-        if (window.SetlistUI?.getCurrentSetlist?.()) { SetlistUI.prev(); }
-        else { App?.navigatePrev?.(); }
+        if (e.shiftKey) {
+          if (window.SetlistUI?.getCurrentSetlist?.()) { SetlistUI.prev(); }
+          else { App?.navigatePrev?.(); }
+        } else {
+          _turnPageOrScroll(-1);
+        }
         break;
       case ' ': {
         e.preventDefault();
@@ -105,8 +125,14 @@ const KeyboardHandler = (() => {
         if (!e.ctrlKey && !e.metaKey) { e.preventDefault(); App?.toggleSidebar?.(); }
         break;
       case '0': if (xml) App?.resetTranspose?.(); break;
-      case 'PageDown': e.preventDefault(); PageNav?.goToNext?.(); break;
-      case 'PageUp':   e.preventDefault(); PageNav?.goToPrev?.(); break;
+      case 'PageDown':
+        e.preventDefault();
+        _turnPageOrScroll(+1);
+        break;
+      case 'PageUp':
+        e.preventDefault();
+        _turnPageOrScroll(-1);
+        break;
       case 'c': case 'C':
         if (xml) {
           window.ModeManager ? window.ModeManager.toggleEditChords() : ChordCanvas?.toggleAddMode?.();

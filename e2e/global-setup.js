@@ -38,5 +38,11 @@ module.exports = async function globalSetup() {
     }
   }
 
+  const chordSetsDir = path.join(root, 'storage', 'data', 'chord_sets');
+  const snapChordSets = path.join(snapshotDir, 'chord_sets');
+  if (fs.existsSync(chordSetsDir)) {
+    fs.cpSync(chordSetsDir, snapChordSets, { recursive: true, force: true });
+  }
+
   console.log('✅ [Playwright E2E] Snapshot CSDL & storage đã được sao lưu an toàn tại test-results/snapshot/');
 };

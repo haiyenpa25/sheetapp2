@@ -40,7 +40,7 @@
 
     <!-- Cụm Thu Phóng & Khóa Zoom (Zoom Pill) -->
     <div class="band-pill zoom-pill" role="group" aria-label="Thu phóng bản nhạc" title="Thu phóng bản nhạc (Zoom & Khóa View)">
-      <button id="btn-zoom-out" class="icon-btn-pill" title="Thu nhỏ bản nhạc (−)" disabled>
+      <button id="btn-zoom-out" class="icon-btn-pill" title="Thu nhỏ bản nhạc (−)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </button>
       <select id="zoom-slider" class="select-zoom-pill" disabled title="Chọn tỷ lệ thu phóng">
@@ -55,7 +55,7 @@
         <option value="175">175%</option>
         <option value="200">200%</option>
       </select>
-      <button id="btn-zoom-in" class="icon-btn-pill" title="Phóng to bản nhạc (+)" disabled>
+      <button id="btn-zoom-in" class="icon-btn-pill" title="Phóng to bản nhạc (+)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </button>
       <button id="btn-lock-zoom" class="icon-btn-pill btn-lock-zoom" title="Khóa tỷ lệ zoom (khi đổi bài giữ nguyên)">
@@ -91,6 +91,13 @@
       <button id="btn-cancel-add-chord" style="display:none;"></button>
     </div>
 
+    <!-- Cụm Xem Band (Lời + Hợp âm chữ) / Bản Nhạc (Ticket L0-4 & L1-7) -->
+    <button id="btn-band-toggle" class="band-pill btn-toggle-view btn-band-toggle" title="Chuyển chế độ: Band (Lời & Hợp âm chữ) ↔ Bản Nhạc">
+      <span class="view-icon">▶</span>
+      <span class="view-text">Band</span>
+    </button>
+    <button id="btn-toggle-view" style="display:none;" aria-hidden="true"></button>
+
     <!-- Cụm Cuộn Trang & Gõ Nhịp (Scroll & Tempo Pill) -->
     <div class="band-pill scroll-pill">
       <button id="btn-auto-scroll" class="btn-pill-scroll" disabled title="Tự động cuộn bản nhạc (Phím Space)">
@@ -98,8 +105,8 @@
         <span class="btn-text">Cuộn</span>
       </button>
       <select id="scroll-speed" class="select-scroll-speed" disabled title="Tốc độ cuộn">
-        <option value="1">1×</option>
-        <option value="2" selected>2×</option>
+        <option value="1" selected>1×</option>
+        <option value="2">2×</option>
         <option value="3">3×</option>
         <option value="4">4×</option>
       </select>
@@ -239,6 +246,39 @@
           <span>Quản Lý Kho Nhạc (/manager/)</span>
         </a>
 
+        <!-- NHÓM PHỤ THU VÀO TỪ TOOLBAR (< 1300px, Ticket L0-4) -->
+        <div class="menu-section-header menu-section-compact-only">ĐIỀU KHIỂN BẢN NHẠC</div>
+        <div class="menu-compact-controls menu-section-compact-only" style="padding: 6px 10px; border-bottom: 1px solid var(--border);">
+          <div class="audio-panel-row" style="margin-bottom: 6px;">
+            <span class="audio-panel-label">Thu phóng:</span>
+            <div style="display:inline-flex; align-items:center; gap:4px;">
+              <button id="btn-menu-zoom-out" class="icon-btn-xs" title="Thu nhỏ">−</button>
+              <span id="menu-zoom-val" style="font-size:0.75rem;font-weight:700;min-width:36px;text-align:center;">100%</span>
+              <button id="btn-menu-zoom-in" class="icon-btn-xs" title="Phóng to">+</button>
+              <button id="btn-menu-lock-zoom" class="icon-btn-xs" title="Khóa tỷ lệ zoom">🔓</button>
+            </div>
+          </div>
+          <div class="audio-panel-row" style="margin-bottom: 6px;">
+            <span class="audio-panel-label">Tự cuộn:</span>
+            <button id="btn-menu-auto-scroll" class="btn btn-ghost btn-xs btn-menu-item" style="padding:2px 8px;margin:0;">
+              <span class="btn-text">Cuộn</span>
+            </button>
+            <select id="menu-scroll-speed" class="select-toolbar" style="font-size:0.72rem;padding:1px 4px;margin-left:6px;">
+              <option value="1" selected>1×</option><option value="2">2×</option><option value="3">3×</option><option value="4">4×</option>
+            </select>
+          </div>
+          <div class="audio-panel-row">
+            <span class="audio-panel-label">Giữ nhịp:</span>
+            <button id="btn-menu-metronome" class="btn btn-ghost btn-xs btn-menu-item" style="padding:2px 8px;margin:0;">
+              <span>⚡ Metronome</span>
+            </button>
+          </div>
+        </div>
+
+        <button id="btn-menu-auth" class="btn btn-ghost btn-sm btn-menu-item menu-section-compact-only" title="Đăng nhập / Phân quyền">
+          <span>👤 Tài Khoản / Đăng Nhập</span>
+        </button>
+
         <!-- NHÓM 4: HỆ THỐNG & IN ẤN -->
         <div class="menu-section-header">HỆ THỐNG & IN ẤN</div>
         <button id="btn-print" class="btn btn-ghost btn-sm btn-menu-item" disabled title="In sheet nhạc">
@@ -268,35 +308,101 @@
   document.addEventListener('DOMContentLoaded', function() {
     const btnOptions = document.getElementById('btn-more-options');
     const menuOptions = document.getElementById('main-dropdown-menu');
-    if (!btnOptions || !menuOptions) return;
+    if (btnOptions && menuOptions) {
+      function positionMenu() {
+        const r = btnOptions.getBoundingClientRect();
+        const w = menuOptions.offsetWidth || 230;
+        let left = r.right - w;
+        if (left < 8) left = 8;
+        if (left + w > window.innerWidth - 8) left = window.innerWidth - w - 8;
+        menuOptions.style.cssText = `position:fixed; top:${r.bottom + 6}px; left:${left}px; right:auto; z-index:99999;`;
+      }
 
-    function positionMenu() {
-      const r = btnOptions.getBoundingClientRect();
-      const w = menuOptions.offsetWidth || 230;
-      let left = r.right - w;
-      if (left < 8) left = 8;
-      if (left + w > window.innerWidth - 8) left = window.innerWidth - w - 8;
-      menuOptions.style.cssText = `position:fixed; top:${r.bottom + 6}px; left:${left}px; right:auto; z-index:99999;`;
+      btnOptions.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isHidden = menuOptions.classList.contains('hidden');
+        if (isHidden) {
+          if (menuOptions.parentNode !== document.body) document.body.appendChild(menuOptions);
+          menuOptions.classList.remove('hidden');
+          positionMenu();
+        } else {
+          menuOptions.classList.add('hidden');
+        }
+      });
+
+      // Đóng khi chọn một mục trong menu (Ticket L0-6)
+      menuOptions.addEventListener('click', (e) => {
+        const item = e.target.closest('.btn-menu-item, a');
+        if (item) {
+          if (!item.closest('.menu-compact-controls') && item.id !== 'btn-audio-settings') {
+            menuOptions.classList.add('hidden');
+          }
+        }
+      });
+
+      // Đóng khi chạm/click ra ngoài hoặc bấm Escape (Ticket L0-6)
+      const handleOutside = (e) => {
+        if (!btnOptions.contains(e.target) && !menuOptions.contains(e.target)) {
+          menuOptions.classList.add('hidden');
+        }
+      };
+      document.addEventListener('click', handleOutside);
+      document.addEventListener('pointerdown', handleOutside);
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') menuOptions.classList.add('hidden');
+      });
+      window.addEventListener('scroll', () => menuOptions.classList.add('hidden'), { passive: true });
+      window.addEventListener('resize', () => menuOptions.classList.add('hidden'));
     }
 
-    btnOptions.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const isHidden = menuOptions.classList.contains('hidden');
-      if (isHidden) {
-        if (menuOptions.parentNode !== document.body) document.body.appendChild(menuOptions);
-        menuOptions.classList.remove('hidden');
-        positionMenu();
-      } else {
-        menuOptions.classList.add('hidden');
+    /* Band / Bản Nhạc Toggle Button (btn-band-toggle / btn-toggle-view) */
+    const btnBandToggle = document.getElementById('btn-band-toggle') || document.getElementById('btn-toggle-view');
+    const btnLyric = document.getElementById('btn-lyric-view');
+    if (btnBandToggle && btnLyric) {
+      btnBandToggle.addEventListener('click', () => btnLyric.click());
+      const lyricContainer = document.getElementById('lyric-view-container');
+      if (lyricContainer) {
+        new MutationObserver(() => {
+          const isLyric = !lyricContainer.classList.contains('hidden');
+          btnBandToggle.classList.toggle('active', isLyric);
+          const txt = btnBandToggle.querySelector('.view-text') || btnBandToggle.querySelector('.band-toggle-text');
+          if (txt) txt.textContent = isLyric ? 'Nhạc' : 'Band';
+          btnBandToggle.title = isLyric ? 'Quay lại Bản Nhạc' : 'Chuyển sang chế độ Band (Lời + Hợp âm chữ)';
+        }).observe(lyricContainer, { attributes: true, attributeFilter: ['class'] });
       }
-    });
+    }
 
-    document.addEventListener('click', (e) => {
-      if (!btnOptions.contains(e.target) && !menuOptions.contains(e.target)) {
-        menuOptions.classList.add('hidden');
-      }
+    /* Menu Compact Controls Handlers */
+    document.getElementById('btn-menu-zoom-out')?.addEventListener('click', () => {
+      document.getElementById('btn-zoom-out')?.click();
+      const cur = document.getElementById('zoom-slider')?.value || '100';
+      const label = document.getElementById('menu-zoom-val');
+      if (label) label.textContent = cur + '%';
     });
-    window.addEventListener('scroll', () => menuOptions.classList.add('hidden'), { passive: true });
-    window.addEventListener('resize', () => menuOptions.classList.add('hidden'));
+    document.getElementById('btn-menu-zoom-in')?.addEventListener('click', () => {
+      document.getElementById('btn-zoom-in')?.click();
+      const cur = document.getElementById('zoom-slider')?.value || '100';
+      const label = document.getElementById('menu-zoom-val');
+      if (label) label.textContent = cur + '%';
+    });
+    document.getElementById('btn-menu-lock-zoom')?.addEventListener('click', () => {
+      document.getElementById('btn-lock-zoom')?.click();
+      const isLocked = localStorage.getItem('sheetapp_zoom_locked') === 'true';
+      const btn = document.getElementById('btn-menu-lock-zoom');
+      if (btn) btn.textContent = isLocked ? '🔒' : '🔓';
+    });
+    document.getElementById('btn-menu-auto-scroll')?.addEventListener('click', () => {
+      document.getElementById('btn-auto-scroll')?.click();
+    });
+    document.getElementById('menu-scroll-speed')?.addEventListener('change', (e) => {
+      const sp = document.getElementById('scroll-speed');
+      if (sp) { sp.value = e.target.value; sp.dispatchEvent(new Event('change')); }
+    });
+    document.getElementById('btn-menu-metronome')?.addEventListener('click', () => {
+      document.getElementById('btn-toolbar-metronome')?.click();
+    });
+    document.getElementById('btn-menu-auth')?.addEventListener('click', () => {
+      document.getElementById('btn-toolbar-auth')?.click();
+    });
   });
 </script>

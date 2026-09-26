@@ -1261,18 +1261,96 @@ body.sheet-only-mode .gig-floating-hud {
   text-align: center;
 }
 
+/* Nút Chuyển Band / Bản Nhạc (btn-toggle-view & btn-band-toggle, Ticket L0-4 & L1-7) */
+.btn-band-toggle,
+.btn-toggle-view {
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  background: var(--bg-overlay);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0 8px;
+  gap: 4px;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.btn-band-toggle:hover,
+.btn-toggle-view:hover {
+  background: var(--bg-raised);
+  border-color: var(--accent);
+}
+.btn-band-toggle.active,
+.btn-toggle-view.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.btn-band-toggle .view-icon,
+.btn-toggle-view .view-icon {
+  font-size: 0.75rem;
+}
+
+/* Các mục điều khiển phụ thu vào menu ⋮ khi <= 1300px */
+.menu-section-compact-only {
+  display: none !important;
+}
+
+/* ====================================================
+   RESPONSIVE OPTIMIZATIONS FOR SCREENS < 1300px (Ticket L0-4)
+   Gom các nút phụ vào ⋮; Luôn hiện: Tên bài, Tông, Bộ hợp âm, Band/Nhạc, ⚡, ⋮, ◀ ▶
+   ==================================================== */
+@media (max-width: 1300px) {
+  .toolbar.unified-toolbar {
+    overflow-x: hidden !important;
+  }
+  .scroll-pill,
+  .zoom-pill,
+  #btn-add-chord-mode-bar,
+  #btn-new-chord-set,
+  .chord-set-count,
+  #btn-transpose-reset,
+  #capo-wrap,
+  #btn-toolbar-auth {
+    display: none !important;
+  }
+  .menu-section-compact-only {
+    display: block !important;
+  }
+  .btn-gig-mode .gig-text {
+    display: none !important;
+  }
+  .btn-gig-mode {
+    padding: 4px 8px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+  }
+  .song-info-pill {
+    max-width: 160px !important;
+  }
+  .song-info-pill .song-title {
+    font-size: 0.8rem;
+  }
+  .chord-set-select {
+    max-width: 95px !important;
+  }
+}
+
 /* ====================================================
    RESPONSIVE OPTIMIZATIONS FOR IPAD & TABLET (681px - 1024px)
    ==================================================== */
 @media (max-width: 1024px) and (min-width: 681px) {
   .unified-toolbar {
     padding: 0 4px !important;
-    gap: 2px !important;
+    gap: 3px !important;
     flex-wrap: nowrap;
     overflow-x: hidden;
   }
   .song-info-pill {
-    max-width: 105px !important;
+    max-width: 120px !important;
     padding: 2px 5px !important;
   }
   .song-info-pill .song-title {
@@ -1282,37 +1360,19 @@ body.sheet-only-mode .gig-floating-hud {
     font-size: 0.62rem;
     padding: 1px 3px;
   }
-  #capo-wrap {
+  #capo-wrap,
+  .btn-pill-reset,
+  .zoom-pill,
+  .scroll-pill,
+  .chord-set-count,
+  .btn-chord-edit-pill,
+  #btn-new-chord-set,
+  #btn-toolbar-auth {
     display: none !important;
-  }
-  .btn-pill-reset {
-    display: none !important;
-  }
-  .select-zoom-pill {
-    max-width: 48px !important;
-    font-size: 0.72rem;
-    padding: 1px 2px;
   }
   .chord-set-select {
-    max-width: 65px !important;
+    max-width: 80px !important;
     font-size: 0.72rem;
-  }
-  .chord-set-count {
-    display: none !important;
-  }
-  .btn-chord-edit-pill .chord-edit-text {
-    display: none !important;
-  }
-  .btn-chord-edit-pill {
-    padding: 0 4px !important;
-    min-width: 24px;
-    justify-content: center;
-  }
-  .select-scroll-speed {
-    display: none !important;
-  }
-  .btn-pill-scroll .btn-text {
-    display: none !important;
   }
   .btn-gig-mode .gig-text {
     display: none !important;
@@ -1325,7 +1385,7 @@ body.sheet-only-mode .gig-floating-hud {
     flex-shrink: 1;
   }
   .band-pill {
-    padding: 0 2px !important;
+    padding: 0 3px !important;
     gap: 1px;
     height: 32px;
   }
@@ -1356,6 +1416,7 @@ body.sheet-only-mode .gig-floating-hud {
     padding: 4px 8px 6px;
     flex-wrap: wrap;
     align-content: flex-start;
+    overflow-x: hidden !important;
   }
 
   /* Row 1: Left (Song Info) and Right (Gig + Nav + More) side by side */
@@ -1393,19 +1454,14 @@ body.sheet-only-mode .gig-floating-hud {
     height: 32px;
   }
   .btn-gig-mode .gig-text {
-    display: inline;
-    font-size: 0.7rem;
+    display: none !important;
   }
-  .btn-toolbar-user {
-    padding: 3px 6px;
-    font-size: 0.72rem;
-    height: 32px;
-  }
-  .btn-toolbar-user .user-pill-name {
-    max-width: 48px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  .btn-toolbar-user,
+  .scroll-pill,
+  .zoom-pill,
+  #btn-add-chord-mode-bar,
+  #btn-new-chord-set {
+    display: none !important;
   }
   .nav-arrows .icon-btn {
     width: 28px;
@@ -1416,21 +1472,16 @@ body.sheet-only-mode .gig-floating-hud {
     height: 28px;
   }
 
-  /* Row 2: Band Quick Actions (Smooth Horizontal Scroll Strip) */
+  /* Row 2: Band Quick Actions (Tông, Hợp âm, Band/Nhạc) */
   .band-controls {
     order: 3;
     width: 100%;
     flex: 0 0 100%;
     margin-top: 4px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+    overflow-x: hidden;
     padding: 1px 0 2px;
-    gap: 5px;
+    gap: 4px;
     justify-content: flex-start;
-  }
-  .band-controls::-webkit-scrollbar {
-    display: none;
   }
 
   .band-pill {

@@ -63,8 +63,9 @@ const ModeManager = (() => {
 
     // Kiểm tra quyền đối với chế độ Sửa Hợp Âm
     if (mode === MODES.EDIT_CHORDS) {
-      const user = window.Store?.get?.('currentUser') || window.Auth?.getUser?.();
-      const canEdit = user && (user.role === 'admin' || user.role === 'banhat');
+      const canEdit = (window.Auth && typeof window.Auth.isBanhat === 'function')
+        ? window.Auth.isBanhat()
+        : Boolean(window.Store?.get?.('currentUser')?.role === 'admin' || window.Store?.get?.('currentUser')?.role === 'banhat');
       if (!canEdit) {
         window.AppUI?.showToast?.('Chỉ nhạc công Ban Hát hoặc Quản Trị Viên mới có quyền điền hợp âm', 'warning');
         return;

@@ -19,10 +19,15 @@ require_once __DIR__ . '/../core/DB.php';
 class ChordSetService {
     public const BASE_DIR = __DIR__ . '/../../storage/data/chord_sets';
 
-    private static function getSongDir(string $songId): string {
+    public static function getBaseDir(): string {
+        $env = getenv('CHORD_SETS_DIR') ?: (getenv('SHEETAPP_CHORD_SETS_DIR') ?: null);
+        return $env ?: self::BASE_DIR;
+    }
+
+    private static function getSongDir(string $songId, bool $create = false): string {
         $safe = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $songId);
-        $dir  = self::BASE_DIR . '/' . $safe;
-        if (!is_dir($dir)) @mkdir($dir, 0755, true);
+        $dir  = self::getBaseDir() . '/' . $safe;
+        if ($create && !is_dir($dir)) @mkdir($dir, 0755, true);
         return $dir;
     }
 
@@ -34,9 +39,9 @@ class ChordSetService {
         return preg_replace('/[^a-zA-Z0-9_\-]+/', '_', trim($normalized));
     }
 
-    private static function getSetFile(string $songId, string $name): string {
+    private static function getSetFile(string $songId, string $name, bool $create = false): string {
         $safe = self::sanitizeName($name);
-        return self::getSongDir($songId) . '/' . $safe . '.json';
+        return self::getSongDir($songId, $create) . '/' . $safe . '.json';
     }
 
     /**
@@ -174,7 +179,7 @@ class ChordSetService {
         }
 
         // 2. Ghi ra file disk (Write-through cache)
-        $file = self::getSetFile($songId, $name);
+        $file = self::getSetFile($songId, $name, true);
         $jsonPretty = json_encode($chords, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
         return file_put_contents($file, $jsonPretty) !== false;
     }

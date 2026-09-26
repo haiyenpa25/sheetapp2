@@ -410,22 +410,23 @@ const DisplaySettings = (() => {
         const currentSet = window.ChordCanvas?.getCurrentSet?.() || 'default';
 
         if (currentSet !== 'default') {
-            // Custom set: inject custom chords, xóa hết harmony gốc
             const customChords = window.ChordCanvas?.getCustomChords?.() || {};
 
-            // Apply transpose vào custom chords trước khi inject
-            const trOffset = window.App?.getCurrentTranspose?.() || 0;
-            let transposedChords = customChords;
-            if (trOffset !== 0 && window.TransposeEngine) {
-                transposedChords = {};
-                for (const [k, chord] of Object.entries(customChords)) {
-                    transposedChords[k] = window.TransposeEngine.transposeChord(chord, trOffset);
+            // Core Rule 1 Fallback: Nếu bộ tùy biến (HD) rỗng, không xóa XML gốc mà giữ nguyên TLH
+            if (Object.keys(customChords).length > 0) {
+                // Apply transpose vào custom chords trước khi inject
+                const trOffset = window.App?.getCurrentTranspose?.() || 0;
+                let transposedChords = customChords;
+                if (trOffset !== 0 && window.TransposeEngine) {
+                    transposedChords = {};
+                    for (const [k, chord] of Object.entries(customChords)) {
+                        transposedChords[k] = window.TransposeEngine.transposeChord(chord, trOffset);
+                    }
                 }
-            }
 
-            if (window.ChordCanvasXML?.cloneAndInjectChords) {
-                // cloneAndInjectChords xóa harmony cũ và inject mới
-                return window.ChordCanvasXML.cloneAndInjectChords(rawXml, transposedChords);
+                if (window.ChordCanvasXML?.cloneAndInjectChords) {
+                    return window.ChordCanvasXML.cloneAndInjectChords(rawXml, transposedChords);
+                }
             }
         }
 

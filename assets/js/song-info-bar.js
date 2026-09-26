@@ -99,6 +99,8 @@ const SongInfoBar = (() => {
       const part = doc.querySelector('part');
       if (part) info.measureCount = part.querySelectorAll('measure').length;
 
+      // Harmony / chord count (TLH gốc trong MusicXML)
+      info.tlhChordCount = doc.querySelectorAll('harmony').length;
     } catch (e) {
       console.warn('[SongInfoBar] Parse error:', e);
     }
@@ -208,16 +210,25 @@ const SongInfoBar = (() => {
       chips.push(`<span class="si-chip si-measures" title="Tổng số ô nhịp">${_songData.measureCount} nhịp</span>`);
     }
 
-    // 8. Bộ hợp âm (Ưu tiên HD thay cho TLH)
+    // 8. Bộ hợp âm (Ưu tiên HD thay cho TLH; L-D1 & Core Rule 1)
     const currentSet = window.ChordCanvas?.getCurrentSet?.() || 'HD';
     const chordCount = Object.keys(window.ChordCanvas?.getCustomChords?.() ?? {}).length;
-    if (currentSet && currentSet !== 'default') {
+    const tlhCount   = _songData?.tlhChordCount || Object.keys(window.ChordCanvasXML?.readXmlChords?.() ?? {}).length;
+    const isHdEmpty  = (currentSet === 'HD' && chordCount === 0 && tlhCount > 0);
+    const isHdSparse = (currentSet === 'HD' && chordCount > 0 && tlhCount > 0 && (chordCount / tlhCount) < 0.3);
+
+    if (isHdEmpty) {
+      chips.push(`<span id="si-chord-set-chip" class="si-chip si-chord-set si-chord-fallback" title="Bộ HD chưa có hợp âm cho bài này — đang hiển thị bản chuẩn TLH gốc (${tlhCount} hợp âm, Core Rule 1). Bấm để chuyển sang TLH" style="cursor:pointer;touch-action:manipulation;background:rgba(217,119,6,0.15);color:var(--warning,#d97706);border:1px solid rgba(217,119,6,0.3);">🎸 HD chưa có · đang hiện TLH</span>`);
+    } else if (isHdSparse) {
+      chips.push(`<span id="si-chord-set-chip" class="si-chip si-chord-set si-chord-sparse" title="Bộ HD chỉ có ${chordCount}/${tlhCount} hợp âm (<30%). Bấm 1 chạm để xem bộ TLH đầy đủ" style="cursor:pointer;touch-action:manipulation;background:rgba(217,119,6,0.15);color:var(--warning,#d97706);border:1px solid rgba(217,119,6,0.3);">🎸 HD còn thiếu — xem TLH</span>`);
+    } else if (currentSet && currentSet !== 'default') {
       const countLabel = chordCount > 0 ? ` · ● ${chordCount}` : ' · ○ 0';
       const chipClass  = chordCount > 0 ? 'si-chip si-chord-set si-chord-has' : 'si-chip si-chord-set si-chord-empty';
       const label      = currentSet === 'HD' ? '⭐ HD (Ưu tiên)' : currentSet;
       chips.push(`<span id="si-chord-set-chip" class="${chipClass}" title="Đang chọn ${_esc(label)}. Bấm để chuyển đổi nhanh sang TLH (gốc)" style="cursor:pointer;touch-action:manipulation;">🎸 ${_esc(label)}${countLabel}</span>`);
     } else if (currentSet === 'default') {
-      chips.push(`<span id="si-chord-set-chip" class="si-chip si-chord-set" title="Đang chọn TLH (gốc). Bấm để chuyển đổi nhanh sang bộ HD (Ưu tiên)" style="cursor:pointer;touch-action:manipulation;">🎸 TLH (gốc)</span>`);
+      const countLabel = tlhCount > 0 ? ` · ● ${tlhCount}` : '';
+      chips.push(`<span id="si-chord-set-chip" class="si-chip si-chord-set" title="Đang chọn TLH (gốc). Bấm để chuyển đổi nhanh sang bộ HD (Ưu tiên)" style="cursor:pointer;touch-action:manipulation;">🎸 TLH (gốc)${countLabel}</span>`);
     }
 
     // 9. Nút 🖨️ In Lời & Hợp âm (D14)
@@ -391,17 +402,22 @@ const SongInfoBar = (() => {
     tempoChip.innerHTML = `♩ = <strong>${safeBpm}</strong> bpm <span style="font-size:0.75em;opacity:0.8;">✎</span>`;
   }
 
-  /* Nạp thông tin lịch sử sử dụng bài hát trong phụng vụ */
+  /* Nạp thông tin lịch sử sử dụng bài hát trong phụng vụ (Tránh nhân đôi chip) */
   async function _loadSongUsageChip(songId) {
     if (!songId || !window.ApiService?.setlists?.songUsage) return;
     try {
       const res = await window.ApiService.setlists.songUsage(songId);
+      if (songId !== _songId) return;
       if (res.success && res.data && res.data.total_used > 0) {
         const inner = document.getElementById('si-inner');
         if (!inner) return;
+        // Xóa chip usage cũ nếu đã tồn tại để chống nhân đôi (Ticket L0-6)
+        inner.querySelectorAll('.si-usage, #si-usage-chip').forEach(el => el.remove());
+
         const count = res.data.total_used;
         const lastDate = res.data.last_used_date || '';
         const chip = document.createElement('span');
+        chip.id = 'si-usage-chip';
         chip.className = 'si-chip si-usage';
         chip.style.cssText = 'background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.25);color:#93c5fd;cursor:pointer;';
         chip.title = `Đã dùng ${count} lần trong chương trình phụng vụ (Gần nhất: ${lastDate}). Bấm để xem chi tiết`;

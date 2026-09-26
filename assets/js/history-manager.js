@@ -94,3 +94,5 @@ const HistoryManager = (() => {
 
   return { init, trackView, getHistory, getRecent: getHistory, toggleFavorite, isFavorite, getFavorites, clearHistory };
 })();
+
+window.HistoryManager = HistoryManager;

@@ -75,6 +75,7 @@ const OSMDRenderer = (() => {
           await osmd.render();
           _titleCompacted = false; // reset để compact lại sau resize
           _compactTitleSVG();
+          _tagChordSymbols();
           if (window.ChordCanvas) window.ChordCanvas.reposition();
           if (window.ChordOverlay) window.ChordOverlay.onOSMDRendered();
       }
@@ -243,14 +244,10 @@ const OSMDRenderer = (() => {
                               note.parentNode.removeChild(note);
                           }
                       } else {
-                          // Kết thúc nhóm (cluster) cũ, áp dụng cao độ lớn nhất cho nốt chính
                           if (currentPrimaryNote && maxPitchNode) {
                               const pPitch = currentPrimaryNote.querySelector("pitch");
-                              if (pPitch && pPitch.innerHTML !== maxPitchNode.innerHTML) {
-                                  pPitch.innerHTML = maxPitchNode.innerHTML;
-                              }
+                              if (pPitch && pPitch.innerHTML !== maxPitchNode.innerHTML) pPitch.innerHTML = maxPitchNode.innerHTML;
                           }
-                          // Bắt đầu nhóm mới với nốt không có chord
                           currentPrimaryNote = note;
                           maxPitchVal = pitchVal;
                           maxPitchNode = pitchNode.cloneNode(true);
@@ -308,6 +305,7 @@ const OSMDRenderer = (() => {
       _forceLayoutRecalc(); // lần 2: sau render để clip SVG nếu vẫn rộng
       _titleCompacted = false;
       _compactTitleSVG();
+      _tagChordSymbols();
       isLoaded = true;
       _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} });
       return osmd;
@@ -350,7 +348,8 @@ const OSMDRenderer = (() => {
       _forceLayoutRecalc();
       _titleCompacted = false;
       _compactTitleSVG();
-      _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} }); // Gọi lại để ChordCanvas rebuild
+      _tagChordSymbols();
+      _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} });
       return osmd;
     } catch (err) {
       if (token !== _renderToken) return osmd;
@@ -370,6 +369,7 @@ const OSMDRenderer = (() => {
       _forceLayoutRecalc();
       await osmd.render();
       _forceLayoutRecalc();
+      _tagChordSymbols();
       _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} });
     }
   }
@@ -382,21 +382,10 @@ const OSMDRenderer = (() => {
 
 
   function getCurrentZoom() { return currentZoom; }
-
-  /**
-   * Trả về instance OSMD để truy cập trực tiếp API nếu cần.
-   */
-  function getInstance() {
-    return osmd;
-  }
-
+  function getInstance() { return osmd; }
   function getIsLoaded() { return isLoaded; }
-
   function getCurrentXml() { return currentXmlString; }
-
-  /** Thêm callback khi OSMD render xong — hỗ trợ nhiều caller */
   function onReady(cb) { _onReadyCallbacks.push(cb); }
-
   function destroy() {
     if (osmd) {
       const container = document.getElementById(containerId);
@@ -406,7 +395,6 @@ const OSMDRenderer = (() => {
     isLoaded = false;
     currentXmlString = null;
   }
-
   function _debounce(fn, ms) {
     let t;
     return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
@@ -481,13 +469,68 @@ const OSMDRenderer = (() => {
     _titleCompacted = true;
   }
 
-  function setCompactMode(val) {
-      _isCompactMode = !!val;
-      if (isLoaded && osmd && currentXmlString) {
-          reload(currentXmlString);
-      }
+  function _tagChordSymbols() {
+    try {
+      // 1. Gắn qua OSMD graphical model nếu có node
+      osmd?.graphic?.measureList?.forEach(sys => sys?.forEach(m => m?.staffEntries?.forEach(se => {
+        const containers = se?.graphicalChordContainers || se?.chordSymbolContainers || [];
+        containers.forEach(gcc => {
+          const node = gcc?.graphicalLabel?.SVGNode || gcc?.graphicalLabel?.svgElement || gcc?.graphicalLabel?.textElement;
+          if (node) {
+            node.classList.add('osmd-chord-symbol');
+            node.setAttribute('data-chord-symbol', 'true');
+            node.querySelectorAll?.('text, tspan')?.forEach(t => {
+              t.classList.add('osmd-chord-text');
+              t.setAttribute('data-chord-text', 'true');
+            });
+          }
+        });
+      })));
+
+      // 2. Quét DOM SVG để gắn chắc chắn 100% bằng cách đối chiếu
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      const svg = container.querySelector('svg');
+      if (!svg) return;
+
+      const xmlChordMap = (typeof ChordCanvasXML !== 'undefined' && ChordCanvasXML.readXmlChords)
+        ? ChordCanvasXML.readXmlChords()
+        : {};
+      const chordSet = new Set(Object.values(xmlChordMap).map(c => String(c).trim()));
+
+      const CHORD_REGEX = /^[A-G][b#]?(m|maj|min|dim|aug|sus|add|M)?[0-9]?(\/[A-G][b#]?)?$/;
+
+      const texts = Array.from(svg.querySelectorAll('text'));
+      texts.forEach(t => {
+        if (t.classList.contains('osmd-title-text')) return;
+        if (t.parentElement && t.parentElement.classList.contains('vf-lyric')) return;
+
+        const txt = t.textContent.trim();
+        if (!txt) return;
+
+        const ff = t.getAttribute('font-family') || '';
+        const isChordFont = ff.includes('OSMDChordFont');
+        const isKnownChord = chordSet.has(txt) || (CHORD_REGEX.test(txt) && !/^\d+$/.test(txt));
+
+        if (isChordFont || isKnownChord) {
+          t.classList.add('osmd-chord-symbol', 'osmd-chord-text');
+          t.setAttribute('data-chord-symbol', 'true');
+          t.setAttribute('data-chord-text', 'true');
+          if (t.parentElement && t.parentElement.tagName.toLowerCase() === 'g') {
+            t.parentElement.classList.add('osmd-chord-symbol');
+            t.parentElement.setAttribute('data-chord-symbol', 'true');
+          }
+        }
+      });
+    } catch (e) {
+      console.warn('[OSMD] Error tagging chord symbols:', e);
+    }
   }
 
+  function setCompactMode(val) {
+    _isCompactMode = !!val;
+    if (isLoaded && osmd && currentXmlString) reload(currentXmlString);
+  }
   function getCompactMode() { return _isCompactMode; }
 
   /**
@@ -511,79 +554,44 @@ const OSMDRenderer = (() => {
   }
 
   function _applyCompactMode() {
-      if (!osmd || !osmd.Sheet) return;  // BUG-11 fix: capital S (OSMD API)
-      
-      let compactPrefs = { hideBass: true, hideVoices: true, hideText: true };
-      if (window.DisplaySettings) compactPrefs = DisplaySettings.getCompactPrefs();
-      
-      // Nếu không bật Gọn nhẹ thì bật lại Text
-      if (!_isCompactMode) {
-          osmd.setOptions({
-              drawComposer: true,
-              drawCredits: true,
-              drawSubtitle: true,
-              drawLyricist: true
-          });
-          return;
-      }
-
-      // KHI ĐANG BẬT GỌN NHẸ -> Đọc cấu hình
-      osmd.Sheet.Instruments.forEach((ins, insIndex) => {  // BUG fix: capital Sheet (OSMD API)
-          if (ins.Staves) {
-              if (compactPrefs.hideBass) {
-                  if (ins.Staves.length >= 2) {
-                      for (let i = 1; i < ins.Staves.length; i++) {
-                          ins.Staves[i].Visible = false;
-                      }
-                  }
-                  if (insIndex > 0) {
-                      ins.Visible = false; 
-                      ins.Staves.forEach(st => st.Visible = false);
-                  }
-              }
-              
-              if (compactPrefs.hideVoices && insIndex === 0) {
-                  if (ins.Voices) {
-                      ins.Voices.forEach(voice => {
-                          if (voice.VoiceId > 1) {
-                              voice.Visible = false;
-                          }
-                      });
-                  }
-              }
+    if (!osmd || !osmd.Sheet) return;
+    let compactPrefs = { hideBass: true, hideVoices: true, hideText: true };
+    if (window.DisplaySettings) compactPrefs = DisplaySettings.getCompactPrefs();
+    if (!_isCompactMode) {
+      osmd.setOptions({ drawComposer: true, drawCredits: true, drawSubtitle: true, drawLyricist: true });
+      return;
+    }
+    osmd.Sheet.Instruments.forEach((ins, insIndex) => {
+      if (ins.Staves) {
+        if (compactPrefs.hideBass) {
+          if (ins.Staves.length >= 2) {
+            for (let i = 1; i < ins.Staves.length; i++) ins.Staves[i].Visible = false;
           }
-      });
-
-      // Ẩn văn bản theo cấu hình
-      if (compactPrefs.hideText) {
-          osmd.setOptions({
-              drawComposer: false,
-              drawCredits: false,
-              drawSubtitle: false,
-              drawLyricist: false
-          });
-      } else {
-          osmd.setOptions({
-              drawComposer: true,
-              drawCredits: true,
-              drawSubtitle: true,
-              drawLyricist: true
-          });
+          if (insIndex > 0) {
+            ins.Visible = false;
+            ins.Staves.forEach(st => st.Visible = false);
+          }
+        }
+        if (compactPrefs.hideVoices && insIndex === 0 && ins.Voices) {
+          ins.Voices.forEach(voice => { if (voice.VoiceId > 1) voice.Visible = false; });
+        }
       }
+    });
 
-      // Title, Lyrics & Measure numbers visibility
-      osmd.setOptions({
-        drawTitle: !compactPrefs.hideTitle,
-        drawLyrics: !compactPrefs.hideLyrics,
-        drawMeasureNumbers: !compactPrefs.hideMeasureNumbers
-      });
-
-      // Ẩn/hiện chữ Điệp Khúc/Coda sau khi OSMD render xong SVG
-
-      setTimeout(() => _hideRepeatLabels(_isCompactMode), 400);
+    const drawCredits = !compactPrefs.hideText;
+    osmd.setOptions({
+      drawComposer: drawCredits,
+      drawCredits: drawCredits,
+      drawSubtitle: drawCredits,
+      drawLyricist: drawCredits,
+      drawTitle: !compactPrefs.hideTitle,
+      drawLyrics: !compactPrefs.hideLyrics,
+      drawMeasureNumbers: !compactPrefs.hideMeasureNumbers
+    });
+    setTimeout(() => _hideRepeatLabels(_isCompactMode), 400);
   }
 
-  return { init, load, reload, setZoom, setZoomSilent, getInstance, getIsLoaded, getCurrentXml, getCurrentZoom, onReady, destroy, setCompactMode, getCompactMode, refreshRules, getRenderToken: () => _renderToken };
+  return { init, load, reload, setZoom, setZoomSilent, getInstance, getIsLoaded, getCurrentXml, getCurrentZoom, onReady, destroy, setCompactMode, getCompactMode, refreshRules, tagChordSymbols: _tagChordSymbols, getRenderToken: () => _renderToken };
 })();
 
 window.OSMDRenderer = OSMDRenderer;

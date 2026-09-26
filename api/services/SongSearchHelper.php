@@ -165,6 +165,38 @@ class SongSearchHelper {
             return DB::run($sql, $params)->fetchAll() ?: [];
         }
 
+        // Ticket L0-7: Tìm theo số bài (chuỗi toàn chữ số hoặc #123 / bài 123)
+        $exactSongByNum = null;
+        if (preg_match('/^(?:#|bài\s+|bai\s+|stt\s+)?(\d+)$/ui', $cleanQuery, $m)) {
+            $songNum = (int)$m[1];
+            $numSql = "
+                SELECT s.id, s.title, s.httlvnId, s.xmlPath, s.defaultKey, s.category_id,
+                       s.liturgical_season, s.theme, s.composer, s.tags,
+                       c.name as category,
+                       0 as relevance_tier, 0 as fts_rank
+                FROM songs s
+                LEFT JOIN categories c ON s.category_id = c.id
+                WHERE s.httlvnId = ?
+            ";
+            $numParams = [$songNum];
+            if ($season !== '') {
+                $numSql .= " AND s.liturgical_season = ?";
+                $numParams[] = $season;
+            }
+            if ($theme !== '') {
+                $numSql .= " AND s.theme = ?";
+                $numParams[] = $theme;
+            }
+            if ($categoryId !== null) {
+                $numSql .= " AND s.category_id = ?";
+                $numParams[] = $categoryId;
+            }
+            $numRow = DB::run($numSql, $numParams)->fetch(PDO::FETCH_ASSOC);
+            if ($numRow) {
+                $exactSongByNum = $numRow;
+            }
+        }
+
         // Trường hợp 2: Có từ khóa tìm kiếm -> Sử dụng FTS5 và BM25 Relevance Ranking
         $unaccentedQuery = self::removeAccents($cleanQuery);
         $rawTerms = preg_split('/\s+/u', $unaccentedQuery, -1, PREG_SPLIT_NO_EMPTY);
@@ -177,7 +209,7 @@ class SongSearchHelper {
         }
 
         if (empty($safeTerms)) {
-            return [];
+            return $exactSongByNum ? [$exactSongByNum] : [];
         }
 
         $ftsMatchExpr = implode(' AND ', $safeTerms);
@@ -238,10 +270,20 @@ class SongSearchHelper {
                 }
                 unset($song['lyrics_text']);
             }
+
+            if ($exactSongByNum !== null) {
+                $rows = array_values(array_filter($rows, fn($r) => (string)$r['id'] !== (string)$exactSongByNum['id']));
+                array_unshift($rows, $exactSongByNum);
+            }
             return $rows;
         } catch (\Throwable $e) {
             // Graceful fallback: Nếu câu query FTS5 bị lỗi, fallback sang tìm kiếm LIKE
-            return self::fallbackLikeSearch($cleanQuery, $filters);
+            $rows = self::fallbackLikeSearch($cleanQuery, $filters);
+            if ($exactSongByNum !== null) {
+                $rows = array_values(array_filter($rows, fn($r) => $r['id'] !== $exactSongByNum['id']));
+                array_unshift($rows, $exactSongByNum);
+            }
+            return $rows;
         }
     }
 
