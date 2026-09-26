@@ -414,13 +414,15 @@ const DisplaySettings = (() => {
 
             // Core Rule 1 Fallback: Nếu bộ tùy biến (HD) rỗng, không xóa XML gốc mà giữ nguyên TLH
             if (Object.keys(customChords).length > 0) {
-                // Apply transpose vào custom chords trước khi inject
+                // Apply transpose và capo vào custom chords trước khi inject
                 const trOffset = window.App?.getCurrentTranspose?.() || 0;
+                const capo = window.Store?.get?.('capoLevel') || 0;
+                const chordShift = trOffset - capo;
                 let transposedChords = customChords;
-                if (trOffset !== 0 && window.TransposeEngine) {
+                if (chordShift !== 0 && window.TransposeEngine) {
                     transposedChords = {};
                     for (const [k, chord] of Object.entries(customChords)) {
-                        transposedChords[k] = window.TransposeEngine.transposeChord(chord, trOffset);
+                        transposedChords[k] = window.TransposeEngine.transposeChord(chord, chordShift);
                     }
                 }
 
@@ -437,9 +439,14 @@ const DisplaySettings = (() => {
     function _renderLyricView() {
         const xml = _buildLyricXml();
         const trOffset = window.App?.getCurrentTranspose?.() || 0;
+        const capo = window.Store?.get?.('capoLevel') || 0;
+        const chordShift = trOffset - capo;
         const currentSet = window.ChordCanvas?.getCurrentSet?.() || 'default';
-        // Nếu custom: đã transpose trong _buildLyricXml rồi, truyền 0 vào render
-        const renderOffset = (currentSet !== 'default') ? 0 : trOffset;
+        const customChords = window.ChordCanvas?.getCustomChords?.() || {};
+        const hasCustomChords = currentSet !== 'default' && Object.keys(customChords).length > 0;
+        // Nếu custom set có hợp âm riêng: đã transpose trong _buildLyricXml
+        // Nếu default hoặc custom rỗng (fallback TLH): truyền chordShift để LyricExtractor dịch hợp âm gốc thành thế bấm
+        const renderOffset = hasCustomChords ? 0 : chordShift;
         window.LyricExtractor?.render?.('lyric-view-container', xml, renderOffset);
     }
 

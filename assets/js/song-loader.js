@@ -229,7 +229,8 @@ const SongLoader = (() => {
     const chords = window.ChordCanvas?.getCustomChords?.();
     let list = (set !== 'default' && chords && Object.keys(chords).length > 0) ? Object.values(chords) : TransposeEngine.extractChordsFromXML(xml);
     const transpose = Store.get('currentTranspose');
-    AppUI.updateCapoBadge(TransposeEngine.suggestBestCapo(list.map(c => TransposeEngine.transposeChord(c, transpose))));
+    const best = TransposeEngine.suggestBestCapo(list.map(c => TransposeEngine.transposeChord(c, transpose)));
+    AppUI.updateCapoBadge(Store.get('capoLevel') || 0, best);
   }
 
   function _syncZoomUI(zoom) {
@@ -290,6 +291,7 @@ const SongLoader = (() => {
     const capoHint = document.getElementById('capo-hint');
     if (capoSel)  capoSel.value = '0';
     if (capoHint) capoHint.textContent = '';
+    AppUI.updateCapoBadge(0);
   }
 
   function _autoCloseSidebar() {

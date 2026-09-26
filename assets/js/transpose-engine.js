@@ -21,10 +21,15 @@ const TransposeEngine = (() => {
       return dir + SEMITONE_TO_INTERVAL[abs];
   }
 
+  function _getTonal() {
+    return (typeof window !== 'undefined' && window.Tonal) ? window.Tonal : ((typeof global !== 'undefined' && global.Tonal) ? global.Tonal : null);
+  }
+
   // Ép định dạng 1 nốt sang thăng/giáng dựa trên target config
   function forceEnharmonic(noteName, useFlats) {
-      if (!window.Tonal) return noteName;
-      const tNote = window.Tonal.Note.get(noteName);
+      const tonal = _getTonal();
+      if (!tonal) return noteName;
+      const tNote = tonal.Note.get(noteName);
       if (tNote.empty) return noteName;
       
       const chroma = tNote.chroma;
@@ -83,14 +88,15 @@ const TransposeEngine = (() => {
       if (useFlats === null) useFlats = _hasFlat(chordName);
 
       // Nếu Tonal không load được → dùng fallback nội bộ
-      if (!window.Tonal) {
+      const tonal = _getTonal();
+      if (!tonal) {
           return _manualTranspose(chordName, semitones, useFlats);
       }
 
       try {
           const interv = getInterval(semitones);
           // Tonal.Chord.transpose sẽ tự động dịch root và bass note!
-          let tr = window.Tonal.Chord.transpose(chordName, interv);
+          let tr = tonal.Chord.transpose(chordName, interv);
 
           // Phân tách Root và Bass để ép enharmonic
           const parts = tr.split('/');
@@ -125,7 +131,6 @@ const TransposeEngine = (() => {
   const OPEN_CHORDS = ['C', 'G', 'D', 'A', 'E', 'Am', 'Em', 'Dm'];
 
   function scoreCapoPos(chordList, capoFret) {
-      if (!window.Tonal) return -1;
       let score = 0;
       chordList.forEach(c => {
           // Khi kẹp Capo ở ngăn 2 (D -> C) thì hợp âm giảm 2 semitones
@@ -143,7 +148,7 @@ const TransposeEngine = (() => {
   }
 
   function suggestBestCapo(chordList) {
-      if (!chordList || chordList.length === 0 || !window.Tonal) return 0;
+      if (!chordList || chordList.length === 0) return 0;
       let bestCapo = 0;
       let maxScore = -1;
       
@@ -216,6 +221,9 @@ const TransposeEngine = (() => {
     if (!origKey) return '';
     const trimmed = String(origKey).trim();
     if (!trimmed) return '';
+    if (window.KeyService?.displayKey) {
+      return window.KeyService.displayKey(trimmed, semitones);
+    }
     if (!semitones || semitones === 0) return trimmed;
     try {
       const res = transposeChord(trimmed, semitones);
@@ -238,4 +246,9 @@ const TransposeEngine = (() => {
   return { transposeChord, calcKey, transposeXML, suggestBestCapo, extractChordsFromXML, NOTES_SHARP, NOTES_FLAT };
 })();
 
-window.TransposeEngine = TransposeEngine;
+if (typeof window !== 'undefined') {
+  window.TransposeEngine = TransposeEngine;
+}
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = TransposeEngine;
+}

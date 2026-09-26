@@ -40,12 +40,19 @@ const ToolbarController = (() => {
     document.getElementById('transpose-display')?.addEventListener('click', e =>
       { App?.resetTranspose?.(); });
 
-    document.getElementById('capo-select')?.addEventListener('change', e => {
+    const _onCapoChanged = (e) => {
       const newCapo = parseInt(e.target.value) || 0;
-      const delta   = newCapo - Store.get('currentTranspose');
       Store.set('capoLevel', newCapo);
-      if (delta !== 0) App?.transposeBy?.(delta);
-    });
+      AppUI.updateCapoBadge(newCapo);
+      const sel1 = document.getElementById('capo-select');
+      const sel2 = document.getElementById('menu-capo-select');
+      if (sel1 && sel1.value !== String(newCapo)) sel1.value = String(newCapo);
+      if (sel2 && sel2.value !== String(newCapo)) sel2.value = String(newCapo);
+      window.ChordCanvas?.reposition?.();
+      window.DisplaySettings?.renderLyricViewIfActive?.();
+    };
+    document.getElementById('capo-select')?.addEventListener('change', _onCapoChanged);
+    document.getElementById('menu-capo-select')?.addEventListener('change', _onCapoChanged);
   }
 
   function _bindZoom() {

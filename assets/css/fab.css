@@ -21,6 +21,12 @@
 }
 
 /* ---- WRAP ---- */
+/* Ticket L0-10: Mặc định ẩn FAB với khách, chỉ hiện khi đã đăng nhập */
+body:not(.logged-in) #fab-wrap,
+body:not(.logged-in) .fab-wrap {
+  display: none !important;
+}
+
 .fab-wrap {
   position: fixed !important;
   bottom: 24px;

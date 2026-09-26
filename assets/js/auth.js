@@ -209,11 +209,16 @@ const Auth = (() => {
     // Ghi chú — Admin only
     document.getElementById('btn-add-annotate-mode')?.classList.toggle('hidden', !canEdit);
 
-    // FAB items
+    // FAB items (Ticket L0-10: Ẩn FAB khi chưa đăng nhập để không đè lên nhạc)
+    document.body.classList.toggle('logged-in', !!_currentUser);
+    const fabWrap = document.getElementById('fab-wrap');
+    if (fabWrap) {
+      fabWrap.classList.toggle('hidden', !_currentUser);
+      fabWrap.style.display = _currentUser ? '' : 'none';
+    }
     document.getElementById('fab-chord')?.classList.toggle('hidden', !canEditChords);
     document.getElementById('fab-annotate')?.classList.toggle('hidden', !canEdit);
-    // FAB highlight — tất CẢ đều thấy
-    document.getElementById('fab-highlight')?.classList.remove('hidden');
+    document.getElementById('fab-highlight')?.classList.toggle('hidden', !_currentUser);
 
     // Nút thùng rác chord set — chỉ hiện khi có quyền
     const delBtn = document.getElementById('btn-delete-chord-set');
@@ -253,7 +258,11 @@ const Auth = (() => {
   function chooseGuestMode() {
     sessionStorage.setItem('sheetapp_guest_chosen', '1');
     closeModal();
-    window.App?.showToast?.('Đang xem dưới quyền Khách (Chỉ xem sheet & hợp âm)', 'info');
+    // Ticket L0-10: Toast chỉ hiện 1 lần duy nhất trên thiết bị rồi không hiện lại
+    if (!localStorage.getItem('sheetapp_guest_toast_shown')) {
+      localStorage.setItem('sheetapp_guest_toast_shown', '1');
+      window.App?.showToast?.('Đang xem dưới quyền Khách (Chỉ xem sheet & hợp âm)', 'info');
+    }
   }
 
   function init() {
@@ -439,7 +448,7 @@ const Auth = (() => {
   }
 
   return {
-    init, checkSession, login: doLogin, logout: doLogout, isAdmin, isLoggedIn, openModal, closeModal,
+    init, checkSession, login: doLogin, logout: doLogout, isAdmin, isLoggedIn, openModal, closeModal, chooseGuestMode,
     isBanhat: () => _canEditChords(),
     userId: () => _userId,
     getUserId: () => _userId,

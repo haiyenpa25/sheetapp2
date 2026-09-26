@@ -182,12 +182,20 @@ const LyricExtractor = (() => {
 
     const isInline = _currentMode === 'inline';
     const title = document.getElementById('song-title')?.textContent?.trim() || '';
-    const key   = document.getElementById('song-key')?.textContent?.trim()   || '';
+    const actualTranspose = window.Store?.get?.('currentTranspose') ?? window.App?.getCurrentTranspose?.() ?? transposeOffset ?? 0;
+    let key = document.getElementById('song-key')?.textContent?.trim() || '';
+    if (key === '--') key = '';
+    if (window.KeyService?.displayKey) {
+      const origKey = window.Store?.get?.('currentSong')?.defaultKey || window.SongInfoBar?.getSongKey?.() || '';
+      if (origKey) {
+        key = window.KeyService.displayKey(origKey, actualTranspose) || key;
+      }
+    }
     let html = '<div class="lv-wrapper">';
 
     if (title && title !== 'Chọn bài hát để bắt đầu') {
-      const trBadge = transposeOffset !== 0
-        ? `<span class="lv-trans-badge">${transposeOffset > 0 ? '+' : ''}${transposeOffset}</span>` : '';
+      const trBadge = actualTranspose !== 0
+        ? `<span class="lv-trans-badge">${actualTranspose > 0 ? '+' : ''}${actualTranspose}</span>` : '';
       const modeLabel   = isInline ? '↕ Dạng Hợp Âm' : '≡ Dạng Inline';
       const modeTitle   = isInline ? 'Chuyển sang kiểu hợp âm trên lời' : 'Chuyển sang kiểu hợp âm trong dòng';
       html += `
@@ -196,7 +204,7 @@ const LyricExtractor = (() => {
             <h2 class="lv-title">${title}</h2>
             <button class="lv-mode-btn" id="lv-mode-toggle" title="${modeTitle}">${modeLabel}</button>
           </div>
-          ${key ? `<p class="lv-key">🎼 Giọng <strong>${key}</strong>${trBadge}</p>` : ''}
+          ${key ? `<p class="lv-key">🎼 Tông <strong>${key}</strong>${trBadge}</p>` : ''}
         </header>`;
     }
 

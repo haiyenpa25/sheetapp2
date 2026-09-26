@@ -145,8 +145,27 @@
 /* Reset button nhỏ hơn */
 .pb-reset-btn { padding: .18rem .42rem !important; font-size: .73rem !important; }
 
-/* Capo badge (legacy hidden) */
-.capo-badge { display: none !important; }
+/* Capo badge (Ticket L0-12) */
+.capo-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 99px;
+  background: rgba(245, 158, 11, 0.18);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  color: #fbbf24;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.capo-badge:hover {
+  background: rgba(245, 158, 11, 0.28);
+}
+.capo-badge.hidden {
+  display: none !important;
+}
 
 /* Capo dropdown */
 .capo-wrap {

@@ -22,9 +22,9 @@
 
   <!-- SIDEBAR TABS -->
   <div class="sidebar-tabs" id="sidebar-tabs">
-    <button class="sidebar-tab active" id="sidebar-tab-lib" data-tab="library">Kho Nhac</button>
+    <button class="sidebar-tab active" id="sidebar-tab-lib" data-tab="library">Kho Nhạc</button>
     <button class="sidebar-tab" data-tab="setlist">Setlists</button>
-    <button class="sidebar-tab" id="sidebar-tab-favs" data-tab="favorites" title="Bai hat yeu thich">&#11088;</button>
+    <button class="sidebar-tab" id="sidebar-tab-favs" data-tab="favorites" title="Bài hát yêu thích">&#11088;</button>
   </div>
 
   <div class="sidebar-search">
@@ -41,8 +41,8 @@
 
     <div class="search-box" style="position:relative;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input id="search-input" type="text" placeholder="Tim bai hat..." autocomplete="off">
-      <button id="btn-search-lyrics" class="icon-btn-xs" title="Tim theo Loi bai hat" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:.8rem;opacity:.55;padding:.2rem .4rem;border-radius:4px;border:1px solid var(--border);background:var(--bg-overlay);">&#127925;</button>
+      <input id="search-input" type="text" placeholder="Tìm bài hát..." autocomplete="off">
+      <button id="btn-search-lyrics" class="icon-btn-xs" title="Tìm theo lời bài hát" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:.8rem;opacity:.55;padding:.2rem .4rem;border-radius:4px;border:1px solid var(--border);background:var(--bg-overlay);">&#127925;</button>
     </div>
 
     <!-- TAXONOMY FILTERS (EPIC 3.5) -->
@@ -88,17 +88,17 @@
     
     <button id="btn-admin-console" class="btn btn-sm w-full hidden" style="background: linear-gradient(135deg, #1e293b, #334155); color: #fff; border: none;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      Ban Quan Tri
+      Ban Quản Trị
     </button>
     <button id="btn-create-setlist" class="btn btn-primary btn-sm w-full hidden">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Tao Setlist Moi
+      Tạo Setlist Mới
     </button>
   </div>
 
   <!-- QUICK JUMP -->
   <div class="quick-jump" id="quick-jump">
-    <span class="quick-jump-label">Nhay nhanh:</span>
+    <span class="quick-jump-label">Nhảy nhanh:</span>
     <div class="quick-jump-btns" id="quick-jump-btns"></div>
   </div>
 
@@ -110,8 +110,8 @@
       <div id="song-list" class="song-list">
         <div class="empty-state">
           <span class="empty-icon">🎶</span>
-          <p>Chua co bai hat nao</p>
-          <small>Nhan "Them Bai Hat" de import</small>
+          <p>Chưa có bài hát nào</p>
+          <small>Nhấn "Thêm Bài Hát" để nhập bài</small>
         </div>
       </div>
     </div>
@@ -121,26 +121,26 @@
       <div id="setlist-list" class="song-list">
         <div class="empty-state">
           <span class="empty-icon">📋</span>
-          <p>Chua co Setlist nao</p>
-          <small>Chi Quan tri moi co the tao</small>
+          <p>Chưa có Setlist nào</p>
+          <small>Chỉ Quản trị mới có thể tạo</small>
         </div>
       </div>
       <div id="setlist-detail" class="song-list hidden setlist-detail-view">
         <div class="setlist-detail-header">
-          <button id="btn-back-setlists" class="icon-btn" title="Quay lai">
+          <button id="btn-back-setlists" class="icon-btn" title="Quay lại">
             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
           <h3 id="setlist-detail-title" class="setlist-detail-title">Setlist</h3>
           <div style="display:flex; gap:4px; align-items:center;">
             <button id="btn-print-setlist" class="icon-btn-xs" title="🖨️ In Chương Trình Biểu Diễn A4">🖨️</button>
             <button id="btn-copy-setlist-slide" class="icon-btn-xs" title="📋 Copy Danh Sách Cho Slide Màn Hình">📋</button>
-            <button id="btn-play-setlist" class="btn btn-sm btn-primary">Phat</button>
+            <button id="btn-play-setlist" class="btn btn-sm btn-primary">Phát</button>
           </div>
         </div>
 
         <div id="setlist-items" class="setlist-items"></div>
         <div id="setlist-add-container" class="setlist-add-container hidden">
-          <input type="text" id="setlist-search-song-input" class="form-input w-full" placeholder="Go tim bai hat de them..." autocomplete="off">
+          <input type="text" id="setlist-search-song-input" class="form-input w-full" placeholder="Gõ tìm bài hát để thêm..." autocomplete="off">
           <div id="setlist-search-results" class="song-list hidden setlist-search-results"></div>
         </div>
       </div>

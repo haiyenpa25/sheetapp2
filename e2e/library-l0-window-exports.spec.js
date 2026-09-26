@@ -47,7 +47,7 @@ test.describe('Ticket L0-1: Module Window Exports & Core Integrations', () => {
     await expect(chordBadge).toContainText('5 hợp âm', { timeout: 10000 });
 
     const siChordChip = page.locator('#si-chord-set-chip');
-    await expect(siChordChip).toContainText('5', { timeout: 10000 });
+    await expect(siChordChip).toHaveAttribute('title', /5\/17|5/, { timeout: 10000 });
   });
 
   test('Phím C bật chế độ sửa hợp âm khi đăng nhập và chặn khi là khách', async ({ page }) => {

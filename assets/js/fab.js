@@ -79,6 +79,11 @@ const FAB = (() => {
     });
     wrap.appendChild(main);
 
+    // Ticket L0-10: Ẩn FAB khi chưa đăng nhập để không che đè lên bản nhạc
+    const isLogged = window.Auth?.isLoggedIn?.() ?? false;
+    wrap.style.display = isLogged ? '' : 'none';
+    if (!isLogged) wrap.classList.add('hidden');
+
     document.body.appendChild(wrap);
   }
 

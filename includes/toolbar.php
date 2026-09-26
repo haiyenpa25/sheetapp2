@@ -25,17 +25,17 @@
       </button>
       <button id="btn-transpose-reset" class="btn-pill-reset" title="Về tông gốc của bài (phím 0)" disabled>Gốc</button>
 
-      <!-- Capo (ẩn gọn, tự động tính cho Guitar) -->
-      <div id="capo-wrap" class="capo-wrap hidden">
+      <!-- Capo (Chọn ngăn kẹp Capo & Gợi ý cho Guitar, Ticket L0-12) -->
+      <div id="capo-wrap" class="capo-wrap">
         <label for="capo-select" class="capo-label">Capo</label>
-        <select id="capo-select" class="capo-select" title="Chọn ngăn kẹp Capo">
-          <option value="0">0</option><option value="1">1</option><option value="2">2</option>
+        <select id="capo-select" class="capo-select" title="Chọn ngăn kẹp Capo (0-7)">
+          <option value="0" selected>0</option><option value="1">1</option><option value="2">2</option>
           <option value="3">3</option><option value="4">4</option><option value="5">5</option>
           <option value="6">6</option><option value="7">7</option>
         </select>
         <span id="capo-hint" class="capo-hint"></span>
       </div>
-      <span id="capo-badge" class="capo-badge hidden" style="display:none">Capo 0</span>
+      <span id="capo-badge" class="capo-badge" style="display:none">Capo 0</span>
     </div>
 
     <!-- Cụm Thu Phóng & Khóa Zoom (Zoom Pill) -->
@@ -265,6 +265,16 @@
             </button>
             <select id="menu-scroll-speed" class="select-toolbar" style="font-size:0.72rem;padding:1px 4px;margin-left:6px;">
               <option value="1" selected>1×</option><option value="2">2×</option><option value="3">3×</option><option value="4">4×</option>
+            </select>
+          </div>
+          <div class="audio-panel-row" style="margin-bottom: 6px;">
+            <span class="audio-panel-label">Kẹp Capo:</span>
+            <select id="menu-capo-select" class="select-toolbar" style="font-size:0.72rem;padding:1px 4px;margin-left:6px;" title="Chọn ngăn kẹp Capo">
+              <option value="0" selected>0 (Không kẹp)</option>
+              <option value="1">Ngăn 1</option><option value="2">Ngăn 2</option>
+              <option value="3">Ngăn 3</option><option value="4">Ngăn 4</option>
+              <option value="5">Ngăn 5</option><option value="6">Ngăn 6</option>
+              <option value="7">Ngăn 7</option>
             </select>
           </div>
           <div class="audio-panel-row">

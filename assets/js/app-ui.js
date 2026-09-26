@@ -122,28 +122,11 @@ const AppUI = (() => {
                            : '#f87171';
     }
 
-    // Sync Capo select: Capo ngăn = số tông tăng (0-7)
-    // Tăng 2 tông → kẹp ngăn 2 để đàn thế bấm gốc
-    const capoSel = document.getElementById('capo-select');
-    if (capoSel) {
-      if (currentTranspose >= 0 && currentTranspose <= 7) {
-        capoSel.value = String(currentTranspose);
-      } else {
-        capoSel.value = '0';
-      }
-    }
-    // Cập nhật capo hint với tên tông gốc
-    const capoHint = document.getElementById('capo-hint');
-    if (capoHint) {
-      if (currentTranspose > 0) {
-        const origKey = window.SongInfoBar?.getSongKey?.() || '';
-        // VD: "→ ngăn 2, đàn thế G gốc" hoặc "→ kẹp ngăn 2" nếu chưa biết key
-        capoHint.textContent = origKey
-          ? `→ ngăn ${currentTranspose}, đàn thế ${origKey} gốc`
-          : `→ kẹp ngăn ${currentTranspose}`;
-      } else {
-        capoHint.textContent = '';
-      }
+    // Cập nhật lại Capo Badge theo tông mới (F6/F12: bảo toàn dải 0-7)
+    if (currentTranspose >= 0 && currentTranspose <= 7) {
+      updateCapoBadge(window.Store?.get?.('capoLevel') || 0);
+    } else {
+      updateCapoBadge(window.Store?.get?.('capoLevel') || 0);
     }
 
     const btnUp   = document.getElementById('btn-transpose-up');
@@ -153,13 +136,69 @@ const AppUI = (() => {
   }
 
   /**
-   * updateCapoBadge — Hiển thị gợi ý capo TỐI ƯU (riêng biệt với capo select)
-   * Chỉ quản lý phần tử #capo-badge, KHÔNG đụng vào #capo-hint (do updateTransposeDisplay quản lý)
+   * updateCapoBadge — Hiển thị Capo badge đúng nghĩa (Ticket L0-12)
+   * - Capo N thì hiển thị badge: "Capo N · nghe ra [Key]"
+   * - Gợi ý capo tốt nhất (bestCapo) phải hiển thị (không bị ẩn)
    */
-  function updateCapoBadge(capoValue) {
+  function updateCapoBadge(capoValue, bestCapo = null) {
     const badge = document.getElementById('capo-badge');
+    const capoSel = document.getElementById('capo-select');
+    const capoHint = document.getElementById('capo-hint');
     if (!badge) return;
-    badge.style.display = 'none';
+
+    const curSong = window.Store?.get?.('currentSong');
+    const baseKey = curSong?.defaultKey || window.SongInfoBar?.getSongKey?.() || '';
+    const curTranspose = window.Store?.get?.('currentTranspose') || 0;
+    const soundingKey = (window.KeyService && baseKey)
+      ? window.KeyService.displayKey(baseKey, curTranspose)
+      : (baseKey || '');
+
+    const currentCapo = (typeof capoValue === 'number') ? capoValue : (window.Store?.get?.('capoLevel') || 0);
+
+    if (currentCapo > 0) {
+      // Đang kẹp capo: tính thế bấm
+      const fingeredKey = (window.KeyService && soundingKey)
+        ? window.KeyService.displayKey(soundingKey, -currentCapo)
+        : '';
+
+      badge.textContent = soundingKey ? `Capo ${currentCapo} · nghe ra ${soundingKey}` : `Capo ${currentCapo}`;
+      badge.title = fingeredKey ? `Thế bấm: ${fingeredKey} (Kẹp ngăn ${currentCapo} nghe ra ${soundingKey})` : `Capo ${currentCapo}`;
+      badge.classList.remove('hidden');
+      badge.style.display = 'inline-flex';
+
+      if (capoHint) {
+        capoHint.textContent = fingeredKey ? `→ thế ${fingeredKey}` : `→ ngăn ${currentCapo}`;
+      }
+      if (capoSel && capoSel.value !== String(currentCapo)) {
+        capoSel.value = String(currentCapo);
+      }
+    } else {
+      // Capo = 0: nếu có gợi ý capo tốt nhất (bestCapo)
+      const suggested = (typeof bestCapo === 'number' && bestCapo > 0)
+        ? bestCapo
+        : (typeof capoValue === 'number' && capoValue > 0 ? capoValue : null);
+
+      if (suggested && suggested > 0) {
+        const suggestedFingered = (window.KeyService && soundingKey)
+          ? window.KeyService.displayKey(soundingKey, -suggested)
+          : '';
+        badge.textContent = `💡 Gợi ý: Capo ${suggested}${suggestedFingered ? ` (thế ${suggestedFingered})` : ''}`;
+        badge.title = `Bấm để kẹp nhanh Capo ngăn ${suggested}`;
+        badge.classList.remove('hidden');
+        badge.style.display = 'inline-flex';
+        badge.onclick = () => {
+          if (capoSel) {
+            capoSel.value = String(suggested);
+            capoSel.dispatchEvent(new Event('change'));
+          }
+        };
+      } else {
+        badge.classList.add('hidden');
+        badge.style.display = 'none';
+      }
+      if (capoHint) capoHint.textContent = '';
+      if (capoSel && capoSel.value !== '0') capoSel.value = '0';
+    }
   }
 
   function updateSongInfo(song, transpose) {
@@ -191,7 +230,9 @@ const AppUI = (() => {
     const tVal = (typeof transpose === 'number') ? transpose : (window.Store?.get?.('currentTranspose') || 0);
 
     if (baseKey) {
-      if (tVal !== 0 && window.TransposeEngine?.transposeChord) {
+      if (window.KeyService?.displayKey) {
+        displayKey = window.KeyService.displayKey(baseKey, tVal) || baseKey;
+      } else if (tVal !== 0 && window.TransposeEngine?.transposeChord) {
         displayKey = TransposeEngine.transposeChord(baseKey, tVal) || baseKey;
       } else {
         displayKey = baseKey;

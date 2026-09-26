@@ -195,12 +195,9 @@ const LibraryUI = (() => {
     b.textContent = text;
     return b;
   }
-
   function _createActionBtn(cls, title, text) {
     const btn = document.createElement('button');
-    btn.className = cls;
-    btn.title = title;
-    btn.textContent = text;
+    btn.className = cls; btn.title = title; btn.textContent = text;
     return btn;
   }
 
@@ -568,40 +565,21 @@ const LibraryUI = (() => {
   }
 
   function _esc(str) {
-    if (window.SafeHtml && typeof window.SafeHtml.escape === 'function') {
-      return window.SafeHtml.escape(str);
-    }
-    return String(str ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
+    if (window.SafeHtml?.escape) return window.SafeHtml.escape(str);
+    return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
   }
 
   function _highlightText(text, query) {
     if (!text) return '';
     const safeText = _esc(text);
-    if (!query) return safeText;
-    const cleanQ = query.trim();
+    const cleanQ = (query || '').trim();
     if (!cleanQ) return safeText;
 
-    const map = {
-      a: '[aáàảãạăắằẳẵặâấầẩẫậ]',
-      e: '[eéèẻẽẹêếềểễệ]',
-      i: '[iíìỉĩị]',
-      o: '[oóòỏõọôốồổỗộơớờởỡợ]',
-      u: '[uúùủũụưứừửữự]',
-      y: '[yýỳỷỹỵ]',
-      d: '[dđ]'
-    };
+    const map = { a: '[aáàảãạăắằẳẵặâấầẩẫậ]', e: '[eéèẻẽẹêếềểễệ]', i: '[iíìỉĩị]', o: '[oóòỏõọôốồổỗộơớờởỡợ]', u: '[uúùủũụưứừửữự]', y: '[yýỳỷỹỵ]', d: '[dđ]' };
     const words = cleanQ.split(/\s+/).filter(Boolean);
-    const parts = words.map(w => {
-      return w.toLowerCase().split('').map(c => map[c] || c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('');
-    });
+    const parts = words.map(w => w.toLowerCase().split('').map(c => map[c] || c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join(''));
     if (parts.length === 0) return safeText;
-    const reg = new RegExp('(' + parts.join('|') + ')', 'gi');
-    return safeText.replace(reg, '<mark>$1</mark>');
+    return safeText.replace(new RegExp('(' + parts.join('|') + ')', 'gi'), '<mark>$1</mark>');
   }
 
   function onSelect(cb) { onSelectCb = cb; }
@@ -609,9 +587,7 @@ const LibraryUI = (() => {
   function getSongs()   { return songs; }
   function getActiveSong() { return songs.find(s => String(s.id) === String(activeSongId)) || null; }
   function getSongObj(id) {
-    return songs.find(s => String(s.id) === String(id))
-        || _lastRenderedSongs.find(s => String(s.id) === String(id))
-        || null;
+    return songs.find(s => String(s.id) === String(id)) || _lastRenderedSongs.find(s => String(s.id) === String(id)) || null;
   }
 
   return { init, loadSongs, render, selectSong, addSong, deleteSong, onSelect, onDelete, getSongs, getActiveSong, getSongObj };

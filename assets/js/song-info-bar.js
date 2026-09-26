@@ -132,6 +132,9 @@ const SongInfoBar = (() => {
     }
     const cleanOrig = String(origKey).trim();
     if (!semitones || semitones === 0) return cleanOrig;
+    if (window.KeyService?.displayKey) {
+      return window.KeyService.displayKey(cleanOrig, semitones) || cleanOrig;
+    }
     if (window.TransposeEngine?.calcKey) {
       return window.TransposeEngine.calcKey(cleanOrig, semitones) || cleanOrig;
     }
@@ -168,9 +171,9 @@ const SongInfoBar = (() => {
     if (origKey) {
       if (curTranspose !== 0) {
         const diffStr = curTranspose > 0 ? `+${curTranspose}` : `${curTranspose}`;
-        toneHtml = `🎵 Tone: <strong>${_esc(origKey)}</strong> | Tập: <strong>${_esc(practicedKey)}</strong> <span class="si-tone-diff">(${diffStr})</span>`;
+        toneHtml = `🎵 Tông: <strong>${_esc(origKey)}</strong> | Tập: <strong>${_esc(practicedKey)}</strong> <span class="si-tone-diff">(${diffStr})</span>`;
       } else {
-        toneHtml = `🎵 Tone: <strong>${_esc(origKey)}</strong> | Tập: <strong>${_esc(origKey)}</strong>`;
+        toneHtml = `🎵 Tông: <strong>${_esc(origKey)}</strong> | Tập: <strong>${_esc(origKey)}</strong>`;
       }
     } else {
       toneHtml = `🎵 Tập: <strong>${_esc(practicedKey)}</strong>`;
@@ -373,9 +376,11 @@ const SongInfoBar = (() => {
   /* Cập nhật chip Tông khi bấm nút dịch giọng trên toolbar */
   function _updateToneChip(semitones) {
     const toneChip = document.getElementById('si-tone-chip');
-    if (!toneChip || !_songData) return;
+    if (!toneChip) return;
 
-    const origKey = _songData.key || window.Store?.get?.('currentSong')?.defaultKey || '';
+    const origKey = _songData?.key || window.Store?.get?.('currentSong')?.defaultKey || '';
+    if (!origKey && !_songData) return;
+
     const semi = semitones ?? (window.Store?.get?.('currentTranspose') ?? 0);
     const practicedKey = _calcPracticedKey(origKey, semi);
 
@@ -383,9 +388,9 @@ const SongInfoBar = (() => {
     if (origKey) {
       if (semi !== 0) {
         const diffStr = semi > 0 ? `+${semi}` : `${semi}`;
-        toneHtml = `🎵 Tone: <strong>${_esc(origKey)}</strong> | Tập: <strong>${_esc(practicedKey)}</strong> <span class="si-tone-diff">(${diffStr})</span>`;
+        toneHtml = `🎵 Tông: <strong>${_esc(origKey)}</strong> | Tập: <strong>${_esc(practicedKey)}</strong> <span class="si-tone-diff">(${diffStr})</span>`;
       } else {
-        toneHtml = `🎵 Tone: <strong>${_esc(origKey)}</strong> | Tập: <strong>${_esc(origKey)}</strong>`;
+        toneHtml = `🎵 Tông: <strong>${_esc(origKey)}</strong> | Tập: <strong>${_esc(origKey)}</strong>`;
       }
     } else {
       toneHtml = `🎵 Tập: <strong>${_esc(practicedKey)}</strong>`;
@@ -476,7 +481,7 @@ const SongInfoBar = (() => {
   function getSongInfo() { return _songData; }
   function getSongKey()  { return _songData?.key || ''; }
 
-  return { init, loadSong, clearSong, getSongInfo, getSongKey, refreshChordChip, refreshNotesChip };
+  return { init, loadSong, clearSong, getSongInfo, getSongKey, refreshChordChip, refreshNotesChip, updateTranspose: _updateToneChip };
 })();
 
 window.SongInfoBar = SongInfoBar;

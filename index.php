@@ -210,6 +210,7 @@ echo "<script>
 </script>\n";
 echo jsTag('core/FeatureFlags.js', false);
 echo jsTag('core/SafeHtml.js',     false);
+echo jsTag('core/KeyService.js',   false);
 echo jsTag('core/ApiService.js',   false);
 echo jsTag('core/EventBus.js',     false);
 echo jsTag('core/Store.js',        false);
@@ -228,6 +229,7 @@ echo jsTag('core/OfflineSetlistManager.js', false);
 echo jsTag('osmd-renderer.js');
 echo jsTag('lyric-extractor.js');
 echo jsTag('transpose-engine.js');
+echo jsTag('key-service.js');
 echo jsTag('session-tracker.js');
 echo jsTag('auth.js');
 echo jsTag('history-manager.js');

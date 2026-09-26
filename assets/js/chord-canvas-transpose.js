@@ -74,11 +74,13 @@ const ChordCanvasTranspose = (() => {
 
   function applyTranspose(chordMap) {
     const semitones = window.App?.getCurrentTranspose?.() ?? 0;
-    if (semitones === 0) return chordMap;
-    const useFlats = getTransposedKeyUseFlats(semitones);
+    const capo = window.Store?.get?.('capoLevel') ?? 0;
+    const effectiveShift = semitones - capo;
+    if (effectiveShift === 0) return chordMap;
+    const useFlats = getTransposedKeyUseFlats(effectiveShift);
     const out = {};
     for (const [k, chord] of Object.entries(chordMap)) {
-      out[k] = TransposeEngine.transposeChord(chord, semitones, useFlats);
+      out[k] = TransposeEngine.transposeChord(chord, effectiveShift, useFlats);
     }
     return out;
   }

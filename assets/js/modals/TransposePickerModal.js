@@ -18,6 +18,9 @@
 
     function _calcTargetKey(orig, semi) {
       if (!orig) return '';
+      if (window.KeyService && window.KeyService.displayKey) {
+        return window.KeyService.displayKey(orig, semi) || orig;
+      }
       if (window.TransposeEngine && window.TransposeEngine.calcKey) {
         return window.TransposeEngine.calcKey(orig, semi) || orig;
       }
