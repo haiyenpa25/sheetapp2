@@ -1,0 +1,2526 @@
+/* =============================================
+   SheetApp — sheet.css
+   Sheet Viewer, OSMD, Chord Features, Page Bar
+   ============================================= */
+
+/* ---- SHEET VIEWER WRAPPER ---- */
+.sheet-viewer-wrapper {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  background: #eef0f7;
+  scroll-behavior: smooth;
+}
+
+/* ---- WELCOME SCREEN ---- */
+.welcome-screen { display: flex; align-items: center; justify-content: center; min-height: 100%; padding: 3rem 1.5rem; }
+.welcome-content { text-align: center; max-width: 480px; }
+.welcome-icon { font-size: 4rem; margin-bottom: 1rem; animation: float 3s ease-in-out infinite; }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+.welcome-content h2 { font-size: 1.6rem; font-weight: 700; margin-bottom: .6rem; }
+.welcome-content p { color: var(--text-secondary); font-size: .95rem; margin-bottom: 1.75rem; }
+.welcome-features { display: flex; flex-direction: column; gap: .75rem; text-align: left; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1.75rem; }
+.feature-item { display: flex; align-items: flex-start; gap: .75rem; }
+.feat-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: .1rem; }
+.feature-item strong { display: block; font-size: .875rem; margin-bottom: .1rem; }
+.feature-item small { color: var(--text-muted); font-size: .775rem; }
+
+/* ---- SKELETON LOADING ---- */
+.loading-screen {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-start;
+  min-height: 100%; padding: 3rem 2rem;
+}
+
+/* Shimmer animation — GPU-accelerated */
+@keyframes skeleton-shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.skeleton-bar {
+  border-radius: 4px;
+  background: linear-gradient(90deg,
+    #dde0f5 25%,
+    #eef0f7 50%,
+    #dde0f5 75%
+  );
+  background-size: 800px 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  display: block;
+}
+
+/* Utility sizes */
+.skeleton-bar.w-full  { width: 100%; }
+.skeleton-bar.w-40    { width: 40%; }
+.skeleton-bar.w-24    { width: 24%; }
+.skeleton-bar.h-px    { height: 2px; }
+.skeleton-bar.h-4     { height: 16px; }
+.skeleton-bar.h-6     { height: 24px; }
+.skeleton-bar.mx-auto { margin-left: auto; margin-right: auto; }
+.skeleton-bar.mt-2    { margin-top: 8px; }
+
+.skeleton-sheet { width: 100%; max-width: 720px; }
+.skeleton-title { text-align: center; margin-bottom: 2.5rem; }
+
+.skeleton-staff-row {
+  position: relative;
+  display: flex; align-items: center; gap: 1rem;
+  margin-bottom: 2rem;
+}
+.skeleton-clef {
+  width: 24px; flex-shrink: 0;
+  height: 48px;
+  background: linear-gradient(90deg, #dde0f5 25%, #eef0f7 50%, #dde0f5 75%);
+  background-size: 800px 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  border-radius: 4px;
+}
+.skeleton-lines {
+  flex: 1; position: relative; padding: 12px 0;
+}
+.skeleton-notes {
+  position: absolute; top: 0; left: 40px; right: 0; bottom: 0;
+  display: flex; align-items: center; gap: 10%;
+  pointer-events: none;
+}
+.skeleton-note {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, #c7cae8 25%, #dde0f5 50%, #c7cae8 75%);
+  background-size: 800px 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  flex-shrink: 0;
+}
+.skeleton-note.delay-1 { animation-delay: .15s; }
+.skeleton-note.delay-2 { animation-delay: .30s; }
+.skeleton-note.delay-3 { animation-delay: .45s; }
+.skeleton-loading-text {
+  color: var(--text-muted); font-size: .85rem;
+  margin-top: 1.5rem; letter-spacing: .02em;
+}
+.skeleton-staff-row.mt-8 { margin-top: 2rem; }
+
+/* Fallback spinner (dùng khi cần) */
+.spinner { width: 36px; height: 36px; border: 3px solid var(--bg-raised); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 1rem; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- SHEET AREA ---- */
+.sheet-area { position: relative; }
+
+/* ---- PAGE BAR ---- */
+.page-bar {
+  display: flex; align-items: center;
+  padding: .35rem 1rem;
+  background: rgba(255, 255, 255, 0.78);
+  border-bottom: 1px solid rgba(109, 40, 217, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  position: sticky; top: 0; z-index: 40;
+  flex-shrink: 0; gap: .35rem;
+  min-height: 44px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.02);
+}
+
+/* Nhóm controls trong page-bar */
+.pb-group {
+  display: flex; align-items: center; gap: .35rem;
+  flex-shrink: 0;
+}
+/* Separator trái — tạo đường phân cách giữa nhóm */
+.pb-sep {
+  padding-left: .65rem;
+  margin-left: .25rem;
+  border-left: 1px solid var(--border);
+}
+/* Spacer đẩy Nav sang phải */
+.pb-spacer { flex: 1; min-width: .25rem; }
+
+/* Nav buttons nhỏ gọn */
+.pb-nav-btn { width: 28px; height: 28px; }
+.page-indicator { font-size: .75rem; font-weight: 600; color: var(--text-secondary); font-family: var(--font-mono); min-width: 48px; text-align: center; }
+
+/* Reset button nhỏ hơn */
+.pb-reset-btn { padding: .18rem .42rem !important; font-size: .73rem !important; }
+
+/* Capo badge (legacy hidden) */
+.capo-badge { display: none !important; }
+
+/* Capo dropdown */
+.capo-wrap {
+  display: flex; align-items: center; gap: 4px;
+  background: var(--accent); border-radius: 99px;
+  padding: .1rem .4rem .1rem .55rem;
+}
+.capo-wrap.hidden { display: none !important; }
+.capo-label { font-size: .68rem; color: #fff; font-weight: 700; white-space: nowrap; }
+.capo-select {
+  font-size: .72rem; font-weight: 700; background: transparent;
+  color: #fff; border: none; outline: none; cursor: pointer;
+  padding: 0; width: 30px;
+}
+.capo-select option { background: var(--bg-surface); color: var(--text-primary); }
+.capo-hint {
+  font-size: .6rem; color: rgba(255,255,255,.8); max-width: 120px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ─── Performance Notes Panel ────────────────────────────── */
+#perf-notes-panel {
+  position: fixed; bottom: 60px; right: 16px; z-index: 9980;
+  width: 300px; background: var(--bg-surface);
+  border: 1px solid var(--border); border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.18);
+  font-size: .82rem; overflow: hidden;
+  animation: fadeSlideUp .18s ease;
+}
+#perf-notes-panel.hidden { display: none !important; }
+.pnp-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .55rem .75rem; background: var(--accent);
+  font-weight: 700; font-size: .8rem; color: #fff;
+}
+.pnp-header button {
+  background: transparent; border: none; color: rgba(255,255,255,.8);
+  font-size: 1rem; cursor: pointer; padding: 0 4px; line-height: 1;
+}
+.pnp-body { padding: .65rem .75rem; display: flex; flex-direction: column; gap: .5rem; }
+.pnp-row { display: flex; align-items: center; gap: .4rem; }
+.pnp-row label { font-size: .7rem; color: var(--text-muted); white-space: nowrap; min-width: 60px; }
+.pnp-row input {
+  flex: 1; padding: .25rem .45rem; border: 1px solid var(--border);
+  border-radius: 5px; font-size: .82rem; background: var(--bg-base);
+  color: var(--text-primary); outline: none;
+}
+.pnp-row-full { flex-direction: column; align-items: flex-start; }
+.pnp-row-full label { min-width: auto; }
+.pnp-row-full textarea {
+  width: 100%; box-sizing: border-box; resize: vertical;
+  min-height: 90px; padding: .35rem .5rem;
+  border: 1px solid var(--border); border-radius: 6px;
+  font-size: .8rem; font-family: inherit; line-height: 1.5;
+  background: var(--bg-base); color: var(--text-primary); outline: none;
+}
+.pnp-actions { display: flex; align-items: center; justify-content: flex-end; gap: .5rem; }
+.pnp-saved-hint { font-size: .7rem; color: var(--success); transition: opacity .3s; }
+
+/* ─── Read-only variant ─── */
+.pnp-header-readonly { background: #475569; } /* slate instead of accent */
+
+.pnp-readonly-badge {
+  display: inline-flex; align-items: center; gap: .3rem;
+  font-size: .68rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+  background: rgba(71,85,105,.1); color: #475569;
+  border: 1px solid rgba(71,85,105,.25); border-radius: 99px;
+  padding: .15rem .55rem; align-self: flex-start; margin-bottom: .2rem;
+}
+
+.pnp-view-content { display: flex; flex-direction: column; gap: .55rem; }
+
+.pnp-view-row {
+  display: flex; align-items: flex-start; gap: .5rem;
+}
+.pnp-view-label {
+  font-size: .68rem; color: var(--text-muted);
+  min-width: 68px; flex-shrink: 0; padding-top: 2px;
+}
+.pnp-view-val {
+  font-size: .85rem; font-weight: 700; color: var(--text-primary);
+}
+.pnp-val-key {
+  color: var(--accent); font-size: .9rem;
+}
+.pnp-view-notes-row { flex-direction: column; align-items: flex-start; }
+.pnp-view-notes {
+  font-size: .8rem; color: var(--text-secondary); line-height: 1.65;
+  background: var(--bg-overlay, #f8f9fa);
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: .45rem .6rem; width: 100%; box-sizing: border-box;
+  margin-top: .2rem; white-space: pre-wrap;
+}
+.pnp-empty {
+  font-size: .8rem; color: var(--text-muted); text-align: center;
+  padding: 1rem 0; font-style: italic;
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Guitar icon trong chord group */
+.pb-chord-icon { width: 14px; height: 14px; color: var(--text-muted); flex-shrink: 0; }
+
+/* Nút icon + text nhỏ */
+.pb-btn-icon-text {
+  display: inline-flex; align-items: center; gap: .25rem;
+  color: var(--accent) !important; font-weight: 600 !important;
+}
+.pb-btn-icon-text svg { width: 12px; height: 12px; }
+
+/* ── Nút Nhập HÂ (toggle chord edit mode) ── */
+.btn-chord-edit {
+  display: inline-flex; align-items: center; gap: .3rem;
+  padding: .22rem .55rem;
+  background: var(--bg-overlay);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: .775rem; font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.btn-chord-edit svg { width: 12px; height: 12px; flex-shrink: 0; }
+.btn-chord-edit:hover:not(:disabled) {
+  border-color: var(--accent); color: var(--accent);
+  background: rgba(109,40,217,.06);
+}
+.btn-chord-edit.active {
+  background: rgba(109,40,217,.12);
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(109,40,217,.15);
+}
+.btn-chord-edit:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ── Nút Nổi Bật (highlight mode) ── */
+#btn-chord-highlight {
+  display: inline-flex; align-items: center; gap: .3rem;
+  padding: .22rem .55rem;
+  background: var(--bg-overlay);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: .775rem; font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+#btn-chord-highlight svg { width: 12px; height: 12px; flex-shrink: 0; }
+#btn-chord-highlight:hover:not(:disabled) {
+  border-color: #7c3aed; color: #7c3aed;
+  background: rgba(109,40,217,.07);
+}
+#btn-chord-highlight.active {
+  background: linear-gradient(135deg, rgba(109,40,217,.9), rgba(139,92,246,.9));
+  border-color: #7c3aed;
+  color: #fff !important;
+  box-shadow: 0 2px 10px rgba(109,40,217,.4), 0 0 0 2px rgba(109,40,217,.18);
+}
+#btn-chord-highlight.active svg { stroke: #fff; }
+#btn-chord-highlight:disabled { opacity: .4; cursor: not-allowed; }
+
+
+/* ── Floating Chord Edit Hint ── */
+.chord-edit-hint {
+  display: flex; align-items: center; justify-content: center; gap: .6rem;
+  padding: .35rem 1.25rem;
+  background: #ecfdf5;
+  border-bottom: 1px solid #a7f3d0;
+  font-size: .8rem; color: #047857; font-weight: 600;
+  flex-shrink: 0; position: relative; z-index: 35;
+  animation: hintSlideDown .2s ease;
+}
+body.dark-mode .chord-edit-hint {
+  background: rgba(6, 78, 59, 0.45);
+  border-bottom-color: rgba(52, 211, 153, 0.3);
+  color: #6ee7b7;
+}
+.chord-edit-hint.hidden { display: none; }
+.hint-icon { width: 14px; height: 14px; flex-shrink: 0; color: #059669; }
+body.dark-mode .hint-icon { color: #34d399; }
+.hint-close-btn {
+  margin-left: 10px; background: #10b981; border: none;
+  color: #ffffff; cursor: pointer; font-size: .75rem; font-weight: 700;
+  padding: .2rem .75rem; border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+  transition: all var(--transition);
+}
+.hint-close-btn:hover { background: #059669; transform: translateY(-1px); }
+@keyframes hintSlideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Legacy — giữ cho link-btn và add-chord-hint JS compat */
+.link-btn { background: none; border: none; color: var(--danger); cursor: pointer; font-size: .78rem; font-weight: 600; text-decoration: underline; padding: 0; white-space: nowrap; }
+.add-chord-hint { font-size: .78rem; color: var(--accent); font-weight: 500; }
+
+
+/* ---- OSMD CONTAINER ---- */
+.osmd-container {
+  position: relative;
+  padding: 2rem 2rem;
+  max-width: 980px;
+  margin: 1.5rem auto;
+  background: #ffffff;
+  border-radius: var(--radius);
+  box-shadow: 0 2px 20px rgba(109,40,217,.10), 0 1px 4px rgba(0,0,0,.06);
+  min-height: 400px;
+  /* Fix box model — padding không làm container rộng hơn */
+  box-sizing: border-box;
+  /* Ngăn SVG tràn ngang */
+  overflow-x: hidden;
+}
+/* SVG luôn fit 100% chiều ngang container */
+.osmd-container svg {
+  width: 100% !important;
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ---- Tablet (iPad ≤ 900px) ---- */
+@media (max-width: 900px) {
+  .osmd-container {
+    /* Full width, không margin ngang — tránh phần tử là width chín xác */
+    max-width: calc(100% - 1rem);
+    width: calc(100% - 1rem);
+    margin: 0.5rem auto;
+    padding: 1.25rem 0.75rem;
+    border-radius: 8px;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+}
+
+/* ---- Mobile (≤ 768px) ---- */
+@media (max-width: 768px) {
+  .page-bar {
+    overflow-x: auto; scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    gap: .2rem; padding: .25rem .4rem;
+  }
+  .page-bar::-webkit-scrollbar { display: none; }
+  .pb-group { gap: .2rem; }
+  .pb-sep { padding-left: .35rem; margin-left: .35rem; }
+  .osmd-container {
+    max-width: calc(100% - 0.5rem);
+    width: calc(100% - 0.5rem);
+    padding: 0.75rem 0.5rem;
+    margin: 0.25rem auto;
+    border-radius: 6px;
+    min-height: 300px;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+  .welcome-screen { padding: 1.5rem 1rem; }
+  #btn-perf-notes .desktop-only { display: none; }
+}
+
+/* ---- Small phone (<480px) ---- */
+@media (max-width: 480px) {
+  .osmd-container { padding: 0.75rem 0.25rem; margin: 0.15rem; border-radius: 4px; }
+  /* Ẩn label text của mọi pb-btn */
+  .pb-btn-icon-text .desktop-only { display: none; }
+  /* Compact transpose buttons */
+  .transpose-controls .transpose-btn { width: 26px; height: 26px; }
+  .transpose-display { font-size: .75rem; min-width: 22px; }
+  /* Zoom select nhỏ lại */
+  .zoom-select { font-size: .75rem; }
+  /* Capo nhỏ lại */
+  .capo-label { display: none; }
+  .capo-select { width: 36px; }
+  /* Ẩn Nhật ký trên phone nhỏ nhất */
+  #btn-perf-notes { display: none; }
+}
+
+
+/* ---- Landscape (Xoay ngang) trên mobile/tablet ---- */
+@media (max-width: 900px) and (orientation: landscape) {
+  .osmd-container {
+    max-width: calc(100% - 1rem);
+    width: calc(100% - 1rem);
+    margin: 0.25rem auto;
+    padding: 0.75rem 0.75rem;
+    border-radius: 6px;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+  .page-bar {
+    min-height: 40px;
+    padding: .2rem .5rem;
+  }
+}
+
+/* ---- THU NHỎ TIÊU ĐỀ BÀI HÁT TRONG OSMD ----
+   OSMD render title rất to. CSS target tất cả text SVG có font-size > 18px.
+   Cách tiếp cận: dùng CSS font-size !important trên text trong #osmd-container
+   nhưng chỉ các text có class/position là title (thường là text đầu tiên, to nhất).
+   Dùng .osmd-title-compact class (toggle bởi JS) để kiểm soát. */
+/* Subtitle / composer / lyricist — preserve default styling */
+#osmd-container svg text[font-size="12"],
+#osmd-container svg text[font-size="13"],
+#osmd-container svg text[font-size="14"] {
+  opacity: 0.95;
+}
+/* Class để compact title — toggle thông qua .osmd-container.compact-title */
+#osmd-container.compact-title svg text:first-of-type {
+  font-size: 11px !important;
+}
+/* Compact title thông qua CSS var — cách an toàn hơn */
+#osmd-container {
+  --osmd-title-scale: 1;
+}
+
+
+/* ---- CHORD SET BAR ---- */
+.chord-set-bar {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  background: rgba(109,40,217,.06);
+  border: 1px solid rgba(109,40,217,.2);
+  border-radius: 6px;
+  padding: .2rem .5rem;
+  font-size: .78rem;
+}
+.chord-set-label {
+  display: flex;
+  align-items: center;
+  gap: .25rem;
+  font-size: .72rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.chord-set-select {
+  border: none;
+  background: transparent;
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--accent);
+  cursor: pointer;
+  min-width: 100px;
+  max-width: 160px;
+  outline: none;
+  padding: .1rem .2rem;
+}
+.chord-set-select:disabled { color: var(--text-muted); cursor: default; }
+.btn.btn-xs { font-size: .72rem; padding: .2rem .55rem; line-height: 1.4; border-radius: 5px; }
+.btn.btn-outline-primary {
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-weight: 700;
+}
+.btn.btn-outline-primary:hover {
+  background: rgba(109,40,217,.1);
+}
+
+/* ---- CC POPUP (chord entry popup) ---- */
+.cc-popup {
+  animation: ccPopIn .14s ease;
+}
+@keyframes ccPopIn {
+  from { opacity:0; transform: translateX(-50%) translateY(-6px); }
+  to   { opacity:1; transform: translateX(-50%) translateY(0); }
+}
+
+/* Mobile bottom sheet style */
+.cc-popup.cc-popup-mobile {
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  top: auto !important;
+  transform: translateY(100%) !important;
+  border-radius: 16px 16px 0 0 !important;
+  border: none !important;
+  border-top: 1px solid rgba(109, 40, 217, 0.3) !important;
+  padding: 1rem 1rem .5rem !important;
+  box-shadow: 0 -8px 32px rgba(109, 40, 217, .18) !important;
+  z-index: 99999 !important;
+  animation: none !important; /* Disable desktop pop-in */
+  transition: transform .28s cubic-bezier(0.32, 0.94, 0.6, 1) !important;
+  max-height: 75vh !important;
+  overflow-y: auto !important;
+}
+
+.cc-popup.cc-popup-mobile.active {
+  transform: translateY(0) !important;
+}
+
+/* ---- CC CHIPS IN CHORD POPUP ---- */
+.cc-chip {
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: .72rem;
+  font-weight: 700;
+  font-family: monospace;
+  border: 1px solid;
+  cursor: pointer;
+  white-space: nowrap;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 28px;
+  transition: transform .1s ease, background-color .15s ease, border-color .15s ease;
+}
+.cc-chip:hover {
+  transform: scale(1.04);
+}
+.cc-chip:active {
+  transform: scale(0.96);
+}
+
+/* Light mode colors */
+.cc-chip-hist {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fde68a;
+}
+.cc-chip-dia {
+  background: #f3f0ff;
+  color: #6d28d9;
+  border-color: #ddd6fe;
+}
+
+
+/* ---- CHORD DOT LAYER ---- */
+/* osmd-container là stacking context gốc cho tất cả chord overlays */
+.osmd-container { position: relative; isolation: isolate; }
+
+/* Layer thứ tự từ dưới lên:
+   1. SVG bản nhạc (z-index: auto)
+   2. Chord text custom (cc-dot, z-index: 80) — hiển thị hợp âm
+   3. Edit badge ✎ (z-index: 82) — chỉ khi edit mode
+   4. Popup nhập hợp âm (z-index: 99999) — trên cùng
+*/
+
+.osmd-wrapper { position: relative; }
+.chord-dot-layer { position: absolute; inset: 0; pointer-events: none; z-index: 60; overflow: visible; }
+
+/* cc-dot: absolute element được đặt trực tiếp vào osmd-container bởi JS */
+/* z-index: 80 được set inline trong JS */
+.cc-dot { position: absolute !important; }
+
+/* Nút tròn "+" — visual scale theo zoom (JS set width/height inline)
+   Touch area mở rộng qua ::after để đạt 44px tối thiểu (Apple HIG)
+   mà KHÔNG làm visual button to hơn */
+.cc-dot-btn {
+  display: none;
+  border-radius: 50%;
+  background: rgba(109, 40, 217, 0.82);
+  border: none;
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1;
+  transition: background .15s, transform .15s;
+  box-shadow: 0 1px 5px rgba(109,40,217,.40);
+  cursor: pointer;
+  /* Stacking context cho ::after */
+  position: absolute;
+  isolation: isolate;
+}
+
+/* Touch area invisible — mở rộng hit zone mà không làm visual to */
+.cc-dot-btn::after {
+  content: '';
+  position: absolute;
+  /* 44px tối thiểu theo Apple HIG — inset âm để mở rộng ra ngoài */
+  top: 50%; left: 50%;
+  width: 44px; height: 44px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+}
+
+.cc-dot-btn:hover,
+.cc-dot-btn:active {
+  background: rgba(109, 40, 217, 1);
+  transform: translateX(-50%) scale(1.2) !important;
+}
+
+/* Edit badge ✎ */
+.cc-edit-badge {
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform .12s, background .12s;
+}
+.cc-edit-badge:hover {
+  transform: translateX(-50%) scale(1.2) !important;
+  background: rgba(109, 40, 217, 1) !important;
+}
+
+/* Chord text hiển thị */
+.cc-chord-text {
+  font-size: .72rem;
+  font-weight: 800;
+  font-family: var(--font-mono, monospace);
+  color: #c00;
+  white-space: nowrap;
+  padding: 0 2px;
+  border-radius: 3px;
+  transition: background .12s;
+  pointer-events: auto;
+  cursor: pointer;
+}
+.cc-chord-text:hover { background: rgba(200,0,0,.1); }
+
+/* Legacy class names still used in older CSS refs */
+.chord-dot-btn { display: none; width: 18px; height: 18px; border-radius: 50%; background: rgba(109,40,217,0.75); border: none; color: #fff; font-size: 15px; line-height: 17px; text-align: center; transition: background .15s, transform .15s; box-shadow: 0 1px 4px rgba(109,40,217,.4); }
+.chord-dot-btn span { display:block; }
+.chord-dot-btn:hover { background: rgba(109,40,217,1); transform: translateX(-50%) scale(1.3) !important; }
+.dots-visible .chord-dot-btn { display: block; }
+
+/* Chữ hợp âm — LUÔN hiện (legacy) */
+.chord-dot-text {
+  font-size: .72rem;
+  font-weight: 800;
+  font-family: var(--font-mono, monospace);
+  color: #c00;
+  white-space: nowrap;
+  padding: 0 2px;
+  border-radius: 3px;
+  transition: background .12s;
+
+}
+.chord-dot-text:hover { background: rgba(200,0,0,.1); }
+
+/* ---- CHORD ENTRY POPUP ---- */
+.chord-entry-popup {
+  background: #fff;
+  border: 1.5px solid var(--accent, #6d28d9);
+  border-radius: 8px;
+  padding: .6rem .75rem;
+  box-shadow: 0 8px 28px rgba(109,40,217,.22);
+  min-width: 200px;
+  animation: cepIn .14s ease;
+  pointer-events: auto;
+}
+@keyframes cepIn {
+  from { opacity:0; transform: translateX(-50%) translateY(6px); }
+  to   { opacity:1; transform: translateX(-50%) translateY(0); }
+}
+.cep-label {
+  font-size: .68rem; font-weight: 700; color: var(--accent, #6d28d9);
+  text-transform: uppercase; letter-spacing: .5px; margin-bottom: .4rem;
+}
+.cep-input {
+  width: 100%; box-sizing: border-box;
+  border: 1px solid var(--border, #ddd); border-radius: 5px;
+  padding: .3rem .55rem; font-size: .92rem; font-weight: 700;
+  font-family: var(--font-mono, monospace); color: #c00;
+  outline: none; background: #fff; margin-bottom: .4rem;
+}
+.cep-input:focus { border-color: var(--accent, #6d28d9); box-shadow: 0 0 0 3px rgba(109,40,217,.15); }
+.cep-actions { display: flex; gap: .35rem; justify-content: flex-end; }
+
+
+
+/* ---- STAGE DARK MODE ---- */
+body.dark-mode .sheet-viewer-wrapper {
+  background: #111827;
+}
+body.dark-mode .osmd-container {
+  filter: invert(0.93) hue-rotate(180deg);
+  box-shadow: 0 4px 25px rgba(0,0,0,0.6);
+}
+body.dark-mode .page-bar {
+  background: rgba(17, 24, 39, 0.95);
+  border-bottom-color: #374151;
+}
+body.dark-mode .pb-sep { border-left-color: #374151; }
+body.dark-mode .page-indicator { color: #9ca3af; }
+body.dark-mode .pb-chord-icon { color: #6b7280; }
+body.dark-mode .btn-chord-edit {
+  background: rgba(255,255,255,.05); border-color: #374151; color: #9ca3af;
+}
+body.dark-mode .btn-chord-edit:hover:not(:disabled) {
+  border-color: var(--accent); color: var(--accent);
+}
+body.dark-mode .btn-chord-edit.active {
+  background: rgba(109,40,217,.2); border-color: var(--accent); color: var(--accent);
+}
+body.dark-mode #btn-chord-highlight {
+  background: rgba(255,255,255,.04); border-color: #374151; color: #9ca3af;
+}
+body.dark-mode #btn-chord-highlight:hover:not(:disabled) {
+  border-color: var(--accent); color: #a78bfa;
+}
+body.dark-mode #btn-chord-highlight.active {
+  background: linear-gradient(135deg, rgba(109,40,217,.8), rgba(139,92,246,.8));
+  border-color: #7c3aed; color: #fff !important;
+  box-shadow: 0 2px 12px rgba(109,40,217,.5), 0 0 0 2px rgba(109,40,217,.25);
+}
+body.dark-mode .chord-edit-hint {
+  background: linear-gradient(90deg, rgba(109,40,217,.12) 0%, rgba(109,40,217,.06) 100%);
+  border-bottom-color: rgba(109,40,217,.3);
+}
+
+
+/* ---- PRINT STYLES ---- */
+@media print {
+  /* Ẩn UI */
+  .sidebar,.toolbar,.session-panel,.modal-overlay,.toast-container,
+  #welcome-screen,#loading-screen,
+  .page-bar,.fab-container,.chord-edit-hint,#perf-notes-panel,
+  .btn-add-chord-mode,.btn-cancel-add-chord { display: none !important; }
+
+  /* Layout full */
+  body { display: block !important; background: #fff !important; color: #000 !important; overflow: visible !important; }
+  .main-content { display: block !important; overflow: visible !important; margin: 0 !important; }
+  .sheet-viewer-wrapper { overflow: visible !important; height: auto !important; padding: 0 !important; }
+  .osmd-container { display: block !important; padding: 0 !important; max-width: 100% !important; margin: 0 !important; position: relative !important; }
+  .osmd-container svg { width: 100% !important; height: auto !important; }
+  .osmd-container svg path, .osmd-container svg line { stroke: #000 !important; }
+  .osmd-container svg text { fill: #000 !important; }
+
+  /* ── Custom chord badges (DOM Overlay) ── */
+  .cc-dot { display: block !important; }
+
+  /* Edit badge ✎ — ẩn khi in (không cần) */
+  .cc-edit-badge, .cc-dot-btn { display: none !important; }
+
+  /* View mode badge (pill đỏ nhạt) — in với màu đỏ rõ ràng */
+  .cc-custom-chord-text {
+    display: block !important;
+    color: #c00 !important;
+    background: transparent !important;
+    border: 1px solid rgba(192,0,0,0.4) !important;
+    border-radius: 4px !important;
+    padding: 0 4px !important;
+    font-weight: 700 !important;
+    font-size: 11pt !important;
+    box-shadow: none !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+
+  /* Highlight mode badge (tím) — in với màu tím đậm */
+  .cc-custom-chord-text[style*="rgba(109,40,217"] {
+    color: #5b21b6 !important;
+    background: transparent !important;
+    border-color: #5b21b6 !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+
+  /* Chord text (legacy default set) */
+  .chord-dot-text { color: #c00 !important; font-weight: 700 !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+
+  /* Annotation in ra — ẩn edit icon, giữ text */
+  .annotation-layer { display: block !important; }
+  .ann-note-edit-btn { display: none !important; }
+
+  /* Capo hint in ra nếu có */
+  #capo-wrap { display: flex !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
+
+
+/* =============================================
+   LYRIC VIEWER v3 — Word-wrap flow + Premium pills
+   ============================================= */
+
+/* ══ Container ═══════════════════════════════ */
+.lyric-view-container {
+  max-width: 860px;
+  margin: 1.5rem auto;
+  padding: 2rem 2.25rem 3.5rem;
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 28px rgba(109,40,217,.09), 0 1px 6px rgba(0,0,0,.05);
+  min-height: 400px;
+  font-family: 'Inter', system-ui, sans-serif;
+
+  /* Chord token */
+  --lv-chord-color: #e11d48;
+  --lv-chord-size:  0.78em;
+
+  /* font-size is set via app.js for zoom: e.g. font-size: 120% */
+  font-size: 100%;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+/* ══ Dark mode ═══════════════════════════════ */
+body.dark-mode .lyric-view-container {
+  background: #111320;
+  color: #dde3f0;
+  box-shadow: 0 6px 40px rgba(0,0,0,.6);
+}
+body.dark-mode .lv-chord {
+  color: #f87171 !important;
+  border-bottom-color: rgba(248,113,113,.25) !important;
+}
+body.dark-mode .lv-syl       { color: #c8d0e5; }
+body.dark-mode .lv-header    { border-bottom-color: rgba(255,255,255,.08); }
+body.dark-mode .lv-regular   { background: rgba(255,255,255,.02); border-color: rgba(109,40,217,.2); }
+body.dark-mode .lv-chorus    { background: rgba(251,191,36,.07); border-color: rgba(251,191,36,.3); }
+body.dark-mode .lv-pill-verse  { background: rgba(109,40,217,.25); color: #a78bfa; }
+body.dark-mode .lv-pill-chorus { background: rgba(217,119,6,.25); color: #fcd34d; }
+body.dark-mode .lv-title     { color: #e2e8f0; }
+
+/* ══ Outer wrapper ═══════════════════════════ */
+.lv-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ══ Song header ═════════════════════════════ */
+.lv-header {
+  text-align: center;
+  padding-bottom: 1.25rem;
+  border-bottom: 1.5px solid var(--border);
+}
+.lv-title {
+  font-size: 1.5em;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+  line-height: 1.25;
+  margin-bottom: 0.4em;
+}
+.lv-key {
+  font-size: 0.78em;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35em;
+}
+.lv-key strong { color: var(--accent); font-weight: 700; }
+.lv-trans-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.05em 0.5em;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 99px;
+  font-size: 0.82em;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+/* ══ Verse section ═══════════════════════════ */
+.lv-verse {
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.25rem 1.1rem;
+  border: 1.5px solid transparent;
+}
+.lv-regular {
+  background: rgba(109,40,217,.025);
+  border-color: rgba(109,40,217,.12);
+}
+.lv-chorus {
+  background: rgba(245,158,11,.06);
+  border-color: rgba(245,158,11,.3);
+  position: relative;
+}
+/* Decorative left accent for chorus */
+.lv-chorus::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3.5px;
+  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  background: linear-gradient(180deg, #f59e0b, #fbbf24);
+}
+
+/* ══ Section label row ════════════════════════ */
+.lv-label-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.9em;
+}
+.lv-label-row::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.12;
+}
+
+/* ═ Pill badge ═ */
+.lv-verse-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  padding: 0.22em 0.75em 0.22em 0.6em;
+  border-radius: 99px;
+  font-size: 0.65em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  user-select: none;
+}
+.lv-pill-verse {
+  background: rgba(109,40,217,.1);
+  color: var(--accent);
+}
+.lv-pill-chorus {
+  background: rgba(217,119,6,.12);
+  color: #b45309;
+  box-shadow: 0 0 0 1.5px rgba(245,158,11,.35);
+}
+.lv-pill-icon {
+  font-size: 0.9em;
+  opacity: 0.85;
+}
+
+/* ══ THE KEY PART: word-wrap flow ═════════════
+   All syllables in one flex container.
+   flex-wrap: wrap → natural text reflow.
+   When font is small: many words per line.
+   When zoomed (font-size: 140%): fewer per line, wraps down.
+   ═══════════════════════════════════════════ */
+.lv-flow {
+  display: flex;
+  flex-wrap: wrap;       /* WORD-WRAP: browser decides line length */
+  align-items: flex-end; /* chords+lyric as unit, bottoms aligned */
+  column-gap: 0;
+  row-gap: 1.55em;       /* space between wrapped rows */
+  overflow: visible;
+}
+
+/* ══ Each chord+syllable pair ════════════════ */
+.lv-pair {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+/* Word-end: a little right margin acts as the space between words */
+.lv-we { margin-right: 0.42em; }
+/* Word-mid: glued syllable — no space */
+.lv-wm { margin-right: 0.02em; }
+
+/* Hyphen between glued syllables */
+.lv-wm .lv-syl::after {
+  content: '-';
+  opacity: 0.35;
+  margin-left: 1px;
+}
+
+/* ══ Chord symbol ════════════════════════════ */
+.lv-chord {
+  display: block;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: var(--lv-chord-size);
+  font-weight: 800;
+  color: var(--lv-chord-color);
+  line-height: 1;
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.25em;
+  min-height: calc(var(--lv-chord-size) * 1.5);  /* keeps empty slots in line */
+  padding-bottom: 1px;
+  border-bottom: 1.5px dotted rgba(225,29,72,.28);
+}
+.lv-chord-empty {
+  visibility: hidden;
+  border-bottom-color: transparent !important;
+  pointer-events: none;
+}
+
+/* ══ Lyric syllable ══════════════════════════ */
+.lv-syl {
+  display: block;
+  font-size: 1.15em;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+.lv-rest { color: transparent !important; user-select: none; }
+
+/* ══ Verse label color variants ══════════════ */
+
+/* ══ Empty state ══════════════════════════════ */
+.lv-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 4rem 2rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+.lv-empty span { font-size: 2.5rem; }
+.lv-empty strong { color: var(--text-secondary); }
+.lv-empty p { font-size: 0.85rem; }
+
+/* ══ Mobile ══════════════════════════════════ */
+@media (max-width: 600px) {
+  .lyric-view-container {
+    margin: 0.5rem;
+    padding: 1.25rem 1rem 2rem;
+    --lv-chord-size: 0.75em;
+  }
+  .lv-syl { font-size: 1.05em; }
+  .lv-flow { row-gap: 1.35em; }
+  .lv-verse { padding: 0.75rem 0.9rem 0.85rem; }
+}
+
+/* ══ Print ═══════════════════════════════════ */
+@media print {
+  .lyric-view-container {
+    max-width: 100%;
+    box-shadow: none;
+    margin: 0;
+    padding: 1rem;
+  }
+  .lv-verse { border: 1px solid #ddd !important; background: none !important; }
+  .lv-chorus::before { display: none; }
+}
+
+/* ══ Mode toggle button ══════════════════════ */
+.lv-header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.lv-mode-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  padding: 0.3em 0.85em;
+  border-radius: 99px;
+  border: 1.5px solid rgba(109,40,217,.25);
+  background: rgba(109,40,217,.06);
+  color: var(--accent);
+  font-size: 0.7em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.18s, border-color 0.18s, transform 0.12s;
+  margin-top: 0.15em;
+  align-self: flex-start;
+}
+.lv-mode-btn:hover {
+  background: rgba(109,40,217,.14);
+  border-color: rgba(109,40,217,.5);
+  transform: translateY(-1px);
+}
+body.dark-mode .lv-mode-btn {
+  border-color: rgba(167,139,250,.35);
+  background: rgba(167,139,250,.1);
+  color: #a78bfa;
+}
+
+/* ══ INLINE MODE — [C] word word [D] word ════ */
+.lvi-line {
+  font-size: 1.1em;
+  font-weight: 500;
+  line-height: 1.9;
+  color: var(--text-primary);
+  margin: 0;
+  word-break: break-word;
+}
+
+.lvi-token {
+  display: inline;
+}
+
+.lvi-chord {
+  display: inline;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 0.82em;
+  font-weight: 800;
+  color: var(--lv-chord-color);
+  letter-spacing: -0.01em;
+}
+
+.lvi-word {
+  display: inline;
+  color: var(--text-primary);
+}
+
+.lvi-word-only {
+  display: inline;
+  color: var(--text-primary);
+}
+
+/* Dark mode inline */
+body.dark-mode .lvi-chord {
+  color: #f87171 !important;
+}
+body.dark-mode .lvi-line,
+body.dark-mode .lvi-word,
+body.dark-mode .lvi-word-only {
+  color: #c8d0e5;
+}
+
+/* Mobile inline */
+@media (max-width: 600px) {
+  .lvi-line { font-size: 1em; line-height: 1.8; }
+}
+
+/* Print inline */
+@media print {
+  .lv-mode-btn { display: none; }
+}
+
+/* =============================================
+   OSMD TITLE — làm đẹp tên bài trong sheet nhạc
+   ============================================= */
+
+/* Title text được class bởi _compactTitleSVG */
+#osmd-container svg text.osmd-title-text {
+  font-weight: 600 !important;
+  letter-spacing: 0.03em !important;
+  fill: #1a1a2e !important;
+}
+
+/* Ẩn mọi rect background xấu trong vùng title (nếu có) */
+#osmd-container svg > rect:first-of-type {
+  display: none;
+}
+
+/* Paper (page) SVG — nền trắng sạch */
+#osmd-container svg .vf-page,
+#osmd-container svg [class*="page"] {
+  background: white;
+}
+
+/* =============================================
+/* =============================================
+   SPRINT A1 — Song Info Strip (Single Row Consolidate)
+   ============================================= */
+.song-info-strip {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  background: linear-gradient(90deg, #f0f4ff 0%, #f8f6ff 100%);
+  border-bottom: 1px solid #e5e7eb;
+  padding: .2rem .75rem;
+  font-size: .75rem;
+  color: #4b5563;
+  min-height: 32px;
+  flex-shrink: 0;
+  transition: all .2s ease;
+  overflow: hidden;
+}
+.song-info-strip.si-hidden { display: none !important; }
+.si-inner {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex: 1;
+  min-width: 0;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+}
+.si-inner::-webkit-scrollbar { display: none; }
+.si-inner.si-collapsed { display: none !important; }
+
+.si-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 9px;
+  padding: .12rem .5rem;
+  font-size: .72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  user-select: none;
+}
+.si-chip strong { font-weight: 800; }
+
+.si-key {
+  border-color: #a78bfa;
+  color: #6d28d9;
+  background: #f5f3ff;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.si-key:hover {
+  border-color: #7c3aed;
+  background: #ede9fe;
+  transform: translateY(-1px);
+}
+.si-tone-diff {
+  font-size: .66rem;
+  font-weight: 700;
+  opacity: .85;
+  margin-left: 2px;
+}
+.si-setlist-chip {
+  border-color: #c4b5fd;
+  color: #6d28d9;
+  background: rgba(109, 40, 217, 0.12);
+  font-weight: 700;
+}
+.si-time    { border-color: #93c5fd; color: #1d4ed8; background: #eff6ff; }
+.si-tempo   {
+  border-color: #34d399;
+  color: #065f46;
+  background: #ecfdf5;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.si-tempo:hover {
+  border-color: #059669;
+  background: #d1fae5;
+  transform: translateY(-1px);
+  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.2);
+}
+.si-tempo:active {
+  transform: scale(0.97);
+}
+.si-measures{ border-color: #fcd34d; color: #92400e; background: #fffbeb; }
+.si-chord-set     { border-color: #d1d5db; color: #6b7280; background: #f9fafb; }
+.si-chord-has     { border-color: #86efac; color: #15803d; background: #f0fdf4; }
+.si-chord-empty   { border-color: #d1d5db; color: #9ca3af; background: #f9fafb; font-style: italic; }
+.si-notes {
+  border-color: #fca5a5;
+  color: #b91c1c;
+  background: #fff5f5;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Các nút hành động inline trong strip */
+.si-chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  border-radius: 6px;
+  padding: .15rem .55rem;
+  font-size: .72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: all .15s ease;
+}
+.si-btn-edit {
+  background: white;
+  border: 1px solid #d1d5db;
+  color: #4b5563;
+}
+.si-btn-edit:hover {
+  border-color: #a78bfa;
+  color: #6d28d9;
+  background: #f5f3ff;
+}
+.si-btn-save-setlist {
+  background: #059669;
+  border: 1px solid #047857;
+  color: #ffffff !important;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(5, 150, 105, 0.35);
+}
+.si-btn-save-setlist:hover {
+  background: #047857;
+  transform: translateY(-1px);
+}
+.si-btn-save-setlist:active {
+  transform: scale(0.97);
+}
+
+.si-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  padding: 0 .3rem;
+  font-size: .8rem;
+  transition: color .15s;
+  flex-shrink: 0;
+}
+.si-toggle:hover { color: #6d28d9; }
+
+/* Setlist Item BPM button & tag */
+.btn-save-bpm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #059669;
+  border: 1px solid #047857;
+  color: #ffffff;
+  border-radius: 6px;
+  padding: 0.22rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  touch-action: manipulation;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(5, 150, 105, 0.25);
+}
+.btn-save-bpm:hover {
+  background: #047857;
+  transform: translateY(-1px);
+}
+.btn-save-bpm:active {
+  transform: scale(0.96);
+}
+.setlist-item-bpm.btn-edit-bpm {
+  cursor: pointer;
+  border-bottom: 1.5px dashed #059669;
+  color: #065f46;
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+.setlist-item-bpm.btn-edit-bpm:hover {
+  background: #d1fae5;
+  color: #047857;
+}
+
+@media (max-width: 768px) {
+  .song-info-strip {
+    padding: .3rem .5rem;
+    min-height: 36px;
+  }
+  .si-inner {
+    gap: .35rem;
+  }
+  .si-chip, .si-chip-btn {
+    padding: .2rem .5rem;
+    font-size: .72rem;
+  }
+  .si-btn-save-setlist {
+    padding: .22rem .6rem;
+    font-size: .74rem;
+  }
+  .btn-save-bpm {
+    padding: .28rem .65rem;
+    font-size: .74rem;
+  }
+}
+
+
+/* =============================================
+   SPRINT B — Volume Slider
+   ============================================= */
+.volume-icon { font-size: .9rem; cursor: default; user-select: none; }
+.volume-slider {
+  -webkit-appearance: none; appearance: none;
+  width: 70px; height: 4px;
+  border-radius: 2px; outline: none; cursor: pointer;
+  background: linear-gradient(to right, var(--accent, #7c3aed) 0%, var(--accent, #7c3aed) 80%, #d1d5db 80%);
+  transition: width .2s;
+}
+.volume-slider:disabled { opacity: .4; cursor: not-allowed; }
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 12px; height: 12px;
+  border-radius: 50%; background: var(--accent, #7c3aed); cursor: pointer;
+}
+@media (max-width: 768px) { .volume-slider { width: 50px; } }
+@media (max-width: 480px) { #volume-group { display: none; } }
+
+/* =============================================
+   SPRINT C1 — Annotation Colors
+   ============================================= */
+.ano-color-row {
+  display: flex; gap: 4px; margin-bottom: .4rem; flex-wrap: wrap;
+}
+.ano-color-btn {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 2px solid transparent; cursor: pointer;
+  transition: transform .1s, border-color .1s;
+}
+.ano-color-btn.active, .ano-color-btn:hover { transform: scale(1.2); border-color: #4b5563; }
+.ano-icon-row {
+  display: flex; gap: 4px; margin-bottom: .4rem; flex-wrap: wrap;
+}
+.ano-icon-btn {
+  padding: .1rem .35rem; border-radius: 6px; font-size: .8rem;
+  border: 1px solid #e5e7eb; background: white; cursor: pointer;
+  transition: background .1s;
+}
+.ano-icon-btn.active, .ano-icon-btn:hover { background: #ede9fe; border-color: #a78bfa; }
+/* Dynamic annotation dot colors */
+.ano-dot[data-color="blue"]   { background: #dbeafe !important; border-color: #3b82f6 !important; color: #1d4ed8 !important; }
+.ano-dot[data-color="red"]    { background: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+.ano-dot[data-color="green"]  { background: #d1fae5 !important; border-color: #10b981 !important; color: #065f46 !important; }
+.ano-dot[data-color="purple"] { background: #ede9fe !important; border-color: #8b5cf6 !important; color: #5b21b6 !important; }
+.ano-dot[data-color="yellow"] { background: #fef3c7 !important; border-color: #d97706 !important; color: #92400e !important; }
+
+/* =============================================
+   SPRINT E1 — Measure Progress Bar
+   ============================================= */
+.measure-progress-bar {
+  position: sticky; bottom: 0;
+  height: 5px; width: 100%;
+  background: rgba(0,0,0,.08);
+  cursor: pointer; flex-shrink: 0;
+  z-index: 40;
+}
+.measure-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #7c3aed, #a78bfa);
+  width: 0%; transition: width .3s ease;
+  border-radius: 0 3px 3px 0;
+}
+
+/* =============================================
+   SPRINT F1 — True Dark Mode
+   ============================================= */
+body.dark-mode {
+  --bg-base:    #0f0f14;
+  --bg-sidebar: #12121a;
+  --bg-surface: #1a1a24;
+  --text-primary:   #e4e4ec;
+  --text-secondary: #9999b0;
+  --border:     #2a2a38;
+  --accent:     #a78bfa;
+}
+body.dark-mode .toolbar,
+body.dark-mode .page-bar {
+  background: rgba(26, 26, 36, 0.78) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: var(--text-primary, #e4e4ec) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+}
+body.dark-mode .song-info-strip {
+  background: var(--bg-surface, #1a1a24) !important;
+  border-color: var(--border, #2a2a38) !important;
+  color: var(--text-primary, #e4e4ec) !important;
+}
+body.dark-mode .si-chip {
+  background: #1e1e2c;
+  border-color: #2e2e42;
+  color: #e4e4ec;
+}
+body.dark-mode .si-key {
+  border-color: #6d28d9;
+  color: #c4b5fd;
+  background: rgba(109, 40, 217, 0.2);
+}
+body.dark-mode .si-btn-edit {
+  background: #1e1e2c;
+  border-color: #3b3b50;
+  color: #9ca3af;
+}
+body.dark-mode .sheet-viewer-wrapper { background: #0c0c14 !important; }
+body.dark-mode .osmd-container {
+  background: #1a1a24 !important;
+  box-shadow: 0 4px 32px rgba(0,0,0,.5) !important;
+}
+/* Invert sheet lightly for dark mode (không full invert tránh lộn màu hợp âm) */
+body.dark-mode #osmd-container svg {
+  filter: invert(0.88) hue-rotate(185deg) brightness(0.92);
+}
+body.dark-mode .sidebar { background: var(--bg-sidebar, #12121a) !important; }
+body.dark-mode .song-item:hover { background: #1e1e2e !important; }
+body.dark-mode .song-item.active { background: #2d1f52 !important; }
+/* Dark mode toggle button glow khi active */
+#btn-dark-toggle.dark-active {
+  color: #a78bfa !important;
+  background: rgba(167,139,250,.12) !important;
+}
+
+/* Dark mode cho các modal, dropdown */
+body.dark-mode .dropdown-menu,
+body.dark-mode .cc-popup,
+body.dark-mode #perf-notes-panel {
+  background: #1e1e2e !important;
+  border-color: #3a3a50 !important;
+  color: #e4e4ec !important;
+}
+body.dark-mode input, body.dark-mode textarea, body.dark-mode select {
+  background: #2a2a38 !important; color: #e4e4ec !important; border-color: #3a3a50 !important;
+}
+
+body.dark-mode .cc-popup.cc-popup-mobile {
+  border-top-color: rgba(167, 139, 250, 0.2) !important;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5) !important;
+}
+body.dark-mode .cc-chip-hist {
+  background: #3a2a1a !important;
+  color: #f59e0b !important;
+  border-color: #78350f !important;
+}
+body.dark-mode .cc-chip-dia {
+  background: #1e1b4b !important;
+  color: #a78bfa !important;
+  border-color: #4c1d95 !important;
+}
+
+/* =============================================
+   MÁY GIỮ NHỊP CHUYÊN NGHIỆP (METRONOME WIDGET)
+   ============================================= */
+.metronome-panel {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 290px;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(109, 40, 217, 0.15);
+  border-radius: 18px;
+  box-shadow: 0 16px 48px rgba(109, 40, 217, 0.16);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.metronome-panel.hidden {
+  display: flex !important; /* Luôn giữ hiển thị để hiệu ứng transition hoạt động */
+  opacity: 0 !important;
+  transform: translateY(24px) scale(0.94) !important;
+  pointer-events: none !important;
+}
+
+.metronome-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.1rem;
+  border-bottom: 1px solid rgba(109, 40, 217, 0.08);
+}
+
+.metronome-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.metronome-icon-pulse {
+  font-size: 1.1rem;
+  animation: metronome-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes metronome-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.2); opacity: 1; color: var(--warning); }
+}
+
+.metronome-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--accent);
+  letter-spacing: -0.01em;
+}
+
+.metronome-close-btn {
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  line-height: 1;
+  padding: 0.1rem;
+  transition: var(--transition);
+}
+
+.metronome-close-btn:hover {
+  color: var(--danger);
+  transform: scale(1.1);
+}
+
+.metronome-body {
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Đèn LED nhấp nháy báo phách */
+.metronome-beats {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.4rem;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 99px;
+  margin-bottom: 0.2rem;
+}
+
+.beat-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.08);
+  transition: all 0.08s ease;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Phách 1: Downbeat - Tím rực rỡ */
+.beat-dot.beat-1.flash {
+  background: #7c3aed !important;
+  box-shadow: 0 0 16px #7c3aed, 0 0 4px #7c3aed !important;
+  transform: scale(1.2);
+}
+
+/* Phách thường: Xanh Neon */
+.beat-dot.flash {
+  background: #10b981 !important;
+  box-shadow: 0 0 12px #10b981, 0 0 3px #10b981 !important;
+  transform: scale(1.15);
+}
+
+/* Bộ điều khiển tốc độ số lớn */
+.metronome-tempo-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tempo-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  user-select: none;
+}
+
+.tempo-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-active);
+  transform: scale(1.06);
+}
+
+.tempo-display-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.tempo-value {
+  font-size: 2.3rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+  font-family: var(--font-mono);
+}
+
+.tempo-unit {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  margin-top: 0.15rem;
+}
+
+.metronome-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 99px;
+  background: #d1d5db;
+  outline: none;
+  margin: 0.3rem 0;
+  transition: background 0.15s ease;
+}
+
+.metronome-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(109, 40, 217, 0.3);
+  transition: transform 0.1s ease;
+}
+
+.metronome-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.metronome-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin: 0.4rem 0;
+}
+
+.btn-metronome-play {
+  flex: 1;
+  padding: 0.7rem 1.2rem;
+  border-radius: 12px;
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(109, 40, 217, 0.25);
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.btn-metronome-play:hover {
+  background: var(--accent-light);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(109, 40, 217, 0.35);
+}
+
+/* Trạng thái đang chạy đổi sang màu Danger */
+.btn-metronome-play.active {
+  background: var(--danger) !important;
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3) !important;
+}
+
+.btn-metronome-play.active:hover {
+  opacity: 0.9;
+}
+
+.btn-metronome-tap {
+  padding: 0.7rem 1.2rem;
+  border-radius: 12px;
+  background: rgba(109, 40, 217, 0.08);
+  color: var(--accent);
+  border: 1px solid rgba(109, 40, 217, 0.2);
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.btn-metronome-tap:hover {
+  background: rgba(109, 40, 217, 0.15);
+  border-color: rgba(109, 40, 217, 0.3);
+}
+
+.btn-metronome-tap.tapped {
+  transform: scale(0.93);
+  background: rgba(109, 40, 217, 0.25);
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Settings block */
+.metronome-settings {
+  border-top: 1px solid rgba(109, 40, 217, 0.08);
+  padding-top: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.metronome-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.metronome-setting-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.metronome-slider.volume-slider {
+  width: 130px;
+  margin: 0;
+}
+
+.metronome-select {
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 0.825rem;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Overrides cho Dark Mode */
+body.dark-mode .metronome-panel {
+  background: rgba(26, 26, 36, 0.85);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+}
+
+body.dark-mode .metronome-beats {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+body.dark-mode .beat-dot {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+body.dark-mode .tempo-btn {
+  background: #2a2a38;
+  border-color: #3b3b52;
+}
+
+body.dark-mode .tempo-btn:hover {
+  background: #3b3b52;
+}
+
+body.dark-mode .btn-metronome-tap {
+  background: rgba(167, 139, 250, 0.08);
+  color: #a78bfa;
+  border-color: rgba(167, 139, 250, 0.25);
+}
+
+body.dark-mode .btn-metronome-tap:hover {
+  background: rgba(167, 139, 250, 0.15);
+}
+
+body.dark-mode .metronome-slider {
+  background: #374151;
+}
+
+/* Hiệu ứng kim gõ nhịp lắc lư khi đang chạy */
+#btn-toolbar-metronome.active svg {
+  animation: metronome-swing 0.8s ease-in-out infinite alternate;
+  transform-origin: 12px 18px; /* Trục xoay ở đế kim */
+  color: var(--danger, #dc2626) !important;
+}
+
+@keyframes metronome-swing {
+  0% { transform: rotate(-18deg); }
+  100% { transform: rotate(18deg); }
+}
+
+/* Nút hoạt động trên toolbar */
+#btn-toolbar-metronome.active {
+  background: rgba(220, 38, 38, 0.1) !important;
+  border-color: rgba(220, 38, 38, 0.2) !important;
+}
+body.dark-mode #btn-toolbar-metronome.active {
+  background: rgba(239, 68, 68, 0.15) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+}
+
+/* Responsive di động & iPad dọc */
+@media (max-width: 500px) {
+  .metronome-panel {
+    bottom: 80px; /* Tránh đè lên Page bar ở đáy */
+    right: 12px;
+    left: 12px;
+    width: auto;
+    max-width: calc(100% - 24px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Print override — ẩn hoàn toàn panel khi in */
+@media print {
+  .metronome-panel { display: none !important; }
+  body.dark-mode #osmd-container svg { filter: none !important; }
+}
+
+
+/* =============================================================
+   HELP MODAL — Keyboard Shortcuts Table & Styles (F9)
+   ============================================================= */
+
+.help-tab {
+  padding: .35rem .8rem;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: .78rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .15s;
+}
+.help-tab:hover { background: var(--bg-overlay); color: var(--text); }
+.help-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.help-pane { display: none; }
+.help-pane.active { display: block; }
+
+.help-body h4 {
+  font-size: .9rem; font-weight: 600;
+  margin: .75rem 0 .4rem;
+  padding-bottom: .35rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+.help-body p, .help-body li {
+  font-size: .87rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+.help-body ul { padding-left: 1.25rem; }
+.help-body code {
+  font-family: var(--font-mono, monospace);
+  background: var(--bg-overlay);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: .05rem .35rem;
+  font-size: .82rem;
+  color: var(--accent);
+}
+
+/* Keyboard key pill */
+kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: .1rem .4rem;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--bg-surface);
+  color: var(--text);
+  font-family: var(--font-mono, monospace);
+  font-size: .75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  box-shadow: 0 1px 0 rgba(0,0,0,.12);
+  white-space: nowrap;
+}
+body.dark-mode kbd {
+  background: #1e293b;
+  border-color: #475569;
+  color: #e2e8f0;
+  box-shadow: 0 1px 0 rgba(0,0,0,.4);
+}
+
+/* Shortcut table (2-column layout) */
+.shortcut-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: .25rem;
+}
+.shortcut-table tr { border-bottom: 1px solid var(--border); }
+.shortcut-table tr:last-child { border-bottom: none; }
+.shortcut-table td {
+  padding: .35rem .25rem;
+  font-size: .82rem;
+  color: var(--text-secondary);
+  vertical-align: middle;
+}
+.shortcut-table td:first-child {
+  white-space: nowrap;
+  padding-right: .75rem;
+  min-width: 120px;
+}
+.shortcut-table td:first-child kbd { margin-right: 2px; }
+
+/* Dark mode */
+body.dark-mode .shortcut-table tr { border-bottom-color: #1e293b; }
+
+/* =============================================================
+   TRANSPOSE PICK MODAL (INC-3)
+   ============================================================= */
+
+.tp-btn {
+  padding: .4rem;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text);
+  font-size: .82rem;
+  font-weight: 700;
+  font-family: var(--font-mono, monospace);
+  cursor: pointer;
+  text-align: center;
+  transition: all .15s;
+  line-height: 1;
+}
+.tp-btn:hover {
+  border-color: var(--accent);
+  background: rgba(109,40,217,.07);
+  color: var(--accent);
+}
+.tp-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(109,40,217,.35);
+}
+.tp-btn.tp-zero { /* Nút 0 có style đặc biệt khi default */
+  border-color: rgba(109,40,217,.4);
+  color: var(--accent);
+}
+.tp-btn.tp-zero.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+body.dark-mode .tp-btn {
+  background: var(--bg-raised);
+  border-color: #374151;
+  color: #d1d5db;
+}
+body.dark-mode .tp-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(109,40,217,.12);
+}
+
+/* =============================================================
+   LOCK ZOOM / LOCK VIEW BUTTON STYLES
+   ============================================================= */
+.zoom-lock-btn {
+  padding: 3px 6px;
+  border-radius: var(--radius-sm, 4px);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+.zoom-lock-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.zoom-lock-btn.locked {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  color: #ffffff !important;
+  border-color: #059669 !important;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+.zoom-lock-btn .lock-icon {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+/* Live Sync Badge */
+.live-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 12px;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.live-badge.host-active {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  box-shadow: 0 0 10px rgba(124, 58, 237, 0.4);
+}
+.live-badge.join-active {
+  background: linear-gradient(135deg, #10b981, #059669);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+.live-badge.reconnecting {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+  animation: pulse-live-badge 1.2s infinite;
+}
+.live-badge.offline {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+}
+@keyframes pulse-live-badge {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.75; transform: scale(0.97); }
+}
+
+
+
+/* =============================================================
+   COUNT-IN OVERLAY & VISUAL PERFORMANCE CUES (Phase 2)
+   ============================================================= */
+.count-in-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(15, 23, 42, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeInCountIn 0.2s ease-out;
+}
+
+.count-in-box {
+  background: rgba(30, 27, 75, 0.88);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(124, 58, 237, 0.25);
+  border-radius: 24px;
+  padding: 2rem 3rem;
+  text-align: center;
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.count-in-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.count-in-pill {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #a78bfa;
+  background: rgba(124, 58, 237, 0.2);
+  padding: 4px 12px;
+  border-radius: 99px;
+  border: 1px solid rgba(167, 139, 250, 0.3);
+}
+
+.count-in-meta {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.count-in-digit-container {
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.count-in-digit {
+  font-size: 6.5rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #ffffff;
+  text-shadow: 0 0 30px rgba(167, 139, 250, 0.8);
+  font-family: system-ui, -apple-system, sans-serif;
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.15s ease;
+}
+
+.count-in-digit.pulse {
+  animation: digitPulse 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.count-in-digit.is-entry {
+  font-size: 4.5rem;
+  color: #34d399;
+  text-shadow: 0 0 40px rgba(52, 211, 153, 0.9);
+  animation: entryPulse 0.5s ease-out;
+}
+
+.count-in-footer {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+@keyframes digitPulse {
+  0% { transform: scale(0.6); opacity: 0.5; }
+  50% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes entryPulse {
+  0% { transform: scale(0.7); opacity: 0.6; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeInCountIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* =============================================================
+   SECTION JUMP BAR & ROADMAP (Phase 3)
+   ============================================================= */
+.section-jump-bar-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  background: var(--bg-surface-glass, rgba(30, 41, 59, 0.85));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  position: sticky;
+  top: 0;
+  z-index: 70;
+  transition: all 0.2s ease;
+}
+
+.section-jump-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding: 2px 4px;
+}
+
+.section-jump-bar::-webkit-scrollbar {
+  height: 4px;
+}
+.section-jump-bar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.section-chips-list {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+
+.section-empty-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted, #94a3b8);
+  font-style: italic;
+  padding: 4px 8px;
+}
+
+.section-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-primary, #f8fafc);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.section-chip:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--chip-accent, #6366f1);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.section-chip:active {
+  transform: scale(0.96);
+}
+
+.section-chip.active {
+  background: var(--chip-accent, #6366f1);
+  color: #ffffff;
+  border-color: #ffffff;
+  box-shadow: 0 0 14px var(--chip-accent, #6366f1);
+  font-weight: 700;
+  transform: scale(1.04);
+}
+
+.chip-icon {
+  font-size: 0.85rem;
+}
+
+.chip-measures {
+  font-size: 0.68rem;
+  opacity: 0.75;
+  font-weight: 500;
+  font-family: monospace;
+}
+
+.section-chip.active .chip-measures {
+  opacity: 0.95;
+}
+
+.btn-section-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  color: var(--text-secondary, #94a3b8);
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.btn-section-edit:hover {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: #6366f1;
+  color: #a5b4fc;
+}
+
+/* =============================================================
+   REAL-TIME CUE ENGINE BANNER (Phase 4)
+   ============================================================= */
+.cue-banner {
+  position: fixed;
+  top: 76px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  pointer-events: none;
+  animation: cueSlideIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.cue-banner.cue-hiding {
+  opacity: 0;
+  transform: translate(-50%, -10px);
+}
+
+.cue-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 9999px;
+  background: rgba(15, 23, 42, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #f8fafc;
+  font-size: 0.92rem;
+  font-weight: 600;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.cue-icon {
+  font-size: 1.1rem;
+}
+
+.cue-role-hint {
+  font-size: 0.8rem;
+  color: #38bdf8;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+.cue-pre-cue .cue-banner-content {
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4), 0 0 16px rgba(245, 158, 11, 0.3);
+}
+
+.cue-urgent-cue .cue-banner-content {
+  border: 1px solid rgba(239, 68, 68, 0.7);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4), 0 0 22px rgba(239, 68, 68, 0.5);
+  animation: cuePulse 0.8s ease-in-out infinite alternate;
+}
+
+.cue-jump .cue-banner-content {
+  border: 1px solid rgba(99, 102, 241, 0.6);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4), 0 0 18px rgba(99, 102, 241, 0.4);
+}
+
+@keyframes cueSlideIn {
+  0% { transform: translate(-50%, -20px); opacity: 0; }
+  100% { transform: translate(-50%, 0); opacity: 1; }
+}
+
+@keyframes cuePulse {
+  0% { transform: scale(0.98); }
+  100% { transform: scale(1.03); }
+}
+
+/* =============================================================
+   SECTION EDITOR MODAL
+   ============================================================= */
+.section-editor-card {
+  max-width: 650px !important;
+}
+
+.section-editor-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #94a3b8);
+  margin-bottom: 12px;
+}
+
+.section-table-container {
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
+  border-radius: 8px;
+}
+
+.section-edit-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.section-edit-table th {
+  background: var(--bg-surface-2, rgba(255, 255, 255, 0.05));
+  padding: 8px 10px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-secondary, #94a3b8);
+  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.section-edit-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.05));
+}
+
+.section-edit-table input,
+.section-edit-table select {
+  font-size: 0.82rem;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+/* =============================================================
+   PRINT MEDIA STYLES (Printable A4 Sheet Music Layout)
+   ============================================================= */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 12pt !important;
+  }
+
+  /* Hide UI controls during printing */
+  header, footer, nav, .sidebar, .sidebar-overlay, .top-toolbar, 
+  .fab-container, .metronome-panel, .modal-backdrop, .modal, 
+  .page-nav-bar, #btn-exit-sheet-only, .admin-console {
+    display: none !important;
+  }
+
+  /* Expand main sheet viewer to full page */
+  .main-content, .sheet-viewer-wrapper, #osmd-container {
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    overflow: visible !important;
+  }
+
+  /* SVG sheet music page break controls */
+  #osmd-container svg {
+    max-width: 100% !important;
+    height: auto !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+}
+

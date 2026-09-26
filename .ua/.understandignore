@@ -1,0 +1,21 @@
+# .understandignore — patterns for files/dirs to exclude from analysis
+# Exclude data, media, and third-party libraries so analysis focuses on core codebase
+
+storage/
+*.xml
+*.mxl
+*.sqlite
+*.db
+*.png
+*.jpg
+*.jpeg
+*.svg
+*.pdf
+*.zip
+vendor/
+node_modules/
+dist/
+.git/
+.ua/
+omr-service/
+tmp/

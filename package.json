@@ -1,0 +1,18 @@
+{
+  "name": "sheetapp",
+  "version": "2.0.0-dev",
+  "description": "SheetApp - Application for reading and performing sheet music and chord charts",
+  "scripts": {
+    "sync": "./sync.sh",
+    "codemap": "node tools/generate_code_map.js",
+    "test:ui": "node tools/test_editor_ui.js",
+    "lint": "eslint assets/js editor manager members learn live-band",
+    "check:syntax": "node tools/check_syntax.js",
+    "e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0",
+    "eslint": "^9.0.0",
+    "puppeteer-core": "^24.43.1"
+  }
+}

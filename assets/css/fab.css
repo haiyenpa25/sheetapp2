@@ -1,0 +1,234 @@
+/* =============================================
+   FAB — Floating Action Button v2
+   ============================================= */
+
+/* ---- BACKDROP (body level) ---- */
+.fab-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-fab, 950) - 5);
+  background: transparent;
+  pointer-events: none;
+  transition: background 0.2s ease;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+.fab-backdrop.active {
+  pointer-events: auto;
+  background: rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+/* ---- WRAP ---- */
+.fab-wrap {
+  position: fixed !important;
+  bottom: 24px;
+  right: 18px;
+  z-index: var(--z-fab, 950) !important;
+  width: 54px;
+  height: 54px;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* ---- MAIN FAB BUTTON ---- */
+.fab-btn {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+  box-shadow:
+    0 4px 20px rgba(124, 58, 237, 0.5),
+    0 2px 6px  rgba(0, 0, 0, 0.2);
+  color: #fff;
+  transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), background 0.2s, box-shadow 0.2s;
+  z-index: 2;
+}
+.fab-btn:hover { transform: scale(1.08); }
+.fab-btn:active { transform: scale(0.93); }
+.fab-btn svg { width: 22px; height: 22px; pointer-events: none; }
+
+.fab-wrap.fab-open .fab-btn {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  box-shadow: 0 4px 20px rgba(220, 38, 38, 0.5);
+  transform: scale(1.05);
+}
+
+/* ---- FAB ITEMS ---- */
+.fab-item {
+  position: absolute;
+  /* Default: collapsed at FAB center */
+  bottom: 27px;       /* vertical center of FAB */
+  right:  27px;       /* horizontal center of FAB */
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 16px rgba(0,0,0,.18), 0 1px 4px rgba(0,0,0,.1);
+  color: #1e1b4b;
+  /* collapsed state */
+  transform: translate(50%, 50%) scale(0);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.28s cubic-bezier(.34,1.56,.64,1),
+    opacity   0.2s ease;
+}
+.fab-item:hover {
+  background: #fff;
+  box-shadow: 0 6px 22px rgba(0,0,0,.22);
+  transform: scale(1.12) !important;
+  z-index: 1;
+}
+.fab-item:active { transform: scale(0.93) !important; }
+
+/* Active state (tính năng đang bật) */
+.fab-item.fab-item-active {
+  background: linear-gradient(135deg, #ede9fe, #ddd6fe) !important;
+  box-shadow: 0 0 0 2.5px #7c3aed, 0 4px 16px rgba(124,58,237,.3) !important;
+  color: #4c1d95 !important;
+}
+
+.fab-item-icon { font-size: 18px; line-height: 1; pointer-events: none; }
+.fab-item-label {
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #4c1d95;
+  margin-top: 1.5px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Dark mode */
+body.dark .fab-item { background: rgba(30,27,75,.93); }
+body.dark .fab-item-label { color: #c4b5fd; }
+
+/* ---- OPEN STATE — Items xòe thành hình cung (UP-LEFT từ bottom-right corner) ---- */
+/*
+  Arc từ 90° (thẳng lên) → 210° (trái-xuống nhẹ), interval 30°
+  Radius = 72px để items không đè lên nhau
+  Tọa độ (bottom, right) tương đối với fab-wrap:
+    bottom=27 right=27 là tâm FAB → dịch thêm theo arc
+    
+  Công thức: từ tâm (27,27), dịch (dx, dy):
+    bottom += -sin(angle)*r = cos_comp  (positive = đi lên)
+    right  += -cos(angle)*r             (positive = đi trái)
+    
+  Item 0 (90°): dx=0,   dy=-72   → bottom=27+72=99,  right=27
+  Item 1 (120°): cos120=-0.5,sin120=0.866 → dx=36,dy=-62   → bottom=89, right=63
+  Item 2 (150°): cos150=-0.866,sin150=0.5 → dx=62,dy=-36   → bottom=63, right=89
+  Item 3 (180°): cos180=-1,sin180=0       → dx=72,dy=0      → bottom=27, right=99
+  Item 4 (210°): cos210=-0.866,sin210=-0.5→ dx=62,dy=36     → bottom=-9→clamp, right=89
+  
+  Item 4 goes slightly below FAB, which is fine since FAB is 24px from bottom.
+*/
+
+/* Position is now handled dynamically via JS (fab.js) */
+
+/* ---- PULSE khi mới vào ---- */
+@keyframes fab-appear-pulse {
+  0%   { box-shadow: 0 4px 20px rgba(124,58,237,.5), 0 0 0 0   rgba(124,58,237,.4); }
+  60%  { box-shadow: 0 4px 20px rgba(124,58,237,.5), 0 0 0 12px rgba(124,58,237,0); }
+  100% { box-shadow: 0 4px 20px rgba(124,58,237,.5), 0 0 0 0   rgba(124,58,237,0); }
+}
+.fab-btn { animation: fab-appear-pulse 2s ease-out 1.5s 2; }
+
+/* ---- PRINT: ẩn FAB ---- */
+@media print {
+  .fab-wrap,
+  .fab-backdrop { display: none !important; }
+}
+
+/* ---- MOBILE adjustments ---- */
+@media (max-width: 768px) {
+  .fab-wrap {
+    bottom: 18px;
+    right: 14px;
+  }
+}
+
+/* ====================================
+   SIDEBAR AUTH BUTTON (trong sidebar header)
+   ==================================== */
+.sidebar-header-actions {
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  flex-shrink: 0;
+}
+
+.sidebar-auth-btn {
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  padding: .25rem .55rem;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  background: var(--bg-overlay);
+  color: var(--text-secondary);
+  font-size: .75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+  white-space: nowrap;
+  max-width: 110px;
+}
+.sidebar-auth-btn:hover {
+  background: var(--bg-raised);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.sidebar-auth-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+.sidebar-auth-name {
+  max-width: 70px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Role badge (hiện ngay sau tên user) ── */
+.sidebar-role-badge {
+  display: inline-block;
+  padding: .1rem .4rem;
+  border-radius: 99px;
+  font-size: .65rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  white-space: nowrap;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+.sidebar-role-badge.role-badge-admin {
+  background: rgba(109,40,217,.15);
+  color: var(--accent);
+  border: 1px solid rgba(109,40,217,.3);
+}
+.sidebar-role-badge.role-badge-banhat {
+  background: rgba(5,150,105,.12);
+  color: #059669;
+  border: 1px solid rgba(5,150,105,.25);
+}
+

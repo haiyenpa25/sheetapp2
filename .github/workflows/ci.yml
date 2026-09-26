@@ -1,0 +1,31 @@
+name: SheetApp2 Quality Gate & Security CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  quality-gate:
+    name: PHP Lint & Security Regression Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP Environment
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo, pdo_sqlite, sqlite3, mbstring, json, openssl, ctype, fileinfo, zip
+          coverage: none
+
+      - name: Check PHP & Extensions
+        run: |
+          php -v
+          php -m
+
+      - name: Run Unified Test Runner
+        run: php tests/run_all_tests.php

@@ -1,0 +1,42 @@
+# ── CSDL & Data cá nhân (không push) ──
+storage/data/*.sqlite
+storage/data/*.db
+storage/data/songs.json.bak
+storage/data/sessions/
+storage/data/live_sync/
+
+# ── Bộ hợp âm HD (data riêng từng server) ──
+data/chord_sets/
+
+# ── OMR workspace (file upload tạm) ──
+storage/omr_workspace/
+
+# ── Annotation files ──
+storage/data/annotations/
+
+# ── File nhạc XML / PDF đã upload ──
+storage/Thanh ca/
+
+# ── Docker (mỗi server config riêng) ──
+docker-compose.yml
+omr-service/
+
+# ── Test files ──
+test*.php
+tmp_player.js
+
+# ── Node.js & Dependencies ──
+node_modules/
+package-lock.json
+
+# ── Generated Screenshots & Artifacts ──
+storage/*.png
+
+# ── Understand Anything intermediate extraction batches ──
+.ua/intermediate/
+.ua/tmp/
+
+# ── IDE / OS ──
+.DS_Store
+Thumbs.db
+.vscode/

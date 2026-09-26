@@ -1,0 +1,322 @@
+/**
+ * toolbar-controller.js — Toolbar Controls Binding
+ * Tách từ app.js: bind toolbar buttons (transpose, zoom, sidebar, capo...).
+ */
+const ToolbarController = (() => {
+  'use strict';
+
+  let _toggleSidebarFn = null;
+
+  function toggleSidebar() {
+    if (_toggleSidebarFn) {
+      _toggleSidebarFn();
+    } else {
+      const sidebar = document.getElementById('sidebar');
+      if (!sidebar) return;
+      if (window.innerWidth <= 900) {
+        sidebar.classList.toggle('mobile-hidden');
+      } else {
+        sidebar.classList.toggle('collapsed');
+      }
+    }
+  }
+
+  function init() {
+    _bindTranspose();
+    _bindZoom();
+    _bindSidebar();
+    _bindDarkMode();
+    _bindMisc();
+  }
+
+  function _bindTranspose() {
+    document.getElementById('btn-transpose-up')?.addEventListener('click', e =>
+      { e.currentTarget.blur(); App?.transposeBy?.(+1); });
+    document.getElementById('btn-transpose-down')?.addEventListener('click', e =>
+      { e.currentTarget.blur(); App?.transposeBy?.(-1); });
+    document.getElementById('btn-transpose-reset')?.addEventListener('click', e =>
+      { e.currentTarget.blur(); App?.resetTranspose?.(); });
+    // Tap vào số hiển thị để reset nhanh về 0
+    document.getElementById('transpose-display')?.addEventListener('click', e =>
+      { App?.resetTranspose?.(); });
+
+    document.getElementById('capo-select')?.addEventListener('change', e => {
+      const newCapo = parseInt(e.target.value) || 0;
+      const delta   = newCapo - Store.get('currentTranspose');
+      Store.set('capoLevel', newCapo);
+      if (delta !== 0) App?.transposeBy?.(delta);
+    });
+  }
+
+  function _bindZoom() {
+    const el = document.getElementById('zoom-slider');
+    if (el) {
+      const evt = el.tagName.toLowerCase() === 'select' ? 'change' : 'input';
+      el.addEventListener(evt, e => App?.setZoom?.(parseInt(e.target.value, 10)));
+    }
+
+    const stepZoom = (delta) => {
+      const curPct = Math.round((Store.get('currentZoom') || 1.0) * 100);
+      const steps = [50, 65, 80, 90, 100, 115, 130, 150, 175, 200];
+      let target;
+      if (delta > 0) {
+        target = steps.find(s => s > curPct + 2) || steps[steps.length - 1];
+      } else {
+        target = [...steps].reverse().find(s => s < curPct - 2) || steps[0];
+      }
+      App?.setZoom?.(target);
+    };
+
+    // Zoom buttons trên Toolbar chính
+    document.getElementById('btn-zoom-out')?.addEventListener('click', () => stepZoom(-1));
+    document.getElementById('btn-zoom-in')?.addEventListener('click', () => stepZoom(+1));
+
+    // Zoom buttons trên Floating HUD (Biểu Diễn Sân Khấu)
+    document.getElementById('btn-gig-zoom-out')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      stepZoom(-1);
+    });
+    document.getElementById('btn-gig-zoom-in')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      stepZoom(+1);
+    });
+
+    _initLockZoomUI();
+    document.getElementById('btn-lock-zoom')?.addEventListener('click', () => _toggleLockZoom());
+    document.getElementById('btn-gig-lock-zoom')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      _toggleLockZoom();
+    });
+  }
+
+  function _initLockZoomUI() {
+    const isLocked = localStorage.getItem('sheetapp_zoom_locked') === 'true';
+    _updateLockButtonsUI(isLocked);
+  }
+
+  function _updateLockButtonsUI(isLocked) {
+    const btns = [
+      document.getElementById('btn-lock-zoom'),
+      document.getElementById('btn-gig-lock-zoom')
+    ];
+    btns.forEach(btn => {
+      if (!btn) return;
+      if (isLocked) {
+        btn.classList.add('locked');
+        btn.innerHTML = '<span class="lock-icon">🔒</span>';
+        btn.title = 'Khóa tỷ lệ View ĐANG BẬT (Bấm để mở khóa)';
+      } else {
+        btn.classList.remove('locked');
+        btn.innerHTML = '<span class="lock-icon">🔓</span>';
+        btn.title = 'Khóa tỷ lệ zoom (khi đổi bài khác sẽ giữ nguyên tỷ lệ này)';
+      }
+    });
+  }
+
+  function _toggleLockZoom() {
+    const wasLocked = localStorage.getItem('sheetapp_zoom_locked') === 'true';
+    const isLocked = !wasLocked;
+    localStorage.setItem('sheetapp_zoom_locked', isLocked ? 'true' : 'false');
+    _updateLockButtonsUI(isLocked);
+
+    if (isLocked) {
+      const currentPct = Math.round((Store.get('currentZoom') || 1.0) * 100);
+      localStorage.setItem('sheetapp_locked_zoom_val', String(currentPct));
+      App?.showToast?.(`🔒 Đã khóa view ở tỷ lệ ${currentPct}%. Đổi bài sẽ giữ nguyên zoom.`, 'success');
+    } else {
+      App?.showToast?.('🔓 Đã mở khóa tỷ lệ view.', 'info');
+    }
+  }
+
+
+  function _bindSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    function _openSidebar() {
+      sidebar?.classList.remove('mobile-hidden');
+      overlay?.classList.remove('hidden');
+      // Click overlay → đóng
+      if (overlay) {
+        overlay.onclick = _closeSidebar;
+      }
+    }
+
+    function _closeSidebar() {
+      sidebar?.classList.add('mobile-hidden');
+      overlay?.classList.add('hidden');
+    }
+
+    function _toggle() {
+      if (!sidebar) return;
+      if (window.innerWidth <= 900) {
+        // Mobile/iPad: toggle ỳ nghĩa rõ ràng
+        if (sidebar.classList.contains('mobile-hidden')) {
+          _openSidebar();
+        } else {
+          _closeSidebar();
+        }
+      } else {
+        // Desktop: collapse narrow
+        sidebar.classList.toggle('collapsed');
+      }
+    }
+
+    _toggleSidebarFn = _toggle;
+    document.getElementById('btn-toggle-sidebar')?.addEventListener('click', _toggle);
+    document.getElementById('btn-open-sidebar')?.addEventListener('click', _toggle);
+
+    // Init: mobile bắt đầu ẩn sidebar
+    if (window.innerWidth <= 900) {
+      sidebar?.classList.add('mobile-hidden');
+      overlay?.classList.add('hidden');
+    }
+
+    // Resize handler
+    let _lastW = window.innerWidth;
+    window.addEventListener('resize', _debounce(() => {
+      const w = window.innerWidth;
+      if (w <= 900) {
+        // Chuyển sang mobile: ẩn sidebar nếu đang mở
+        if (!sidebar?.classList.contains('mobile-hidden')) {
+          _closeSidebar();
+        }
+        sidebar?.classList.remove('collapsed');
+      } else {
+        // Chuyển sang desktop: hiện sidebar
+        sidebar?.classList.remove('mobile-hidden');
+        overlay?.classList.add('hidden');
+      }
+      const wDelta = Math.abs(w - _lastW);
+      _lastW = w;
+      if (wDelta > 100 && OSMDRenderer?.getIsLoaded?.()) {
+        setTimeout(async () => {
+          try {
+            const osmdInstance = OSMDRenderer.getInstance();
+            if (localStorage.getItem('sheetapp_zoom_locked') === 'true') {
+              await osmdInstance?.render?.();
+              ChordCanvas?.reposition?.();
+              return;
+            }
+            const svg = document.getElementById('osmd-container')?.querySelector('svg');
+            const wrapper = document.querySelector('.sheet-viewer-wrapper');
+            if (svg && wrapper && osmdInstance) {
+              const avail = wrapper.clientWidth - 24;
+              if (avail > 0 && svg.clientWidth > 0) {
+                const ratio = avail / svg.clientWidth;
+                const currentZoom = Store.get('currentZoom') || 1.0;
+                const pct = Math.round(Math.max(0.3, Math.min(2.5, ratio * currentZoom)) * 20) * 5;
+                await App.setZoom(pct);
+              }
+            } else {
+              await osmdInstance?.render?.();
+              ChordCanvas?.reposition?.();
+            }
+          } catch(e) {}
+        }, 350);
+      }
+    }, 250));
+
+    if ('onorientationchange' in window) {
+      window.addEventListener('orientationchange', () => {
+        // Xử lý xoay màn hình: đóng sidebar rồi re-render
+        if (window.innerWidth <= 900) _closeSidebar();
+        setTimeout(async () => {
+          if (!OSMDRenderer?.getIsLoaded?.()) return;
+          try {
+            const osmdInstance = OSMDRenderer.getInstance();
+            if (localStorage.getItem('sheetapp_zoom_locked') === 'true') {
+              await osmdInstance?.render?.();
+              ChordCanvas?.reposition?.();
+              return;
+            }
+            const svg = document.getElementById('osmd-container')?.querySelector('svg');
+            const wrapper = document.querySelector('.sheet-viewer-wrapper');
+            if (svg && wrapper && osmdInstance) {
+              const avail = wrapper.clientWidth - 24;
+              if (avail > 0 && svg.clientWidth > 0) {
+                const ratio = avail / svg.clientWidth;
+                const currentZoom = Store.get('currentZoom') || 1.0;
+                const pct = Math.round(Math.max(0.3, Math.min(2.5, ratio * currentZoom)) * 20) * 5;
+                await App.setZoom(pct);
+              }
+            } else {
+              await osmdInstance?.render?.();
+              ChordCanvas?.reposition?.();
+            }
+          } catch(e) {}
+        }, 500);
+      });
+    }
+
+    // Expose cho các module khác dùng
+    window._closeSidebar = _closeSidebar;
+  }
+
+  function _bindDarkMode() {
+    const btn = document.getElementById('btn-dark-toggle');
+    const saved = localStorage.getItem('sheetapp_dark_mode') === '1';
+    if (saved) { document.body.classList.add('dark-mode'); btn?.classList.add('dark-active'); }
+    btn?.addEventListener('click', () => {
+      const on = document.body.classList.toggle('dark-mode');
+      btn.classList.toggle('dark-active', on);
+      localStorage.setItem('sheetapp_dark_mode', on ? '1' : '0');
+      App?.showToast?.(on ? '🌙 Chế độ tối' : '☀️ Chế độ sáng', 'info');
+    });
+  }
+
+  function _bindMisc() {
+    document.getElementById('btn-fullscreen')?.addEventListener('click', AppUI?.toggleFullscreen);
+    document.getElementById('btn-print')?.addEventListener('click', () => window.print());
+    document.getElementById('btn-session-panel')?.addEventListener('click', () => PerformanceNotes?.toggle?.());
+
+    document.getElementById('btn-compact-mode')?.addEventListener('click', e => {
+      const btn = e.currentTarget;
+      const isCompact = OSMDRenderer?.getCompactMode?.();
+      OSMDRenderer?.setCompactMode?.(!isCompact);
+      btn.classList.toggle('active', !isCompact);
+      btn.style.color = !isCompact ? 'var(--accent)' : '';
+      window.URLState?.update?.({ compact: !isCompact });
+    });
+
+    // Volume slider
+    const vol = document.getElementById('audio-volume');
+    if (vol) {
+      vol.addEventListener('input', () => {
+        _updateTrackFill(vol);
+        SheetAudioPlayer?.setVolume?.(parseInt(vol.value));
+      });
+      _updateTrackFill(vol);
+    }
+
+    // Session panel buttons
+    document.getElementById('btn-close-session')?.addEventListener('click', () => {
+      const panel = document.getElementById('session-panel');
+      if (panel) {
+        if (window.ModalManager) {
+          window.ModalManager.close(panel);
+        } else {
+          panel.classList.add('hidden');
+        }
+      }
+    });
+    document.getElementById('btn-save-session')?.addEventListener('click', async () => {
+      const note = document.getElementById('session-note')?.value.trim() || '';
+      await SessionTracker?.saveNow?.(note);
+      AppUI?.updateSessionPanel?.(Store.get('currentTranspose'), SessionTracker?.getHistory?.());
+      App?.showToast?.('💾 Đã lưu nhật ký', 'success');
+    });
+  }
+
+  function _updateTrackFill(slider) {
+    const min = parseFloat(slider.min ?? 0), max = parseFloat(slider.max ?? 100), val = parseFloat(slider.value ?? 0);
+    const pct = max > min ? Math.round(((val-min)/(max-min))*100) : 0;
+    slider.style.background = `linear-gradient(to right, var(--accent,#7c3aed) 0%, var(--accent,#7c3aed) ${pct}%, #d1d5db ${pct}%)`;
+  }
+
+  function _debounce(fn, ms) { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); }; }
+
+  return { init, toggleSidebar };
+})();
+
+window.ToolbarController = ToolbarController;

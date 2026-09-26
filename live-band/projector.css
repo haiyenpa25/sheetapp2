@@ -1,0 +1,291 @@
+/* live-band/projector.css — Church Screen & Projector Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+:root {
+  --projector-font-size: 3.2rem;
+  --projector-accent: #f59e0b;
+  --projector-bg: #000000;
+  --projector-text: #ffffff;
+  --projector-text-dim: rgba(255, 255, 255, 0.55);
+}
+body {
+  background-color: var(--projector-bg);
+  color: var(--projector-text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: background-color 0.3s ease;
+}
+
+/* Blank Screen Overlay */
+body.is-blank {
+  background-color: #000000 !important;
+}
+body.is-blank .projector-header,
+body.is-blank .projector-viewport,
+body.is-blank .projector-toolbar {
+  visibility: hidden;
+  opacity: 0;
+}
+.blank-indicator {
+  display: none;
+  position: fixed;
+  top: 16px;
+  right: 24px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.25);
+  letter-spacing: 1px;
+  z-index: 999;
+}
+body.is-blank .blank-indicator {
+  display: block;
+}
+
+/* Top Subtle Status Bar */
+.projector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 36px;
+  font-size: 1.15rem;
+  color: rgba(255, 255, 255, 0.45);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  transition: opacity 0.4s ease;
+  z-index: 10;
+}
+.projector-header.dimmed {
+  opacity: 0.08;
+}
+.projector-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.projector-plan-badge {
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--projector-accent);
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.projector-title {
+  font-weight: 700;
+  color: var(--projector-accent);
+  letter-spacing: 0.5px;
+  font-size: 1.25rem;
+  text-transform: uppercase;
+}
+.projector-header-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.projector-slide-counter {
+  font-size: 0.95rem;
+  color: var(--projector-text-dim);
+  font-variant-numeric: tabular-nums;
+}
+.projector-conn-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+.conn-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+}
+.conn-dot.connecting { background: #f59e0b; }
+.conn-dot.offline { background: #ef4444; }
+
+/* Main Lyrics & Liturgy Canvas */
+.projector-viewport {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 36px 60px;
+  overflow-y: auto;
+  position: relative;
+}
+
+.projector-slide-wrap {
+  max-width: 1400px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.projector-song-heading {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--projector-accent);
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.85;
+}
+
+.projector-line {
+  font-size: var(--projector-font-size);
+  font-weight: 700;
+  line-height: 1.38;
+  color: var(--projector-text-dim);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 8px 24px;
+  border-radius: 12px;
+}
+.projector-line.active {
+  color: #ffffff;
+  font-weight: 900;
+  background: rgba(245, 158, 11, 0.16);
+  transform: scale(1.03);
+  text-shadow: 0 0 35px rgba(245, 158, 11, 0.45);
+}
+
+/* Liturgical Slide (Non-song) */
+.liturgy-slide {
+  max-width: 1200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 40px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.liturgy-icon {
+  font-size: 4rem;
+  color: var(--projector-accent);
+  margin-bottom: 8px;
+}
+.liturgy-title {
+  font-size: calc(var(--projector-font-size) * 0.9);
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.liturgy-subtitle {
+  font-size: calc(var(--projector-font-size) * 0.65);
+  color: var(--projector-accent);
+  font-weight: 700;
+}
+.liturgy-notes {
+  font-size: calc(var(--projector-font-size) * 0.55);
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.75);
+  max-width: 900px;
+  white-space: pre-wrap;
+}
+
+/* Floating Quick Actions Bar */
+.projector-toolbar {
+  position: fixed;
+  bottom: 18px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(18, 18, 18, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 6px 12px;
+  border-radius: 30px;
+  z-index: 100;
+  opacity: 0.15;
+  transition: opacity 0.3s ease;
+}
+.projector-toolbar:hover,
+body:not(.mouse-idle) .projector-toolbar {
+  opacity: 0.9;
+}
+.tb-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  padding: 5px 10px;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: inherit;
+}
+.tb-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--projector-accent);
+}
+.tb-btn.active {
+  background: var(--projector-accent);
+  color: #000000;
+  font-weight: 700;
+}
+
+/* Cue Banner Overlay */
+.projector-cue-banner {
+  position: fixed;
+  top: 72px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(220, 38, 38, 0.92);
+  color: #ffffff;
+  padding: 12px 32px;
+  border-radius: 40px;
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  box-shadow: 0 8px 30px rgba(220, 38, 38, 0.4);
+  z-index: 200;
+  animation: pulse 1.5s infinite;
+  display: none;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+  50% { opacity: 0.85; transform: translateX(-50%) scale(0.98); }
+}
+
+/* Empty State */
+.projector-empty {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 2.2rem;
+  line-height: 1.5;
+}
+.projector-empty-hint {
+  font-size: 1.2rem;
+  margin-top: 16px;
+  color: rgba(255, 255, 255, 0.25);
+}

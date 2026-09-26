@@ -1,0 +1,1 @@
+/root/.understand-anything/repo/understand-anything-plugin/skills/understand/locales/en.md

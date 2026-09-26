@@ -1,0 +1,91 @@
+Options -Indexes
+
+# ─── URL Rewriting ───────────────────────────────────────────────────
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Chặn công cụ nội bộ, tài liệu vận hành, tests và metadata qua web.
+    RewriteRule ^(?:tools|docs|dashboard|tests|\.ua|\.agents|\.agent-skills)(?:/|$) - [F,L,NC]
+
+    # Chặn các thư mục mã nguồn backend nội bộ của API (chỉ cho phép truy cập qua api/index.php và shims cho phép)
+    RewriteRule ^api/(?:migrations|core|services|controllers|database)(?:/|$) - [F,L,NC]
+    RewriteRule ^api/(?:init_db|omr_worker|import_helpers|import_scrapers)\.php$ - [F,L,NC]
+
+    # Storage mặc định là private. Chỉ MusicXML trong "Thanh ca" được frontend tải.
+    RewriteRule ^storage/(?!Thanh.ca/) - [F,L,NC]
+
+    # Không công khai file cấu hình, repo, script thực thi, tài liệu, backup, log hoặc DB.
+    RewriteRule (^|/)(?:\.git|\.env|\.htaccess)(?:/|$) - [F,L,NC]
+    RewriteRule \.(?:bat|sh|cmd|ps1|md|bak|log|sqlite|db)$ - [F,L,NC]
+
+    RewriteRule ^huong-dan/?$ huong-dan/index.php [L,QSA]
+    RewriteRule ^manager/?$ manager/index.php [L,QSA]
+</IfModule>
+
+# ─── Security ──────────────────────────────────────────────────────
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# ─── GZIP Compression ──────────────────────────────────────────────
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css text/javascript
+    AddOutputFilterByType DEFLATE application/javascript application/json application/xml
+    AddOutputFilterByType DEFLATE image/svg+xml font/woff2 font/woff
+</IfModule>
+
+# ─── Browser Cache (Cache-Control) ────────────────────────────────
+<IfModule mod_expires.c>
+    ExpiresActive On
+
+    # HTML — không cache (luôn cần mới nhất)
+    ExpiresByType text/html                 "access plus 0 seconds"
+
+    # CSS/JS với cache-bust (?v=timestamp) — cache dài 1 năm
+    ExpiresByType text/css                  "access plus 1 year"
+    ExpiresByType application/javascript    "access plus 1 year"
+    ExpiresByType text/javascript           "access plus 1 year"
+
+    # Fonts — cache 1 năm
+    ExpiresByType font/woff2                "access plus 1 year"
+    ExpiresByType font/woff                 "access plus 1 year"
+    ExpiresByType font/ttf                  "access plus 1 year"
+
+    # Images/SVG — cache 6 tháng
+    ExpiresByType image/svg+xml             "access plus 6 months"
+    ExpiresByType image/png                 "access plus 6 months"
+    ExpiresByType image/jpeg                "access plus 6 months"
+    ExpiresByType image/webp                "access plus 6 months"
+
+    # XML (sheet nhạc) — cache ngắn vì user có thể sửa
+    ExpiresByType application/xml           "access plus 10 minutes"
+    ExpiresByType text/xml                  "access plus 10 minutes"
+</IfModule>
+
+# ─── Cache headers bổ sung ────────────────────────────────────────
+<IfModule mod_headers.c>
+    # Không cache API responses
+    <FilesMatch "^api/">
+        Header set Cache-Control "no-store, no-cache, must-revalidate"
+    </FilesMatch>
+
+    # Cache vendor JS (không đổi) lâu hơn
+    <FilesMatch "assets/js/vendor/">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+</IfModule>
+
+# ─── PHP settings ─────────────────────────────────────────────────
+<IfModule mod_php.c>
+    php_value upload_max_filesize 20M
+    php_value post_max_size 20M
+    php_value max_execution_time 60
+    php_value allow_url_fopen On
+</IfModule>
+
+# PHP output buffering để gzip hoạt động đúng
+<IfModule mod_php8.c>
+    php_flag output_buffering On
+</IfModule>

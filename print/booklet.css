@@ -1,0 +1,361 @@
+/**
+ * print/booklet.css — Stylesheet chuyên dụng cho In Cuốn Booklet Phụng Vụ A4
+ * SheetApp 2.0 (Epic 4.3)
+ */
+
+:root {
+  --bg: #ffffff;
+  --text: #18181b;
+  --text-muted: #64748b;
+  --chord-color: #b91c1c;
+  --border: #cbd5e1;
+  --font-size: 14px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #f1f5f9;
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: var(--font-size);
+  line-height: 1.5;
+  padding-bottom: 60px;
+}
+
+/* ─── Control Bar ─── */
+.control-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.ctrl-group { display: flex; align-items: center; gap: 8px; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  touch-action: manipulation;
+}
+
+.btn:hover { background: #f8fafc; border-color: #94a3b8; }
+.btn-primary { background: #2563eb; color: #ffffff; border-color: #1d4ed8; font-weight: 600; }
+.btn-primary:hover { background: #1d4ed8; }
+
+/* ─── Booklet Pages ─── */
+.booklet-container {
+  max-width: 860px;
+  margin: 20px auto;
+}
+
+.booklet-page {
+  background: var(--bg);
+  padding: 40px 50px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border);
+  margin-bottom: 30px;
+  min-height: 980px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Trang Bìa */
+.cover-header {
+  text-align: center;
+  border-bottom: 3px double #0f172a;
+  padding-bottom: 24px;
+  margin-bottom: 28px;
+}
+
+.cover-sub {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.cover-title {
+  font-size: 28px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+
+.cover-theme {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2563eb;
+  margin-bottom: 12px;
+}
+
+.cover-meta {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  font-size: 13px;
+  color: #475569;
+}
+
+/* Bảng Phân công & Lịch trình */
+.cover-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #334155;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 4px;
+}
+
+.assignments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.assign-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+.assign-role {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.assign-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.program-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 24px;
+  font-size: 13px;
+}
+
+.program-table th {
+  background: #f1f5f9;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  text-align: left;
+  font-weight: 700;
+  color: #334155;
+}
+
+.program-table td {
+  padding: 8px 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.program-table tr:nth-child(even) td {
+  background: #fafafa;
+}
+
+/* Trang từng bài hát */
+.song-booklet-header {
+  border-bottom: 2px solid #0f172a;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.song-number-tag {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #2563eb;
+  letter-spacing: 1px;
+}
+
+.song-booklet-title {
+  font-size: 22px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #0f172a;
+  margin-top: 2px;
+}
+
+.song-booklet-meta {
+  display: flex;
+  gap: 14px;
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.song-booklet-meta strong {
+  color: #0f172a;
+}
+
+.sections-container.two-columns {
+  column-count: 2;
+  column-gap: 32px;
+  column-rule: 1px dashed #cbd5e1;
+}
+
+.section-block {
+  margin-bottom: 20px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.section-heading {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #475569;
+  background: #f8fafc;
+  border-left: 3px solid #2563eb;
+  padding: 2px 6px;
+  margin-bottom: 8px;
+  display: inline-block;
+  border-radius: 0 4px 4px 0;
+}
+
+.section-chorus {
+  border-left: 2px solid #fdba74;
+  padding-left: 8px;
+}
+
+.section-chorus .section-heading {
+  border-left-color: #ea580c;
+  color: #c2410c;
+  background: #fff7ed;
+}
+
+.line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  line-height: 1;
+  margin-bottom: 7px;
+  white-space: pre-wrap;
+}
+
+.empty-line { height: 12px; }
+
+.chord-pair {
+  display: inline-flex;
+  flex-direction: column;
+  vertical-align: bottom;
+}
+
+.chord {
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-size: 0.88em;
+  font-weight: 700;
+  color: var(--chord-color);
+  height: 1.25em;
+  line-height: 1.25;
+  padding-bottom: 2px;
+  white-space: pre;
+}
+
+.chord-spacer { visibility: hidden; }
+.lyric { font-size: 1em; color: #1e293b; white-space: pre; }
+.lyric-only { font-size: 1em; color: #1e293b; line-height: 1.5; }
+.comment-line { font-style: italic; color: #64748b; font-size: 0.88em; margin: 3px 0; }
+
+.song-notes-box {
+  margin-top: 20px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #475569;
+}
+
+.page-footer {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 10px;
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* ─── In Ấn (@media print) ─── */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm 15mm 15mm 15mm;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+  }
+
+  .control-bar, .no-print {
+    display: none !important;
+  }
+
+  .booklet-container {
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+
+  .booklet-page {
+    box-shadow: none !important;
+    border: none !important;
+    margin-bottom: 0 !important;
+    padding: 0 !important;
+    min-height: auto !important;
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .booklet-page:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  .chord {
+    color: #000000 !important;
+    font-weight: 800 !important;
+  }
+
+  .section-block {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+}

@@ -1,0 +1,132 @@
+/* =============================================
+   SheetApp — base.css
+   CSS Variables, Reset, Scrollbar
+   ============================================= */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-base:       #eef0f7;
+  --bg-surface:    #ffffff;
+  --bg-overlay:    #f4f5fb;
+  --bg-raised:     #e8eaf6;
+  --bg-hover:      #dde0f5;
+  --bg-sheet:      #ffffff;
+
+  --accent:        #6d28d9;
+  --accent-light:  #7c3aed;
+  --accent-dim:    #8b5cf6;
+  --accent-glow:   rgba(109,40,217,.15);
+  --success:       #059669;
+  --warning:       #d97706;
+  --danger:        #dc2626;
+  --chord-color:   #e11d48;
+
+  --text-primary:  #1e1b4b;
+  --text-secondary:#4c4a7a;
+  --text-muted:    #8b85b8;
+  --border:        rgba(109,40,217,.12);
+  --border-active: rgba(109,40,217,.45);
+
+  --sidebar-w:     290px;
+  --toolbar-h:     64px;
+  --radius:        12px;
+  --radius-sm:     8px;
+  --radius-xs:     5px;
+  --shadow:        0 4px 24px rgba(109,40,217,.12);
+  --shadow-sm:     0 1px 6px rgba(0,0,0,.08);
+  --transition:    .2s cubic-bezier(.4,0,.2,1);
+
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, 'Menlo', 'Consolas', monospace; /* Không cần tải font ngoài */
+
+  /* ─── Z-INDEX SCALE (CHUẨN HÓA) ─────────────────────────────────── */
+  --z-base:        1;
+  --z-dropdown:    100;
+  --z-sticky:      200;
+  --z-app-shell:   500;
+  --z-header:      600;
+  --z-sidebar:     700;
+  --z-hud:         800;
+  --z-popup:       900;
+  --z-fab:         950;
+  --z-modal-bg:    1000;
+  --z-modal:       1010;
+  --z-toast:       2000;
+  --z-topmost:     9999;
+
+  /* ─── FOCUS & ACCESSIBILITY ─────────────────────────────────────── */
+  --focus-ring:    0 0 0 3px rgba(124, 58, 237, 0.4);
+}
+
+/* ─── FOCUS ACCESSIBILITY ─────────────────────────────────────────── */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* ─── REDUCED MOTION PREFERENCE ───────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html { font-size: 14px; height: 100%; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg-raised); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--bg-hover); }
+
+/* iPad / mobile scroll optimization */
+.sheet-viewer-wrapper,
+.sidebar,
+.library-list,
+.setlist-list {
+  -webkit-overflow-scrolling: touch; /* iOS momentum scroll */
+  touch-action: pan-y;
+}
+
+/* Đầu tư GPU cho các phần tử hay animation */
+.toolbar, .sidebar, .sheet-viewer-wrapper {
+  transform: translateZ(0);     /* Force GPU layer */
+  backface-visibility: hidden;
+}
+
+/* content-visibility cho các panel ẩn (không render khi hidden) */
+.modal-overlay,
+#admin-console,
+#session-panel {
+  content-visibility: auto;
+}
+
+/* Utilities */
+.hidden   { display: none !important; }
+.mt-half  { margin-top: .4rem; }
+.mt-1     { margin-top: .75rem; }
+.mt-2     { margin-top: 1.5rem; }
+.text-sm  { font-size: .825rem; }
+.text-xs  { font-size: .7rem; }
+.text-muted   { color: var(--text-muted); }
+.text-center  { text-align: center; }
+.w-full   { width: 100%; }
+
+/* Tags */
+.tag { display: inline-block; padding: .15rem .5rem; border-radius: 99px; font-size: .7rem; font-weight: 500; background: var(--bg-raised); color: var(--text-secondary); border: 1px solid var(--border); }
+.tag-purple { background: rgba(167,139,250,.15); color: var(--accent); border-color: rgba(167,139,250,.3); }
+.tag-green  { background: rgba(52,211,153,.15); color: var(--success); border-color: rgba(52,211,153,.3); }
+
+/* KBD badge */
+.kbd { display: inline-block; font-size: .6rem; color: var(--text-muted); background: var(--bg-overlay); border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 3px; padding: .05em .35em; font-family: var(--font-mono); line-height: 1.6; }
