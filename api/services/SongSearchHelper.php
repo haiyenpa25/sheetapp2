@@ -62,6 +62,77 @@ class SongSearchHelper {
         ];
     }
 
+    public static function extractLyricsByVerse(string $xmlContent): string {
+        if ($xmlContent === '' || !str_contains($xmlContent, '<lyric')) {
+            return '';
+        }
+
+        $xml = @simplexml_load_string($xmlContent);
+        if (!$xml) return '';
+
+        $selectedPart = null;
+        foreach ($xml->xpath('//part') as $part) {
+            if ($part->xpath('.//lyric')) {
+                $selectedPart = $part;
+                break;
+            }
+        }
+        if (!$selectedPart) {
+            $selectedPart = $xml->part[0] ?? null;
+            if (!$selectedPart) return '';
+        }
+
+        $verseTokens = [];
+        foreach ($selectedPart->xpath('.//note') as $note) {
+            if ($note->chord) continue;
+            foreach ($note->xpath('lyric') as $lyric) {
+                $num = (string)($lyric['number'] ?? $lyric['name'] ?? '1');
+                $text = trim((string)$lyric->text);
+                $syllabic = (string)($lyric->syllabic ?? 'single');
+                if ($text !== '') {
+                    $verseTokens[$num][] = ['text' => $text, 'syllabic' => $syllabic];
+                }
+            }
+        }
+
+        $verses = [];
+        foreach ($verseTokens as $num => $tokens) {
+            $words = [];
+            $buf = '';
+            foreach ($tokens as $t) {
+                $txt = $t['text'];
+                $syl = $t['syllabic'];
+                if ($syl === 'begin') {
+                    $buf = $txt;
+                } elseif ($syl === 'middle') {
+                    $buf .= (str_ends_with($buf, '-') ? '' : '-') . $txt;
+                } elseif ($syl === 'end') {
+                    $words[] = $buf . (str_ends_with($buf, '-') ? '' : '-') . $txt;
+                    $buf = '';
+                } else {
+                    if ($buf !== '') {
+                        $words[] = $buf;
+                        $buf = '';
+                    }
+                    $words[] = $txt;
+                }
+            }
+            if ($buf !== '') $words[] = $buf;
+
+            // Chuẩn hóa khoảng trắng sau số thứ tự như "1.Cúi" -> "1. Cúi"
+            if (!empty($words)) {
+                $words[0] = preg_replace('/^(\d+\.)([^\s\d])/u', '$1 $2', $words[0]);
+            }
+
+            $verseStr = trim(implode(' ', $words));
+            if ($verseStr !== '') {
+                $verses[] = $verseStr;
+            }
+        }
+
+        return implode("\n\n", $verses);
+    }
+
     public static function syncSongFts(string $songId): void {
         try {
             $pdo = DB::pdo();
@@ -74,20 +145,16 @@ class SongSearchHelper {
             $titleUnaccented = self::removeAccents($title);
             $lyrics = $song['lyrics_text'] ?? '';
 
-            // Nếu lyrics_text chưa có trong DB, thử đọc nhanh từ MusicXML file
+            // Nếu lyrics_text chưa có trong DB, thử đọc chuẩn theo từng khổ từ MusicXML file
             if (empty($lyrics) && !empty($song['xmlPath'])) {
                 require_once __DIR__ . '/SongService.php';
                 $resolvedPath = SongService::resolveManagedXmlPath($song['xmlPath']);
                 if ($resolvedPath && file_exists($resolvedPath) && filesize($resolvedPath) < 2000000) {
                     $xmlContent = @file_get_contents($resolvedPath);
-                    if ($xmlContent && str_contains($xmlContent, '<lyric>')) {
-                        @preg_match_all('/<text[^>]*>(.*?)<\/text>/si', $xmlContent, $matches);
-                        if (!empty($matches[1])) {
-                            $extractedWords = array_map('trim', $matches[1]);
-                            $lyrics = implode(' ', array_filter($extractedWords));
-                            if ($lyrics !== '') {
-                                DB::run("UPDATE songs SET lyrics_text = ? WHERE id = ?", [$lyrics, $songId]);
-                            }
+                    if ($xmlContent && str_contains($xmlContent, '<lyric')) {
+                        $lyrics = self::extractLyricsByVerse($xmlContent);
+                        if ($lyrics !== '') {
+                            DB::run("UPDATE songs SET lyrics_text = ? WHERE id = ?", [$lyrics, $songId]);
                         }
                     }
                 }
@@ -264,7 +331,7 @@ class SongSearchHelper {
                 $params[':catId'] = $categoryId;
             }
 
-            $sql .= " ORDER BY relevance_tier ASC, fts_rank ASC, s.httlvnId ASC LIMIT " . (int)$limit;
+            $sql .= " ORDER BY relevance_tier ASC, (CASE WHEN relevance_tier < 4 THEN s.httlvnId ELSE 0 END) ASC, fts_rank ASC, s.httlvnId ASC LIMIT " . (int)$limit;
 
             $stmt = DB::pdo()->prepare($sql);
             $stmt->execute($params);
@@ -317,20 +384,30 @@ class SongSearchHelper {
     public static function createLyricSnippet(string $lyrics, string $cleanQuery, string $unaccentedQuery): ?string {
         if ($lyrics === '' || $cleanQuery === '') return null;
 
+        // 1. Tìm vị trí khớp tốt nhất
         $pos = mb_stripos($lyrics, $cleanQuery);
-        if ($pos === false) {
+        $matchLen = mb_strlen($cleanQuery);
+
+        if ($pos === false && $unaccentedQuery !== '') {
             $unaccLyrics = self::removeAccents($lyrics);
             $pos = mb_stripos($unaccLyrics, $unaccentedQuery);
+            $matchLen = mb_strlen($unaccentedQuery);
         }
+
         if ($pos === false) {
             $words = preg_split('/\s+/u', $cleanQuery, -1, PREG_SPLIT_NO_EMPTY);
             foreach ($words as $w) {
                 if (mb_strlen($w) >= 2) {
                     $pos = mb_stripos($lyrics, $w);
-                    if ($pos === false) {
-                        $pos = mb_stripos(self::removeAccents($lyrics), self::removeAccents($w));
-                    }
                     if ($pos !== false) {
+                        $matchLen = mb_strlen($w);
+                        break;
+                    }
+                    $unaccW = self::removeAccents($w);
+                    $unaccLyrics = self::removeAccents($lyrics);
+                    $pos = mb_stripos($unaccLyrics, $unaccW);
+                    if ($pos !== false) {
+                        $matchLen = mb_strlen($unaccW);
                         break;
                     }
                 }
@@ -341,14 +418,64 @@ class SongSearchHelper {
             return null;
         }
 
-        $start = max(0, $pos - 25);
-        $length = 80;
-        $slice = mb_substr($lyrics, $start, $length);
-        $prefix = ($start > 0) ? '...' : '';
-        $suffix = (mb_strlen($lyrics) > $start + $length) ? '...' : '';
+        // 2. Tìm ranh giới câu liền mạch (sentence boundary)
+        $lyricsLen = mb_strlen($lyrics);
+        $preSub = mb_substr($lyrics, 0, $pos);
+        $sentenceStartPos = 0;
+
+        $lastNewline = mb_strrpos($preSub, "\n");
+        if ($lastNewline !== false) {
+            $sentenceStartPos = $lastNewline + 1;
+        }
+
+        $between = mb_substr($lyrics, $sentenceStartPos, $pos - $sentenceStartPos);
+        if (preg_match_all('/([.!?;]+)(?:\s+|$)/u', $between, $m, PREG_OFFSET_CAPTURE)) {
+            $lastPunctMatch = end($m[0]);
+            $offsetInBetween = $lastPunctMatch[1] + strlen($lastPunctMatch[0]);
+            $charOffset = mb_strlen(substr($between, 0, $offsetInBetween));
+            $subBeforePunct = trim(substr($between, 0, $charOffset));
+            if (!preg_match('/^\d+\.$/u', $subBeforePunct)) {
+                $sentenceStartPos += $charOffset;
+            }
+        }
+
+        if ($pos - $sentenceStartPos > 60) {
+            $longPre = mb_substr($lyrics, $sentenceStartPos, $pos - $sentenceStartPos);
+            $lastComma = mb_strrpos($longPre, ',');
+            if ($lastComma !== false && ($pos - ($sentenceStartPos + $lastComma)) <= 50) {
+                $sentenceStartPos += $lastComma + 1;
+            }
+        }
+
+        $searchAfterPos = $pos + $matchLen;
+        $postSub = mb_substr($lyrics, $searchAfterPos);
+
+        $firstNewline = mb_strpos($postSub, "\n");
+        if ($firstNewline !== false) {
+            $postSub = mb_substr($postSub, 0, $firstNewline);
+        }
+
+        $sentenceEndPos = $searchAfterPos + mb_strlen($postSub);
+        if (preg_match('/([.!?;]+)(?:\s+|$)/u', $postSub, $pm, PREG_OFFSET_CAPTURE)) {
+            $punctEnd = $pm[0][1] + strlen($pm[0][0]);
+            $punctCharLen = mb_strlen(substr($postSub, 0, $punctEnd));
+            $curLen = ($searchAfterPos + $punctCharLen) - $sentenceStartPos;
+            if ($curLen < 35) {
+                $remainingPost = mb_substr($postSub, $punctCharLen);
+                if (preg_match('/([.!?;]+)(?:\s+|$)/u', $remainingPost, $pm2, PREG_OFFSET_CAPTURE)) {
+                    $punctEnd2 = $pm2[0][1] + strlen($pm2[0][0]);
+                    $punctCharLen += mb_strlen(substr($remainingPost, 0, $punctEnd2));
+                }
+            }
+            $sentenceEndPos = $searchAfterPos + $punctCharLen;
+        }
+
+        $slice = trim(mb_substr($lyrics, $sentenceStartPos, $sentenceEndPos - $sentenceStartPos));
+        $prefix = ($sentenceStartPos > 0 && !preg_match('/^\d+\./u', $slice)) ? '... ' : '';
+        $suffix = ($sentenceEndPos < $lyricsLen && !preg_match('/[.!?]$/u', $slice)) ? ' ...' : '';
 
         // BƯỚC 1: Escape toàn bộ trước (không bao giờ chèn HTML thô từ DB)
-        $rawSnippet = $prefix . trim($slice) . $suffix;
+        $rawSnippet = $prefix . $slice . $suffix;
         $escaped = htmlspecialchars($rawSnippet, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 
         // BƯỚC 2: Chèn <mark> quanh từ khớp đã được escape (hỗ trợ cả tiếng Việt không dấu khớp từ có dấu)
