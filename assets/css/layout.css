@@ -18,6 +18,7 @@ select, input, label,
 
 /* ---- SIDEBAR ---- */
 .sidebar {
+  order: -1;
   width: var(--sidebar-w);
   height: 100%;
   display: flex;

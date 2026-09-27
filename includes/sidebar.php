@@ -29,10 +29,10 @@
 
   <div class="sidebar-search">
     <div class="mt-half" style="display: flex; gap: 4px;">
-      <select id="category-filter" class="form-input select-toolbar" style="flex: 1; height: 30px; border-color: var(--border);">
+      <select id="category-filter" class="form-input select-toolbar" style="flex: 1; height: 30px; border-color: var(--border);" aria-label="Lọc theo danh mục bài hát">
         <option value="">Tất cả danh mục</option>
       </select>
-      <select id="sort-filter" class="form-input select-toolbar" style="width: 105px; height: 30px; border-color: var(--border); font-size: .8rem;" title="Sắp xếp bài hát">
+      <select id="sort-filter" class="form-input select-toolbar" style="width: 105px; height: 30px; border-color: var(--border); font-size: .8rem;" title="Sắp xếp bài hát" aria-label="Sắp xếp danh sách bài hát">
         <option value="num" selected>STT HTTLVN</option>
         <option value="title">Tên (A-Z)</option>
         <option value="key">Tông gốc</option>
@@ -47,7 +47,7 @@
 
     <!-- TAXONOMY FILTERS (EPIC 3.5) -->
     <div class="mt-half" style="display: flex; gap: 4px; margin-top: 4px;">
-      <select id="season-filter" class="form-input select-toolbar" style="flex: 1; height: 28px; font-size: .75rem; border-color: var(--border);" title="Lọc theo Mùa Phụng Vụ">
+      <select id="season-filter" class="form-input select-toolbar" style="flex: 1; height: 28px; font-size: .75rem; border-color: var(--border);" title="Lọc theo Mùa Phụng Vụ" aria-label="Lọc theo mùa phụng vụ">
         <option value="">Tất cả Mùa Lễ</option>
         <option value="advent">Mùa Vọng</option>
         <option value="christmas">Giáng Sinh</option>
@@ -56,7 +56,7 @@
         <option value="ordinary">Thường Niên</option>
         <option value="solemnity">Lễ Trọng</option>
       </select>
-      <select id="theme-filter" class="form-input select-toolbar" style="flex: 1; height: 28px; font-size: .75rem; border-color: var(--border);" title="Lọc theo Chủ Đề Phụng Vụ">
+      <select id="theme-filter" class="form-input select-toolbar" style="flex: 1; height: 28px; font-size: .75rem; border-color: var(--border);" title="Lọc theo Chủ Đề Phụng Vụ" aria-label="Lọc theo chủ đề phụng vụ">
         <option value="">Tất cả Chủ Đề</option>
         <option value="nhap-le">Nhập Lễ</option>
         <option value="dap-ca">Đáp Ca</option>

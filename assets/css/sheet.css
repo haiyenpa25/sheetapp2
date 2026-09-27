@@ -145,23 +145,27 @@
 /* Reset button nhỏ hơn */
 .pb-reset-btn { padding: .18rem .42rem !important; font-size: .73rem !important; }
 
-/* Capo badge (Ticket L0-12) */
+/* Capo badge (Ticket L0-12, L1-11) */
 .capo-badge {
   display: inline-flex;
   align-items: center;
-  font-size: 0.72rem;
+  font-size: 11px;
   font-weight: 700;
   padding: 2px 7px;
   border-radius: 99px;
-  background: rgba(245, 158, 11, 0.18);
+  background: rgba(245, 158, 11, 0.14);
   border: 1px solid rgba(245, 158, 11, 0.45);
-  color: #fbbf24;
+  color: #92400e;
   white-space: nowrap;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 .capo-badge:hover {
-  background: rgba(245, 158, 11, 0.28);
+  background: rgba(245, 158, 11, 0.25);
+}
+body.dark-mode .capo-badge {
+  background: rgba(245, 158, 11, 0.22);
+  color: #fcd34d;
 }
 .capo-badge.hidden {
   display: none !important;
@@ -1536,6 +1540,7 @@ body.dark-mode {
   --bg-surface: #1a1a24;
   --text-primary:   #e4e4ec;
   --text-secondary: #9999b0;
+  --text-muted:     #9e9eb8;
   --border:     #2a2a38;
   --accent:     #a78bfa;
 }

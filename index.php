@@ -89,15 +89,22 @@ echo cssTag('app-shell.css');
 </head>
 <body>
 
-<?php require_once __DIR__ . '/includes/sidebar.php'; ?>
-<div id="sidebar-overlay" class="sidebar-overlay hidden"></div>
+<!-- Skip Navigation Links cho điều hướng bàn phím A11y (Ticket L1-11) -->
+<nav class="skip-links" aria-label="Điều hướng nhanh">
+  <a href="#unified-toolbar" class="skip-link">Nhảy tới thanh công cụ</a>
+  <a href="#sheet-viewer-wrapper" class="skip-link">Nhảy tới bản nhạc</a>
+  <a href="#sidebar" class="skip-link">Nhảy tới danh sách bài hát</a>
+</nav>
 
-<!-- ===== MAIN CONTENT ===== -->
+<!-- ===== MAIN CONTENT (Thanh công cụ & Bản nhạc focus trước Sidebar) ===== -->
 <main id="main" class="main-content">
   <?php $activePillar = 'library'; require_once __DIR__ . '/includes/app_nav.php'; ?>
   <?php require_once __DIR__ . '/includes/toolbar.php'; ?>
   <?php require_once __DIR__ . '/includes/sheet_viewer.php'; ?>
 </main>
+
+<?php require_once __DIR__ . '/includes/sidebar.php'; ?>
+<div id="sidebar-overlay" class="sidebar-overlay hidden"></div>
 
 <?php require_once __DIR__ . '/includes/modals.php'; ?>
 <?php require_once __DIR__ . '/includes/admin_console.php'; ?>
@@ -134,7 +141,7 @@ echo cssTag('app-shell.css');
 
     <!-- Cụm 4: Bộ chọn nhịp (4/4, 3/4, 2/4, 6/8) & Count-in -->
     <div class="mm-section mm-meter-section">
-      <select id="metronome-beats-select" class="mm-select" title="Số phách và kiểu nhịp">
+      <select id="metronome-beats-select" class="mm-select" title="Số phách và kiểu nhịp" aria-label="Số phách và kiểu nhịp">
         <option value="4" selected>4/4 (Nhịp 4)</option>
         <option value="3">3/4 (Nhịp 3)</option>
         <option value="2">2/4 (Nhịp 2)</option>

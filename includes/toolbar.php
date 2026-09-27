@@ -47,7 +47,7 @@
       <!-- Capo (Chọn ngăn kẹp Capo & Gợi ý cho Guitar, Ticket L0-12) -->
       <div id="capo-wrap" class="capo-wrap">
         <label for="capo-select" class="capo-label">Capo</label>
-        <select id="capo-select" class="capo-select" title="Chọn ngăn kẹp Capo (0-7)">
+        <select id="capo-select" class="capo-select" title="Chọn ngăn kẹp Capo (0-7)" aria-label="Chọn ngăn kẹp Capo (0-7)">
           <option value="0" selected>0</option><option value="1">1</option><option value="2">2</option>
           <option value="3">3</option><option value="4">4</option><option value="5">5</option>
           <option value="6">6</option><option value="7">7</option>
@@ -62,7 +62,7 @@
       <button id="btn-zoom-out" class="icon-btn-pill" title="Thu nhỏ bản nhạc (−)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </button>
-      <select id="zoom-slider" class="select-zoom-pill" disabled title="Chọn tỷ lệ thu phóng">
+      <select id="zoom-slider" class="select-zoom-pill" disabled title="Chọn tỷ lệ thu phóng" aria-label="Chọn tỷ lệ thu phóng">
         <option value="50">50%</option>
         <option value="65">65%</option>
         <option value="80">80%</option>
@@ -86,7 +86,7 @@
     <!-- Cụm Bản Phối Hợp Âm (Chord Set Pill) -->
     <div class="band-pill chord-set-pill" id="chord-set-bar" role="group" aria-label="Chọn bản phối hợp âm" title="Bản phối hợp âm">
       <span class="pill-icon" style="font-size: 0.95rem;">🎸</span>
-      <select id="chord-set-selector" class="chord-set-select" disabled onchange="ChordCanvas.handleSelectChange ? ChordCanvas.handleSelectChange(this.value) : ChordCanvas.switchSet(this.value)" title="Chọn bản phối hợp âm">
+      <select id="chord-set-selector" class="chord-set-select" disabled onchange="ChordCanvas.handleSelectChange ? ChordCanvas.handleSelectChange(this.value) : ChordCanvas.switchSet(this.value)" title="Chọn bản phối hợp âm" aria-label="Chọn bản phối hợp âm">
         <option value="HD" selected>⭐ HD (Mặc định)</option>
         <option value="default">TLH (gốc)</option>
       </select>
@@ -142,7 +142,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
         <span class="btn-text">Cuộn</span>
       </button>
-      <select id="scroll-speed" class="select-scroll-speed" disabled title="Tốc độ cuộn">
+      <select id="scroll-speed" class="select-scroll-speed" disabled title="Tốc độ cuộn" aria-label="Chọn tốc độ cuộn tự động">
         <option value="1" selected>1×</option>
         <option value="2">2×</option>
         <option value="3">3×</option>
@@ -213,7 +213,7 @@
           </div>
           <div class="audio-panel-row">
             <span class="audio-panel-label">Tốc độ:</span>
-            <select id="audio-speed" class="select-toolbar" data-touch-allow="true" disabled>
+            <select id="audio-speed" class="select-toolbar" data-touch-allow="true" disabled aria-label="Chọn tốc độ phát nhạc">
               <option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1.0" selected>1.0×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option>
             </select>
           </div>
@@ -222,7 +222,7 @@
             <input id="audio-volume" type="range" class="audio-volume-slider" min="-20" max="24" step="1" value="18" data-touch-allow="true" disabled>
           </div>
           <button id="btn-metronome" style="display:none"></button>
-          <select id="audio-playback-mode" style="display:none"><option value="satb">SATB</option></select>
+          <select id="audio-playback-mode" style="display:none" aria-label="Chế độ phát SATB"><option value="satb">SATB</option></select>
         </div>
 
         <button id="btn-mixer" class="btn btn-ghost btn-sm btn-menu-item" disabled title="Bật/Tắt nhạc cụ">
@@ -302,13 +302,13 @@
             <button id="btn-menu-auto-scroll" class="btn btn-ghost btn-xs btn-menu-item" style="padding:2px 8px;margin:0;">
               <span class="btn-text">Cuộn</span>
             </button>
-            <select id="menu-scroll-speed" class="select-toolbar" style="font-size:0.72rem;padding:1px 4px;margin-left:6px;">
+            <select id="menu-scroll-speed" class="select-toolbar" style="font-size:0.72rem;padding:1px 4px;margin-left:6px;" aria-label="Chọn tốc độ cuộn">
               <option value="1" selected>1×</option><option value="2">2×</option><option value="3">3×</option><option value="4">4×</option>
             </select>
           </div>
           <div class="audio-panel-row" style="margin-bottom: 6px;">
             <span class="audio-panel-label">Kẹp Capo:</span>
-            <select id="menu-capo-select" class="select-toolbar" style="font-size:0.72rem;padding:1px 4px;margin-left:6px;" title="Chọn ngăn kẹp Capo">
+            <select id="menu-capo-select" class="select-toolbar" style="font-size:0.72rem;padding:1px 4px;margin-left:6px;" title="Chọn ngăn kẹp Capo" aria-label="Chọn ngăn kẹp Capo">
               <option value="0" selected>0 (Không kẹp)</option>
               <option value="1">Ngăn 1</option><option value="2">Ngăn 2</option>
               <option value="3">Ngăn 3</option><option value="4">Ngăn 4</option>
