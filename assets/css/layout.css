@@ -1494,14 +1494,19 @@ body.sheet-only-mode .gig-floating-hud {
     height: 28px;
     min-width: 28px;
   }
-  #capo-wrap {
+  #capo-wrap,
+  #capo-badge {
     display: none !important;
   }
   .btn-pill-reset {
     display: none !important;
   }
+  #btn-toolbar-chord-edit,
+  .btn-chord-edit-pill {
+    display: none !important;
+  }
   .chord-set-select {
-    max-width: 90px;
+    max-width: 80px !important;
     font-size: 0.75rem;
   }
   .chord-set-count {

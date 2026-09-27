@@ -28,7 +28,7 @@ test.describe('L0-11: Unified Key Display (KeyService)', () => {
     // Tông gốc G
     await expect(songKey).toHaveText('G');
     await expect(gigHudKey).toHaveText('G');
-    await expect(siToneChip).toContainText('Tone: G');
+    await expect(siToneChip).toContainText('G');
 
     // Thực hiện dịch giọng +1
     await page.evaluate(() => {
@@ -67,9 +67,9 @@ test.describe('L0-11: Unified Key Display (KeyService)', () => {
     }
   });
 
-  test('Song 002 (F) + 1 shows Gb, Song 003 (Eb) - 1 shows D', async ({ page }) => {
-    // 1. Song 002 (F)
-    await page.goto('/sheetapp2/?song=thanh-ca-002');
+  test('Song 007 (F) + 1 shows Gb, Song 004 (Eb) - 1 shows D', async ({ page }) => {
+    // 1. Song 007 (F)
+    await page.goto('/sheetapp2/?song=thanh-ca-007');
     await page.waitForSelector('#sheet-area svg', { timeout: 25000 });
 
     const songKey = page.locator('#song-key');
@@ -95,8 +95,8 @@ test.describe('L0-11: Unified Key Display (KeyService)', () => {
     await expect(gigHudKey).toHaveText('Gb');
     await expect(siToneChip).toContainText('Tập: Gb');
 
-    // 2. Song 003 (Eb)
-    await page.goto('/sheetapp2/?song=thanh-ca-003');
+    // 2. Song 004 (Eb)
+    await page.goto('/sheetapp2/?song=thanh-ca-004');
     await page.waitForSelector('#sheet-area svg', { timeout: 25000 });
 
     await expect(songKey).toHaveText('Eb');

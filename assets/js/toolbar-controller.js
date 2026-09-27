@@ -273,7 +273,7 @@ const ToolbarController = (() => {
   }
 
   function _bindMisc() {
-    document.getElementById('btn-fullscreen')?.addEventListener('click', AppUI?.toggleFullscreen);
+    // Ticket L0-16: #btn-fullscreen được ModeManager quản lý tập trung, không bind trùng lặp tại đây
     document.getElementById('btn-print')?.addEventListener('click', () => window.print());
     document.getElementById('btn-session-panel')?.addEventListener('click', () => PerformanceNotes?.toggle?.());
 

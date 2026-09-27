@@ -7,7 +7,7 @@ const Auth = (() => {
 
   let _userId = null;
   let _currentUser = null;
-  let _role = 'viewer'; // viewer | banhat | admin
+  let _role = 'viewer'; // viewer | banhat | leader | admin
   let _chordCode = null;
   let _mustChangePassword = false;
 
@@ -97,8 +97,9 @@ const Auth = (() => {
     if (roleBadge) {
       const badgeInfo = {
         admin:  { text: 'Quản Trị', cls: 'role-badge-admin' },
+        leader: { text: 'Trưởng Ban', cls: 'role-badge-leader' },
         banhat: { text: 'Ban Hát',   cls: 'role-badge-banhat' },
-        viewer: { text: '',            cls: '' }
+        viewer: { text: '',          cls: '' }
       }[_role] ?? { text: '', cls: '' };
 
       if (_currentUser && badgeInfo.text) {
@@ -125,9 +126,9 @@ const Auth = (() => {
     }
     if (toolbarBadge) {
       if (_currentUser) {
-        const roleLabel = _role === 'admin' ? 'Admin' : (_role === 'banhat' ? (_chordCode || 'HÂ') : 'Khách');
+        const roleLabel = _role === 'admin' ? 'Admin' : (_role === 'leader' ? 'Leader' : (_role === 'banhat' ? (_chordCode || 'HÂ') : 'Khách'));
         toolbarBadge.textContent = roleLabel;
-        toolbarBadge.className = 'user-pill-role ' + (_role === 'admin' ? 'role-admin' : 'role-banhat');
+        toolbarBadge.className = 'user-pill-role ' + (_role === 'admin' ? 'role-admin' : (_role === 'leader' ? 'role-leader' : 'role-banhat'));
         toolbarBadge.classList.remove('hidden');
       } else {
         toolbarBadge.className = 'user-pill-role hidden';
@@ -158,6 +159,11 @@ const Auth = (() => {
           rolePill.style.background = 'rgba(239, 68, 68, 0.2)';
           rolePill.style.color = '#fca5a5';
           rolePill.style.border = '1px solid rgba(239, 68, 68, 0.4)';
+        } else if (_role === 'leader') {
+          rolePill.textContent = 'Trưởng Ban Hát (Leader)';
+          rolePill.style.background = 'rgba(16, 185, 129, 0.2)';
+          rolePill.style.color = '#6ee7b7';
+          rolePill.style.border = '1px solid rgba(16, 185, 129, 0.4)';
         } else if (_role === 'banhat') {
           rolePill.textContent = 'Nhạc Công Ban Hát';
           rolePill.style.background = 'rgba(124, 58, 237, 0.2)';
@@ -176,6 +182,8 @@ const Auth = (() => {
       if (permSummary) {
         if (_role === 'admin') {
           permSummary.innerHTML = '✅ Xem sheet &amp; hợp âm<br>✅ Toàn quyền sửa bộ <strong>ADMIN</strong><br>✅ Ghi chú &amp; Quản trị hệ thống';
+        } else if (_role === 'leader') {
+          permSummary.innerHTML = '✅ Xem sheet &amp; hợp âm<br>✅ Toàn quyền sửa hợp âm &amp; Setlist<br>✅ Đồng bộ Live Band &amp; Điều khiển sân khấu';
         } else if (_role === 'banhat') {
           permSummary.innerHTML = `✅ Xem sheet &amp; hợp âm<br>✅ Độc quyền sửa bộ <strong>${window.SafeHtml.escape(_chordCode || 'Cá nhân')}</strong><br>❌ Không sửa đè bộ người khác`;
         } else {
@@ -189,10 +197,12 @@ const Auth = (() => {
 
     // Phân quyền:
     //  viewer  — chỉ được xem
-    //  banhat  — thêm/sửa hợp âm
+    //  banhat  — thêm/sửa hợp âm cá nhân
+    //  leader  — quản lý chương trình, thêm/sửa hợp âm, live sync
     //  admin   — toàn quyền
     const canEdit       = isAdmin();       // admin only
-    const canEditChords = _canEditChords(); // banhat + admin
+    const isLead        = isLeader();      // leader + admin
+    const canEditChords = _canEditChords(); // banhat + leader + admin
     const loggedIn      = isLoggedIn();
 
     // Thêm hợp âm — CHỈ hiển thị khi đã đăng nhập có quyền banhat/admin
@@ -203,8 +213,10 @@ const Auth = (() => {
     // Nổi bật hợp âm — TẤT CẢ người dùng đều được dùng (chỉ xem, không sửa)
     document.getElementById('btn-chord-highlight')?.classList.remove('hidden');
     
-    // Tạo bộ hợp âm mới — CHỈ hiển thị khi đã đăng nhập
+    // Tạo bộ hợp âm mới — CHỈ hiển thị khi đã đăng nhập có quyền sửa hợp âm
     document.getElementById('btn-new-chord-set')?.classList.toggle('hidden', !canEditChords);
+    // Nút tạo Setlist — Leader + Admin
+    document.getElementById('btn-create-setlist')?.classList.toggle('hidden', !isLead);
     
     // Ghi chú — Admin only
     document.getElementById('btn-add-annotate-mode')?.classList.toggle('hidden', !canEdit);
@@ -438,17 +450,21 @@ const Auth = (() => {
     return _role === 'admin';
   }
 
+  function isLeader() {
+    return _role === 'leader' || _role === 'admin';
+  }
+
   function isLoggedIn() {
     return _currentUser !== null;
   }
 
-  /** Ban Hát hoặc Admin đều có quyền chỉnh sửa hợp âm */
+  /** Ban Hát, Leader hoặc Admin đều có quyền chỉnh sửa hợp âm */
   function _canEditChords() {
-    return _role === 'banhat' || _role === 'admin';
+    return _role === 'banhat' || _role === 'leader' || _role === 'admin';
   }
 
   return {
-    init, checkSession, login: doLogin, logout: doLogout, isAdmin, isLoggedIn, openModal, closeModal, chooseGuestMode,
+    init, checkSession, login: doLogin, logout: doLogout, isAdmin, isLeader, isLoggedIn, openModal, closeModal, chooseGuestMode,
     isBanhat: () => _canEditChords(),
     userId: () => _userId,
     getUserId: () => _userId,

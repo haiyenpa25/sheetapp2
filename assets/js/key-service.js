@@ -3,7 +3,7 @@
  * Quản lý & quy chuẩn hoá điệu tính (Key) và Enharmonic thống nhất toàn ứng dụng.
  * Ticket L0-11 (ROADMAP4.md)
  */
-const KeyService = (() => {
+var KeyService = window.KeyService || (() => {
   'use strict';
 
   // Ánh xạ Fifths (-7 .. +7) sang tên điệu tính Major (Trưởng)

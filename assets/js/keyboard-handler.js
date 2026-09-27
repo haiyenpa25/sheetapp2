@@ -156,20 +156,13 @@ const KeyboardHandler = (() => {
         if (e.ctrlKey || e.metaKey) { e.preventDefault(); ChordCanvas?.redo?.(); }
         break;
       case 'Escape':
-        if (window.ModeManager && window.ModeManager.getMode() !== 'view') {
+        // Ticket L0-16: ModeManager làm chủ duy nhất việc điều phối phím Escape
+        if (window.ModeManager?.handleEscape) {
+          window.ModeManager.handleEscape(e);
+        } else if (window.ModeManager?.resetToView) {
           window.ModeManager.resetToView();
-        } else if (document.body.classList.contains('sheet-only-mode')) {
-          AppUI?.toggleFullscreen?.();
-        }
-        if (window.ModalManager) {
-          window.ModalManager.closeAll();
-        } else {
-          document.getElementById('admin-modal')?.classList.add('hidden');
-          document.getElementById('livesync-modal')?.classList.add('hidden');
-          document.getElementById('mixer-modal')?.classList.add('hidden');
-          document.getElementById('session-panel')?.classList.add('hidden');
-          document.getElementById('add-to-setlist-modal')?.classList.add('hidden');
-          document.getElementById('pwa-install-modal')?.classList.add('hidden');
+        } else if (window.ModalManager?.closeTopmost) {
+          window.ModalManager.closeTopmost();
         }
         break;
     }

@@ -47,8 +47,11 @@ const ChordCanvas = (() => {
 
     try { _highlightMode = localStorage.getItem(HIGHLIGHT_KEY) === 'true'; } catch(e) {}
 
-    document.getElementById('btn-add-chord-mode')?.addEventListener('click', toggleAddMode);
-    document.getElementById('btn-add-chord-mode-bar')?.addEventListener('click', toggleAddMode);
+    // Ticket L0-16: Ủy quyền nút sửa hợp âm sang ModeManager để tránh kích hoạt trùng lặp
+    document.getElementById('btn-add-chord-mode')?.addEventListener('click', () => {
+      if (window.ModeManager?.toggleEditChords) window.ModeManager.toggleEditChords();
+      else toggleAddMode();
+    });
 
     const doneBtn = document.getElementById('btn-cancel-add-chord');
     if (doneBtn) {
@@ -61,13 +64,6 @@ const ChordCanvas = (() => {
     }
 
     document.getElementById('btn-chord-highlight')?.addEventListener('click', toggleHighlight);
-
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') {
-        window.ChordCanvasEdit?.closePopup?.();
-        setAddMode(false);
-      }
-    });
 
     const container = document.getElementById('osmd-container');
     if (container) {
@@ -454,6 +450,15 @@ const ChordCanvas = (() => {
     _refreshSetDropdown(true);
   }
 
+  async function confirmDeleteSet(name) {
+    const target = name || _currentSet;
+    if (!target || target === 'default' || target === 'TLH' || target === 'HD') {
+      window.App?.showToast?.('Bộ này được bảo vệ chuẩn, không thể xóa!', 'error');
+      return;
+    }
+    if (window.confirm(`Bạn có chắc muốn xóa bộ hợp âm "${target}"?`)) await deleteSet(target);
+  }
+
   /* ─── Set dropdown UI ───────────────────────────────────────── */
   const _chordSetsCache = new Map();
 
@@ -561,6 +566,7 @@ const ChordCanvas = (() => {
     createSet,
     showNewSetModal,
     deleteSet,
+    confirmDeleteSet,
     resetSet,
     refreshSetDropdown: (force) => _refreshSetDropdown(force),
     undo: () => window.ChordCanvasEdit?.undo?.(),
@@ -568,22 +574,14 @@ const ChordCanvas = (() => {
     getCurrentSet: () => _currentSet,
     getCustomChords: () => _customChords,
     setCustomChords: (c) => { _customChords = c; },
-    getXmlChordCount: () => {
-      const xmlChords = (typeof ChordCanvasXML !== 'undefined' && ChordCanvasXML.readXmlChords) ? ChordCanvasXML.readXmlChords() : {};
-      return Object.keys(xmlChords).length;
-    },
+    getXmlChordCount: () => Object.keys(window.ChordCanvasXML?.readXmlChords?.() || {}).length,
     getChordStatus: () => {
       const customCount = Object.keys(_customChords || {}).length;
-      const xmlChords = (typeof ChordCanvasXML !== 'undefined' && ChordCanvasXML.readXmlChords) ? ChordCanvasXML.readXmlChords() : {};
-      const xmlCount = Object.keys(xmlChords).length;
-      const isFallback = (_currentSet !== 'default' && customCount === 0 && xmlCount > 0);
-      const isSparse = (_currentSet !== 'default' && customCount > 0 && xmlCount > 0 && customCount < 0.3 * xmlCount);
+      const xmlCount = Object.keys(window.ChordCanvasXML?.readXmlChords?.() || {}).length;
       return {
-        currentSet: _currentSet,
-        customCount,
-        xmlCount,
-        isFallback,
-        isSparse
+        currentSet: _currentSet, customCount, xmlCount,
+        isFallback: (_currentSet !== 'default' && customCount === 0 && xmlCount > 0),
+        isSparse: (_currentSet !== 'default' && customCount > 0 && xmlCount > 0 && customCount < 0.3 * xmlCount)
       };
     },
     getNoteEls: () => _noteEls,

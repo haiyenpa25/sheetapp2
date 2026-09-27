@@ -393,7 +393,7 @@
     <div style="display:flex;align-items:center;justify-content:center;gap:.75rem;padding:1rem;background:linear-gradient(135deg, rgba(16,185,129,0.08), rgba(59,130,246,0.08));border:1px solid rgba(16,185,129,0.25);border-radius:var(--radius-md);margin-bottom:1rem;text-align:center;">
       <button id="tempo-modal-dec" class="tempo-btn" style="width:38px;height:38px;font-size:1.3rem;font-weight:700;border:1px solid var(--border);border-radius:8px;background:var(--bg-surface);cursor:pointer;touch-action:manipulation;">−</button>
       <div style="display:flex;flex-direction:column;align-items:center;min-width:100px;">
-        <span id="tempo-modal-val" style="font-size:2.2rem;font-weight:900;color:var(--text-primary);line-height:1;">104</span>
+        <span id="tempo-modal-val" style="font-size:2.2rem;font-weight:900;color:var(--text-primary);line-height:1;">80</span>
         <span style="font-size:.75rem;color:var(--text-muted);font-weight:700;margin-top:4px;">BPM</span>
       </div>
       <button id="tempo-modal-inc" class="tempo-btn" style="width:38px;height:38px;font-size:1.3rem;font-weight:700;border:1px solid var(--border);border-radius:8px;background:var(--bg-surface);cursor:pointer;touch-action:manipulation;">+</button>
@@ -401,7 +401,7 @@
 
     <!-- Slider -->
     <div style="margin-bottom:1rem;">
-      <input type="range" id="tempo-modal-slider" min="40" max="220" value="104" style="width:100%;cursor:pointer;touch-action:manipulation;">
+      <input type="range" id="tempo-modal-slider" min="40" max="220" value="80" style="width:100%;cursor:pointer;touch-action:manipulation;">
     </div>
 
     <!-- Presets -->
@@ -434,11 +434,11 @@
         <h3 id="help-modal-title" style="margin:0;font-size:1rem;">Hướng Dẫn Sử Dụng SheetApp</h3>
       </div>
       <div style="display:flex;align-items:center;gap:8px;">
-        <a href="/manager/" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;gap:5px;font-size:0.78rem;font-weight:700;padding:4px 10px;border-radius:6px;background:rgba(139,92,246,0.15);color:#a78bfa;border:1px solid rgba(139,92,246,0.3);" title="Mở trang Quản Lý Kho Nhạc & Bản Phối Thành Viên">
+        <a href="<?= ($baseHref ?? '/') ?>manager/" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;gap:5px;font-size:0.78rem;font-weight:700;padding:4px 10px;border-radius:6px;background:rgba(139,92,246,0.15);color:#a78bfa;border:1px solid rgba(139,92,246,0.3);" title="Mở trang Quản Lý Kho Nhạc & Bản Phối Thành Viên">
           <span>📂</span>
           <span>Cổng Quản Lý</span>
         </a>
-        <a href="/huong-dan/" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;gap:5px;font-size:0.78rem;font-weight:700;padding:4px 10px;border-radius:6px;background:linear-gradient(135deg,#0284c7,#7c3aed);color:#fff;" title="Mở trang cẩm nang hướng dẫn toàn diện v2.0">
+        <a href="<?= ($baseHref ?? '/') ?>huong-dan/" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;gap:5px;font-size:0.78rem;font-weight:700;padding:4px 10px;border-radius:6px;background:linear-gradient(135deg,#0284c7,#7c3aed);color:#fff;" title="Mở trang cẩm nang hướng dẫn toàn diện v2.0">
           <span>📚</span>
           <span>Cẩm Nang Toàn Diện</span>
         </a>

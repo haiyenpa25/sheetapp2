@@ -151,15 +151,16 @@
   <div class="sidebar-footer-tools" style="border-top: 1px solid var(--border); padding: 8px 12px; background: var(--bg-surface); flex-shrink: 0;">
     <div style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px;">Tiện Ích Phụ Trợ</div>
     <div style="display: flex; gap: 6px;">
-      <a href="/learn/" class="sidebar-mini-link" style="flex: 1; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 6px 8px; border-radius: 6px; background: rgba(79, 70, 229, 0.12); color: #818cf8; border: 1px solid rgba(79, 70, 229, 0.25); font-size: 0.75rem; font-weight: 600;" title="Góc tự tập đàn, điệu đệm & MIDI ở nhà">
+      <?php $bHref = $baseHref ?? '/'; ?>
+      <a href="<?= $bHref ?>learn/" class="sidebar-mini-link" style="flex: 1; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 6px 8px; border-radius: 6px; background: rgba(79, 70, 229, 0.12); color: #818cf8; border: 1px solid rgba(79, 70, 229, 0.25); font-size: 0.75rem; font-weight: 600;" title="Góc tự tập đàn, điệu đệm & MIDI ở nhà">
         <span>🎹</span>
         <span>Học Đàn</span>
       </a>
-      <a href="/live-band/" class="sidebar-mini-link" style="flex: 1; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 6px 8px; border-radius: 6px; background: rgba(124, 58, 237, 0.12); color: #a78bfa; border: 1px solid rgba(124, 58, 237, 0.25); font-size: 0.75rem; font-weight: 600;" title="Phòng biểu diễn đồng bộ ban nhạc & máy chiếu nhà thờ">
+      <a href="<?= $bHref ?>live-band/" class="sidebar-mini-link" style="flex: 1; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 6px 8px; border-radius: 6px; background: rgba(124, 58, 237, 0.12); color: #a78bfa; border: 1px solid rgba(124, 58, 237, 0.25); font-size: 0.75rem; font-weight: 600;" title="Phòng biểu diễn đồng bộ ban nhạc & máy chiếu nhà thờ">
         <span>📡</span>
         <span>Live Band</span>
       </a>
-      <a href="/manager/" target="_blank" class="sidebar-mini-link" style="padding: 6px 10px; text-decoration: none; display: flex; align-items: center; justify-content: center; border-radius: 6px; background: rgba(255, 255, 255, 0.06); color: var(--text-secondary); border: 1px solid var(--border); font-size: 0.75rem; font-weight: 600;" title="Cổng Quản Lý Kho Nhạc & Bản Phối (/manager/)">
+      <a href="<?= $bHref ?>manager/" target="_blank" class="sidebar-mini-link" style="padding: 6px 10px; text-decoration: none; display: flex; align-items: center; justify-content: center; border-radius: 6px; background: rgba(255, 255, 255, 0.06); color: var(--text-secondary); border: 1px solid var(--border); font-size: 0.75rem; font-weight: 600;" title="Cổng Quản Lý Kho Nhạc & Bản Phối (/manager/)">
         <span>⚙️</span>
       </a>
     </div>

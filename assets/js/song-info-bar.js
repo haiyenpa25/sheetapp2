@@ -180,17 +180,27 @@ const SongInfoBar = (() => {
     }
     chips.push(`<span class="si-chip si-key" id="si-tone-chip" role="button" tabindex="0" title="Click để chọn tông tập nhanh">${toneHtml}</span>`);
 
-    // 3. Chip Tempo / BPM (Click để chỉnh nhanh hoặc mở Gõ Nhịp)
+    // 3. Chip Tempo / BPM (Ticket L0-15: coi 104 là "chưa có tempo", hiện "♩ —", bấm để đặt)
     let effectiveBpm = null;
+    let hasRealTempo = false;
     if (inSetlist && setlist?.items?.[idx]?.bpm) {
-      effectiveBpm = setlist.items[idx].bpm;
+      effectiveBpm = Number.parseInt(setlist.items[idx].bpm, 10);
+      hasRealTempo = Boolean(effectiveBpm > 0 && effectiveBpm !== 104);
     } else if (notes.bpm) {
-      effectiveBpm = notes.bpm;
+      effectiveBpm = Number.parseInt(notes.bpm, 10);
+      hasRealTempo = Boolean(effectiveBpm > 0 && effectiveBpm !== 104);
     } else if (_songData.tempo) {
-      effectiveBpm = _songData.tempo;
+      const parsed = Number.parseInt(_songData.tempo, 10);
+      if (parsed > 0 && parsed !== 104) {
+        effectiveBpm = parsed;
+        hasRealTempo = true;
+      }
     }
-    const bpmDisplay = effectiveBpm || 100;
-    chips.push(`<span class="si-chip si-tempo" id="si-tempo-chip" style="cursor:pointer;" title="Click để chỉnh Tempo (BPM) / Gõ nhịp">♩ = <strong>${bpmDisplay}</strong> bpm <span style="font-size:0.75em;opacity:0.8;">✎</span></span>`);
+    if (hasRealTempo && effectiveBpm) {
+      chips.push(`<span class="si-chip si-tempo" id="si-tempo-chip" style="cursor:pointer;" title="Click để chỉnh Tempo (BPM) / Gõ nhịp">♩ = <strong>${effectiveBpm}</strong> bpm <span style="font-size:0.75em;opacity:0.8;">✎</span></span>`);
+    } else {
+      chips.push(`<span class="si-chip si-tempo" id="si-tempo-chip" style="cursor:pointer;" title="Chưa có tempo · Click để đặt Tempo (BPM) / Gõ nhịp">♩ — <span style="font-size:0.75em;opacity:0.8;">✎</span></span>`);
+    }
 
     // 4. ⭐ NÚT LƯU VÀO SETLIST: ĐƯA LÊN NGAY SAU TÔNG & TEMPO ĐỂ HIỆN RÕ TRÊN MOBILE / IPAD
     if (inSetlist) {
@@ -399,12 +409,18 @@ const SongInfoBar = (() => {
     toneChip.innerHTML = toneHtml;
   }
 
-  /* Cập nhật chip Tempo khi BPM thay đổi từ Metronome / TempoPick */
+  /* Cập nhật chip Tempo khi BPM thay đổi từ Metronome / TempoPick (Ticket L0-15) */
   function _updateTempoChip(bpm) {
     const tempoChip = document.getElementById('si-tempo-chip');
-    if (!tempoChip || !bpm) return;
-    const safeBpm = Number.parseInt(bpm, 10) || 100;
-    tempoChip.innerHTML = `♩ = <strong>${safeBpm}</strong> bpm <span style="font-size:0.75em;opacity:0.8;">✎</span>`;
+    if (!tempoChip) return;
+    const safeBpm = Number.parseInt(bpm, 10);
+    if (!safeBpm || safeBpm === 104) {
+      tempoChip.innerHTML = `♩ — <span style="font-size:0.75em;opacity:0.8;">✎</span>`;
+      tempoChip.title = 'Chưa có tempo · Click để đặt Tempo (BPM) / Gõ nhịp';
+    } else {
+      tempoChip.innerHTML = `♩ = <strong>${safeBpm}</strong> bpm <span style="font-size:0.75em;opacity:0.8;">✎</span>`;
+      tempoChip.title = 'Click để chỉnh Tempo (BPM) / Gõ nhịp';
+    }
   }
 
   /* Nạp thông tin lịch sử sử dụng bài hát trong phụng vụ (Tránh nhân đôi chip) */

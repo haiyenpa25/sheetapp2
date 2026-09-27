@@ -300,6 +300,10 @@ const AppUI = (() => {
   });
 
   function toggleFullscreen() {
+    if (window.ModeManager?.togglePerformance) {
+      window.ModeManager.togglePerformance();
+      return;
+    }
     const body  = document.body;
     const isOn  = body.classList.toggle('sheet-only-mode');
     const btnFS = document.getElementById('btn-fullscreen');

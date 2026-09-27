@@ -41,16 +41,62 @@ const ModeManager = (() => {
       resetToView();
     });
 
-    // Thoát chế độ khi nhấn phím Escape
+    // Thoát tập trung qua ModeManager khi nhấn phím Escape (Ticket L0-16)
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        const tag = document.activeElement?.tagName?.toLowerCase();
-        if (tag === 'input' || tag === 'textarea') return;
-        if (_currentMode !== MODES.VIEW) {
-          resetToView();
-        }
+        handleEscape(e);
       }
     });
+  }
+
+  function handleEscape(e) {
+    // 1. Popup sửa hợp âm
+    const chordPopup = document.querySelector('.chord-popup-overlay, #chord-popup-modal, .cc-popup');
+    if (chordPopup || window.ChordCanvasEdit?.isPopupOpen?.()) {
+      window.ChordCanvasEdit?.closePopup?.();
+      chordPopup?.remove?.();
+      e?.preventDefault?.();
+      return true;
+    }
+
+    // 2. Modals / Bottom sheets (đóng lớp trên cùng trước tiên)
+    const openSheet = document.querySelector('.bottom-sheet:not(.hidden), .modal-overlay:not(.hidden), [role="dialog"]:not(.hidden)');
+    if (window.ModalManager?.hasOpenModals?.() || openSheet) {
+      if (window.ModalManager?.hasOpenModals?.()) {
+        window.ModalManager.closeTopmost();
+      } else if (openSheet) {
+        openSheet.classList.add('hidden');
+      }
+      e?.preventDefault?.();
+      return true;
+    }
+
+    // 3. Nếu người dùng đang gõ trong input/textarea độc lập ngoài trang (thanh tìm kiếm bài...)
+    const activeEl = document.activeElement;
+    const tag = activeEl?.tagName?.toLowerCase();
+    if (tag === 'input' || tag === 'textarea') {
+      activeEl.blur();
+      e?.preventDefault?.();
+      return true;
+    }
+
+    // 4. Menu ⋮ Toolbar (nếu đang mở)
+    const moreMenu = document.getElementById('toolbar-more-menu');
+    if (moreMenu && !moreMenu.classList.contains('hidden')) {
+      moreMenu.classList.add('hidden');
+      document.getElementById('btn-more-options')?.setAttribute('aria-expanded', 'false');
+      e?.preventDefault?.();
+      return true;
+    }
+
+    // 5. Nếu đang ở chế độ đặc biệt (edit_chords hoặc performance) -> thoát về VIEW
+    if (_currentMode !== MODES.VIEW) {
+      resetToView();
+      e?.preventDefault?.();
+      return true;
+    }
+
+    return false;
   }
 
   function getMode() {
@@ -181,7 +227,8 @@ const ModeManager = (() => {
     setMode,
     togglePerformance,
     toggleEditChords,
-    resetToView
+    resetToView,
+    handleEscape
   };
 })();
 

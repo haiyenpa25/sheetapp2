@@ -20,7 +20,10 @@ const AnnotationCanvas = (() => {
     document.getElementById('btn-add-annotate-mode')?.addEventListener('click', toggleAddMode);
     document.getElementById('btn-cancel-add-annotate')?.addEventListener('click', () => setAddMode(false));
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') { _closePopup(); setAddMode(false); }
+      if (e.key === 'Escape') {
+        if (window.ModalManager?.hasOpenModals?.()) return;
+        if (_editEnabled) { _closePopup(); setAddMode(false); }
+      }
     });
     
     if (_isInitialized) return;

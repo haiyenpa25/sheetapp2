@@ -31,16 +31,17 @@ const Metronome = (() => {
       const setlistItem = (curSetlist && curIdx >= 0) ? curSetlist.items?.[curIdx] : null;
 
       if (setlistItem && setlistItem.bpm) {
-        _bpm = parseInt(setlistItem.bpm) || 80;
+        _bpm = parseInt(setlistItem.bpm);
         _beatsPerMeasure = parseInt(setlistItem.beats_per_measure) || 4;
       } else {
         const info = SongInfoBar?.getSongInfo?.();
-        if (info) {
-          _bpm = parseInt(info.tempo) || 80;
+        const infoTempo = info?.tempo ? parseInt(info.tempo) : 0;
+        if (info && infoTempo && infoTempo !== 104) {
+          _bpm = infoTempo;
           _beatsPerMeasure = parseInt(info.timeBeats) || 4;
         } else {
-          _bpm = 80;
-          _beatsPerMeasure = 4;
+          _bpm = 80; // Ticket L0-15: coi 104 là chưa có tempo, mặc định metronome 80
+          _beatsPerMeasure = parseInt(info?.timeBeats) || 4;
         }
       }
       _updateBpmUI();

@@ -258,6 +258,8 @@
     open,
     close,
     closeAll,
+    closeTopmost: () => close(),
+    hasOpenModals: () => _modalStack.length > 0,
     getActiveModal,
     getStackDepth: () => _modalStack.length,
     autoBindModals

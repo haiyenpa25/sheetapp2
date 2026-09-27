@@ -443,12 +443,13 @@ const SongLoader = (() => {
   function _syncSidebarNavLinks(songId, chordSet) {
     if (!songId) return;
     const set = chordSet || window.ChordCanvas?.getCurrentSet?.() || 'HD';
+    const base = window.__APP_BASE__ || '';
     document.querySelectorAll('.sidebar-mini-link').forEach(link => {
       const href = link.getAttribute('href');
       if (href && (href.startsWith('/learn') || href.includes('/learn/'))) {
-        link.href = `/learn/?song=${encodeURIComponent(songId)}&set=${encodeURIComponent(set)}`;
+        link.href = `${base}/learn/?song=${encodeURIComponent(songId)}&set=${encodeURIComponent(set)}`;
       } else if (href && (href.startsWith('/live-band') || href.includes('/live-band/'))) {
-        link.href = `/live-band/?song=${encodeURIComponent(songId)}&set=${encodeURIComponent(set)}`;
+        link.href = `${base}/live-band/?song=${encodeURIComponent(songId)}&set=${encodeURIComponent(set)}`;
       }
     });
   }
