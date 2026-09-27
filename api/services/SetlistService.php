@@ -255,7 +255,15 @@ class SetlistService {
         $leaderNotes = $extra['leader_notes'] ?? null;
         $duration = isset($extra['duration_minutes']) ? (int)$extra['duration_minutes'] : 5;
 
-        if (self::hasColumn('setlist_items', 'item_type')) {
+        $selectedVerses = $extra['selected_verses'] ?? $extra['stanzas'] ?? null;
+
+        if (self::hasColumn('setlist_items', 'selected_verses')) {
+            DB::run(
+                "INSERT INTO setlist_items (setlist_id, song_id, display_order, chord_profile, transpose_key, bpm, beats_per_measure, item_type, custom_title, leader_notes, duration_minutes, selected_verses)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                [$setlistId, $songId, $order, $chordProfile, $transposeKey, $bpm, $beatsPerMeasure, $itemType, $customTitle, $leaderNotes, $duration, $selectedVerses]
+            );
+        } elseif (self::hasColumn('setlist_items', 'item_type')) {
             DB::run(
                 "INSERT INTO setlist_items (setlist_id, song_id, display_order, chord_profile, transpose_key, bpm, beats_per_measure, item_type, custom_title, leader_notes, duration_minutes)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -271,7 +279,10 @@ class SetlistService {
     }
 
     public static function updateItem(int $itemId, array $data): bool {
-        $allowed = ['chord_profile', 'transpose_key', 'bpm', 'beats_per_measure', 'display_order', 'item_type', 'custom_title', 'leader_notes', 'duration_minutes'];
+        if (!isset($data['selected_verses']) && isset($data['stanzas'])) {
+            $data['selected_verses'] = $data['stanzas'];
+        }
+        $allowed = ['chord_profile', 'transpose_key', 'bpm', 'beats_per_measure', 'display_order', 'item_type', 'custom_title', 'leader_notes', 'duration_minutes', 'selected_verses'];
         $fields = [];
         $params = [];
 

@@ -119,6 +119,8 @@ const SetlistPlayer = (() => {
       ctx.setCurrentIndex?.(-1);
       ctx.renderSetlistItems?.();
       document.querySelector('.toolbar-left')?.classList.remove('in-setlist');
+      window.VerseManager?.clearSelectedVerses?.();
+      window.LeaderNotesBanner?.hide?.();
       updateProgramBar();
       return;
     }
@@ -145,6 +147,20 @@ const SetlistPlayer = (() => {
     if (window.URLState) {
       window.URLState.resetForNewSong(songId);
       window.URLState.update({ set: item.chord_profile || 'HD', t: item.transpose_key || 0 });
+    }
+
+    // Ticket L3-3: Áp dụng khổ sẽ hát (selected_verses) và ghi chú ca trưởng (leader_notes)
+    const selectedVerses = item.selected_verses || item.stanzas || null;
+    if (selectedVerses && window.VerseManager?.setSelectedVerses) {
+      window.VerseManager.setSelectedVerses(selectedVerses);
+    } else if (window.VerseManager?.clearSelectedVerses) {
+      window.VerseManager.clearSelectedVerses();
+    }
+
+    if (item.leader_notes && window.LeaderNotesBanner?.show) {
+      window.LeaderNotesBanner.show(item.leader_notes);
+    } else if (window.LeaderNotesBanner?.hide) {
+      window.LeaderNotesBanner.hide();
     }
 
     // Ticket L3-2: Chuyển bài tức thì không trắng màn hình nếu đã có trong Preloader

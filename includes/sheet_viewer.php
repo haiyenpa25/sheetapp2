@@ -159,6 +159,24 @@
     <button id="btn-song-info-toggle" class="si-toggle" title="Thu gọn / Mở rộng thông tin">▼</button>
   </div>
 
+  <!-- LEADER NOTES BANNER (Dải vàng ghi chú ca trưởng — Ticket L3-3) -->
+  <div id="leader-notes-banner" class="leader-notes-banner hidden" role="note" aria-label="Ghi chú ca trưởng">
+    <div class="ln-banner-inner">
+      <div class="ln-banner-left">
+        <span class="ln-banner-icon" aria-hidden="true">📌</span>
+        <strong class="ln-banner-badge">Ghi chú ca trưởng:</strong>
+        <span id="leader-notes-text" class="ln-banner-text"></span>
+      </div>
+      <div class="ln-banner-actions">
+        <button id="btn-toggle-leader-notes" class="btn-ln-toggle" title="Thu gọn / Mở rộng ghi chú" aria-expanded="true">
+          <span id="ln-toggle-icon" class="ln-toggle-icon">▲</span>
+          <span id="ln-toggle-label" class="ln-toggle-label">Thu gọn</span>
+        </button>
+        <button id="btn-close-leader-notes" class="btn-ln-close" title="Ẩn dải ghi chú" aria-label="Đóng">&times;</button>
+      </div>
+    </div>
+  </div>
+
   <!-- OSMD CONTAINER -->
   <div id="sheet-area" class="sheet-area hidden">
     <div id="osmd-container" class="osmd-container"></div>

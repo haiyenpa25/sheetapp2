@@ -2200,6 +2200,168 @@ body.sheet-only-mode .setlist-program-bar {
   height: 24px !important;
 }
 
+/* ========================================================
+   LEADER NOTES BANNER (Dải vàng ghi chú ca trưởng — Ticket L3-3)
+   ======================================================== */
+.leader-notes-banner {
+  position: relative;
+  z-index: 20;
+  width: 100%;
+  box-sizing: border-box;
+  background: #fef3c7;
+  border-bottom: 2px solid #f59e0b;
+  color: #92400e;
+  padding: 8px 16px;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+  transition: all 0.2s ease-in-out;
+}
+
+.leader-notes-banner.hidden {
+  display: none !important;
+}
+
+.ln-banner-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.ln-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.ln-banner-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.ln-banner-badge {
+  font-weight: 700;
+  color: #b45309;
+  flex-shrink: 0;
+  font-size: 0.85rem;
+}
+
+.ln-banner-text {
+  color: #78350f;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.ln-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.btn-ln-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #92400e;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background 0.15s;
+}
+
+.btn-ln-toggle:hover {
+  background: rgba(245, 158, 11, 0.3);
+}
+
+.btn-ln-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  color: #b45309;
+  font-size: 1.1rem;
+  cursor: pointer;
+  border-radius: 4px;
+  touch-action: manipulation;
+  transition: background 0.15s;
+}
+
+.btn-ln-close:hover {
+  background: rgba(245, 158, 11, 0.2);
+}
+
+/* Trạng thái Thu Gọn (Collapsed) */
+.leader-notes-banner.collapsed {
+  padding: 4px 12px;
+  background: #fffbeb;
+  border-bottom: 1px solid #fcd34d;
+}
+
+.leader-notes-banner.collapsed .ln-banner-text {
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.85;
+}
+
+/* Dark Mode */
+body.dark-mode .leader-notes-banner,
+[data-theme="dark"] .leader-notes-banner {
+  background: #261b0c;
+  border-bottom: 2px solid #b45309;
+  color: #fde68a;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .ln-banner-badge,
+[data-theme="dark"] .ln-banner-badge {
+  color: #fbbf24;
+}
+
+body.dark-mode .ln-banner-text,
+[data-theme="dark"] .ln-banner-text {
+  color: #fef3c7;
+}
+
+body.dark-mode .btn-ln-toggle,
+[data-theme="dark"] .btn-ln-toggle {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #fef3c7;
+}
+
+body.dark-mode .btn-ln-toggle:hover,
+[data-theme="dark"] .btn-ln-toggle:hover {
+  background: rgba(245, 158, 11, 0.25);
+}
+
+body.dark-mode .btn-ln-close,
+[data-theme="dark"] .btn-ln-close {
+  color: #fde68a;
+}
+
+body.dark-mode .leader-notes-banner.collapsed,
+[data-theme="dark"] .leader-notes-banner.collapsed {
+  background: #1c1408;
+  border-bottom: 1px solid #78350f;
+}
+
+
 
 
 

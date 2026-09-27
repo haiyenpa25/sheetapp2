@@ -237,6 +237,7 @@ echo jsTag('modals/PracticeTeamBoardModal.js');
 echo jsTag('library-ui.js');
 echo jsTag('modals/QuickNumpadModal.js');
 echo jsTag('service-plan-ui.js');
+echo jsTag('leader-notes-banner.js');
 echo jsTag('setlist-player.js');
 echo jsTag('setlist-list.js');
 echo jsTag('setlist-detail.js');

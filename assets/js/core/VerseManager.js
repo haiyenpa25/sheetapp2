@@ -18,6 +18,7 @@ const VerseManager = (() => {
   let _mode = MODES.ALL;
   let _currentVerse = 1;
   let _availableVerses = [];
+  let _selectedVerses = null;
   let _xmlCache = new Map();
 
   function init() {
@@ -73,8 +74,54 @@ const VerseManager = (() => {
     return Array.from(set).sort((a, b) => a - b);
   }
 
+  function parseVersesInput(input) {
+    if (!input) return null;
+    if (Array.isArray(input)) {
+      const arr = input.map(Number).filter(n => !isNaN(n) && n > 0);
+      return arr.length > 0 ? arr : null;
+    }
+    if (typeof input === 'string') {
+      const parts = input.split(/[,;\s]+/).map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n) && n > 0);
+      return parts.length > 0 ? parts : null;
+    }
+    return null;
+  }
+
+  function getNavigableVerses() {
+    if (_selectedVerses && _selectedVerses.length > 0) {
+      const filtered = _availableVerses.filter(v => _selectedVerses.includes(v));
+      if (filtered.length > 0) return filtered;
+    }
+    return [..._availableVerses];
+  }
+
+  function setSelectedVerses(versesInput) {
+    _selectedVerses = parseVersesInput(versesInput);
+    _xmlCache.clear();
+    const nav = getNavigableVerses();
+    if (nav.length > 0 && !nav.includes(_currentVerse)) {
+      _currentVerse = nav[0];
+    }
+    syncUI();
+  }
+
+  function getSelectedVerses() {
+    return _selectedVerses ? [..._selectedVerses] : null;
+  }
+
+  function clearSelectedVerses() {
+    _selectedVerses = null;
+    _xmlCache.clear();
+    const nav = getNavigableVerses();
+    if (nav.length > 0 && !nav.includes(_currentVerse)) {
+      _currentVerse = nav[0];
+    }
+    syncUI();
+  }
+
   function hasMultipleVerses() {
-    return _availableVerses.length > 1;
+    const nav = getNavigableVerses();
+    return nav.length > 1 || _availableVerses.length > 1;
   }
 
   function getAvailableVerses() {
@@ -95,7 +142,8 @@ const VerseManager = (() => {
   function onSongLoaded(xmlString) {
     _xmlCache.clear();
     _availableVerses = detectVerses(xmlString);
-    _currentVerse = _availableVerses.length > 0 ? _availableVerses[0] : 1;
+    const nav = getNavigableVerses();
+    _currentVerse = nav.length > 0 ? nav[0] : (_availableVerses.length > 0 ? _availableVerses[0] : 1);
     syncUI();
   }
 
@@ -122,11 +170,13 @@ const VerseManager = (() => {
     }
 
     if (_mode === MODES.UNROLL) {
-      const cacheKey = 'unroll';
+      const nav = getNavigableVerses();
+      const targetVerses = nav.length > 0 ? nav : _availableVerses;
+      const cacheKey = `unroll_${targetVerses.join('_')}`;
       if (_xmlCache.has(cacheKey)) {
         return _xmlCache.get(cacheKey);
       }
-      const processed = _unrollVersesXml(xmlString, _availableVerses);
+      const processed = _unrollVersesXml(xmlString, targetVerses);
       _xmlCache.set(cacheKey, processed);
       return processed;
     }
@@ -244,7 +294,11 @@ const VerseManager = (() => {
     syncUI();
 
     let toastMsg = 'Chế độ khổ: Tất cả khổ (như sách in)';
-    if (newMode === MODES.SINGLE) toastMsg = `Chế độ Một khổ — Đang xem Khổ ${_currentVerse}/${_availableVerses.length || 1}`;
+    if (newMode === MODES.SINGLE) {
+      const nav = getNavigableVerses();
+      const total = nav.length || _availableVerses.length || 1;
+      toastMsg = `Chế độ Một khổ — Đang xem Khổ ${_currentVerse}/${total}`;
+    }
     if (newMode === MODES.UNROLL) toastMsg = 'Chế độ Trải khổ — Toàn bộ các khổ được trải ra để cuộn 1 chiều';
     window.AppUI?.showToast?.(toastMsg, 'info');
 
@@ -263,7 +317,8 @@ const VerseManager = (() => {
 
   function setVerse(verseNum) {
     const v = parseInt(verseNum, 10);
-    if (isNaN(v) || !_availableVerses.includes(v)) return;
+    const nav = getNavigableVerses();
+    if (isNaN(v) || (!nav.includes(v) && !_availableVerses.includes(v))) return;
     if (_mode !== MODES.SINGLE) {
       _mode = MODES.SINGLE;
       localStorage.setItem('sheetapp_verse_mode', MODES.SINGLE);
@@ -271,32 +326,37 @@ const VerseManager = (() => {
     _currentVerse = v;
     syncUI();
     window.LyricExtractor?.highlightVerse?.(_currentVerse);
-    window.AppUI?.showToast?.(`Đã chuyển sang Khổ ${_currentVerse}/${_availableVerses.length}`, 'info');
+    const total = nav.length > 0 ? nav.length : _availableVerses.length;
+    window.AppUI?.showToast?.(`Đã chuyển sang Khổ ${_currentVerse}/${total}`, 'info');
     _reRenderSheet();
   }
 
   function nextVerse() {
-    if (!hasMultipleVerses()) return;
+    const nav = getNavigableVerses();
+    if (nav.length <= 1 && _mode === MODES.SINGLE) return;
+    if (!hasMultipleVerses() && nav.length <= 1) return;
     const isBandActive = !document.getElementById('lyric-view-container')?.classList.contains('hidden');
     if (_mode !== MODES.SINGLE && !isBandActive) {
       setMode(MODES.SINGLE);
       return;
     }
-    const idx = _availableVerses.indexOf(_currentVerse);
-    const nextIdx = (idx + 1) % _availableVerses.length;
-    setVerse(_availableVerses[nextIdx]);
+    const idx = nav.indexOf(_currentVerse);
+    const nextIdx = (idx >= 0) ? (idx + 1) % nav.length : 0;
+    setVerse(nav[nextIdx]);
   }
 
   function prevVerse() {
-    if (!hasMultipleVerses()) return;
+    const nav = getNavigableVerses();
+    if (nav.length <= 1 && _mode === MODES.SINGLE) return;
+    if (!hasMultipleVerses() && nav.length <= 1) return;
     const isBandActive = !document.getElementById('lyric-view-container')?.classList.contains('hidden');
     if (_mode !== MODES.SINGLE && !isBandActive) {
       setMode(MODES.SINGLE);
       return;
     }
-    const idx = _availableVerses.indexOf(_currentVerse);
-    const prevIdx = (idx - 1 + _availableVerses.length) % _availableVerses.length;
-    setVerse(_availableVerses[prevIdx]);
+    const idx = nav.indexOf(_currentVerse);
+    const prevIdx = (idx >= 0) ? (idx - 1 + nav.length) % nav.length : 0;
+    setVerse(nav[prevIdx]);
   }
 
   function _reRenderSheet() {
@@ -311,11 +371,12 @@ const VerseManager = (() => {
   function syncUI() {
     const pill = document.getElementById('verse-pill');
     const label = document.getElementById('verse-mode-label');
-    const nav = document.getElementById('verse-nav-controls');
+    const navControls = document.getElementById('verse-nav-controls');
     const indicator = document.getElementById('verse-indicator');
     const gigVerse = document.getElementById('btn-gig-verse');
 
-    const multiple = hasMultipleVerses();
+    const nav = getNavigableVerses();
+    const multiple = (nav.length > 1) || hasMultipleVerses();
 
     if (pill) {
       pill.classList.toggle('hidden', !multiple);
@@ -331,24 +392,30 @@ const VerseManager = (() => {
       }
     }
 
-    if (nav) {
-      nav.classList.toggle('hidden', _mode !== MODES.SINGLE || !multiple);
+    if (navControls) {
+      navControls.classList.toggle('hidden', _mode !== MODES.SINGLE || !multiple);
     }
 
     if (indicator) {
-      const total = _availableVerses.length || 1;
+      const total = nav.length || _availableVerses.length || 1;
       indicator.textContent = `${_currentVerse}/${total}`;
+      if (_selectedVerses && _selectedVerses.length > 0) {
+        indicator.title = `Khổ ${_currentVerse} (Khổ chọn: ${_selectedVerses.join(', ')})`;
+      } else {
+        indicator.title = `Khổ ${_currentVerse}/${total}`;
+      }
     }
 
     if (gigVerse) {
       gigVerse.classList.toggle('hidden', !multiple);
       if (multiple) {
         if (_mode === MODES.SINGLE) {
-          gigVerse.textContent = `Khổ ${_currentVerse}/${_availableVerses.length}`;
+          const total = nav.length || _availableVerses.length;
+          gigVerse.textContent = `Khổ ${_currentVerse}/${total}`;
         } else if (_mode === MODES.UNROLL) {
           gigVerse.textContent = 'Trải khổ';
         } else {
-          gigVerse.textContent = `${_availableVerses.length} Khổ`;
+          gigVerse.textContent = `${nav.length || _availableVerses.length} Khổ`;
         }
       }
     }
@@ -358,8 +425,13 @@ const VerseManager = (() => {
     MODES,
     init,
     detectVerses,
+    parseVersesInput,
     hasMultipleVerses,
     getAvailableVerses,
+    getNavigableVerses,
+    setSelectedVerses,
+    getSelectedVerses,
+    clearSelectedVerses,
     getMode,
     getCurrentVerse,
     onSongLoaded,

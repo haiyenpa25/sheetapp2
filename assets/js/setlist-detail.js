@@ -187,11 +187,21 @@ const SetlistDetail = (() => {
         ? `<span class="tag tag-blue btn-edit-bpm" style="cursor:pointer;" title="Click để đổi BPM">♩${_esc(String(item.bpm))} BPM ✎</span>`
         : `<span class="tag btn-edit-bpm" style="cursor:pointer;opacity:0.8;" title="Click để đặt BPM">♩ BPM ✎</span>`;
 
+      const versesVal = item.selected_verses || item.stanzas || '';
+      const versesBadge = versesVal
+        ? `<span class="tag tag-green btn-edit-verses" style="cursor:pointer;" title="Khổ sẽ hát: ${_esc(versesVal)} (Click để sửa)">📖 Khổ: ${_esc(versesVal)} ✎</span>`
+        : `<span class="tag btn-edit-verses" style="cursor:pointer;opacity:0.8;" title="Đặt khổ sẽ hát (ví dụ: 1, 3)">📖 Khổ ✎</span>`;
+
+      const notesVal = item.leader_notes || '';
+      const notesBadge = notesVal
+        ? `<span class="tag tag-amber btn-edit-notes" style="cursor:pointer;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="Ghi chú: ${_esc(notesVal)} (Click để sửa)">📌 ${_esc(notesVal)} ✎</span>`
+        : `<span class="tag btn-edit-notes" style="cursor:pointer;opacity:0.8;" title="Thêm ghi chú ca trưởng">📌 Ghi chú ✎</span>`;
+
       el.innerHTML = `
         <div class="song-item-info" style="flex:1;min-width:0;">
           <div class="song-item-title">${numStr} - ${_esc(title)}</div>
           <div class="song-item-meta text-xs" style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;">
-            ${toneBadge} ${chordBadge} ${bpmBadge}
+            ${toneBadge} ${chordBadge} ${bpmBadge} ${versesBadge} ${notesBadge}
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
@@ -201,7 +211,7 @@ const SetlistDetail = (() => {
       `;
 
       el.addEventListener('click', async (e) => {
-        if (e.target.closest('.btn-del-item, .btn-save-bpm, .btn-edit-tone, .btn-edit-bpm')) return;
+        if (e.target.closest('.btn-del-item, .btn-save-bpm, .btn-edit-tone, .btn-edit-bpm, .btn-edit-verses, .btn-edit-notes')) return;
         ctx.setCurrentIndex?.(idx);
         await renderSetlistItems();
         ctx.playCurrentItem?.();
@@ -215,6 +225,47 @@ const SetlistDetail = (() => {
       el.querySelector('.btn-edit-bpm')?.addEventListener('click', (e) => {
         e.stopPropagation();
         _handleEditBpm(item, title, idx);
+      });
+
+      el.querySelector('.btn-edit-verses')?.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const currentVal = item.selected_verses || item.stanzas || '';
+        const input = window.prompt(`Khổ sẽ hát cho "${title}" (ví dụ: 1, 3 hoặc 1, 3, 4 - để trống nếu hát tất cả):`, currentVal);
+        if (input !== null) {
+          const newVal = input.trim();
+          try {
+            await window.ApiService.setlists.updateItem(item.id, { selected_verses: newVal });
+            item.selected_verses = newVal;
+            window.App?.showToast?.(`✅ Đã cập nhật khổ hát cho "${title}"`, 'success');
+            await renderSetlistItems();
+            if (ctx.getCurrentIndex?.() === idx) {
+              window.VerseManager?.setSelectedVerses?.(newVal);
+            }
+          } catch (err) {
+            window.App?.showToast?.('Lỗi cập nhật khổ hát', 'error');
+          }
+        }
+      });
+
+      el.querySelector('.btn-edit-notes')?.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const currentVal = item.leader_notes || '';
+        const input = window.prompt(`Ghi chú ca trưởng cho "${title}" (để trống để xóa):`, currentVal);
+        if (input !== null) {
+          const newVal = input.trim();
+          try {
+            await window.ApiService.setlists.updateItem(item.id, { leader_notes: newVal });
+            item.leader_notes = newVal;
+            window.App?.showToast?.(`✅ Đã cập nhật ghi chú cho "${title}"`, 'success');
+            await renderSetlistItems();
+            if (ctx.getCurrentIndex?.() === idx) {
+              if (newVal) window.LeaderNotesBanner?.show?.(newVal);
+              else window.LeaderNotesBanner?.hide?.();
+            }
+          } catch (err) {
+            window.App?.showToast?.('Lỗi cập nhật ghi chú', 'error');
+          }
+        }
       });
 
       const saveBtn = el.querySelector('.btn-save-bpm');

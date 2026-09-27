@@ -183,7 +183,12 @@ const App = (() => {
   }
 
   return {
-    loadSong: (song, t) => SongLoader.load(song, t),
+    loadSong: (song, t) => {
+      document.querySelector('.toolbar-left')?.classList.remove('in-setlist');
+      window.LeaderNotesBanner?.hide?.();
+      window.VerseManager?.clearSelectedVerses?.();
+      return SongLoader.load(song, t);
+    },
     loadSongWithProfile: (song, profile, t, options) => {
       return options ? SongLoader.load(song, t, profile, options) : SongLoader.load(song, t, profile);
     },
