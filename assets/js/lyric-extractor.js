@@ -52,7 +52,7 @@ const LyricExtractor = (() => {
   /* ─── Clean verse-number prefix ─── */
   function cleanFirstSyl(text) {
     if (!text) return { text, isChorus: false };
-    const dkMatch = text.match(/^(ĐK|đk|DC|Điệp\s*khúc|Chorus)[:.\s]*(.*)/is);
+    const dkMatch = text.match(/^\[?(ĐK|đk|DC|Điệp\s*khúc|Chorus)\]?[:.\s-]*(.*)/is);
     if (dkMatch) return { text: dkMatch[2].trim(), isChorus: true };
     const numMatch = text.match(/^\d+[\.\s]+(.*)/);
     if (numMatch) return { text: numMatch[1].trim(), isChorus: false };
@@ -211,9 +211,10 @@ const LyricExtractor = (() => {
     for (const view of views) {
       const sectionClass = view.isChorus ? 'lv-chorus' : 'lv-regular';
       const labelIcon = view.isChorus ? '✦' : '';
+      const safeNum = window.SafeHtml ? window.SafeHtml.escape(String(view.num)) : String(view.num);
 
       html += `
-        <section class="lv-verse ${sectionClass}">
+        <section class="lv-verse ${sectionClass}" data-verse-num="${safeNum}">
           <div class="lv-label-row">
             <span class="lv-verse-pill ${view.isChorus ? 'lv-pill-chorus' : 'lv-pill-verse'}">
               ${labelIcon ? `<span class="lv-pill-icon">${labelIcon}</span>` : ''}${window.SafeHtml ? window.SafeHtml.escape(view.label) : view.label}
@@ -248,6 +249,7 @@ const LyricExtractor = (() => {
     html += '</div>';
     container.innerHTML = html;
     _applyStyles(container);
+    highlightVerse(window.VerseManager?.getCurrentVerse?.() || 1);
 
     // Bind toggle
     document.getElementById('lv-mode-toggle')?.addEventListener('click', () => {
@@ -262,13 +264,34 @@ const LyricExtractor = (() => {
     });
   }
 
+  function highlightVerse(verseNum) {
+    const container = document.getElementById('lyric-view-container');
+    if (!container) return;
+    const vStr = String(verseNum || 1);
+    const verses = container.querySelectorAll('.lv-verse');
+    verses.forEach(sec => {
+      const isTarget = sec.getAttribute('data-verse-num') === vStr;
+      sec.classList.toggle('lv-active-verse', isTarget);
+    });
+  }
+
   function _applyStyles(container) {
+    // Ticket L1-7: Hợp âm lớn 24-32px chuẩn sân khấu
+    const preset = window.DisplaySettings?.getChordPreset?.() || 'standard';
+    let baseChordSize = '26px';
+    if (preset === 'stage') {
+      baseChordSize = '30px';
+    } else if (preset === 'high-contrast') {
+      baseChordSize = '28px';
+    }
+    container.style.setProperty('--lv-chord-size', baseChordSize);
+    container.style.setProperty('--lv-syl-size', '21px');
+
     const p = window.DisplaySettings?.getChordPrefs?.();
     if (p) {
       if (p.color) container.style.setProperty('--lv-chord-color', p.color);
-      if (p.size) {
-        const em = Math.max(0.65, Math.min(1.1, p.size * 0.22));
-        container.style.setProperty('--lv-chord-size', em + 'em');
+      if (p.size && p.size > 3.0) {
+        container.style.setProperty('--lv-chord-size', Math.round(p.size * 8.5) + 'px');
       }
     } else {
       try {
@@ -276,7 +299,6 @@ const LyricExtractor = (() => {
         if (s) {
           const c = JSON.parse(s);
           if (c.color) container.style.setProperty('--lv-chord-color', c.color);
-          if (c.size)  container.style.setProperty('--lv-chord-size', Math.max(0.65, Math.min(1.1, c.size * 0.22)) + 'em');
         }
       } catch (_) {}
     }
@@ -294,7 +316,7 @@ const LyricExtractor = (() => {
     render('lyric-view-container', raw, window.App?.getCurrentTranspose?.() || 0);
   }
 
-  return { render, extract, reloadIfActive };
+  return { render, extract, reloadIfActive, highlightVerse };
 })();
 
 window.LyricExtractor = LyricExtractor;

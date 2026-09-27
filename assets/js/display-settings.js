@@ -298,30 +298,13 @@ const DisplaySettings = (() => {
             chkBass.checked = compactPrefs.hideBass;
             chkBass.addEventListener('change', _onCompactPrefChanged);
         }
-        if (chkVoices) {
-            chkVoices.checked = compactPrefs.hideVoices;
-            chkVoices.addEventListener('change', _onCompactPrefChanged);
-        }
-        if (chkChordNotes) {
-            chkChordNotes.checked = compactPrefs.hideChordNotes;
-            chkChordNotes.addEventListener('change', _onCompactPrefChanged);
-        }
-        if (chkLyrics) {
-            chkLyrics.checked = compactPrefs.hideLyrics;
-            chkLyrics.addEventListener('change', _onCompactPrefChanged);
-        }
-        if (chkMeasures) {
-            chkMeasures.checked = compactPrefs.hideMeasureNumbers;
-            chkMeasures.addEventListener('change', _onCompactPrefChanged);
-        }
-        if (chkText) {
-            chkText.checked = compactPrefs.hideText;
-            chkText.addEventListener('change', _onCompactPrefChanged);
-        }
-        if (chkTitle) {
-            chkTitle.checked = compactPrefs.hideTitle;
-            chkTitle.addEventListener('change', _onCompactPrefChanged);
-        }
+        [
+            [chkVoices, 'hideVoices'], [chkChordNotes, 'hideChordNotes'],
+            [chkLyrics, 'hideLyrics'], [chkMeasures, 'hideMeasureNumbers'],
+            [chkText, 'hideText'], [chkTitle, 'hideTitle']
+        ].forEach(([el, key]) => {
+            if (el) { el.checked = compactPrefs[key]; el.addEventListener('change', _onCompactPrefChanged); }
+        });
 
 
         // 2. Gắn sự kiện cho Admin Tab
@@ -354,14 +337,15 @@ const DisplaySettings = (() => {
                 const btnText = btnLyricView.querySelector('.btn-text');
 
                 if (lyricContainer.classList.contains('hidden')) {
-                    // Mở chế độ Lời
+                    // Mở chế độ Lời / Band
                     lyricContainer.classList.remove('hidden');
                     const osmd = document.getElementById('osmd-container');
                     if(osmd) osmd.style.display = 'none';
                     btnLyricView.classList.add('active');
                     if (btnText) btnText.textContent = 'Bản Nhạc';
-                    // Cập nhật URL
+                    // Cập nhật URL & lưu lựa chọn thiết bị
                     window.URLState?.update?.({ v: 'lyric' });
+                    localStorage.setItem('sheetapp_view_mode', 'band');
                     try {
                         _renderLyricView();
                     } catch(e) { console.error('Lỗi render LyricView', e); }
@@ -373,8 +357,9 @@ const DisplaySettings = (() => {
                     if(osmd) osmd.style.display = 'block';
                     btnLyricView.classList.remove('active');
                     if (btnText) btnText.textContent = 'Lời Nhạc';
-                    // Cập nhật URL
+                    // Cập nhật URL & lưu lựa chọn thiết bị
                     window.URLState?.update?.({ v: 'sheet' });
+                    localStorage.setItem('sheetapp_view_mode', 'sheet');
                     // Re-render OSMD
                     if (window.App?.reloadCurrentXML) {
                         window.App.reloadCurrentXML().then(() => {

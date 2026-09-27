@@ -407,6 +407,7 @@ const ChordCanvas = (() => {
     _updateSetUI();
     window.URLState?.update?.({ set: name });
     window.SongLoader?.syncSidebarNavLinks?.(window.App?.getCurrentSongId?.(), name);
+    window.DisplaySettings?.renderLyricViewIfActive?.();
   }
 
   async function createSet(name) {
@@ -559,16 +560,8 @@ const ChordCanvas = (() => {
     if (newBtn) newBtn.classList.toggle('hidden', !isLoggedIn);
   }
 
-  function _updateSetUI() {
-    _refreshSetDropdown();
-    window.SongInfoBar?.refreshChordChip?.();
-  }
-
-  function resetSet() {
-    _currentSet   = 'HD';
-    _prevSet      = 'HD';
-    _customChords = {};
-  }
+  function _updateSetUI() { _refreshSetDropdown(); window.SongInfoBar?.refreshChordChip?.(); }
+  function resetSet() { _currentSet = 'HD'; _prevSet = 'HD'; _customChords = {}; }
 
   /* ─── Exports ────────────────────────────────────────────────── */
   return {

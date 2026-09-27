@@ -131,6 +131,15 @@ const SongLoader = (() => {
 
       document.getElementById('btn-print')?.removeAttribute('disabled');
       _syncSidebarNavLinks(song.id, profileOverride || window.ChordCanvas?.getCurrentSet?.() || 'HD');
+
+      // Nếu Band View đang hoạt động khi đổi bài -> cập nhật ngay lời bài mới
+      const lyricContainer = document.getElementById('lyric-view-container');
+      if (lyricContainer && !lyricContainer.classList.contains('hidden')) {
+        if (window.DisplaySettings?.renderLyricViewIfActive) {
+          window.DisplaySettings.renderLyricViewIfActive();
+        }
+      }
+
       EventBus.emit('song:loaded', { song, xml });
 
     } catch (err) {
@@ -345,10 +354,19 @@ const SongLoader = (() => {
     else if (urlSet && urlSet !== 'default' && urlSet !== 'HD' && ChordCanvas?.getCurrentSet?.() !== urlSet) {
       await ChordCanvas.switchSet(urlSet);
     }
-    if (state.v === 'lyric') {
+    const hasExplicitViewParam = new URLSearchParams(location.search).has('v');
+    const isMobile = window.innerWidth <= 680;
+    const savedMode = localStorage.getItem('sheetapp_view_mode');
+    const shouldOpenBand = state.v === 'lyric' ||
+      (!hasExplicitViewParam && (savedMode === 'band' || (!savedMode && isMobile)));
+
+    if (shouldOpenBand) {
       if (state.lv === 'inline') localStorage.setItem('sheetapp_lyric_mode', 'inline');
       const lyric = document.getElementById('lyric-view-container');
-      if (lyric?.classList.contains('hidden')) document.getElementById('btn-lyric-view')?.click();
+      if (lyric?.classList.contains('hidden')) {
+        const toggleBtn = document.getElementById('btn-band-toggle') || document.getElementById('btn-lyric-view');
+        toggleBtn?.click();
+      }
     }
   }
 

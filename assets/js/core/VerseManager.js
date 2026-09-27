@@ -270,13 +270,15 @@ const VerseManager = (() => {
     }
     _currentVerse = v;
     syncUI();
+    window.LyricExtractor?.highlightVerse?.(_currentVerse);
     window.AppUI?.showToast?.(`Đã chuyển sang Khổ ${_currentVerse}/${_availableVerses.length}`, 'info');
     _reRenderSheet();
   }
 
   function nextVerse() {
     if (!hasMultipleVerses()) return;
-    if (_mode !== MODES.SINGLE) {
+    const isBandActive = !document.getElementById('lyric-view-container')?.classList.contains('hidden');
+    if (_mode !== MODES.SINGLE && !isBandActive) {
       setMode(MODES.SINGLE);
       return;
     }
@@ -287,7 +289,8 @@ const VerseManager = (() => {
 
   function prevVerse() {
     if (!hasMultipleVerses()) return;
-    if (_mode !== MODES.SINGLE) {
+    const isBandActive = !document.getElementById('lyric-view-container')?.classList.contains('hidden');
+    if (_mode !== MODES.SINGLE && !isBandActive) {
       setMode(MODES.SINGLE);
       return;
     }
@@ -297,7 +300,10 @@ const VerseManager = (() => {
   }
 
   function _reRenderSheet() {
-    if (window.SongLoader?.commitTranspose) {
+    const isBandActive = !document.getElementById('lyric-view-container')?.classList.contains('hidden');
+    if (isBandActive && window.DisplaySettings?.renderLyricViewIfActive) {
+      window.DisplaySettings.renderLyricViewIfActive();
+    } else if (window.SongLoader?.commitTranspose) {
       window.SongLoader.commitTranspose();
     }
   }

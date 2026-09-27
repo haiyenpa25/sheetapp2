@@ -834,7 +834,7 @@ body.dark-mode .chord-edit-hint {
 
 /* ══ Container ═══════════════════════════════ */
 .lyric-view-container {
-  max-width: 860px;
+  max-width: 1320px;
   margin: 1.5rem auto;
   padding: 2rem 2.25rem 3.5rem;
   background: #fff;
@@ -843,14 +843,15 @@ body.dark-mode .chord-edit-hint {
   min-height: 400px;
   font-family: 'Inter', system-ui, sans-serif;
 
-  /* Chord token */
+  /* Chord & Lyric stage readability (Ticket L1-7 ⭐: Hợp âm 24-32px, Lời 20-24px) */
   --lv-chord-color: #e11d48;
-  --lv-chord-size:  0.78em;
+  --lv-chord-size:  26px; /* chuẩn ≥ 24px sân khấu */
+  --lv-syl-size:    21px; /* chuẩn ≥ 20px sân khấu */
 
   /* font-size is set via app.js for zoom: e.g. font-size: 120% */
   font-size: 100%;
   color: var(--text-primary);
-  line-height: 1;
+  line-height: 1.2;
 }
 
 /* ══ Dark mode ═══════════════════════════════ */
@@ -860,10 +861,10 @@ body.dark-mode .lyric-view-container {
   box-shadow: 0 6px 40px rgba(0,0,0,.6);
 }
 body.dark-mode .lv-chord {
-  color: #f87171 !important;
-  border-bottom-color: rgba(248,113,113,.25) !important;
+  color: #fbbf24 !important; /* Hổ phách sáng chuẩn stage readability */
+  border-bottom-color: rgba(251,191,36,.35) !important;
 }
-body.dark-mode .lv-syl       { color: #c8d0e5; }
+body.dark-mode .lv-syl       { color: #f1f5f9; }
 body.dark-mode .lv-header    { border-bottom-color: rgba(255,255,255,.08); }
 body.dark-mode .lv-regular   { background: rgba(255,255,255,.02); border-color: rgba(109,40,217,.2); }
 body.dark-mode .lv-chorus    { background: rgba(251,191,36,.07); border-color: rgba(251,191,36,.3); }
@@ -1014,18 +1015,18 @@ body.dark-mode .lv-title     { color: #e2e8f0; }
   margin-left: 1px;
 }
 
-/* ══ Chord symbol ════════════════════════════ */
+/* ══ Chord symbol (Ticket L1-7 ⭐: Hợp âm lớn 24-32px) ════ */
 .lv-chord {
   display: block;
   font-family: 'JetBrains Mono', 'Courier New', monospace;
-  font-size: var(--lv-chord-size);
+  font-size: var(--lv-chord-size, 1.65rem);
   font-weight: 800;
   color: var(--lv-chord-color);
-  line-height: 1;
+  line-height: 1.1;
   white-space: nowrap;
   letter-spacing: -0.01em;
   margin-bottom: 0.25em;
-  min-height: calc(var(--lv-chord-size) * 1.5);  /* keeps empty slots in line */
+  min-height: calc(var(--lv-chord-size, 1.65rem) * 1.25);
   padding-bottom: 1px;
   border-bottom: 1.5px dotted rgba(225,29,72,.28);
 }
@@ -1035,18 +1036,40 @@ body.dark-mode .lv-title     { color: #e2e8f0; }
   pointer-events: none;
 }
 
-/* ══ Lyric syllable ══════════════════════════ */
+/* ══ Lyric syllable (Ticket L1-7 ⭐: Lời 20-24px) ════════ */
 .lv-syl {
   display: block;
-  font-size: 1.15em;
-  font-weight: 500;
-  line-height: 1.2;
+  font-size: var(--lv-syl-size, 1.35rem);
+  font-weight: 600;
+  line-height: 1.35;
   color: var(--text-primary);
   white-space: nowrap;
 }
 .lv-rest { color: transparent !important; user-select: none; }
 
-/* ══ Verse label color variants ══════════════ */
+/* ══ Active Verse Highlighting (Ticket L1-7 ⭐) ═══════════ */
+.lv-verse.lv-active-verse {
+  border-color: #8b5cf6 !important;
+  box-shadow: 0 0 0 2.5px rgba(139,92,246,.45), 0 8px 32px rgba(139,92,246,.18) !important;
+  background: rgba(139,92,246,.08) !important;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.lv-verse.lv-active-verse .lv-verse-pill {
+  background: #8b5cf6 !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 10px rgba(139,92,246,.4) !important;
+}
+
+/* ══ Inline mode tokens ══════════════════════ */
+.lvi-token .lvi-chord {
+  font-size: var(--lv-chord-size, 1.5rem);
+  font-weight: 800;
+  color: var(--lv-chord-color, #e11d48);
+}
+.lvi-token .lvi-word {
+  font-size: var(--lv-syl-size, 1.3rem);
+  font-weight: 600;
+}
 
 /* ══ Empty state ══════════════════════════════ */
 .lv-empty {
@@ -1062,16 +1085,35 @@ body.dark-mode .lv-title     { color: #e2e8f0; }
 .lv-empty strong { color: var(--text-secondary); }
 .lv-empty p { font-size: 0.85rem; }
 
-/* ══ Mobile ══════════════════════════════════ */
-@media (max-width: 600px) {
+/* ══ 2 Cột trên iPad ngang (1180x820) và Màn hình rộng (Ticket L1-7 ⭐) ══ */
+@media (min-width: 820px) and (orientation: landscape), (min-width: 992px) {
+  .lyric-view-container {
+    padding: 2rem 2.5rem 4rem;
+  }
+  .lv-wrapper {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem 2.25rem;
+    align-items: start;
+  }
+  .lv-header {
+    grid-column: 1 / -1;
+  }
+  .lv-empty {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ══ Mobile (màn hình nhỏ) ═════════════════════ */
+@media (max-width: 680px) {
   .lyric-view-container {
     margin: 0.5rem;
     padding: 1.25rem 1rem 2rem;
-    --lv-chord-size: 0.75em;
+    --lv-chord-size: 25px; /* ≥ 24px */
+    --lv-syl-size: 20px;   /* ≥ 20px */
   }
-  .lv-syl { font-size: 1.05em; }
   .lv-flow { row-gap: 1.35em; }
-  .lv-verse { padding: 0.75rem 0.9rem 0.85rem; }
+  .lv-verse { padding: 0.85rem 1rem 0.95rem; }
 }
 
 /* ══ Print ═══════════════════════════════════ */
