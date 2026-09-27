@@ -97,6 +97,11 @@ const SetlistPlayer = (() => {
       const gigNextBtn = document.getElementById('btn-gig-sp-next');
       if (gigNextBtn) gigNextBtn.disabled = !hasNext;
     }
+
+    // Tự động tải trước bài kế tiếp khi thanh chương trình được cập nhật (Ticket L3-2)
+    if (hasNext && window.SongPreloader?.preloadNextInSetlist) {
+      window.SongPreloader.preloadNextInSetlist(currentSetlist, currentIndex);
+    }
   }
 
   async function playCurrentItem() {
@@ -142,12 +147,18 @@ const SetlistPlayer = (() => {
       window.URLState.update({ set: item.chord_profile || 'HD', t: item.transpose_key || 0 });
     }
 
+    // Ticket L3-2: Chuyển bài tức thì không trắng màn hình nếu đã có trong Preloader
+    const hasPreloaded = window.SongPreloader?.has?.(songId, item.chord_profile || 'HD');
+
     // Đưa cả profile lẫn transpose_key qua bên App và chờ load hoàn tất (Core Rule 4, Fix F1)
-    await window.App?.loadSongWithProfile?.(songObj, item.chord_profile, item.transpose_key);
+    await window.App?.loadSongWithProfile?.(songObj, item.chord_profile, item.transpose_key, { instant: hasPreloaded });
     document.querySelector('.toolbar-left')?.classList.add('in-setlist');
 
     // Cập nhật Thanh chương trình (Ticket L3-1)
     updateProgramBar();
+
+    // Tự động tải trước bài kế tiếp trong setlist (Ticket L3-2)
+    window.SongPreloader?.preloadNextInSetlist?.(currentSetlist, currentIndex);
 
     // Apply BPM đã lưu cho bài này (nếu có)
     if (item.bpm && window.Metronome) {

@@ -574,6 +574,11 @@ const ChordCanvas = (() => {
     getCurrentSet: () => _currentSet,
     getCustomChords: () => _customChords,
     setCustomChords: (c) => { _customChords = c; },
+    applyPreloaded: (set, chords) => {
+      _clear(); _songUseFlats = null; window.ChordCanvasTranspose?.resetCache?.();
+      _currentSet = set || 'HD'; _prevSet = _currentSet; _customChords = chords ? { ...chords } : {};
+      _refreshSetDropdown(); window.SongInfoBar?.refreshChordChip?.();
+    },
     getXmlChordCount: () => Object.keys(window.ChordCanvasXML?.readXmlChords?.() || {}).length,
     getChordStatus: () => {
       const customCount = Object.keys(_customChords || {}).length;

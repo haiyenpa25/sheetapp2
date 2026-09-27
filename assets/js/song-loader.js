@@ -12,7 +12,7 @@ const SongLoader = (() => {
   let _currentAbortController = null; // AbortController: hủy ngay lập tức request fetch XML của bài cũ
 
   /* ── Load bài hát hoàn chỉnh ── */
-  async function load(song, transposeOverride = null, profileOverride = 'HD') {
+  async function load(song, transposeOverride = null, profileOverride = 'HD', options = {}) {
     if (!song?.xmlPath) { AppUI.showToast('Bài hát chưa có file sheet nhạc', 'error'); return; }
 
     const loadToken = ++_currentLoadToken;
@@ -33,33 +33,53 @@ const SongLoader = (() => {
     if (window.AutoScroller) AutoScroller.stop();
     if (window.InstrumentMixer?.clearState) InstrumentMixer.clearState();
 
-    // AnnotationCanvas không ảnh hưởng đến render — fire-and-forget
-    AnnotationCanvas.loadSong(song.id);
     PageNav.reset();
 
-    AppUI.showLoading(`Đang tải "${song.title}"...`);
-    AppUI.enableControls(false);
-    _autoCloseSidebar();
+    // Ticket L3-2: Chuyển bài tức thì không trắng màn hình nếu đã có trong Preloader
+    const hasPreloaded = window.SongPreloader?.has?.(song.id, profileOverride);
+    const isInstant = options?.instant === true || (hasPreloaded && options?.instant !== false);
+
+    if (!isInstant) {
+      AnnotationCanvas.loadSong(song.id);
+      AppUI.showLoading(`Đang tải "${song.title}"...`);
+      AppUI.enableControls(false);
+      _autoCloseSidebar();
+    }
 
     try {
-      // ── Fetch XML + session + chord data SONG SONG (tiết kiệm round-trip, tránh race condition) ──
-      // FIX BUG-2: ChordCanvas.loadSong() phải hoàn thành TRƯỚC _injectChords() bên dưới.
-      // Đặt cùng Promise.all → 3 request song song, _customChords sẵn sàng khi cần.
-      AppUI.setLoadingText('Đang tải dữ liệu...');
-      const xmlUrl = (window.ApiService && typeof window.ApiService.resolveUrl === 'function')
-        ? window.ApiService.resolveUrl(song.xmlPath)
-        : (song.xmlPath || '');
-      const [res, settings] = await Promise.all([
-        // INTENTIONAL EXCEPTION: Static MusicXML asset fetch
-        fetch(xmlUrl, { signal: abortSignal }),
-        ApiService.sessions.load(song.id).catch(() => ({})),
-        ChordCanvas.loadSong(song.id, profileOverride)  // đảm bảo chords ready trước render
-      ]);
-      if (loadToken !== _currentLoadToken) return; // Request cũ bị hủy vì người dùng đã đổi bài
+      let xml = '';
+      let processedXml = '';
+      const preloaded = isInstant ? window.SongPreloader?.get?.(song.id, profileOverride) : null;
 
-      if (!res.ok) throw new Error(`Không thể tải file: ${res.status}`);
-      const xml = await res.text();
-      if (loadToken !== _currentLoadToken) return;
+      if (preloaded && preloaded.xml) {
+        xml = preloaded.xml;
+        processedXml = preloaded.processedXml || xml;
+        window.ChordCanvas?.applyPreloaded?.(profileOverride, preloaded.chordsMap);
+      } else {
+        AppUI.setLoadingText('Đang tải dữ liệu...');
+        const xmlUrl = (window.ApiService && typeof window.ApiService.resolveUrl === 'function')
+          ? window.ApiService.resolveUrl(song.xmlPath)
+          : (song.xmlPath || '');
+        const [res, settings] = await Promise.all([
+          // INTENTIONAL EXCEPTION: Static MusicXML asset fetch
+          fetch(xmlUrl, { signal: abortSignal }),
+          ApiService.sessions.load(song.id).catch(() => ({})),
+          ChordCanvas.loadSong(song.id, profileOverride)  // đảm bảo chords ready trước render
+        ]);
+        if (loadToken !== _currentLoadToken) return;
+
+        if (!res.ok) throw new Error(`Không thể tải file: ${res.status}`);
+        xml = await res.text();
+        if (loadToken !== _currentLoadToken) return;
+
+        processedXml = _injectChords(xml);
+        if (window.VerseManager?.onSongLoaded) {
+          window.VerseManager.onSongLoaded(processedXml);
+        }
+        if (window.VerseManager?.processXml) {
+          processedXml = window.VerseManager.processXml(processedXml);
+        }
+      }
 
       Store.set('originalXml', xml);
 
@@ -70,35 +90,37 @@ const SongLoader = (() => {
         const lockedPct = parseInt(localStorage.getItem('sheetapp_locked_zoom_val') || '100', 10);
         zoom = (lockedPct || 100) / 100;
       } else {
-        zoom = settings?.userSettings?.zoomLevel || 1.0;
+        zoom = 1.0;
       }
 
       Store.set('currentTranspose', transpose);
       Store.set('currentZoom', zoom);
 
       // ── Render OSMD ──
-      AppUI.setLoadingText('Đang vẽ bản nhạc...');
-      let processedXml = _injectChords(xml);
-      if (window.VerseManager?.onSongLoaded) {
-        window.VerseManager.onSongLoaded(processedXml);
-      }
-      if (window.VerseManager?.processXml) {
-        processedXml = window.VerseManager.processXml(processedXml);
+      if (!isInstant) {
+        AppUI.setLoadingText('Đang vẽ bản nhạc...');
       }
       OSMDRenderer.setZoomSilent(zoom);
 
       // Bắt buộc hiển thị container trước khi render để OSMD tính đúng clientWidth
-      // (nếu #sheet-area đang hidden, OSMD sẽ tính width=0 → trắng trang)
       document.getElementById('sheet-area')?.classList.remove('hidden');
+
+      if (isInstant) {
+        window.SongPreloader?.startTransitionTimer?.();
+      }
 
       if (loadToken !== _currentLoadToken) return;
       await OSMDRenderer.load(processedXml, transpose);
       if (loadToken !== _currentLoadToken) return;
 
+      if (isInstant) {
+        window.SongPreloader?.endTransitionTimer?.();
+        AnnotationCanvas.loadSong(song.id);
+      }
+
       // ── Post-render tasks ──
       _syncZoomUI(zoom);
-      // Nếu đã Lock View thì không chạy _autoFitZoom để giữ nguyên tỷ lệ zoom đã khóa
-      if (!isZoomLocked) {
+      if (!isZoomLocked && !isInstant) {
         setTimeout(_autoFitZoom, 80);
       }
 

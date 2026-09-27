@@ -264,6 +264,7 @@ echo jsTag('song-info-bar.js');
 echo jsTag('live-sync.js');
 
 // ── 5. App Controllers (defer, phụ thuộc vào modules trên) ──
+echo jsTag('song-preloader.js');
 echo jsTag('song-loader.js');
 echo jsTag('keyboard-handler.js');
 echo jsTag('toolbar-controller.js');

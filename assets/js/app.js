@@ -183,10 +183,12 @@ const App = (() => {
   }
 
   return {
-    // Public API (backward compat)
     loadSong: (song, t) => SongLoader.load(song, t),
-    loadSongWithProfile: (song, profile, t) => {
-      return SongLoader.load(song, t, profile);
+    loadSongWithProfile: (song, profile, t, options) => {
+      return options ? SongLoader.load(song, t, profile, options) : SongLoader.load(song, t, profile);
+    },
+    loadSongXmlDirect: async (songId, xml, transpose = 0, profile = 'HD') => {
+      return SongLoader.load({ id: songId, xmlPath: `storage/Thanh ca/${songId}.xml` }, transpose, profile, { instant: true });
     },
     transposeBy, resetTranspose, setTransposeDirect, setZoom, navigateNext, navigatePrev,
     toggleSidebar:       ()    => ToolbarController?.toggleSidebar?.(),

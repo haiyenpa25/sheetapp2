@@ -277,30 +277,33 @@ const OSMDRenderer = (() => {
    * @param {string} xmlString - Nội dung MusicXML
    * @param {number} transposeValue - Số nửa cung để dịch (Mặc định: 0)
    */
-  async function load(xmlString, transposeValue = 0) {
+  async function load(xmlInput, transposeValue = 0) {
     if (!osmd) throw new Error('OSMD chưa được khởi tạo. Gọi init() trước.');
     const token = ++_renderToken;
-    currentXmlString = xmlString; // Luôn giữ bản gốc
+    let processedInput = xmlInput;
+    if (typeof xmlInput === 'string') {
+      currentXmlString = xmlInput; // Luôn giữ bản gốc
+      processedInput = preprocessXML(xmlInput);
+    }
     isLoaded = false;
 
     try {
-      const processedXml = preprocessXML(xmlString);
-      await osmd.load(processedXml);
+      await osmd.load(processedInput);
       if (token !== _renderToken) return osmd; // Bị hủy bởi lần load mới hơn
 
       osmd.zoom = currentZoom;
       _applyCompactMode();
       
-      if (osmd.Sheet && opensheetmusicdisplay.TransposeCalculator) {
+      if (transposeValue !== 0 && osmd.Sheet && opensheetmusicdisplay.TransposeCalculator) {
           osmd.TransposeCalculator = new opensheetmusicdisplay.TransposeCalculator();
           osmd.Sheet.Transpose = transposeValue;
           osmd.updateGraphic();
       }
 
       refreshRules();
-      _forceLayoutRecalc();
       await osmd.render();
       if (token !== _renderToken) return osmd; // Bị hủy bởi lần render mới hơn
+      window.SongPreloader?.markSvgReady?.();
 
       _forceLayoutRecalc(); // lần 2: sau render để clip SVG nếu vẫn rộng
       _titleCompacted = false;
@@ -334,7 +337,7 @@ const OSMDRenderer = (() => {
       if (window.InstrumentMixer?.restoreState) window.InstrumentMixer.restoreState();
       _applyCompactMode();
 
-      if (osmd.Sheet && opensheetmusicdisplay.TransposeCalculator) {
+      if (transposeValue !== 0 && osmd.Sheet && opensheetmusicdisplay.TransposeCalculator) {
           osmd.TransposeCalculator = new opensheetmusicdisplay.TransposeCalculator();
           osmd.Sheet.Transpose = transposeValue;
           osmd.updateGraphic();
