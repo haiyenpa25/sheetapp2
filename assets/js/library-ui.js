@@ -141,33 +141,76 @@ const LibraryUI = (() => {
     if (urlSongId) selectSong(urlSongId, false);
   }
 
+  const ITEM_H = 38, V_BUFFER = 6;
+  let _virtualSongs = null, _virtualRaf = null, _vScrollBound = false;
+
+  function _renderVirtualChunk() {
+    if (!_virtualSongs || !_virtualSongs.length) return;
+    const el = listEl(), container = el?.closest('.song-list-container') || el;
+    if (!el || !container) return;
+    const st = container.scrollTop || el.scrollTop || 0, vh = container.clientHeight || 600, total = _virtualSongs.length;
+    const start = Math.max(0, Math.floor(st / ITEM_H) - V_BUFFER);
+    const end = Math.min(total, Math.ceil((st + vh) / ITEM_H) + V_BUFFER);
+    const topPad = start * ITEM_H, bottomPad = Math.max(0, (total - end) * ITEM_H);
+    const frag = document.createDocumentFragment();
+    if (topPad > 0) {
+      const topDiv = document.createElement('div');
+      topDiv.className = 'virtual-spacer';
+      topDiv.style.height = `${topPad}px`;
+      frag.appendChild(topDiv);
+    }
+    const canAdmin = window.Auth?.isAdmin?.() ?? false, canEdit = window.Auth?.isBanhat?.() ?? false;
+    for (let i = start; i < end; i++) frag.appendChild(_createSongItem(_virtualSongs[i], canAdmin, canEdit));
+    if (bottomPad > 0) {
+      const botDiv = document.createElement('div');
+      botDiv.className = 'virtual-spacer';
+      botDiv.style.height = `${bottomPad}px`;
+      frag.appendChild(botDiv);
+    }
+    el.innerHTML = '';
+    el.appendChild(frag);
+    if (activeSongId) _highlightActive(activeSongId, false);
+  }
+
   function render(list, opts = {}) {
     _lastRenderedSongs = Array.isArray(list) ? list : [];
     const el = listEl();
     if (!el) return;
 
     if (!list || list.length === 0) {
-      el.innerHTML = `<div class="empty-state">
-        <span class="empty-icon">🎶</span>
-        <p>${opts.emptyMsg || 'Không tìm thấy bài hát'}</p>
-        <small>${opts.emptyHint || 'Thử từ khóa khác'}</small>
-      </div>`;
+      _virtualSongs = null;
+      el.innerHTML = `<div class="empty-state"><span class="empty-icon">🎶</span><p>${opts.emptyMsg || 'Không tìm thấy bài hát'}</p><small>${opts.emptyHint || 'Thử từ khóa khác'}</small></div>`;
       return;
     }
 
-    // Dùng DocumentFragment để batch DOM insert — nhanh hơn innerHTML cho list lớn
-    const frag = document.createDocumentFragment();
-    const canAdmin = window.Auth?.isAdmin?.() ?? false;
-    const canEdit  = window.Auth?.isBanhat?.() ?? false;
-
-    // Ticket L2-1: Nếu là kết quả tìm kiếm và có cả kết quả theo tên lẫn lời -> Phân thành 2 nhóm
     const isSearch = opts.isSearch || !!(searchEl()?.value || '').trim();
     const hasLyricMatches = isSearch && list.some(s => s.match_type === 'lyric');
+
+    // Ticket L2-2: Ảo hoá danh sách khi danh sách lớn (> 35 bài)
+    if (list.length > 35 && !(isSearch && hasLyricMatches)) {
+      _virtualSongs = list;
+      const container = el.closest('.song-list-container') || el;
+      if (container && !_vScrollBound) {
+        _vScrollBound = true;
+        const onScroll = () => {
+          if (!_virtualSongs) return;
+          cancelAnimationFrame(_virtualRaf);
+          _virtualRaf = requestAnimationFrame(_renderVirtualChunk);
+        };
+        container.addEventListener('scroll', onScroll, { passive: true });
+        if (el !== container) el.addEventListener('scroll', onScroll, { passive: true });
+      }
+      _renderVirtualChunk();
+      return;
+    }
+
+    _virtualSongs = null;
+    const frag = document.createDocumentFragment();
+    const canAdmin = window.Auth?.isAdmin?.() ?? false, canEdit = window.Auth?.isBanhat?.() ?? false;
 
     if (isSearch && hasLyricMatches) {
       const titleMatches = list.filter(s => s.match_type !== 'lyric');
       const lyricMatches = list.filter(s => s.match_type === 'lyric');
-
       if (titleMatches.length > 0) {
         const hTitle = document.createElement('div');
         hTitle.className = 'search-group-header search-group-title';
@@ -175,7 +218,6 @@ const LibraryUI = (() => {
         frag.appendChild(hTitle);
         titleMatches.forEach(song => frag.appendChild(_createSongItem(song, canAdmin, canEdit)));
       }
-
       if (lyricMatches.length > 0) {
         const hLyric = document.createElement('div');
         hLyric.className = 'search-group-header search-group-lyric';
@@ -184,15 +226,10 @@ const LibraryUI = (() => {
         lyricMatches.forEach(song => frag.appendChild(_createSongItem(song, canAdmin, canEdit)));
       }
     } else {
-      list.forEach(song => {
-        const div = _createSongItem(song, canAdmin, canEdit);
-        frag.appendChild(div);
-      });
+      list.forEach(song => frag.appendChild(_createSongItem(song, canAdmin, canEdit)));
     }
-
     el.innerHTML = '';
     el.appendChild(frag);
-
     if (activeSongId) _highlightActive(activeSongId);
   }
 
@@ -371,34 +408,24 @@ const LibraryUI = (() => {
   function _buildQuickJump(list) {
     const container = document.getElementById('quick-jump-btns');
     if (!container) return;
-    const ranges = [
-      ['1-100',1,100],['101-200',101,200],['201-300',201,300],
-      ['301-400',301,400],['401-500',401,500],['501-600',501,600],
-      ['601-700',601,700],['701-800',701,800],['801-900',801,900],['901+',901,9999]
-    ];
+    const ranges = [['1-100',1,100],['101-200',101,200],['201-300',201,300],['301-400',301,400],['401-500',401,500],['501-600',501,600],['601-700',601,700],['701-800',701,800],['801-900',801,900],['901+',901,9999]];
     const frag = document.createDocumentFragment();
     const makeBtn = (label, cls, filterFn) => {
       const btn = document.createElement('button');
       btn.className = `quick-jump-btn ${cls}`.trim();
       btn.textContent = label;
-      const handler = () => {
-        container.querySelectorAll('.quick-jump-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        render(filterFn ? list.filter(filterFn) : songs);
-      };
-      btn.addEventListener('touchstart', handler, { passive: true });
-      btn.addEventListener('click', handler);
+      const h = () => { container.querySelectorAll('.quick-jump-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); render(filterFn ? list.filter(filterFn) : songs); };
+      btn.addEventListener('touchstart', h, { passive: true });
+      btn.addEventListener('click', h);
       return btn;
     };
-
     frag.appendChild(makeBtn('Tất cả', 'quick-jump-all', null));
     ranges.forEach(([label, min, max]) => {
       if (list.some(s => (s.httlvnId || 0) >= min && (s.httlvnId || 0) <= max)) {
         frag.appendChild(makeBtn(label, '', s => (s.httlvnId || 0) >= min && (s.httlvnId || 0) <= max));
       }
     });
-    container.innerHTML = '';
-    container.appendChild(frag);
+    container.innerHTML = ''; container.appendChild(frag);
   }
 
   // ── Recently Viewed ──────────────────────────────────────────
@@ -406,39 +433,16 @@ const LibraryUI = (() => {
     const section = document.getElementById('recently-viewed-section');
     if (!section || !window.HistoryManager) return;
     const recent = HistoryManager.getRecent?.() ?? [];
-    if (recent.length === 0) { section.style.display = 'none'; return; }
-
+    if (!recent.length) { section.style.display = 'none'; return; }
     section.style.display = '';
-    section.innerHTML = `<div class="recent-header">
-      <span>Gần đây</span>
-      <button id="btn-clear-history" class="btn btn-ghost btn-xs">Xóa</button>
-    </div>
-    <div class="recent-list">${
-      recent.slice(0,5).map(s => `
-        <div class="recent-item" data-id="${_esc(s.id)}" style="touch-action:manipulation">
-          <span class="recent-num">${s.httlvnId ? String(s.httlvnId).padStart(3,'0') : ''}</span>
-          <span class="recent-title">${_esc(s.title)}</span>
-        </div>`).join('')
-    }</div>`;
-
-    // recent-item: touchstart instant
+    section.innerHTML = `<div class="recent-header"><span>Gần đây</span><button id="btn-clear-history" class="btn btn-ghost btn-xs">Xóa</button></div>` +
+      `<div class="recent-list">${recent.slice(0,5).map(s => `<div class="recent-item" data-id="${_esc(s.id)}" style="touch-action:manipulation"><span class="recent-num">${s.httlvnId ? String(s.httlvnId).padStart(3,'0') : ''}</span><span class="recent-title">${_esc(s.title)}</span></div>`).join('')}</div>`;
     let _rLastId = '', _rLastTime = 0;
     section.querySelectorAll('.recent-item').forEach(item => {
-      item.addEventListener('touchstart', () => {
-        _rLastId   = item.dataset.id;
-        _rLastTime = Date.now();
-        selectSong(item.dataset.id);
-      }, { passive: true });
-      item.addEventListener('click', () => {
-        if (item.dataset.id === _rLastId && Date.now() - _rLastTime < 600) return;
-        selectSong(item.dataset.id);
-      });
+      item.addEventListener('touchstart', () => { _rLastId = item.dataset.id; _rLastTime = Date.now(); selectSong(item.dataset.id); }, { passive: true });
+      item.addEventListener('click', () => { if (item.dataset.id === _rLastId && Date.now() - _rLastTime < 600) return; selectSong(item.dataset.id); });
     });
-    section.querySelector('#btn-clear-history')?.addEventListener('click', e => {
-      e.stopPropagation();
-      HistoryManager.clearHistory?.();
-      section.style.display = 'none';
-    });
+    section.querySelector('#btn-clear-history')?.addEventListener('click', e => { e.stopPropagation(); HistoryManager.clearHistory?.(); section.style.display = 'none'; });
   }
 
   // ── Favorites ────────────────────────────────────────────────
@@ -457,19 +461,10 @@ const LibraryUI = (() => {
     const resp = await ApiService.setlists.list();
     const data = Array.isArray(resp) ? resp : (resp?.data ?? []);
     if (!data.length) { window.App?.showToast('Chưa có Setlist nào được tạo', 'error'); return; }
-
-    const modal = document.getElementById('add-to-setlist-modal');
-    const opts  = document.getElementById('add-to-setlist-options');
+    const modal = document.getElementById('add-to-setlist-modal'), opts = document.getElementById('add-to-setlist-options');
     if (!modal || !opts) return;
-
-    opts.innerHTML = data.map(sl =>
-      `<div class="song-item" data-id="${_esc(sl.id)}" style="touch-action:manipulation">
-        <div class="song-item-info"><div class="song-item-title">${_esc(sl.title)}</div></div>
-      </div>`
-    ).join('');
-
+    opts.innerHTML = data.map(sl => `<div class="song-item" data-id="${_esc(sl.id)}" style="touch-action:manipulation"><div class="song-item-info"><div class="song-item-title">${_esc(sl.title)}</div></div></div>`).join('');
     const closeModal = () => window.ModalManager ? window.ModalManager.close(modal) : modal.classList.add('hidden');
-
     opts.querySelectorAll('.song-item').forEach(item => {
       item.addEventListener('click', async () => {
         closeModal();
@@ -478,10 +473,8 @@ const LibraryUI = (() => {
         if (window.SetlistUI?.addSongToSetlist) await window.SetlistUI.addSongToSetlist(setId, songId);
       });
     });
-
     if (window.ModalManager) window.ModalManager.open(modal);
     else modal.classList.remove('hidden');
-
     document.getElementById('btn-close-add-setlist')?.addEventListener('click', closeModal, { once: true });
     modal.addEventListener('click', e => { if (e.target === modal) closeModal(); }, { once: true });
   }
@@ -516,15 +509,23 @@ const LibraryUI = (() => {
     if (song && onSelectCb) onSelectCb(song);
   }
 
-  function _highlightActive(id) {
+  function _highlightActive(id, autoScroll = true) {
     const el = listEl();
     if (!el) return;
     el.querySelectorAll('.song-item.active').forEach(i => i.classList.remove('active'));
-    const active = el.querySelector(`.song-item[data-id="${CSS.escape(String(id))}"]`);
+    let active = el.querySelector(`.song-item[data-id="${CSS.escape(String(id))}"]`);
+    if (!active && autoScroll && _virtualSongs) {
+      const idx = _virtualSongs.findIndex(s => String(s.id) === String(id));
+      const container = el.closest('.song-list-container');
+      if (idx !== -1 && container) {
+        container.scrollTop = Math.max(0, idx * ITEM_H - (container.clientHeight || 600) / 2);
+        _renderVirtualChunk();
+        active = el.querySelector(`.song-item[data-id="${CSS.escape(String(id))}"]`);
+      }
+    }
     if (active) {
       active.classList.add('active');
-      // Scroll: behavior instant trên mobile để không giật
-      active.scrollIntoView({ behavior: 'instant', block: 'nearest' });
+      if (autoScroll) active.scrollIntoView({ behavior: 'instant', block: 'nearest' });
     }
   }
 
