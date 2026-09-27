@@ -2704,4 +2704,216 @@ body.dark-mode .tp-btn:hover {
   background: #0f172a;
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   Ticket L1-8: Tối ưu hiển thị điện thoại (Mobile Optimization)
+   - Thanh điều khiển ngón cái ở cạnh dưới (Bottom Thumb Bar)
+   - Tự vừa bề ngang, không tràn, >= 2 ô nhịp mỗi hàng
+   - Mặc định ẩn tên tác giả và chú thích trên điện thoại
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Mặc định ẩn trên iPad và Desktop */
+.mobile-thumb-bar {
+  display: none !important;
+}
+
+@media (max-width: 680px) {
+  /* 1. Thanh điều khiển cạnh dưới 52px cho ngón cái */
+  .mobile-thumb-bar {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 52px;
+    background: rgba(18, 18, 22, 0.94);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.4);
+    z-index: 999;
+    padding: 0 8px max(4px, env(safe-area-inset-bottom, 0px));
+    box-sizing: content-box;
+    align-items: center;
+    justify-content: space-around;
+    gap: 6px;
+    user-select: none;
+  }
+
+  body:not(.dark-mode) .mobile-thumb-bar {
+    background: rgba(255, 255, 255, 0.95);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .mobile-thumb-group {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  /* Nhóm Dịch Tông: [-] [Tông] [+] */
+  .mobile-transpose-group {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 9999px;
+    padding: 2px 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  body:not(.dark-mode) .mobile-transpose-group {
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .btn-thumb-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    border: none;
+    background: transparent;
+    color: var(--text, #f1f5f9);
+    font-size: 1.25rem;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 9999px;
+    touch-action: manipulation;
+  }
+  .btn-thumb-action:active {
+    transform: scale(0.92);
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  .btn-thumb-tone {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    height: 44px;
+    padding: 0 6px;
+    border: none;
+    background: transparent;
+    color: var(--text, #f1f5f9);
+    font-size: 0.88rem;
+    font-weight: 800;
+    font-family: var(--font-mono, monospace);
+    cursor: pointer;
+    border-radius: 9999px;
+    touch-action: manipulation;
+    white-space: nowrap;
+  }
+  .btn-thumb-tone.has-transpose {
+    color: #fbbf24 !important;
+  }
+  .btn-thumb-tone:active {
+    opacity: 0.75;
+  }
+
+  /* Nút Chọn Bộ Hợp Âm [🎸 HD] */
+  .btn-thumb-chordset {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-width: 44px;
+    height: 44px;
+    padding: 0 10px;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text, #f1f5f9);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  body:not(.dark-mode) .btn-thumb-chordset {
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  .btn-thumb-chordset:active {
+    transform: scale(0.94);
+    background: rgba(255, 255, 255, 0.16);
+  }
+
+  /* Nút Chuyển Đổi Band / Nhạc */
+  .btn-thumb-view {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-width: 44px;
+    height: 44px;
+    padding: 0 10px;
+    border-radius: 9999px;
+    border: 1.5px solid var(--accent, #7c3aed);
+    background: rgba(124, 58, 237, 0.15);
+    color: var(--text, #f1f5f9);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .btn-thumb-view.active {
+    background: var(--accent, #7c3aed);
+    color: #ffffff;
+  }
+  .btn-thumb-view:active {
+    transform: scale(0.94);
+  }
+
+  /* Nút Biểu Diễn [⚡] */
+  .btn-thumb-gig {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 9999px;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    font-size: 1.1rem;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .btn-thumb-gig:active {
+    transform: scale(0.92);
+    background: rgba(245, 158, 11, 0.3);
+  }
+
+  /* 2. Dành không gian đáy cho Mobile Thumb Bar */
+  .sheet-viewer-wrapper,
+  #sheet-container,
+  #lyric-view-container {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* 3. Tự vừa bề ngang & chống tràn chữ */
+  .sheet-container,
+  .sheet-viewer-wrapper {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    box-sizing: border-box;
+  }
+  .sheet-container svg {
+    max-width: 100% !important;
+    height: auto !important;
+    box-sizing: border-box;
+  }
+
+  /* 4. Mặc định ẩn tên tác giả và chú thích trên điện thoại */
+  .sheet-container svg text.osmd-composer,
+  .sheet-container svg text.osmd-lyricist,
+  .sheet-container svg text.osmd-subtitle,
+  .sheet-container svg text.osmd-credit,
+  .sheet-container svg text.osmd-author,
+  .sheet-container svg text.osmd-meta-text {
+    display: none !important;
+  }
+}
+
 

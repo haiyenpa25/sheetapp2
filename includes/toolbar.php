@@ -349,8 +349,36 @@
         </button>
       </div>
     </div>
-  </div>
 </header>
+
+<!-- MOBILE BOTTOM THUMB BAR (Ticket L1-8: Thanh điều khiển cạnh dưới cho ngón cái) -->
+<nav class="mobile-thumb-bar" id="mobile-thumb-bar" aria-label="Thanh điều khiển nhanh cho điện thoại">
+  <div class="mobile-thumb-group mobile-transpose-group" role="group" aria-label="Dịch giọng">
+    <button id="btn-mobile-transpose-down" class="btn-thumb-action" title="Hạ 1 nửa cung" aria-label="Hạ tông">−</button>
+    <button id="mobile-transpose-display" class="btn-thumb-tone" title="Tông hiện tại (chạm để về tông gốc)">--</button>
+    <button id="btn-mobile-transpose-up" class="btn-thumb-action" title="Tăng 1 nửa cung" aria-label="Tăng tông">+</button>
+  </div>
+
+  <div class="mobile-thumb-group mobile-chordset-group" role="group" aria-label="Bộ hợp âm">
+    <button id="btn-mobile-chordset" class="btn-thumb-chordset" title="Chọn bản phối hợp âm">
+      <span class="thumb-icon">🎸</span>
+      <span id="mobile-chordset-label" class="thumb-label">HD</span>
+    </button>
+  </div>
+
+  <div class="mobile-thumb-group mobile-view-group" role="group" aria-label="Chế độ xem">
+    <button id="btn-mobile-view-toggle" class="btn-thumb-view" title="Chuyển chế độ Band ↔ Bản Nhạc">
+      <span id="mobile-view-icon" class="thumb-icon">▶</span>
+      <span id="mobile-view-label" class="thumb-label">Band</span>
+    </button>
+  </div>
+
+  <div class="mobile-thumb-group mobile-gig-group" role="group" aria-label="Biểu diễn">
+    <button id="btn-mobile-gig" class="btn-thumb-gig" title="Chế độ Biểu Diễn sân khấu" aria-label="Biểu diễn">
+      <span class="thumb-icon">⚡</span>
+    </button>
+  </div>
+</nav>
 
 <script>
   /* More Options Dropdown Position & Event handling */

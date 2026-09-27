@@ -1739,16 +1739,18 @@ body.sheet-only-mode .gig-floating-hud {
    RESPONSIVE OPTIMIZATIONS FOR MOBILE PHONE (<= 680px)
    ==================================================== */
 @media (max-width: 680px) {
+  /* Ticket L1-8: Thanh đỉnh đầu 44px duy nhất, sạch sẽ và thanh thoát */
   .unified-toolbar {
-    height: auto !important;
-    min-height: 48px;
-    padding: 4px 8px 6px;
-    flex-wrap: wrap;
-    align-content: flex-start;
-    overflow-x: hidden !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    padding: 0 8px !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    overflow: hidden !important;
   }
 
-  /* Row 1: Left (Song Info) and Right (Gig + Nav + More) side by side */
+  /* Left: Hamburger + Tên bài + Tông gốc */
   .toolbar-left {
     order: 1;
     flex: 1 1 0%;
@@ -1758,22 +1760,23 @@ body.sheet-only-mode .gig-floating-hud {
     gap: 4px;
   }
   .song-info-pill {
-    max-width: calc(100% - 48px);
+    max-width: 100% !important;
     padding: 0 8px;
-    height: 44px !important;
-    min-height: 44px !important;
+    height: 38px !important;
+    min-height: 38px !important;
   }
   .song-info-pill .song-title {
-    font-size: 0.78rem;
+    font-size: 0.82rem;
   }
   .song-info-pill .song-key-badge {
-    font-size: 0.65rem;
-    padding: 1px 4px;
+    font-size: 0.7rem;
+    padding: 1px 5px;
   }
   #btn-song-info-popover {
     display: none !important;
   }
 
+  /* Right: Giữ nút More Options ⋮ 44px */
   .toolbar-right {
     order: 2;
     flex: 0 0 auto;
@@ -1781,28 +1784,14 @@ body.sheet-only-mode .gig-floating-hud {
     align-items: center;
     gap: 4px;
   }
-  .btn-gig-mode {
-    padding: 0 10px !important;
-    font-size: 0.82rem;
-    height: 44px !important;
-    min-height: 44px !important;
-    min-width: 44px !important;
-  }
-  .btn-gig-mode .gig-text {
-    display: none !important;
-  }
+  .btn-gig-mode,
+  .nav-arrows,
   .btn-toolbar-user,
   .scroll-pill,
   .zoom-pill,
   #btn-add-chord-mode-bar,
   #btn-new-chord-set {
     display: none !important;
-  }
-  .nav-arrows .icon-btn {
-    width: 44px !important;
-    height: 44px !important;
-    min-width: 44px !important;
-    min-height: 44px !important;
   }
   #btn-more-options {
     width: 44px !important;
@@ -1811,16 +1800,9 @@ body.sheet-only-mode .gig-floating-hud {
     min-height: 44px !important;
   }
 
-  /* Row 2: Band Quick Actions (Tông, Hợp âm, Band/Nhạc) */
+  /* Toàn bộ Band Controls đã chuyển sang thanh điều khiển ngón cái ở đáy (mobile-thumb-bar) */
   .band-controls {
-    order: 3;
-    width: 100%;
-    flex: 0 0 100%;
-    margin-top: 4px;
-    overflow-x: hidden;
-    padding: 1px 0 2px;
-    gap: 3px;
-    justify-content: flex-start;
+    display: none !important;
   }
 
   .band-pill {

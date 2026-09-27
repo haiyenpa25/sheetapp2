@@ -297,10 +297,38 @@ const SongLoader = (() => {
     const ratio = avail / svgW;
     // Snap sang bước zoom gần nhất (10%, 15%, ..., 200%)
     const pct = Math.round(Math.max(0.1, Math.min(2.0, ratio)) * 20) * 5; // bước 5%
-    // Task 2.8 (F13 fix): Chỉ apply autofit nếu user chưa chỉnh zoom và tỷ lệ khác zoom hiện tại đáng kể (> 3%)
+    const isMobile = window.innerWidth <= 680;
     const curZoom = Store.get('currentZoom') || 1.0;
-    if (curZoom === 1.0 && Math.abs((pct / 100) - curZoom) > 0.03) {
+    // Task 2.8 (F13 fix): Chỉ apply autofit nếu user chưa chỉnh zoom và tỷ lệ khác zoom hiện tại đáng kể (> 3%)
+    if (isMobile) {
+      if (Math.abs((pct / 100) - curZoom) > 0.03) {
+        window.App?.setZoom?.(pct);
+        setTimeout(() => _ensureMinMeasuresPerSystem(pct), 120);
+      } else {
+        setTimeout(() => _ensureMinMeasuresPerSystem(Math.round(curZoom * 100)), 120);
+      }
+    } else if (curZoom === 1.0 && Math.abs((pct / 100) - curZoom) > 0.03) {
       window.App?.setZoom?.(pct);
+    }
+  }
+
+  function _ensureMinMeasuresPerSystem(targetPct) {
+    if (window.innerWidth > 680) return;
+    const osmd = window.OSMDRenderer?.getInstance?.();
+    if (!osmd?.graphic?.measureList) return;
+    const systems = osmd.graphic.measureList;
+    if (systems.length <= 1) return;
+
+    let hasSingleMeasure = false;
+    for (let i = 0; i < systems.length - 1; i++) {
+      if (systems[i] && systems[i].length < 2) {
+        hasSingleMeasure = true;
+        break;
+      }
+    }
+    if (hasSingleMeasure && targetPct > 25) {
+      const adjustedPct = Math.max(25, targetPct - 5);
+      window.App?.setZoom?.(adjustedPct);
     }
   }
 

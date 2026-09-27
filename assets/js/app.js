@@ -39,6 +39,7 @@ const App = (() => {
     if (window.LiveSync)         window.LiveSync.init();
 
     ToolbarController.init();
+    if (window.MobileController) MobileController.init();
     KeyboardHandler.init();
     if (window.ServiceWorkerManager) ServiceWorkerManager.register();
 

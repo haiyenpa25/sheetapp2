@@ -380,25 +380,16 @@ const OSMDRenderer = (() => {
     if (osmd) osmd.zoom = currentZoom;
   }
 
-
   function getCurrentZoom() { return currentZoom; }
   function getInstance() { return osmd; }
   function getIsLoaded() { return isLoaded; }
   function getCurrentXml() { return currentXmlString; }
   function onReady(cb) { _onReadyCallbacks.push(cb); }
   function destroy() {
-    if (osmd) {
-      const container = document.getElementById(containerId);
-      if (container) container.innerHTML = '';
-    }
-    osmd = null;
-    isLoaded = false;
-    currentXmlString = null;
+    if (osmd) { const el = document.getElementById(containerId); if (el) el.innerHTML = ''; }
+    osmd = null; isLoaded = false; currentXmlString = null;
   }
-  function _debounce(fn, ms) {
-    let t;
-    return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
-  }
+  function _debounce(fn, ms) { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); }; }
 
   /**
    * Tinh chỉnh title SVG sau render — ẩn title bị duplicate, style đẹp hơn.
@@ -442,14 +433,18 @@ const OSMDRenderer = (() => {
         }
       }
 
-      // 3. Tìm và ẩn các text TRÙNG NỘI DUNG với title (duplicate từ movement-title + credit)
+      // 3. Tìm và ẩn các text TRÙNG NỘI DUNG với title hoặc tác giả/chú thích trên điện thoại (L1-8)
+      const isMobile = typeof window !== 'undefined' && window.innerWidth <= 680;
       const titleContent = (titleEl.querySelector('tspan') || titleEl).textContent.trim().toLowerCase();
+      const titleY = parseFloat(titleEl.getAttribute('y') || '0');
       texts.forEach(t => {
         if (t === titleEl) return;
         const content = t.textContent.trim().toLowerCase();
         const fs = parseFloat(t.getAttribute('font-size') || '0');
-        // Ẩn nếu trùng nội dung & nhỏ hơn title
-        if (content === titleContent && fs < maxSize) {
+        const y = parseFloat(t.getAttribute('y') || '0');
+        if (content === titleContent && fs < maxSize) t.style.display = 'none';
+        if (isMobile && fs < maxSize && Math.abs(y - titleY) < 160) {
+          t.classList.add('osmd-meta-text');
           t.style.display = 'none';
         }
       });
@@ -558,8 +553,10 @@ const OSMDRenderer = (() => {
     if (!osmd || !osmd.Sheet) return;
     let compactPrefs = { hideBass: true, hideVoices: true, hideText: true };
     if (window.DisplaySettings) compactPrefs = DisplaySettings.getCompactPrefs();
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 680;
     if (!_isCompactMode) {
-      osmd.setOptions({ drawComposer: true, drawCredits: true, drawSubtitle: true, drawLyricist: true });
+      const drawMeta = !isMobile;
+      osmd.setOptions({ drawComposer: drawMeta, drawCredits: drawMeta, drawSubtitle: drawMeta, drawLyricist: drawMeta });
       return;
     }
     osmd.Sheet.Instruments.forEach((ins, insIndex) => {
