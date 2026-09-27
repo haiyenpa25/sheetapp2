@@ -173,48 +173,93 @@ const SetlistDetail = (() => {
     if (ctx.ensureSongsLoaded) await ctx.ensureSongsLoaded();
     const allSongs = ctx.getAllSongsCache?.() || [];
 
+    // Tổng thời lượng dự kiến của cả chương trình (Ticket L3-4)
+    const totalMin = currentSetlist.items.reduce((sum, it) => sum + (parseInt(it.duration_minutes, 10) || 5), 0);
+    const summaryEl = document.createElement('div');
+    summaryEl.className = 'setlist-duration-summary text-xs text-muted mb-2';
+    summaryEl.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:rgba(99,102,241,0.08);border-radius:6px;border:1px solid rgba(99,102,241,0.18);';
+    summaryEl.innerHTML = `<span>⏱️ Tổng thời lượng dự kiến: <strong style="color:var(--text-color);">${totalMin} phút</strong> (${currentSetlist.items.length} mục)</span>`;
+    itemsEl.appendChild(summaryEl);
+
     currentSetlist.items.forEach((item, idx) => {
-      const songObj = allSongs.find(s => String(s.id) === String(item.song_id)) || window.LibraryUI?.getSongObj?.(item.song_id);
-      const title = songObj ? songObj.title : 'Bài hát không tồn tại';
+      const isSong = !item.item_type || item.item_type === 'song';
+      const typeInfo = window.LiturgyCard?.getTypeInfo?.(item.item_type) || { icon: '⛪', label: 'Tiết mục', badge: 'TIẾT MỤC' };
+      const songObj = isSong ? (allSongs.find(s => String(s.id) === String(item.song_id)) || window.LibraryUI?.getSongObj?.(item.song_id)) : null;
+      const title = isSong ? (songObj ? songObj.title : 'Bài hát không tồn tại') : `${typeInfo.icon} ${_esc(item.custom_title || typeInfo.label)}`;
       const el = document.createElement('div');
       el.className = 'song-item' + (currentIndex === idx ? ' active' : '');
 
       const numStr = String(idx + 1).padStart(2, '0');
-      const origKey = songObj?.defaultKey || songObj?.keySignature || '';
-      const toneBadge = _formatToneBadge(origKey, item.transpose_key, true);
-      const chordBadge = item.chord_profile && item.chord_profile !== 'default' ? `<span class="tag">🎸 ${_esc(item.chord_profile)}</span>` : '';
-      const bpmBadge = item.bpm
-        ? `<span class="tag tag-blue btn-edit-bpm" style="cursor:pointer;" title="Click để đổi BPM">♩${_esc(String(item.bpm))} BPM ✎</span>`
-        : `<span class="tag btn-edit-bpm" style="cursor:pointer;opacity:0.8;" title="Click để đặt BPM">♩ BPM ✎</span>`;
+      const durVal = parseInt(item.duration_minutes, 10) || 5;
+      const durBadge = `<span class="tag btn-edit-duration" style="cursor:pointer;" title="Thời lượng dự kiến (Click để đổi)">⏱️ ${durVal}' ✎</span>`;
 
-      const versesVal = item.selected_verses || item.stanzas || '';
-      const versesBadge = versesVal
-        ? `<span class="tag tag-green btn-edit-verses" style="cursor:pointer;" title="Khổ sẽ hát: ${_esc(versesVal)} (Click để sửa)">📖 Khổ: ${_esc(versesVal)} ✎</span>`
-        : `<span class="tag btn-edit-verses" style="cursor:pointer;opacity:0.8;" title="Đặt khổ sẽ hát (ví dụ: 1, 3)">📖 Khổ ✎</span>`;
+      let metaHtml = '';
+      if (isSong) {
+        const origKey = songObj?.defaultKey || songObj?.keySignature || '';
+        const toneBadge = _formatToneBadge(origKey, item.transpose_key, true);
+        const chordBadge = item.chord_profile && item.chord_profile !== 'default' ? `<span class="tag">🎸 ${_esc(item.chord_profile)}</span>` : '';
+        const bpmBadge = item.bpm
+          ? `<span class="tag tag-blue btn-edit-bpm" style="cursor:pointer;" title="Click để đổi BPM">♩${_esc(String(item.bpm))} BPM ✎</span>`
+          : `<span class="tag btn-edit-bpm" style="cursor:pointer;opacity:0.8;" title="Click để đặt BPM">♩ BPM ✎</span>`;
+        const versesVal = item.selected_verses || item.stanzas || '';
+        const versesBadge = versesVal
+          ? `<span class="tag tag-green btn-edit-verses" style="cursor:pointer;" title="Khổ sẽ hát: ${_esc(versesVal)} (Click để sửa)">📖 Khổ: ${_esc(versesVal)} ✎</span>`
+          : `<span class="tag btn-edit-verses" style="cursor:pointer;opacity:0.8;" title="Đặt khổ sẽ hát (ví dụ: 1, 3)">📖 Khổ ✎</span>`;
+        const notesVal = item.leader_notes || '';
+        const notesBadge = notesVal
+          ? `<span class="tag tag-amber btn-edit-notes" style="cursor:pointer;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="Ghi chú: ${_esc(notesVal)} (Click để sửa)">📌 ${_esc(notesVal)} ✎</span>`
+          : `<span class="tag btn-edit-notes" style="cursor:pointer;opacity:0.8;" title="Thêm ghi chú ca trưởng">📌 Ghi chú ✎</span>`;
+        metaHtml = `${toneBadge} ${chordBadge} ${bpmBadge} ${versesBadge} ${durBadge} ${notesBadge}`;
+      } else {
+        const typeBadge = `<span class="tag tag-purple">🔖 ${typeInfo.badge}</span>`;
+        const notesVal = item.leader_notes || '';
+        const notesBadge = notesVal
+          ? `<span class="tag tag-amber btn-edit-notes" style="cursor:pointer;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="Ghi chú: ${_esc(notesVal)} (Click để sửa)">📌 ${_esc(notesVal)} ✎</span>`
+          : `<span class="tag btn-edit-notes" style="cursor:pointer;opacity:0.8;" title="Thêm ghi chú ca trưởng">📌 Ghi chú ✎</span>`;
+        metaHtml = `${typeBadge} ${durBadge} ${notesBadge}`;
+      }
 
-      const notesVal = item.leader_notes || '';
-      const notesBadge = notesVal
-        ? `<span class="tag tag-amber btn-edit-notes" style="cursor:pointer;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="Ghi chú: ${_esc(notesVal)} (Click để sửa)">📌 ${_esc(notesVal)} ✎</span>`
-        : `<span class="tag btn-edit-notes" style="cursor:pointer;opacity:0.8;" title="Thêm ghi chú ca trưởng">📌 Ghi chú ✎</span>`;
+      const saveBpmBtn = isSong 
+        ? `<button class="icon-btn-xs btn-save-bpm" title="Lưu Tone & BPM đang tập vào bài này" style="color:var(--accent);font-size:.7rem;padding:.25rem .5rem;font-weight:700;touch-action:manipulation;">💾 Lưu Tập</button>`
+        : '';
 
       el.innerHTML = `
         <div class="song-item-info" style="flex:1;min-width:0;">
           <div class="song-item-title">${numStr} - ${_esc(title)}</div>
           <div class="song-item-meta text-xs" style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;">
-            ${toneBadge} ${chordBadge} ${bpmBadge} ${versesBadge} ${notesBadge}
+            ${metaHtml}
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
-          <button class="icon-btn-xs btn-save-bpm" title="Lưu Tone & BPM đang tập vào bài này" style="color:var(--accent);font-size:.7rem;padding:.25rem .5rem;font-weight:700;touch-action:manipulation;">💾 Lưu Tập</button>
+          ${saveBpmBtn}
           <button class="icon-btn-xs text-danger btn-del-item" title="Xóa khỏi list">✕</button>
         </div>
       `;
 
       el.addEventListener('click', async (e) => {
-        if (e.target.closest('.btn-del-item, .btn-save-bpm, .btn-edit-tone, .btn-edit-bpm, .btn-edit-verses, .btn-edit-notes')) return;
+        if (e.target.closest('.btn-del-item, .btn-save-bpm, .btn-edit-tone, .btn-edit-bpm, .btn-edit-verses, .btn-edit-notes, .btn-edit-duration')) return;
         ctx.setCurrentIndex?.(idx);
         await renderSetlistItems();
         ctx.playCurrentItem?.();
+      });
+
+      el.querySelector('.btn-edit-duration')?.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const currentDur = parseInt(item.duration_minutes, 10) || 5;
+        const input = window.prompt(`Thời lượng dự kiến (phút) cho "${title}":`, String(currentDur));
+        if (input !== null) {
+          const val = parseInt(input.trim(), 10);
+          if (!isNaN(val) && val > 0) {
+            try {
+              await window.ApiService.setlists.updateItem(item.id, { duration_minutes: val });
+              item.duration_minutes = val;
+              window.App?.showToast?.(`✅ Đã cập nhật thời lượng ${val} phút`, 'success');
+              await renderSetlistItems();
+            } catch (err) {
+              window.App?.showToast?.('Lỗi cập nhật thời lượng', 'error');
+            }
+          }
+        }
       });
 
       el.querySelector('.btn-edit-tone')?.addEventListener('click', (e) => {

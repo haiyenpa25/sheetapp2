@@ -187,6 +187,31 @@
     <div id="lyric-view-container" class="lyric-view-container hidden"></div>
   </div>
 
+  <!-- LITURGY CARD / NON-SONG PLACEHOLDER (Thẻ chờ phụng vụ — Ticket L3-4) -->
+  <div id="liturgy-card" class="liturgy-card hidden" role="region" aria-label="Tiết mục phụng vụ">
+    <div class="liturgy-card-inner">
+      <div class="liturgy-card-icon" id="lc-icon" aria-hidden="true">🙏</div>
+      <div class="liturgy-card-badge" id="lc-badge">CẦU NGUYỆN</div>
+      <h2 class="liturgy-card-title" id="lc-title">Cầu Nguyện Khai Lễ</h2>
+      
+      <div class="liturgy-card-notes hidden" id="lc-notes-box">
+        <span class="lc-notes-label">📌 Ghi chú ca trưởng:</span>
+        <p class="lc-notes-text" id="lc-notes-text"></p>
+      </div>
+
+      <div class="liturgy-card-meta">
+        <span class="lc-meta-item" id="lc-item-duration">⏱️ Thời lượng mục: 5 phút</span>
+        <span class="lc-meta-divider">•</span>
+        <span class="lc-meta-item" id="lc-total-duration">⏱️ Tổng thời lượng chương trình: 45 phút</span>
+      </div>
+
+      <div class="liturgy-card-actions">
+        <button id="btn-lc-prev" class="btn btn-ghost btn-lc-btn" title="Mục trước (◀)">◀ Mục trước</button>
+        <button id="btn-lc-next" class="btn btn-primary btn-lc-btn" title="Mục tiếp theo (▶)">Mục tiếp theo ▶</button>
+      </div>
+    </div>
+  </div>
+
   <!-- HALF-PAGE DIVIDER (Ticket L1-9: Vạch chia nửa trang chuẩn forScore) -->
   <div id="half-page-divider" class="half-page-divider hidden" aria-hidden="true">
     <div class="half-page-divider-line"></div>

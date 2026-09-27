@@ -43,24 +43,31 @@ const SetlistPlayer = (() => {
 
     if (hasNext) {
       const nextItem = currentSetlist.items[currentIndex + 1];
-      const allSongs = ctx.getAllSongsCache?.() || window.LibraryUI?.getSongs?.() || [];
-      const nextSongObj = allSongs.find(s => String(s.id) === String(nextItem.song_id))
-                       || window.LibraryUI?.getSongObj?.(nextItem.song_id);
-      const nextTitle = nextSongObj?.title || nextItem.title || `Bài #${nextItem.song_id}`;
-      const origKey = nextSongObj?.defaultKey || nextSongObj?.keySignature || nextItem.key || '';
-      const semi = parseInt(nextItem.transpose_key || 0, 10);
+      if (nextItem.item_type && nextItem.item_type !== 'song') {
+        const typeInfo = window.LiturgyCard?.getTypeInfo?.(nextItem.item_type) || { icon: '⛪', label: 'Tiết mục' };
+        const dur = parseInt(nextItem.duration_minutes, 10) || 5;
+        nextText = `${typeInfo.icon} ${nextItem.custom_title || typeInfo.label}`;
+        nextKeyText = `(${dur}')`;
+      } else {
+        const allSongs = ctx.getAllSongsCache?.() || window.LibraryUI?.getSongs?.() || [];
+        const nextSongObj = allSongs.find(s => String(s.id) === String(nextItem.song_id))
+                         || window.LibraryUI?.getSongObj?.(nextItem.song_id);
+        const nextTitle = nextSongObj?.title || nextItem.title || `Bài #${nextItem.song_id}`;
+        const origKey = nextSongObj?.defaultKey || nextSongObj?.keySignature || nextItem.key || '';
+        const semi = parseInt(nextItem.transpose_key || 0, 10);
 
-      let keyDisplay = '';
-      if (origKey) {
-        if (semi !== 0 && window.KeyService?.displayKey) {
-          const targetKey = window.KeyService.displayKey(origKey, semi) || origKey;
-          keyDisplay = `(${origKey}→${targetKey})`;
-        } else {
-          keyDisplay = `(${origKey})`;
+        let keyDisplay = '';
+        if (origKey) {
+          if (semi !== 0 && window.KeyService?.displayKey) {
+            const targetKey = window.KeyService.displayKey(origKey, semi) || origKey;
+            keyDisplay = `(${origKey}→${targetKey})`;
+          } else {
+            keyDisplay = `(${origKey})`;
+          }
         }
+        nextText = nextTitle;
+        nextKeyText = keyDisplay;
       }
-      nextText = nextTitle;
-      nextKeyText = keyDisplay;
     } else {
       nextText = 'Kết thúc chương trình';
       nextKeyText = '';
@@ -121,11 +128,32 @@ const SetlistPlayer = (() => {
       document.querySelector('.toolbar-left')?.classList.remove('in-setlist');
       window.VerseManager?.clearSelectedVerses?.();
       window.LeaderNotesBanner?.hide?.();
+      window.LiturgyCard?.hide?.();
       updateProgramBar();
       return;
     }
 
     const item = currentSetlist.items[currentIndex];
+
+    // Ticket L3-4: Xử lý mục không phải bài hát (Cầu nguyện, Kinh Thánh, Thông báo...)
+    if (item.item_type && item.item_type !== 'song') {
+      window.VerseManager?.clearSelectedVerses?.();
+      window.LeaderNotesBanner?.hide?.();
+      if (window.LiturgyCard?.show) {
+        window.LiturgyCard.show(item, currentSetlist, currentIndex);
+      }
+      document.querySelector('.toolbar-left')?.classList.add('in-setlist');
+      updateProgramBar();
+
+      // Nếu có bài kế tiếp thì tải trước
+      if (currentIndex < currentSetlist.items.length - 1 && window.SongPreloader?.preloadNextInSetlist) {
+        window.SongPreloader.preloadNextInSetlist(currentSetlist, currentIndex);
+      }
+      return;
+    }
+
+    // Nếu là bài hát: ẩn Thẻ chờ phụng vụ
+    window.LiturgyCard?.hide?.();
     const songId = item.song_id;
 
     if (ctx.ensureSongsLoaded) {

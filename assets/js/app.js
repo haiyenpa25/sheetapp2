@@ -187,6 +187,7 @@ const App = (() => {
       document.querySelector('.toolbar-left')?.classList.remove('in-setlist');
       window.LeaderNotesBanner?.hide?.();
       window.VerseManager?.clearSelectedVerses?.();
+      window.LiturgyCard?.hide?.();
       return SongLoader.load(song, t);
     },
     loadSongWithProfile: (song, profile, t, options) => {
