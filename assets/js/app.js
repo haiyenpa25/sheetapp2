@@ -29,6 +29,7 @@ const App = (() => {
     if (window.SetlistUI)        SetlistUI.init();
     if (window.Importer)         Importer.init();
     if (window.DisplaySettings)  DisplaySettings.init();
+    if (window.StageLens)        window.StageLens.init();
     if (window.PerformanceNotes) PerformanceNotes.init();
     if (window.SongInfoBar)      SongInfoBar.init();
     if (window.Metronome)        Metronome.init();
@@ -39,7 +40,7 @@ const App = (() => {
     if (window.LiveSync)         window.LiveSync.init();
 
     ToolbarController.init();
-    if (window.MobileController) MobileController.init();
+    if (window.MobileController) window.MobileController.init();
     KeyboardHandler.init();
     if (window.ServiceWorkerManager) ServiceWorkerManager.register();
     if (window.OfflineSetlistManager?.checkOnStartup) window.OfflineSetlistManager.checkOnStartup();

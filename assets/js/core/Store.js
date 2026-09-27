@@ -12,6 +12,7 @@ const Store = (() => {
     currentTranspose: 0,      // Semitone offset
     currentZoom:      1.0,    // Zoom ratio (0.5-2.0)
     capoLevel:        0,      // Capo ngăn
+    instrumentRole:   'guitar', // Stage Lens Role: guitar, keyboard, bass, drums, vocals
   };
 
   function get(key) {
@@ -33,7 +34,7 @@ const Store = (() => {
 
   function reset(keys = null) {
     const targets = keys || Object.keys(_state);
-    const defaults = { currentSong: null, originalXml: null, currentTranspose: 0, currentZoom: 1.0, capoLevel: 0 };
+    const defaults = { currentSong: null, originalXml: null, currentTranspose: 0, currentZoom: 1.0, capoLevel: 0, instrumentRole: 'guitar' };
     targets.forEach(k => set(k, defaults[k]));
   }
 

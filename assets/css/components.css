@@ -375,3 +375,27 @@ body.dark-mode .voice-selector {
   background: var(--bg-hover);
   border-color: var(--accent);
 }
+
+/* ========================================================
+   Ticket L4-1: Stage Lens Instrument Roles
+   ======================================================== */
+.btn-instrument-role {
+  cursor: pointer;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.btn-instrument-role:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+}
+.stage-lens-role-card:hover {
+  background: var(--bg-hover) !important;
+  border-color: var(--accent) !important;
+}
+.stage-lens-role-card.active {
+  border-color: var(--accent, #8b5cf6) !important;
+  background: rgba(139, 92, 246, 0.12) !important;
+}
+

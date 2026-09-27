@@ -1160,6 +1160,17 @@ SheetApp/
   🏆 ĐẠT 100% QUALITY GATE: 107/107 suites PASS (1868 passed, 0 failed, 65.7% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
   🎉 HOÀN THÀNH 100% TOÀN BỘ CHƯƠNG L3 (CHẾ ĐỘ CHƯƠNG TRÌNH LỄ - 10/10 TICKETS TỪ L3-1 ĐẾN L3-10).
 
+[2026-09-28] — Hoàn tất Ticket L4-1 (ROADMAP4.md): Vai Trò Nhạc Cụ "Stage Lens" & Điều Khiển 1 Icon
+  + Tạo: assets/js/stage-lens.js (Quản lý 5 vai trò: Guitar, Keyboard, Bass, Trống, Hát; lưu localStorage 'sheetapp_instrument_role'; cập nhật document.body.dataset.stageLens; phát EventBus 'role:changed'; hiển thị modal #modal-stage-lens; < 230 dòng)
+  ~ Sửa: assets/js/core/Store.js (Bổ sung thuộc tính instrumentRole vào _state và defaults)
+  ~ Sửa: includes/toolbar.php (Tích hợp nút #btn-instrument-role với icon động #instrument-role-icon và nhãn #instrument-role-label)
+  ~ Sửa: assets/css/components.css (Styles cho nút vai trò và modal chọn vai trò nhạc cụ .stage-lens-role-card)
+  ~ Sửa: assets/js/app.js (Tự động khởi tạo window.StageLens.init() khi app boot)
+  ~ Sửa: eslint.config.js (Khai báo global StageLens: 'writable')
+  + Tạo: tests/library_l41_stage_lens_roles_regression.php (19/19 checks PASS, 68.4% behavioral assertions)
+  + Tạo: e2e/library-l4-stage-lens.spec.js (E2E Playwright: Chọn 5 vai trò, đổi bằng 1 icon trên toolbar, đổi dataset và label, bảo toàn qua reload trên cả Chromium và WebKit)
+  🏆 ĐẠT 100% QUALITY GATE: 108/108 suites PASS (1887 passed, 0 failed, 66.1% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
+
 ---
 
 *File này là "bộ nhớ" của dự án. AI Agent cập nhật sau mỗi phiên để phiên sau không phải khám phá lại từ đầu.*

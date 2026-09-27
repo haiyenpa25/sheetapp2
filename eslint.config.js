@@ -203,6 +203,8 @@ module.exports = [
         KeyboardHandler: 'writable',
         ServiceWorkerManager: 'writable',
         SongLoader: 'writable',
+        StageLens: 'writable',
+        MobileController: 'writable',
         Importer: 'writable',
         ToolbarController: 'writable',
         OsmdAudioPlayer: 'writable',

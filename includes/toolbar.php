@@ -136,6 +136,12 @@
     </button>
     <button id="btn-toggle-view" style="display:none;" aria-hidden="true"></button>
 
+    <!-- Cụm Vai Trò Nhạc Cụ / Stage Lens (Ticket L4-1) -->
+    <button id="btn-instrument-role" class="band-pill btn-instrument-role" title="Đổi vai trò: Guitar · Keyboard · Bass · Trống · Hát" aria-label="Vai trò nhạc công" style="cursor:pointer; padding: 0 8px;">
+      <span id="instrument-role-icon" class="role-icon" style="font-size: 0.95rem;">🎸</span>
+      <span id="instrument-role-label" class="role-label" style="font-size: 0.72rem; margin-left: 2px;">Guitar</span>
+    </button>
+
     <!-- Cụm Cuộn Trang & Gõ Nhịp (Scroll & Tempo Pill) -->
     <div class="band-pill scroll-pill">
       <button id="btn-auto-scroll" class="btn-pill-scroll" disabled title="Tự động cuộn bản nhạc (Phím Space)">
