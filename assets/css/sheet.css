@@ -11,7 +11,7 @@
   overflow-x: hidden;
   position: relative;
   background: #eef0f7;
-  scroll-behavior: smooth;
+  padding-bottom: 60vh;
 }
 
 /* ---- WELCOME SCREEN ---- */
@@ -2914,6 +2914,66 @@ body.dark-mode .tp-btn:hover {
   .sheet-container svg text.osmd-meta-text {
     display: none !important;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Ticket L1-9: Lật nửa trang (Half-Page Turn, học từ forScore)
+   - Vạch chia nửa trang rõ ràng (.half-page-divider)
+   - Lật theo hàng nhạc, không cắt đôi một hàng
+   ═══════════════════════════════════════════════════════════════ */
+
+.half-page-divider {
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 85;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 16px;
+  transition: opacity 0.35s ease, transform 0.25s ease;
+}
+
+.half-page-divider.hidden {
+  display: none !important;
+}
+
+.half-page-divider.faded {
+  opacity: 0.15;
+}
+
+.half-page-divider-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-top: 2px dashed rgba(245, 158, 11, 0.75);
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.45);
+}
+
+.half-page-divider-badge {
+  position: relative;
+  background: rgba(245, 158, 11, 0.95);
+  color: #0f172a;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  font-family: var(--font-sans, sans-serif);
+}
+
+body.dark-mode .half-page-divider-line {
+  border-top-color: #fbbf24;
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.55);
+}
+
+body.dark-mode .half-page-divider-badge {
+  background: #fbbf24;
+  color: #000;
 }
 
 

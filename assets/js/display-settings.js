@@ -348,6 +348,7 @@ const DisplaySettings = (() => {
                     localStorage.setItem('sheetapp_view_mode', 'band');
                     try {
                         _renderLyricView();
+                        setTimeout(() => window.PageNav?.computePages?.(), 100);
                     } catch(e) { console.error('Lỗi render LyricView', e); }
                 } else {
                     // Quay lại bản nhạc
@@ -364,9 +365,11 @@ const DisplaySettings = (() => {
                     if (window.App?.reloadCurrentXML) {
                         window.App.reloadCurrentXML().then(() => {
                             window.scrollTo(0, scrollY);
+                            setTimeout(() => window.PageNav?.computePages?.(), 150);
                         }).catch(() => {});
                     } else if (window.ChordCanvas) {
                         window.ChordCanvas.reposition();
+                        setTimeout(() => window.PageNav?.computePages?.(), 150);
                     }
                 }
             });

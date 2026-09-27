@@ -140,6 +140,8 @@ const SongLoader = (() => {
         }
       }
 
+      window.PageNav?.computePages?.();
+      setTimeout(() => window.PageNav?.computePages?.(), 150);
       EventBus.emit('song:loaded', { song, xml });
 
     } catch (err) {

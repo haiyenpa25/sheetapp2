@@ -159,6 +159,12 @@
     </div>
     <div id="lyric-view-container" class="lyric-view-container hidden"></div>
   </div>
+
+  <!-- HALF-PAGE DIVIDER (Ticket L1-9: Vạch chia nửa trang chuẩn forScore) -->
+  <div id="half-page-divider" class="half-page-divider hidden" aria-hidden="true">
+    <div class="half-page-divider-line"></div>
+    <span class="half-page-divider-badge">Nửa Trang Kế Tiếp</span>
+  </div>
 </div>
 
 
