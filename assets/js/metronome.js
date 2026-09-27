@@ -1,6 +1,13 @@
 /**
- * metronome.js — Máy gõ nhịp (Metronome) chuyên nghiệp sử dụng Web Audio API
- * Tích hợp Floating Glassmorphic Panel, Visual Beat Flashing, Tap Tempo, Sound Presets và Volume Control.
+ * metronome.js — Máy gõ nhịp (Metronome) chuyên nghiệp dạng Mini-Bar gắn đáy (Ticket L1-10)
+ * 
+ * Tính năng chính:
+ * 1. Mini-bar gắn ở cạnh đáy màn hình, không còn thẻ nổi che đè bản nhạc.
+ * 2. Visual Beat LED Flasher (đèn nháy báo phách nhịp), hiển thị nháy chuẩn xác.
+ * 3. Hỗ trợ nhịp 6/8: 2 phách chấm (compound_2) hoặc 6 phách nhấn mạnh đúng phách 1 và phách 4 (compound_6).
+ * 4. Tap Tempo tích hợp, Count-in đếm nhịp chuẩn bị.
+ * 5. Tự động điều chỉnh khoảng đệm (has-metronome-bar) để vùng nhạc không bị che.
+ * 6. Tuân thủ Core Rule 4 (bảo toàn BPM Setlist) và Ticket L0-15 (bỏ qua 104 giả).
  */
 const Metronome = (() => {
   'use strict';
@@ -9,6 +16,7 @@ const Metronome = (() => {
   let _isPlaying = false;
   let _bpm = 80;
   let _beatsPerMeasure = 4;
+  let _meterMode = 'standard'; // 'standard' | 'compound_2' | 'compound_6'
   let _currentBeat = 0;
   let _nextNoteTime = 0.0;     // Thời điểm phát phách tiếp theo (giây)
   let _lookahead = 25.0;       // Tần suất gọi bộ lập lịch (mili-giây)
@@ -32,17 +40,18 @@ const Metronome = (() => {
 
       if (setlistItem && setlistItem.bpm) {
         _bpm = parseInt(setlistItem.bpm);
-        _beatsPerMeasure = parseInt(setlistItem.beats_per_measure) || 4;
+        _applyBeatsFromNumber(parseInt(setlistItem.beats_per_measure) || 4);
       } else {
         const info = SongInfoBar?.getSongInfo?.();
         const infoTempo = info?.tempo ? parseInt(info.tempo) : 0;
+        const timeBeats = parseInt(info?.timeBeats) || 4;
+
         if (info && infoTempo && infoTempo !== 104) {
           _bpm = infoTempo;
-          _beatsPerMeasure = parseInt(info.timeBeats) || 4;
         } else {
           _bpm = 80; // Ticket L0-15: coi 104 là chưa có tempo, mặc định metronome 80
-          _beatsPerMeasure = parseInt(info?.timeBeats) || 4;
         }
+        _applyBeatsFromNumber(timeBeats);
       }
       _updateBpmUI();
       _renderBeatDots();
@@ -51,6 +60,7 @@ const Metronome = (() => {
     EventBus.on('song:cleared', () => {
       stop();
       _beatsPerMeasure = 4;
+      _meterMode = 'standard';
       _bpm = 80;
       _updateBpmUI();
       _renderBeatDots();
@@ -58,6 +68,16 @@ const Metronome = (() => {
 
     // Tạo các đèn nháy ban đầu
     _renderBeatDots();
+  }
+
+  function _applyBeatsFromNumber(beats) {
+    if (beats === 6) {
+      _beatsPerMeasure = 6;
+      _meterMode = 'compound_6';
+    } else {
+      _beatsPerMeasure = beats > 0 ? beats : 4;
+      _meterMode = 'standard';
+    }
   }
 
   function _bindEvents() {
@@ -73,12 +93,12 @@ const Metronome = (() => {
       togglePanel();
     });
 
-    // Nút đóng ở Floating Panel
+    // Nút đóng ở Mini-bar
     document.getElementById('btn-close-metronome')?.addEventListener('click', () => {
       hidePanel();
     });
 
-    // Nút Play ở Floating Panel
+    // Nút Play ở Mini-bar
     document.getElementById('btn-metronome-toggle-play')?.addEventListener('click', () => {
       togglePlay();
     });
@@ -105,7 +125,7 @@ const Metronome = (() => {
       setBpm(_bpm + 1);
     });
 
-    // BPM Slider
+    // BPM Slider nếu có
     const bpmSlider = document.getElementById('metronome-bpm-slider');
     if (bpmSlider) {
       bpmSlider.addEventListener('input', (e) => {
@@ -113,7 +133,7 @@ const Metronome = (() => {
       });
     }
 
-    // Volume Slider
+    // Volume Slider nếu có
     const volSlider = document.getElementById('metronome-volume-slider');
     if (volSlider) {
       volSlider.addEventListener('input', (e) => {
@@ -129,15 +149,27 @@ const Metronome = (() => {
       });
     }
 
-    // Beats Per Measure Select
+    // Beats Per Measure Select (hỗ trợ 6-dotted và 6 nhấn 1 & 4)
     const beatsSelect = document.getElementById('metronome-beats-select');
     if (beatsSelect) {
       beatsSelect.addEventListener('change', (e) => {
-        setBeatsPerMeasure(parseInt(e.target.value, 10));
+        const val = e.target.value;
+        if (val === '6-dotted') {
+          _beatsPerMeasure = 2;
+          _meterMode = 'compound_2';
+        } else if (val === '6') {
+          _beatsPerMeasure = 6;
+          _meterMode = 'compound_6';
+        } else {
+          _beatsPerMeasure = parseInt(val, 10) || 4;
+          _meterMode = 'standard';
+        }
+        _updateBpmUI();
+        _renderBeatDots();
       });
     }
 
-    // Tempo Presets
+    // Tempo Presets nếu có
     document.querySelectorAll('.btn-tempo-preset').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const bpm = parseInt(e.currentTarget.dataset.bpm, 10);
@@ -146,19 +178,41 @@ const Metronome = (() => {
     });
   }
 
-
   function _initAudio() {
     if (_audioContext) return;
     _audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
+  /**
+   * Kiểm tra xem phách hiện tại có phải là phách nhấn (accent) không.
+   * - Nhịp thường: phách 1 (index 0).
+   * - Nhịp 6/8 compound_6: phách 1 (index 0) và phách 4 (index 3).
+   */
+  function isAccentBeat(beatIndex) {
+    if (_beatsPerMeasure === 6 && _meterMode === 'compound_6') {
+      return beatIndex === 0 || beatIndex === 3;
+    }
+    return beatIndex === 0;
   }
 
   /* ── 3 BỘ PHÁT ÂM THANH SYNTHESIZER ── */
   function _scheduleNote(beatNumber, time) {
     if (!_audioContext) return;
 
-    // Tính toán Gain dựa trên volume
-    const targetGain = (_volume / 100) * 0.8;
-    if (targetGain <= 0.001) return;
+    const baseGain = (_volume / 100) * 0.8;
+    if (baseGain <= 0.001) return;
+
+    const isPrimaryAccent = (beatNumber === 0);
+    const isSecondaryAccent = (_beatsPerMeasure === 6 && _meterMode === 'compound_6' && beatNumber === 3);
+
+    // Tính toán gain dựa theo phách nhấn
+    let gainFactor = 0.55;
+    if (isPrimaryAccent) {
+      gainFactor = 1.0;
+    } else if (isSecondaryAccent) {
+      gainFactor = 0.85;
+    }
+    const targetGain = baseGain * gainFactor;
 
     // Hẹn giờ nháy đèn LED chuẩn xác cùng lúc với tiếng gõ âm thanh
     const delayMs = Math.max(0, (time - _audioContext.currentTime) * 1000);
@@ -169,7 +223,7 @@ const Metronome = (() => {
     }, delayMs);
 
     if (_soundType === 'woodblock') {
-      // 1. MÕ GỖ (Woodblock): Sắc bén, trầm ấm tự nhiên
+      // 1. MÕ GỖ (Woodblock)
       const osc = _audioContext.createOscillator();
       const gainNode = _audioContext.createGain();
 
@@ -177,17 +231,22 @@ const Metronome = (() => {
       gainNode.connect(_audioContext.destination);
 
       osc.type = 'sine';
-      osc.frequency.value = (beatNumber === 0) ? 1000 : 750;
+      if (isPrimaryAccent) {
+        osc.frequency.value = 1000;
+      } else if (isSecondaryAccent) {
+        osc.frequency.value = 880;
+      } else {
+        osc.frequency.value = 700;
+      }
 
       gainNode.gain.setValueAtTime(targetGain, time);
-      // Decay cực nhanh tạo âm gỗ mõ đanh
       gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.04);
 
       osc.start(time);
       osc.stop(time + 0.05);
     } 
     else if (_soundType === 'cowbell') {
-      // 2. CHUÔNG BÒ (Cowbell): Tông kim loại đặc trưng, cực kỳ lý tưởng cho Trống
+      // 2. CHUÔNG BÒ (Cowbell)
       const osc1 = _audioContext.createOscillator();
       const osc2 = _audioContext.createOscillator();
       const filter = _audioContext.createBiquadFilter();
@@ -196,13 +255,15 @@ const Metronome = (() => {
       osc1.type = 'square';
       osc2.type = 'square';
 
-      // Phối hợp 2 tần số vuông để giả lập âm chuông kim loại đục đặc trưng (chuẩn Roland 808)
-      if (beatNumber === 0) {
+      if (isPrimaryAccent) {
         osc1.frequency.value = 580;
         osc2.frequency.value = 850;
+      } else if (isSecondaryAccent) {
+        osc1.frequency.value = 560;
+        osc2.frequency.value = 820;
       } else {
-        osc1.frequency.value = 540;
-        osc2.frequency.value = 800;
+        osc1.frequency.value = 520;
+        osc2.frequency.value = 760;
       }
 
       filter.type = 'bandpass';
@@ -230,7 +291,13 @@ const Metronome = (() => {
       gainNode.connect(_audioContext.destination);
 
       osc.type = 'sine';
-      osc.frequency.value = (beatNumber === 0) ? 880 : 440;
+      if (isPrimaryAccent) {
+        osc.frequency.value = 1000;
+      } else if (isSecondaryAccent) {
+        osc.frequency.value = 880;
+      } else {
+        osc.frequency.value = 520;
+      }
 
       gainNode.gain.setValueAtTime(targetGain, time);
       gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.08);
@@ -243,7 +310,6 @@ const Metronome = (() => {
   function _nextNote() {
     const secondsPerBeat = 60.0 / _bpm;
     _nextNoteTime += secondsPerBeat;
-
     _currentBeat = (_currentBeat + 1) % _beatsPerMeasure;
   }
 
@@ -259,7 +325,6 @@ const Metronome = (() => {
     _initAudio();
     if (_isPlaying) return;
 
-    // Kích hoạt AudioContext trên các thiết bị Safari iOS / iPad
     if (_audioContext.state === 'suspended') {
       _audioContext.resume();
     }
@@ -304,7 +369,6 @@ const Metronome = (() => {
     }
 
     const now = performance.now();
-    // Nếu cú TAP cách cú trước quá 2 giây, coi như bắt đầu chuỗi TAP mới
     if (_tapTimes.length > 0 && (now - _tapTimes[_tapTimes.length - 1] > 2000)) {
       _tapTimes = [];
     }
@@ -344,9 +408,16 @@ const Metronome = (() => {
     
     if (bpmVal) bpmVal.textContent = _bpm;
     if (bpmSlider) bpmSlider.value = _bpm;
-    if (beatsSelect) beatsSelect.value = String(_beatsPerMeasure);
+    if (beatsSelect) {
+      if (_meterMode === 'compound_2') {
+        beatsSelect.value = '6-dotted';
+      } else if (_meterMode === 'compound_6') {
+        beatsSelect.value = '6';
+      } else {
+        beatsSelect.value = String(_beatsPerMeasure);
+      }
+    }
   }
-
 
   function _renderBeatDots() {
     const container = document.getElementById('metronome-beats-container');
@@ -355,7 +426,10 @@ const Metronome = (() => {
     container.innerHTML = '';
     for (let i = 0; i < _beatsPerMeasure; i++) {
       const dot = document.createElement('span');
-      dot.className = `beat-dot beat-${i + 1}`;
+      const isAccent1 = (i === 0);
+      const isAccent4 = (_beatsPerMeasure === 6 && _meterMode === 'compound_6' && i === 3);
+      const accentClass = isAccent1 ? 'beat-1' : (isAccent4 ? 'beat-4' : '');
+      dot.className = `beat-dot beat-${i + 1} ${accentClass}`.trim();
       container.appendChild(dot);
     }
   }
@@ -368,7 +442,6 @@ const Metronome = (() => {
     const activeDot = dots[beatNumber];
     if (activeDot) {
       activeDot.classList.add('flash');
-      // Tự động tắt đèn sau 120ms để tạo cảm giác nhấp nháy tự nhiên
       setTimeout(() => {
         activeDot.classList.remove('flash');
       }, 120);
@@ -376,11 +449,11 @@ const Metronome = (() => {
   }
 
   function _updateUI() {
-    // 1. Sync button nổi trong panel
+    // 1. Sync button nổi trong panel / mini-bar
     const panelPlayBtn = document.getElementById('btn-metronome-toggle-play');
     if (panelPlayBtn) {
       panelPlayBtn.classList.toggle('active', _isPlaying);
-      panelPlayBtn.innerHTML = _isPlaying ? '⏸ Dừng nhịp' : '🔊 Bật nhịp';
+      panelPlayBtn.innerHTML = _isPlaying ? '⏸ Dừng' : '▶ Nhịp';
     }
 
     // 2. Sync button phụ trên thanh công cụ Audio Settings Panel
@@ -391,7 +464,7 @@ const Metronome = (() => {
       toolbarBtn.style.color = _isPlaying ? 'var(--danger)' : '';
     }
 
-    // 3. Sync button chính trên thanh công cụ lớn
+    // 3. Sync button chính trên thanh công cụ lớn (icon ♩)
     const mainToolbarBtn = document.getElementById('btn-toolbar-metronome');
     if (mainToolbarBtn) {
       mainToolbarBtn.classList.toggle('active', _isPlaying);
@@ -404,11 +477,13 @@ const Metronome = (() => {
     }
   }
 
-  /* ── PANEL VISIBILITY ── */
+  /* ── PANEL VISIBILITY & MUSIC AREA COVERAGE ── */
   function showPanel() {
     const panel = document.getElementById('metronome-panel');
     if (panel) {
       panel.classList.remove('hidden');
+      document.body.classList.add('has-metronome-bar');
+      document.querySelector('.sheet-viewer-wrapper')?.classList.add('has-metronome-bar');
     }
   }
 
@@ -416,6 +491,8 @@ const Metronome = (() => {
     const panel = document.getElementById('metronome-panel');
     if (panel) {
       panel.classList.add('hidden');
+      document.body.classList.remove('has-metronome-bar');
+      document.querySelector('.sheet-viewer-wrapper')?.classList.remove('has-metronome-bar');
     }
   }
 
@@ -431,13 +508,44 @@ const Metronome = (() => {
     }
   }
 
+  /**
+   * Kiểm tra xem vùng hiển thị bản nhạc có bị che đè bởi metronome không.
+   * Với thiết kế mini-bar gắn cạnh đáy và viewer có margin-bottom tương ứng, luôn trả về false.
+   */
+  function isMusicAreaCovered() {
+    const panel = document.getElementById('metronome-panel');
+    const viewer = document.querySelector('.sheet-viewer-wrapper');
+    if (!panel || panel.classList.contains('hidden') || !viewer) return false;
+
+    const pRect = panel.getBoundingClientRect();
+    const vRect = viewer.getBoundingClientRect();
+    return pRect.top < vRect.bottom - 2;
+  }
+
   function getBpm() { return _bpm; }
   function getBeatsPerMeasure() { return _beatsPerMeasure; }
+  function getMeterMode() { return _meterMode; }
+
+  function setMeterMode(mode) {
+    if (mode === 'compound_2') {
+      _meterMode = 'compound_2';
+      _beatsPerMeasure = 2;
+    } else if (mode === 'compound_6') {
+      _meterMode = 'compound_6';
+      _beatsPerMeasure = 6;
+    } else {
+      _meterMode = 'standard';
+    }
+    _updateBpmUI();
+    _renderBeatDots();
+  }
 
   /** Đặt cả BPM + nhịp cùng lúc (dùng khi play setlist item) */
   function setBpmAndBeats(bpm, beats) {
     if (bpm && bpm >= 30 && bpm <= 250) _bpm = bpm;
-    if (beats && beats >= 1 && beats <= 12) _beatsPerMeasure = beats;
+    if (beats) {
+      _applyBeatsFromNumber(beats);
+    }
     _updateBpmUI();
     _renderBeatDots();
     if (typeof EventBus !== 'undefined') {
@@ -447,13 +555,30 @@ const Metronome = (() => {
 
   function setBeatsPerMeasure(beats) {
     if (beats && beats >= 1 && beats <= 12) {
-      _beatsPerMeasure = beats;
+      _applyBeatsFromNumber(beats);
       _updateBpmUI();
       _renderBeatDots();
     }
   }
 
-  return { init, play, stop, togglePlay, setBpm, getBpm, getBeatsPerMeasure, setBeatsPerMeasure, setBpmAndBeats, showPanel, hidePanel, togglePanel };
+  return {
+    init,
+    play,
+    stop,
+    togglePlay,
+    setBpm,
+    getBpm,
+    getBeatsPerMeasure,
+    setBeatsPerMeasure,
+    setBpmAndBeats,
+    getMeterMode,
+    setMeterMode,
+    isAccentBeat,
+    isMusicAreaCovered,
+    showPanel,
+    hidePanel,
+    togglePanel
+  };
 
 })();
 

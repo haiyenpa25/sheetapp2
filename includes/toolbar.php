@@ -148,8 +148,8 @@
         <option value="3">3×</option>
         <option value="4">4×</option>
       </select>
-      <button id="btn-toolbar-metronome" class="icon-btn-pill" disabled title="Mở bộ Giữ Nhịp & Tempo (Metronome)">
-        <span class="metronome-icon-pulse">⚡</span>
+      <button id="btn-toolbar-metronome" class="icon-btn-pill" disabled title="Mở máy gõ nhịp (♩ Metronome)">
+        <span class="metronome-icon-pulse">♩</span>
       </button>
     </div>
   </div>
@@ -319,7 +319,7 @@
           <div class="audio-panel-row">
             <span class="audio-panel-label">Giữ nhịp:</span>
             <button id="btn-menu-metronome" class="btn btn-ghost btn-xs btn-menu-item" style="padding:2px 8px;margin:0;">
-              <span>⚡ Metronome</span>
+              <span>♩ Metronome</span>
             </button>
           </div>
         </div>

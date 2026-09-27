@@ -102,75 +102,58 @@ echo cssTag('app-shell.css');
 <?php require_once __DIR__ . '/includes/modals.php'; ?>
 <?php require_once __DIR__ . '/includes/admin_console.php'; ?>
 
-<!-- ===== FLOATING METRONOME PANEL (Máy Giữ Nhịp & Tạo Tempo) ===== -->
-<div id="metronome-panel" class="metronome-panel hidden">
-  <div class="metronome-header">
-    <div class="metronome-header-left">
-      <span class="metronome-icon-pulse">⚡</span>
-      <span class="metronome-title">Giữ Nhịp (Tempo)</span>
+<!-- ===== METRONOME MINI-BAR GẮN ĐÁY (Ticket L1-10) ===== -->
+<div id="metronome-panel" class="metronome-mini-bar hidden" role="region" aria-label="Bộ giữ nhịp Metronome">
+  <div class="mm-inner">
+    <!-- Cụm 1: Nút Play/Stop + Icon ♩ -->
+    <div class="mm-section mm-playback">
+      <button id="btn-metronome-toggle-play" class="btn-mm-play" title="Bật/Dừng máy gõ nhịp (Space)">
+        <span class="mm-play-icon">▶</span>
+        <span class="mm-play-text">Nhịp</span>
+      </button>
+      <span class="mm-note-icon" title="Metronome">♩</span>
     </div>
-    <button id="btn-close-metronome" class="metronome-close-btn" title="Ẩn bộ giữ nhịp">&times;</button>
-  </div>
-  
-  <div class="metronome-body">
-    <!-- Visual Beat LED Flasher -->
-    <div class="metronome-beats" id="metronome-beats-container" title="Đèn nháy báo phách nhịp">
-      <!-- Sẽ được tạo động bằng JS, ví dụ nhịp 4/4 sẽ có 4 đèn nháy -->
-    </div>
-    
-    <!-- Large Tempo Control -->
-    <div class="metronome-tempo-control">
-      <button id="btn-metronome-dec" class="tempo-btn" title="Giảm 1 BPM">−</button>
-      <div class="tempo-display-wrapper">
-        <span id="metronome-bpm-val" class="tempo-value">80</span>
-        <span class="tempo-unit">BPM</span>
-      </div>
-      <button id="btn-metronome-inc" class="tempo-btn" title="Tăng 1 BPM">+</button>
-    </div>
-    
-    <!-- BPM Slider -->
-    <div class="metronome-row">
-      <input type="range" id="metronome-bpm-slider" class="metronome-slider" min="30" max="250" value="80" title="Kéo để điều chỉnh BPM">
-    </div>
-    
-    <!-- Metronome Controls: Play, Count-in & TAP Tempo -->
-    <div class="metronome-actions" style="display:flex;gap:0.4rem;">
-      <button id="btn-metronome-toggle-play" class="btn-metronome-play" style="flex:1;" title="Bật/Tắt âm gõ nhịp">🔊 Bật nhịp</button>
-      <button id="btn-metronome-count-in" class="btn-metronome-play" style="flex:1.2;background:linear-gradient(135deg,#7c3aed,#6d28d9);" title="Đếm nhịp chuẩn bị 1-2-3-4 đồng bộ">⏱️ Đếm nhịp</button>
-      <button id="btn-metronome-tap" class="btn-metronome-tap" title="Gõ liên tục theo tốc độ để tính BPM">TAP</button>
-    </div>
-    
-    <!-- Metronome Volume & Sound Select -->
-    <div class="metronome-settings">
-      <div class="metronome-setting-row">
-        <span class="metronome-setting-label">Số Phách:</span>
-        <select id="metronome-beats-select" class="metronome-select" title="Số phách trong 1 ô nhịp">
-          <option value="2">2/4 (Nhịp 2)</option>
-          <option value="3">3/4 (Nhịp 3)</option>
-          <option value="4" selected>4/4 (Nhịp 4)</option>
-          <option value="6">6/8 (Nhịp 6)</option>
-        </select>
-      </div>
-      <div class="metronome-setting-row">
-        <span class="metronome-setting-label">Âm lượng:</span>
-        <input type="range" id="metronome-volume-slider" class="metronome-slider volume-slider" min="0" max="100" value="60" title="Âm lượng tiếng gõ">
-      </div>
-      <div class="metronome-setting-row">
-        <span class="metronome-setting-label">Tiếng gõ:</span>
-        <select id="metronome-sound-select" class="metronome-select" title="Loại nhạc cụ gõ nhịp">
-          <option value="woodblock" selected>Woodblock (Mõ gỗ)</option>
-          <option value="cowbell">Cowbell (Chuông bò)</option>
-          <option value="beep">Digital Beep (Bíp)</option>
-        </select>
+
+    <!-- Cụm 2: Visual Beat Flasher (Đèn nháy báo phách) -->
+    <div class="mm-section mm-beats-section">
+      <div class="metronome-beats" id="metronome-beats-container" title="Đèn nháy báo phách nhịp">
+        <!-- Tạo động bằng JS -->
       </div>
     </div>
 
-    <!-- Quick Tempo Presets -->
-    <div class="metronome-presets" style="display: flex; gap: 4px; justify-content: center; margin-top: 8px; flex-wrap: wrap;">
-      <button class="btn-tempo-preset" data-bpm="60" style="padding: 2px 6px; font-size: 0.72rem; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-surface); cursor: pointer;">Largo (60)</button>
-      <button class="btn-tempo-preset" data-bpm="76" style="padding: 2px 6px; font-size: 0.72rem; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-surface); cursor: pointer;">Andante (76)</button>
-      <button class="btn-tempo-preset" data-bpm="108" style="padding: 2px 6px; font-size: 0.72rem; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-surface); cursor: pointer;">Moderato (108)</button>
-      <button class="btn-tempo-preset" data-bpm="132" style="padding: 2px 6px; font-size: 0.72rem; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-surface); cursor: pointer;">Allegro (132)</button>
+    <!-- Cụm 3: Điều khiển BPM ([-], Số BPM, [+], TAP) -->
+    <div class="mm-section mm-tempo-section">
+      <button id="btn-metronome-dec" class="btn-mm-ctrl" title="Giảm 1 BPM">−</button>
+      <div class="mm-tempo-display" title="Nhấp hoặc đổi BPM">
+        <span id="metronome-bpm-val" class="mm-bpm-value">80</span>
+        <span class="mm-bpm-unit">BPM</span>
+      </div>
+      <button id="btn-metronome-inc" class="btn-mm-ctrl" title="Tăng 1 BPM">+</button>
+      <button id="btn-metronome-tap" class="btn-mm-tap" title="Gõ liên tục để tính BPM (TAP)">TAP</button>
+    </div>
+
+    <!-- Cụm 4: Bộ chọn nhịp (4/4, 3/4, 2/4, 6/8) & Count-in -->
+    <div class="mm-section mm-meter-section">
+      <select id="metronome-beats-select" class="mm-select" title="Số phách và kiểu nhịp">
+        <option value="4" selected>4/4 (Nhịp 4)</option>
+        <option value="3">3/4 (Nhịp 3)</option>
+        <option value="2">2/4 (Nhịp 2)</option>
+        <option value="6-dotted">6/8 (2 phách chấm)</option>
+        <option value="6">6/8 (6 phách, nhấn 1 & 4)</option>
+      </select>
+      <button id="btn-metronome-count-in" class="btn-mm-countin" title="Đếm nhịp chuẩn bị vào bài (1-2-3-4)">
+        ⏱️ Count-in
+      </button>
+    </div>
+
+    <!-- Cụm 5: Tuỳ chọn âm thanh & Nút Đóng -->
+    <div class="mm-section mm-opts-section">
+      <select id="metronome-sound-select" class="mm-select mm-select-sound" title="Loại âm thanh">
+        <option value="woodblock" selected>Mõ gỗ</option>
+        <option value="cowbell">Chuông bò</option>
+        <option value="beep">Bíp</option>
+      </select>
+      <button id="btn-close-metronome" class="btn-mm-close" title="Ẩn thanh Metronome" aria-label="Đóng">&times;</button>
     </div>
   </div>
 </div>
