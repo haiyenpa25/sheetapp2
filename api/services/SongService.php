@@ -88,7 +88,7 @@ class SongService {
             if (is_array($data)) return $data;
         }
 
-        $sql = "SELECT s.*, c.name as category FROM songs s LEFT JOIN categories c ON s.category_id = c.id ORDER BY s.httlvnId ASC, s.title ASC";
+        $sql = "SELECT s.id, s.title, s.httlvnId, s.xmlPath, s.defaultKey, s.category_id, s.liturgical_season, s.theme, s.composer, s.tags, c.name as category FROM songs s LEFT JOIN categories c ON s.category_id = c.id ORDER BY s.httlvnId ASC, s.title ASC";
         $songs = DB::run($sql)->fetchAll();
 
         // Ghi cache an toàn

@@ -49,8 +49,21 @@ const ApiService = (() => {
     });
   }
 
+  let _songsListPromise = null;
+
   const songs = {
-    list:   ()            => _request('api/index.php?route=songs'),
+    list:   (forceReload = false) => {
+      if (forceReload || !_songsListPromise) {
+        _songsListPromise = _request('api/index.php?route=songs').catch(err => {
+          _songsListPromise = null;
+          throw err;
+        });
+      }
+      return _songsListPromise;
+    },
+    invalidateCache: () => {
+      _songsListPromise = null;
+    },
     get:    async (id)    => {
       if (!id) return null;
       try {
@@ -60,7 +73,7 @@ const ApiService = (() => {
       } catch (e) {
         // Fallback to searching in full song list
       }
-      const list = await _request('api/index.php?route=songs');
+      const list = await songs.list();
       const items = Array.isArray(list) ? list : (list?.data || []);
       return items.find(s => s.id === id) || null;
     },
@@ -80,10 +93,22 @@ const ApiService = (() => {
     getVersions: (songId) => _request(`api/index.php?route=songs&action=get_versions&song_id=${encodeURIComponent(songId)}`),
     saveVersion: (payload) => _json('POST', 'api/index.php?route=songs&action=save_version', payload),
     deleteVersion: (versionId) => _json('POST', 'api/index.php?route=songs&action=delete_version', { version_id: versionId }),
-    add:    (data)        => _json('POST',   'api/index.php?route=songs', data),
-    update: (id, data)    => _json('PUT',    `api/index.php?route=songs&id=${encodeURIComponent(id)}`, data),
-    updateMetadata: (id, patch) => _json('PUT', `api/index.php?route=songs&action=update_metadata&id=${encodeURIComponent(id)}`, patch),
-    delete: (id)          => _request(`api/index.php?route=songs&id=${encodeURIComponent(id)}`, { method: 'DELETE' }),
+    add:    async (data)        => {
+      _songsListPromise = null;
+      return _json('POST',   'api/index.php?route=songs', data);
+    },
+    update: async (id, data)    => {
+      _songsListPromise = null;
+      return _json('PUT',    `api/index.php?route=songs&id=${encodeURIComponent(id)}`, data);
+    },
+    updateMetadata: async (id, patch) => {
+      _songsListPromise = null;
+      return _json('PUT', `api/index.php?route=songs&action=update_metadata&id=${encodeURIComponent(id)}`, patch);
+    },
+    delete: async (id)          => {
+      _songsListPromise = null;
+      return _request(`api/index.php?route=songs&id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+    },
   };
 
   const chordSets = {
