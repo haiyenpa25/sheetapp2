@@ -1150,7 +1150,15 @@ SheetApp/
   ~ Sửa: assets/js/song-loader.js (Bổ sung CacheStorage offline fallback cho fetchXml, giúp mở và vẽ bản nhạc OSMD ngoại tuyến ổn định ngay cả khi Service Worker chưa chiếm quyền kiểm soát)
   + Tạo: tests/library_l39_offline_sunday_package_regression.php (14/14 checks PASS, 71.4% behavioral assertions)
   + Tạo: e2e/library-l3-offline-sunday.spec.js (E2E Playwright: Tải gói 1-Click, kiểm tra huy hiệu, reload xác thực checkOnStartup, ngắt mạng offline mode mở và render bản nhạc thành công trên cả Chromium và WebKit)
-  🏆 ĐẠT 100% QUALITY GATE: 106/106 suites PASS (1849 passed, 0 failed, 65.4% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
+[2026-09-28] — Hoàn tất Ticket L3-10 (ROADMAP4.md): Kết Thúc Chương Trình & Giải Phóng Điều Hướng ◀ ▶
+  ~ Sửa: assets/js/setlist-player.js (Bổ sung hàm endSetlist(notify) tự động kích hoạt khi hết bài cuối cùng hoặc bấm nút kết thúc; hiển thị thông báo "Kết thúc chương trình", ẩn thanh chương trình và dòng HUD sân khấu, giải phóng các nút điều hướng ◀ ▶ trên Toolbar)
+  ~ Sửa: includes/setlist_program_bar.php (Thêm nút #btn-sp-end cho phép ca trưởng / nhạc công chủ động kết thúc chương trình bất kỳ lúc nào)
+  ~ Sửa: assets/js/setlist-ui.js (Kết nối và xuất phương thức endSetlist() cho SetlistUI và context)
+  ~ Sửa: assets/js/library-ui.js (Cập nhật logic lắng nghe #btn-prev-song và #btn-next-song chỉ nhường quyền cho setlist khi đang thực sự phát setlist currentIndex >= 0; tự động gọi endSetlist(false) khi chọn bài mới từ Kho Nhạc)
+  + Tạo: tests/library_l310_setlist_end_and_cleanup_regression.php (19/19 checks PASS, 77.8% behavioral assertions)
+  + Tạo: e2e/library-l3-setlist-end.spec.js (E2E Playwright: Phát setlist, hết bài cuối cùng tự động hiện toast "Kết thúc chương trình", dọn sạch trạng thái setlist, các nút ◀ ▶ trên Toolbar lập tức chuyển giao lại cho điều hướng Kho Nhạc, kiểm tra nút đóng #btn-sp-end trên cả Chromium và WebKit)
+  🏆 ĐẠT 100% QUALITY GATE: 107/107 suites PASS (1868 passed, 0 failed, 65.7% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
+  🎉 HOÀN THÀNH 100% TOÀN BỘ CHƯƠNG L3 (CHẾ ĐỘ CHƯƠNG TRÌNH LỄ - 10/10 TICKETS TỪ L3-1 ĐẾN L3-10).
 
 ---
 

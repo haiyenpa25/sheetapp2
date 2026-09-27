@@ -96,7 +96,8 @@ const SetlistUI = (() => {
     fetchSetlists: () => fetchSetlists(),
     viewSetlistDetail: (id) => viewSetlistDetail(id),
     renderSetlistItems: () => renderSetlistItems(),
-    playCurrentItem: () => playCurrentItem()
+    playCurrentItem: () => playCurrentItem(),
+    endSetlist: (notify) => window.SetlistPlayer?.endSetlist?.(notify)
   };
 
   function _linkModules() {
@@ -251,6 +252,7 @@ const SetlistUI = (() => {
     copySetlistSlide,
     renderSetlistItems,
     backToSetlists,
+    endSetlist: (notify) => window.SetlistPlayer?.endSetlist?.(notify),
     _context: context,
     _arch: _ARCH_REF
   };

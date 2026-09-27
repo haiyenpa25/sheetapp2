@@ -122,14 +122,7 @@ const SetlistPlayer = (() => {
       return;
     }
     if (currentIndex >= currentSetlist.items.length) {
-      window.App?.showToast?.('Đã kết thúc Setlist!', 'success');
-      ctx.setCurrentIndex?.(-1);
-      ctx.renderSetlistItems?.();
-      document.querySelector('.toolbar-left')?.classList.remove('in-setlist');
-      window.VerseManager?.clearSelectedVerses?.();
-      window.LeaderNotesBanner?.hide?.();
-      window.LiturgyCard?.hide?.();
-      updateProgramBar();
+      endSetlist(true);
       return;
     }
 
@@ -220,12 +213,42 @@ const SetlistPlayer = (() => {
     }
   }
 
+  function endSetlist(notify = true) {
+    const ctx = getContext();
+    ctx.setCurrentIndex?.(-1);
+    ctx.setCurrentSetlist?.(null);
+    if (ctx.renderSetlistItems) {
+      ctx.renderSetlistItems();
+    }
+    document.querySelector('.toolbar-left')?.classList.remove('in-setlist');
+    window.VerseManager?.clearSelectedVerses?.();
+    window.LeaderNotesBanner?.hide?.();
+    window.LiturgyCard?.hide?.();
+
+    const bar = document.getElementById('setlist-program-bar');
+    if (bar) bar.classList.add('hidden');
+    const gigRow = document.getElementById('gig-hud-setlist-row');
+    if (gigRow) gigRow.classList.add('hidden');
+
+    if (notify) {
+      window.App?.showToast?.('Kết thúc chương trình', 'info');
+    }
+
+    if (typeof EventBus !== 'undefined') {
+      EventBus.emit('setlist:ended');
+    }
+
+    updateProgramBar();
+  }
+
   function next() {
     const ctx = getContext();
     const currentSetlist = ctx.getCurrentSetlist?.();
     const currentIndex = ctx.getCurrentIndex?.() ?? -1;
 
-    if (currentSetlist && currentIndex >= 0 && currentIndex < currentSetlist.items.length - 1) {
+    if (!currentSetlist) return;
+
+    if (currentIndex >= 0 && currentIndex < currentSetlist.items.length - 1) {
       const nextIdx = currentIndex + 1;
       ctx.setCurrentIndex?.(nextIdx);
       if (ctx.renderSetlistItems) {
@@ -233,6 +256,8 @@ const SetlistPlayer = (() => {
       } else {
         playCurrentItem();
       }
+    } else if (currentIndex >= currentSetlist.items.length - 1) {
+      endSetlist(true);
     }
   }
 
@@ -279,10 +304,10 @@ const SetlistPlayer = (() => {
       }
     });
 
-    // Cặp nút chuyển bài trên Toolbar
+    // Cặp nút chuyển bài trên Toolbar: chỉ can thiệp khi đang thực sự phát setlist
     document.getElementById('btn-next-song')?.addEventListener('click', (e) => {
       const ctx = getContext();
-      if (ctx.getCurrentSetlist?.()) {
+      if (ctx.getCurrentSetlist?.() && (ctx.getCurrentIndex?.() ?? -1) >= 0) {
         e.preventDefault();
         e.stopPropagation();
         next();
@@ -291,12 +316,27 @@ const SetlistPlayer = (() => {
 
     document.getElementById('btn-prev-song')?.addEventListener('click', (e) => {
       const ctx = getContext();
-      if (ctx.getCurrentSetlist?.()) {
+      if (ctx.getCurrentSetlist?.() && (ctx.getCurrentIndex?.() ?? -1) >= 0) {
         e.preventDefault();
         e.stopPropagation();
         prev();
       }
     }, true);
+
+    // Nút đóng/kết thúc chương trình trên thanh đáy (Ticket L3-10)
+    document.getElementById('btn-sp-end')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      endSetlist(true);
+    });
+
+    document.getElementById('sp-bar-center')?.addEventListener('click', () => {
+      const ctx = getContext();
+      const currentSetlist = ctx.getCurrentSetlist?.();
+      const currentIndex = ctx.getCurrentIndex?.() ?? -1;
+      if (currentSetlist && currentIndex >= currentSetlist.items.length - 1) {
+        endSetlist(true);
+      }
+    });
 
     // Cặp nút chuyển bài trên Thanh chương trình cạnh dưới (Ticket L3-1)
     document.getElementById('btn-sp-next')?.addEventListener('click', (e) => {
@@ -327,6 +367,7 @@ const SetlistPlayer = (() => {
     next,
     prev,
     jumpTo,
+    endSetlist,
     updateProgramBar,
     bindPlayerEvents
   };

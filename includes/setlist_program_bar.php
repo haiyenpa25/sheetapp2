@@ -16,5 +16,8 @@
     <button id="btn-sp-next" class="btn-sp-nav" title="Bài tiếp theo (▶)" aria-label="Bài tiếp theo">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
+    <button id="btn-sp-end" class="btn-sp-nav btn-sp-end" title="Kết thúc chương trình (✕)" aria-label="Kết thúc chương trình">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
   </div>
 </aside>

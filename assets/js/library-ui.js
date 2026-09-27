@@ -30,19 +30,10 @@ const LibraryUI = (() => {
 
     loadSongs();
 
-    document.getElementById('btn-prev-song')?.addEventListener('click', () => {
-      if (window.SetlistUI?.getCurrentSetlist?.()) return;
-      App?.navigatePrev?.();
-    });
-    document.getElementById('btn-next-song')?.addEventListener('click', () => {
-      if (window.SetlistUI?.getCurrentSetlist?.()) return;
-      App?.navigateNext?.();
-    });
+    document.getElementById('btn-prev-song')?.addEventListener('click', () => { if (!(window.SetlistUI?.getCurrentSetlist?.() && (window.SetlistUI?.getCurrentIndex?.() ?? -1) >= 0)) App?.navigatePrev?.(); });
+    document.getElementById('btn-next-song')?.addEventListener('click', () => { if (!(window.SetlistUI?.getCurrentSetlist?.() && (window.SetlistUI?.getCurrentIndex?.() ?? -1) >= 0)) App?.navigateNext?.(); });
     document.getElementById('btn-search-lyrics')?.addEventListener('click', _toggleSearchMode);
-    categoryEl()?.addEventListener('change', _onSearch);
-    document.getElementById('sort-filter')?.addEventListener('change', _onSearch);
-    document.getElementById('season-filter')?.addEventListener('change', _onSearch);
-    document.getElementById('theme-filter')?.addEventListener('change', _onSearch);
+    [categoryEl(), document.getElementById('sort-filter'), document.getElementById('season-filter'), document.getElementById('theme-filter')].forEach(el => el?.addEventListener('change', _onSearch));
     const btnToggle = document.getElementById('btn-filter-toggle'), panel = document.getElementById('sidebar-filters-panel');
     btnToggle?.addEventListener('click', () => {
       const isHidden = panel?.classList.toggle('hidden');
@@ -522,6 +513,7 @@ const LibraryUI = (() => {
 
   function selectSong(songId, updateUrl = true) {
     if (!songId) return;
+    if (window.SetlistPlayer?.endSetlist && window.SetlistUI?.getCurrentSetlist?.() && (window.SetlistUI?.getCurrentIndex?.() ?? -1) >= 0) window.SetlistPlayer.endSetlist(false);
     activeSongId = String(songId);
     _highlightActive(activeSongId);
     if (updateUrl) {
