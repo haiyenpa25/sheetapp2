@@ -4,6 +4,8 @@
  * - Chơi nhạc theo thứ tự (Next, Prev, JumpTo)
  * - Tôn trọng tuyệt đối Core Rule 4: Áp dụng Tông tập, Tempo tập và Profile hợp âm của item
  * - Đồng bộ Metronome BPM & URLState
+ * - Ticket L3-1: Thanh chương trình 40px cạnh dưới ("2/5 · Tiếp: Ca Cảm Tạ (F→G)" + ◀ ▶ lớn),
+ *   ở chế độ Sân khấu thu thành dòng nhỏ trong HUD.
  */
 const SetlistPlayer = (() => {
   'use strict';
@@ -18,6 +20,85 @@ const SetlistPlayer = (() => {
     return _context || window.SetlistUI || {};
   }
 
+  function updateProgramBar() {
+    const ctx = getContext();
+    const currentSetlist = ctx.getCurrentSetlist?.();
+    const currentIndex = ctx.getCurrentIndex?.() ?? -1;
+    const bar = document.getElementById('setlist-program-bar');
+    const gigRow = document.getElementById('gig-hud-setlist-row');
+
+    if (!currentSetlist || !currentSetlist.items || currentSetlist.items.length === 0 || currentIndex < 0) {
+      if (bar) bar.classList.add('hidden');
+      if (gigRow) gigRow.classList.add('hidden');
+      return;
+    }
+
+    const total = currentSetlist.items.length;
+    const posText = `${currentIndex + 1}/${total}`;
+
+    // Xác định bài tiếp theo
+    let nextText = '';
+    let nextKeyText = '';
+    const hasNext = currentIndex < total - 1;
+
+    if (hasNext) {
+      const nextItem = currentSetlist.items[currentIndex + 1];
+      const allSongs = ctx.getAllSongsCache?.() || window.LibraryUI?.getSongs?.() || [];
+      const nextSongObj = allSongs.find(s => String(s.id) === String(nextItem.song_id))
+                       || window.LibraryUI?.getSongObj?.(nextItem.song_id);
+      const nextTitle = nextSongObj?.title || nextItem.title || `Bài #${nextItem.song_id}`;
+      const origKey = nextSongObj?.defaultKey || nextSongObj?.keySignature || nextItem.key || '';
+      const semi = parseInt(nextItem.transpose_key || 0, 10);
+
+      let keyDisplay = '';
+      if (origKey) {
+        if (semi !== 0 && window.KeyService?.displayKey) {
+          const targetKey = window.KeyService.displayKey(origKey, semi) || origKey;
+          keyDisplay = `(${origKey}→${targetKey})`;
+        } else {
+          keyDisplay = `(${origKey})`;
+        }
+      }
+      nextText = nextTitle;
+      nextKeyText = keyDisplay;
+    } else {
+      nextText = 'Kết thúc chương trình';
+      nextKeyText = '';
+    }
+
+    // Cập nhật DOM thanh đáy (Bottom Program Bar 40px)
+    if (bar) {
+      bar.classList.remove('hidden');
+      const posEl = document.getElementById('sp-bar-pos');
+      if (posEl) posEl.textContent = posText;
+      const setNameEl = document.getElementById('sp-bar-set-name');
+      if (setNameEl) setNameEl.textContent = currentSetlist.name || '';
+      const nextTitleEl = document.getElementById('sp-bar-next-title');
+      if (nextTitleEl) nextTitleEl.textContent = nextText;
+      const nextKeyEl = document.getElementById('sp-bar-next-key');
+      if (nextKeyEl) nextKeyEl.textContent = nextKeyText;
+
+      const prevBtn = document.getElementById('btn-sp-prev');
+      if (prevBtn) prevBtn.disabled = (currentIndex === 0);
+      const nextBtn = document.getElementById('btn-sp-next');
+      if (nextBtn) nextBtn.disabled = !hasNext;
+    }
+
+    // Cập nhật DOM HUD Sân khấu (Gig Mode HUD Setlist Row)
+    if (gigRow) {
+      gigRow.classList.remove('hidden');
+      const gigPos = document.getElementById('gig-sp-pos');
+      if (gigPos) gigPos.textContent = posText;
+      const gigNext = document.getElementById('gig-sp-next');
+      if (gigNext) gigNext.textContent = hasNext ? `Tiếp: ${nextText} ${nextKeyText}` : 'Kết thúc';
+
+      const gigPrevBtn = document.getElementById('btn-gig-sp-prev');
+      if (gigPrevBtn) gigPrevBtn.disabled = (currentIndex === 0);
+      const gigNextBtn = document.getElementById('btn-gig-sp-next');
+      if (gigNextBtn) gigNextBtn.disabled = !hasNext;
+    }
+  }
+
   async function playCurrentItem() {
     const ctx = getContext();
     const currentSetlist = ctx.getCurrentSetlist?.();
@@ -25,6 +106,7 @@ const SetlistPlayer = (() => {
 
     if (!currentSetlist || !currentSetlist.items || currentSetlist.items.length === 0) {
       window.App?.showToast?.('Setlist trống', 'error');
+      updateProgramBar();
       return;
     }
     if (currentIndex >= currentSetlist.items.length) {
@@ -32,6 +114,7 @@ const SetlistPlayer = (() => {
       ctx.setCurrentIndex?.(-1);
       ctx.renderSetlistItems?.();
       document.querySelector('.toolbar-left')?.classList.remove('in-setlist');
+      updateProgramBar();
       return;
     }
 
@@ -49,6 +132,7 @@ const SetlistPlayer = (() => {
 
     if (!songObj) {
       window.App?.showToast?.(`Lỗi: Không tìm thấy bài hát ID ${songId}`, 'error');
+      updateProgramBar();
       return;
     }
 
@@ -62,9 +146,12 @@ const SetlistPlayer = (() => {
     await window.App?.loadSongWithProfile?.(songObj, item.chord_profile, item.transpose_key);
     document.querySelector('.toolbar-left')?.classList.add('in-setlist');
 
+    // Cập nhật Thanh chương trình (Ticket L3-1)
+    updateProgramBar();
+
     // Apply BPM đã lưu cho bài này (nếu có)
     if (item.bpm && window.Metronome) {
-      window.Metronome.setBpmAndBeats(parseInt(item.bpm), parseInt(item.beats_per_measure) || 4);
+      window.Metronome.setBpmAndBeats(parseInt(item.bpm, 10), parseInt(item.beats_per_measure, 10) || 4);
       window.App?.showToast?.(`♩ ${item.bpm} BPM`, 'info', 1800);
     }
   }
@@ -128,6 +215,7 @@ const SetlistPlayer = (() => {
       }
     });
 
+    // Cặp nút chuyển bài trên Toolbar
     document.getElementById('btn-next-song')?.addEventListener('click', (e) => {
       const ctx = getContext();
       if (ctx.getCurrentSetlist?.()) {
@@ -145,6 +233,28 @@ const SetlistPlayer = (() => {
         prev();
       }
     }, true);
+
+    // Cặp nút chuyển bài trên Thanh chương trình cạnh dưới (Ticket L3-1)
+    document.getElementById('btn-sp-next')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      next();
+    });
+
+    document.getElementById('btn-sp-prev')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      prev();
+    });
+
+    // Cặp nút chuyển bài trong HUD Sân khấu (Ticket L3-1)
+    document.getElementById('btn-gig-sp-next')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      next();
+    });
+
+    document.getElementById('btn-gig-sp-prev')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      prev();
+    });
   }
 
   return {
@@ -153,6 +263,7 @@ const SetlistPlayer = (() => {
     next,
     prev,
     jumpTo,
+    updateProgramBar,
     bindPlayerEvents
   };
 })();

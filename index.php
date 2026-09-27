@@ -109,6 +109,7 @@ echo cssTag('app-shell.css');
 <?php require_once __DIR__ . '/includes/modals.php'; ?>
 <?php require_once __DIR__ . '/includes/quick_numpad_modal.php'; ?>
 <?php require_once __DIR__ . '/includes/admin_console.php'; ?>
+<?php require_once __DIR__ . '/includes/setlist_program_bar.php'; ?>
 
 <!-- ===== METRONOME MINI-BAR GẮN ĐÁY (Ticket L1-10) ===== -->
 <div id="metronome-panel" class="metronome-mini-bar hidden" role="region" aria-label="Bộ giữ nhịp Metronome">

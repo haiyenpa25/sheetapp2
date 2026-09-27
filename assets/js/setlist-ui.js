@@ -59,6 +59,7 @@ const SetlistUI = (() => {
     document.querySelector('.toolbar-left')?.classList.remove('in-setlist');
     _currentSetlist = null;
     _currentIndex = -1;
+    window.SetlistPlayer?.updateProgramBar?.();
     fetchSetlists();
   }
 
@@ -238,7 +239,9 @@ const SetlistUI = (() => {
     next,
     prev,
     getCurrentSetlist: () => _currentSetlist,
+    setCurrentSetlist: (sl) => { _currentSetlist = sl; },
     getCurrentIndex: () => _currentIndex,
+    setCurrentIndex: (idx) => { _currentIndex = idx; },
     promptAddSong,
     addSongToSetlist,
     switchToSetlistTab,

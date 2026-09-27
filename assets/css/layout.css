@@ -2034,5 +2034,172 @@ body.dark-mode .song-info-popover {
   font-weight: 600;
 }
 
+/* ===== TICKET L3-1: THANH CHƯƠNG TRÌNH LỄ (SETLIST PROGRAM BAR 40px) ===== */
+.setlist-program-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: var(--bg-surface, #1e293b);
+  border-top: 1px solid var(--border-color, #334155);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.25);
+  z-index: 850;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  color: var(--text-primary, #f8fafc);
+  font-size: 0.88rem;
+  box-sizing: border-box;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.setlist-program-bar.hidden {
+  display: none !important;
+}
+
+/* Ẩn thanh bottom khi ở chế độ Sân khấu (thu vào HUD) */
+body.sheet-only-mode .setlist-program-bar {
+  display: none !important;
+}
+
+.sp-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 70px;
+}
+
+.sp-bar-pos {
+  background: #8b5cf6;
+  color: #ffffff;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.5px;
+}
+
+.sp-bar-set-name {
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.78rem;
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sp-bar-center {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sp-bar-next-prefix {
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.8rem;
+}
+
+.sp-bar-next-title {
+  color: var(--text-primary, #f8fafc);
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.sp-bar-next-key {
+  color: #f59e0b;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-left: 2px;
+}
+
+.sp-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-sp-nav {
+  width: 44px;
+  height: 32px;
+  min-width: 44px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.15));
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary, #ffffff);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.btn-sp-nav svg {
+  width: 18px;
+  height: 18px;
+}
+
+.btn-sp-nav:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-sp-nav:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Dòng chương trình trong HUD Sân khấu (Ticket L3-1) */
+.gig-hud-setlist-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.gig-hud-setlist-row.hidden {
+  display: none !important;
+}
+
+.gig-sp-pos {
+  background: #8b5cf6;
+  color: #ffffff;
+  padding: 1px 6px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.72rem;
+}
+
+.gig-sp-next {
+  color: #e2e8f0;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gig-sp-navs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-gig-sp-btn {
+  padding: 2px 8px !important;
+  font-size: 0.75rem !important;
+  min-width: 28px !important;
+  height: 24px !important;
+}
+
+
 
 

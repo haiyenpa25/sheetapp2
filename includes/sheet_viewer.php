@@ -115,6 +115,15 @@
       <span id="gig-hud-title" class="gig-hud-title">Bài hát</span>
       <span id="gig-hud-key" class="gig-hud-key">--</span>
     </div>
+    <!-- Dòng chương trình lễ trong HUD Sân khấu (Ticket L3-1) -->
+    <div id="gig-hud-setlist-row" class="gig-hud-setlist-row hidden" title="Chương trình lễ">
+      <span id="gig-sp-pos" class="gig-sp-pos">--/--</span>
+      <span id="gig-sp-next" class="gig-sp-next">Tiếp: --</span>
+      <div class="gig-sp-navs">
+        <button id="btn-gig-sp-prev" class="btn-gig-action btn-gig-sp-btn" title="Bài trước (◀)">◀</button>
+        <button id="btn-gig-sp-next" class="btn-gig-action btn-gig-sp-btn" title="Bài tiếp theo (▶)">▶</button>
+      </div>
+    </div>
     <div class="gig-hud-actions">
       <!-- Cụm Dịch Tông -->
       <button id="btn-gig-trans-down" class="btn-gig-action" title="Hạ 1 nửa cung (Phím [ )">−</button>
