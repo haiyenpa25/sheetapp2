@@ -205,9 +205,18 @@ const SetlistPlayer = (() => {
     window.SongPreloader?.preloadNextInSetlist?.(currentSetlist, currentIndex);
 
     // Apply BPM đã lưu cho bài này (nếu có)
-    if (item.bpm && window.Metronome) {
-      window.Metronome.setBpmAndBeats(parseInt(item.bpm, 10), parseInt(item.beats_per_measure, 10) || 4);
-      window.App?.showToast?.(`♩ ${item.bpm} BPM`, 'info', 1800);
+    if (item.bpm) {
+      const bpmNum = parseInt(item.bpm, 10);
+      const beatsNum = parseInt(item.beats_per_measure, 10) || 4;
+      if (bpmNum > 0) {
+        if (window.Metronome) {
+          window.Metronome.setBpmAndBeats(bpmNum, beatsNum);
+        }
+        if (window.AutoScroller?.setBpm) {
+          window.AutoScroller.setBpm(bpmNum);
+        }
+        window.App?.showToast?.(`♩ ${bpmNum} BPM`, 'info', 1800);
+      }
     }
   }
 
