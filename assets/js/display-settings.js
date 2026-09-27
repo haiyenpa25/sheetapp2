@@ -7,13 +7,130 @@ const DisplaySettings = (() => {
 
     const CHORD_PREFS_KEY = 'sheetapp_chord_prefs';
     const COMPACT_PREFS_KEY = 'sheetapp_compact_prefs';
+    const CHORD_PRESET_KEY = 'sheetapp_chord_preset';
+
+    const CHORD_PRESETS = {
+        standard: {
+            id: 'standard',
+            name: 'Chuẩn',
+            label: 'Chuẩn',
+            size: 2.85,
+            yOffset: 1.2,
+            color: '#dc2626',
+            fontWeight: 'normal',
+            highContrast: false,
+            desc: 'Cỡ chuẩn 1.35x, màu đỏ'
+        },
+        stage: {
+            id: 'stage',
+            name: 'Sân khấu lớn',
+            label: 'Sân khấu',
+            size: 4.56,
+            yOffset: 1.5,
+            color: '#ea580c',
+            fontWeight: '800',
+            highContrast: false,
+            desc: 'Cỡ lớn 1.6x, chữ đậm cho giá nhạc'
+        },
+        high_contrast: {
+            id: 'high_contrast',
+            name: 'Tương phản cao',
+            label: 'Tương phản',
+            size: 3.8,
+            yOffset: 1.4,
+            color: '#fbbf24',
+            fontWeight: '800',
+            highContrast: true,
+            desc: 'Nền pill tối, chữ hổ phách sáng'
+        }
+    };
+
+    let currentPreset = 'standard';
 
     // Giá trị chuẩn ban đầu
     let chordPrefs = {
-        size: 2.6,     // Tăng từ 2.2 → 2.6: to hơn, rõ ràng hơn
+        size: 2.85,    // Tăng lên 2.85: đảm bảo tỉ lệ hợp âm/lời >= 1.35
         yOffset: 1.2,  // Tăng từ 0.8 → 1.2: cao hơn trên khuông nhạc
-        color: '#dc2626'
+        color: '#dc2626',
+        preset: 'standard'
     };
+
+    function _applyPresetDOMClasses(preset) {
+        if (typeof document === 'undefined') return;
+        const container = document.getElementById('osmd-container');
+        document.body?.classList.remove('chord-preset-standard', 'chord-preset-stage', 'chord-preset-high-contrast');
+        document.body?.classList.add(`chord-preset-${preset.id.replace('_', '-')}`);
+        if (container) {
+            container.classList.remove('chord-preset-standard', 'chord-preset-stage', 'chord-preset-high-contrast');
+            container.classList.add(`chord-preset-${preset.id.replace('_', '-')}`);
+        }
+    }
+
+    function _updatePresetUI() {
+        if (typeof document === 'undefined') return;
+        const btn = document.getElementById('btn-chord-preset');
+        const lbl = document.getElementById('chord-preset-label');
+        const p = CHORD_PRESETS[currentPreset] || CHORD_PRESETS.standard;
+        if (lbl) lbl.textContent = p.label || p.name;
+        if (btn) {
+            btn.setAttribute('title', `Preset hiển thị hợp âm: ${p.name} (${p.desc}). Bấm để đổi (Aa)`);
+            btn.setAttribute('data-preset', currentPreset);
+        }
+    }
+
+    function _applyPreset(presetId, save = true) {
+        if (!CHORD_PRESETS[presetId]) presetId = 'standard';
+        currentPreset = presetId;
+        const p = CHORD_PRESETS[presetId];
+        chordPrefs.size = p.size;
+        chordPrefs.yOffset = p.yOffset;
+        chordPrefs.color = p.color;
+        chordPrefs.preset = presetId;
+
+        if (save) {
+            try {
+                localStorage.setItem(CHORD_PRESET_KEY, presetId);
+                localStorage.setItem(CHORD_PREFS_KEY, JSON.stringify(chordPrefs));
+            } catch(e) { console.warn(e); }
+        }
+
+        _updatePresetUI();
+        _applyPresetDOMClasses(p);
+
+        if (typeof window !== 'undefined' && window.OSMDRenderer && window.OSMDRenderer.getIsLoaded?.()) {
+            window.OSMDRenderer.refreshRules?.();
+            if (save && window.App?.reloadCurrentXML) {
+                window.App.reloadCurrentXML().catch(() => {});
+            } else if (window.ChordCanvas?.reposition) {
+                window.ChordCanvas.reposition();
+            }
+        }
+    }
+
+    function cyclePreset() {
+        const keys = ['standard', 'stage', 'high_contrast'];
+        const idx = keys.indexOf(currentPreset);
+        const nextPreset = keys[(idx + 1) % keys.length];
+        _applyPreset(nextPreset, true);
+        const p = CHORD_PRESETS[nextPreset];
+        if (typeof window !== 'undefined' && window.AppUI?.showToast) {
+            window.AppUI.showToast(`🎸 Preset hợp âm: ${p.name}`, 'info');
+        }
+        return nextPreset;
+    }
+
+    function setChordPreset(presetId) {
+        _applyPreset(presetId, true);
+        return currentPreset;
+    }
+
+    function getChordPreset() {
+        return currentPreset;
+    }
+
+    function getChordPresets() {
+        return CHORD_PRESETS;
+    }
 
 
     let compactPrefs = {
@@ -66,6 +183,16 @@ const DisplaySettings = (() => {
 
     function init() {
         _loadPrefs();
+
+        // 0. Gắn sự kiện cho Toolbar Chord Preset (Aa) (Ticket L1-2)
+        const btnChordPreset = document.getElementById('btn-chord-preset');
+        if (btnChordPreset && !btnChordPreset.dataset.boundPreset) {
+            btnChordPreset.dataset.boundPreset = 'true';
+            btnChordPreset.addEventListener('click', (e) => {
+                e.preventDefault();
+                cyclePreset();
+            });
+        }
 
         // 1. Gắn sự kiện cho Toolbar Compact Dropdown
         const btnCompactSettings = document.getElementById('btn-compact-settings');
@@ -264,16 +391,22 @@ const DisplaySettings = (() => {
 
     function _loadPrefs() {
         try {
+            const savedPreset = localStorage.getItem(CHORD_PRESET_KEY);
+            if (savedPreset && CHORD_PRESETS[savedPreset]) {
+                currentPreset = savedPreset;
+            } else {
+                currentPreset = 'standard';
+            }
+
             const cp = localStorage.getItem(CHORD_PREFS_KEY);
             if (cp) {
                 const saved = JSON.parse(cp);
-                // Migration: nếu size <= 2.2 (giá trị cũ), nâng lên default mới 2.6
-                if (saved.size !== undefined && saved.size <= 2.2) {
-                    saved.size = 2.6;
-                    saved.yOffset = Math.max(saved.yOffset ?? 0.8, 1.2);
+                if (saved.preset && CHORD_PRESETS[saved.preset]) {
+                    currentPreset = saved.preset;
                 }
                 chordPrefs = { ...chordPrefs, ...saved };
             }
+            _applyPreset(currentPreset, false);
 
             const comp = localStorage.getItem(COMPACT_PREFS_KEY);
             if (comp) compactPrefs = { ...compactPrefs, ...JSON.parse(comp) };
@@ -450,7 +583,16 @@ const DisplaySettings = (() => {
         window.LyricExtractor?.render?.('lyric-view-container', xml, renderOffset);
     }
 
-    return { init, getChordPrefs, getCompactPrefs, renderLyricViewIfActive: _renderLyricView };
+    return {
+        init,
+        getChordPrefs,
+        getCompactPrefs,
+        renderLyricViewIfActive: _renderLyricView,
+        setChordPreset,
+        getChordPreset,
+        getChordPresets,
+        cyclePreset
+    };
 })();
 
 window.DisplaySettings = DisplaySettings;

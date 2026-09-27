@@ -9,7 +9,7 @@
  * - Eb - 1 = D
  * - Dùng chung 1 nguồn sự thật cho Toolbar badge, SongInfoBar, Chế độ xem chữ / Band mode, và Stage HUD.
  */
-var KeyService = window.KeyService || (() => {
+var KeyService = (typeof window !== 'undefined' ? window.KeyService : null) || (() => {
   'use strict';
 
   // Circle of Fifths sang Tên Tông (Trưởng / Thứ)

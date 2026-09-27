@@ -18,6 +18,30 @@ const SongInfoBar = (() => {
   function init() {
     document.getElementById('btn-song-info-toggle')?.addEventListener('click', _toggle);
 
+    // Gắn sự kiện cho Popover Thông Tin Bài Hát (Ticket L1-3: Gộp vào thanh công cụ)
+    const btnPopover = document.getElementById('btn-song-info-popover');
+    const popover = document.getElementById('song-info-popover');
+    const btnClosePopover = document.getElementById('btn-close-song-info-popover');
+
+    if (btnPopover && popover) {
+      btnPopover.addEventListener('click', (e) => {
+        e.stopPropagation();
+        popover.classList.toggle('hidden');
+        if (!popover.classList.contains('hidden')) {
+          _updatePopoverContent();
+        }
+      });
+      btnClosePopover?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        popover.classList.add('hidden');
+      });
+      document.addEventListener('click', (e) => {
+        if (!popover.classList.contains('hidden') && !popover.contains(e.target) && !btnPopover.contains(e.target)) {
+          popover.classList.add('hidden');
+        }
+      });
+    }
+
     // Lắng nghe sự kiện đổi tông từ App / Store để cập nhật Tông tập tức thì
     if (typeof EventBus !== 'undefined') {
       EventBus.on('transpose:changed', ({ value }) => {
@@ -30,6 +54,28 @@ const SongInfoBar = (() => {
       EventBus.on('metronome:bpm', ({ bpm }) => {
         _updateTempoChip(bpm);
       });
+    }
+  }
+
+  function _updatePopoverContent() {
+    if (!_songData) return;
+    const titleEl = document.getElementById('si-pop-title');
+    const keyEl = document.getElementById('si-pop-key');
+    const prKeyEl = document.getElementById('si-pop-practice-key');
+    const timeEl = document.getElementById('si-pop-time');
+    const tempoEl = document.getElementById('si-pop-tempo');
+    const measuresEl = document.getElementById('si-pop-measures');
+    const chordsetEl = document.getElementById('si-pop-chordset');
+
+    if (titleEl) titleEl.textContent = _songData.title || '--';
+    if (keyEl) keyEl.textContent = _songData.key ? `${_songData.key} ${_songData.mode}` : '--';
+    if (prKeyEl) prKeyEl.textContent = _calcPracticedKey();
+    if (timeEl) timeEl.textContent = _songData.timeBeats ? `${_songData.timeBeats}/${_songData.timeBeatType}` : '--';
+    if (tempoEl) tempoEl.textContent = _songData.tempo ? `♩ = ${_songData.tempo} bpm` : '♩ —';
+    if (measuresEl) measuresEl.textContent = _songData.measureCount ? `${_songData.measureCount} ô nhịp` : '--';
+    if (chordsetEl) {
+      const curSet = window.ChordCanvas?.getCurrentSet?.() || 'HD';
+      chordsetEl.textContent = curSet === 'default' ? 'TLH (Gốc)' : curSet;
     }
   }
 
@@ -233,11 +279,11 @@ const SongInfoBar = (() => {
     if (isHdEmpty) {
       chips.push(`<span id="si-chord-set-chip" class="si-chip si-chord-set si-chord-fallback" title="Bộ HD chưa có hợp âm cho bài này — đang hiển thị bản chuẩn TLH gốc (${tlhCount} hợp âm, Core Rule 1). Bấm để chuyển sang TLH" style="cursor:pointer;touch-action:manipulation;background:rgba(217,119,6,0.15);color:var(--warning,#d97706);border:1px solid rgba(217,119,6,0.3);">🎸 HD chưa có · đang hiện TLH</span>`);
     } else if (isHdSparse) {
-      chips.push(`<span id="si-chord-set-chip" class="si-chip si-chord-set si-chord-sparse" title="Bộ HD chỉ có ${chordCount}/${tlhCount} hợp âm (<30%). Bấm 1 chạm để xem bộ TLH đầy đủ" style="cursor:pointer;touch-action:manipulation;background:rgba(217,119,6,0.15);color:var(--warning,#d97706);border:1px solid rgba(217,119,6,0.3);">🎸 HD còn thiếu — xem TLH</span>`);
+      chips.push(`<span id="si-chord-set-chip" class="si-chip si-chord-set si-chord-sparse" title="Bộ HD chỉ có ${chordCount}/${tlhCount} hợp âm (<30%). Bấm 1 chạm để xem bộ TLH đầy đủ (HD còn thiếu — xem TLH)" style="cursor:pointer;touch-action:manipulation;background:rgba(217,119,6,0.15);color:var(--warning,#d97706);border:1px solid rgba(217,119,6,0.3);">🎸 HD còn thiếu — xem TLH (● ${chordCount}/${tlhCount})</span>`);
     } else if (currentSet && currentSet !== 'default') {
-      const countLabel = chordCount > 0 ? ` · ● ${chordCount}` : ' · ○ 0';
+      const countLabel = chordCount > 0 ? ` · ● ${chordCount}` : ' · ○ Chưa có';
       const chipClass  = chordCount > 0 ? 'si-chip si-chord-set si-chord-has' : 'si-chip si-chord-set si-chord-empty';
-      const label      = currentSet === 'HD' ? '⭐ HD (Ưu tiên)' : currentSet;
+      const label      = currentSet === 'HD' ? '⭐ HD' : currentSet;
       chips.push(`<span id="si-chord-set-chip" class="${chipClass}" title="Đang chọn ${_esc(label)}. Bấm để chuyển đổi nhanh sang TLH (gốc)" style="cursor:pointer;touch-action:manipulation;">🎸 ${_esc(label)}${countLabel}</span>`);
     } else if (currentSet === 'default') {
       const countLabel = tlhCount > 0 ? ` · ● ${tlhCount}` : '';
@@ -255,6 +301,7 @@ const SongInfoBar = (() => {
 
     inner.innerHTML = chips.join('');
     _loadSongUsageChip(_songId);
+    _updatePopoverContent();
 
     // Wire sự kiện click vào Chip Tông để đổi nhanh
     const toneChipEl = document.getElementById('si-tone-chip');
@@ -497,7 +544,17 @@ const SongInfoBar = (() => {
   function getSongInfo() { return _songData; }
   function getSongKey()  { return _songData?.key || ''; }
 
-  return { init, loadSong, clearSong, getSongInfo, getSongKey, refreshChordChip, refreshNotesChip, updateTranspose: _updateToneChip };
+  return {
+    init,
+    loadSong,
+    clearSong,
+    getSongInfo,
+    getSongKey,
+    refreshChordChip,
+    refreshNotesChip,
+    updateTranspose: _updateToneChip,
+    updatePopoverContent: _updatePopoverContent
+  };
 })();
 
 window.SongInfoBar = SongInfoBar;

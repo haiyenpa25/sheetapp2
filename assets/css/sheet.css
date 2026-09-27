@@ -2612,3 +2612,54 @@ body.dark-mode .tp-btn:hover {
   }
 }
 
+/* ========================================================
+   Ticket L1-2: 3 Preset hiển thị hợp âm (Aa)
+   1. Chuẩn (Standard)
+   2. Sân khấu lớn (Stage 1.6x, đậm)
+   3. Tương phản cao (High Contrast: hổ phách, pill tối)
+   ======================================================== */
+.chord-preset-stage #osmd-container svg text[font-family*="OSMDChordFont"],
+.chord-preset-stage #osmd-container svg text[font-family*="OSMDChordFont"] tspan,
+.chord-preset-stage #osmd-container svg .osmd-chord-text {
+  font-weight: 800 !important;
+}
+.chord-preset-stage .cc-custom-chord-text {
+  font-weight: 800 !important;
+}
+
+.chord-preset-high-contrast #osmd-container svg text[font-family*="OSMDChordFont"],
+.chord-preset-high-contrast #osmd-container svg text[font-family*="OSMDChordFont"] tspan,
+.chord-preset-high-contrast #osmd-container svg .osmd-chord-text {
+  fill: #FBBF24 !important;
+  font-weight: 800 !important;
+  paint-order: stroke fill;
+  stroke: #0B0B0C !important;
+  stroke-width: 2px !important;
+  stroke-linejoin: round !important;
+}
+.chord-preset-high-contrast .cc-custom-chord-text {
+  background: #0F172A !important;
+  color: #FBBF24 !important;
+  border: 1.5px solid #F59E0B !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.75) !important;
+  font-weight: 800 !important;
+  padding: 1px 6px !important;
+  border-radius: 4px !important;
+}
+
+#btn-chord-preset.band-pill {
+  transition: all 0.15s ease;
+  user-select: none;
+}
+#btn-chord-preset[data-preset="stage"] {
+  border-color: #ea580c;
+  color: #ea580c;
+  background: rgba(234, 88, 12, 0.1);
+}
+#btn-chord-preset[data-preset="high_contrast"] {
+  border-color: #f59e0b;
+  color: #fbbf24;
+  background: #0f172a;
+}
+
+

@@ -424,9 +424,9 @@ body.fullscreen-mode .osmd-container { max-width: 100%; padding: 1rem; margin-to
   .zoom-select { min-width: 46px; font-size: .73rem; }
 }
 
-/* --- iPad / Tablet Portrait (≤ 900px) --- */
-/* Sidebar chuyển sang overlay dạng drawer trượt đếp */
-@media (max-width: 900px) {
+/* --- iPad / Tablet Portrait & Landscape (≤ 1200px) --- */
+/* Sidebar chuyển sang overlay dạng drawer trượt đẹp (Ticket L1-3 & L-D3) */
+@media (max-width: 1200px) {
   .mobile-only { display: inline-flex !important; }
 
   .sidebar {
@@ -1558,5 +1558,69 @@ body.sheet-only-mode .gig-floating-hud {
     width: 100% !important;
   }
 }
+
+/* ========================================================
+   Ticket L1-3: Song Info Popover (Gộp thông tin vào toolbar)
+   ======================================================== */
+.song-info-popover {
+  position: absolute;
+  top: 52px;
+  left: 48px;
+  width: 320px;
+  max-width: calc(100vw - 32px);
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  padding: 12px;
+  font-size: 0.85rem;
+  color: var(--text-primary, #111827);
+  box-sizing: border-box;
+}
+body.dark-mode .song-info-popover {
+  background: #1e1e2e;
+  border-color: #3a3a50;
+  color: #f3f4f6;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+.si-popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+  padding-bottom: 6px;
+}
+.si-popover-title {
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  color: var(--text-muted, #6b7280);
+}
+.si-popover-close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted, #6b7280);
+  font-size: 0.9rem;
+  padding: 2px 6px;
+}
+.si-popover-close:hover {
+  color: var(--text-primary, #111827);
+}
+.si-popover-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px dashed rgba(150, 150, 150, 0.2);
+}
+.si-popover-label {
+  color: var(--text-secondary, #4b5563);
+}
+.si-popover-value {
+  font-weight: 600;
+}
+
 
 

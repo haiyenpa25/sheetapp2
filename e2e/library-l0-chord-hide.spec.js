@@ -80,8 +80,8 @@ test.describe('Ticket L0-3: Ẩn hợp âm SVG bằng class / data-attribute tha
         }
       });
 
-      // Tiêu đề
-      const titleEl = svg.querySelector('.osmd-title-text') || allTexts.find(t => (t.textContent || '').includes('Thờ Phượng'));
+      // Tiêu đề chính
+      const titleEl = svg.querySelector('.osmd-title-text') || allTexts.find(t => (t.textContent || '').includes('Thờ Phượng') && window.getComputedStyle(t).display !== 'none');
       let titleHidden = false;
       if (titleEl) {
         const tStyle = window.getComputedStyle(titleEl);

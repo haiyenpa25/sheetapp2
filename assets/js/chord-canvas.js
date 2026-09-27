@@ -82,7 +82,6 @@ const ChordCanvas = (() => {
         vpTid = setTimeout(() => { _build(); }, 250);
       };
       window.visualViewport.addEventListener('resize', onVpChange);
-      window.visualViewport.addEventListener('scroll', onVpChange);
     }
   }
 
@@ -102,7 +101,7 @@ const ChordCanvas = (() => {
     const svg = container.querySelector('svg');
     if (!svg) return;
 
-    const chords = Array.from(svg.querySelectorAll('text[font-family*="OSMDChordFont"]'));
+    const chords = Array.from(svg.querySelectorAll('text[font-family*="OSMDChordFont"], .osmd-chord-text'));
     if (!chords.length) return;
 
     const systems = [];
@@ -128,7 +127,21 @@ const ChordCanvas = (() => {
     });
 
     systems.forEach(sys => {
-      sys.chords.forEach(c => c.setAttribute('y', sys.minY));
+      sys.chords.sort((a, b) => (parseFloat(a.getAttribute('x') || 0)) - (parseFloat(b.getAttribute('x') || 0)));
+      let prevRight = -Infinity;
+      sys.chords.forEach(c => {
+        c.setAttribute('y', sys.minY);
+        const curX = parseFloat(c.getAttribute('x') || 0);
+        let curW = 20;
+        try { curW = c.getBBox ? c.getBBox().width : (c.textContent.trim().length * 10); } catch(e){}
+        if (curX < prevRight + 6) {
+          const newX = prevRight + 6;
+          c.setAttribute('x', newX);
+          prevRight = newX + curW;
+        } else {
+          prevRight = curX + curW;
+        }
+      });
     });
   }
 
@@ -157,6 +170,7 @@ const ChordCanvas = (() => {
     }
 
     _refreshSetDropdown();
+    window.SongInfoBar?.refreshChordChip?.();
   }
 
   function _loadOfflineChords(songId, set) {
@@ -492,15 +506,18 @@ const ChordCanvas = (() => {
     } catch(e) {}
 
     const chordCount = Object.keys(_customChords).length;
+    const tlhCount   = Object.keys(window.ChordCanvasXML?.readXmlChords?.() || {}).length;
     const isFallback = (_currentSet === 'HD' && chordCount === 0);
     const countText  = isFallback
       ? '○ HD chưa có · đang hiện TLH'
-      : (_currentSet !== 'default' ? (chordCount > 0 ? `● ${chordCount} hợp âm` : '○ Chưa có') : '');
+      : (_currentSet !== 'default'
+          ? (chordCount > 0 ? `● ${chordCount} hợp âm` : '○ Chưa có')
+          : (tlhCount > 0 ? `● ${tlhCount} hợp âm` : ''));
     if (countBadge) {
       countBadge.textContent = countText;
       countBadge.style.color = isFallback
         ? 'var(--warning,#d97706)'
-        : (chordCount > 0 ? 'var(--success,#16a34a)' : 'var(--text-muted,#9ca3af)');
+        : ((chordCount > 0 || (_currentSet === 'default' && tlhCount > 0)) ? 'var(--success,#16a34a)' : 'var(--text-muted,#9ca3af)');
     }
 
     const myChordCode = (window.Auth?.getChordCode?.() || '').toUpperCase();
@@ -529,6 +546,8 @@ const ChordCanvas = (() => {
     + (canCreate ? `<option value="__open_members__" style="color: var(--emerald,#10b981); font-weight: bold;">👥 Quản Lý Nhạc Công & Hợp Âm (/manager/#tab-users)...</option>` : '')
     + (canCreate ? `<option value="__open_manager__" style="color: var(--cyan,#06b6d4);">📂 Mở Quản Lý Kho Nhạc (/manager/)...</option>` : '');
 
+    selector.value = _currentSet;
+
     if (!selector.dataset.boundCreateHandler) {
       selector.dataset.boundCreateHandler = 'true';
       selector.addEventListener('change', (e) => handleSelectChange(e.target.value));
@@ -542,6 +561,7 @@ const ChordCanvas = (() => {
 
   function _updateSetUI() {
     _refreshSetDropdown();
+    window.SongInfoBar?.refreshChordChip?.();
   }
 
   function resetSet() {
@@ -552,22 +572,9 @@ const ChordCanvas = (() => {
 
   /* ─── Exports ────────────────────────────────────────────────── */
   return {
-    init,
-    loadSong,
-    clearSong,
-    setAddMode,
-    toggleAddMode,
-    toggleHighlight,
-    setHighlightMode,
-    onOSMDRendered,
-    reposition,
-    handleSelectChange,
-    switchSet,
-    createSet,
-    showNewSetModal,
-    deleteSet,
-    confirmDeleteSet,
-    resetSet,
+    init, loadSong, clearSong, setAddMode, toggleAddMode, toggleHighlight, setHighlightMode,
+    onOSMDRendered, reposition, handleSelectChange, switchSet, createSet, showNewSetModal,
+    deleteSet, confirmDeleteSet, resetSet,
     refreshSetDropdown: (force) => _refreshSetDropdown(force),
     undo: () => window.ChordCanvasEdit?.undo?.(),
     redo: () => window.ChordCanvasEdit?.redo?.(),

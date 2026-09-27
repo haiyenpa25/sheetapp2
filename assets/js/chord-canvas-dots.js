@@ -13,7 +13,8 @@ const ChordCanvasDots = (() => {
     if (!container) return;
 
     const cRect = container.getBoundingClientRect();
-    const GAP_PX = 22;
+    const scale = window.ChordCanvasUI?.getScale?.() || 1.0;
+    const GAP_PX = Math.round(22 * scale);
 
     const svg = container.querySelector('svg');
     if (!svg) return;
@@ -102,8 +103,20 @@ const ChordCanvasDots = (() => {
 
     for (const [sys, badges] of assigned.entries()) {
       const fixedY = Math.round(sys.topLine - GAP_PX);
+      badges.sort((a, b) => (parseFloat(a.style.left) || 0) - (parseFloat(b.style.left) || 0));
+      let prevRight = -Infinity;
       badges.forEach(badge => {
         badge.style.top = fixedY + 'px';
+        const curLeft = parseFloat(badge.style.left) || 0;
+        let curW = badge.offsetWidth;
+        if (!curW || curW <= 0) curW = badge.textContent.trim().length * 14 + 12;
+        if (curLeft < prevRight + 6) {
+          const newLeft = prevRight + 6;
+          badge.style.left = newLeft + 'px';
+          prevRight = newLeft + curW;
+        } else {
+          prevRight = curLeft + curW;
+        }
       });
     }
   }
@@ -131,7 +144,20 @@ const ChordCanvasDots = (() => {
 
     rows.forEach(row => {
       const minY = Math.min(...row.items.map(it => it.y));
-      row.items.forEach(it => { it.el.style.top = `${minY}px`; });
+      row.items.sort((a, b) => (parseFloat(a.el.style.left) || 0) - (parseFloat(b.el.style.left) || 0));
+      let prevRight = -Infinity;
+      row.items.forEach(it => {
+        it.el.style.top = `${minY}px`;
+        const curLeft = parseFloat(it.el.style.left) || 0;
+        let curW = it.el.offsetWidth || (it.el.textContent.trim().length * 14 + 12);
+        if (curLeft < prevRight + 6) {
+          const newLeft = prevRight + 6;
+          it.el.style.left = newLeft + 'px';
+          prevRight = newLeft + curW;
+        } else {
+          prevRight = curLeft + curW;
+        }
+      });
     });
   }
 
@@ -245,10 +271,12 @@ const ChordCanvasDots = (() => {
 
     const scale   = ChordCanvasUI.getScale();
     const dotSize = ChordCanvasUI.getDotSize(scale);
-    const fSize   = Math.min(22, Math.max(13, Math.round(14 * scale)));
+    const preset = window.DisplaySettings?.getChordPreset?.() || 'standard';
+    const presetMultiplier = (preset === 'stage' ? 1.6 : (preset === 'high_contrast' ? 1.3 : 1.0));
+    const fSize   = Math.max(16, Math.round(20 * scale * 1.35 * presetMultiplier));
 
     const cx = (rect.left - cRect.left) + rect.width / 2;
-    const cy = (rect.top  - cRect.top)  - (25 * scale);
+    const cy = (rect.top  - cRect.top)  - (28 * scale);
 
     const editEnabled = opts.editEnabled ?? false;
     const highlightEnabled = opts.highlightEnabled ?? false;

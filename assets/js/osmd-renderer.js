@@ -37,7 +37,7 @@ const OSMDRenderer = (() => {
       engravingRules: {
         // Chord symbols — size to hơn, cao hơn
         ChordSymbolFontFamily: "OSMDChordFont, sans-serif",
-        ChordSymbolTextHeight: 2.6,
+        ChordSymbolTextHeight: 2.85,
         ChordSymbolYOffset: 1.2,
         DefaultColorChordSymbol: '#dc2626',
         // Sheet layout
@@ -167,11 +167,11 @@ const OSMDRenderer = (() => {
    */
   function refreshRules() {
     if (osmd && osmd.rules) {
-        let prefs = { size: 2.6, yOffset: 1.2, color: '#dc2626' }; // chuẩn hiện tại
+        let prefs = { size: 2.85, yOffset: 1.2, color: '#dc2626' }; // chuẩn hiện tại
         if (window.DisplaySettings) prefs = DisplaySettings.getChordPrefs();
 
         osmd.rules.DefaultColorChordSymbol = prefs.color;
-        osmd.rules.ChordSymbolTextHeight   = prefs.size   ?? 2.6;
+        osmd.rules.ChordSymbolTextHeight   = (prefs.size && prefs.size >= 2.6) ? Math.max(2.85, prefs.size) : 2.85;
         osmd.rules.ChordSymbolYOffset      = prefs.yOffset ?? 1.2;
         
         // --- ÉP KHOẢNG CÁCH HỢP ÂM CỐ ĐỊNH, KHÔNG BỊ ĐẨY LÊN CAO ---
@@ -428,6 +428,7 @@ const OSMDRenderer = (() => {
 
     if (titleEl) {
       // 1. Style title đẹp hơn
+      titleEl.classList.add('osmd-title-text');
       titleEl.setAttribute('class', (titleEl.getAttribute('class') || '') + ' osmd-title-text');
 
       // 2. Convert ALL CAPS → Title Case cho dễ đọc

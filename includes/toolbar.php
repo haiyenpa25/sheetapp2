@@ -9,6 +9,25 @@
       <span id="song-title" class="song-title">Chọn bài hát...</span>
       <span id="song-key" class="song-key-badge" title="Tông gốc">--</span>
     </div>
+    <button id="btn-song-info-popover" class="icon-btn-pill btn-song-info-popover" title="Xem chi tiết: Tông, BPM, Nhịp, Số ô nhịp, Phụng vụ (ⓘ)" aria-label="Chi tiết bài hát" style="margin-left: 2px;">
+      <span style="font-weight: 800; font-size: 0.95rem; font-family: serif;">ⓘ</span>
+    </button>
+    <!-- Popover Chi Tiết Bài Hát (Ticket L1-3: Gộp thanh thông tin vào thanh công cụ) -->
+    <div id="song-info-popover" class="song-info-popover hidden" role="dialog" aria-label="Thông tin chi tiết bài hát">
+      <div class="si-popover-header">
+        <span class="si-popover-title">THÔNG TIN BÀI HÁT</span>
+        <button id="btn-close-song-info-popover" class="si-popover-close" title="Đóng">✕</button>
+      </div>
+      <div class="si-popover-body" id="si-popover-content">
+        <div class="si-popover-row"><span class="si-popover-label">Tên bài:</span><span class="si-popover-value" id="si-pop-title">--</span></div>
+        <div class="si-popover-row"><span class="si-popover-label">Tông gốc:</span><span class="si-popover-value" id="si-pop-key">--</span></div>
+        <div class="si-popover-row"><span class="si-popover-label">Tông đang tập:</span><span class="si-popover-value" id="si-pop-practice-key">--</span></div>
+        <div class="si-popover-row"><span class="si-popover-label">Nhịp / Phách:</span><span class="si-popover-value" id="si-pop-time">--</span></div>
+        <div class="si-popover-row"><span class="si-popover-label">Tempo:</span><span class="si-popover-value" id="si-pop-tempo">--</span></div>
+        <div class="si-popover-row"><span class="si-popover-label">Số ô nhịp:</span><span class="si-popover-value" id="si-pop-measures">--</span></div>
+        <div class="si-popover-row"><span class="si-popover-label">Bộ hợp âm:</span><span class="si-popover-value" id="si-pop-chordset">--</span></div>
+      </div>
+    </div>
   </div>
 
   <!-- 2. CỤM ĐIỀU KHIỂN TRỌNG TÂM CHO BAN NHẠC (PRO BAND CONTROLS) -->
@@ -90,6 +109,12 @@
       <button id="btn-clear-all-chords" style="display:none;"></button>
       <button id="btn-cancel-add-chord" style="display:none;"></button>
     </div>
+
+    <!-- Cụm Preset Hiển Thị Hợp Âm (Aa) (Ticket L1-2) -->
+    <button id="btn-chord-preset" class="band-pill btn-chord-preset" title="Preset hiển thị hợp âm: Chuẩn / Sân khấu lớn / Tương phản cao (nút Aa)" aria-label="Preset hiển thị hợp âm" style="cursor:pointer; padding: 0 8px;">
+      <span class="preset-icon" style="font-weight: 800; font-size: 0.95rem; letter-spacing: -0.5px;">Aa</span>
+      <span id="chord-preset-label" class="preset-label" style="font-size: 0.72rem; margin-left: 2px; opacity: 0.85;">Chuẩn</span>
+    </button>
 
     <!-- Cụm Xem Band (Lời + Hợp âm chữ) / Bản Nhạc (Ticket L0-4 & L1-7) -->
     <button id="btn-band-toggle" class="band-pill btn-toggle-view btn-band-toggle" title="Chuyển chế độ: Band (Lời & Hợp âm chữ) ↔ Bản Nhạc">

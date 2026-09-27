@@ -156,8 +156,8 @@ const ToolbarController = (() => {
 
     function _toggle() {
       if (!sidebar) return;
-      if (window.innerWidth <= 900) {
-        // Mobile/iPad: toggle ỳ nghĩa rõ ràng
+      if (window.innerWidth <= 1200) {
+        // Mobile/iPad: toggle ý nghĩa rõ ràng (Ticket L1-3 & L-D3)
         if (sidebar.classList.contains('mobile-hidden')) {
           _openSidebar();
         } else {
@@ -173,18 +173,27 @@ const ToolbarController = (() => {
     document.getElementById('btn-toggle-sidebar')?.addEventListener('click', _toggle);
     document.getElementById('btn-open-sidebar')?.addEventListener('click', _toggle);
 
-    // Init: mobile bắt đầu ẩn sidebar
-    if (window.innerWidth <= 900) {
+    // Init: mobile/iPad bắt đầu ẩn sidebar (Ticket L1-3 & L-D3: đóng mặc định khi xem bài)
+    if (window.innerWidth <= 1200) {
       sidebar?.classList.add('mobile-hidden');
       overlay?.classList.add('hidden');
+    }
+
+    // Đóng sidebar khi chọn bài trên tablet/mobile để nhạc chiếm trọn màn hình
+    if (typeof EventBus !== 'undefined') {
+      EventBus.on('song:loaded', () => {
+        if (window.innerWidth <= 1200) {
+          _closeSidebar();
+        }
+      });
     }
 
     // Resize handler
     let _lastW = window.innerWidth;
     window.addEventListener('resize', _debounce(() => {
       const w = window.innerWidth;
-      if (w <= 900) {
-        // Chuyển sang mobile: ẩn sidebar nếu đang mở
+      if (w <= 1200) {
+        // Chuyển sang mobile/iPad: ẩn sidebar nếu đang mở
         if (!sidebar?.classList.contains('mobile-hidden')) {
           _closeSidebar();
         }

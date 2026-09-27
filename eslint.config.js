@@ -82,6 +82,8 @@ module.exports = [
         CSS: 'readonly',
 
         // Node.js / Tooling globals
+        global: 'readonly',
+        globalThis: 'readonly',
         require: 'readonly',
         module: 'readonly',
         exports: 'readonly',
