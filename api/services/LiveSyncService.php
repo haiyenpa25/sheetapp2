@@ -271,7 +271,7 @@ class LiveSyncService {
                 if (is_array($data['cue']) && !empty($data['cue']['text'])) {
                     $cue = $data['cue'];
                     $cue['cueId'] = $cue['cueId'] ?? ('CUE-' . bin2hex(random_bytes(5)));
-                    $ttlSec = (float)($cue['ttlSec'] ?? (isset($cue['durationMs']) && $cue['durationMs'] ? $cue['durationMs'] / 1000 : 4.0));
+                    $ttlSec = (float)($cue['ttlSec'] ?? (isset($cue['durationMs']) && $cue['durationMs'] ? $cue['durationMs'] / 1000 : 5.0));
                     $cue['createdAt'] = microtime(true);
                     $cue['expiresAt'] = microtime(true) + $ttlSec;
                     $current['cue'] = $cue;

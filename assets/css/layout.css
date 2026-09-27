@@ -2835,6 +2835,73 @@ body.dark-mode .btn-follow-leader.is-following,
   to { transform: translateY(158px); }
 }
 
+/* ---- HOST QUICK CUES BAR (Ticket L3-6) ---- */
+.host-quick-cues-bar {
+  background: rgba(109, 40, 217, 0.08);
+  border-bottom: 1px solid rgba(109, 40, 217, 0.22);
+  padding: 4px 1rem;
+  z-index: 80;
+  transition: all 0.2s ease;
+}
+
+.host-quick-cues-bar.hidden {
+  display: none !important;
+}
+
+.hqc-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.hqc-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hqc-chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-cue-chip {
+  background: var(--bg-surface, #fff);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-radius: 99px;
+  padding: 3px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.btn-cue-chip:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(109, 40, 217, 0.25);
+}
+
+.btn-cue-chip:active {
+  transform: translateY(0);
+}
+
+
 
 
 

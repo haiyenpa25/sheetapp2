@@ -113,6 +113,46 @@ const FollowLeader = (() => {
 
     // Nút Rời phòng từ host modal
     document.getElementById('btn-fl-host-leave')?.addEventListener('click', leave);
+
+    // Bảng thông điệp nhanh trong modal Ca Trưởng
+    document.querySelectorAll('.btn-fl-cue').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const cue = btn.getAttribute('data-cue') || 'info';
+        const icon = btn.getAttribute('data-icon') || '📣';
+        const text = btn.getAttribute('data-text') || btn.textContent.trim();
+        sendCue(text, cue, icon);
+      });
+    });
+
+    document.getElementById('btn-fl-send-custom-cue')?.addEventListener('click', () => {
+      const input = document.getElementById('fl-cue-custom-input');
+      const text = input ? input.value.trim() : '';
+      if (!text) {
+        window.App?.showToast?.('Vui lòng nhập nội dung thông điệp!', 'warning');
+        return;
+      }
+      sendCue(text, 'custom', '📢');
+      if (input) input.value = '';
+    });
+
+    document.getElementById('fl-cue-custom-input')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('btn-fl-send-custom-cue')?.click();
+      }
+    });
+
+    // Các nút trên thanh Host Quick Cues Bar
+    document.querySelectorAll('.btn-cue-chip').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const cue = btn.getAttribute('data-cue') || 'info';
+        const icon = btn.getAttribute('data-icon') || '📣';
+        const text = btn.getAttribute('data-text') || btn.textContent.trim();
+        sendCue(text, cue, icon);
+      });
+    });
   }
 
   function _bindBannerEvents() {
@@ -227,6 +267,8 @@ const FollowLeader = (() => {
     if (window.LiveSession?.leaveRoom) {
       window.LiveSession.leaveRoom();
     }
+    const hostCuesBar = document.getElementById('host-quick-cues-bar');
+    if (hostCuesBar) hostCuesBar.classList.add('hidden');
     _updateBannerUI();
     closeModal();
     window.App?.showToast?.('👋 Đã rời phòng theo dõi', 'info');
@@ -346,10 +388,15 @@ const FollowLeader = (() => {
     const roomDisplay = document.getElementById('fl-host-room-display');
     const linkDisplay = document.getElementById('fl-host-link-display');
     const canvas = document.getElementById('fl-host-qr-canvas');
+    const hostCuesBar = document.getElementById('host-quick-cues-bar');
 
     if (idleView && activeView) {
       idleView.classList.toggle('hidden', isHost);
       activeView.classList.toggle('hidden', !isHost);
+    }
+
+    if (hostCuesBar) {
+      hostCuesBar.classList.toggle('hidden', !isHost);
     }
 
     if (isHost && _roomCode) {
@@ -362,6 +409,13 @@ const FollowLeader = (() => {
         window.QRHelper.drawQR(canvas, url.href, 180);
       }
     }
+  }
+
+  function sendCue(text, type = 'info', icon = '📣') {
+    if (window.CueEngine?.broadcastCue) {
+      return window.CueEngine.broadcastCue({ text, type, icon, durationMs: 5000 });
+    }
+    return false;
   }
 
   async function _toggleQrScanner() {
@@ -480,7 +534,8 @@ const FollowLeader = (() => {
     getPendingState: () => _pendingState,
     setPendingState: (s) => { _pendingState = s; },
     onRemoteStateReceived,
-    onConnectionChange
+    onConnectionChange,
+    sendCue
   };
 })();
 

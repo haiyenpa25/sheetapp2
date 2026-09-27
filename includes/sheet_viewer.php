@@ -180,6 +180,20 @@
     </div>
   </div>
 
+  <!-- HOST QUICK CUES BAR (Thanh nhắc ban nhạc nhanh của Ca Trưởng — Ticket L3-6) -->
+  <div id="host-quick-cues-bar" class="host-quick-cues-bar hidden" role="toolbar" aria-label="Thanh nhắc ban nhạc nhanh của Ca Trưởng">
+    <div class="hqc-inner">
+      <span class="hqc-label">👑 Nhắc Band:</span>
+      <div class="hqc-chips">
+        <button type="button" class="btn-cue-chip" data-cue="repeat" data-icon="🔁" data-text="Lặp Điệp Khúc" title="Gửi: Lặp Điệp Khúc">🔁 Lặp ĐK</button>
+        <button type="button" class="btn-cue-chip" data-cue="slow" data-icon="⏳" data-text="Khổ cuối chậm" title="Gửi: Khổ cuối chậm">⏳ Chậm lại</button>
+        <button type="button" class="btn-cue-chip" data-cue="key" data-icon="🎺" data-text="Lên tông (+1)" title="Gửi: Lên tông">🎺 Lên tông</button>
+        <button type="button" class="btn-cue-chip" data-cue="ending" data-icon="🛑" data-text="Chuẩn bị kết" title="Gửi: Chuẩn bị kết">🛑 Kết</button>
+        <button type="button" class="btn-cue-chip" data-cue="intro" data-icon="🎹" data-text="Dạo lại intro" title="Gửi: Dạo lại intro">🎹 Dạo lại</button>
+      </div>
+    </div>
+  </div>
+
   <!-- LEADER NOTES BANNER (Dải vàng ghi chú ca trưởng — Ticket L3-3) -->
   <div id="leader-notes-banner" class="leader-notes-banner hidden" role="note" aria-label="Ghi chú ca trưởng">
     <div class="ln-banner-inner">

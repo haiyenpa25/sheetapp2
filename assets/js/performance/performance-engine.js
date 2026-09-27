@@ -170,7 +170,7 @@ const PerformanceEngine = (() => {
           const firstKey = _processedCueIds.values().next().value;
           _processedCueIds.delete(firstKey);
         }
-        window.CueEngine?.showBanner?.(state.cue.text, state.cue.type || 'info', state.cue.durationMs || 3000, state.cue.icon || '⚡');
+        window.CueEngine?.showBanner?.(state.cue.text, state.cue.type || 'info', state.cue.durationMs || 5000, state.cue.icon || '⚡');
       }
     }
 
@@ -331,7 +331,8 @@ const PerformanceEngine = (() => {
     applyRoleView,
     triggerHostCountIn,
     onSessionStarted,
-    onSessionEnded
+    onSessionEnded,
+    getProcessedCueIds: () => Array.from(_processedCueIds)
   };
 })();
 

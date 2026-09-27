@@ -13,6 +13,7 @@ const CueEngine = (() => {
   let _dismissTimer     = null;
   let _lastAlertMeasure = null;
   let _enabled          = true;
+  let _lastCue          = null;
 
   function init() {
     _createCueBannerDOM();
@@ -29,15 +30,23 @@ const CueEngine = (() => {
     const banner = document.createElement('div');
     banner.id = 'cue-banner';
     banner.className = 'cue-banner hidden';
+    banner.setAttribute('role', 'status');
+    banner.setAttribute('aria-live', 'polite');
     banner.innerHTML = `
       <div class="cue-banner-content">
         <span class="cue-icon" id="cue-banner-icon">⚡</span>
         <span class="cue-text" id="cue-banner-text">Chuẩn bị vào Điệp Khúc</span>
+        <button type="button" id="btn-cue-banner-close" class="cue-close-btn" title="Đóng thông điệp" aria-label="Đóng">×</button>
       </div>
     `;
 
     document.body.appendChild(banner);
     _cueBannerDOM = banner;
+
+    document.getElementById('btn-cue-banner-close')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dismiss();
+    });
   }
 
   function _bindEvents() {
@@ -88,11 +97,11 @@ const CueEngine = (() => {
   /**
    * Hiển thị Banner thông báo diễn tập nổi
    * @param {string} htmlMessage Nội dung thông báo
-   * @param {string} type 'info' | 'pre-cue' | 'urgent-cue' | 'jump' | 'entry'
-   * @param {number} durationMs Thời gian tự đóng (mặc định 3000ms)
+   * @param {string} type 'info' | 'repeat' | 'slow' | 'key' | 'ending' | 'intro' | 'custom' | 'urgent-cue' | 'pre-cue'
+   * @param {number} durationMs Thời gian tự đóng (mặc định 5000ms = 5 giây theo chuẩn Ticket L3-6)
    * @param {string} icon Icon hiển thị
    */
-  function showBanner(htmlMessage, type = 'info', durationMs = 3000, icon = '⚡') {
+  function showBanner(htmlMessage, type = 'info', durationMs = 5000, icon = '⚡') {
     if (!_cueBannerDOM) _createCueBannerDOM();
     if (!_cueBannerDOM) return;
 
@@ -104,6 +113,14 @@ const CueEngine = (() => {
     if (iconEl) iconEl.textContent = icon;
     if (textEl) textEl.innerHTML = htmlMessage;
 
+    _lastCue = {
+      text: htmlMessage,
+      type,
+      durationMs,
+      icon,
+      timestamp: Date.now()
+    };
+
     _cueBannerDOM.className = `cue-banner cue-${type}`;
     _cueBannerDOM.classList.remove('hidden');
 
@@ -112,6 +129,46 @@ const CueEngine = (() => {
         dismiss();
       }, durationMs);
     }
+  }
+
+  /**
+   * Phát sóng thông điệp từ Ca Trưởng (Host) đến toàn ban nhạc qua LiveSession
+   */
+  function broadcastCue(cueData) {
+    if (!cueData) return false;
+    const isHost = window.LiveSession?.isHost?.() ?? false;
+    if (!isHost) {
+      window.App?.showToast?.('Chỉ Ca Trưởng đang mở phòng mới có thể gửi thông điệp đến ban nhạc!', 'warning');
+      return false;
+    }
+
+    const cueObj = typeof cueData === 'string' ? { text: cueData } : cueData;
+    const text = (cueObj.text || '').trim();
+    if (!text) return false;
+
+    const type = cueObj.type || 'info';
+    const icon = cueObj.icon || '📣';
+    const durationMs = cueObj.durationMs || 5000;
+    const cueId = 'CUE-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7);
+
+    const payload = {
+      cueId,
+      text,
+      type,
+      icon,
+      durationMs,
+      createdAt: Date.now() / 1000,
+      expiresAt: (Date.now() / 1000) + (durationMs / 1000)
+    };
+
+    if (window.LiveSession?.broadcastState) {
+      window.LiveSession.broadcastState({ cue: payload });
+    }
+
+    // Hiển thị ngay lập tức trên máy Host
+    showBanner(text, type, durationMs, icon);
+    window.App?.showToast?.(`📣 Đã gửi thông điệp: ${text}`, 'success');
+    return true;
   }
 
   function dismiss() {
@@ -162,8 +219,11 @@ const CueEngine = (() => {
     init,
     checkMeasure,
     showBanner,
+    broadcastCue,
     dismiss,
-    setEnabled
+    setEnabled,
+    getLastCue: () => _lastCue,
+    getBannerDOM: () => _cueBannerDOM
   };
 })();
 

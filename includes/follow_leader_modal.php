@@ -108,7 +108,41 @@
             <button type="button" id="btn-fl-copy-share-link" class="btn btn-ghost btn-sm" title="Sao chép link">📋 Copy</button>
           </div>
 
-          <button type="button" id="btn-fl-host-leave" class="btn btn-danger btn-sm w-full" style="margin-top:.3rem;">
+          <!-- THÔNG ĐIỆP CA TRƯỞNG TỨC THỜI (ONSONG CUES - TICKET L3-6) -->
+          <div class="fl-host-cues-section" style="width:100%;border-top:1px dashed var(--border);padding-top:.85rem;margin-top:.2rem;text-align:left;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;">
+              <span style="font-size:.8rem;font-weight:700;color:var(--accent);">📣 Nhắc Ban Nhạc (OnSong Cues):</span>
+              <span style="font-size:.7rem;color:var(--text-muted);">(Tự tắt sau 5s)</span>
+            </div>
+            
+            <div class="fl-cues-grid" style="display:grid;grid-template-columns:repeat(3, 1fr);gap:6px;margin-bottom:.6rem;">
+              <button type="button" class="btn btn-secondary btn-xs btn-fl-cue" data-cue="repeat" data-icon="🔁" data-text="Lặp Điệp Khúc" style="font-weight:600;padding:.35rem .4rem;">
+                🔁 Lặp ĐK
+              </button>
+              <button type="button" class="btn btn-secondary btn-xs btn-fl-cue" data-cue="slow" data-icon="⏳" data-text="Khổ cuối chậm" style="font-weight:600;padding:.35rem .4rem;">
+                ⏳ Chậm lại
+              </button>
+              <button type="button" class="btn btn-secondary btn-xs btn-fl-cue" data-cue="key" data-icon="🎺" data-text="Lên tông (+1)" style="font-weight:600;padding:.35rem .4rem;">
+                🎺 Lên tông
+              </button>
+              <button type="button" class="btn btn-secondary btn-xs btn-fl-cue" data-cue="ending" data-icon="🛑" data-text="Chuẩn bị kết" style="font-weight:600;padding:.35rem .4rem;">
+                🛑 Kết bài
+              </button>
+              <button type="button" class="btn btn-secondary btn-xs btn-fl-cue" data-cue="intro" data-icon="🎹" data-text="Dạo lại intro" style="font-weight:600;padding:.35rem .4rem;">
+                🎹 Dạo lại
+              </button>
+              <button type="button" class="btn btn-secondary btn-xs btn-fl-cue" data-cue="custom" data-icon="📢" data-text="Chú ý nhịp phách" style="font-weight:600;padding:.35rem .4rem;">
+                📢 Chú ý nhịp
+              </button>
+            </div>
+
+            <div style="display:flex;gap:4px;">
+              <input type="text" id="fl-cue-custom-input" class="form-input text-xs" style="flex:1;height:28px;padding:.2rem .5rem;" placeholder="Thông điệp tùy ý (VD: Ngắt tự do...)" maxlength="50">
+              <button type="button" id="btn-fl-send-custom-cue" class="btn btn-primary btn-xs" style="padding:0 .75rem;font-weight:700;">Gửi</button>
+            </div>
+          </div>
+
+          <button type="button" id="btn-fl-host-leave" class="btn btn-danger btn-sm w-full" style="margin-top:.4rem;">
             👋 Kết Thúc Buổi Phát Sóng
           </button>
         </div>
