@@ -1,6 +1,9 @@
 @echo off
-set GIT_EXE=C:\Users\CNS-MSI-004\.git-bin\cmd\git.exe
-if not exist "%GIT_EXE%" (
+if exist "C:\Program Files\Git\cmd\git.exe" (
+    set GIT_EXE=C:\Program Files\Git\cmd\git.exe
+) else if exist "C:\Users\CNS-MSI-004\.git-bin\cmd\git.exe" (
+    set GIT_EXE=C:\Users\CNS-MSI-004\.git-bin\cmd\git.exe
+) else (
     set GIT_EXE=git
 )
 
