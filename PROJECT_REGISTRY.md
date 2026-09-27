@@ -1143,10 +1143,19 @@ SheetApp/
   🏆 0 LỆNH FETCH() TRỰC TIẾP NGOÀI APISERVICE — 10/10 MODAL CHUẨN A11Y & MODALMANAGER.
   🏆 TOÀN BỘ 58/58 REGRESSION TEST SUITES TRONG TEST.BAT ĐẠT 100% PASS (1240 passed, 0 failed).
 
+[2026-09-28] — Hoàn tất Ticket L3-9 (ROADMAP4.md): "Tải cho Chúa nhật" (Offline Package 1-Click)
+  ~ Sửa: assets/js/service-plan-ui.js (Cung cấp nút `#btn-sp-offline-dl` với nhãn "📥 Tải cho Chúa nhật", huy hiệu `.tag-offline-ready` hiển thị "✓ Sẵn sàng offline (n/n)", bổ sung fallback tự chèn container khi chưa có header)
+  ~ Sửa: assets/js/core/OfflineSetlistManager.js (Thêm phương thức checkOnStartup() tự động xác thực và kích hoạt EventBus 'offline:ready' khi mở ứng dụng)
+  ~ Sửa: assets/js/app.js (Tự động kích hoạt OfflineSetlistManager.checkOnStartup() khi ứng dụng boot)
+  ~ Sửa: assets/js/song-loader.js (Bổ sung CacheStorage offline fallback cho fetchXml, giúp mở và vẽ bản nhạc OSMD ngoại tuyến ổn định ngay cả khi Service Worker chưa chiếm quyền kiểm soát)
+  + Tạo: tests/library_l39_offline_sunday_package_regression.php (14/14 checks PASS, 71.4% behavioral assertions)
+  + Tạo: e2e/library-l3-offline-sunday.spec.js (E2E Playwright: Tải gói 1-Click, kiểm tra huy hiệu, reload xác thực checkOnStartup, ngắt mạng offline mode mở và render bản nhạc thành công trên cả Chromium và WebKit)
+  🏆 ĐẠT 100% QUALITY GATE: 106/106 suites PASS (1849 passed, 0 failed, 65.4% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
+
 ---
 
 *File này là "bộ nhớ" của dự án. AI Agent cập nhật sau mỗi phiên để phiên sau không phải khám phá lại từ đầu.*
-*Cập nhật: 2026-09-26*
+*Cập nhật: 2026-09-28*
 
 
 

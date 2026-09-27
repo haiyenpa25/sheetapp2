@@ -356,6 +356,31 @@ const OfflineSetlistManager = (() => {
     return getOfflineChords(songId, profile) !== null;
   }
 
+  /**
+   * Tự động kiểm tra lại tính sẵn sàng offline của các gói khi mở app (Ticket L3-9)
+   */
+  async function checkOnStartup() {
+    const list = listPackages();
+    if (!list || list.length === 0) return null;
+
+    const latestPkg = list[0];
+    try {
+      const res = await verifyPackage(latestPkg.id);
+      if (res && res.isReady && res.totalCount > 0) {
+        if (typeof EventBus !== 'undefined') {
+          EventBus.emit('offline:ready', { package: latestPkg, details: res });
+        }
+        if (typeof navigator !== 'undefined' && !navigator.onLine) {
+          window.App?.showToast?.(`✓ Sẵn sàng offline: ${latestPkg.title} (${res.cachedCount}/${res.totalCount})`, 'success');
+        }
+      }
+      return res;
+    } catch (e) {
+      console.warn('[OfflineSetlistManager] checkOnStartup error:', e);
+      return null;
+    }
+  }
+
   return {
     isSupported,
     getSetlistCacheName,
@@ -368,7 +393,8 @@ const OfflineSetlistManager = (() => {
     getOfflineSong,
     getAllOfflineSongs,
     getOfflineChords,
-    hasOfflineChords
+    hasOfflineChords,
+    checkOnStartup
   };
 })();
 

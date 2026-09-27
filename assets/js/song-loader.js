@@ -60,15 +60,26 @@ const SongLoader = (() => {
         const xmlUrl = (window.ApiService && typeof window.ApiService.resolveUrl === 'function')
           ? window.ApiService.resolveUrl(song.xmlPath)
           : (song.xmlPath || '');
+        const fetchXml = async () => {
+          try {
+            // INTENTIONAL EXCEPTION: Static MusicXML asset fetch
+            const r = await fetch(xmlUrl, { signal: abortSignal });
+            if (r.ok) return r;
+          } catch (e) {}
+          if (typeof caches !== 'undefined') {
+            const cached = await caches.match(xmlUrl);
+            if (cached) return cached;
+          }
+          throw new Error('Không thể nạp file XML (Mất mạng và chưa lưu ngoại tuyến)');
+        };
+
         const [res, settings] = await Promise.all([
-          // INTENTIONAL EXCEPTION: Static MusicXML asset fetch
-          fetch(xmlUrl, { signal: abortSignal }),
+          fetchXml(),
           ApiService.sessions.load(song.id).catch(() => ({})),
           ChordCanvas.loadSong(song.id, profileOverride)  // đảm bảo chords ready trước render
         ]);
         if (loadToken !== _currentLoadToken) return;
 
-        if (!res.ok) throw new Error(`Không thể tải file: ${res.status}`);
         xml = await res.text();
         if (loadToken !== _currentLoadToken) return;
 

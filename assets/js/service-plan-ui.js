@@ -59,6 +59,9 @@ const ServicePlanUI = (() => {
       const headerEl = document.querySelector('.setlist-detail-header');
       if (headerEl && headerEl.parentNode) {
         headerEl.parentNode.insertBefore(metaEl, headerEl.nextSibling);
+      } else {
+        const detail = document.getElementById('setlist-detail') || document.body;
+        detail.appendChild(metaEl);
       }
     }
 
@@ -102,7 +105,7 @@ const ServicePlanUI = (() => {
 
     if (offlineStatus.isDownloaded) {
       if (offlineStatus.isReady) {
-        offlineBadge = `<span class="tag tag-green" style="font-size:0.68rem;" title="Đã tải đủ 100% file XML và hợp âm">⚡ Sẵn sàng offline (${offlineStatus.cachedCount}/${offlineStatus.totalCount})</span>`;
+        offlineBadge = `<span class="tag tag-green tag-offline-ready" style="font-size:0.68rem;font-weight:700;" title="Đã tải đủ 100% file XML và hợp âm">✓ Sẵn sàng offline (${offlineStatus.cachedCount}/${offlineStatus.totalCount})</span>`;
       } else {
         offlineBadge = `<span class="tag tag-amber" style="font-size:0.68rem;" title="Thiếu một số file bài hát">⚠️ Chưa đủ offline (${offlineStatus.cachedCount}/${offlineStatus.totalCount})</span>`;
       }
@@ -113,7 +116,7 @@ const ServicePlanUI = (() => {
     } else {
       offlineBadge = `<span class="tag" style="font-size:0.68rem;opacity:0.7;">○ Chưa tải offline</span>`;
       offlineActions = `
-        <button id="btn-sp-offline-dl" class="btn btn-sm btn-ghost" style="padding:2px 6px;font-size:0.68rem;border:1px solid var(--border);" title="Tải trước toàn bộ bài hát & hợp âm để dùng khi không có mạng">⚡ Tải Offline</button>
+        <button id="btn-sp-offline-dl" class="btn btn-sm btn-ghost btn-sp-offline-dl" style="padding:2px 8px;font-size:0.68rem;border:1px solid var(--border);" title="Tải trọn bộ bài hát & hợp âm về máy để dùng khi không có mạng">📥 Tải cho Chúa nhật</button>
       `;
     }
 

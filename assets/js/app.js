@@ -42,6 +42,7 @@ const App = (() => {
     if (window.MobileController) MobileController.init();
     KeyboardHandler.init();
     if (window.ServiceWorkerManager) ServiceWorkerManager.register();
+    if (window.OfflineSetlistManager?.checkOnStartup) window.OfflineSetlistManager.checkOnStartup();
 
 
     // Library callbacks
