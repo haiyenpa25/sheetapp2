@@ -217,6 +217,7 @@ echo jsTag('core/Store.js',        false);
 echo jsTag('core/AppShell.js',     false);
 echo jsTag('core/ModalManager.js', false);
 echo jsTag('core/ModeManager.js',  false);
+echo jsTag('core/VerseManager.js', false);
 echo jsTag('core/TapTempo.js',     false);
 echo jsTag('core/AudioUnlocker.js',false);
 echo jsTag('core/MidiEngine.js',   false);

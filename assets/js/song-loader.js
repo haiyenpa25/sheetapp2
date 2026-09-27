@@ -78,7 +78,13 @@ const SongLoader = (() => {
 
       // ── Render OSMD ──
       AppUI.setLoadingText('Đang vẽ bản nhạc...');
-      const processedXml = _injectChords(xml);
+      let processedXml = _injectChords(xml);
+      if (window.VerseManager?.onSongLoaded) {
+        window.VerseManager.onSongLoaded(processedXml);
+      }
+      if (window.VerseManager?.processXml) {
+        processedXml = window.VerseManager.processXml(processedXml);
+      }
       OSMDRenderer.setZoomSilent(zoom);
 
       // Bắt buộc hiển thị container trước khi render để OSMD tính đúng clientWidth
@@ -147,7 +153,10 @@ const SongLoader = (() => {
     if (disp) disp.style.opacity = '0.5';
 
     const isLyricActive = !document.getElementById('lyric-view-container')?.classList.contains('hidden');
-    const processedXml  = _injectChords(xml);
+    let processedXml  = _injectChords(xml);
+    if (window.VerseManager?.processXml) {
+      processedXml = window.VerseManager.processXml(processedXml);
+    }
 
     if (isLyricActive) {
       SessionTracker.setTranspose(transpose);

@@ -142,6 +142,18 @@ const KeyboardHandler = (() => {
       case 'f': case 'F':
         window.ModeManager ? window.ModeManager.togglePerformance() : AppUI?.toggleFullscreen?.();
         break;
+      case 'v': case 'V':
+        if (!e.ctrlKey && !e.metaKey && !e.altKey && xml) {
+          if (window.VerseManager?.hasMultipleVerses?.()) {
+            e.preventDefault();
+            if (e.shiftKey) {
+              window.VerseManager.prevVerse();
+            } else {
+              window.VerseManager.nextVerse();
+            }
+          }
+        }
+        break;
       case 'p': case 'P': if (xml) window.print(); break;
       case 'd': case 'D': document.getElementById('btn-dark-toggle')?.click(); break;
       case '+': case '=': if (e.ctrlKey) { e.preventDefault(); _adjustZoom(+10); } break;

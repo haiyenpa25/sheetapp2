@@ -1109,6 +1109,68 @@ body.dark-mode .btn-chord-edit-pill:hover:not(:disabled) {
   cursor: pointer;
 }
 
+/* Cụm Chọn Khổ Hát (Ticket L1-6 ⭐) */
+.verse-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+}
+
+.btn-verse-mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  height: 44px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 8px;
+  cursor: pointer;
+  border-radius: 6px;
+  box-sizing: border-box;
+  font-weight: 700;
+  transition: background 0.15s;
+}
+
+.btn-verse-mode:hover {
+  background: var(--bg-hover);
+}
+
+.verse-nav-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.btn-verse-nav {
+  font-size: 0.72rem;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.verse-indicator {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 0.76rem;
+  color: #8b5cf6;
+  min-width: 28px;
+  text-align: center;
+  user-select: none;
+}
+
+.btn-gig-verse {
+  background: rgba(139, 92, 246, 0.25) !important;
+  border-color: rgba(139, 92, 246, 0.45) !important;
+  color: #c4b5fd !important;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 .btn-pill-scroll {
   display: inline-flex;
   align-items: center;
@@ -1794,7 +1856,9 @@ body.sheet-only-mode .gig-floating-hud {
   #capo-badge {
     display: none !important;
   }
-  .btn-pill-reset {
+  .btn-pill-reset,
+  .preset-label,
+  .verse-mode-label {
     display: none !important;
   }
   #btn-toolbar-chord-edit,

@@ -116,6 +116,19 @@
       <span id="chord-preset-label" class="preset-label" style="font-size: 0.72rem; margin-left: 2px; opacity: 0.85;">Chuẩn</span>
     </button>
 
+    <!-- Cụm Chọn Khổ (Ticket L1-6 ⭐: Tất cả khổ / Một khổ / Trải khổ) -->
+    <div class="band-pill verse-pill hidden" id="verse-pill" role="group" aria-label="Chọn khổ hát" title="Chế độ hiển thị khổ">
+      <button id="btn-verse-mode" class="btn-verse-mode" title="Đổi chế độ: Tất cả khổ ↔ Một khổ ↔ Trải khổ (Phím V)">
+        <span class="verse-icon" style="font-size: 0.88rem;">📖</span>
+        <span id="verse-mode-label" class="verse-mode-label" style="font-size: 0.76rem; font-weight: 700;">Tất cả khổ</span>
+      </button>
+      <div id="verse-nav-controls" class="verse-nav-controls hidden" style="display: inline-flex; align-items: center; gap: 2px;">
+        <button id="btn-verse-prev" class="icon-btn-pill btn-verse-nav" title="Khổ trước (Shift+V)">◀</button>
+        <span id="verse-indicator" class="verse-indicator" title="Khổ hiện tại / Tổng số khổ" style="font-size: 0.74rem; font-weight: 800; font-family: var(--font-mono); min-width: 26px; text-align: center;">1/1</span>
+        <button id="btn-verse-next" class="icon-btn-pill btn-verse-nav" title="Khổ tiếp theo (V)">▶</button>
+      </div>
+    </div>
+
     <!-- Cụm Xem Band (Lời + Hợp âm chữ) / Bản Nhạc (Ticket L0-4 & L1-7) -->
     <button id="btn-band-toggle" class="band-pill btn-toggle-view btn-band-toggle" title="Chuyển chế độ: Band (Lời & Hợp âm chữ) ↔ Bản Nhạc">
       <span class="view-icon">▶</span>

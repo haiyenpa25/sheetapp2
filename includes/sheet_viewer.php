@@ -129,6 +129,9 @@
         <button id="btn-gig-lock-zoom" class="btn-gig-action btn-gig-lock" title="Khóa tỷ lệ zoom (khi đổi bài giữ nguyên)">🔓</button>
       </div>
 
+      <!-- Nút Chuyển Khổ trong Biểu Diễn (Ticket L1-6 ⭐) -->
+      <button id="btn-gig-verse" class="btn-gig-action btn-gig-verse hidden" title="Chuyển khổ hát (Phím V)">Khổ 1/1</button>
+
       <button id="btn-gig-scroll-toggle" class="btn-gig-action btn-gig-scroll" title="Bật/Tắt cuộn (Space)">▼ Cuộn</button>
       <button id="btn-gig-exit" class="btn-gig-action btn-gig-exit" title="Thoát Biểu Diễn (Esc)">✕ Thoát</button>
     </div>
