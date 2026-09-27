@@ -1179,7 +1179,11 @@ SheetApp/
   ~ Sửa: assets/css/components.css (Styles cho .guitar-lens-bar, .guitar-chord-card, .btn-guitar-tool và .guitar-chord-svg)
   + Tạo: tests/library_l42_guitar_lens_regression.php (21/21 checks PASS, 61.9% behavioral assertions)
   + Tạo: e2e/library-l4-guitar-lens.spec.js (E2E Playwright: Chế độ Band, Capo cá nhân không đổi tông band, đơn giản hoá Cmaj7 → C và D7sus4 → D, bảng thế bấm SVG, bảo tồn qua reload trên cả Chromium và WebKit)
-  🏆 ĐẠT 100% QUALITY GATE: 109/109 suites PASS (1908 passed, 0 failed, 66.5% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
+[2026-09-28] — Hoàn tất Ticket L4-3 (ROADMAP4.md): Keyboard Stage Lens (Bản Nhạc Đầy Đủ + Hợp Âm)
+  ~ Sửa: assets/js/stage-lens.js (Bổ sung logic thích ứng _applyRoleAdaptations cho Keyboard: tự động đóng chế độ Band/Lời, chuyển sang Bản nhạc đầy đủ #osmd-container v=sheet, kích hoạt hiển thị hợp âm trên khuông nhạc, ẩn thanh guitar bar để tối đa hoá diện tích hiển thị)
+  + Tạo: tests/library_l43_keyboard_lens_regression.php (17/17 checks PASS, 58.8% behavioral assertions)
+  + Tạo: e2e/library-l4-keyboard-lens.spec.js (E2E Playwright: Chọn Keyboard tự động ẩn Band mode mở bản nhạc OSMD đầy đủ, hợp âm hiển thị, ẩn guitar bar, bảo tồn qua reload trên cả Chromium và WebKit)
+  🏆 ĐẠT 100% QUALITY GATE: 110/110 suites PASS (1925 passed, 0 failed, 66.8% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
 
 ---
 

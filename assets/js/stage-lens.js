@@ -69,6 +69,7 @@ const StageLens = (() => {
     }
 
     _updateToolbarUI(info);
+    _applyRoleAdaptations(_currentRole);
 
     if (notify && window.App?.showToast) {
       window.App.showToast(`🎯 Vai trò: ${info.icon} ${info.label}`, 'info', 1800);
@@ -79,6 +80,48 @@ const StageLens = (() => {
     }
 
     return info;
+  }
+
+  function _applyRoleAdaptations(roleId) {
+    if (typeof document === 'undefined') return;
+
+    if (roleId === 'keyboard') {
+      // Ticket L4-3: Keyboard: Bản nhạc đầy đủ + Hợp âm
+      const lyricContainer = document.getElementById('lyric-view-container');
+      const osmdContainer = document.getElementById('osmd-container');
+      const btnBand = document.getElementById('btn-band-toggle') || document.getElementById('btn-lyric-view');
+
+      // Nếu đang mở chế độ Lời/Band: chuyển sang Bản nhạc
+      if (lyricContainer && !lyricContainer.classList.contains('hidden')) {
+        lyricContainer.classList.add('hidden');
+        if (osmdContainer) osmdContainer.style.display = 'block';
+        if (btnBand) {
+          btnBand.classList.remove('active');
+          const txt = btnBand.querySelector('.view-text') || btnBand.querySelector('.btn-text');
+          if (txt) txt.textContent = 'Lời Nhạc';
+        }
+        window.URLState?.update?.({ v: 'sheet' });
+        try { localStorage.setItem('sheetapp_view_mode', 'sheet'); } catch (_) {}
+        if (window.ChordCanvas?.reposition) {
+          setTimeout(() => window.ChordCanvas.reposition(), 100);
+        }
+      }
+
+      // Đảm bảo hiển thị hợp âm trên bản nhạc
+      if (window.ChordCanvas?.showChords) {
+        window.ChordCanvas.showChords();
+      }
+
+      // Ẩn thanh guitar bar nếu có
+      const guitarBar = document.getElementById('guitar-lens-bar');
+      if (guitarBar) guitarBar.classList.add('hidden');
+    } else if (roleId === 'guitar') {
+      const guitarBar = document.getElementById('guitar-lens-bar');
+      if (guitarBar) guitarBar.classList.remove('hidden');
+      if (window.GuitarLens?.refreshPalette) {
+        setTimeout(() => window.GuitarLens.refreshPalette(), 200);
+      }
+    }
   }
 
   function _createPickerModal() {
