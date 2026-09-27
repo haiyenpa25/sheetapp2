@@ -399,3 +399,43 @@ body.dark-mode .voice-selector {
   background: rgba(139, 92, 246, 0.12) !important;
 }
 
+/* ========================================================
+   Ticket L4-2: Guitar Stage Lens & Chord Palette
+   ======================================================== */
+.guitar-lens-bar {
+  width: 100%;
+  position: relative;
+  z-index: 20;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  animation: fadeInDown 0.2s ease-out;
+}
+.btn-guitar-tool {
+  transition: all var(--transition-fast, 0.15s ease);
+}
+.btn-guitar-tool:hover {
+  background: var(--bg-hover) !important;
+  border-color: var(--accent-amber, #f59e0b) !important;
+}
+.btn-guitar-tool.active {
+  background: rgba(245, 158, 11, 0.2) !important;
+  border-color: var(--accent-amber, #f59e0b) !important;
+  color: var(--accent-amber, #f59e0b) !important;
+  font-weight: 700;
+}
+.guitar-chord-card {
+  transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+}
+.guitar-chord-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-amber, #f59e0b) !important;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+}
+.guitar-chord-svg text {
+  font-family: var(--font-sans, system-ui, -apple-system, sans-serif);
+}
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+

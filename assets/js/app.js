@@ -30,6 +30,7 @@ const App = (() => {
     if (window.Importer)         Importer.init();
     if (window.DisplaySettings)  DisplaySettings.init();
     if (window.StageLens)        window.StageLens.init();
+    if (window.GuitarLens)       window.GuitarLens.init();
     if (window.PerformanceNotes) PerformanceNotes.init();
     if (window.SongInfoBar)      SongInfoBar.init();
     if (window.Metronome)        Metronome.init();

@@ -1169,7 +1169,17 @@ SheetApp/
   ~ Sửa: eslint.config.js (Khai báo global StageLens: 'writable')
   + Tạo: tests/library_l41_stage_lens_roles_regression.php (19/19 checks PASS, 68.4% behavioral assertions)
   + Tạo: e2e/library-l4-stage-lens.spec.js (E2E Playwright: Chọn 5 vai trò, đổi bằng 1 icon trên toolbar, đổi dataset và label, bảo toàn qua reload trên cả Chromium và WebKit)
-  🏆 ĐẠT 100% QUALITY GATE: 108/108 suites PASS (1887 passed, 0 failed, 66.1% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
+[2026-09-28] — Hoàn tất Ticket L4-2 (ROADMAP4.md): Guitar Stage Lens, Capo Cá Nhân & Đơn Giản Hoá Hợp Âm
+  + Tạo: assets/js/guitar-lens.js (Quản lý chế độ Guitar: Capo cá nhân lưu localStorage không đổi tông cả band; thuật toán đơn giản hoá Cmaj7 → C, D7sus4 → D, Am7 → Am, Em9/G → Em/G; cơ sở dữ liệu thế bấm guitar 6 dây và hàm renderChordSvg; bảng thế bấm mini guitar #guitar-chord-palette; thanh điều khiển #guitar-lens-bar; 558 dòng < 600 dòng)
+  ~ Sửa: assets/js/display-settings.js (Tích hợp getPersonalCapo vào chordShift thế bấm chế độ Band, đơn giản hoá custom chords khi bật)
+  ~ Sửa: assets/js/lyric-extractor.js (Tích hợp simplifyChord vào bộ trích xuất lời và render hiển thị, thêm huy hiệu Capo cá nhân trong header)
+  ~ Sửa: includes/toolbar.php & index.php (Nạp guitar-lens.js)
+  ~ Sửa: assets/js/app.js (Khởi tạo GuitarLens.init() khi app boot)
+  ~ Sửa: eslint.config.js (Khai báo global GuitarLens: 'writable')
+  ~ Sửa: assets/css/components.css (Styles cho .guitar-lens-bar, .guitar-chord-card, .btn-guitar-tool và .guitar-chord-svg)
+  + Tạo: tests/library_l42_guitar_lens_regression.php (21/21 checks PASS, 61.9% behavioral assertions)
+  + Tạo: e2e/library-l4-guitar-lens.spec.js (E2E Playwright: Chế độ Band, Capo cá nhân không đổi tông band, đơn giản hoá Cmaj7 → C và D7sus4 → D, bảng thế bấm SVG, bảo tồn qua reload trên cả Chromium và WebKit)
+  🏆 ĐẠT 100% QUALITY GATE: 109/109 suites PASS (1908 passed, 0 failed, 66.5% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
 
 ---
 

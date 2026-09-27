@@ -77,6 +77,7 @@ const LyricExtractor = (() => {
           let str = parseHarmonyToText(c);
           const custom = c.hasAttribute('color');
           if (!custom && transposeOffset !== 0) str = _transposeChordText(str, transposeOffset);
+          if (window.GuitarLens?.isSimplifyActive?.()) str = window.GuitarLens.simplifyChord(str);
           currentChord = str;
 
         } else if (c.tagName === 'note') {
@@ -194,6 +195,10 @@ const LyricExtractor = (() => {
     let html = '<div class="lv-wrapper">';
 
     if (title && title !== 'Chọn bài hát để bắt đầu') {
+      const isGuitar = window.StageLens?.getCurrentRole?.() === 'guitar' || document.body?.dataset?.stageLens === 'guitar';
+      const personalCapo = isGuitar ? (window.GuitarLens?.getPersonalCapo?.() || 0) : 0;
+      const capoBadge = personalCapo > 0
+        ? `<span class="lv-capo-badge" style="margin-left:6px;padding:2px 7px;border-radius:4px;background:var(--accent-amber,#f59e0b);color:#18181b;font-size:0.75rem;font-weight:700;">🎸 Capo ${personalCapo}</span>` : '';
       const trBadge = actualTranspose !== 0
         ? `<span class="lv-trans-badge">${actualTranspose > 0 ? '+' : ''}${actualTranspose}</span>` : '';
       const modeLabel   = isInline ? '↕ Dạng Hợp Âm' : '≡ Dạng Inline';
@@ -204,7 +209,7 @@ const LyricExtractor = (() => {
             <h2 class="lv-title">${title}</h2>
             <button class="lv-mode-btn" id="lv-mode-toggle" title="${modeTitle}">${modeLabel}</button>
           </div>
-          ${key ? `<p class="lv-key">🎼 Tông <strong>${key}</strong>${trBadge}</p>` : ''}
+          ${key ? `<p class="lv-key">🎼 Tông <strong>${key}</strong>${trBadge}${capoBadge}</p>` : ''}
         </header>`;
     }
 
@@ -230,10 +235,12 @@ const LyricExtractor = (() => {
         for (const syl of view.syllables) {
           const spClass = syl.isWordEnd ? 'lv-we' : 'lv-wm';
           const rest    = !syl.text || syl.text === '\u00a0';
-          const safeChord = syl.chord ? (window.SafeHtml ? window.SafeHtml.escape(syl.chord) : syl.chord) : '';
+          let cStr = syl.chord;
+          if (cStr && window.GuitarLens?.isSimplifyActive?.()) cStr = window.GuitarLens.simplifyChord(cStr);
+          const safeChord = cStr ? (window.SafeHtml ? window.SafeHtml.escape(cStr) : cStr) : '';
           const safeText = syl.text ? (window.SafeHtml ? window.SafeHtml.escape(syl.text) : syl.text) : '';
-          const chordEl = syl.chord
-            ? `<b class="lv-chord">${safeChord}</b>`
+          const chordEl = cStr
+            ? `<b class="lv-chord" data-chord="${safeChord}">${safeChord}</b>`
             : `<b class="lv-chord lv-chord-empty"></b>`;
           const sylEl = rest
             ? `<span class="lv-syl lv-rest">\u00a0\u00a0</span>`

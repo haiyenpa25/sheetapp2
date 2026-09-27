@@ -204,6 +204,7 @@ module.exports = [
         ServiceWorkerManager: 'writable',
         SongLoader: 'writable',
         StageLens: 'writable',
+        GuitarLens: 'writable',
         MobileController: 'writable',
         Importer: 'writable',
         ToolbarController: 'writable',

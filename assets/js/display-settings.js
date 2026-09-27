@@ -535,38 +535,33 @@ const DisplaySettings = (() => {
 
             // Core Rule 1 Fallback: Nếu bộ tùy biến (HD) rỗng, không xóa XML gốc mà giữ nguyên TLH
             if (Object.keys(customChords).length > 0) {
-                // Apply transpose và capo vào custom chords trước khi inject
                 const trOffset = window.App?.getCurrentTranspose?.() || 0;
-                const capo = window.Store?.get?.('capoLevel') || 0;
+                const pCapo = (window.StageLens?.getCurrentRole?.() === 'guitar' || document.body?.dataset?.stageLens === 'guitar') ? (window.GuitarLens?.getPersonalCapo?.() || 0) : 0;
+                const capo = pCapo > 0 ? pCapo : (window.Store?.get?.('capoLevel') || 0);
                 const chordShift = trOffset - capo;
-                let transposedChords = customChords;
-                if (chordShift !== 0 && window.TransposeEngine) {
-                    transposedChords = {};
-                    for (const [k, chord] of Object.entries(customChords)) {
-                        transposedChords[k] = window.TransposeEngine.transposeChord(chord, chordShift);
-                    }
+                let transposedChords = {};
+                for (const [k, chord] of Object.entries(customChords)) {
+                    let c = (chordShift !== 0 && window.TransposeEngine) ? window.TransposeEngine.transposeChord(chord, chordShift) : chord;
+                    if (window.GuitarLens?.isSimplifyActive?.()) c = window.GuitarLens.simplifyChord(c);
+                    transposedChords[k] = c;
                 }
-
                 if (window.ChordCanvasXML?.cloneAndInjectChords) {
                     return window.ChordCanvasXML.cloneAndInjectChords(rawXml, transposedChords);
                 }
             }
         }
-
-        // Default: trả về XML gốc (LyricExtractor sẽ parse harmony tag có sẵn)
         return rawXml;
     }
 
     function _renderLyricView() {
         const xml = _buildLyricXml();
         const trOffset = window.App?.getCurrentTranspose?.() || 0;
-        const capo = window.Store?.get?.('capoLevel') || 0;
+        const pCapo = (window.StageLens?.getCurrentRole?.() === 'guitar' || document.body?.dataset?.stageLens === 'guitar') ? (window.GuitarLens?.getPersonalCapo?.() || 0) : 0;
+        const capo = pCapo > 0 ? pCapo : (window.Store?.get?.('capoLevel') || 0);
         const chordShift = trOffset - capo;
         const currentSet = window.ChordCanvas?.getCurrentSet?.() || 'default';
         const customChords = window.ChordCanvas?.getCustomChords?.() || {};
         const hasCustomChords = currentSet !== 'default' && Object.keys(customChords).length > 0;
-        // Nếu custom set có hợp âm riêng: đã transpose trong _buildLyricXml
-        // Nếu default hoặc custom rỗng (fallback TLH): truyền chordShift để LyricExtractor dịch hợp âm gốc thành thế bấm
         const renderOffset = hasCustomChords ? 0 : chordShift;
         window.LyricExtractor?.render?.('lyric-view-container', xml, renderOffset);
     }
