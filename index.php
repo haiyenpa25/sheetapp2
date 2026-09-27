@@ -107,6 +107,7 @@ echo cssTag('app-shell.css');
 <div id="sidebar-overlay" class="sidebar-overlay hidden"></div>
 
 <?php require_once __DIR__ . '/includes/modals.php'; ?>
+<?php require_once __DIR__ . '/includes/quick_numpad_modal.php'; ?>
 <?php require_once __DIR__ . '/includes/admin_console.php'; ?>
 
 <!-- ===== METRONOME MINI-BAR GẮN ĐÁY (Ticket L1-10) ===== -->
@@ -233,6 +234,7 @@ echo jsTag('modals/TempoPickerSheet.js');
 echo jsTag('modals/ServicePlanAssignModal.js');
 echo jsTag('modals/PracticeTeamBoardModal.js');
 echo jsTag('library-ui.js');
+echo jsTag('modals/QuickNumpadModal.js');
 echo jsTag('service-plan-ui.js');
 echo jsTag('setlist-player.js');
 echo jsTag('setlist-list.js');

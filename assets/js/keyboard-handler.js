@@ -156,6 +156,10 @@ const KeyboardHandler = (() => {
         break;
       case 'p': case 'P': if (xml) window.print(); break;
       case 'd': case 'D': document.getElementById('btn-dark-toggle')?.click(); break;
+      case '#':
+        e.preventDefault();
+        window.QuickNumpadModal?.toggle?.();
+        break;
       case '+': case '=': if (e.ctrlKey) { e.preventDefault(); _adjustZoom(+10); } break;
       case '-':           if (e.ctrlKey) { e.preventDefault(); _adjustZoom(-10); } break;
       case 'z': case 'Z':

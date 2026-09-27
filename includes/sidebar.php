@@ -28,10 +28,13 @@
   </div>
 
   <div class="sidebar-search">
-    <div class="search-box" style="position:relative;">
+    <div class="search-box" style="position:relative; padding-right: 68px;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <input id="search-input" type="text" placeholder="Tìm bài hát..." autocomplete="off">
-      <button id="btn-search-lyrics" class="icon-btn-xs" title="Tìm theo lời bài hát" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:.8rem;opacity:.55;padding:.2rem .4rem;border-radius:4px;border:1px solid var(--border);background:var(--bg-overlay);">&#127925;</button>
+      <div style="position:absolute;right:6px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:4px;">
+        <button id="btn-quick-numpad" class="btn-quick-numpad" title="Bàn phím số nhanh (#)" aria-label="Mở bàn phím số nhanh">#</button>
+        <button id="btn-search-lyrics" class="icon-btn-xs" title="Tìm theo lời bài hát" style="font-size:.8rem;opacity:.55;padding:.2rem .4rem;border-radius:4px;border:1px solid var(--border);background:var(--bg-overlay);">&#127925;</button>
+      </div>
     </div>
 
     <!-- Hàng điều khiển: Sắp xếp + Nút gom bộ lọc Lọc (Ticket L2-3) -->
