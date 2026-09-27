@@ -150,6 +150,7 @@ const LiveSession = (() => {
         throw new Error(res.error || 'Không thể tạo phòng');
       }
     } catch (err) {
+      console.error('[LiveSession] startHost failed:', err?.message || err);
       window.App?.showToast?.('Lỗi mở phòng: ' + err.message, 'error');
       leaveRoom();
     }
@@ -203,10 +204,13 @@ const LiveSession = (() => {
       ? curSetlist.items[curIndex]
       : null;
 
+    const curSong = window.Store?.get?.('currentSong');
     const payload = {
       leader: { clientId: _clientId, name: window.Auth?.getUser?.() || 'Ca Trưởng' },
       song: {
-        songId: window.App?.getCurrentSongId?.() || '',
+        songId: curSong?.id || window.App?.getCurrentSongId?.() || '',
+        songTitle: curSong?.title || '',
+        xmlPath: curSong?.xmlPath || '',
         setlistId: curSetlist?.id || null,
         setlistIndex: curIndex >= 0 ? curIndex : 0
       },
@@ -225,6 +229,10 @@ const LiveSession = (() => {
       position: {
         measure: window.MusicalPosition?.getVisibleMeasure?.() || 1
       },
+      verse: {
+        verseIndex: window.VerseManager?.getCurrentVerse?.() ?? 1,
+        verseMode: window.VerseManager?.getMode?.() || 'all'
+      },
       ...patch
     };
 
@@ -237,11 +245,17 @@ const LiveSession = (() => {
     if (msg.type === 'connection') {
       _connectionStatus = msg.status;
       _updateBadgeUI();
+      if (window.FollowLeader?.onConnectionChange) {
+        window.FollowLeader.onConnectionChange(msg.status);
+      }
     } else if (msg.type === 'closed') {
       window.App?.showToast?.('📡 Phòng Live đã kết thúc bởi Trưởng ban.', 'info');
       leaveRoom();
     } else if (msg.type === 'state' && msg.state) {
       _lastState = msg.state;
+      if (window.FollowLeader?.onRemoteStateReceived) {
+        window.FollowLeader.onRemoteStateReceived(msg.state);
+      }
       if (window.PerformanceEngine) {
         window.PerformanceEngine.applyRemoteState(msg.state);
       }
@@ -368,7 +382,8 @@ const LiveSession = (() => {
     getMode: () => _mode,
     getRoomCode: () => _roomCode,
     isHost: () => _mode === 'host',
-    isConnected: () => _connectionStatus === 'connected'
+    isConnected: () => _connectionStatus === 'connected',
+    getLastState: () => _lastState
   };
 })();
 

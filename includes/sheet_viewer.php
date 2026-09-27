@@ -159,6 +159,27 @@
     <button id="btn-song-info-toggle" class="si-toggle" title="Thu gọn / Mở rộng thông tin">▼</button>
   </div>
 
+  <!-- FOLLOW LEADER BANNER (Dải trạng thái theo ca trưởng — Ticket L3-5) -->
+  <div id="follow-leader-banner" class="follow-leader-banner hidden" role="status" aria-live="polite">
+    <div class="fl-banner-inner">
+      <div class="fl-banner-left">
+        <span class="fl-pulse-dot" id="fl-pulse-dot" aria-hidden="true"></span>
+        <span class="fl-banner-icon" aria-hidden="true">📡</span>
+        <span id="fl-leader-status" class="fl-leader-status">
+          <span id="fl-leader-name" class="fl-leader-name">Đang theo: Ca Trưởng</span>
+          <span id="fl-room-code-tag" class="fl-room-code-tag">BAND-1234</span>
+        </span>
+      </div>
+      <div class="fl-banner-actions">
+        <button id="btn-follow-toggle-pause" class="btn-fl-pause" title="Tạm ngưng nhận đồng bộ từ ca trưởng">
+          <span id="fl-pause-icon">⏸️</span>
+          <span id="fl-pause-label">Tạm ngưng</span>
+        </button>
+        <button id="btn-follow-leave" class="btn-fl-leave" title="Rời khỏi phòng theo dõi" aria-label="Rời">&times;</button>
+      </div>
+    </div>
+  </div>
+
   <!-- LEADER NOTES BANNER (Dải vàng ghi chú ca trưởng — Ticket L3-3) -->
   <div id="leader-notes-banner" class="leader-notes-banner hidden" role="note" aria-label="Ghi chú ca trưởng">
     <div class="ln-banner-inner">

@@ -164,6 +164,11 @@ class LiveSyncService {
                     'startAt' => 0.0
                 ],
 
+                'verse' => [
+                    'verseIndex' => (int)($leader['verseIndex'] ?? ($leader['verse']['verseIndex'] ?? 1)),
+                    'verseMode'  => $leader['verseMode'] ?? ($leader['verse']['verseMode'] ?? 'all')
+                ],
+
                 'servicePlanItem' => $leader['servicePlanItem'] ?? null,
 
                 'cue' => null
@@ -280,6 +285,17 @@ class LiveSyncService {
             if (array_key_exists('servicePlanItem', $data)) {
                 $current['servicePlanItem'] = $data['servicePlanItem'];
                 $eventType = 'service_plan_item';
+            }
+
+            if (isset($data['verse']) && is_array($data['verse'])) {
+                $current['verse'] = array_merge($current['verse'] ?? [], $data['verse']);
+                $eventType = 'verse';
+            } elseif (isset($data['verseIndex'])) {
+                $current['verse']['verseIndex'] = (int)$data['verseIndex'];
+                if (isset($data['verseMode'])) {
+                    $current['verse']['verseMode'] = $data['verseMode'];
+                }
+                $eventType = 'verse';
             }
 
             if (array_key_exists('loop', $data)) {

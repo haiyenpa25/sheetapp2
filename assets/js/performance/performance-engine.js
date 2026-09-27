@@ -69,7 +69,8 @@ const PerformanceEngine = (() => {
           LiveSession.broadcastState({
             song: {
               songId: song?.id || '',
-              songTitle: song?.title || ''
+              songTitle: song?.title || '',
+              xmlPath: song?.xmlPath || ''
             },
             music: {
               transpose: window.Store?.get?.('currentTranspose') ?? 0,
@@ -98,6 +99,12 @@ const PerformanceEngine = (() => {
   async function applyRemoteState(state) {
     if (!state || LiveSession.isHost()) return;
 
+    // Follower đang ở chế độ Tạm Ngưng -> lưu pending state và bỏ qua
+    if (window.FollowLeader?.isPaused?.()) {
+      window.FollowLeader.setPendingState?.(state);
+      return;
+    }
+
     const currentSongId = window.App?.getCurrentSongId?.();
     const targetSongId  = state.song?.songId || state.songId;
 
@@ -111,7 +118,22 @@ const PerformanceEngine = (() => {
       if (cachedXml && window.App?.loadSongXmlDirect) {
         await window.App.loadSongXmlDirect(targetSongId, cachedXml, state.music?.transpose ?? 0);
       } else {
-        await window.SongLoader?.load?.({ id: targetSongId, xmlPath: `storage/Thanh ca/${targetSongId}.xml` });
+        let songObj = null;
+        if (state.song?.xmlPath) {
+          songObj = { id: targetSongId, title: songTitle, xmlPath: state.song.xmlPath };
+        } else if (window.LibraryUI?.getSongById) {
+          songObj = window.LibraryUI.getSongById(targetSongId);
+        }
+        if (!songObj && window.ApiService?.songs?.get) {
+          try {
+            const res = await window.ApiService.songs.get(targetSongId);
+            songObj = res?.data || res;
+          } catch (e) {}
+        }
+        if (!songObj) {
+          songObj = { id: targetSongId, title: songTitle, xmlPath: `storage/Thanh ca/${targetSongId}.xml` };
+        }
+        await window.SongLoader?.load?.(songObj, state.music?.transpose ?? 0);
       }
     }
 
@@ -179,7 +201,26 @@ const PerformanceEngine = (() => {
       window.CountInEngine?.cancel();
     }
 
+    // 7. Đồng bộ Khổ Hát (Verse & Verse Mode — Ticket L3-5)
+    if (state.verse && window.VerseManager) {
+      const targetMode = state.verse.verseMode;
+      const targetVerse = state.verse.verseIndex;
+      if (targetMode && window.VerseManager.getMode?.() !== targetMode) {
+        window.VerseManager.setMode?.(targetMode);
+      }
+      if (targetVerse && window.VerseManager.getCurrentVerse?.() !== targetVerse) {
+        window.VerseManager.setVerse?.(targetVerse);
+      }
+    }
+
     _lastAppliedState = state;
+  }
+
+  function applyPendingState(stateToApply) {
+    const s = stateToApply || window.FollowLeader?.getPendingState?.() || _lastAppliedState;
+    if (s) {
+      applyRemoteState(s);
+    }
   }
 
   /**
@@ -286,6 +327,7 @@ const PerformanceEngine = (() => {
   return {
     init,
     applyRemoteState,
+    applyPendingState,
     applyRoleView,
     triggerHostCountIn,
     onSessionStarted,

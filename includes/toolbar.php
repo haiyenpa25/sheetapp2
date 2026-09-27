@@ -163,6 +163,12 @@
       <span id="toolbar-auth-badge" class="user-pill-role hidden"></span>
     </button>
 
+    <!-- NÚT THEO CA TRƯỞNG (Ticket L3-5) -->
+    <button id="btn-follow-leader" class="btn-gig-mode btn-follow-leader" title="Theo ca trưởng / Đồng bộ ban nhạc (📡)">
+      <span class="follow-icon">📡</span>
+      <span class="follow-text">Theo ca trưởng</span>
+    </button>
+
     <!-- NÚT SÂN KHẤU / BIỂU DIỄN (BAND GIG MODE) -->
     <button id="btn-fullscreen" class="btn-gig-mode" title="Vào chế độ Biểu Diễn Toàn Màn Hình (Phím F)">
       <span class="gig-icon">⚡</span>
@@ -333,6 +339,10 @@
         <button id="btn-print" class="btn btn-ghost btn-sm btn-menu-item" disabled title="In sheet nhạc">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
           In Bản Nhạc
+        </button>
+        <button id="btn-menu-follow-leader" class="btn btn-ghost btn-sm btn-menu-item" title="Theo ca trưởng / Kết nối nhóm ban nhạc (📡)">
+          <span style="font-size: 0.95rem;">📡</span>
+          <span>Theo Ca Trưởng (Live Sync)</span>
         </button>
         <button id="btn-dark-toggle" class="btn btn-ghost btn-sm btn-menu-item" title="Đổi chế độ Sáng / Tối (D)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>

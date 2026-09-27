@@ -20,6 +20,7 @@ const VerseManager = (() => {
   let _availableVerses = [];
   let _selectedVerses = null;
   let _xmlCache = new Map();
+  let _pendingVerse = null;
 
   function init() {
     const savedMode = localStorage.getItem('sheetapp_verse_mode');
@@ -143,7 +144,12 @@ const VerseManager = (() => {
     _xmlCache.clear();
     _availableVerses = detectVerses(xmlString);
     const nav = getNavigableVerses();
-    _currentVerse = nav.length > 0 ? nav[0] : (_availableVerses.length > 0 ? _availableVerses[0] : 1);
+    if (_pendingVerse && (_availableVerses.includes(_pendingVerse) || nav.includes(_pendingVerse))) {
+      _currentVerse = _pendingVerse;
+      _pendingVerse = null;
+    } else {
+      _currentVerse = nav.length > 0 ? nav[0] : (_availableVerses.length > 0 ? _availableVerses[0] : 1);
+    }
     syncUI();
   }
 
@@ -303,6 +309,15 @@ const VerseManager = (() => {
     window.AppUI?.showToast?.(toastMsg, 'info');
 
     _reRenderSheet();
+
+    if (window.LiveSession?.isHost?.()) {
+      window.LiveSession.broadcastState({
+        verse: { verseIndex: _currentVerse, verseMode: _mode }
+      });
+    }
+    if (typeof EventBus !== 'undefined') {
+      EventBus.emit('verse:changed', { verse: _currentVerse, mode: _mode });
+    }
   }
 
   function cycleMode() {
@@ -317,18 +332,33 @@ const VerseManager = (() => {
 
   function setVerse(verseNum) {
     const v = parseInt(verseNum, 10);
+    if (isNaN(v)) return;
+    if (_availableVerses.length === 0) {
+      _pendingVerse = v;
+      return;
+    }
     const nav = getNavigableVerses();
-    if (isNaN(v) || (!nav.includes(v) && !_availableVerses.includes(v))) return;
+    if (!nav.includes(v) && !_availableVerses.includes(v)) return;
     if (_mode !== MODES.SINGLE) {
       _mode = MODES.SINGLE;
       localStorage.setItem('sheetapp_verse_mode', MODES.SINGLE);
     }
     _currentVerse = v;
+    _pendingVerse = null;
     syncUI();
     window.LyricExtractor?.highlightVerse?.(_currentVerse);
     const total = nav.length > 0 ? nav.length : _availableVerses.length;
     window.AppUI?.showToast?.(`Đã chuyển sang Khổ ${_currentVerse}/${total}`, 'info');
     _reRenderSheet();
+
+    if (window.LiveSession?.isHost?.()) {
+      window.LiveSession.broadcastState({
+        verse: { verseIndex: _currentVerse, verseMode: _mode }
+      });
+    }
+    if (typeof EventBus !== 'undefined') {
+      EventBus.emit('verse:changed', { verse: _currentVerse, mode: _mode });
+    }
   }
 
   function nextVerse() {

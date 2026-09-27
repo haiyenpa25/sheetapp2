@@ -108,6 +108,7 @@ echo cssTag('app-shell.css');
 
 <?php require_once __DIR__ . '/includes/modals.php'; ?>
 <?php require_once __DIR__ . '/includes/quick_numpad_modal.php'; ?>
+<?php require_once __DIR__ . '/includes/follow_leader_modal.php'; ?>
 <?php require_once __DIR__ . '/includes/admin_console.php'; ?>
 <?php require_once __DIR__ . '/includes/setlist_program_bar.php'; ?>
 
@@ -264,6 +265,7 @@ echo jsTag('song-info-bar.js');
 
 // ── 4. Performance Engine & Live Sync V2 (Lazy loaded on-demand khi bật Live Sync / Performance Mode) ──
 echo jsTag('live-sync.js');
+echo jsTag('follow-leader.js');
 
 // ── 5. App Controllers (defer, phụ thuộc vào modules trên) ──
 echo jsTag('song-preloader.js');
