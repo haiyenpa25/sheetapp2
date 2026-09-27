@@ -23,6 +23,7 @@ echo [2/3] Staging and committing changes...
 
 echo [3/3] Pushing to GitHub repository...
 set GIT_TERMINAL_PROMPT=0
+set GCM_INTERACTIVE=never
 "%GIT_EXE%" push origin main
 if errorlevel 1 (
     echo [Warning] Git push can require manual authentication or network. Local commit created.
