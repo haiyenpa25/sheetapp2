@@ -21,6 +21,12 @@ const ArrangementEngine = (() => {
   function init() {
     _createJumpBarDOM();
     _bindEvents();
+
+    const curSong = window.Store?.get?.('currentSong');
+    if (curSong?.id) {
+      loadForSong(curSong.id);
+    }
+
     console.log('[ArrangementEngine] Initialized');
   }
 
@@ -46,35 +52,40 @@ const ArrangementEngine = (() => {
    * Tạo DOM container cho Section Jump Bar nếu chưa có
    */
   function _createJumpBarDOM() {
-    if (document.getElementById('section-jump-bar-container')) return;
+    let bar = document.getElementById('section-jump-bar-container');
+    if (!bar) {
+      const wrapper = document.querySelector('.sheet-viewer-wrapper') || document.getElementById('sheet-container') || document.body;
+      
+      bar = document.createElement('div');
+      bar.id = 'section-jump-bar-container';
+      bar.className = 'section-jump-bar-container hidden';
+      bar.innerHTML = `
+        <div class="section-jump-bar" id="section-jump-bar">
+          <div class="section-chips-list" id="section-chips-list"></div>
+          <button type="button" class="btn-section-edit" id="btn-section-edit" title="Chỉnh sửa phân đoạn (Admin/Ban Hát)">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            <span class="btn-text">Phân đoạn</span>
+          </button>
+        </div>
+      `;
 
-    const wrapper = document.querySelector('.sheet-viewer-wrapper') || document.getElementById('sheet-container') || document.body;
-    
-    const bar = document.createElement('div');
-    bar.id = 'section-jump-bar-container';
-    bar.className = 'section-jump-bar-container hidden';
-    bar.innerHTML = `
-      <div class="section-jump-bar" id="section-jump-bar">
-        <div class="section-chips-list" id="section-chips-list"></div>
-        <button type="button" class="btn-section-edit" id="btn-section-edit" title="Chỉnh sửa phân đoạn (Admin/Ban Hát)">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-          <span class="btn-text">Phân đoạn</span>
-        </button>
-      </div>
-    `;
-
-    // Chèn lên trước sheet container hoặc vào đầu wrapper
-    const sheetContainer = document.getElementById('sheet-container') || document.getElementById('osmd-container');
-    if (sheetContainer && sheetContainer.parentNode) {
-      sheetContainer.parentNode.insertBefore(bar, sheetContainer);
-    } else {
-      wrapper.appendChild(bar);
+      // Chèn lên trước sheet container hoặc vào đầu wrapper
+      const sheetContainer = document.getElementById('sheet-container') || document.getElementById('osmd-container');
+      if (sheetContainer && sheetContainer.parentNode) {
+        sheetContainer.parentNode.insertBefore(bar, sheetContainer);
+      } else {
+        wrapper.appendChild(bar);
+      }
     }
 
     // Gắn sự kiện nút Sửa phân đoạn
-    document.getElementById('btn-section-edit')?.addEventListener('click', () => {
-      openSectionEditor();
-    });
+    const btnEdit = document.getElementById('btn-section-edit');
+    if (btnEdit && !btnEdit.dataset.bound) {
+      btnEdit.dataset.bound = 'true';
+      btnEdit.addEventListener('click', () => {
+        openSectionEditor();
+      });
+    }
   }
 
   /**
@@ -201,11 +212,39 @@ const ArrangementEngine = (() => {
     // 3. Kích hoạt thông báo Cue Banner
     if (window.CueEngine) {
       window.CueEngine.showBanner(`🎯 Đã nhảy đến: ${sec.name} (Ô nhịp ${sec.start_measure})`, 'jump', 2500);
+    } else if (window.AppUI?.showToast) {
+      window.AppUI.showToast(`🎯 Chuyển đoạn: ${sec.name}`, 'info');
     } else if (window.App?.showToast) {
       window.App.showToast(`🎯 Chuyển đoạn: ${sec.name}`, 'info');
     }
 
     EventBus.emit('section:jumped', { section: sec, measure: targetMeasure });
+  }
+
+  /**
+   * Nhảy tới phân đoạn tiếp theo trong bài
+   */
+  function nextSection() {
+    if (!_sections || _sections.length === 0) return;
+    const idx = _sections.findIndex(s => String(s.id) === String(_currentSectionId));
+    if (idx === -1) {
+      jumpToSection(_sections[0].id);
+    } else if (idx < _sections.length - 1) {
+      jumpToSection(_sections[idx + 1].id);
+    }
+  }
+
+  /**
+   * Nhảy về phân đoạn trước đó trong bài
+   */
+  function prevSection() {
+    if (!_sections || _sections.length === 0) return;
+    const idx = _sections.findIndex(s => String(s.id) === String(_currentSectionId));
+    if (idx === -1) {
+      jumpToSection(_sections[0].id);
+    } else if (idx > 0) {
+      jumpToSection(_sections[idx - 1].id);
+    }
   }
 
   /**
@@ -226,6 +265,16 @@ const ArrangementEngine = (() => {
         _lastHighlightedSec = null;
         _highlightChip(null);
       }
+    }
+  }
+
+  function highlightSection(sectionId) {
+    if (!sectionId || !_sections || _sections.length === 0) return;
+    const sec = _sections.find(s => String(s.id) === String(sectionId));
+    if (sec) {
+      _currentSectionId = sec.id;
+      _lastHighlightedSec = sec.id;
+      _highlightChip(sec.id);
     }
   }
 
@@ -487,6 +536,9 @@ const ArrangementEngine = (() => {
     getSections,
     getCurrentSection,
     jumpToSection,
+    nextSection,
+    prevSection,
+    highlightSection,
     updateActiveSectionByMeasure,
     renderJumpBar,
     openSectionEditor,

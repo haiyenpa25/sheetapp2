@@ -153,6 +153,15 @@ const KeyboardHandler = (() => {
             }
           }
         }
+      case 'j': case 'J':
+        if (!e.ctrlKey && !e.metaKey && !e.altKey && xml) {
+          e.preventDefault();
+          if (e.shiftKey) {
+            window.ArrangementEngine?.prevSection?.();
+          } else {
+            window.ArrangementEngine?.nextSection?.();
+          }
+        }
         break;
       case 'p': case 'P': if (xml) window.print(); break;
       case 'd': case 'D': document.getElementById('btn-dark-toggle')?.click(); break;

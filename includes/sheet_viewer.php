@@ -212,6 +212,17 @@
     </div>
   </div>
 
+  <!-- SONG ROADMAP & SECTION JUMP BAR (Dải bản đồ bài và nhảy đoạn — Ticket L3-7) -->
+  <div id="section-jump-bar-container" class="section-jump-bar-container hidden" role="navigation" aria-label="Bản đồ bài hát và nhảy đoạn">
+    <div class="section-jump-bar" id="section-jump-bar">
+      <div class="section-chips-list" id="section-chips-list"></div>
+      <button type="button" class="btn-section-edit" id="btn-section-edit" title="Chỉnh sửa phân đoạn (Admin/Ban Hát)">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        <span class="btn-text">Phân đoạn</span>
+      </button>
+    </div>
+  </div>
+
   <!-- OSMD CONTAINER -->
   <div id="sheet-area" class="sheet-area hidden">
     <div id="osmd-container" class="osmd-container"></div>

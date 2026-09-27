@@ -133,6 +133,7 @@ const SongLoader = (() => {
       // Các task phụ — không cần await
       if (window.SongInfoBar) SongInfoBar.loadSong(xml, song);
       if (window.PerformanceNotes) PerformanceNotes.loadSong(song.id); // bỏ await
+      if (window.LiveSync?.ensureLoaded) window.LiveSync.ensureLoaded();
 
       _enableAudioControls();
       AppUI.showOSMD();

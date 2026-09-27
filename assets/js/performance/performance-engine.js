@@ -151,6 +151,10 @@ const PerformanceEngine = (() => {
 
     // 3. Đồng bộ Vị trí Ô Nhịp (Musical Position) & Section
     const targetMeasure = state.position?.measure || state.measure;
+    const targetSectionId = state.position?.sectionId;
+    if (targetSectionId && window.ArrangementEngine?.highlightSection) {
+      window.ArrangementEngine.highlightSection(targetSectionId);
+    }
     if (targetMeasure && targetMeasure > 0) {
       MusicalPosition.scrollToMeasure(targetMeasure, true);
       if (typeof EventBus !== 'undefined') {
