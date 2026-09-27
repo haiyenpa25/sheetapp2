@@ -114,8 +114,12 @@
   <div class="song-list-container">
     <!-- TAB CONTENT: LIBRARY -->
     <div id="tab-content-library" class="sidebar-tab-content">
-      <!-- RECENTLY VIEWED -->
+      <!-- 1. CHƯƠNG TRÌNH HÔM NAY / SẮP TỚI (TICKET L2-4) -->
+      <div id="upcoming-setlist-section" class="upcoming-setlist-section hidden" style="border-bottom: 1px solid var(--border); padding: .45rem .65rem; background: rgba(109, 40, 217, 0.05);"></div>
+      <!-- 2. GẦN ĐÂY -->
       <div id="recently-viewed-section" style="display:none; border-bottom:1px solid var(--border); padding:.4rem 0 .3rem;"></div>
+      <!-- 3. YÊU THÍCH (TICKET L2-4) -->
+      <div id="quick-favorites-section" class="quick-favorites-section hidden" style="border-bottom:1px solid var(--border); padding:.4rem 0 .3rem;"></div>
       <div id="song-list" class="song-list">
         <div class="empty-state">
           <span class="empty-icon">🎶</span>

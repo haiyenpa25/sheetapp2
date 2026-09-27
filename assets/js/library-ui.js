@@ -10,7 +10,7 @@ const LibraryUI = (() => {
 
   function init() {
     if (window.HistoryManager?.init) {
-      window.HistoryManager.init(() => _buildRecentlyViewed());
+      window.HistoryManager.init(() => { _buildRecentlyViewed(); _buildQuickFavorites(); });
     }
     // Search — debounce 200ms
     searchEl()?.addEventListener('input', () => {
@@ -31,12 +31,10 @@ const LibraryUI = (() => {
     loadSongs();
 
     document.getElementById('btn-prev-song')?.addEventListener('click', () => {
-      // Nếu đang trong setlist → nhường quyền cho SetlistUI (tránh double-fire)
       if (window.SetlistUI?.getCurrentSetlist?.()) return;
       App?.navigatePrev?.();
     });
     document.getElementById('btn-next-song')?.addEventListener('click', () => {
-      // Nếu đang trong setlist → nhường quyền cho SetlistUI (tránh double-fire)
       if (window.SetlistUI?.getCurrentSetlist?.()) return;
       App?.navigateNext?.();
     });
@@ -58,7 +56,6 @@ const LibraryUI = (() => {
     });
 
     // Sidebar tabs
-
     document.getElementById('sidebar-tab-favs')?.addEventListener('click', _showFavorites);
     document.getElementById('sidebar-tab-lib')?.addEventListener('click', () => {
       document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
@@ -68,7 +65,6 @@ const LibraryUI = (() => {
       render(songs);
     });
 
-    // Category filter
     _buildCategoryFilter();
 
     // ── Event Delegation (touch instant 0ms + click fallback) ──
@@ -82,23 +78,16 @@ const LibraryUI = (() => {
         selectSong(item.dataset.id);
       }, { passive: true });
 
-      // click = fallback cho desktop và trường hợp touch không fire
       list.addEventListener('click', (e) => {
         const btn = e.target.closest('.song-delete-btn');
         if (btn) { e.stopPropagation(); _handleDelete(btn); return; }
-
         const addSetBtn = e.target.closest('.song-add-setlist-btn');
         if (addSetBtn) { e.stopPropagation(); _promptAddToSetlist(addSetBtn.closest('.song-item')?.dataset.id); return; }
-
         const favBtn = e.target.closest('.song-fav-btn');
         if (favBtn) { e.stopPropagation(); _handleFav(favBtn); return; }
-
         const item = e.target.closest('.song-item');
         if (!item?.dataset.id) return;
-
-        // Nếu touchstart đã xử lý item này trong vòng 600ms → bỏ qua (tránh double-fire)
         if (item.dataset.id === _lastTouchId && Date.now() - _lastTouchTime < 600) return;
-
         selectSong(item.dataset.id);
       });
     }
@@ -107,22 +96,21 @@ const LibraryUI = (() => {
   function _handleDelete(btn) {
     const item = btn.closest('.song-item');
     if (!item) return;
-    const id   = item.dataset.id;
-    const name = songs.find(s => s.id === id)?.title || 'bài này';
+    const id = item.dataset.id, name = songs.find(s => s.id === id)?.title || 'bài này';
     if (confirm(`Xoá "${name}" khỏi thư viện?`)) deleteSong(id);
   }
 
   function _handleFav(btn) {
     const item = btn.closest('.song-item');
     if (!item || !window.HistoryManager) return;
-    const id   = item.dataset.id;
-    const song = songs.find(s => s.id === id);
+    const id = item.dataset.id, song = songs.find(s => s.id === id);
     if (!song) return;
     const added = HistoryManager.toggleFavorite(song);
     btn.textContent = added ? '★' : '☆';
     btn.title       = added ? 'Bỏ yêu thích' : 'Thêm yêu thích';
     btn.classList.toggle('fav-active', added);
     App?.showToast(added ? '★ Đã thêm vào Yêu Thích' : 'Đã bỏ Yêu Thích', 'success');
+    _buildQuickFavorites();
   }
 
   // ── Load / Render ─────────────────────────────────────────────
@@ -140,7 +128,9 @@ const LibraryUI = (() => {
     if (songs.length > 0) {
       _buildCategoryFilter();
       _buildQuickJump(songs);
+      _buildUpcomingSetlist();
       _buildRecentlyViewed();
+      _buildQuickFavorites();
     }
     const urlSongId = new URLSearchParams(window.location.search).get('song');
     if (urlSongId) selectSong(urlSongId, false);
@@ -451,84 +441,96 @@ const LibraryUI = (() => {
     container.innerHTML = ''; container.appendChild(frag);
   }
 
-  // ── Recently Viewed ──────────────────────────────────────────
-  function _buildRecentlyViewed() {
-    const section = document.getElementById('recently-viewed-section');
-    if (!section || !window.HistoryManager) return;
-    const recent = HistoryManager.getRecent?.() ?? [];
-    if (!recent.length) { section.style.display = 'none'; return; }
-    section.style.display = '';
-    section.innerHTML = `<div class="recent-header"><span>Gần đây</span><button id="btn-clear-history" class="btn btn-ghost btn-xs">Xóa</button></div>` +
-      `<div class="recent-list">${recent.slice(0,5).map(s => `<div class="recent-item" data-id="${_esc(s.id)}" style="touch-action:manipulation"><span class="recent-num">${s.httlvnId ? String(s.httlvnId).padStart(3,'0') : ''}</span><span class="recent-title">${_esc(s.title)}</span></div>`).join('')}</div>`;
-    let _rLastId = '', _rLastTime = 0;
-    section.querySelectorAll('.recent-item').forEach(item => {
-      item.addEventListener('touchstart', () => { _rLastId = item.dataset.id; _rLastTime = Date.now(); selectSong(item.dataset.id); }, { passive: true });
-      item.addEventListener('click', () => { if (item.dataset.id === _rLastId && Date.now() - _rLastTime < 600) return; selectSong(item.dataset.id); });
-    });
-    section.querySelector('#btn-clear-history')?.addEventListener('click', e => { e.stopPropagation(); HistoryManager.clearHistory?.(); section.style.display = 'none'; });
+  // ── Upcoming Setlist (Ticket L2-4) ───────────────────────────
+  async function _buildUpcomingSetlist() {
+    const sec = document.getElementById('upcoming-setlist-section');
+    if (!sec) return;
+    try {
+      const resp = await ApiService?.setlists?.list?.();
+      const list = Array.isArray(resp) ? resp : (resp?.data ?? []);
+      if (!list || !list.length) { sec.classList.add('hidden'); sec.style.display = 'none'; return; }
+      const today = new Date().toISOString().split('T')[0];
+      const item = list.filter(s => s.scheduled_date && s.scheduled_date >= today).sort((a,b) => a.scheduled_date.localeCompare(b.scheduled_date))[0] || list[0];
+      const isToday = item.scheduled_date === today;
+      sec.style.display = ''; sec.classList.remove('hidden');
+      sec.innerHTML = `<div class="upcoming-setlist-card" data-id="${_esc(item.id)}" style="display:flex;align-items:center;justify-content:space-between;gap:8px;touch-action:manipulation;">` +
+        `<div class="upcoming-setlist-info" style="flex:1;min-width:0;cursor:pointer;"><div style="font-size:0.68rem;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:4px;text-transform:uppercase;"><span>📅</span><span>${isToday ? 'Chương trình hôm nay' : 'Chương trình sắp tới'}</span></div>` +
+        `<div class="upcoming-setlist-title" style="font-size:0.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;">${_esc(item.title)}</div>` +
+        `<div style="font-size:0.68rem;color:var(--text-muted);margin-top:2px;">${item.item_count || 1} bài ${item.scheduled_date ? '· ' + item.scheduled_date : ''}</div></div>` +
+        `<button class="btn btn-xs btn-primary btn-play-upcoming" style="flex-shrink:0;padding:4px 8px;font-size:0.72rem;" title="Mở chương trình">▶ Mở</button></div>`;
+      const open = () => { document.querySelector('[data-tab="setlist"]')?.click(); window.SetlistUI?.selectSetlist?.(item.id); };
+      sec.querySelector('.upcoming-setlist-info')?.addEventListener('click', open);
+      sec.querySelector('.btn-play-upcoming')?.addEventListener('click', open);
+    } catch { sec.classList.add('hidden'); sec.style.display = 'none'; }
   }
 
-  // ── Favorites ────────────────────────────────────────────────
+  // ── Recently Viewed & Quick Favorites (Ticket L2-4) ───────────
+  function _buildRecentlyViewed() {
+    const sec = document.getElementById('recently-viewed-section');
+    if (!sec || !window.HistoryManager) return;
+    const recent = HistoryManager.getRecent?.() ?? [];
+    if (!recent.length) { sec.style.display = 'none'; return; }
+    sec.style.display = '';
+    sec.innerHTML = `<div class="recent-header"><span>Gần đây</span><button id="btn-clear-history" class="btn btn-ghost btn-xs">Xóa</button></div>` +
+      `<div class="recent-list">${recent.slice(0,5).map(s => `<div class="recent-item" data-id="${_esc(s.id)}" style="touch-action:manipulation"><span class="recent-num">${s.httlvnId ? String(s.httlvnId).padStart(3,'0') : ''}</span><span class="recent-title">${_esc(s.title)}</span></div>`).join('')}</div>`;
+    let _rId = '', _rTime = 0;
+    sec.querySelectorAll('.recent-item').forEach(it => {
+      it.addEventListener('touchstart', () => { _rId = it.dataset.id; _rTime = Date.now(); selectSong(it.dataset.id); }, { passive: true });
+      it.addEventListener('click', () => { if (it.dataset.id === _rId && Date.now() - _rTime < 600) return; selectSong(it.dataset.id); });
+    });
+    sec.querySelector('#btn-clear-history')?.addEventListener('click', e => { e.stopPropagation(); HistoryManager.clearHistory?.(); sec.style.display = 'none'; });
+  }
+
+  function _buildQuickFavorites() {
+    const sec = document.getElementById('quick-favorites-section');
+    if (!sec || !window.HistoryManager) return;
+    const favs = HistoryManager.getFavorites?.() ?? [];
+    if (!favs.length) { sec.classList.add('hidden'); sec.style.display = 'none'; return; }
+    sec.style.display = ''; sec.classList.remove('hidden');
+    sec.innerHTML = `<div class="recent-header"><span>⭐ Yêu thích (${favs.length})</span></div>` +
+      `<div class="recent-list">${favs.slice(0,5).map(s => `<div class="recent-item fav-item" data-id="${_esc(s.id)}" style="touch-action:manipulation"><span class="recent-num">${s.httlvnId ? String(s.httlvnId).padStart(3,'0') : ''}</span><span class="recent-title">${_esc(s.title)}</span></div>`).join('')}</div>`;
+    sec.querySelectorAll('.recent-item').forEach(it => {
+      it.addEventListener('click', () => selectSong(it.dataset.id));
+      it.addEventListener('touchstart', () => selectSong(it.dataset.id), { passive: true });
+    });
+  }
+
   function _showFavorites() {
     document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
     document.getElementById('sidebar-tab-favs')?.classList.add('active');
     document.querySelectorAll('.sidebar-tab-content').forEach(c => c.classList.add('hidden'));
     document.getElementById('tab-content-library')?.classList.remove('hidden');
-    const favs = window.HistoryManager?.getFavorites?.() ?? [];
-    render(favs, { emptyMsg: 'Chưa có bài yêu thích', emptyHint: 'Nhấn ★ trên bài hát để thêm' });
+    render(window.HistoryManager?.getFavorites?.() ?? [], { emptyMsg: 'Chưa có bài yêu thích', emptyHint: 'Nhấn ★ trên bài hát để thêm' });
   }
 
-  // ── Setlist ──────────────────────────────────────────────────
   async function _promptAddToSetlist(songId) {
     if (!songId) return;
-    const resp = await ApiService.setlists.list();
-    const data = Array.isArray(resp) ? resp : (resp?.data ?? []);
+    const resp = await ApiService.setlists.list(), data = Array.isArray(resp) ? resp : (resp?.data ?? []);
     if (!data.length) { window.App?.showToast('Chưa có Setlist nào được tạo', 'error'); return; }
     const modal = document.getElementById('add-to-setlist-modal'), opts = document.getElementById('add-to-setlist-options');
     if (!modal || !opts) return;
     opts.innerHTML = data.map(sl => `<div class="song-item" data-id="${_esc(sl.id)}" style="touch-action:manipulation"><div class="song-item-info"><div class="song-item-title">${_esc(sl.title)}</div></div></div>`).join('');
-    const closeModal = () => window.ModalManager ? window.ModalManager.close(modal) : modal.classList.add('hidden');
-    opts.querySelectorAll('.song-item').forEach(item => {
-      item.addEventListener('click', async () => {
-        closeModal();
-        const setId = parseInt(item.dataset.id, 10);
-        window.SetlistUI?.switchToSetlistTab?.(setId);
-        if (window.SetlistUI?.addSongToSetlist) await window.SetlistUI.addSongToSetlist(setId, songId);
-      });
-    });
-    if (window.ModalManager) window.ModalManager.open(modal);
-    else modal.classList.remove('hidden');
-    document.getElementById('btn-close-add-setlist')?.addEventListener('click', closeModal, { once: true });
-    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); }, { once: true });
+    const close = () => window.ModalManager ? window.ModalManager.close(modal) : modal.classList.add('hidden');
+    opts.querySelectorAll('.song-item').forEach(it => it.addEventListener('click', async () => {
+      close(); const setId = parseInt(it.dataset.id, 10); window.SetlistUI?.switchToSetlistTab?.(setId);
+      if (window.SetlistUI?.addSongToSetlist) await window.SetlistUI.addSongToSetlist(setId, songId);
+    }));
+    window.ModalManager ? window.ModalManager.open(modal) : modal.classList.remove('hidden');
+    document.getElementById('btn-close-add-setlist')?.addEventListener('click', close, { once: true });
+    modal.addEventListener('click', e => { if (e.target === modal) close(); }, { once: true });
   }
 
-  // ── Select Song ──────────────────────────────────────────────
   function selectSong(songId, updateUrl = true) {
     if (!songId) return;
     activeSongId = String(songId);
     _highlightActive(activeSongId);
-
     if (updateUrl) {
-      if (window.URLState?.resetForNewSong) {
-        window.URLState.resetForNewSong(songId);
-      } else {
-        const url = new URL(window.location.href);
-        url.searchParams.set('song', songId);
-        window.history.pushState({}, '', url);
-      }
+      if (window.URLState?.resetForNewSong) window.URLState.resetForNewSong(songId);
+      else { const u = new URL(window.location.href); u.searchParams.set('song', songId); window.history.pushState({}, '', u); }
     }
-
-    let song = songs.find(s => String(s.id) === String(songId))
-            || _lastRenderedSongs.find(s => String(s.id) === String(songId));
-    if (song && !songs.some(s => String(s.id) === String(song.id))) {
-      songs.push(song);
-    }
-    if (!song && window.OfflineSetlistManager?.getOfflineSong) {
-      song = window.OfflineSetlistManager.getOfflineSong(songId);
-      if (song && !songs.some(s => String(s.id) === String(song.id))) {
-        songs.push(song);
-      }
-    }
+    let song = songs.find(s => String(s.id) === String(songId)) || _lastRenderedSongs.find(s => String(s.id) === String(songId));
+    if (!song && window.OfflineSetlistManager?.getOfflineSong) song = window.OfflineSetlistManager.getOfflineSong(songId);
+    if (song && !songs.some(s => String(s.id) === String(song.id))) songs.push(song);
     if (song && onSelectCb) onSelectCb(song);
   }
 
