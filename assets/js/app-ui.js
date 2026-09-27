@@ -374,6 +374,19 @@ const AppUI = (() => {
         wrap?.scrollBy({ top: Math.round(window.innerHeight * 0.75), behavior: 'smooth' });
       }
     });
+
+    // Center-Tap: Chạm giữa màn hình để hiện lại HUD hoặc ẩn HUD (Ticket L1-5)
+    document.getElementById('edge-tap-center')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const hud = document.getElementById('gig-floating-hud');
+      if (hud) {
+        if (hud.classList.contains('faded')) {
+          window.ModeManager?.showHud?.();
+        } else {
+          window.ModeManager?.fadeHud?.();
+        }
+      }
+    });
   })();
 
 

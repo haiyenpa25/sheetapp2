@@ -104,8 +104,9 @@
     <span id="add-annotate-hint" style="display:none;"></span>
   </div>
 
-  <!-- HANDS-FREE EDGE-TAP ZONES FOR GIG / BAND PLAYING -->
+  <!-- HANDS-FREE EDGE-TAP & CENTER-TAP ZONES FOR GIG / BAND PLAYING (Ticket L1-5) -->
   <div id="edge-tap-prev" class="edge-tap-zone edge-tap-left" title="Chạm mép trái: Lật trang trước (PageUp)"></div>
+  <div id="edge-tap-center" class="edge-tap-center" title="Chạm giữa màn hình: Hiện/Ẩn bảng điều khiển HUD"></div>
   <div id="edge-tap-next" class="edge-tap-zone edge-tap-right" title="Chạm mép phải: Lật trang sau (PageDown)"></div>
 
   <!-- FLOATING GIG HUD (Xuất hiện khi ở chế độ Biểu Diễn) -->

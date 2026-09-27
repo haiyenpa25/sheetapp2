@@ -16,6 +16,9 @@ const ModeManager = (() => {
   };
 
   let _currentMode = MODES.VIEW;
+  let _wasDarkModeBeforeGig = false;
+  let _hudFadeTimeout = null;
+  const HUD_FADE_DELAY = 3000; // L1-5: HUD tự mờ sau 3 giây
 
   function init() {
     _currentMode = MODES.VIEW;
@@ -39,6 +42,23 @@ const ModeManager = (() => {
     // Nút Thoát Chế Độ Biểu Diễn (Góc trên phải khi toàn màn hình)
     document.getElementById('btn-exit-sheet-only')?.addEventListener('click', () => {
       resetToView();
+    });
+
+    // Tương tác với HUD nổi: di chuột hoặc chạm vào sẽ reset timer 3s (Ticket L1-5)
+    const gigHud = document.getElementById('gig-floating-hud');
+    if (gigHud) {
+      ['mousemove', 'touchstart', 'pointerdown', 'click'].forEach((evt) => {
+        gigHud.addEventListener(evt, () => {
+          _resetHudTimer();
+        }, { passive: true });
+      });
+    }
+
+    // Tự động khôi phục Wake Lock khi tab hiển thị lại trong chế độ Biểu Diễn
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && _currentMode === MODES.PERFORMANCE) {
+        _requestWakeLock();
+      }
     });
 
     // Thoát tập trung qua ModeManager khi nhấn phím Escape (Ticket L0-16)
@@ -123,16 +143,26 @@ const ModeManager = (() => {
     const body = document.body;
     body.dataset.appMode = mode;
 
-    // 1. Điều phối chế độ Biểu Diễn (Performance)
+    // 1. Điều phối chế độ Biểu Diễn (Performance - Ticket L1-5)
     const isPerformance = (mode === MODES.PERFORMANCE);
     body.classList.toggle('sheet-only-mode', isPerformance);
     if (isPerformance) {
+      // Mặc định nền tối khi biểu diễn (L1-5)
+      _wasDarkModeBeforeGig = body.classList.contains('dark-mode');
+      body.classList.add('dark-mode');
+      _startHudTimer();
+
       _requestFullscreen();
       _requestWakeLock();
       window.KeyboardHandler?.enableMIDI?.();
       window.LiveSync?.ensureLoaded?.();
       window.AppUI?.showToast?.('Chế độ Biểu Diễn — Toàn màn hình, nhấn F hoặc Esc để thoát', 'info');
     } else if (prevMode === MODES.PERFORMANCE) {
+      _clearHudTimer();
+      // Khôi phục trạng thái ban đầu của người dùng nếu trước đó không bật dark-mode
+      if (!_wasDarkModeBeforeGig) {
+        body.classList.remove('dark-mode');
+      }
       _exitFullscreen();
       _releaseWakeLock();
     }
@@ -186,6 +216,51 @@ const ModeManager = (() => {
     }
   }
 
+  /* HUD Fade Control Helpers (Ticket L1-5) */
+  function _fadeHud() {
+    const hud = document.getElementById('gig-floating-hud');
+    if (hud && _currentMode === MODES.PERFORMANCE) {
+      hud.classList.add('faded');
+    }
+  }
+
+  function _showHud() {
+    const hud = document.getElementById('gig-floating-hud');
+    if (hud) {
+      hud.classList.remove('faded');
+    }
+    _resetHudTimer();
+  }
+
+  function _resetHudTimer() {
+    if (_hudFadeTimeout) {
+      clearTimeout(_hudFadeTimeout);
+      _hudFadeTimeout = null;
+    }
+    if (_currentMode === MODES.PERFORMANCE) {
+      _hudFadeTimeout = setTimeout(_fadeHud, HUD_FADE_DELAY);
+    }
+  }
+
+  function _startHudTimer() {
+    const hud = document.getElementById('gig-floating-hud');
+    if (hud) {
+      hud.classList.remove('faded');
+    }
+    _resetHudTimer();
+  }
+
+  function _clearHudTimer() {
+    if (_hudFadeTimeout) {
+      clearTimeout(_hudFadeTimeout);
+      _hudFadeTimeout = null;
+    }
+    const hud = document.getElementById('gig-floating-hud');
+    if (hud) {
+      hud.classList.remove('faded');
+    }
+  }
+
   /* Fullscreen & WakeLock Helpers */
   let _wakeLock = null;
 
@@ -228,7 +303,10 @@ const ModeManager = (() => {
     togglePerformance,
     toggleEditChords,
     resetToView,
-    handleEscape
+    handleEscape,
+    showHud: _showHud,
+    fadeHud: _fadeHud,
+    resetHudTimer: _resetHudTimer
   };
 })();
 

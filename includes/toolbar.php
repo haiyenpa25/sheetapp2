@@ -191,22 +191,22 @@
           <div class="audio-panel-row">
             <span class="audio-panel-label">Bè:</span>
             <div class="voice-selector" id="voice-selector" role="group" aria-label="Chọn bè">
-              <button class="voice-btn voice-s" data-voice="soprano" disabled>S</button>
-              <button class="voice-btn voice-a" data-voice="alto" disabled>A</button>
-              <button class="voice-btn voice-t" data-voice="tenor" disabled>T</button>
-              <button class="voice-btn voice-b" data-voice="bass" disabled>B</button>
-              <button class="voice-btn voice-all active" data-voice="satb" disabled>♪</button>
+              <button class="voice-btn voice-s" data-voice="soprano" data-touch-allow="true" disabled>S</button>
+              <button class="voice-btn voice-a" data-voice="alto" data-touch-allow="true" disabled>A</button>
+              <button class="voice-btn voice-t" data-voice="tenor" data-touch-allow="true" disabled>T</button>
+              <button class="voice-btn voice-b" data-voice="bass" data-touch-allow="true" disabled>B</button>
+              <button class="voice-btn voice-all active" data-voice="satb" data-touch-allow="true" disabled>♪</button>
             </div>
           </div>
           <div class="audio-panel-row">
             <span class="audio-panel-label">Tốc độ:</span>
-            <select id="audio-speed" class="select-toolbar" disabled>
+            <select id="audio-speed" class="select-toolbar" data-touch-allow="true" disabled>
               <option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1.0" selected>1.0×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option>
             </select>
           </div>
           <div class="audio-panel-row">
             <span class="audio-panel-label">Âm lượng:</span>
-            <input id="audio-volume" type="range" class="audio-volume-slider" min="-20" max="24" step="1" value="18" disabled>
+            <input id="audio-volume" type="range" class="audio-volume-slider" min="-20" max="24" step="1" value="18" data-touch-allow="true" disabled>
           </div>
           <button id="btn-metronome" style="display:none"></button>
           <select id="audio-playback-mode" style="display:none"><option value="satb">SATB</option></select>
