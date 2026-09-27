@@ -179,6 +179,30 @@ select, input, label,
 .song-item-num { font-size: .65rem; font-family: var(--font-mono); color: var(--text-muted); font-weight: 600; min-width: 28px; flex-shrink: 0; text-align: right; letter-spacing: .3px; padding-right: 2px; }
 .song-item.active .song-item-num { color: var(--accent); }
 
+/* ─── SEARCH GROUP HEADERS (TICKET L2-1) ────────────────────────── */
+.search-group-header {
+  padding: 0.45rem 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  background: var(--bg-overlay);
+  border-radius: var(--radius-xs);
+  border-left: 3px solid var(--accent);
+  margin-top: 0.35rem;
+  margin-bottom: 0.15rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  user-select: none;
+}
+.search-group-lyric {
+  color: var(--text-secondary);
+  border-left-color: var(--warning, #d97706);
+  margin-top: 0.65rem;
+}
+
 .empty-state { text-align: center; padding: 2rem 1rem; color: var(--text-muted); }
 .empty-icon { font-size: 2.5rem; display: block; margin-bottom: .75rem; opacity: .5; }
 .empty-state p { font-size: .875rem; margin-bottom: .25rem; }

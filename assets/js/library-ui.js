@@ -1,8 +1,4 @@
-/**
- * library-ui.js — Thư viện bài hát
- * v3: pointerdown instant, không preventDefault trên action buttons,
- *     visual feedback qua CSS :active (không cần JS), dedup bằng pointerId
- */
+// library-ui.js — Thư viện bài hát (v3: pointerdown instant, L2-1 search ranking)
 const LibraryUI = (() => {
   'use strict';
 
@@ -70,29 +66,16 @@ const LibraryUI = (() => {
     // Category filter
     _buildCategoryFilter();
 
-    // ── Event Delegation ──
-    // GIẢI PHÁP DỨT ĐIỂM CHO iOS 300ms:
-    // Dùng touchstart + pointerdown. touchstart phản hồi ngay (0ms), 
-    // click bị block bằng e.preventDefault() trên touchend (implicit via pointerdown).
-    // KHÔNG dùng e.preventDefault() trên touchstart vì sẽ ngăn scroll.
+    // ── Event Delegation (touch instant 0ms + click fallback) ──
     const list = listEl();
     if (list) {
-      // Track xem song nào vừa được chọn bằng touch để dedup với click sau đó
-      let _lastTouchId = '';
-      let _lastTouchTime = 0;
-
-      // touchstart = 0ms delay, phản hồi NGAY
+      let _lastTouchId = '', _lastTouchTime = 0;
       list.addEventListener('touchstart', (e) => {
         const item = e.target.closest('.song-item');
-        if (!item?.dataset.id) return;
-
-        // Bỏ qua action buttons — chúng cần click để hoạt động đúng
-        if (e.target.closest('.song-delete-btn,.song-add-setlist-btn,.song-fav-btn')) return;
-
-        _lastTouchId   = item.dataset.id;
-        _lastTouchTime = Date.now();
+        if (!item?.dataset.id || e.target.closest('.song-delete-btn,.song-add-setlist-btn,.song-fav-btn')) return;
+        _lastTouchId = item.dataset.id; _lastTouchTime = Date.now();
         selectSong(item.dataset.id);
-      }, { passive: true }); // passive: KHÔNG gọi preventDefault → scroll vẫn hoạt động
+      }, { passive: true });
 
       // click = fallback cho desktop và trường hợp touch không fire
       list.addEventListener('click', (e) => {
@@ -177,10 +160,35 @@ const LibraryUI = (() => {
     const canAdmin = window.Auth?.isAdmin?.() ?? false;
     const canEdit  = window.Auth?.isBanhat?.() ?? false;
 
-    list.forEach(song => {
-      const div = _createSongItem(song, canAdmin, canEdit);
-      frag.appendChild(div);
-    });
+    // Ticket L2-1: Nếu là kết quả tìm kiếm và có cả kết quả theo tên lẫn lời -> Phân thành 2 nhóm
+    const isSearch = opts.isSearch || !!(searchEl()?.value || '').trim();
+    const hasLyricMatches = isSearch && list.some(s => s.match_type === 'lyric');
+
+    if (isSearch && hasLyricMatches) {
+      const titleMatches = list.filter(s => s.match_type !== 'lyric');
+      const lyricMatches = list.filter(s => s.match_type === 'lyric');
+
+      if (titleMatches.length > 0) {
+        const hTitle = document.createElement('div');
+        hTitle.className = 'search-group-header search-group-title';
+        hTitle.textContent = `🎵 Kết quả theo tên (${titleMatches.length})`;
+        frag.appendChild(hTitle);
+        titleMatches.forEach(song => frag.appendChild(_createSongItem(song, canAdmin, canEdit)));
+      }
+
+      if (lyricMatches.length > 0) {
+        const hLyric = document.createElement('div');
+        hLyric.className = 'search-group-header search-group-lyric';
+        hLyric.textContent = `📝 Kết quả theo lời (${lyricMatches.length})`;
+        frag.appendChild(hLyric);
+        lyricMatches.forEach(song => frag.appendChild(_createSongItem(song, canAdmin, canEdit)));
+      }
+    } else {
+      list.forEach(song => {
+        const div = _createSongItem(song, canAdmin, canEdit);
+        frag.appendChild(div);
+      });
+    }
 
     el.innerHTML = '';
     el.appendChild(frag);
@@ -188,18 +196,8 @@ const LibraryUI = (() => {
     if (activeSongId) _highlightActive(activeSongId);
   }
 
-  function _createBadge(text, color) {
-    const b = document.createElement('span');
-    b.className = 'song-key-badge';
-    if (color) b.style.color = color;
-    b.textContent = text;
-    return b;
-  }
-  function _createActionBtn(cls, title, text) {
-    const btn = document.createElement('button');
-    btn.className = cls; btn.title = title; btn.textContent = text;
-    return btn;
-  }
+  const _createBadge = (text, color) => { const b = document.createElement('span'); b.className = 'song-key-badge'; if (color) b.style.color = color; b.textContent = text; return b; };
+  const _createActionBtn = (cls, title, text) => { const btn = document.createElement('button'); btn.className = cls; btn.title = title; btn.textContent = text; return btn; };
 
   /** Tạo DOM node một song item */
   function _createSongItem(song, canAdmin, canEdit) {
@@ -306,27 +304,19 @@ const LibraryUI = (() => {
           if (numM) {
             const target = parseInt(numM[1], 10);
             list.sort((a, b) => (Number(a.httlvnId) === target ? -1 : Number(b.httlvnId) === target ? 1 : (Number(a.httlvnId) || 0) - (Number(b.httlvnId) || 0)));
-          } else {
+          } else if (!q) {
             list = _sortSongs(list);
           }
-          render(list, {
-            emptyMsg: q ? `Không tìm thấy "${q}"` : 'Không có bài hát phù hợp',
-            emptyHint: 'Thử đổi mùa phụng vụ hoặc từ khóa khác'
-          });
+          render(list, { isSearch: !!q, emptyMsg: q ? `Không tìm thấy "${q}"` : 'Không có bài hát phù hợp', emptyHint: 'Thử đổi mùa phụng vụ hoặc từ khóa khác' });
           return;
         }
-      } catch (err) {
-        // Fallback local memory search bên dưới
-      }
+      } catch (err) { /* fallback local */ }
     }
-
     if (seq !== _searchSeq) return;
 
     // Client-side fallback & memory filtering
-    const qLower = q.toLowerCase();
-    const qUnacc = _removeAccents(qLower);
+    const qLower = q.toLowerCase(), qUnacc = _removeAccents(qLower);
     let filtered = songs;
-
     if (cat) filtered = filtered.filter(s => s.category === cat);
     if (season) filtered = filtered.filter(s => (s.liturgical_season || '').toLowerCase() === season.toLowerCase());
     if (theme) filtered = filtered.filter(s => (s.theme || '').toLowerCase().includes(theme.toLowerCase()));
@@ -334,23 +324,26 @@ const LibraryUI = (() => {
     if (q) {
       const numM = q.match(/^(?:#|bài\s+|bai\s+|stt\s+)?(\d+)$/i);
       const target = numM ? parseInt(numM[1], 10) : null;
-      filtered = filtered.filter(s => {
-        if (target !== null && Number(s.httlvnId) === target) return true;
-        const tLower = (s.title || '').toLowerCase();
-        return tLower.includes(qLower) || _removeAccents(tLower).includes(qUnacc);
+      const titleMatches = [], lyricMatches = [];
+      filtered.forEach(s => {
+        const isNum = target !== null && Number(s.httlvnId) === target;
+        const tLower = (s.title || '').toLowerCase(), tUnacc = _removeAccents(tLower);
+        if (isNum) titleMatches.push({ ...s, match_type: 'title', relevance_tier: 0 });
+        else if (tLower === qLower || tUnacc === qUnacc) titleMatches.push({ ...s, match_type: 'title', relevance_tier: 1 });
+        else if (tLower.startsWith(qLower) || tUnacc.startsWith(qUnacc)) titleMatches.push({ ...s, match_type: 'title', relevance_tier: 2 });
+        else if (tLower.includes(qLower) || tUnacc.includes(qUnacc)) titleMatches.push({ ...s, match_type: 'title', relevance_tier: 3 });
+        else if (s.lyrics_text && (_removeAccents(s.lyrics_text.toLowerCase()).includes(qUnacc) || s.lyrics_text.toLowerCase().includes(qLower))) lyricMatches.push({ ...s, match_type: 'lyric', relevance_tier: 4 });
       });
+      titleMatches.sort((a, b) => (a.relevance_tier || 0) - (b.relevance_tier || 0) || (Number(a.httlvnId) || 0) - (Number(b.httlvnId) || 0));
+      lyricMatches.sort((a, b) => (Number(a.httlvnId) || 0) - (Number(b.httlvnId) || 0));
+      filtered = [...titleMatches, ...lyricMatches];
       if (target !== null) {
         filtered.sort((a, b) => (Number(a.httlvnId) === target ? -1 : Number(b.httlvnId) === target ? 1 : (Number(a.httlvnId) || 0) - (Number(b.httlvnId) || 0)));
-      } else {
-        filtered = _sortSongs(filtered);
       }
     } else {
       filtered = _sortSongs(filtered);
     }
-    render(filtered, {
-      emptyMsg: q ? `Không tìm thấy "${q}"` : 'Không có bài hát',
-      emptyHint: q ? 'Thử từ khóa khác' : ''
-    });
+    render(filtered, { isSearch: !!q, emptyMsg: q ? `Không tìm thấy "${q}"` : 'Không có bài hát', emptyHint: q ? 'Thử từ khóa khác' : '' });
   }
 
 

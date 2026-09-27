@@ -165,7 +165,7 @@ class SongSearchHelper {
             return DB::run($sql, $params)->fetchAll() ?: [];
         }
 
-        // Ticket L0-7: Tìm theo số bài (chuỗi toàn chữ số hoặc #123 / bài 123)
+        // Ticket L0-7 & L2-1: Tìm theo số bài (chuỗi toàn chữ số hoặc #123 / bài 123)
         $exactSongByNum = null;
         if (preg_match('/^(?:#|bài\s+|bai\s+|stt\s+)?(\d+)$/ui', $cleanQuery, $m)) {
             $songNum = (int)$m[1];
@@ -173,7 +173,8 @@ class SongSearchHelper {
                 SELECT s.id, s.title, s.httlvnId, s.xmlPath, s.defaultKey, s.category_id,
                        s.liturgical_season, s.theme, s.composer, s.tags,
                        c.name as category,
-                       0 as relevance_tier, 0 as fts_rank
+                       0 as relevance_tier, 0 as fts_rank,
+                       'title' as match_type
                 FROM songs s
                 LEFT JOIN categories c ON s.category_id = c.id
                 WHERE s.httlvnId = ?
@@ -197,7 +198,7 @@ class SongSearchHelper {
             }
         }
 
-        // Trường hợp 2: Có từ khóa tìm kiếm -> Sử dụng FTS5 và BM25 Relevance Ranking
+        // Trường hợp 2: Có từ khóa tìm kiếm -> Sử dụng FTS5 và BM25 Relevance Ranking (Ticket L2-1)
         $unaccentedQuery = self::removeAccents($cleanQuery);
         $rawTerms = preg_split('/\s+/u', $unaccentedQuery, -1, PREG_SPLIT_NO_EMPTY);
         $safeTerms = [];
@@ -223,11 +224,17 @@ class SongSearchHelper {
                        bm25(songs_fts) as fts_rank,
                        CASE
                            WHEN lower(s.title) = lower(:exactQuery) THEN 1
-                           WHEN lower(f.title_unaccented) = lower(:exactUnaccented) THEN 2
-                           WHEN lower(s.title) LIKE :prefixLike THEN 3
-                           WHEN lower(f.title_unaccented) LIKE :prefixUnaccentedLike THEN 4
-                           ELSE 5
-                       END as relevance_tier
+                           WHEN lower(f.title_unaccented) = lower(:exactUnaccented) THEN 1
+                           WHEN lower(s.title) LIKE :prefixLike THEN 2
+                           WHEN lower(f.title_unaccented) LIKE :prefixUnaccentedLike THEN 2
+                           WHEN lower(s.title) LIKE :containsLike THEN 3
+                           WHEN lower(f.title_unaccented) LIKE :containsUnaccentedLike THEN 3
+                           ELSE 4
+                       END as relevance_tier,
+                       CASE
+                           WHEN lower(s.title) LIKE :containsLike OR lower(f.title_unaccented) LIKE :containsUnaccentedLike THEN 'title'
+                           ELSE 'lyric'
+                       END as match_type
                 FROM songs_fts f
                 JOIN songs s ON f.song_id = s.id
                 LEFT JOIN categories c ON s.category_id = c.id
@@ -239,7 +246,9 @@ class SongSearchHelper {
                 ':exactQuery'            => $cleanQuery,
                 ':exactUnaccented'       => $unaccentedQuery,
                 ':prefixLike'            => $cleanQuery . '%',
-                ':prefixUnaccentedLike'  => $unaccentedQuery . '%'
+                ':prefixUnaccentedLike'  => $unaccentedQuery . '%',
+                ':containsLike'          => '%' . $cleanQuery . '%',
+                ':containsUnaccentedLike'=> '%' . $unaccentedQuery . '%'
             ];
 
             if ($season !== '') {
@@ -373,6 +382,8 @@ class SongSearchHelper {
 
     public static function fallbackLikeSearch(string $query, array $filters = []): array {
         $cleanQuery = trim($query);
+        $unaccentedQuery = self::removeAccents($cleanQuery);
+        $prefix = $cleanQuery . '%';
         $keyword = '%' . $cleanQuery . '%';
         $season = trim($filters['season'] ?? '');
         $theme = trim($filters['theme'] ?? '');
@@ -382,12 +393,22 @@ class SongSearchHelper {
         $sql = "
             SELECT s.id, s.title, s.httlvnId, s.xmlPath, s.defaultKey, s.category_id,
                    s.liturgical_season, s.theme, s.composer, s.tags, s.lyrics_text,
-                   c.name as category
+                   c.name as category,
+                   CASE
+                       WHEN lower(s.title) = lower(?) THEN 1
+                       WHEN lower(s.title) LIKE ? THEN 2
+                       WHEN lower(s.title) LIKE ? THEN 3
+                       ELSE 4
+                   END as relevance_tier,
+                   CASE
+                       WHEN lower(s.title) LIKE ? THEN 'title'
+                       ELSE 'lyric'
+                   END as match_type
             FROM songs s
             LEFT JOIN categories c ON s.category_id = c.id
             WHERE (s.title LIKE ? OR s.lyrics_text LIKE ? OR s.theme LIKE ? OR s.composer LIKE ?)
         ";
-        $params = [$keyword, $keyword, $keyword, $keyword];
+        $params = [$cleanQuery, $prefix, $keyword, $keyword, $keyword, $keyword, $keyword, $keyword];
 
         if ($season !== '') {
             $sql .= " AND s.liturgical_season = ?";
@@ -401,13 +422,13 @@ class SongSearchHelper {
             $sql .= " AND s.category_id = ?";
             $params[] = $categoryId;
         }
-        $sql .= " ORDER BY s.httlvnId ASC, s.title ASC LIMIT ?";
+        $sql .= " ORDER BY relevance_tier ASC, s.httlvnId ASC LIMIT ?";
         $params[] = $limit;
 
         $rows = DB::run($sql, $params)->fetchAll() ?: [];
         foreach ($rows as &$song) {
             $lyrics = $song['lyrics_text'] ?? '';
-            $snippet = self::createLyricSnippet($lyrics, $cleanQuery, self::removeAccents($cleanQuery));
+            $snippet = self::createLyricSnippet($lyrics, $cleanQuery, $unaccentedQuery);
             if ($snippet !== null) {
                 $song['lyric_snippet'] = $snippet;
             }
