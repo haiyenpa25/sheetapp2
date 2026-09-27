@@ -2,13 +2,7 @@
 const LibraryUI = (() => {
   'use strict';
 
-  let songs        = [];
-  let activeSongId = null;
-  let onSelectCb   = null;
-  let onDeleteCb   = null;
-  let _searchDebounce = null;
-  let _searchSeq = 0;
-  let _lastRenderedSongs = [];
+  let songs = [], activeSongId = null, onSelectCb = null, onDeleteCb = null, _searchDebounce = null, _searchSeq = 0, _lastRenderedSongs = [];
 
   const listEl     = () => document.getElementById('song-list');
   const searchEl   = () => document.getElementById('search-input');
@@ -51,6 +45,17 @@ const LibraryUI = (() => {
     document.getElementById('sort-filter')?.addEventListener('change', _onSearch);
     document.getElementById('season-filter')?.addEventListener('change', _onSearch);
     document.getElementById('theme-filter')?.addEventListener('change', _onSearch);
+    const btnToggle = document.getElementById('btn-filter-toggle'), panel = document.getElementById('sidebar-filters-panel');
+    btnToggle?.addEventListener('click', () => {
+      const isHidden = panel?.classList.toggle('hidden');
+      btnToggle.setAttribute('aria-expanded', isHidden ? 'false' : 'true');
+    });
+    document.getElementById('btn-clear-filters')?.addEventListener('click', () => {
+      if (categoryEl()) categoryEl().value = '';
+      const sEl = document.getElementById('season-filter'); if (sEl) sEl.value = '';
+      const tEl = document.getElementById('theme-filter'); if (tEl) tEl.value = '';
+      _onSearch();
+    });
 
     // Sidebar tabs
 
@@ -322,6 +327,10 @@ const LibraryUI = (() => {
     const season = document.getElementById('season-filter')?.value || '';
     const theme  = document.getElementById('theme-filter')?.value || '';
     const mode   = document.getElementById('sort-filter')?.value || 'num';
+    const activeCount = (cat ? 1 : 0) + (season ? 1 : 0) + (theme ? 1 : 0);
+    const badge  = document.getElementById('filter-active-badge');
+    if (badge) { badge.textContent = String(activeCount); badge.classList.toggle('hidden', activeCount === 0); }
+    document.getElementById('btn-filter-toggle')?.classList.toggle('active', activeCount > 0);
 
     // Ẩn thanh nhảy nhanh (Quick Jump STT) nếu đang lọc
     const quickJumpEl = document.querySelector('.quick-jump');
@@ -394,14 +403,28 @@ const LibraryUI = (() => {
     _onSearch();
   }
 
-  // ── Category Filter ──────────────────────────────────────────
+  // ── Dynamic Taxonomy & Category Filters (Ticket L2-3) ─────────
   function _buildCategoryFilter() {
-    const sel = categoryEl();
-    if (!sel || songs.length === 0) return;
+    if (!songs || !songs.length) return;
     const cats = [...new Set(songs.map(s => s.category).filter(Boolean))].sort();
-    const current = sel.value;
-    sel.innerHTML = '<option value="">Tất cả danh mục</option>' +
-      cats.map(c => `<option value="${_esc(c)}"${c === current ? ' selected' : ''}>${_esc(c)}</option>`).join('');
+    const seasons = [...new Set(songs.map(s => s.liturgical_season).filter(Boolean))].sort();
+    const themes = [...new Set(songs.map(s => s.theme).filter(Boolean))].sort();
+    const sync = (id, wrapId, list, label) => {
+      const el = document.getElementById(id), wrap = document.getElementById(wrapId);
+      if (wrap) wrap.style.display = list.length > (id === 'category-filter' ? 1 : 0) ? '' : 'none';
+      if (el) {
+        if (list.length <= (id === 'category-filter' ? 1 : 0)) el.value = '';
+        else {
+          const cur = el.value;
+          el.innerHTML = `<option value="">${label}</option>` + list.map(v => `<option value="${_esc(v)}"${v === cur ? ' selected' : ''}>${_esc(v)}</option>`).join('');
+        }
+      }
+    };
+    sync('category-filter', 'category-filter-wrap', cats, 'Tất cả danh mục');
+    sync('season-filter', 'season-filter-wrap', seasons, 'Tất cả Mùa Lễ');
+    sync('theme-filter', 'theme-filter-wrap', themes, 'Tất cả Chủ Đề');
+    const avail = (cats.length > 1 ? 1 : 0) + (seasons.length > 0 ? 1 : 0) + (themes.length > 0 ? 1 : 0);
+    document.getElementById('filter-empty-hint')?.classList.toggle('hidden', avail > 0);
   }
 
   // ── Quick Jump ───────────────────────────────────────────────
@@ -535,29 +558,19 @@ const LibraryUI = (() => {
       songs.push(song);
       songs.sort((a, b) => (a.httlvnId || 0) - (b.httlvnId || 0));
     }
-    render(songs);
-    _updateCount(songs.length);
-    selectSong(song.id);
+    render(songs); _updateCount(songs.length); selectSong(song.id);
   }
 
   async function deleteSong(id) {
     await ApiService.songs.delete(id);
     songs = songs.filter(s => String(s.id) !== String(id));
-    render(songs);
-    _updateCount(songs.length);
-    if (String(activeSongId) === String(id)) {
-      activeSongId = null;
-      AppUI?.showWelcome?.();
-    }
+    render(songs); _updateCount(songs.length);
+    if (String(activeSongId) === String(id)) { activeSongId = null; AppUI?.showWelcome?.(); }
     if (onDeleteCb) onDeleteCb(id);
   }
 
   // ── Helpers ───────────────────────────────────────────────────
-  function _updateCount(n) {
-    const badge = document.getElementById('library-count');
-    if (badge) badge.textContent = n;
-  }
-
+  function _updateCount(n) { const b = document.getElementById('library-count'); if (b) b.textContent = n; }
   function _esc(str) {
     if (window.SafeHtml?.escape) return window.SafeHtml.escape(str);
     return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
@@ -565,24 +578,16 @@ const LibraryUI = (() => {
 
   function _highlightText(text, query) {
     if (!text) return '';
-    const safeText = _esc(text);
-    const cleanQ = (query || '').trim();
+    const safeText = _esc(text), cleanQ = (query || '').trim();
     if (!cleanQ) return safeText;
-
     const map = { a: '[aáàảãạăắằẳẵặâấầẩẫậ]', e: '[eéèẻẽẹêếềểễệ]', i: '[iíìỉĩị]', o: '[oóòỏõọôốồổỗộơớờởỡợ]', u: '[uúùủũụưứừửữự]', y: '[yýỳỷỹỵ]', d: '[dđ]' };
-    const words = cleanQ.split(/\s+/).filter(Boolean);
-    const parts = words.map(w => w.toLowerCase().split('').map(c => map[c] || c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join(''));
-    if (parts.length === 0) return safeText;
-    return safeText.replace(new RegExp('(' + parts.join('|') + ')', 'gi'), '<mark>$1</mark>');
+    const parts = cleanQ.split(/\s+/).filter(Boolean).map(w => w.toLowerCase().split('').map(c => map[c] || c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join(''));
+    return parts.length === 0 ? safeText : safeText.replace(new RegExp('(' + parts.join('|') + ')', 'gi'), '<mark>$1</mark>');
   }
 
-  function onSelect(cb) { onSelectCb = cb; }
-  function onDelete(cb) { onDeleteCb = cb; }
-  function getSongs()   { return songs; }
-  function getActiveSong() { return songs.find(s => String(s.id) === String(activeSongId)) || null; }
-  function getSongObj(id) {
-    return songs.find(s => String(s.id) === String(id)) || _lastRenderedSongs.find(s => String(s.id) === String(id)) || null;
-  }
+  const onSelect = cb => { onSelectCb = cb; }, onDelete = cb => { onDeleteCb = cb; }, getSongs = () => songs;
+  const getActiveSong = () => songs.find(s => String(s.id) === String(activeSongId)) || null;
+  const getSongObj = id => songs.find(s => String(s.id) === String(id)) || _lastRenderedSongs.find(s => String(s.id) === String(id)) || null;
 
   return { init, loadSongs, render, selectSong, addSong, deleteSong, onSelect, onDelete, getSongs, getActiveSong, getSongObj };
 })();

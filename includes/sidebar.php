@@ -28,46 +28,55 @@
   </div>
 
   <div class="sidebar-search">
-    <div class="mt-half" style="display: flex; gap: 4px;">
-      <select id="category-filter" class="form-input select-toolbar" style="flex: 1; height: 30px; border-color: var(--border);" aria-label="Lọc theo danh mục bài hát">
-        <option value="">Tất cả danh mục</option>
-      </select>
-      <select id="sort-filter" class="form-input select-toolbar" style="width: 105px; height: 30px; border-color: var(--border); font-size: .8rem;" title="Sắp xếp bài hát" aria-label="Sắp xếp danh sách bài hát">
-        <option value="num" selected>STT HTTLVN</option>
-        <option value="title">Tên (A-Z)</option>
-        <option value="key">Tông gốc</option>
-      </select>
-    </div>
-
     <div class="search-box" style="position:relative;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <input id="search-input" type="text" placeholder="Tìm bài hát..." autocomplete="off">
       <button id="btn-search-lyrics" class="icon-btn-xs" title="Tìm theo lời bài hát" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:.8rem;opacity:.55;padding:.2rem .4rem;border-radius:4px;border:1px solid var(--border);background:var(--bg-overlay);">&#127925;</button>
     </div>
 
-    <!-- TAXONOMY FILTERS (EPIC 3.5) -->
-    <div class="mt-half" style="display: flex; gap: 4px; margin-top: 4px;">
-      <select id="season-filter" class="form-input select-toolbar" style="flex: 1; height: 28px; font-size: .75rem; border-color: var(--border);" title="Lọc theo Mùa Phụng Vụ" aria-label="Lọc theo mùa phụng vụ">
-        <option value="">Tất cả Mùa Lễ</option>
-        <option value="advent">Mùa Vọng</option>
-        <option value="christmas">Giáng Sinh</option>
-        <option value="lent">Mùa Chay</option>
-        <option value="easter">Phục Sinh</option>
-        <option value="ordinary">Thường Niên</option>
-        <option value="solemnity">Lễ Trọng</option>
+    <!-- Hàng điều khiển: Sắp xếp + Nút gom bộ lọc Lọc (Ticket L2-3) -->
+    <div class="mt-half" style="display: flex; gap: 4px; align-items: center; margin-top: 4px;">
+      <select id="sort-filter" class="form-input select-toolbar" style="flex: 1; height: 30px; border-color: var(--border); font-size: .8rem;" title="Sắp xếp bài hát" aria-label="Sắp xếp danh sách bài hát">
+        <option value="num" selected>STT HTTLVN</option>
+        <option value="title">Tên (A-Z)</option>
+        <option value="key">Tông gốc</option>
       </select>
-      <select id="theme-filter" class="form-input select-toolbar" style="flex: 1; height: 28px; font-size: .75rem; border-color: var(--border);" title="Lọc theo Chủ Đề Phụng Vụ" aria-label="Lọc theo chủ đề phụng vụ">
-        <option value="">Tất cả Chủ Đề</option>
-        <option value="nhap-le">Nhập Lễ</option>
-        <option value="dap-ca">Đáp Ca</option>
-        <option value="dang-le">Dâng Lễ</option>
-        <option value="hiep-le">Hiệp Lễ</option>
-        <option value="ta-le">Tạ Lễ</option>
-        <option value="duc-me">Đức Mẹ</option>
-        <option value="thanh-tam">Thánh Tâm</option>
-        <option value="cau-nguyen">Cầu Nguyện</option>
-        <option value="ton-vinh">Tôn Vinh</option>
-      </select>
+      <button id="btn-filter-toggle" class="btn btn-sm btn-filter-toggle" style="height: 30px; padding: 0 10px; font-size: .8rem; display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--border); background: var(--bg-raised); border-radius: var(--radius-sm); cursor: pointer;" aria-expanded="false" aria-controls="sidebar-filters-panel" aria-label="Gom bộ lọc bài hát" title="Mở bộ lọc">
+        <span>⚡ Lọc</span>
+        <span id="filter-active-badge" class="filter-active-badge hidden" style="background: var(--accent); color: #fff; font-size: 0.65rem; border-radius: 999px; padding: 1px 5px; font-weight: 600; line-height: 1;">0</span>
+      </button>
+    </div>
+
+    <!-- PANEL GOM BỘ LỌC (TỰ ẨN KHI KHÔNG CÓ DỮ LIỆU - TICKET L2-3) -->
+    <div id="sidebar-filters-panel" class="sidebar-filters-panel hidden" style="margin-top: 6px; padding: 8px; background: var(--bg-overlay); border: 1px solid var(--border); border-radius: var(--radius-sm); display: flex; flex-direction: column; gap: 6px;">
+      <div id="category-filter-wrap" style="display: flex; flex-direction: column; gap: 2px;">
+        <label for="category-filter" style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">Danh mục:</label>
+        <select id="category-filter" class="form-input select-toolbar" style="width: 100%; height: 28px; font-size: .75rem; border-color: var(--border);" aria-label="Lọc theo danh mục bài hát">
+          <option value="">Tất cả danh mục</option>
+        </select>
+      </div>
+
+      <div id="season-filter-wrap" style="display: flex; flex-direction: column; gap: 2px;">
+        <label for="season-filter" style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">Mùa phụng vụ:</label>
+        <select id="season-filter" class="form-input select-toolbar" style="width: 100%; height: 28px; font-size: .75rem; border-color: var(--border);" title="Lọc theo Mùa Phụng Vụ" aria-label="Lọc theo mùa phụng vụ">
+          <option value="">Tất cả Mùa Lễ</option>
+        </select>
+      </div>
+
+      <div id="theme-filter-wrap" style="display: flex; flex-direction: column; gap: 2px;">
+        <label for="theme-filter" style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">Chủ đề:</label>
+        <select id="theme-filter" class="form-input select-toolbar" style="width: 100%; height: 28px; font-size: .75rem; border-color: var(--border);" title="Lọc theo Chủ Đề Phụng Vụ" aria-label="Lọc theo chủ đề phụng vụ">
+          <option value="">Tất cả Chủ Đề</option>
+        </select>
+      </div>
+
+      <div id="filter-empty-hint" class="hidden" style="font-size: 0.72rem; color: var(--text-muted); font-style: italic; text-align: center; padding: 4px 0;">
+        Toàn bộ bài hát thuộc Thánh ca (không có bộ lọc phụ)
+      </div>
+
+      <button id="btn-clear-filters" class="btn btn-xs" style="align-self: flex-end; font-size: 0.7rem; padding: 2px 8px; margin-top: 2px; background: transparent; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer;" title="Đặt lại bộ lọc">
+        Xóa bộ lọc
+      </button>
     </div>
   </div>
 

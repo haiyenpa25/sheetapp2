@@ -181,6 +181,16 @@ select, input, label,
 .song-item.active .song-item-num { color: var(--accent); }
 .virtual-spacer { width: 100%; pointer-events: none; flex-shrink: 0; }
 
+/* ─── FILTERS PANEL & TOGGLE (TICKET L2-3) ────────────────────────── */
+.btn-filter-toggle.active {
+  background: rgba(109, 40, 217, 0.15) !important;
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+}
+.sidebar-filters-panel.hidden {
+  display: none !important;
+}
+
 /* ─── SEARCH GROUP HEADERS (TICKET L2-1) ────────────────────────── */
 .search-group-header {
   padding: 0.45rem 0.75rem;
