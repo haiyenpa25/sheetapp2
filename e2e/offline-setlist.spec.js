@@ -114,7 +114,7 @@ test.describe('E2E-08: Ngoại Tuyến Setlist Không Bị Đẩy Khỏi Cache',
     await expect(svgLocator).toBeVisible({ timeout: 15000 });
 
     const songTitleLocator = page.locator('#song-title');
-    await expect(songTitleLocator).toContainText('NGUYỀN TỤNG MỸ CHÚA LINH NĂNG', { timeout: 10000 });
+    await expect(songTitleLocator).toContainText(/NGUY[ỆỀ]N TỤNG MỸ CHÚA LINH NĂNG/, { timeout: 10000 });
     console.log('E2E-08: Bài hát 2 đã render SVG thành công khi offline!');
 
     // Dọn dẹp

@@ -1,0 +1,571 @@
+/* =====================================================================
+   assets/css/library-polish.css — Lớp hoàn thiện giao diện trang Thư viện
+   Nạp SAU CÙNG trong index.php. Mục tiêu: nút nhỏ gọn, đồng đều một cỡ,
+   viền mảnh, ít màu, khoảng cách đều — đẹp trên desktop, iPad và điện thoại.
+
+   Kích thước:
+   - Chuột (desktop):       control 30px, icon 16px, chữ 12.5–13px
+   - Cảm ứng (iPad/phone):  control 36px (nhỏ gọn nhưng vẫn bấm chắc tay)
+   !important chỉ dùng ở những chỗ CSS gốc đã ép kích thước bằng !important.
+   ===================================================================== */
+
+:root {
+  --lp-h: 30px;
+  --lp-h-inner: 24px;
+  --lp-radius: 8px;
+  --lp-radius-sm: 6px;
+  --lp-gap: 6px;
+  --lp-font: 12.5px;
+  --lp-font-sm: 11px;
+  --lp-ink: #1f2330;
+  --lp-muted: #6b7080;
+  --lp-faint: #9aa0ad;
+  --lp-surface: #ffffff;
+  --lp-canvas: #f6f6f9;
+  --lp-border: rgba(20, 24, 40, 0.09);
+  --lp-border-strong: rgba(20, 24, 40, 0.16);
+  --lp-hover: rgba(109, 40, 217, 0.06);
+  --lp-accent: #6d28d9;
+  --lp-accent-soft: rgba(109, 40, 217, 0.09);
+  --lp-shadow: 0 1px 2px rgba(20, 24, 40, 0.05);
+  --lp-shadow-pop: 0 8px 28px rgba(20, 24, 40, 0.14);
+}
+
+@media (pointer: coarse) {
+  :root { --lp-h: 36px; --lp-h-inner: 30px; }
+}
+
+body.dark-mode {
+  --lp-ink: #e7e7ee;
+  --lp-muted: #a3a3b4;
+  --lp-faint: #74748a;
+  --lp-surface: #16161c;
+  --lp-canvas: #0e0e12;
+  --lp-border: rgba(255, 255, 255, 0.09);
+  --lp-border-strong: rgba(255, 255, 255, 0.16);
+  --lp-hover: rgba(255, 255, 255, 0.06);
+  --lp-accent: #a78bfa;
+  --lp-accent-soft: rgba(167, 139, 250, 0.14);
+  --lp-shadow: none;
+  --lp-shadow-pop: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* ─── 0. Sửa lỗi hiển thị ─────────────────────────────────────────── */
+
+/* Link "nhảy tới nội dung" bị hở một mẩu tím ở góc trên trái */
+.skip-link:not(:focus):not(:focus-visible) {
+  top: 0 !important;
+  transform: translateY(-120%);
+  clip-path: inset(50%);
+}
+
+/* Logo trùng: thanh App Shell (≥1201px) đã có logo SheetApp */
+@media (min-width: 1201px) {
+  .sidebar-header .logo-icon,
+  .sidebar-header .logo-text,
+  .sidebar-header .library-count-badge { display: none; }
+}
+
+/* ─── 1. Thanh công cụ (desktop & iPad) ───────────────────────────── */
+@media (min-width: 681px) {
+  .unified-toolbar {
+    height: 46px !important;
+    min-height: 46px !important;
+    padding: 0 10px !important;
+    gap: 8px;
+    background: var(--lp-surface);
+    border-bottom: 1px solid var(--lp-border);
+    box-shadow: none;
+  }
+  .unified-toolbar > .band-controls { gap: var(--lp-gap); }
+  .unified-toolbar .toolbar-left,
+  .unified-toolbar .toolbar-right { gap: var(--lp-gap); }
+
+  /* Mọi "pill": cùng một cỡ, viền mảnh, nền trắng */
+  .unified-toolbar .band-pill {
+    height: var(--lp-h) !important;
+    min-height: var(--lp-h) !important;
+    padding: 0 8px !important;
+    gap: 4px !important;
+    border: 1px solid var(--lp-border) !important;
+    border-radius: var(--lp-radius) !important;
+    background: var(--lp-surface) !important;
+    box-shadow: var(--lp-shadow) !important;
+    color: var(--lp-ink);
+    font-size: var(--lp-font) !important;
+    font-weight: 500;
+    transition: background .15s ease, border-color .15s ease;
+  }
+  .unified-toolbar .band-pill:hover { background: var(--lp-hover) !important; border-color: var(--lp-border-strong) !important; }
+  .unified-toolbar button.band-pill.active,
+  .unified-toolbar .btn-band-toggle.active {
+    background: var(--lp-accent-soft) !important;
+    border-color: transparent !important;
+    color: var(--lp-accent) !important;
+  }
+
+  /* Nút icon bên trong pill */
+  .unified-toolbar .icon-btn-pill {
+    width: var(--lp-h-inner) !important;
+    height: var(--lp-h-inner) !important;
+    min-width: var(--lp-h-inner) !important;
+    min-height: var(--lp-h-inner) !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: var(--lp-radius-sm) !important;
+    background: transparent !important;
+    color: var(--lp-muted);
+  }
+  .unified-toolbar .icon-btn-pill:hover:not(:disabled) { background: var(--lp-hover) !important; color: var(--lp-ink); }
+  .unified-toolbar .icon-btn-pill svg { width: 15px; height: 15px; }
+
+  /* Nút icon đứng riêng: ☰, ◀ ▶, ⋮ */
+  .unified-toolbar .icon-btn,
+  .unified-toolbar .icon-btn-pill.btn-song-info-popover {
+    width: var(--lp-h) !important;
+    height: var(--lp-h) !important;
+    min-width: var(--lp-h) !important;
+    min-height: var(--lp-h) !important;
+    padding: 0 !important;
+    border-radius: var(--lp-radius) !important;
+    color: var(--lp-muted);
+  }
+  .unified-toolbar .icon-btn svg { width: 17px; height: 17px; }
+  .unified-toolbar .icon-btn:hover:not(:disabled) { background: var(--lp-hover); color: var(--lp-ink); }
+  .unified-toolbar .nav-arrows { gap: 2px; }
+  .unified-toolbar .nav-arrows .icon-btn {
+    border: 1px solid var(--lp-border) !important;
+    background: var(--lp-surface) !important;
+  }
+  .unified-toolbar .nav-arrows .icon-btn:disabled { opacity: .45; }
+
+  /* Tên bài */
+  .unified-toolbar .song-info-pill {
+    height: var(--lp-h) !important;
+    min-height: var(--lp-h) !important;
+    padding: 0 10px !important;
+    gap: 6px;
+    border: 1px solid var(--lp-border) !important;
+    border-radius: var(--lp-radius) !important;
+    background: var(--lp-surface) !important;
+    box-shadow: var(--lp-shadow) !important;
+    max-width: 280px;
+  }
+  .unified-toolbar .song-title {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    letter-spacing: .01em;
+    color: var(--lp-ink);
+  }
+  .unified-toolbar .song-key-badge {
+    font-size: 10.5px !important;
+    font-weight: 700;
+    padding: 1px 7px !important;
+    line-height: 16px;
+  }
+
+  /* Ô chọn (select) nằm trong pill: không viền, cùng cỡ chữ */
+  .unified-toolbar .band-pill select,
+  .unified-toolbar .capo-select {
+    height: var(--lp-h-inner) !important;
+    min-height: var(--lp-h-inner) !important;
+    padding: 0 4px !important;
+    border: 0 !important;
+    background-color: transparent !important;
+    font-size: var(--lp-font) !important;
+    font-weight: 500;
+    color: var(--lp-ink);
+    box-shadow: none !important;
+  }
+  .unified-toolbar .chord-set-select { max-width: 150px; text-overflow: ellipsis; }
+
+  /* Tông: số dịch giọng + "Gốc" + Capo nhẹ nhàng */
+  .unified-toolbar .transpose-value {
+    min-width: 20px;
+    font-size: 13px !important;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    color: var(--lp-ink);
+  }
+  .unified-toolbar .btn-pill-reset {
+    height: var(--lp-h-inner) !important;
+    min-height: var(--lp-h-inner) !important;
+    padding: 0 7px !important;
+    border: 0 !important;
+    border-radius: var(--lp-radius-sm) !important;
+    background: transparent !important;
+    font-size: var(--lp-font-sm) !important;
+    font-weight: 600;
+    color: var(--lp-muted);
+  }
+  .unified-toolbar .btn-pill-reset:hover:not(:disabled) { background: var(--lp-hover) !important; color: var(--lp-ink); }
+  .unified-toolbar .capo-wrap {
+    height: var(--lp-h-inner) !important;
+    padding: 0 2px 0 8px !important;
+    margin-left: 2px;
+    border-radius: var(--lp-radius-sm) !important;
+    background: var(--lp-accent-soft) !important;
+    border: 0 !important;
+    color: var(--lp-accent) !important;
+    gap: 2px !important;
+  }
+  .unified-toolbar .capo-label {
+    font-size: var(--lp-font-sm) !important;
+    font-weight: 600;
+    color: var(--lp-accent) !important;
+  }
+  .unified-toolbar .capo-wrap .capo-select { color: var(--lp-accent) !important; font-weight: 700; }
+  .unified-toolbar .capo-hint {
+    font-size: var(--lp-font-sm) !important;
+    padding: 2px 8px !important;
+    border-radius: 999px !important;
+    background: rgba(245, 158, 11, 0.10) !important;
+    border: 0 !important;
+    color: #b45309 !important;
+    white-space: nowrap;
+  }
+  .unified-toolbar .capo-hint:empty { display: none; }
+
+  /* Nhãn phụ trong pill (preset Aa, ký hiệu, vai trò, khổ, số hợp âm) */
+  .unified-toolbar .preset-label,
+  .unified-toolbar .role-label,
+  .unified-toolbar .verse-mode-label,
+  .unified-toolbar .chord-notation-label,
+  .unified-toolbar .view-text,
+  .unified-toolbar .btn-text {
+    font-size: var(--lp-font) !important;
+    font-weight: 500 !important;
+  }
+  .unified-toolbar .preset-icon { font-size: 12px; font-weight: 800; }
+  .unified-toolbar .btn-verse-mode {
+    height: var(--lp-h-inner) !important;
+    min-height: var(--lp-h-inner) !important;
+    padding: 0 4px !important;
+    border: 0 !important;
+    background: transparent !important;
+    gap: 4px;
+  }
+  .unified-toolbar .verse-indicator { font-size: var(--lp-font-sm); font-variant-numeric: tabular-nums; color: var(--lp-muted); }
+  .unified-toolbar .chord-set-count { font-size: var(--lp-font-sm); color: var(--lp-muted); }
+  .unified-toolbar .pill-icon,
+  .unified-toolbar .role-icon,
+  .unified-toolbar .verse-icon,
+  .unified-toolbar .view-icon { font-size: 13px; line-height: 1; }
+
+  /* Nhóm phải: Theo ca trưởng · Biểu diễn */
+  .unified-toolbar .btn-gig-mode {
+    height: var(--lp-h) !important;
+    min-height: var(--lp-h) !important;
+    padding: 0 12px !important;
+    gap: 6px !important;
+    border-radius: var(--lp-radius) !important;
+    font-size: var(--lp-font) !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+  .unified-toolbar #btn-fullscreen {
+    background: var(--lp-accent) !important;
+    border: 1px solid transparent !important;
+    color: #fff !important;
+  }
+  .unified-toolbar #btn-fullscreen:hover { filter: brightness(1.08); }
+  .unified-toolbar .btn-follow-leader {
+    background: var(--lp-surface) !important;
+    border: 1px solid var(--lp-border) !important;
+    color: var(--lp-ink) !important;
+  }
+  .unified-toolbar .btn-follow-leader:hover { background: var(--lp-hover) !important; }
+  .unified-toolbar .btn-toolbar-user {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 4px;
+    height: var(--lp-h) !important;
+    min-height: var(--lp-h) !important;
+    padding: 0 10px !important;
+    border-radius: var(--lp-radius) !important;
+    font-size: var(--lp-font) !important;
+  }
+}
+
+/* iPad dọc & laptop nhỏ: bỏ chữ, chỉ giữ icon cho gọn */
+@media (min-width: 681px) and (max-width: 1100px) {
+  .unified-toolbar .follow-text,
+  .unified-toolbar .gig-text { display: none; }
+  .unified-toolbar .btn-gig-mode { padding: 0 9px !important; }
+}
+
+/* ─── 2. Dải phân đoạn bài (Intro · Lời 1 · Điệp khúc…) ───────────── */
+.section-jump-bar-container {
+  min-height: 34px;
+  padding: 3px 10px;
+  background: var(--lp-surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: 1px solid var(--lp-border);
+}
+.section-chips-list { gap: 4px; }
+.section-chip {
+  padding: 3px 10px;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--lp-ink);
+  background: transparent;
+  border: 1px solid var(--lp-border);
+}
+.section-chip:hover {
+  background: var(--lp-hover);
+  border-color: var(--lp-border-strong);
+  transform: none;
+  box-shadow: none;
+}
+.section-chip.active {
+  background: var(--lp-accent);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: none;
+  transform: none;
+}
+.section-chip .chip-icon { font-size: 11px; }
+.section-chip .chip-measures {
+  font-family: inherit;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--lp-faint);
+  opacity: 1;
+}
+.section-chip.active .chip-measures { color: rgba(255, 255, 255, 0.8); }
+
+/* ─── 3. Sidebar thư viện ─────────────────────────────────────────── */
+.sidebar-tab { font-size: 12.5px; }
+
+.quick-jump { padding: 6px 12px 8px; }
+.quick-jump-label {
+  font-size: 10px;
+  letter-spacing: .06em;
+  color: var(--lp-faint);
+  margin-bottom: 5px;
+}
+.quick-jump-btns { gap: 4px !important; }
+.quick-jump-btn {
+  height: 24px !important;
+  min-height: 24px !important;
+  min-width: 0 !important;
+  padding: 0 9px !important;
+  border: 1px solid var(--lp-border) !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  font-family: inherit !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  font-variant-numeric: tabular-nums;
+  color: var(--lp-muted) !important;
+  letter-spacing: 0 !important;
+}
+.quick-jump-btn:hover { background: var(--lp-hover) !important; color: var(--lp-ink) !important; }
+.quick-jump-btn.active {
+  background: var(--lp-accent-soft) !important;
+  border-color: transparent !important;
+  color: var(--lp-accent) !important;
+  font-weight: 600 !important;
+}
+@media (pointer: coarse) {
+  .quick-jump-btn { height: 30px !important; min-height: 30px !important; padding: 0 11px !important; }
+}
+
+/* Dòng bài hát: gọn, một nhãn tông; nhãn mùa lễ/chủ đề chỉ hiện ở bài đang chọn */
+.song-item {
+  gap: 10px;
+  padding: 6px 10px !important;
+  min-height: 40px !important;
+}
+.song-item-num {
+  min-width: 26px;
+  font-family: inherit !important;
+  font-size: 11px !important;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--lp-faint);
+  letter-spacing: 0;
+}
+.song-item-title {
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  line-height: 1.35 !important;
+  letter-spacing: .01em;
+  color: var(--lp-ink);
+}
+.song-item.active .song-item-title { font-weight: 600 !important; }
+.song-item-meta { gap: 4px !important; margin-top: 2px; flex-wrap: wrap; }
+.song-item-meta .song-key-badge {
+  font-size: 10px !important;
+  line-height: 15px !important;
+  padding: 0 6px !important;
+  height: auto !important;
+}
+.song-item-meta .song-key-badge ~ .song-key-badge {
+  background: transparent !important;
+  color: var(--lp-muted) !important;
+  border: 1px solid var(--lp-border);
+  font-weight: 500 !important;
+}
+.song-item:not(.active) .song-item-meta .song-key-badge ~ .song-key-badge { display: none; }
+.song-item .song-fav-btn {
+  width: 28px !important; height: 28px !important;
+  min-width: 28px !important; min-height: 28px !important;
+  font-size: 14px;
+  opacity: .35;
+  transition: opacity .15s ease;
+}
+@media (pointer: coarse) {
+  .song-item .song-fav-btn { width: 32px !important; height: 32px !important; min-width: 32px !important; min-height: 32px !important; }
+}
+.song-item-actions { height: auto !important; }
+
+/* Đầu sidebar: tab, nút tài khoản, nút tìm theo lời */
+.sidebar-tab {
+  height: 38px !important;
+  min-height: 38px !important;
+  font-weight: 600;
+}
+.sidebar-auth-btn {
+  height: var(--lp-h) !important;
+  min-height: var(--lp-h) !important;
+  padding: 0 10px !important;
+  border-radius: 999px !important;
+  font-size: var(--lp-font) !important;
+}
+.sidebar-header .icon-btn {
+  width: var(--lp-h) !important; height: var(--lp-h) !important;
+  min-width: var(--lp-h) !important; min-height: var(--lp-h) !important;
+}
+.sidebar-search-actions .icon-btn-xs,
+.sidebar-search-actions .btn-quick-numpad {
+  width: 26px !important; height: 26px !important;
+  min-width: 26px !important; min-height: 26px !important;
+  border-radius: var(--lp-radius-sm) !important;
+  font-size: 12px !important;
+}
+@media (pointer: coarse) {
+  .sidebar-search-actions .icon-btn-xs,
+  .sidebar-search-actions .btn-quick-numpad { width: 32px !important; height: 32px !important; min-width: 32px !important; min-height: 32px !important; }
+}
+.song-item:hover .song-fav-btn,
+.song-item .song-fav-btn.active,
+.song-item .song-fav-btn.fav-active { opacity: 1; }
+
+/* ─── 4. Thông báo nổi: nhỏ, giữa đáy, không đè bản nhạc ──────────── */
+.toast-container {
+  left: 50% !important;
+  right: auto !important;
+  bottom: 18px !important;
+  transform: translateX(-50%);
+  align-items: center !important;
+  pointer-events: none;
+}
+.toast-container .toast {
+  max-width: min(420px, calc(100vw - 32px)) !important;
+  padding: 7px 14px !important;
+  border-radius: 12px !important;
+  font-size: 12.5px !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block !important;
+  box-shadow: var(--lp-shadow-pop) !important;
+  pointer-events: auto;
+  animation-name: fadeIn, fadeOut;
+}
+body.dark-mode .toast-container .toast { background: #22222b; color: var(--lp-ink); }
+
+/* ─── 5. Điện thoại (≤680px) ──────────────────────────────────────── */
+@media (max-width: 680px) {
+  .unified-toolbar { gap: 6px; }
+  .unified-toolbar .song-info-pill {
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 10px !important;
+    border-radius: var(--lp-radius) !important;
+    border: 1px solid var(--lp-border) !important;
+  }
+  .unified-toolbar .song-title { font-size: 13.5px !important; font-weight: 600 !important; }
+  .unified-toolbar .icon-btn,
+  .unified-toolbar #btn-more-options,
+  .unified-toolbar #btn-open-sidebar { width: 36px !important; height: 36px !important; min-width: 36px !important; min-height: 36px !important; }
+
+  /* Thanh ngón cái: nền kính, 4 nút cùng chiều cao 40px, rõ ràng */
+  .mobile-thumb-bar {
+    height: 56px;
+    padding: 0 12px max(6px, env(safe-area-inset-bottom, 0px));
+    gap: 8px;
+    justify-content: space-between;
+  }
+  .mobile-thumb-group { gap: 2px; }
+  .mobile-transpose-group { padding: 2px; }
+  .btn-thumb-action,
+  .btn-thumb-gig {
+    width: 38px; height: 38px; min-width: 38px; min-height: 38px;
+    font-size: 1.1rem;
+  }
+  .btn-thumb-tone { height: 38px; min-width: 40px; font-family: inherit; font-size: 13px; }
+  .btn-thumb-chordset,
+  .btn-thumb-view { height: 38px; padding: 0 14px; font-size: 13px; font-weight: 600; }
+  body:not(.dark-mode) .btn-thumb-action,
+  body:not(.dark-mode) .btn-thumb-tone,
+  body:not(.dark-mode) .btn-thumb-chordset { color: var(--lp-ink); }
+  body:not(.dark-mode) .btn-thumb-view:not(.active) { color: var(--lp-accent); }
+  .btn-thumb-gig { background: var(--lp-accent); border-color: transparent; color: #fff; }
+
+  /* Toast nằm trên thanh ngón cái */
+  .toast-container { bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important; }
+
+  /* Sidebar điện thoại */
+  .sidebar-header { padding-top: 10px; padding-bottom: 10px; }
+}
+
+/* ─── 6. Chế độ Band (Lời + Hợp âm chữ): gọn dòng hơn ─────────────── */
+.lv-flow { row-gap: .7em; }
+.lv-chord {
+  margin-bottom: .1em;
+  border-bottom: 0;
+  min-height: calc(var(--lv-chord-size, 1.65rem) * 1.1);
+}
+/* Âm tiết không có hợp âm không giữ chỗ: dòng chỉ có lời sẽ khít lại, dòng có
+   hợp âm vẫn đủ cao (flex align-items:flex-end giữ lời thẳng hàng). */
+.lv-chord.lv-chord-empty {
+  min-height: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+@media (max-width: 680px) {
+  .lv-flow { row-gap: .55em !important; }
+}
+
+/* ─── 7. Menu ⋮: mục gọn hơn ──────────────────────────────────────── */
+#main-dropdown-menu {
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: 12px;
+  border: 1px solid var(--lp-border);
+  box-shadow: var(--lp-shadow-pop);
+  padding: 6px;
+}
+#main-dropdown-menu .btn-menu-item {
+  min-height: 32px;
+  padding: 6px 10px;
+  border-radius: var(--lp-radius);
+  font-size: 12.5px;
+  border-color: transparent;
+}
+#main-dropdown-menu .btn-menu-item:hover { background: var(--lp-hover); }
+#main-dropdown-menu .menu-section-header {
+  font-size: 10px;
+  letter-spacing: .06em;
+  color: var(--lp-faint);
+  padding: 8px 10px 4px;
+}

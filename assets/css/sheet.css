@@ -1270,12 +1270,23 @@ body.dark-mode .lvi-word-only {
 }
 
 /* =============================================
-/* =============================================
    SPRINT A1 — Song Info Strip (Single Row Consolidate)
    ============================================= */
 .song-info-strip {
-  display: none !important;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  background: linear-gradient(90deg, #f0f4ff 0%, #f8f6ff 100%);
+  border-bottom: 1px solid #e5e7eb;
+  padding: .2rem .75rem;
+  font-size: .75rem;
+  color: #4b5563;
+  transition: all .2s ease;
+  overflow: hidden;
 }
+.song-info-strip.si-hidden { display: none !important; }
 .si-inner {
   display: flex;
   align-items: center;

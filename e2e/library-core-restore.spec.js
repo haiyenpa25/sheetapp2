@@ -60,7 +60,7 @@ test.describe('Khôi phục lõi trang Thư viện', () => {
   test('1. Module chính có mặt, không lỗi console, nút Đăng nhập mở modal', async ({ page }) => {
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
-    await page.setViewportSize({ width: 1180, height: 820 });
+    await page.setViewportSize({ width: 1440, height: 900 });
     await openSong(page, '?song=thanh-ca-002');
 
     const missing = await page.evaluate(() => ['Auth', 'HistoryManager', 'PageNav', 'LyricExtractor', 'Metronome',

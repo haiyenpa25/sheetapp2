@@ -228,7 +228,8 @@ module.exports = [
         ChordJudge: 'writable',
         LearnTransportBridge: 'writable',
         QRHelper: 'writable',
-        MusicalPosition: 'writable'
+        MusicalPosition: 'writable',
+        OSMDSvgText: 'writable'
       }
     },
     rules: {

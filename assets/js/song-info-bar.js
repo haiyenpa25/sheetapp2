@@ -91,6 +91,8 @@ const SongInfoBar = (() => {
       _songData.tempo = realSongTempo;
     }
     _render();
+    const strip = document.getElementById('song-info-strip');
+    if (strip) strip.classList.remove('si-hidden');
     // Ticket L1-3: Thông tin bài hát đã tích hợp vào Toolbar pill và popover ⓘ
   }
 

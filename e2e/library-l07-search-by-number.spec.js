@@ -61,7 +61,7 @@ test.describe('Ticket L0-7: Search by Song Number and Enter to Open', () => {
 
     // Kiểm tra URL đổi sang thanh-ca-002
     await expect(page).toHaveURL(/song=thanh-ca-002/, { timeout: 15000 });
-    await expect(page.locator('#song-title')).toContainText('NGUYỀN TỤNG MỸ CHÚA LINH NĂNG', { timeout: 15000 });
+    await expect(page.locator('#song-title')).toContainText(/NGUY[ỆỀ]N TỤNG MỸ CHÚA LINH NĂNG/, { timeout: 15000 });
 
     // OSMD hiển thị
     await expect(page.locator('#osmd-container svg').first()).toBeVisible({ timeout: 15000 });

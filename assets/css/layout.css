@@ -468,6 +468,9 @@ body.fullscreen-mode .osmd-container { max-width: 100%; padding: 1rem; margin-to
   gap: 0.1rem;
   z-index: var(--z-modal);
   min-width: 150px;
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   animation: fadeScaleIn .12s ease;
   pointer-events: auto;
 }

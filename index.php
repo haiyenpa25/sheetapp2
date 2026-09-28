@@ -49,6 +49,7 @@ echo cssTag('sheet.css');
 echo cssTag('components.css');
 echo cssTag('fab.css');
 echo cssTag('app-shell.css');
+echo cssTag('library-polish.css'); // lớp hoàn thiện giao diện — luôn nạp sau cùng
 
 ?>
 </head>
