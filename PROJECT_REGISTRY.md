@@ -1347,7 +1347,14 @@ SheetApp/
   + Tạo: e2e/library-l6-bulk-labels.spec.js (Playwright E2E: Thư viện chính hiển thị bộ lọc Mùa Lễ #season-filter-wrap và Chủ Đề #theme-filter-wrap tự nhiên, lọc bài Giáng Sinh chính xác; Manager Portal chọn nhiều bài hát hiển thị Bulk Bar và gán nhãn thành công, bảng cập nhật badge; 4/4 tests PASS trên Chromium và WebKit)
   🏆 ĐẠT 100% QUALITY GATE: 126/126 suites PASS (2425 passed, 0 failed, 73.2% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
 
+[2026-09-28] — Hoàn tất Ticket L6-5 (ROADMAP4.md Mục 8): Title Spelling Audit & Normalization (Rà Chính Tả Tiêu Đề Bài Hát, Sửa "NGUYỀN" → "NGUYỆN" & Danh Sách Sửa Được Duyệt)
+  + Tạo: tools/check_song_spelling.php (Công cụ CLI rà soát chính tả: --report phân loại danh sách nghi sai, --dry-run chạy thử xem trước, --fix cập nhật CSDL và tự động sync chỉ mục FTS5 unaccented & xóa cache; phân biệt CLI thực thi qua SCRIPT_FILENAME an toàn; 221 dòng < 600 dòng)
+  + Tạo: docs/SPELLING_AUDIT_REPORT.md (Báo cáo thẩm định danh sách sửa được duyệt: 7 bài sửa lỗi gõ Telex "NGUYỀN" → "NGUYỆN" [002, 035, 050, 138, 231, 232, 239], 1 bài sửa thiếu từ [234: "TA THEO Ý CHÚA CHƯA?"], 64 bài chuẩn hóa khoảng trắng thừa trước dấu câu typography, giải trình bảo lưu từ cổ Hán Việt nguyên bản [DỨC DẤY, BIẾN CANH, TIỆN DANH, KHUYÊN LƠN])
+  + Tạo: tests/library_l65_spelling_audit_regression.php (22/22 checks PASS 100%, 77.3% behavioral assertions, kiểm thử 0 bài có 'NGUYỀN', 7 bài có 'NGUYỆN', bài 234 có 'Ý CHÚA', 0 khoảng trắng trước dấu ! hoặc ?, SongService tìm kiếm FTS5 theo tên mới, CLI tool & docs tồn tại)
+  + Tạo: e2e/library-l6-spelling.spec.js (Playwright E2E: Bài 002 hiển thị tiêu đề chuẩn 'NGUYỆN TỤNG MỸ CHÚA LINH NĂNG'; tìm kiếm Thư viện theo từ khóa chuẩn 'Nguyện tụng mỹ', 'Theo ý Chúa', 'Thánh linh chiếu ánh'; bài 004 hiển thị không có khoảng trắng thừa trước dấu chấm than; 6/6 tests PASS trên Chromium và WebKit)
+  🏆 ĐẠT 100% QUALITY GATE: 127/127 suites PASS (2448 passed, 0 failed, 73.4% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
+
 ---
 
 *File này là "bộ nhớ" của dự án. AI Agent cập nhật sau mỗi phiên để phiên sau không phải khám phá lại từ đầu.*
-*Cập nhật: 2026-09-28 (Hoàn tất Ticket L6-3: Gắn nhãn mùa lễ / chủ đề hàng loạt trong Manager, Kích hoạt bộ lọc Thư viện)*
+*Cập nhật: 2026-09-28 (Hoàn tất Ticket L6-5: Rà chính tả tiêu đề bài hát, Sửa "NGUYỀN" → "NGUYỆN" & Danh sách sửa được duyệt)*
