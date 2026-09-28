@@ -249,6 +249,7 @@ echo jsTag('admin-ui.js');
 echo jsTag('display-settings.js');
 echo jsTag('stage-lens.js');
 echo jsTag('guitar-lens.js');
+echo jsTag('bass-lens.js');
 echo jsTag('chord-canvas-xml.js');
 echo jsTag('chord-canvas-ui.js');
 echo jsTag('chord-canvas-transpose.js');

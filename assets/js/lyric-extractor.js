@@ -237,10 +237,22 @@ const LyricExtractor = (() => {
           const rest    = !syl.text || syl.text === '\u00a0';
           let cStr = syl.chord;
           if (cStr && window.GuitarLens?.isSimplifyActive?.()) cStr = window.GuitarLens.simplifyChord(cStr);
+          let chordDisplay = cStr ? (window.SafeHtml ? window.SafeHtml.escape(cStr) : cStr) : '';
+          const isBassRole = window.StageLens?.getCurrentRole?.() === 'bass' || document.body?.dataset?.stageLens === 'bass';
+          if (cStr && isBassRole && window.BassLens?.isBigBassActive?.()) {
+            const bInfo = window.BassLens.parseBassInfo(cStr);
+            if (bInfo) {
+              const safeBass = window.SafeHtml ? window.SafeHtml.escape(bInfo.bassNote) : bInfo.bassNote;
+              const safeFull = window.SafeHtml ? window.SafeHtml.escape(bInfo.fullChord) : bInfo.fullChord;
+              chordDisplay = bInfo.isSlash
+                ? `<span class="lv-bass-root">${safeBass}</span><span class="lv-bass-sub">(${safeFull})</span>`
+                : `<span class="lv-bass-root">${safeBass}</span>`;
+            }
+          }
           const safeChord = cStr ? (window.SafeHtml ? window.SafeHtml.escape(cStr) : cStr) : '';
           const safeText = syl.text ? (window.SafeHtml ? window.SafeHtml.escape(syl.text) : syl.text) : '';
           const chordEl = cStr
-            ? `<b class="lv-chord" data-chord="${safeChord}">${safeChord}</b>`
+            ? `<b class="lv-chord ${isBassRole ? 'lv-chord-bass' : ''}" data-chord="${safeChord}">${chordDisplay}</b>`
             : `<b class="lv-chord lv-chord-empty"></b>`;
           const sylEl = rest
             ? `<span class="lv-syl lv-rest">\u00a0\u00a0</span>`

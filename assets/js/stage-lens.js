@@ -112,15 +112,33 @@ const StageLens = (() => {
         window.ChordCanvas.showChords();
       }
 
-      // Ẩn thanh guitar bar nếu có
+      // Ẩn thanh guitar bar và bass bar nếu có
       const guitarBar = document.getElementById('guitar-lens-bar');
       if (guitarBar) guitarBar.classList.add('hidden');
+      const bassBar = document.getElementById('bass-lens-bar');
+      if (bassBar) bassBar.classList.add('hidden');
+    } else if (roleId === 'bass') {
+      // Ticket L4-4: Bass: Nốt gốc chữ to & Hợp âm đảo lấy nốt bass (C/E -> E)
+      const guitarBar = document.getElementById('guitar-lens-bar');
+      if (guitarBar) guitarBar.classList.add('hidden');
+      const bassBar = document.getElementById('bass-lens-bar');
+      if (bassBar) bassBar.classList.remove('hidden');
+      if (window.DisplaySettings?.renderLyricViewIfActive) {
+        window.DisplaySettings.renderLyricViewIfActive();
+      }
     } else if (roleId === 'guitar') {
       const guitarBar = document.getElementById('guitar-lens-bar');
       if (guitarBar) guitarBar.classList.remove('hidden');
+      const bassBar = document.getElementById('bass-lens-bar');
+      if (bassBar) bassBar.classList.add('hidden');
       if (window.GuitarLens?.refreshPalette) {
         setTimeout(() => window.GuitarLens.refreshPalette(), 200);
       }
+    } else {
+      const guitarBar = document.getElementById('guitar-lens-bar');
+      if (guitarBar) guitarBar.classList.add('hidden');
+      const bassBar = document.getElementById('bass-lens-bar');
+      if (bassBar) bassBar.classList.add('hidden');
     }
   }
 

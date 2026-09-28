@@ -438,4 +438,48 @@ body.dark-mode .voice-selector {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ========================================================
+   Ticket L4-4: Bass Stage Lens (Nốt gốc to, Hợp âm đảo C/E -> E)
+   ======================================================== */
+.bass-lens-bar {
+  width: 100%;
+  position: relative;
+  z-index: 20;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  animation: fadeInDown 0.2s ease-out;
+}
+.btn-bass-tool {
+  transition: all var(--transition-fast, 0.15s ease);
+}
+.btn-bass-tool:hover {
+  background: var(--bg-hover) !important;
+  border-color: var(--accent-cyan, #06b6d4) !important;
+}
+.btn-bass-tool.active {
+  background: rgba(6, 182, 212, 0.2) !important;
+  border-color: var(--accent-cyan, #06b6d4) !important;
+  color: var(--accent-cyan, #06b6d4) !important;
+  font-weight: 700;
+}
+.lv-chord-bass {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+}
+.lv-bass-root {
+  font-size: 1.28em;
+  font-weight: 900;
+  color: var(--accent-cyan, #06b6d4);
+  letter-spacing: -0.02em;
+  text-shadow: 0 0 1px rgba(6, 182, 212, 0.4);
+}
+.lv-bass-sub {
+  font-size: 0.68em;
+  font-weight: normal;
+  opacity: 0.72;
+  color: var(--text-muted, #94a3b8);
+  margin-left: 1px;
+}
+
+
 

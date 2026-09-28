@@ -1183,12 +1183,23 @@ SheetApp/
   ~ Sửa: assets/js/stage-lens.js (Bổ sung logic thích ứng _applyRoleAdaptations cho Keyboard: tự động đóng chế độ Band/Lời, chuyển sang Bản nhạc đầy đủ #osmd-container v=sheet, kích hoạt hiển thị hợp âm trên khuông nhạc, ẩn thanh guitar bar để tối đa hoá diện tích hiển thị)
   + Tạo: tests/library_l43_keyboard_lens_regression.php (17/17 checks PASS, 58.8% behavioral assertions)
   + Tạo: e2e/library-l4-keyboard-lens.spec.js (E2E Playwright: Chọn Keyboard tự động ẩn Band mode mở bản nhạc OSMD đầy đủ, hợp âm hiển thị, ẩn guitar bar, bảo tồn qua reload trên cả Chromium và WebKit)
-  🏆 ĐẠT 100% QUALITY GATE: 110/110 suites PASS (1925 passed, 0 failed, 66.8% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
+[2026-09-28] — Hoàn tất Ticket L4-4 (ROADMAP4.md): Bass Stage Lens (Nốt Gốc Chữ To & Hợp Âm Đảo C/E → E)
+  + Tạo: assets/js/bass-lens.js (Quản lý chế độ Bass: trích xuất nốt bass từ hợp âm đảo C/E → E, G/B → B, D/F# → F#, nốt gốc C → C, Am7 → A; parseBassInfo & formatBassDisplay; toggleBigBass lưu localStorage 'sheetapp_bass_big_notes'; thanh điều khiển #bass-lens-bar với nút toggle; 206 dòng < 600 dòng)
+  ~ Sửa: assets/js/stage-lens.js (Thích ứng cho vai trò Bass: hiển thị thanh #bass-lens-bar, ẩn guitar-lens-bar, tự động kích hoạt render lại nốt bass chữ lớn khi chuyển vai trò)
+  ~ Sửa: assets/js/lyric-extractor.js (Render hợp âm theo phong cách Bass Lens: nốt bass to đậm .lv-bass-root và hợp âm phụ mờ .lv-bass-sub cho hợp âm đảo C/E)
+  ~ Sửa: assets/css/components.css (Thêm CSS cho .bass-lens-bar, .btn-bass-tool, .lv-chord-bass, .lv-bass-root, .lv-bass-sub; < 490 dòng)
+  ~ Sửa: assets/js/app.js (Khởi tạo BassLens.init() khi app boot)
+  ~ Sửa: index.php (Nạp bass-lens.js)
+  ~ Sửa: eslint.config.js (Khai báo global BassLens: 'writable')
+  + Tạo: tests/library_l44_bass_lens_regression.php (19/19 checks PASS, 78.9% behavioral assertions)
+  + Tạo: e2e/library-l4-bass-lens.spec.js (E2E Playwright: Chọn Bass Lens, thanh #bass-lens-bar xuất hiện, nốt bass chữ to trong Band mode, nốt đảo C/E → E, nút toggle nốt bass lớn, bảo toàn qua reload trên cả Chromium và WebKit)
+  🏆 ĐẠT 100% QUALITY GATE: 111/111 suites PASS (1944 passed, 0 failed, 67.1% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
 
 ---
 
 *File này là "bộ nhớ" của dự án. AI Agent cập nhật sau mỗi phiên để phiên sau không phải khám phá lại từ đầu.*
 *Cập nhật: 2026-09-28*
+
 
 
 
