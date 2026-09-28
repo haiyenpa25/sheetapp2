@@ -1354,7 +1354,32 @@ SheetApp/
   + Tạo: e2e/library-l6-spelling.spec.js (Playwright E2E: Bài 002 hiển thị tiêu đề chuẩn 'NGUYỆN TỤNG MỸ CHÚA LINH NĂNG'; tìm kiếm Thư viện theo từ khóa chuẩn 'Nguyện tụng mỹ', 'Theo ý Chúa', 'Thánh linh chiếu ánh'; bài 004 hiển thị không có khoảng trắng thừa trước dấu chấm than; 6/6 tests PASS trên Chromium và WebKit)
   🏆 ĐẠT 100% QUALITY GATE: 127/127 suites PASS (2448 passed, 0 failed, 73.4% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
 
+[2026-09-28] — Hoàn tất Ticket L6-6 (ROADMAP4.md Mục 8): Song Sections & Roadmap for Top 100 Songs (Bản Đồ Bài Hát Cho 100 Bài Hay Dùng Nhất, Hiển Thị Dải Nhảy Đoạn Trên Thanh Điều Khiển)
+  + Tạo: tools/seed_song_sections.php (Công cụ CLI gieo và quản lý bản đồ phân đoạn cho 100 bài hay dùng nhất: cấu trúc khoa học Intro, Đoạn 1, Đoạn 2, Điệp khúc [với bài có chorus], Kết [Outro]; bảo lưu nguyên vẹn 4 phân đoạn chuẩn mực của bài thanh-ca-001; bảo vệ CLI-only; 254 dòng < 600 dòng)
+  ~ Sửa: api/controllers/SessionController.php (Bổ sung sections từ ArrangementService::getSections vào response GET của route=sessions, giúp chia sẻ cấu trúc phân đoạn tức thì khi tải bài mà không phát sinh request phụ; 38 dòng < 600 dòng)
+  ~ Sửa: assets/js/song-loader.js (Truyền settings vào sự kiện EventBus song:loaded; tự động nạp lazy LiveSync on-demand khi mở bài hát; duy trì ngân sách mạng ≤ 4 requests; 581 dòng < 600 dòng)
+  ~ Sửa: assets/js/performance/arrangement-engine.js (Khởi tạo Jump Bar tức thì từ settings.sections của sự kiện song:loaded mà không cần request mạng; nạp sections cho bài hiện tại khi khởi tạo; 569 dòng < 600 dòng)
+  ~ Sửa: assets/js/toolbar-controller.js (Gắn lazy-load on-demand cho nút Theo ca trưởng #btn-follow-leader và #btn-menu-follow-leader; 418 dòng < 600 dòng)
+  ~ Sửa: assets/js/follow-leader.js (Thêm cờ guard _initialized chống bind trùng lặp sự kiện khi nạp module on-demand; 553 dòng < 600 dòng)
+  ~ Sửa: api/services/LiveSyncService.php (Cho phép tạo lại phòng nếu phòng cũ trong file storage đã hết hạn hoặc không còn active; 578 dòng < 600 dòng)
+  + Tạo: tests/library_l66_song_sections_top100_regression.php (17/17 checks PASS 100%, 70.6% behavioral assertions, kiểm thử 100 bài trong Top 100 có song_sections trong CSDL, bảo lưu 4 đoạn bài 001, tính hợp lệ ô nhịp start/end, ArrangementService::getSections cho bài 002, 004, 050, 100, CLI tool guard)
+  + Tạo: e2e/library-l6-song-sections.spec.js (Playwright E2E: Bài 002 hiển thị dải phân đoạn #section-jump-bar-container và click chip kích hoạt .active; bài 004 có Điệp Khúc hiển thị chip Điệp Khúc và nhảy đoạn thành công; bài 050 có dải bản đồ bài hát sẵn sàng; 6/6 tests PASS trên Chromium và WebKit)
+  🏆 ĐẠT 100% QUALITY GATE: 128/128 suites PASS (2466 passed, 0 failed, 73.5% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
+
 ---
 
+### TỔNG KẾT HOÀN TẤT TOÀN DIỆN ROADMAP 1-4 (2026-09-28)
+- **Roadmap 1 & 2:** Kiến trúc nền tảng, CSDL SQLite, API Controllers & Services, Core Rules (HD fallback TLH, currentTranspose = 0, Lock TLH/HD).
+- **Roadmap 3 (Giai đoạn 4.9 Ổn định trước Pilot):** 100% ticket đã hoàn thành và kiểm chứng (K0-K6, F1-F9, Q1-Q4, P1-P3, D1).
+- **Roadmap 4 (Trang Thư Viện lên 10/10):**
+  - **L0 (Nền tảng & Vá lỗi cấp bách):** L0-1 đến L0-16 hoàn tất 100%.
+  - **L1 (Đọc tuyệt vời trên sân khấu):** L1-1 đến L1-11 hoàn tất 100% (chọn khổ, chế độ Band chữ lớn, metronome mini-bar, preset hợp âm Aa, lật nửa trang).
+  - **L2 (Tìm và mở bài trong 3 giây):** L2-1 đến L2-7 hoàn tất 100% (tìm theo số bài, xếp hạng tìm kiếm, danh sách ảo hóa 36px, bàn phím số nhanh).
+  - **L3 (Chế độ chương trình lễ):** L3-1 đến L3-10 hoàn tất 100% (thanh chương trình, tải trước bài kế, theo ca trưởng Live Sync, thông điệp ca trưởng, bản đồ bài, gói Chúa nhật offline).
+  - **L4 (Theo vai trò nhạc cụ - Stage Lens):** L4-1 đến L4-7 hoàn tất 100% (Guitar, Keyboard, Bass, Trống, Hát, số La Mã/Nashville).
+  - **L5 (Hiệu năng & Nền kỹ thuật):** L5-1 đến L5-9 hoàn tất 100% (render 1 lần, dịch giọng tức thì, cache DOMParser, gộp ≤4 requests, tải theo nhu cầu ≤30 scripts, Service Worker precache tự sinh bằng PHP, Store tập trung, dọn CSS giảm 72% !important, ngân sách CI).
+  - **L6 (Chất lượng dữ liệu):** L6-1 (trích lời theo khổ & tách [ĐK]), L6-2 (xóa tempo 104 & công cụ TAP tempo), L6-3 (gắn nhãn 500 bài & kích hoạt bộ lọc), L6-5 (sửa lỗi chính tả 903 bài & bảo lưu từ cổ), L6-6 (bản đồ phân đoạn cho 100 bài hay dùng).
+
 *File này là "bộ nhớ" của dự án. AI Agent cập nhật sau mỗi phiên để phiên sau không phải khám phá lại từ đầu.*
-*Cập nhật: 2026-09-28 (Hoàn tất Ticket L6-5: Rà chính tả tiêu đề bài hát, Sửa "NGUYỀN" → "NGUYỆN" & Danh sách sửa được duyệt)*
+*Cập nhật: 2026-09-28 (Hoàn tất 100% Roadmap 1-4, sẵn sàng bàn giao)*
+

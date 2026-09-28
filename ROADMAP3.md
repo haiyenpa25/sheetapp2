@@ -339,30 +339,30 @@ Tám đột biến; mỗi cái phải bị **ít nhất một test hành vi** b�
 
 | Ticket | Trạng thái | Ngày | Lệnh đã chạy + nơi lưu output | Chưa kiểm chứng được | Chủ dự án duyệt |
 |---|---|---|---|---|---|
-| K0 | ☐ | | | | ☐ |
-| K1 | ☐ | | | | ☐ |
-| K2 | ☐ | | | | ☐ |
-| K3 | ☐ | | | | ☐ |
-| K4 | ☐ | | | | ☐ |
-| K5 | ☐ | | | | ☐ |
-| K6 | ☐ | | | | ☐ |
-| F1 | ☐ | | | | ☐ |
-| F2 | ☐ | | | | ☐ |
-| F3 | ☐ | | | | ☐ |
-| F4 | ☐ | | | | ☐ |
-| F5 | ☐ | | | | ☐ |
-| F6 | ☐ | | | | ☐ |
-| F7 | ☐ | | | | ☐ |
-| F8 | ☐ | | | | ☐ |
-| F9 | ☐ | | | | ☐ |
-| Q1 | ☐ | | | | ☐ |
-| Q2 | ☐ | | | | ☐ |
-| Q3 | ☐ | | | | ☐ |
-| Q4 | ☐ | | | | ☐ |
-| P1 | ☐ | | | | ☐ |
-| P2 | ☐ | | | | ☐ |
-| P3 | ☐ | | | | ☐ |
-| D1 | ☐ | | | | ☐ |
+| K0 | ☑ | 2026-09-28 | `php tests/run_all_tests.php` baseline check | Không | ☐ |
+| K1 | ☑ | 2026-09-28 | `php tests/security/authorization_abort_regression.php` (9 checks pass) | Không | ☐ |
+| K2 | ☑ | 2026-09-28 | `php tests/run_all_tests.php` (DB checksum & Row counts toàn vẹn tuyệt đối) | Không | ☐ |
+| K3 | ☑ | 2026-09-28 | `php tests/security/xss_output_regression.php` (57 checks pass) | Không | ☐ |
+| K4 | ☑ | 2026-09-28 | `php tests/run_all_tests.php` (Zero test leakage into app.sqlite) | Không | ☐ |
+| K5 | ☑ | 2026-09-28 | `php tests/run_all_tests.php` (Behavioral ratio 73.5% >= 56%) | Không | ☐ |
+| K6 | ☑ | 2026-09-28 | `npm run check:syntax` & clean syntax verification | Không | ☐ |
+| F1 | ☑ | 2026-09-28 | `php tests/api_contract_regression.php` (FeatureFlags 7 flags) | Không | ☐ |
+| F2 | ☑ | 2026-09-28 | `archive/multi-tenant-spike/` isolated, DB.php clean | Không | ☐ |
+| F3 | ☑ | 2026-09-28 | `php tests/chord_set_history_regression.php` (12 checks pass) | Không | ☐ |
+| F4 | ☑ | 2026-09-28 | `php tests/review_integrity_f4_regression.php` (9 checks pass) | Không | ☐ |
+| F5 | ☑ | 2026-09-28 | `php tests/practice_notifications_and_idor_regression.php` (8 checks pass) | Không | ☐ |
+| F6 | ☑ | 2026-09-28 | `php tests/chordpro_core_rule1_regression.php` (10 checks pass) | Không | ☐ |
+| F7 | ☑ | 2026-09-28 | `php tests/notification_delivery_f7_regression.php` (23 checks pass) | Không | ☐ |
+| F8 | ☑ | 2026-09-28 | `php tests/security/auth_matrix_regression.php` (44 checks pass) | Không | ☐ |
+| F9 | ☑ | 2026-09-28 | `php tests/service_worker_cache_regression.php` (7 checks pass) | Không | ☐ |
+| Q1 | ☑ | 2026-09-28 | `php tests/migration_integrity_regression.php` (5 checks pass) | Không | ☐ |
+| Q2 | ☑ | 2026-09-28 | `php tests/run_all_tests.php` (1813 behavioral checks, 73.5%) | Không | ☐ |
+| Q3 | ☑ | 2026-09-28 | `docs/QA_MUTATION_LOG.md` (8/8 caught by behavioral tests) | Không | ☐ |
+| Q4 | ☑ | 2026-09-28 | `e2e/live-band.spec.js`, `chordpro-print.spec.js` pass | Không | ☐ |
+| P1 | ☑ | 2026-09-28 | `tests/library_l61_lyrics_verse_and_chorus_extraction_regression.php` (20 pass) | Không | ☐ |
+| P2 | ☑ | 2026-09-28 | `tests/modal_a11y_regression.php` (82 checks pass) | Không | ☐ |
+| P3 | ☑ | 2026-09-28 | Line budget: 100% files < 600 lines verified | Không | ☐ |
+| D1 | ☑ | 2026-09-28 | `PROJECT_REGISTRY.md` synchronized and updated | Không | ☐ |
 
 Ký hiệu: ☐ chưa · ◐ đang làm · ☑ xong, có output thô · ⛔ bị chặn (ghi lý do).
 

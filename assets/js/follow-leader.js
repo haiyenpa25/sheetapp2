@@ -18,8 +18,11 @@ const FollowLeader = (() => {
   let _pendingState = null;
   let _videoStream = null;
   let _scanInterval = null;
+  let _initialized = false;
 
   function init() {
+    if (_initialized) return;
+    _initialized = true;
     _bindToolbarEvents();
     _bindModalEvents();
     _bindBannerEvents();

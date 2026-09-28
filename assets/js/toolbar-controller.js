@@ -295,6 +295,16 @@ const ToolbarController = (() => {
       AppUI?.updateSessionPanel?.(Store.get('currentTranspose'), SessionTracker?.getHistory?.());
       App?.showToast?.('💾 Đã lưu nhật ký', 'success');
     });
+
+    const _handleFollowLeaderClick = async (e) => {
+      e?.preventDefault?.();
+      if (!window.FollowLeader && window.ScriptLoader?.loadLiveSync) {
+        await window.ScriptLoader.loadLiveSync();
+      }
+      window.FollowLeader?.openModal?.();
+    };
+    document.getElementById('btn-follow-leader')?.addEventListener('click', _handleFollowLeaderClick);
+    document.getElementById('btn-menu-follow-leader')?.addEventListener('click', _handleFollowLeaderClick);
   }
 
   function _updateTrackFill(slider) {

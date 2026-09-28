@@ -136,7 +136,11 @@ const SongLoader = (() => {
       // Các task phụ — không cần await
       if (window.SongInfoBar) SongInfoBar.loadSong(xml, song);
       if (window.PerformanceNotes) PerformanceNotes.loadSong(song.id, settings); // Ticket L5-4: dùng chung sessions
-      if (window.LiveSync?.ensureLoaded) window.LiveSync.ensureLoaded();
+      if (window.LiveSync?.ensureLoaded) {
+        window.LiveSync.ensureLoaded();
+      } else if (window.ScriptLoader?.loadLiveSync) {
+        window.ScriptLoader.loadLiveSync().then(() => window.LiveSync?.ensureLoaded?.());
+      }
 
       _enableAudioControls();
       AppUI.showOSMD();
@@ -168,7 +172,7 @@ const SongLoader = (() => {
 
       window.PageNav?.computePages?.();
       setTimeout(() => window.PageNav?.computePages?.(), 150);
-      EventBus.emit('song:loaded', { song, xml });
+      EventBus.emit('song:loaded', { song, xml, settings });
 
     } catch (err) {
       if (err.name === 'AbortError' || loadToken !== _currentLoadToken) {

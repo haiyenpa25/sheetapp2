@@ -11,8 +11,10 @@ class SessionController {
         if ($method === 'GET') {
             $songId = $_GET['songId'] ?? '';
             if (!$songId) { Response::error('Missing songId'); return; }
-            // Anonymous users receive defaults; persisted settings are private per account.
-            Response::ok(SessionService::load($songId, Auth::userId() ?? 0));
+            $data = SessionService::load($songId, Auth::userId() ?? 0);
+            require_once __DIR__ . '/../services/ArrangementService.php';
+            $data['sections'] = ArrangementService::getSections($songId);
+            Response::ok($data);
         } elseif ($method === 'POST') {
             Auth::requireLogin();
             $body   = json_decode(file_get_contents('php://input'), true) ?? [];

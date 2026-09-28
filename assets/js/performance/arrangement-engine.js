@@ -23,8 +23,7 @@ const ArrangementEngine = (() => {
     _bindEvents();
 
     const curSong = window.Store?.get?.('currentSong');
-    const isLive = window.LiveSession?.isActive?.() || window.Store?.get?.('currentRoom');
-    if (curSong?.id && (isLive || window.__enableArrangementsAutoLoad)) {
+    if (curSong?.id) {
       loadForSong(curSong.id);
     }
 
@@ -34,18 +33,25 @@ const ArrangementEngine = (() => {
   function _bindEvents() {
     if (typeof EventBus === 'undefined') return;
 
-    EventBus.on('song:loaded', ({ song }) => {
+    EventBus.on('song:loaded', ({ song, settings }) => {
       const songId = song?.id;
       if (songId) {
-        const isLive = window.LiveSession?.isActive?.() || window.Store?.get?.('currentRoom');
-        if (isLive || window.__enableArrangementsAutoLoad) {
-          loadForSong(songId);
-        } else {
+        if (settings?.sections && Array.isArray(settings.sections)) {
           _currentSongId = songId;
-          _sections = [];
+          _sections = settings.sections;
           _arrangements = [];
-          const container = document.getElementById('section-jump-bar-container');
-          if (container) container.classList.add('hidden');
+          renderJumpBar();
+          EventBus.emit('arrangements:loaded', { songId, sections: _sections, arrangements: _arrangements });
+        } else {
+          const isLive = window.LiveSession?.isActive?.() || window.Store?.get?.('currentRoom');
+          if (isLive || window.__enableArrangementsAutoLoad) {
+            loadForSong(songId);
+          } else {
+            _currentSongId = songId;
+            _sections = [];
+            _arrangements = [];
+            renderJumpBar();
+          }
         }
       } else {
         clear();

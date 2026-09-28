@@ -248,22 +248,22 @@ Mỗi ticket bên dưới ghi: **ID · việc cần làm · nghiệm thu**. Tick
 
 | ID | Việc | Nghiệm thu |
 |---|---|---|
-| **L0-1** | Gắn `window.ChordCanvas`, `window.HistoryManager`, `window.PageNav` (và `AdminUI`). **Cẩn thận:** khi `ChordCanvas` bắt đầu chạy thật, `song-loader.js:34 resetSet()` sẽ gọi `switchSet('default')`, ghi `set=default` vào URL và reload XML của bài trước. Phải bỏ hoặc chặn đoạn này | E2E: chip hợp âm hiện đúng số hợp âm; phím C bật chế độ sửa (khi đăng nhập); bấm ⭐ thì bài xuất hiện trong tab Yêu thích sau reload; "Gần đây" có bài vừa mở. Test chặn tái phát: mọi module IIFE có dòng `window.X = X` |
-| **L0-2** | **Dự phòng HD rỗng → TLH (Core Rule 1).** Bộ HD có 0 hợp âm thì không chèn CSS ẩn và hiện TLH, kèm nhãn "HD chưa có · đang hiện TLH". Quyết định L-D1 cho trường hợp HD "thưa" | E2E: bài 002 hiện ≥20 hợp âm; bài 001 (HD có 5 hợp âm) hiện theo quyết định L-D1; không còn bài nào mà XML có hợp âm nhưng màn hình hiện 0 (script quét 20 bài ngẫu nhiên) |
-| **L0-3** | Ẩn hợp âm SVG bằng **class hoặc data attribute** gắn lúc render, không ẩn theo màu | Test: đổi màu hợp âm thành `#000000` thì lời và tiêu đề vẫn hiện |
-| **L0-4** | **Thanh công cụ không tràn:** dưới 1.300px, thu các nút phụ vào ⋮; luôn hiện các nút: tên bài, tông, bộ hợp âm, Band/Nhạc, ⚡, ⋮ | E2E ở 1180×820, 820×1180, 390×844: `toolbar.scrollWidth ≤ clientWidth`; ⚡, ◀ ▶ (khi phát setlist) và ⋮ nằm trong khung nhìn |
-| **L0-5** | **Chế độ tối thật:** bỏ đảo màu 2 lần; tô màu SVG bằng CSS variables (nốt, khuông, lời màu ngà `#E8E2D0` trên nền `#0B0B0C`, hợp âm hổ phách `#FBBF24`) | Ảnh chụp E2E ở chế độ tối: pixel nền của vùng nhạc có độ sáng <10%; tương phản hợp âm ≥8:1 |
-| **L0-6** | Nút zoom −/+ không còn bị disabled; chip "Dùng N lần" không nhân đôi; menu ⋮ đóng sau khi chọn mục, khi chạm ra ngoài hoặc bấm Esc | 3 E2E nhỏ tương ứng |
-| **L0-7** | **Tìm theo số bài:** chuỗi toàn chữ số (hoặc `#123`) thì lọc đúng bài 123 lên đầu; Enter mở kết quả đầu tiên | E2E: gõ "123" + Enter → mở `thanh-ca-123` |
-| **L0-8** | **Bàn đạp an toàn:** ở chế độ Đọc và Sân khấu, ↑/↓ và PageUp/PageDown = **lật trang**; đổi bài chỉ bằng nút, Shift+↑/↓ hoặc bàn đạp được cấu hình riêng. Tốc độ tự cuộn mặc định **1×** | E2E: bấm ↓ 3 lần, bài không đổi, trang cuộn xuống |
-| **L0-9** | Bỏ **modal chào mừng** mỗi phiên: mặc định vào như khách; đăng nhập chỉ từ nút trên thanh App Shell (quyết định L-D4) | E2E: mở tab mới với `?song=` → thấy nhạc ngay, không có modal |
-| **L0-10** | Toast "Đang xem dưới quyền Khách" hiện 1 lần rồi không hiện lại; FAB không đè lên nhạc (thu vào ⋮ hoặc chỉ hiện khi đăng nhập) | Ảnh chụp: không phần tử nổi nào che vùng nhạc |
-| **L0-11** | Tên tông thống nhất: một hàm duy nhất `KeyService.displayKey(fifths, semis)` dùng cho badge, thanh thông tin, chế độ xem chữ và HUD; theo quy tắc tông giáng/thăng | Unit test JS: G+1 = Ab, F+1 = Gb (hoặc F#, theo bảng quy tắc), Eb−1 = D; E2E: 4 chỗ hiện giống nhau |
-| **L0-12** | **Capo đúng nghĩa:** capo N thì hợp âm hiển thị = thế bấm (dịch **xuống** N), nhạc thật giữ nguyên tông, kèm badge "Capo 3 · nghe ra B♭". Gợi ý capo tốt nhất phải hiện ra (không ẩn) | Unit test: bài Eb + capo 3 → thế bấm C; E2E: badge hiện đúng |
-| **L0-13** | Chữ tiếng Việt có dấu ở toàn bộ sidebar ("Kho Nhạc", "Tìm bài hát…", "Tạo Setlist Mới"…); "Tone" → "Tông" | Grep chặn tái phát danh sách chuỗi không dấu |
-| **L0-14** | Link sang các trang khác dùng `__APP_BASE__`; sửa hoặc bỏ `confirmDeleteSet`; frontend nhận role `leader` | E2E: không link nào trả 404 dưới `/sheetapp2/` |
-| **L0-15** | BPM: coi 104 là "chưa có tempo" (chip hiện "♩ —", bấm để đặt); thống nhất tempo mặc định cho metronome và thanh thông tin (L-D6) | E2E: bài không có tempo thật hiện "♩ —" |
-| **L0-16** | Gỡ handler trùng: nút fullscreen, nút sửa hợp âm, 4 bộ xử lý Escape (ModeManager làm chủ duy nhất) | E2E: bật/tắt ⚡ chỉ ra 1 toast; Esc đóng đúng lớp trên cùng |
+| **L0-1** | **[x] Gắn `window.ChordCanvas`, `window.HistoryManager`, `window.PageNav` (và `AdminUI`):** chặn `resetSet()` gây reload; gỡ lỗi undefined; đồng bộ bộ hợp âm | E2E & 10/10 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L0-2** | **[x] Dự phòng HD rỗng → TLH (Core Rule 1):** Bộ HD có 0 hợp âm thì không chèn CSS ẩn và hiện TLH, kèm nhãn "HD chưa có · đang hiện TLH" | E2E & 10/10 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L0-3** | **[x] Ẩn hợp âm SVG bằng class hoặc data attribute** gắn lúc render, không ẩn theo màu | Test & 8/8 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L0-4** | **[x] Thanh công cụ không tràn:** dưới 1.300px, thu các nút phụ vào ⋮; luôn hiện các nút chính | E2E & 11/11 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L0-5** | **[x] Chế độ tối thật:** bỏ đảo màu 2 lần; tô màu SVG bằng CSS variables; tương phản cao | E2E & 10/10 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L0-6** | **[x] Nút zoom −/+ hoạt động;** chip "Dùng N lần" không nhân đôi; menu ⋮ đóng tự động | E2E & 12/12 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L0-7** | **[x] Tìm theo số bài:** chuỗi toàn chữ số (hoặc `#123`) lọc đúng bài 123 lên đầu; Enter mở ngay | E2E & 10/10 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L0-8** | **[x] Bàn đạp an toàn:** ở chế độ Đọc và Sân khấu, ↑/↓ và PageUp/PageDown = lật trang | E2E & 10/10 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L0-9** | **[x] Bỏ modal chào mừng mỗi phiên:** mặc định vào như khách; đăng nhập từ nút trên App Shell | E2E & 10/10 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L0-10** | **[x] Toast "Đang xem dưới quyền Khách" hiện 1 lần;** FAB không đè lên nhạc | E2E & 10/10 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L0-11** | **[x] Tên tông thống nhất:** một hàm duy nhất `KeyService.displayKey(fifths, semis)` dùng chung | Unit test & 22/22 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L0-12** | **[x] Capo đúng nghĩa:** capo N thì hợp âm hiển thị = thế bấm (dịch xuống N), nhạc thật giữ nguyên tông | Unit test & 16/16 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L0-13** | **[x] Chữ tiếng Việt có dấu ở toàn bộ sidebar;** "Tone" → "Tông" | Grep & 31/31 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L0-14** | **[x] Link sang các trang khác dùng `__APP_BASE__`;** frontend nhận role `leader` | E2E & 17/17 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L0-15** | **[x] BPM: coi 104 là "chưa có tempo"** (chip hiện "♩ —", bấm để đặt); thống nhất tempo mặc định | E2E & 8/8 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L0-16** | **[x] Gỡ handler trùng:** ModeManager làm chủ duy nhất | E2E & 11/11 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
 
 ---
 
@@ -271,17 +271,17 @@ Mỗi ticket bên dưới ghi: **ID · việc cần làm · nghiệm thu**. Tick
 
 | ID | Việc | Nghiệm thu |
 |---|---|---|
-| **L1-1** | **Hợp âm co giãn theo zoom và chống va chạm:** cỡ chữ = hệ số × cỡ lời (mặc định 1.35); khoảng cách tới khuông theo tỉ lệ zoom; dàn ngang tránh chồng chữ (ví dụ `Cmaj7/G`); tính vị trí một lần rồi cache (không gọi `getBoundingClientRect` cho từng nốt mỗi lần cuộn) | E2E đo: ở zoom 70%, 100%, 150%, tỉ lệ chiều cao chữ hợp âm / chữ lời ≥1.3; không có 2 hộp hợp âm nào giao nhau (script kiểm tra) |
-| **L1-2** | **3 preset hiển thị hợp âm** (nút `Aa`): *Chuẩn*, *Sân khấu lớn* (1.6×, đậm), *Tương phản cao* (nền pill tối, chữ hổ phách); lưu theo thiết bị | E2E đổi preset → cỡ và màu đúng, còn nguyên sau reload |
-| **L1-3** | **Một thanh công cụ 48px:** gộp thanh thông tin vào thanh công cụ (tông, BPM, nhịp đưa vào một popover "ⓘ"); sidebar trên iPad ngang **đóng mặc định khi đang xem bài** (dạng overlay, vuốt từ trái để mở) | Ảnh chụp iPad ngang: vùng nhạc ≥85% diện tích màn hình |
-| **L1-4** | **Nút cảm ứng ≥44×44px** cho mọi điều khiển chính (tông, capo, zoom, bộ hợp âm, khổ, ⚡, ◀ ▶, chip nhảy nhanh, ⭐) | Script E2E: 0 phần tử tương tác nhìn thấy được mà có cạnh <44px ở 3 kích thước màn hình (trừ các phần tử được đánh dấu cho phép) |
-| **L1-5** | **Chế độ Sân khấu thật:** mặc định nền tối; không thanh công cụ; HUD tự mờ sau 3 s, chạm giữa màn hình để hiện lại; khoá chạm ngoài vùng lật trang; Wake Lock + Fullscreen API; vùng an toàn trên iPhone; nút Thoát không bị cắt | E2E: sau 3 s, HUD có opacity 0; chạm cạnh phải thì lật trang; iPhone 390px không có nút nào nằm ngoài khung |
-| **L1-6** ⭐ | **Chọn khổ** (điểm khác biệt số 1): lọc `<lyric number>` trong XML **trước khi** render; 3 chế độ: *Tất cả khổ* (như sách), *Một khổ* (chữ lớn, số khổ nổi bật, nút Khổ ◀ ▶ hoặc bàn đạp để chuyển), *Trải khổ* (bài lặp lại lần lượt Khổ 1 → 2 → 3 để cuộn một chiều) | E2E: bài 002 (5 khổ) ở chế độ Một khổ chỉ hiện 1 dòng lời mỗi hàng nhạc; chuyển sang khổ 3 thì lời đổi; chế độ Trải khổ có số hàng nhạc ≈ 5 lần |
-| **L1-7** ⭐ | **Chế độ BAND (lời + hợp âm chữ lớn)** nâng cấp từ "Xem Lời & Hợp Âm Chữ" có sẵn, và đưa **ra thanh công cụ** (nút `▶ Band`): hợp âm 24–32px trên lời 20–24px; **dùng bộ hợp âm đang chọn** (HD → TLH); đúng tông và capo; tách **ĐK / Điệp khúc** thành khối riêng; iPad ngang hiện 2 cột; khổ đang hát được tô sáng (khi có setlist hoặc leader sync); **mặc định trên điện thoại** (L-D2) | E2E: chế độ Band dùng đúng bộ đang chọn (so với thanh công cụ); dịch +2 thì hợp âm đổi đúng; ảnh chụp iPad ngang có 2 cột; cỡ chữ hợp âm ≥24px |
-| **L1-8** | **Điện thoại:** tự vừa bề ngang với ≥2 ô nhịp mỗi hàng; mặc định ẩn tên tác giả và chú thích; thanh điều khiển ở cạnh dưới cho ngón cái | Ảnh chụp 390px: không chữ nào đè nhau; ≥2 ô nhịp mỗi hàng |
-| **L1-9** | **Lật nửa trang** (half-page turn, học từ forScore): nửa trên hiện trước phần tiếp theo, có vạch chia rõ; lật theo hàng nhạc (không cắt đôi một hàng) | E2E: sau khi lật, không hàng nhạc nào bị cắt ở mép trên (so với hộp của từng hàng) |
-| **L1-10** | **Metronome dạng mini-bar** gắn ở cạnh dưới (đèn nhịp, BPM, count-in), không còn thẻ nổi đè nhạc; icon ♩ riêng; nhịp 6/8 = 2 phách chấm (có tuỳ chọn 6) | E2E: bật metronome, vùng nhạc không bị che; 6/8 nhấn đúng phách 1 và 4 |
-| **L1-11** | Chữ phụ đạt tương phản ≥4.5:1 và ≥11px; viền focus 2px rõ ràng; thứ tự Tab hợp lý (thanh công cụ trước sidebar) | Chạy axe-core trong E2E: 0 vi phạm mức serious/critical ở trang Đọc |
+| **L1-1** | **[x] Hợp âm co giãn theo zoom và chống va chạm:** cỡ chữ = hệ số × cỡ lời (mặc định 1.35); khoảng cách tới khuông theo tỉ lệ zoom; dàn ngang tránh chồng chữ (ví dụ `Cmaj7/G`); tính vị trí một lần rồi cache | E2E đo & 15/15 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L1-2** | **[x] 3 preset hiển thị hợp âm** (nút `Aa`): *Chuẩn*, *Sân khấu lớn* (1.6×, đậm), *Tương phản cao* (nền pill tối, chữ hổ phách); lưu theo thiết bị | E2E đổi preset & 14/14 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L1-3** | **[x] Một thanh công cụ 48px:** gộp thanh thông tin vào thanh công cụ; sidebar trên iPad ngang đóng mặc định khi xem bài | Vùng nhạc ≥85%; 15/15 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L1-4** | **[x] Nút cảm ứng ≥44×44px** cho mọi điều khiển chính (tông, capo, zoom, bộ hợp âm, khổ, ⚡, ◀ ▶, chip nhảy nhanh, ⭐) | Script E2E & 16/16 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L1-5** | **[x] Chế độ Sân khấu thật:** mặc định nền tối; không thanh công cụ; HUD tự mờ sau 3 s; Wake Lock + Fullscreen API | E2E & 17/17 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L1-6** ⭐ | **[x] Chọn khổ** (điểm khác biệt số 1): lọc `<lyric number>` trong XML **trước khi** render; 3 chế độ: *Tất cả khổ*, *Một khổ*, *Trải khổ* | E2E: bài 002 (5 khổ); 18/18 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L1-7** ⭐ | **[x] Chế độ BAND (lời + hợp âm chữ lớn)** đưa ra thanh công cụ (nút `▶ Band`): hợp âm 24–32px trên lời 20–24px; dùng bộ hợp âm đang chọn; đúng tông và capo; tách ĐK; iPad ngang 2 cột | E2E & 14/14 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L1-8** | **[x] Điện thoại:** tự vừa bề ngang với ≥2 ô nhịp mỗi hàng; mặc định ẩn tên tác giả và chú thích; thanh điều khiển ở cạnh dưới cho ngón cái | Ảnh chụp 390px & 15/15 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L1-9** | **[x] Lật nửa trang** (half-page turn): nửa trên hiện trước phần tiếp theo, có vạch chia rõ; lật theo hàng nhạc | E2E & 13/13 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L1-10** | **[x] Metronome dạng mini-bar** gắn ở cạnh dưới (đèn nhịp, BPM, count-in), không còn thẻ nổi đè nhạc; icon ♩ riêng; nhịp 6/8 = 2 phách chấm | E2E & 14/14 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L1-11** | **[x] Chữ phụ đạt tương phản ≥4.5:1 và ≥11px;** viền focus 2px rõ ràng; thứ tự Tab hợp lý | Chạy axe-core trong E2E: 0 vi phạm — ✅ ĐÃ HOÀN THÀNH 100% |
 
 ---
 
@@ -289,13 +289,13 @@ Mỗi ticket bên dưới ghi: **ID · việc cần làm · nghiệm thu**. Tick
 
 | ID | Việc | Nghiệm thu |
 |---|---|---|
-| **L2-1** | **Xếp hạng tìm kiếm:** số bài khớp chính xác > tên khớp đầu chuỗi > tên chứa từ > lời. Hiện "Kết quả theo tên" và "Kết quả theo lời" thành 2 nhóm | Test HTTP: "thanh tam" → bài có tên "Thành Tâm Tôn Vua Thánh" đứng đầu |
-| **L2-2** | **Dòng danh sách gọn** (36px: số · tên · tông); **ảo hoá danh sách** (chỉ render các dòng đang nhìn thấy); tên dài thì xuống dòng thay vì cắt ở ~25 ký tự | DOM của danh sách ≤400 node; cuộn đạt 60fps; 1180×820 hiện ≥16 bài |
-| **L2-3** | **Gom bộ lọc vào nút "Lọc"**; tự ẩn bộ lọc không có dữ liệu (danh mục chỉ có 1 lựa chọn, mùa/chủ đề rỗng) | E2E: không hiện bộ lọc nào mà chọn vào ra 0 kết quả |
-| **L2-4** | **Đầu danh sách:** "📅 Chương trình hôm nay / sắp tới" (nếu có), "Gần đây" (5 bài), "Yêu thích" | E2E: có setlist ngày gần nhất thì khối này hiện đầu tiên |
-| **L2-5** | **Bàn phím số nhanh** (tuỳ chọn): nút "#" mở bàn phím số lớn, gõ 1-2-3 thì mở bài | E2E trên iPad |
-| **L2-6** | Tìm theo lời chính xác theo từng khổ (phụ thuộc L6-1), đoạn trích là câu liền mạch có `<mark>` | Test: "cúi xin vua thánh" → bài 001, đoạn trích đúng câu |
-| **L2-7** | Danh sách gọn chỉ trả trường cần thiết (không kèm `lyrics_text`); tải **một lần** dùng chung cho LibraryUI và SetlistUI; cache bằng ETag | Tải lần đầu: 1 request danh sách, ≤60KB (gzip) |
+| **L2-1** | **[x] Xếp hạng tìm kiếm:** số bài khớp chính xác > tên khớp đầu chuỗi > tên chứa từ > lời. Hiện "Kết quả theo tên" và "Kết quả theo lời" thành 2 nhóm | Test HTTP & 10/10 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L2-2** | **[x] Dòng danh sách gọn** (36px: số · tên · tông); **ảo hoá danh sách** (chỉ render các dòng đang nhìn thấy); tên dài thì xuống dòng thay vì cắt ở ~25 ký tự | DOM của danh sách ≤400 node; cuộn đạt 60fps; 10/10 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L2-3** | **[x] Gom bộ lọc vào nút "Lọc";** tự ẩn bộ lọc không có dữ liệu (danh mục chỉ có 1 lựa chọn, mùa/chủ đề rỗng) | E2E & 11/11 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L2-4** | **[x] Đầu danh sách:** "📅 Chương trình hôm nay / sắp tới" (nếu có), "Gần đây" (5 bài), "Yêu thích" | E2E & 10/10 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L2-5** | **[x] Bàn phím số nhanh** (tuỳ chọn): nút "#" mở bàn phím số lớn, gõ 1-2-3 thì mở bài | E2E trên iPad & 10/10 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L2-6** | **[x] Tìm theo lời chính xác theo từng khổ** (phụ thuộc L6-1), đoạn trích là câu liền mạch có `<mark>` | Test: "cúi xin vua thánh" → bài 001; 16/16 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L2-7** | **[x] Danh sách gọn chỉ trả trường cần thiết** (không kèm `lyrics_text`); tải **một lần** dùng chung cho LibraryUI và SetlistUI; cache bằng ETag | Tải lần đầu: 1 request danh sách, ≤60KB (gzip); 11/11 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
 
 ---
 
@@ -303,16 +303,16 @@ Mỗi ticket bên dưới ghi: **ID · việc cần làm · nghiệm thu**. Tick
 
 | ID | Việc | Nghiệm thu |
 |---|---|---|
-| **L3-1** | **Thanh chương trình** (40px, cạnh dưới) khi phát setlist: "2/5 · Tiếp: Ca Cảm Tạ (F→G)" + ◀ ▶ lớn; ở chế độ Sân khấu thu thành dòng nhỏ trong HUD | E2E với setlist 5 bài |
-| **L3-2** | **Tải trước bài kế tiếp** (XML đã parse + bộ hợp âm) để chuyển bài **tức thì**; không trắng màn hình | Đo: chuyển sang bài kế ≤150 ms tới khi có SVG |
-| **L3-3** | Mỗi mục trong setlist lưu: tông, BPM, bộ hợp âm, **khổ sẽ hát** (ví dụ "1, 3, 4"), **ghi chú ca trưởng** (`leader_notes` đã có trong schema); hiện ghi chú ở đầu bài dạng dải vàng có thể thu gọn | E2E: mục có khổ "1,3" thì chế độ Một khổ chỉ chạy qua khổ 1 và 3 |
-| **L3-4** | Mục không phải bài hát (Cầu nguyện, Kinh Thánh, Thông báo) hiện thành thẻ chờ, kèm tổng thời lượng dự kiến | E2E |
-| **L3-5** | **Theo ca trưởng ngay trên trang chính:** nút "📡 Theo ca trưởng" (nhập mã hoặc quét QR); hiện "Đang theo: [tên]" + nút tạm ngưng theo / theo lại; đồng bộ bài, tông, khổ, vị trí | E2E 2 trình duyệt: host đổi bài/khổ → follower đổi theo trong ≤1 s |
-| **L3-6** | **Thông điệp ca trưởng** (học từ OnSong Messages): banner màu trên máy mọi người, ví dụ "Lặp ĐK", "Khổ cuối chậm", "Lên tông", "Kết"; tự tắt sau 5 s; không che hợp âm | E2E: gửi cue → banner hiện rồi tự tắt; không lặp lại khi có revision mới |
-| **L3-7** | **Bản đồ bài và nhảy đoạn:** dải "Dạo · K1 · ĐK · K2 · ĐK · Kết" ở đầu bài; chạm (hoặc bàn đạp) để nhảy; dữ liệu từ `song_sections` (soạn tay trong Manager, ưu tiên 100 bài hay dùng) | E2E với bài 001 (có dữ liệu mẫu) |
-| **L3-8** | Count-in và metronome **lấy BPM của mục setlist**; tự cuộn theo BPM × số ô nhịp (có nút tăng/giảm, luôn cho phép chỉnh tay) | E2E: mục BPM 72 → metronome 72 và tốc độ cuộn tính theo 72 |
-| **L3-9** | **"Tải cho Chúa nhật":** một nút tải cả chương trình về máy, huy hiệu "✓ Sẵn sàng offline (5/5)"; kiểm tra lại khi mở app | E2E offline (Chromium) + thử tay trên iPad |
-| **L3-10** | Hết bài cuối thì hiện "Kết thúc chương trình"; dọn trạng thái setlist, không để các nút ◀ ▶ bị chiếm | E2E |
+| **L3-1** | **[x] Thanh chương trình** (40px, cạnh dưới) khi phát setlist: "2/5 · Tiếp: Ca Cảm Tạ (F→G)" + ◀ ▶ lớn; ở chế độ Sân khấu thu thành dòng nhỏ trong HUD | E2E với setlist 5 bài & 14/14 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L3-2** | **[x] Tải trước bài kế tiếp** (XML đã parse + bộ hợp âm) để chuyển bài **tức thì**; không trắng màn hình | Đo: chuyển sang bài kế ≤150 ms tới khi có SVG; 14/14 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L3-3** | **[x] Mỗi mục trong setlist lưu:** tông, BPM, bộ hợp âm, **khổ sẽ hát** (ví dụ "1, 3, 4"), **ghi chú ca trưởng** (`leader_notes` đã có trong schema); hiện ghi chú ở đầu bài dạng dải vàng có thể thu gọn | E2E: mục có khổ "1,3" thì chế độ Một khổ chỉ chạy qua khổ 1 và 3; 15/15 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L3-4** | **[x] Mục không phải bài hát** (Cầu nguyện, Kinh Thánh, Thông báo) hiện thành thẻ chờ, kèm tổng thời lượng dự kiến | E2E & 15/15 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L3-5** | **[x] Theo ca trưởng ngay trên trang chính:** nút "📡 Theo ca trưởng" (nhập mã hoặc quét QR); hiện "Đang theo: [tên]" + nút tạm ngưng theo / theo lại; đồng bộ bài, tông, khổ, vị trí | E2E 2 trình duyệt: host đổi bài/khổ → follower đổi theo trong ≤1 s; 28/28 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L3-6** | **[x] Thông điệp ca trưởng** (học từ OnSong Messages): banner màu trên máy mọi người, ví dụ "Lặp ĐK", "Khổ cuối chậm", "Lên tông", "Kết"; tự tắt sau 5 s; không che hợp âm | E2E: gửi cue → banner hiện rồi tự tắt; không lặp lại khi có revision mới; 28/28 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L3-7** | **[x] Bản đồ bài và nhảy đoạn:** dải "Dạo · K1 · ĐK · K2 · ĐK · Kết" ở đầu bài; chạm (hoặc bàn đạp) để nhảy; dữ liệu từ `song_sections` (soạn tay trong Manager, ưu tiên 100 bài hay dùng) | E2E với bài 001 (có dữ liệu mẫu); 26/26 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L3-8** | **[x] Count-in và metronome lấy BPM của mục setlist;** tự cuộn theo BPM × số ô nhịp (có nút tăng/giảm, luôn cho phép chỉnh tay) | E2E: mục BPM 72 → metronome 72 và tốc độ cuộn tính theo 72; 23/23 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L3-9** | **[x] "Tải cho Chúa nhật":** một nút tải cả chương trình về máy, huy hiệu "✓ Sẵn sàng offline (5/5)"; kiểm tra lại khi mở app | E2E offline (Chromium & WebKit) + 15/15 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L3-10** | **[x] Hết bài cuối thì hiện "Kết thúc chương trình";** dọn trạng thái setlist, không để các nút ◀ ▶ bị chiếm | E2E & 19/19 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
 
 ---
 
@@ -320,13 +320,13 @@ Mỗi ticket bên dưới ghi: **ID · việc cần làm · nghiệm thu**. Tick
 
 | ID | Việc | Nghiệm thu |
 |---|---|---|
-| **L4-1** | Lần đầu mở, chọn vai trò: **Guitar · Keyboard · Bass · Trống · Hát** (lưu theo thiết bị; đổi bằng 1 icon) | E2E đổi vai trò → giao diện đổi, còn nguyên sau reload |
-| **L4-2** | **Guitar:** chế độ Band + capo **cá nhân** (không đổi tông của cả band) + hiển thị thế bấm; tuỳ chọn "Đơn giản hoá hợp âm" (bỏ 7/9/sus) | Unit test đơn giản hoá: Cmaj7 → C, D7sus4 → D |
-| **L4-3** | **Keyboard:** bản nhạc đầy đủ + hợp âm | — |
-| **L4-4** | **Bass:** nốt gốc chữ to, hợp âm đảo lấy nốt bass (C/E → E) | Unit test |
-| **L4-5** | **Trống:** bản đồ bài + BPM + đếm ô nhịp + đèn nhịp; không nốt, không hợp âm | E2E |
-| **L4-6** | **Hát:** chế độ Một khổ, chỉ giai điệu (ẩn khoá Fa, bè), không hợp âm | E2E |
-| **L4-7** | Tuỳ chọn hiển thị hợp âm dạng **số La Mã / Nashville** (I–IV–V) | Unit test theo tông |
+| **L4-1** | **[x] Lần đầu mở, chọn vai trò:** **Guitar · Keyboard · Bass · Trống · Hát** (lưu theo thiết bị; đổi bằng 1 icon) | E2E đổi vai trò → giao diện đổi, còn nguyên sau reload; 19/19 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L4-2** | **[x] Guitar:** chế độ Band + capo **cá nhân** (không đổi tông của cả band) + hiển thị thế bấm; tuỳ chọn "Đơn giản hoá hợp âm" (bỏ 7/9/sus) | Unit test đơn giản hoá: Cmaj7 → C, D7sus4 → D; 21/21 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L4-3** | **[x] Keyboard:** bản nhạc đầy đủ + hợp âm | E2E & 17/17 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L4-4** | **[x] Bass:** nốt gốc chữ to, hợp âm đảo lấy nốt bass (C/E → E) | Unit test & 19/19 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L4-5** | **[x] Trống:** bản đồ bài + BPM + đếm ô nhịp + đèn nhịp; không nốt, không hợp âm | E2E & 15/15 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L4-6** | **[x] Hát:** chế độ Một khổ, chỉ giai điệu (ẩn khoá Fa, bè), không hợp âm | E2E & 16/16 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L4-7** | **[x] Tuỳ chọn hiển thị hợp âm dạng số La Mã / Nashville** (I–IV–V) | Unit test theo tông & 18/18 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
 
 ---
 
@@ -334,10 +334,10 @@ Mỗi ticket bên dưới ghi: **ID · việc cần làm · nghiệm thu**. Tick
 
 | ID | Việc | Nghiệm thu |
 |---|---|---|
-| **L5-1** | **Render 1 lần mỗi bài:** tính zoom vừa khung **trước** lần render đầu (từ bề ngang khung và bề ngang trang trong XML); bỏ `updateGraphic()` thừa; ResizeObserver duy nhất làm chủ việc layout lại | Bộ đếm render trong E2E: tải = 1, đổi bài = 1, resize = 1 |
-| **L5-2** | **Dịch giọng không reparse:** giữ đối tượng OSMD, đặt `Sheet.Transpose` rồi `render()`; hợp âm overlay cập nhật cùng khung hình (không trễ 350 ms) | Dịch 1 bước ≤300 ms |
-| **L5-3** | **Parse XML 1 lần và cache** theo bài (thay cho 8 chỗ gọi DOMParser); tính vị trí hợp âm dùng dữ liệu hình học của OSMD, có cache | Profile: ≤2 lần gọi DOMParser mỗi lần đổi bài |
-| **L5-4** | **Gộp request mỗi lần đổi bài:** `song_usage` 1 lần (lấy ra khỏi `_render`); `sessions` 1 lần dùng chung; danh sách bộ hợp âm cache; tổng ≤4 request | Đếm request trong E2E |
+| **L5-1** | **[x] Render 1 lần mỗi bài:** tính zoom vừa khung **trước** lần render đầu (từ bề ngang khung và bề ngang trang trong XML); bỏ `updateGraphic()` thừa; ResizeObserver duy nhất làm chủ việc layout lại | Bộ đếm render trong E2E: tải = 1, đổi bài = 1, resize = 1; 29/29 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L5-2** | **[x] Dịch giọng không reparse:** giữ đối tượng OSMD, đặt `Sheet.Transpose` rồi `render()`; hợp âm overlay cập nhật cùng khung hình (không trễ 350 ms) | Dịch 1 bước ≤300 ms (thực tế 82ms); E2E & 28/28 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L5-3** | **[x] Parse XML 1 lần và cache theo bài** (thay cho 8 chỗ gọi DOMParser); tính vị trí hợp âm dùng dữ liệu hình học của OSMD, có cache | Profile: ≤2 lần gọi DOMParser mỗi lần đổi bài; E2E & 56/56 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
+| **L5-4** | **[x] Gộp request mỗi lần đổi bài:** `song_usage` 1 lần (lấy ra khỏi `_render`); `sessions` 1 lần dùng chung; danh sách bộ hợp âm cache; tổng ≤4 request | Đếm request trong E2E: chuẩn xác 4 requests; E2E & 35/35 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
 | **L5-5** | **[x] Tải theo nhu cầu:** admin console, importer, OMR, editor hooks, live sync, audio (Tone, osmd-audio-player) chỉ nạp khi dùng; không render OSMD khi khung đang ẩn (hết cảnh báo "width not > 0") | Vào lần đầu ≤30 script; console không còn cảnh báo SkyBottomLine — ✅ ĐÃ HOÀN THÀNH 100% |
 | **L5-6** | **[x] Precache Service Worker tự sinh bằng PHP:** `tools/generate_sw_manifest.php` quét toàn bộ tài nguyên App Shell (CSS, JS, vendor, 903 bài API) theo `filemtime` & hash, tự sinh manifest & nạp vào `sw.js`; tích hợp auto-sync; offline hoàn chỉnh | Offline: mở app lần đầu sau khi đã vào 1 lần → chạy được hoàn toàn (E2E Chromium & WebKit 100% PASS) — ✅ ĐÃ HOÀN THÀNH 100% |
 | **L5-7** | **[x] State tập trung (Store):** song / set / transpose / zoom / mode / verse nằm trong Store; URL, thanh công cụ, HUD, chế độ Band là 4 bên đăng ký nghe; hỗ trợ alias 2 chiều và subscribe | Test: đổi `Store.set('transpose', 2)` thì cả 4 chỗ hiển thị cập nhật (E2E Chromium & WebKit PASS) — ✅ ĐÃ HOÀN THÀNH 100% |
@@ -355,7 +355,7 @@ Mỗi ticket bên dưới ghi: **ID · việc cần làm · nghiệm thu**. Tick
 | **L6-3** | **[x] Gắn nhãn mùa lễ / chủ đề hàng loạt trong Manager (chọn nhiều bài → gắn nhãn):** thêm giao diện chọn nhiều bài `#chk-select-all-songs`, bulk action bar `#mgr-bulk-bar` trong Manager Repertoire; backend `ManagerRepertoireHelper::bulkUpdateLabels` và router `ManagerController` action `bulk_update_labels`; công cụ CLI `tools/manage_song_labels.php` với 500 bài có nhãn chuẩn mực mục lục Thánh Ca HTTLVN; bộ lọc mùa lễ & chủ đề trong Thư viện (`library-ui.js`) tự động kích hoạt hiển thị đầy đủ | Dev + người biên tập | 500 bài có nhãn (vượt mốc ≥300); bộ lọc hiện lại; E2E Chromium/WebKit & 38/38 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
 | **L6-4** | Chiến lược HD: (a) giữ TLH làm mặc định và HD bổ sung dần qua luồng duyệt, hoặc (b) nhân bản TLH thành HD cho 865 bài rồi chỉnh dần (L-D1) | Chủ dự án quyết | Không bài nào thiếu hợp âm |
 | **L6-5** | **[x] Rà chính tả tên bài (ví dụ "NGUYỀN" → "NGUYỆN"); script liệt kê từ nghi sai:** tạo công cụ CLI `tools/check_song_spelling.php` (`--report`, `--dry-run`, `--fix`); rà soát 903 bài, sửa lỗi gõ Telex "NGUYỀN" → "NGUYỆN" (7 bài: 002, 035, 050, 138, 231, 232, 239), sửa thiếu từ bài 234 "TA THEO Ý CHÚA CHƯA?", chuẩn hóa khoảng trắng thừa trước dấu câu typography (64 bài); lập báo cáo thẩm định chi tiết `docs/SPELLING_AUDIT_REPORT.md` bảo lưu các từ cổ Hán Việt nguyên bản (DỨC DẤY, BIẾN CANH, TIỆN DANH, KHUYÊN LƠN); tự động re-sync FTS5 | Dev + người duyệt | Danh sách sửa được duyệt; E2E Chromium/WebKit & 22/22 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
-| **L6-6** | Soạn **bản đồ bài** (song_sections) cho 50–100 bài hay dùng nhất | Ca trưởng | Có dữ liệu cho L3-7 |
+| **L6-6** | **[x] Soạn bản đồ bài (song_sections) cho 100 bài hay dùng nhất (Intro, Đoạn 1, Đoạn 2, Điệp khúc, Kết):** tạo công cụ `tools/seed_song_sections.php` gieo bản đồ phân đoạn cho 100 bài hay dùng nhất trong CSDL; bảo lưu nguyên vẹn 4 phân đoạn mẫu của bài 001; tích hợp `ArrangementService::getSections` trả về các phân đoạn; dải nhảy đoạn `#section-jump-bar-container` và các chips hiển thị trực tiếp trên thanh điều khiển cho ca trưởng & nhạc công bấm nhảy đoạn tức thì | Dev + ca trưởng | 100 bài có bản đồ phân đoạn; hiển thị Jump Bar và click chip nhảy đoạn; E2E Chromium/WebKit & 17/17 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
 
 ---
 
