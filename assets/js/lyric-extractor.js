@@ -132,7 +132,7 @@ const LyricExtractor = (() => {
   }
 
   /* ─── Build inline HTML từ syllables ─── */
-  function _renderInlineSection(syllables) {
+  function _renderInlineSection(syllables, key) {
     // Ghép syllable thành words, chord lấy từ syl đầu của mỗi word
     const words = [];
     let buf = '', chordBuf = null, firstOfWord = true;
@@ -153,7 +153,13 @@ const LyricExtractor = (() => {
 
     let html = '';
     for (const w of words) {
-      const safeChord = w.chord ? (window.SafeHtml ? window.SafeHtml.escape(w.chord) : w.chord) : '';
+      let cStr = w.chord;
+      if (cStr && window.GuitarLens?.isSimplifyActive?.()) cStr = window.GuitarLens.simplifyChord(cStr);
+      const nStyle = window.HarmonicNumeral?.getNotationStyle?.() || 'standard';
+      if (cStr && nStyle !== 'standard' && window.HarmonicNumeral?.convertChord) {
+        cStr = window.HarmonicNumeral.convertChord(cStr, key);
+      }
+      const safeChord = cStr ? (window.SafeHtml ? window.SafeHtml.escape(cStr) : cStr) : '';
       const safeText  = w.text  ? (window.SafeHtml ? window.SafeHtml.escape(w.text)  : w.text)  : '';
       if (w.chord) {
         html += `<span class="lvi-token"><span class="lvi-chord">[${safeChord}]</span>${w.text ? ` <span class="lvi-word">${safeText}</span>` : ''}</span> `;
@@ -228,7 +234,7 @@ const LyricExtractor = (() => {
 
       if (isInline) {
         // Inline mode: [C] word word [D] word
-        html += `<p class="lvi-line">${_renderInlineSection(view.syllables)}</p>`;
+        html += `<p class="lvi-line">${_renderInlineSection(view.syllables, key)}</p>`;
       } else {
         // Stacked mode: chord trên, lyric dưới
         html += `<div class="lv-flow">`;
@@ -237,9 +243,13 @@ const LyricExtractor = (() => {
           const rest    = !syl.text || syl.text === '\u00a0';
           let cStr = syl.chord;
           if (cStr && window.GuitarLens?.isSimplifyActive?.()) cStr = window.GuitarLens.simplifyChord(cStr);
+          const nStyle = window.HarmonicNumeral?.getNotationStyle?.() || 'standard';
+          if (cStr && nStyle !== 'standard' && window.HarmonicNumeral?.convertChord) {
+            cStr = window.HarmonicNumeral.convertChord(cStr, key);
+          }
           let chordDisplay = cStr ? (window.SafeHtml ? window.SafeHtml.escape(cStr) : cStr) : '';
           const isBassRole = window.StageLens?.getCurrentRole?.() === 'bass' || document.body?.dataset?.stageLens === 'bass';
-          if (cStr && isBassRole && window.BassLens?.isBigBassActive?.()) {
+          if (cStr && isBassRole && window.BassLens?.isBigBassActive?.() && nStyle === 'standard') {
             const bInfo = window.BassLens.parseBassInfo(cStr);
             if (bInfo) {
               const safeBass = window.SafeHtml ? window.SafeHtml.escape(bInfo.bassNote) : bInfo.bassNote;

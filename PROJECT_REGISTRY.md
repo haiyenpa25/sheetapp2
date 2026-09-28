@@ -1212,18 +1212,22 @@ SheetApp/
   ~ Sửa: eslint.config.js (Khai báo global VocalsLens: 'writable')
   + Tạo: tests/library_l46_vocals_lens_regression.php (16/16 checks PASS, 68.8% behavioral assertions)
   + Tạo: e2e/library-l4-vocals-lens.spec.js (E2E Playwright: Chọn vai trò Hát 🎤, kiểm tra chế độ Một khổ, chỉ giai điệu ẩn khoá Fa, không hợp âm, nút chuyển khổ, các nút toggle tuỳ chọn, bảo toàn qua reload trên cả Chromium và WebKit)
-  🏆 ĐẠT 100% QUALITY GATE: 113/113 suites PASS (1975 passed, 0 failed, 67.6% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
+[2026-09-28] — Hoàn tất Ticket L4-7 (ROADMAP4.md): Harmonic Numeral (Ký Hiệu Hợp Âm Số La Mã / Nashville I–IV–V / 1–4–5)
+  + Tạo: assets/js/harmonic-numeral.js (Thuật toán chuyển đổi hợp âm số La Mã & Nashville Number System: quy đổi chuẩn xác theo tông Trưởng/Thứ; hỗ trợ hợp âm mở rộng 7/maj7/sus4/dim/aug/add9 và hợp âm đảo slash chord C/E → I/3 hoặc 1/3; quản lý notationStyle 'standard' | 'roman' | 'nashville'; lưu localStorage 'sheetapp_chord_notation'; 308 dòng < 600 dòng)
+  ~ Sửa: assets/js/lyric-extractor.js (Tích hợp chuyển đổi hiển thị hợp âm trong cả hai chế độ Stacked và Inline, tương thích an toàn với BassLens và GuitarLens)
+  ~ Sửa: assets/js/chord-canvas-dots.js (Tích hợp chuyển đổi hợp âm hiển thị trên khuông nhạc theo HarmonicNumeral)
+  ~ Sửa: assets/js/keyboard-handler.js (Bổ sung phím tắt 'N' để chuyển đổi nhanh chu trình hợp âm Chuẩn ↔ Số La Mã ↔ Nashville)
+  ~ Sửa: includes/toolbar.php (Thêm nút #btn-chord-notation trên toolbar)
+  ~ Sửa: assets/css/components.css (Thêm CSS cho nút #btn-chord-notation; 508 dòng < 600 dòng)
+  ~ Sửa: assets/js/app.js (Khởi tạo HarmonicNumeral.init() khi app boot)
+  ~ Sửa: index.php (Nạp harmonic-numeral.js)
+  ~ Sửa: eslint.config.js (Khai báo global HarmonicNumeral: 'writable')
+  + Tạo: tests/library_l47_harmonic_numeral_regression.php (18/18 checks PASS, 66.7% behavioral assertions, kiểm thử toàn diện các tông Key C, G, D, F, Bb, A, Am)
+  + Tạo: e2e/library-l4-harmonic-numeral.spec.js (E2E Playwright: Chuyển đổi hợp âm Chuẩn ↔ La Mã ↔ Nashville bằng nút toolbar và phím tắt N, bảo toàn qua reload trên cả Chromium và WebKit)
+  🏆 HOÀN TẤT TOÀN DIỆN CHƯƠNG L4 (7/7 vé L4-1 đến L4-7: 100% Hoàn Thành).
+  🏆 ĐẠT 100% QUALITY GATE: 114/114 suites PASS (1993 passed, 0 failed, 67.9% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
 
 ---
 
 *File này là "bộ nhớ" của dự án. AI Agent cập nhật sau mỗi phiên để phiên sau không phải khám phá lại từ đầu.*
-*Cập nhật: 2026-09-28*
-
-
-
-
-
-
-
-
-
+*Cập nhật: 2026-09-28 (Hoàn tất Chương L4)*

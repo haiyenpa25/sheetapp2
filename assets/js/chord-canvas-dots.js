@@ -349,7 +349,16 @@ const ChordCanvasDots = (() => {
 
         const textBadge = document.createElement('div');
         textBadge.className = DOT_CLASS + ' cc-custom-chord-text';
-        textBadge.textContent = chord;
+        let displayChord = chord;
+        const nStyle = window.HarmonicNumeral?.getNotationStyle?.() || 'standard';
+        if (nStyle !== 'standard' && window.HarmonicNumeral?.convertChord) {
+          let currentKey = document.getElementById('song-key')?.textContent?.trim() || '';
+          if (!currentKey || currentKey === '--') {
+            currentKey = window.Store?.get?.('currentSong')?.defaultKey || window.SongInfoBar?.getSongKey?.() || 'C';
+          }
+          displayChord = window.HarmonicNumeral.convertChord(chord, currentKey);
+        }
+        textBadge.textContent = displayChord;
         textBadge.title = editEnabled ? 'Sửa hợp âm: ' + chord : chord;
 
         const chordColor = window.DisplaySettings?.getChordPrefs?.()?.color || '#dc2626';

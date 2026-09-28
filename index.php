@@ -252,6 +252,7 @@ echo jsTag('guitar-lens.js');
 echo jsTag('bass-lens.js');
 echo jsTag('drums-lens.js');
 echo jsTag('vocals-lens.js');
+echo jsTag('harmonic-numeral.js');
 echo jsTag('chord-canvas-xml.js');
 echo jsTag('chord-canvas-ui.js');
 echo jsTag('chord-canvas-transpose.js');

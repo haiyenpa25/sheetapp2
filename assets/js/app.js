@@ -34,6 +34,7 @@ const App = (() => {
     if (window.BassLens)         window.BassLens.init();
     if (window.DrumsLens)        window.DrumsLens.init();
     if (window.VocalsLens)       window.VocalsLens.init();
+    if (window.HarmonicNumeral)  window.HarmonicNumeral.init();
     if (window.PerformanceNotes) PerformanceNotes.init();
     if (window.SongInfoBar)      SongInfoBar.init();
     if (window.Metronome)        Metronome.init();

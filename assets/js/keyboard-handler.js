@@ -153,6 +153,13 @@ const KeyboardHandler = (() => {
             }
           }
         }
+        break;
+      case 'n': case 'N':
+        if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+          e.preventDefault();
+          window.HarmonicNumeral?.cycleNotationStyle?.();
+        }
+        break;
       case 'j': case 'J':
         if (!e.ctrlKey && !e.metaKey && !e.altKey && xml) {
           e.preventDefault();

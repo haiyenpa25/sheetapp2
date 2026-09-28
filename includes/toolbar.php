@@ -116,6 +116,11 @@
       <span id="chord-preset-label" class="preset-label" style="font-size: 0.72rem; margin-left: 2px; opacity: 0.85;">Chuẩn</span>
     </button>
 
+    <!-- Cụm Ký Hiệu Hợp Âm Số La Mã / Nashville (Ticket L4-7) -->
+    <button id="btn-chord-notation" class="band-pill btn-chord-notation" title="Chế độ hợp âm: Chuẩn / Số La Mã / Nashville (Bấm để đổi, Phím N)" aria-label="Chế độ ký hiệu hợp âm" style="cursor:pointer; padding: 0 8px;">
+      <span>🔤</span> <span id="chord-notation-label" style="font-size: 0.76rem; font-weight: 700; margin-left: 2px;">C</span>
+    </button>
+
     <!-- Cụm Chọn Khổ (Ticket L1-6 ⭐: Tất cả khổ / Một khổ / Trải khổ) -->
     <div class="band-pill verse-pill hidden" id="verse-pill" role="group" aria-label="Chọn khổ hát" title="Chế độ hiển thị khổ">
       <button id="btn-verse-mode" class="btn-verse-mode" title="Đổi chế độ: Tất cả khổ ↔ Một khổ ↔ Trải khổ (Phím V)">

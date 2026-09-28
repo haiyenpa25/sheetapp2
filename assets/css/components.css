@@ -503,8 +503,5 @@ body.dark-mode .voice-selector {
 .btn-vocals-tool.active { background: rgba(236, 72, 153, 0.2) !important; border-color: var(--accent-pink, #ec4899) !important; color: var(--accent-pink, #ec4899) !important; font-weight: 700; }
 body.vocals-lens-active #chord-canvas, body[data-stage-lens="vocals"] #chord-canvas { display: none !important; opacity: 0 !important; pointer-events: none !important; }
 body.vocals-lens-active .osmd-chord-symbol, body[data-stage-lens="vocals"] .osmd-chord-symbol, body.vocals-lens-active .osmd-chord-text, body[data-stage-lens="vocals"] .osmd-chord-text, body.vocals-lens-active [data-chord-symbol="true"], body[data-stage-lens="vocals"] [data-chord-symbol="true"] { display: none !important; fill: transparent !important; opacity: 0 !important; }
-
-
-
-
-
+/* Ticket L4-7: Roman / Nashville Chord Notation Button */
+#btn-chord-notation.active { background: rgba(139, 92, 246, 0.25) !important; border-color: var(--accent-purple, #8b5cf6) !important; color: #a78bfa !important; font-weight: 700; }
