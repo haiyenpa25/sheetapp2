@@ -207,6 +207,7 @@ module.exports = [
         GuitarLens: 'writable',
         BassLens: 'writable',
         DrumsLens: 'writable',
+        VocalsLens: 'writable',
         MobileController: 'writable',
         Importer: 'writable',
         ToolbarController: 'writable',

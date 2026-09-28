@@ -489,6 +489,21 @@ body.dark-mode .voice-selector {
 .drums-sec-name { font-size: 1rem; font-weight: 800; }
 .drums-sec-range { font-size: 0.72rem; color: var(--text-muted, #94a3b8); }
 
+/* ========================================================
+   Ticket L4-6: Vocals Stage Lens (Chỉ giai điệu, ẩn Fa/bè, không hợp âm, một khổ)
+   ======================================================== */
+.vocals-lens-bar { width: 100%; position: relative; z-index: 20; box-shadow: 0 2px 8px rgba(0,0,0,0.25); animation: fadeInDown 0.2s ease-out; background: var(--bg-surface, #18181b); border-bottom: 1px solid var(--border, #3f3f46); font-size: 0.82rem; }
+.vocals-lens-inner { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 6px 12px; }
+.vocals-lens-tag { font-weight: 700; color: var(--accent-pink, #ec4899); display: flex; align-items: center; gap: 4px; }
+.vocals-mode-badge { font-size: 0.75rem; color: var(--text-muted, #94a3b8); padding: 2px 8px; border-radius: 4px; background: rgba(255,255,255,0.05); }
+.vocals-verse-group { display: inline-flex; align-items: center; gap: 4px; background: var(--bg-overlay, rgba(255,255,255,0.06)); border: 1px solid var(--border, #3f3f46); border-radius: 6px; padding: 2px; }
+.vocals-verse-indicator { font-weight: 800; font-size: 0.8rem; padding: 2px 8px; color: var(--accent-pink, #ec4899); }
+.btn-vocals-tool { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border, #3f3f46); background: var(--bg-overlay, rgba(255,255,255,0.06)); color: var(--text-primary, #fff); cursor: pointer; touch-action: manipulation; min-height: 32px; transition: all var(--transition-fast, 0.15s ease); }
+.btn-vocals-tool:hover { background: var(--bg-hover) !important; border-color: var(--accent-pink, #ec4899) !important; }
+.btn-vocals-tool.active { background: rgba(236, 72, 153, 0.2) !important; border-color: var(--accent-pink, #ec4899) !important; color: var(--accent-pink, #ec4899) !important; font-weight: 700; }
+body.vocals-lens-active #chord-canvas, body[data-stage-lens="vocals"] #chord-canvas { display: none !important; opacity: 0 !important; pointer-events: none !important; }
+body.vocals-lens-active .osmd-chord-symbol, body[data-stage-lens="vocals"] .osmd-chord-symbol, body.vocals-lens-active .osmd-chord-text, body[data-stage-lens="vocals"] .osmd-chord-text, body.vocals-lens-active [data-chord-symbol="true"], body[data-stage-lens="vocals"] [data-chord-symbol="true"] { display: none !important; fill: transparent !important; opacity: 0 !important; }
+
 
 
 

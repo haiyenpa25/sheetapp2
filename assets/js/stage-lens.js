@@ -118,8 +118,20 @@ const StageLens = (() => {
       const bassBar = document.getElementById('bass-lens-bar');
       if (bassBar) bassBar.classList.add('hidden');
       if (window.DrumsLens?.deactivate) window.DrumsLens.deactivate();
+      if (window.VocalsLens?.deactivate) window.VocalsLens.deactivate();
+    } else if (roleId === 'vocals') {
+      // Ticket L4-6: Hát: chế độ Một khổ, chỉ giai điệu (ẩn khoá Fa, bè), không hợp âm
+      if (window.DrumsLens?.deactivate) window.DrumsLens.deactivate();
+      const guitarBar = document.getElementById('guitar-lens-bar');
+      if (guitarBar) guitarBar.classList.add('hidden');
+      const bassBar = document.getElementById('bass-lens-bar');
+      if (bassBar) bassBar.classList.add('hidden');
+      if (window.VocalsLens?.activate) {
+        window.VocalsLens.activate();
+      }
     } else if (roleId === 'drums') {
       // Ticket L4-5: Trống: bản đồ bài + BPM + đếm ô nhịp + đèn nhịp; không nốt, không hợp âm
+      if (window.VocalsLens?.deactivate) window.VocalsLens.deactivate();
       const guitarBar = document.getElementById('guitar-lens-bar');
       if (guitarBar) guitarBar.classList.add('hidden');
       const bassBar = document.getElementById('bass-lens-bar');
@@ -130,6 +142,7 @@ const StageLens = (() => {
     } else if (roleId === 'bass') {
       // Ticket L4-4: Bass: Nốt gốc chữ to & Hợp âm đảo lấy nốt bass (C/E -> E)
       if (window.DrumsLens?.deactivate) window.DrumsLens.deactivate();
+      if (window.VocalsLens?.deactivate) window.VocalsLens.deactivate();
       const guitarBar = document.getElementById('guitar-lens-bar');
       if (guitarBar) guitarBar.classList.add('hidden');
       const bassBar = document.getElementById('bass-lens-bar');
@@ -139,6 +152,7 @@ const StageLens = (() => {
       }
     } else if (roleId === 'guitar') {
       if (window.DrumsLens?.deactivate) window.DrumsLens.deactivate();
+      if (window.VocalsLens?.deactivate) window.VocalsLens.deactivate();
       const guitarBar = document.getElementById('guitar-lens-bar');
       if (guitarBar) guitarBar.classList.remove('hidden');
       const bassBar = document.getElementById('bass-lens-bar');
@@ -148,6 +162,7 @@ const StageLens = (() => {
       }
     } else {
       if (window.DrumsLens?.deactivate) window.DrumsLens.deactivate();
+      if (window.VocalsLens?.deactivate) window.VocalsLens.deactivate();
       const guitarBar = document.getElementById('guitar-lens-bar');
       if (guitarBar) guitarBar.classList.add('hidden');
       const bassBar = document.getElementById('bass-lens-bar');

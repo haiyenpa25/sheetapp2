@@ -1203,12 +1203,22 @@ SheetApp/
   ~ Sửa: eslint.config.js (Khai báo global DrumsLens: 'writable')
   + Tạo: tests/library_l45_drums_lens_regression.php (15/15 checks PASS, 66.7% behavioral assertions)
   + Tạo: e2e/library-l4-drums-lens.spec.js (E2E Playwright: Chọn vai trò Trống 🥁, ẩn nốt nhạc và hợp âm, hiển thị BPM to, đèn nhịp LED, đếm ô nhịp, bản đồ bài, nhảy đoạn, bảo toàn qua reload và thoát chế độ trên cả Chromium và WebKit)
-  🏆 ĐẠT 100% QUALITY GATE: 112/112 suites PASS (1959 passed, 0 failed, 67.3% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
+[2026-09-28] — Hoàn tất Ticket L4-6 (ROADMAP4.md): Vocals Stage Lens (Chế Độ Một Khổ, Chỉ Giai Điệu, Không Hợp Âm)
+  + Tạo: assets/js/vocals-lens.js (Quản lý chế độ Hát: tự động kích hoạt chế độ Một khổ qua VerseManager.setMode('single') phóng to lời ca; chỉ giai điệu qua OSMDRenderer.setCompactMode(true) ẩn khuông Fa và các bè phụ Alto/Tenor; ẩn toàn bộ ký hiệu hợp âm #chord-canvas; thanh điều khiển Vocals Bar #vocals-lens-bar với các nút chuyển khổ và toggle tuỳ chọn; 268 dòng < 600 dòng)
+  ~ Sửa: assets/js/stage-lens.js (Thích ứng vai trò Hát: kích hoạt VocalsLens.activate() và deactivate() khi chuyển vai trò)
+  ~ Sửa: assets/css/components.css (Thêm CSS cho .vocals-lens-bar, .vocals-mode-badge, .btn-vocals-tool, body.vocals-lens-active #chord-canvas; 510 dòng < 600 dòng)
+  ~ Sửa: assets/js/app.js (Khởi tạo VocalsLens.init() khi app boot)
+  ~ Sửa: index.php (Nạp vocals-lens.js)
+  ~ Sửa: eslint.config.js (Khai báo global VocalsLens: 'writable')
+  + Tạo: tests/library_l46_vocals_lens_regression.php (16/16 checks PASS, 68.8% behavioral assertions)
+  + Tạo: e2e/library-l4-vocals-lens.spec.js (E2E Playwright: Chọn vai trò Hát 🎤, kiểm tra chế độ Một khổ, chỉ giai điệu ẩn khoá Fa, không hợp âm, nút chuyển khổ, các nút toggle tuỳ chọn, bảo toàn qua reload trên cả Chromium và WebKit)
+  🏆 ĐẠT 100% QUALITY GATE: 113/113 suites PASS (1975 passed, 0 failed, 67.6% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
 
 ---
 
 *File này là "bộ nhớ" của dự án. AI Agent cập nhật sau mỗi phiên để phiên sau không phải khám phá lại từ đầu.*
 *Cập nhật: 2026-09-28*
+
 
 
 
