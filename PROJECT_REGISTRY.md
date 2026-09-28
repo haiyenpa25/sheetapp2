@@ -1285,7 +1285,16 @@ SheetApp/
   + Tạo: e2e/library-l5-offline-precache.spec.js (E2E Playwright: Mở online lần đầu → ngắt mạng hoàn toàn offline → reload/khởi động lại 100% từ CacheStorage, hiển thị đầy đủ 903 bài hát trong bộ nhớ ngoại tuyến trên cả Chromium và WebKit)
   🏆 ĐẠT 100% QUALITY GATE: 120/120 suites PASS (2264 passed, 0 failed, 71.7% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
 
+[2026-09-28] — Hoàn tất Ticket L5-7 (ROADMAP4.md): Centralized State Management (Store) & 4 Subscribers (State tập trung)
+  + Sửa: assets/js/core/Store.js (Xây dựng State tập trung chuẩn hóa: quản lý song / set / transpose / zoom / mode / verse / capo / role; hỗ trợ alias 2 chiều; cơ chế subscribe/unsubscribe; tích hợp 4 core subscribers tự động đồng bộ URL, Toolbar, Stage HUD, và Band Mode; 448 dòng < 600 dòng)
+  ~ Sửa: assets/js/core/ModeManager.js (Đồng bộ mode sang Store.set('mode'); 326 dòng < 600 dòng)
+  ~ Sửa: assets/js/core/VerseManager.js (Đồng bộ verse sang Store.set('verse'); 490 dòng < 600 dòng)
+  ~ Sửa: assets/js/chord-canvas.js (Đồng bộ set sang Store.set('set'); 594 dòng < 600 dòng)
+  + Tạo: tests/library_l57_centralized_store_regression.php (51/51 checks PASS, 45.1% behavioral assertions, kiểm thử toàn diện kiến trúc Store, alias 2 chiều, DOM mock simulation 4 subscribers, K2 DB Checksum)
+  + Tạo: e2e/library-l5-centralized-store.spec.js (E2E Playwright: Store.set('transpose', 2) tự động cập nhật đồng thời cả 4 chỗ [URL ?t=2, Toolbar #song-key A & #transpose-display +2, HUD #gig-hud-key A & #gig-hud-trans +2, Band Mode .lv-key strong A]; kiểm thử alias, zoom, set, mode, reset về gốc thành công trên cả Chromium và WebKit)
+  🏆 ĐẠT 100% QUALITY GATE: 121/121 suites PASS (2315 passed, 0 failed, 72.3% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
+
 ---
 
 *File này là "bộ nhớ" của dự án. AI Agent cập nhật sau mỗi phiên để phiên sau không phải khám phá lại từ đầu.*
-*Cập nhật: 2026-09-28 (Hoàn tất Ticket L5-6)*
+*Cập nhật: 2026-09-28 (Hoàn tất Ticket L5-7)*

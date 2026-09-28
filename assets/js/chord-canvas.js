@@ -403,7 +403,7 @@ const ChordCanvas = (() => {
     }
     _prevSet = name;
     _updateSetUI();
-    window.URLState?.update?.({ set: name });
+    window.Store?.set?.('set', name);
     window.SongLoader?.syncSidebarNavLinks?.(window.App?.getCurrentSongId?.(), name);
     window.DisplaySettings?.renderLyricViewIfActive?.();
   }

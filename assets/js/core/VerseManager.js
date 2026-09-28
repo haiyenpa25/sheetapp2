@@ -314,6 +314,9 @@ const VerseManager = (() => {
     if (typeof EventBus !== 'undefined') {
       EventBus.emit('verse:changed', { verse: _currentVerse, mode: _mode });
     }
+    if (typeof window !== 'undefined' && window.Store?.set) {
+      window.Store.set('verse', newMode === MODES.ALL ? 'all' : (newMode === MODES.UNROLL ? 'spread' : _currentVerse));
+    }
   }
 
   function cycleMode() {
@@ -354,6 +357,9 @@ const VerseManager = (() => {
     }
     if (typeof EventBus !== 'undefined') {
       EventBus.emit('verse:changed', { verse: _currentVerse, mode: _mode });
+    }
+    if (typeof window !== 'undefined' && window.Store?.set) {
+      window.Store.set('verse', _currentVerse);
     }
   }
 

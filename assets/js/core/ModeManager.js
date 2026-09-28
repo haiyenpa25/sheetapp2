@@ -200,6 +200,9 @@ const ModeManager = (() => {
 
     // 6. Phát sự kiện ra toàn hệ thống
     window.EventBus?.emit?.('app:mode_change', { mode, prevMode });
+    if (typeof window !== 'undefined' && window.Store?.set) {
+      window.Store.set('mode', mode);
+    }
   }
 
   function togglePerformance() {
