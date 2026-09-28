@@ -1263,7 +1263,19 @@ SheetApp/
   + Tạo: e2e/library-l5-coalesced-requests.spec.js (E2E Playwright: Đếm network requests khi đổi bài: đúng 4 requests [XML, sessions, chord_sets, song_usage], giảm 55.6% overhead trên cả Chromium và WebKit)
   🏆 ĐẠT 100% QUALITY GATE: 118/118 suites PASS (2141 passed, 0 failed, 70.1% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
 
+[2026-09-28] — Hoàn tất Ticket L5-5 (ROADMAP4.md): On-Demand Script Loading & No Hidden Render (Tải theo nhu cầu & Không render khi khung ẩn)
+  + Tạo: assets/js/core/ScriptLoader.js (In-flight deduplication, in-memory cache, on-demand presets: loadAudio, loadAdmin, loadSetlist, loadLiveSync, loadLenses, loadModal; auto triggers click & keyboard; prefetchIdle(); 252 dòng < 600 dòng)
+  ~ Sửa: assets/js/osmd-renderer.js (Thêm _canRender() kiểm tra clientWidth > 0, visible, display != none; cơ chế _pendingRender hoãn render khi khung ẩn và renderPending() khi khung mở lại; triệt tiêu 100% cảnh báo SkyBottomLine và width not > 0; 580 dòng < 600 dòng)
+  ~ Sửa: index.php (Gỡ các script nặng Tone.js, OsmdAudioPlayer ở head; giới hạn ban đầu đúng 30 thẻ <script> trong DOM; hỗ trợ conditional blocks cho mở rộng)
+  ~ Sửa: includes/toolbar.php (Tích hợp comment điều hướng cho ToolbarController; dọn script inline)
+  ~ Sửa: assets/js/toolbar-controller.js (Tích hợp quản lý Dropdown Menu, Escape, Outside click từ toolbar.php; 407 dòng < 600 dòng)
+  ~ Sửa: assets/js/song-loader.js (Bọc an toàn optional chaining và gọi prefetchIdle khi nạp bài xong; 577 dòng < 600 dòng)
+  ~ Sửa: assets/js/app.js (Tích hợp ScriptLoader.setupAutoTriggers(); 222 dòng < 600 dòng)
+  + Tạo: tests/library_l55_on_demand_and_no_hidden_render_regression.php (49/49 checks PASS, 65.3% behavioral assertions)
+  + Tạo: e2e/library-l5-on-demand.spec.js (E2E Playwright: Đo đúng 30 script tags ban đầu, 0 cảnh báo SkyBottomLine, 0 cảnh báo width not > 0, render sheet thành công, nạp on-demand Audio/Metronome thành công trên cả Chromium và WebKit)
+  🏆 ĐẠT 100% QUALITY GATE: 119/119 suites PASS, bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
+
 ---
 
 *File này là "bộ nhớ" của dự án. AI Agent cập nhật sau mỗi phiên để phiên sau không phải khám phá lại từ đầu.*
-*Cập nhật: 2026-09-28 (Hoàn tất Ticket L5-3 & L5-4)*
+*Cập nhật: 2026-09-28 (Hoàn tất Ticket L5-5)*

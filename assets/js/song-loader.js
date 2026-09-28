@@ -31,18 +31,18 @@ const SongLoader = (() => {
     _resetCapoUI();
     window.XmlDocCache?.clear?.();
     window.ChordCanvasDots?.clearGeomCache?.();
-    SheetAudioPlayer.stop();
+    window.SheetAudioPlayer?.stop?.();
     if (window.AutoScroller) AutoScroller.stop();
     if (window.InstrumentMixer?.clearState) InstrumentMixer.clearState();
 
-    PageNav.reset();
+    window.PageNav?.reset?.();
 
     // Ticket L3-2: Chuyển bài tức thì không trắng màn hình nếu đã có trong Preloader
     const hasPreloaded = window.SongPreloader?.has?.(song.id, profileOverride);
     const isInstant = options?.instant === true || (hasPreloaded && options?.instant !== false);
 
     if (!isInstant) {
-      AnnotationCanvas.loadSong(song.id);
+      window.AnnotationCanvas?.loadSong?.(song.id);
       AppUI.showLoading(`Đang tải "${song.title}"...`);
       AppUI.enableControls(false);
       _autoCloseSidebar();
@@ -122,14 +122,13 @@ const SongLoader = (() => {
 
       if (isInstant) {
         window.SongPreloader?.endTransitionTimer?.();
-        AnnotationCanvas.loadSong(song.id);
+        window.AnnotationCanvas?.loadSong?.(song.id);
       }
 
       // ── Post-render tasks ──
       _syncZoomUI(zoom);
 
-
-      SheetAudioPlayer.setup(OSMDRenderer.getInstance());
+      window.SheetAudioPlayer?.setup?.(OSMDRenderer.getInstance());
       AppUI.updateTransposeDisplay(transpose);
       AppUI.updateSongInfo(song, transpose);
       _updateCapoBadge(xml);
@@ -197,7 +196,7 @@ const SongLoader = (() => {
     }
 
     if (isLyricActive) {
-      SessionTracker.setTranspose(transpose);
+      window.SessionTracker?.setTranspose?.(transpose);
       if (window.DisplaySettings?.renderLyricViewIfActive) DisplaySettings.renderLyricViewIfActive();
       _updateCapoBadge(processedXml);
       if (disp) disp.style.opacity = '';
@@ -216,7 +215,7 @@ const SongLoader = (() => {
       } else {
         await OSMDRenderer.reload(processedXml, transpose);
       }
-      SessionTracker.setTranspose(transpose);
+      window.SessionTracker?.setTranspose?.(transpose);
       _updateCapoBadge(processedXml);
     } catch (err) {
       console.warn('[SongLoader] transpose/reload lỗi:', err.message);
@@ -412,7 +411,7 @@ const SongLoader = (() => {
     if (perfBtn) perfBtn.disabled = false;
     const vol = document.getElementById('audio-volume');
     if (vol) { vol.disabled = false; }
-    SheetAudioPlayer.enableBtn(true);
+    window.SheetAudioPlayer?.enableBtn?.(true);
   }
 
   function _showLoadToast(song, transpose) {

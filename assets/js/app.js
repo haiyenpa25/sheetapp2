@@ -12,63 +12,63 @@ const App = (() => {
     OSMDRenderer.init('osmd-container');
     OSMDRenderer.onReady(() => {
       ChordCanvas?.onOSMDRendered?.();
-      AnnotationCanvas?.onOSMDRendered?.();
+      window.AnnotationCanvas?.onOSMDRendered?.();
       AppUI.enableControls(true);
-      PageNav.computePages();
+      window.PageNav?.computePages?.();
+      window.ScriptLoader?.prefetchIdle?.();
     });
 
-    // Init tất cả modules
-    ChordCanvas.init();
+    // Init các modules có mặt
+    ChordCanvas?.init?.();
     if (window.InstrumentMixer) InstrumentMixer.init();
-    AnnotationCanvas.init();
-    SheetAudioPlayer.init();
-    AutoScroller.init();
-    PageNav.init();
-    if (window.Auth)             window.Auth.init();
-    LibraryUI.init();
-    if (window.SetlistUI)        SetlistUI.init();
-    if (window.Importer)         Importer.init();
-    if (window.DisplaySettings)  DisplaySettings.init();
-    if (window.StageLens)        window.StageLens.init();
-    if (window.GuitarLens)       window.GuitarLens.init();
-    if (window.BassLens)         window.BassLens.init();
-    if (window.DrumsLens)        window.DrumsLens.init();
-    if (window.VocalsLens)       window.VocalsLens.init();
-    if (window.HarmonicNumeral)  window.HarmonicNumeral.init();
+    if (window.AnnotationCanvas) AnnotationCanvas.init();
+    if (window.SheetAudioPlayer) SheetAudioPlayer.init();
+    if (window.AutoScroller) AutoScroller.init();
+    if (window.PageNav) PageNav.init();
+    if (window.Auth) window.Auth.init();
+    LibraryUI?.init?.();
+    if (window.SetlistUI) SetlistUI.init();
+    if (window.Importer) Importer.init();
+    if (window.DisplaySettings) DisplaySettings.init();
+    if (window.StageLens) window.StageLens.init();
+    if (window.GuitarLens) window.GuitarLens.init();
+    if (window.BassLens) window.BassLens.init();
+    if (window.DrumsLens) window.DrumsLens.init();
+    if (window.VocalsLens) window.VocalsLens.init();
+    if (window.HarmonicNumeral) window.HarmonicNumeral.init();
     if (window.PerformanceNotes) PerformanceNotes.init();
-    if (window.SongInfoBar)      SongInfoBar.init();
-    if (window.Metronome)        Metronome.init();
+    if (window.SongInfoBar) SongInfoBar.init();
+    if (window.Metronome) Metronome.init();
     if (window.ArrangementEngine) window.ArrangementEngine.init();
-    if (window.CueEngine)        window.CueEngine.init();
-    if (window.LiveSession)      LiveSession.init();
+    if (window.CueEngine) window.CueEngine.init();
+    if (window.LiveSession) LiveSession.init();
     if (window.PerformanceEngine) window.PerformanceEngine.init();
-    if (window.LiveSync)         window.LiveSync.init();
+    if (window.LiveSync) window.LiveSync.init();
 
-    ToolbarController.init();
+    ToolbarController?.init?.();
     if (window.MobileController) window.MobileController.init();
-    KeyboardHandler.init();
+    KeyboardHandler?.init?.();
     if (window.ServiceWorkerManager) ServiceWorkerManager.register();
     if (window.OfflineSetlistManager?.checkOnStartup) window.OfflineSetlistManager.checkOnStartup();
 
-
     // Library callbacks
-    LibraryUI.onSelect(song => SongLoader.load(song));
-    LibraryUI.onDelete(songId => {
+    LibraryUI?.onSelect?.(song => SongLoader.load(song));
+    LibraryUI?.onDelete?.(songId => {
       if (Store.get('currentSong')?.id === songId) {
         AppUI.showWelcome();
         Store.reset();
-        ChordCanvas.clearSong();
-        AnnotationCanvas.clearSong();
-        SheetAudioPlayer.stop();
+        ChordCanvas?.clearSong?.();
+        window.AnnotationCanvas?.clearSong?.();
+        window.SheetAudioPlayer?.stop?.();
         if (window.Metronome) Metronome.stop();
-        PageNav.reset();
+        window.PageNav?.reset?.();
         EventBus.emit('song:cleared');
       }
     });
 
     if (window.Importer) {
       Importer.onSuccess(song => {
-        LibraryUI.addSong(song);
+        LibraryUI?.addSong?.(song);
         AppUI.showToast(`🎵 "${song.title}" đã thêm vào thư viện!`, 'success');
       });
     }

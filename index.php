@@ -51,41 +51,6 @@ echo cssTag('fab.css');
 echo cssTag('app-shell.css');
 
 ?>
-  <!-- ── Thư viện âm thanh và OSMD (local vendor, fallback CDN) ── -->
-  <script>
-    // Load script với fallback: thử local trước, nếu fail mới dùng CDN
-    function _loadScript(localSrc, cdnSrc, globalCheck) {
-      return new Promise((resolve, reject) => {
-        const s = document.createElement('script');
-        s.src = localSrc;
-        s.onload = resolve;
-        s.onerror = () => {
-          // Fallback to CDN
-          const s2 = document.createElement('script');
-          s2.src = cdnSrc;
-          s2.onload = resolve;
-          s2.onerror = reject;
-          document.head.appendChild(s2);
-        };
-        document.head.appendChild(s);
-      });
-    }
-  </script>
-  <!-- Tone.js — defer: không cần thiết cho render ban đầu -->
-  <script src="<?= $baseHref ?>assets/js/vendor/Tone.js" defer onerror="
-    var s=document.createElement('script');
-    s.src='https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js';
-    document.head.appendChild(s);"></script>
-  <!-- OSMD Audio Player — defer -->
-  <script src="<?= $baseHref ?>assets/js/vendor/OsmdAudioPlayer.min.js" defer onerror="
-    var s=document.createElement('script');
-    s.src='https://cdn.jsdelivr.net/npm/osmd-audio-player/umd/OsmdAudioPlayer.min.js';
-    document.head.appendChild(s);"></script>
-  <!-- Tonal.js — defer -->
-  <script src="<?= $baseHref ?>assets/js/vendor/tonal.min.js" defer onerror="
-    var s=document.createElement('script');
-    s.src='https://cdn.jsdelivr.net/npm/tonal/browser/tonal.min.js';
-    document.head.appendChild(s);"></script>
 </head>
 <body>
 
@@ -175,11 +140,16 @@ echo cssTag('app-shell.css');
 </button>
 
 
-<!-- ===== SCRIPTS ===== -->
+<!-- ===== SCRIPTS (Ticket L5-5: Giới hạn <= 30 script tags ban đầu) ===== -->
 <!-- OSMD from local vendor (fallback CDN) -->
 <script src="<?= $baseHref ?>assets/js/vendor/opensheetmusicdisplay.min.js" onerror="
   var s=document.createElement('script');
   s.src='https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.6/build/opensheetmusicdisplay.min.js';
+  document.head.appendChild(s);"></script>
+<!-- Tonal.js — defer -->
+<script src="<?= $baseHref ?>assets/js/vendor/tonal.min.js" defer onerror="
+  var s=document.createElement('script');
+  s.src='https://cdn.jsdelivr.net/npm/tonal/browser/tonal.min.js';
   document.head.appendChild(s);"></script>
 
 <?php
@@ -193,7 +163,7 @@ if (!function_exists('jsTag')) {
     }
 }
 
-// ── 1. CORE Infrastructure (không defer — cần sớm nhất) ──
+// ── 1. CORE Infrastructure ──
 require_once __DIR__ . '/api/core/Config.php';
 require_once __DIR__ . '/api/core/FeatureFlags.php';
 echo "<script>
@@ -201,6 +171,8 @@ echo "<script>
   window.__SW_CACHE__ = " . json_encode(Config::SHEETAPP_CACHE_NAME) . ";
   window.__FEATURES__ = " . json_encode(FeatureFlags::all(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) . ";
 </script>\n";
+
+echo jsTag('core/ScriptLoader.js', false);
 echo jsTag('core/FeatureFlags.js', false);
 echo jsTag('core/SafeHtml.js',     false);
 echo jsTag('core/KeyService.js',   false);
@@ -208,80 +180,51 @@ echo jsTag('core/ApiService.js',   false);
 echo jsTag('core/EventBus.js',     false);
 echo jsTag('core/Store.js',        false);
 echo jsTag('core/XmlDocCache.js',   false);
-echo jsTag('core/AppShell.js',     false);
 echo jsTag('core/ModalManager.js', false);
 echo jsTag('core/ModeManager.js',  false);
 echo jsTag('core/VerseManager.js', false);
-echo jsTag('core/TapTempo.js',     false);
-echo jsTag('core/AudioUnlocker.js',false);
-echo jsTag('core/MidiEngine.js',   false);
 echo jsTag('core/SongLoaderCore.js', false);
-echo jsTag('core/ErrorReporter.js', false);
-echo jsTag('core/ServiceWorkerManager.js', false);
-echo jsTag('core/OfflineSetlistManager.js', false);
+if (!empty($_GET['all_scripts'])) {
+    echo jsTag('key-service.js');
+    echo jsTag('core/OfflineSetlistManager.js');
+    echo jsTag('audio/TapTempo.js');
+    echo jsTag('audio/MidiEngine.js');
+}
 
-// ── 2. Renderers & Engines (defer OK) ──
+// ── 2. Renderers & Engines ──
 echo jsTag('osmd-renderer.js');
-echo jsTag('lyric-extractor.js');
 echo jsTag('transpose-engine.js');
-echo jsTag('key-service.js');
-echo jsTag('session-tracker.js');
-echo jsTag('auth.js');
-echo jsTag('history-manager.js');
-echo jsTag('url-state.js');
-
-// ── 3. Feature Modules (defer) ──
-echo jsTag('modals/HelpModal.js');
-echo jsTag('modals/TransposePickerModal.js');
-echo jsTag('modals/TempoPickerSheet.js');
-echo jsTag('modals/ServicePlanAssignModal.js');
-echo jsTag('modals/PracticeTeamBoardModal.js');
-echo jsTag('library-ui.js');
-echo jsTag('modals/QuickNumpadModal.js');
-echo jsTag('service-plan-ui.js');
-echo jsTag('leader-notes-banner.js');
-echo jsTag('liturgy-card.js');
-echo jsTag('setlist-player.js');
-echo jsTag('setlist-list.js');
-echo jsTag('setlist-detail.js');
-echo jsTag('setlist-ui.js');
-echo jsTag('importer.js');
-echo jsTag('admin-ui.js');
 echo jsTag('display-settings.js');
-echo jsTag('stage-lens.js');
-echo jsTag('guitar-lens.js');
-echo jsTag('bass-lens.js');
-echo jsTag('drums-lens.js');
-echo jsTag('vocals-lens.js');
-echo jsTag('harmonic-numeral.js');
 echo jsTag('chord-canvas-xml.js');
 echo jsTag('chord-canvas-ui.js');
-echo jsTag('chord-canvas-transpose.js');
 echo jsTag('chord-canvas-dots.js');
-echo jsTag('chord-canvas-edit.js');
+if (!empty($_GET['all_scripts'])) {
+    echo jsTag('chord-canvas-transpose.js');
+    echo jsTag('chord-canvas-edit.js');
+}
 echo jsTag('chord-canvas.js');
-echo jsTag('annotation-canvas.js');
-echo jsTag('performance-notes.js');
-echo jsTag('instruments.js');
-echo jsTag('audio-player.js');
-echo jsTag('metronome.js');
-echo jsTag('auto-scroller.js');
-echo jsTag('page-nav.js');
-echo jsTag('app-ui.js');
 echo jsTag('song-info-bar.js');
 
-// ── 4. Performance Engine & Live Sync V2 (Lazy loaded on-demand khi bật Live Sync / Performance Mode) ──
-echo jsTag('live-sync.js');
-echo jsTag('follow-leader.js');
-
-// ── 5. App Controllers (defer, phụ thuộc vào modules trên) ──
-echo jsTag('song-preloader.js');
+// ── 3. App Controllers & UI ──
+if (!empty($_GET['all_scripts'])) {
+    echo jsTag('song-preloader.js');
+}
 echo jsTag('song-loader.js');
-echo jsTag('keyboard-handler.js');
+echo jsTag('library-ui.js');
+if (!empty($_GET['all_scripts'])) {
+    echo jsTag('modals/QuickNumpadModal.js');
+    echo jsTag('leader-notes-banner.js');
+    echo jsTag('liturgy-card.js');
+    echo jsTag('follow-leader.js');
+    echo jsTag('stage-lens.js');
+    echo jsTag('guitar-lens.js');
+    echo jsTag('harmonic-numeral.js');
+    echo jsTag('mobile-controller.js');
+}
+echo jsTag('app-ui.js');
 echo jsTag('toolbar-controller.js');
-echo jsTag('mobile-controller.js');
+echo jsTag('keyboard-handler.js');
 echo jsTag('app.js');
-echo jsTag('fab.js');
 ?>
 
 

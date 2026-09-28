@@ -60,11 +60,6 @@ $helpAnchor = match($activePillar) {
     default   => '#mod-2'  // Chương 02: Đọc sheet & hợp âm
 };
 ?>
-<script>
-  if (typeof window !== 'undefined' && typeof window.__APP_BASE__ === 'undefined') {
-    window.__APP_BASE__ = <?= json_encode($appBase, JSON_UNESCAPED_SLASHES) ?>;
-  }
-</script>
 <nav id="app-shell-navbar" class="app-shell-navbar" data-active-pillar="<?= htmlspecialchars($activePillar) ?>" aria-label="Thanh điều hướng chính của SheetApp">
   <div class="shell-nav-inner">
     <!-- 1. Logo & Nhãn Thương Hiệu -->

@@ -27,6 +27,7 @@ const ToolbarController = (() => {
     _bindSidebar();
     _bindDarkMode();
     _bindMisc();
+    _bindMoreOptionsMenu();
   }
 
   function _bindTranspose() {
@@ -302,9 +303,105 @@ const ToolbarController = (() => {
     slider.style.background = `linear-gradient(to right, var(--accent,#7c3aed) 0%, var(--accent,#7c3aed) ${pct}%, #d1d5db ${pct}%)`;
   }
 
+  function _bindMoreOptionsMenu() {
+    const btnOptions = document.getElementById('btn-more-options');
+    const menuOptions = document.getElementById('main-dropdown-menu');
+    if (btnOptions && menuOptions) {
+      function positionMenu() {
+        const r = btnOptions.getBoundingClientRect();
+        const w = menuOptions.offsetWidth || 230;
+        let left = r.right - w;
+        if (left < 8) left = 8;
+        if (left + w > window.innerWidth - 8) left = window.innerWidth - w - 8;
+        menuOptions.style.cssText = `position:fixed; top:${r.bottom + 6}px; left:${left}px; right:auto; z-index:99999;`;
+      }
+
+      btnOptions.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isHidden = menuOptions.classList.contains('hidden');
+        if (isHidden) {
+          if (menuOptions.parentNode !== document.body) document.body.appendChild(menuOptions);
+          menuOptions.classList.remove('hidden');
+          positionMenu();
+        } else {
+          menuOptions.classList.add('hidden');
+        }
+      });
+
+      menuOptions.addEventListener('click', (e) => {
+        const item = e.target.closest('.btn-menu-item, a');
+        if (item && !item.closest('.menu-compact-controls') && item.id !== 'btn-audio-settings') {
+          menuOptions.classList.add('hidden');
+        }
+      });
+
+      const handleOutside = (e) => {
+        if (!btnOptions.contains(e.target) && !menuOptions.contains(e.target)) {
+          menuOptions.classList.add('hidden');
+        }
+      };
+      document.addEventListener('click', handleOutside);
+      document.addEventListener('pointerdown', handleOutside);
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') menuOptions.classList.add('hidden');
+      });
+      window.addEventListener('scroll', () => menuOptions.classList.add('hidden'), { passive: true });
+      window.addEventListener('resize', () => menuOptions.classList.add('hidden'));
+    }
+
+    const btnBandToggle = document.getElementById('btn-band-toggle') || document.getElementById('btn-toggle-view');
+    const btnLyric = document.getElementById('btn-lyric-view');
+    if (btnBandToggle && btnLyric) {
+      btnBandToggle.addEventListener('click', () => btnLyric.click());
+      const lyricContainer = document.getElementById('lyric-view-container');
+      if (lyricContainer) {
+        new MutationObserver(() => {
+          const isLyric = !lyricContainer.classList.contains('hidden');
+          btnBandToggle.classList.toggle('active', isLyric);
+          const txt = btnBandToggle.querySelector('.view-text') || btnBandToggle.querySelector('.band-toggle-text');
+          if (txt) txt.textContent = isLyric ? 'Nhạc' : 'Band';
+          btnBandToggle.title = isLyric ? 'Quay lại Bản Nhạc' : 'Chuyển sang chế độ Band (Lời + Hợp âm chữ)';
+        }).observe(lyricContainer, { attributes: true, attributeFilter: ['class'] });
+      }
+    }
+
+    document.getElementById('btn-menu-zoom-out')?.addEventListener('click', () => {
+      document.getElementById('btn-zoom-out')?.click();
+      const cur = document.getElementById('zoom-slider')?.value || '100';
+      const label = document.getElementById('menu-zoom-val');
+      if (label) label.textContent = cur + '%';
+    });
+    document.getElementById('btn-menu-zoom-in')?.addEventListener('click', () => {
+      document.getElementById('btn-zoom-in')?.click();
+      const cur = document.getElementById('zoom-slider')?.value || '100';
+      const label = document.getElementById('menu-zoom-val');
+      if (label) label.textContent = cur + '%';
+    });
+    document.getElementById('btn-menu-lock-zoom')?.addEventListener('click', () => {
+      document.getElementById('btn-lock-zoom')?.click();
+      const isLocked = localStorage.getItem('sheetapp_zoom_locked') === 'true';
+      const btn = document.getElementById('btn-menu-lock-zoom');
+      if (btn) btn.textContent = isLocked ? '🔒' : '🔓';
+    });
+    document.getElementById('btn-menu-auto-scroll')?.addEventListener('click', () => {
+      document.getElementById('btn-auto-scroll')?.click();
+    });
+    document.getElementById('menu-scroll-speed')?.addEventListener('change', (e) => {
+      const sp = document.getElementById('scroll-speed');
+      if (sp) { sp.value = e.target.value; sp.dispatchEvent(new Event('change')); }
+    });
+    document.getElementById('btn-menu-metronome')?.addEventListener('click', () => {
+      document.getElementById('btn-toolbar-metronome')?.click();
+    });
+    document.getElementById('btn-menu-auth')?.addEventListener('click', () => {
+      document.getElementById('btn-toolbar-auth')?.click();
+    });
+  }
+
   function _debounce(fn, ms) { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); }; }
 
   return { init, toggleSidebar };
 })();
 
 window.ToolbarController = ToolbarController;
+
