@@ -48,6 +48,7 @@ class ManagerRepertoireHelper {
         // Lấy danh sách bài
         $sql = "
             SELECT s.id, s.title, s.httlvnId, s.xmlPath, s.defaultKey, s.category_id,
+                   s.liturgical_season, s.theme, s.tags, s.tempo,
                    c.name as category_name, c.icon as category_icon, c.slug as category_slug
             FROM songs s
             LEFT JOIN categories c ON s.category_id = c.id
@@ -282,5 +283,67 @@ class ManagerRepertoireHelper {
         SongService::invalidateCache();
 
         return ['success' => true, 'message' => 'Đã cập nhật thể loại bài hát thành công!'];
+    }
+
+    /**
+     * Gắn nhãn mùa lễ / chủ đề hàng loạt cho nhiều bài hát (Ticket L6-3)
+     */
+    public static function bulkUpdateLabels(array $songIds, array $labels): array {
+        Auth::requireBanhat();
+        $pdo = DB::get();
+
+        if (empty($songIds)) {
+            return ['success' => false, 'message' => 'Danh sách bài hát rỗng'];
+        }
+
+        $fields = [];
+        $params = [];
+
+        if (array_key_exists('liturgical_season', $labels)) {
+            $fields[] = "liturgical_season = ?";
+            $val = trim((string)$labels['liturgical_season']);
+            $params[] = $val === '' ? null : $val;
+        }
+
+        if (array_key_exists('theme', $labels)) {
+            $fields[] = "theme = ?";
+            $val = trim((string)$labels['theme']);
+            $params[] = $val === '' ? null : $val;
+        }
+
+        if (array_key_exists('tags', $labels)) {
+            $fields[] = "tags = ?";
+            $val = trim((string)$labels['tags']);
+            $params[] = $val === '' ? null : $val;
+        }
+
+        if (empty($fields)) {
+            return ['success' => false, 'message' => 'Không có nhãn nào được chỉ định để cập nhật'];
+        }
+
+        $fieldsSql = implode(', ', $fields);
+        $placeholders = implode(',', array_fill(0, count($songIds), '?'));
+        $sql = "UPDATE songs SET {$fieldsSql} WHERE id IN ({$placeholders})";
+
+        $execParams = array_merge($params, $songIds);
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($execParams);
+        $affected = $stmt->rowCount();
+
+        // Đồng bộ FTS5 cho các bài hát vừa được gắn nhãn
+        foreach ($songIds as $sid) {
+            try {
+                SongSearchHelper::syncSongFts((string)$sid);
+            } catch (\Throwable $e) {}
+        }
+
+        // Xóa cache danh sách bài hát
+        SongService::invalidateCache();
+
+        return [
+            'success' => true,
+            'message' => "Đã gắn nhãn thành công cho {$affected} bài hát",
+            'affected' => $affected
+        ];
     }
 }

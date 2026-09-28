@@ -1335,7 +1335,19 @@ SheetApp/
   + Tạo: e2e/library-l6-tempo-tap-tool.spec.js (Playwright E2E: Bài có tempo thật [001] hiển thị đúng 92 bpm; bài chưa có tempo [150] hiển thị '♩ —'; bấm chip mở Bottom Sheet, dùng TAP tempo / preset 100 BPM, áp dụng tempo và chip cập nhật thành công; 3/3 tests PASS trên Chromium)
   🏆 ĐẠT 100% QUALITY GATE: 125/125 suites PASS (2386 passed, 0 failed, 72.8% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
 
+[2026-09-28] — Hoàn tất Ticket L6-3 (ROADMAP4.md Mục 8): Bulk Taxonomy Labeling & Dynamic Library Filters (Gắn Nhãn Mùa Lễ / Chủ Đề Hàng Loạt trong Manager & Kích Hoạt Bộ Lọc Thư Viện)
+  ~ Sửa: api/services/ManagerRepertoireHelper.php (Bổ sung liturgical_season, theme, tags, tempo vào SELECT của getRepertoire(); thêm phương thức bulkUpdateLabels(array $songIds, array $labels) cập nhật hàng loạt, tự động đồng bộ FTS5 cho từng bài và xóa cache danh sách; 350 dòng < 600 dòng)
+  ~ Sửa: api/services/ManagerService.php (Bổ sung method forwarder bulkUpdateLabels; 599 dòng < 600 dòng)
+  ~ Sửa: api/controllers/ManagerController.php (Bổ sung action case 'bulk_update_labels' với bảo vệ phân quyền Auth::requireBanhat(); 259 dòng < 600 dòng)
+  ~ Sửa: assets/js/core/ApiService.js (Bổ sung endpoint window.ApiService.manager.bulkUpdateLabels; 409 dòng < 600 dòng)
+  ~ Sửa: manager/partials/tab_repertoire.php (Bổ sung thanh công cụ thao tác hàng loạt #mgr-bulk-bar: chọn mùa lễ #mgr-bulk-season, nhập chủ đề #mgr-bulk-theme kèm datalist gợi ý, nút gắn nhãn #btn-mgr-bulk-apply, nút bỏ chọn #btn-mgr-bulk-clear; bổ sung cột checkbox chọn tất cả #chk-select-all-songs; 97 dòng < 600 dòng)
+  ~ Sửa: manager/js/manager-repertoire.js (Quản lý tập hợp _selectedSongIds Set, bộ lắng nghe _initBulkActionHandlers(), cập nhật giao diện _updateBulkBar() toggle class hidden, render checkbox từng dòng bảng, hiển thị badge Mùa Lễ 🟣 và Chủ Đề 🏷️; 598 dòng < 600 dòng)
+  + Tạo: tools/manage_song_labels.php (Công cụ CLI quản lý nhãn phân loại: --status xem thống kê phân bố mùa lễ và chủ đề, --seed tự động gieo dữ liệu chuẩn mực theo mục lục Thánh Ca HTTLVN cho 500 bài đầu, --clear xóa nhãn, --song đặt thủ công; CLI guard an toàn; 190 dòng < 600 dòng)
+  + Tạo: tests/library_l63_bulk_labels_regression.php (38/38 checks PASS 100%, 78.9% behavioral assertions, kiểm thử cột DB, dữ liệu ≥300 bài có nhãn [thực tế 500 bài], ManagerService & ManagerRepertoireHelper bulkUpdateLabels, phân quyền RBAC viewer bị chặn, SongService filter season Giáng Sinh, frontend contract)
+  + Tạo: e2e/library-l6-bulk-labels.spec.js (Playwright E2E: Thư viện chính hiển thị bộ lọc Mùa Lễ #season-filter-wrap và Chủ Đề #theme-filter-wrap tự nhiên, lọc bài Giáng Sinh chính xác; Manager Portal chọn nhiều bài hát hiển thị Bulk Bar và gán nhãn thành công, bảng cập nhật badge; 4/4 tests PASS trên Chromium và WebKit)
+  🏆 ĐẠT 100% QUALITY GATE: 126/126 suites PASS (2425 passed, 0 failed, 73.2% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
+
 ---
 
 *File này là "bộ nhớ" của dự án. AI Agent cập nhật sau mỗi phiên để phiên sau không phải khám phá lại từ đầu.*
-*Cập nhật: 2026-09-28 (Hoàn tất Ticket L6-2: Xóa tempo giả 104, Công cụ Ca trưởng nhập tempo thật có TAP)*
+*Cập nhật: 2026-09-28 (Hoàn tất Ticket L6-3: Gắn nhãn mùa lễ / chủ đề hàng loạt trong Manager, Kích hoạt bộ lọc Thư viện)*

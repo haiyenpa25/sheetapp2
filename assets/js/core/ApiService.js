@@ -301,6 +301,7 @@ const ApiService = (() => {
     manageCategory:         (data)   => _json('POST', 'api/index.php?route=manager&action=manage_category', data),
     myContributions:        ()       => _request('api/index.php?route=manager&action=my_contributions'),
     updateSongCategory:     (data)   => _json('POST', 'api/index.php?route=manager&action=update_song_category', data),
+    bulkUpdateLabels:       (data)   => _json('POST', 'api/index.php?route=manager&action=bulk_update_labels', data),
     toggleRecommend:        (data)   => _json('POST', 'api/index.php?route=manager&action=toggle_recommend', data),
     deleteChordSet:         (data)   => _json('POST', 'api/index.php?route=manager&action=delete_chord_set', data)
   };

@@ -592,4 +592,8 @@ class ManagerService {
             'message' => $newVal == 1 ? 'Đã ghim khuyên dùng cho phiên bản này' : 'Đã bỏ ghim khuyên dùng'
         ];
     }
+
+    public static function bulkUpdateLabels(array $songIds, array $labels): array {
+        return ManagerRepertoireHelper::bulkUpdateLabels($songIds, $labels);
+    }
 }

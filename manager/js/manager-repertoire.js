@@ -6,9 +6,79 @@
   'use strict';
 
   let _ctx = null;
+  const _selectedSongIds = new Set();
 
   function init(ctx) {
     _ctx = ctx;
+    _initBulkActionHandlers();
+  }
+
+  function _initBulkActionHandlers() {
+    document.getElementById('chk-select-all-songs')?.addEventListener('change', (e) => {
+      const repState = _getApp().state?.repertoire;
+      const songs = repState?.songs || [];
+      if (e.target.checked) {
+        songs.forEach(s => _selectedSongIds.add(s.id));
+      } else {
+        songs.forEach(s => _selectedSongIds.delete(s.id));
+      }
+      _syncCheckboxUI();
+      _updateBulkBar();
+    });
+
+    document.getElementById('btn-mgr-bulk-clear')?.addEventListener('click', () => {
+      _selectedSongIds.clear();
+      _syncCheckboxUI();
+      _updateBulkBar();
+    });
+
+    document.getElementById('btn-mgr-bulk-apply')?.addEventListener('click', async () => {
+      if (_selectedSongIds.size === 0) return;
+      const seasonVal = document.getElementById('mgr-bulk-season')?.value;
+      const themeVal = document.getElementById('mgr-bulk-theme')?.value;
+
+      const payload = { song_ids: Array.from(_selectedSongIds) };
+      if (seasonVal !== '__KEEP__') payload.liturgical_season = seasonVal;
+      if (themeVal !== undefined && themeVal.trim() !== '') payload.theme = themeVal.trim();
+
+      if (payload.liturgical_season === undefined && payload.theme === undefined) {
+        _getApp().showToast('Vui lòng chọn mùa lễ hoặc nhập chủ đề', 'warning');
+        return;
+      }
+
+      try {
+        const res = await window.ApiService.manager.bulkUpdateLabels(payload);
+        if (res.success) {
+          _getApp().showToast(res.message || 'Đã gắn nhãn thành công!', 'success');
+          _selectedSongIds.clear();
+          _updateBulkBar();
+          loadRepertoire();
+        } else {
+          _getApp().showToast(res.message || 'Lỗi gắn nhãn hàng loạt', 'error');
+        }
+      } catch (err) {
+        _getApp().showToast('Lỗi mạng', 'error');
+      }
+    });
+  }
+
+  function _updateBulkBar() {
+    const bar = document.getElementById('mgr-bulk-bar');
+    const countEl = document.getElementById('mgr-bulk-count');
+    const count = _selectedSongIds.size;
+    if (countEl) countEl.textContent = count;
+    if (bar) bar.classList.toggle('hidden', count === 0);
+    const selectAll = document.getElementById('chk-select-all-songs');
+    const pageSongs = _getApp().state?.repertoire?.songs || [];
+    if (selectAll && pageSongs.length > 0) {
+      selectAll.checked = pageSongs.every(s => _selectedSongIds.has(s.id));
+    }
+  }
+
+  function _syncCheckboxUI() {
+    document.querySelectorAll('.chk-song-select').forEach(cb => {
+      cb.checked = _selectedSongIds.has(cb.dataset.id);
+    });
   }
 
   function _getApp() {
@@ -121,17 +191,13 @@
     // 1. Master HD Preset
     html += `
       <div class="song-chord-card master-card">
-        <div class="song-chord-card-title">
-          <span>⭐ Bản Chuẩn Ban Hát (HD)</span>
-          <span class="card-badge" style="background:#fef3c7; color:#b45309;">Hội Thánh</span>
-        </div>
+        <div class="song-chord-card-title"><span>⭐ Bản Chuẩn Ban Hát (HD)</span><span class="card-badge" style="background:#fef3c7; color:#b45309;">Hội Thánh</span></div>
         <div class="song-chord-card-meta">Bộ hợp âm mẫu mực được biên tập chuẩn cho hội thánh và ban hát.</div>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:auto; padding-top:0.5rem;">
           <span class="card-badge badge-chord-count">● ${song.master_hd_chord_count || 12} hợp âm</span>
           <a href="../index.php?song=${encodeURIComponent(song.id)}&set=HD" class="mgr-btn mgr-btn-primary mgr-btn-xs">👁️ Mở Sheet HD</a>
         </div>
-      </div>
-    `;
+      </div>`;
 
     // 2. User Created Chord Sets
     const userChords = song.user_chord_sets || [];
@@ -141,42 +207,21 @@
 
     userChords.forEach(c => {
       const isOwner = currentUserId && (c.user_id == currentUserId);
-      const canManage = isOwner || isAdmin;
-      const isRec = c.is_recommended == 1;
+      const canManage = isOwner || isAdmin, isRec = c.is_recommended == 1;
       const instIcon = c.instrument_type === 'piano' ? '🎹 Piano' : (c.instrument_type === 'bass' ? '🎻 Bass' : '🎸 Guitar');
       const safeDiskName = c.username + '__' + c.set_name.replace(/[^a-zA-Z0-9_\-]/g, '_');
-
       html += `
         <div class="song-chord-card ${isRec ? 'card-recommended' : ''}">
-          <div class="song-chord-card-title">
-            <span>${isRec ? '⭐ ' : ''}${_escape(c.set_name)}</span>
-            <span class="card-badge">${instIcon}</span>
-          </div>
-          <div class="song-chord-card-meta">
-            👤 Soạn bởi: <strong>@${_escape(c.username)}</strong> (${_escape(c.display_name || c.username)})<br>
-            ${c.capo_fret > 0 ? `<span class="badge-capo">Capo ${c.capo_fret}</span> • ` : ''}
-            <span>${c.chord_count || 0} hợp âm</span>
-            ${c.review_status === 'pending' ? ' • <span style="color:#3b82f6;font-weight:600;">⏳ Chờ duyệt</span>' : ''}
-          </div>
+          <div class="song-chord-card-title"><span>${isRec ? '⭐ ' : ''}${_escape(c.set_name)}</span><span class="card-badge">${instIcon}</span></div>
+          <div class="song-chord-card-meta">👤 @<strong>${_escape(c.username)}</strong> (${_escape(c.display_name || c.username)})<br>${c.capo_fret > 0 ? `<span class="badge-capo">Capo ${c.capo_fret}</span> • ` : ''}<span>${c.chord_count || 0} hợp âm</span>${c.review_status === 'pending' ? ' • <span style="color:#3b82f6;font-weight:600;">⏳ Chờ duyệt</span>' : ''}</div>
           ${c.notes_guide ? `<div class="card-notes-guide" style="font-size:0.75rem; padding:0.35rem 0.5rem;">"${_escape(c.notes_guide)}"</div>` : ''}
-
           <div style="display:flex; gap:0.4rem; align-items:center; margin-top:auto; padding-top:0.5rem; border-top:1px solid var(--border);">
             <a href="../index.php?song=${encodeURIComponent(song.id)}&set=${encodeURIComponent(safeDiskName)}" class="mgr-btn mgr-btn-primary mgr-btn-xs" style="flex:1;">👁️ Mở Sheet</a>
-            ${isOwner && c.review_status !== 'pending' ? `
-              <button class="mgr-btn mgr-btn-ghost mgr-btn-xs" title="Gửi đề xuất phê duyệt cho Ca Trưởng" onclick="window.ManagerReviews?.promptSubmitReview('chord_set', ${c.id}, '${_escapeInlineJs(c.set_name)}')">
-                🚀 Duyệt
-              </button>` : ''}
-            ${isBanhat ? `
-              <button class="mgr-btn mgr-btn-ghost mgr-btn-xs ${isRec ? 'text-accent' : ''}" title="${isRec ? 'Bỏ ghim' : 'Ghim khuyên dùng'}" onclick="ManagerApp.toggleRecommend(${c.id})">
-                ${isRec ? '⭐' : '☆'}
-              </button>` : ''}
-            ${canManage ? `
-              <button class="mgr-btn mgr-btn-ghost mgr-btn-xs text-danger" title="Xóa bộ này" onclick="ManagerApp.deleteUserChordSet(${c.id}, '${_escapeInlineJs(c.set_name)}')">
-                ✕
-              </button>` : ''}
+            ${isOwner && c.review_status !== 'pending' ? `<button class="mgr-btn mgr-btn-ghost mgr-btn-xs" title="Gửi duyệt" onclick="window.ManagerReviews?.promptSubmitReview('chord_set', ${c.id}, '${_escapeInlineJs(c.set_name)}')">🚀 Duyệt</button>` : ''}
+            ${isBanhat ? `<button class="mgr-btn mgr-btn-ghost mgr-btn-xs ${isRec ? 'text-accent' : ''}" title="${isRec ? 'Bỏ ghim' : 'Ghim'}" onclick="ManagerApp.toggleRecommend(${c.id})">${isRec ? '⭐' : '☆'}</button>` : ''}
+            ${canManage ? `<button class="mgr-btn mgr-btn-ghost mgr-btn-xs text-danger" title="Xóa" onclick="ManagerApp.deleteUserChordSet(${c.id}, '${_escapeInlineJs(c.set_name)}')">✕</button>` : ''}
           </div>
-        </div>
-      `;
+        </div>`;
     });
 
     // 3. New Chord Set Action Card
@@ -186,9 +231,7 @@
         <span style="font-size: 1.75rem;">➕</span>
         <strong style="color: var(--accent); font-size: 0.9rem;">Tạo Bản Phối Hợp Âm Mới</strong>
         <span class="text-xs text-muted">Nhân bản an toàn từ bản gốc để tùy biến theo phong cách của bạn</span>
-      </div>
-    `;
-
+      </div>`;
     chordsGrid.innerHTML = html;
 
     // 4. Render MusicXML Fork Versions for Selected Song
@@ -199,54 +242,26 @@
       if (versions.length > 0) {
         versions.forEach(v => {
           const isOwner = currentUserId && (v.user_id == currentUserId);
-          const canManage = isOwner || isAdmin;
-          const isRec = v.is_recommended == 1;
+          const canManage = isOwner || isAdmin, isRec = v.is_recommended == 1;
           vHtml += `
             <div class="song-chord-card ${isRec ? 'card-recommended' : ''}" style="border-left: 3px solid var(--cyan);">
-              <div class="song-chord-card-title">
-                <span>${isRec ? '⭐ ' : ''}${_escape(v.version_name)}</span>
-                <span class="song-version-badge">📑 MusicXML</span>
-              </div>
-              <div class="song-chord-card-meta">
-                👤 Soạn bởi: <strong>@${_escape(v.username)}</strong> (${_escape(v.display_name || v.username)})<br>
-                <span>Cập nhật: ${(v.updated_at || v.created_at || '').substring(0, 10)}</span>
-              </div>
+              <div class="song-chord-card-title"><span>${isRec ? '⭐ ' : ''}${_escape(v.version_name)}</span><span class="song-version-badge">📑 MusicXML</span></div>
+              <div class="song-chord-card-meta">👤 @<strong>${_escape(v.username)}</strong> (${_escape(v.display_name || v.username)})<br><span>Cập nhật: ${(v.updated_at || v.created_at || '').substring(0, 10)}</span></div>
               ${v.description ? `<div class="card-notes-guide" style="font-size:0.75rem; padding:0.35rem 0.5rem;">"${_escape(v.description)}"</div>` : ''}
-
               <div style="display:flex; gap:0.4rem; align-items:center; margin-top:auto; padding-top:0.5rem; border-top:1px solid var(--border);">
-                <a href="../editor/?song=${encodeURIComponent(song.id)}&version=${v.id}" target="_blank" class="mgr-btn mgr-btn-primary mgr-btn-xs" style="flex:1;" title="Mở Visual Editor để chỉnh nốt SATB">
-                  ✏️ Sửa Nốt (SATB)
-                </a>
-                <a href="../index.php?song=${encodeURIComponent(song.id)}&version=${v.id}" target="_blank" class="mgr-btn mgr-btn-ghost mgr-btn-xs" title="Xem trên Sheet Reader">
-                  👁️ Xem Sheet
-                </a>
-                ${isBanhat ? `
-                  <button class="mgr-btn mgr-btn-ghost mgr-btn-xs ${isRec ? 'text-accent' : ''}" 
-                          title="${isRec ? 'Bỏ ghim' : 'Ghim khuyên dùng'}"
-                          onclick="ManagerApp.toggleVersionRecommend(${v.id})">
-                    ${isRec ? '⭐' : '☆'}
-                  </button>
-                ` : ''}
-                ${canManage ? `
-                  <button class="mgr-btn mgr-btn-ghost mgr-btn-xs text-danger" 
-                          title="Xóa bản fork này"
-                          onclick="ManagerApp.deleteVersion(${v.id}, '${_escapeInlineJs(v.version_name)}')">
-                    ✕
-                  </button>
-                ` : ''}
+                <a href="../editor/?song=${encodeURIComponent(song.id)}&version=${v.id}" target="_blank" class="mgr-btn mgr-btn-primary mgr-btn-xs" style="flex:1;">✏️ Sửa Nốt</a>
+                <a href="../index.php?song=${encodeURIComponent(song.id)}&version=${v.id}" target="_blank" class="mgr-btn mgr-btn-ghost mgr-btn-xs">👁️ Xem Sheet</a>
+                ${isBanhat ? `<button class="mgr-btn mgr-btn-ghost mgr-btn-xs ${isRec ? 'text-accent' : ''}" title="${isRec ? 'Bỏ ghim' : 'Ghim'}" onclick="ManagerApp.toggleVersionRecommend(${v.id})">${isRec ? '⭐' : '☆'}</button>` : ''}
+                ${canManage ? `<button class="mgr-btn mgr-btn-ghost mgr-btn-xs text-danger" title="Xóa" onclick="ManagerApp.deleteVersion(${v.id}, '${_escapeInlineJs(v.version_name)}')">✕</button>` : ''}
               </div>
-            </div>
-          `;
+            </div>`;
         });
       } else {
         vHtml += `
           <div style="grid-column: 1 / -1; padding: 0.75rem; background: var(--bg-surface-elevated); border: 1px dashed var(--border); border-radius: var(--radius-md); font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; justify-content: space-between;">
             <span>Bài hát này chưa có bản fork MusicXML nào. Bấm nút bên cạnh để nhân bản phân bè SATB độc lập.</span>
-            <button class="mgr-btn mgr-btn-ghost mgr-btn-xs" onclick="ManagerApp.openForkModal('${_escapeInlineJs(song.id)}', '${_escapeInlineJs(song.title)}', 'score_version')">
-              + Tạo Bản Fork SATB
-            </button>
-          </div>
-        `;
+            <button class="mgr-btn mgr-btn-ghost mgr-btn-xs" onclick="ManagerApp.openForkModal('${_escapeInlineJs(song.id)}', '${_escapeInlineJs(song.title)}', 'score_version')">+ Tạo Bản Fork SATB</button>
+          </div>`;
       }
       versGrid.innerHTML = vHtml;
     }
@@ -317,21 +332,22 @@
     if (!tbody || !repState) return;
 
     let songs = repState.songs;
-
     if (repState.onlyHasChords) {
       songs = songs.filter(s => (s.user_chord_sets && s.user_chord_sets.length > 0) || (s.song_versions && s.song_versions.length > 0));
     }
 
     if (songs.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6" class="mgr-table-loading"><p>Không tìm thấy bài hát nào phù hợp với bộ lọc.</p></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" class="mgr-table-loading"><p>Không tìm thấy bài hát nào phù hợp với bộ lọc.</p></td></tr>`;
+      _updateBulkBar();
       return;
     }
 
     let html = '';
     songs.forEach(song => {
       const userChords = song.user_chord_sets || [];
+      const isSelected = _selectedSongIds.has(song.id);
 
-      let chordChipsHtml = '';
+      let chordChipsHtml = '<span class="text-muted text-xs">Chưa có bản phối</span>';
       if (userChords.length > 0) {
         chordChipsHtml = userChords.map(c => {
           const isRec = c.is_recommended == 1;
@@ -347,12 +363,21 @@
             </a>
           `;
         }).join('');
-      } else {
-        chordChipsHtml = '<span class="text-muted text-xs">Chưa có bản phối</span>';
+      }
+
+      let labelsHtml = '';
+      if (song.liturgical_season) {
+        labelsHtml += `<span class="cat-badge" style="background:rgba(139,92,246,0.15);color:#8b5cf6;border:1px solid rgba(139,92,246,0.3);margin-top:3px;display:inline-flex;font-size:0.75rem;">🟣 ${_escape(song.liturgical_season)}</span>`;
+      }
+      if (song.theme) {
+        labelsHtml += `<span class="cat-badge" style="background:rgba(59,130,246,0.15);color:#3b82f6;border:1px solid rgba(59,130,246,0.3);margin-top:3px;display:inline-flex;font-size:0.75rem;">🏷️ ${_escape(song.theme)}</span>`;
       }
 
       html += `
         <tr style="cursor:pointer;" onclick="ManagerApp.selectSong('${song.id}')">
+          <td style="text-align:center;" onclick="event.stopPropagation()">
+            <input type="checkbox" class="chk-song-select" data-id="${song.id}" ${isSelected ? 'checked' : ''}>
+          </td>
           <td><strong style="color:var(--text-muted); font-size:0.85rem;">#${song.httlvnId || '—'}</strong></td>
           <td>
             <div class="song-title-cell">
@@ -368,23 +393,16 @@
               <span>${song.category_icon || '🎵'}</span>
               <span>${_escape(song.category_name || 'Thánh Ca')}</span>
             </span>
+            ${labelsHtml}
           </td>
           <td>
-            <div class="user-chords-list">
-              ${chordChipsHtml}
-            </div>
+            <div class="user-chords-list">${chordChipsHtml}</div>
           </td>
           <td style="text-align:right;" onclick="event.stopPropagation()">
             <div class="table-actions">
-              <button class="mgr-btn mgr-btn-primary mgr-btn-xs" onclick="ManagerApp.openForkModal('${_escapeInlineJs(song.id)}', '${_escapeInlineJs(song.title)}')">
-                ✨ Clone & Phối
-              </button>
-              <button class="mgr-btn mgr-btn-ghost mgr-btn-xs" onclick="ManagerApp.selectSong('${song.id}')">
-                🎯 Chọn Bài
-              </button>
-              <a href="../index.php?song=${encodeURIComponent(song.id)}" class="mgr-btn mgr-btn-ghost mgr-btn-xs" title="Xem Sheet">
-                👁️
-              </a>
+              <button class="mgr-btn mgr-btn-primary mgr-btn-xs" onclick="ManagerApp.openForkModal('${_escapeInlineJs(song.id)}', '${_escapeInlineJs(song.title)}')">✨ Clone</button>
+              <button class="mgr-btn mgr-btn-ghost mgr-btn-xs" onclick="ManagerApp.selectSong('${song.id}')">🎯 Chọn</button>
+              <a href="../index.php?song=${encodeURIComponent(song.id)}" class="mgr-btn mgr-btn-ghost mgr-btn-xs" title="Xem Sheet">👁️</a>
             </div>
           </td>
         </tr>
@@ -392,6 +410,17 @@
     });
 
     tbody.innerHTML = html;
+
+    tbody.querySelectorAll('.chk-song-select').forEach(cb => {
+      cb.addEventListener('change', (e) => {
+        const sid = e.target.dataset.id;
+        if (e.target.checked) _selectedSongIds.add(sid);
+        else _selectedSongIds.delete(sid);
+        _updateBulkBar();
+      });
+    });
+
+    _updateBulkBar();
   }
 
   function updatePagination() {

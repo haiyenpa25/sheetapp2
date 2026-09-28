@@ -191,6 +191,31 @@ class ManagerController {
                         }
                         return;
 
+                    case 'bulk_update_labels':
+                        Auth::requireBanhat();
+                        $songIds = $body['song_ids'] ?? [];
+                        if (empty($songIds) || !is_array($songIds)) {
+                            Response::error('Thiếu danh sách song_ids hoặc định dạng không hợp lệ');
+                            return;
+                        }
+                        $labels = [];
+                        if (array_key_exists('liturgical_season', $body)) {
+                            $labels['liturgical_season'] = $body['liturgical_season'];
+                        }
+                        if (array_key_exists('theme', $body)) {
+                            $labels['theme'] = $body['theme'];
+                        }
+                        if (array_key_exists('tags', $body)) {
+                            $labels['tags'] = $body['tags'];
+                        }
+                        $res = ManagerService::bulkUpdateLabels($songIds, $labels);
+                        if ($res['success']) {
+                            Response::ok($res, $res['message']);
+                        } else {
+                            Response::error($res['message']);
+                        }
+                        return;
+
                     case 'delete_version':
                         $versionId = (int)($body['version_id'] ?? 0);
                         if (!$versionId) {
