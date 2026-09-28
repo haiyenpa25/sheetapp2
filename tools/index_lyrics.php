@@ -13,6 +13,24 @@ if (PHP_SAPI !== 'cli') {
 require_once __DIR__ . '/../api/core/DB.php';
 require_once __DIR__ . '/../api/services/SongSearchHelper.php';
 
+// Hỗ trợ tham số --db=<path> để chạy trên bản sao trước (ROADMAP4 L6-1)
+$customDb = null;
+$force = false;
+foreach ($argv as $arg) {
+    if (str_starts_with($arg, '--db=')) {
+        $customDb = substr($arg, 5);
+    } elseif ($arg === '--force') {
+        $force = true;
+    }
+}
+
+if ($customDb !== null) {
+    putenv("SHEETAPP_DB_PATH={$customDb}");
+    $_ENV['SHEETAPP_DB_PATH'] = $customDb;
+    DB::resetConnections();
+    echo "Sử dụng CSDL chỉ định: {$customDb}\n";
+}
+
 $pdo = DB::get();
 
 // Thêm cột lyrics_text nếu chưa có

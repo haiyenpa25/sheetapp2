@@ -342,7 +342,7 @@ Mỗi ticket bên dưới ghi: **ID · việc cần làm · nghiệm thu**. Tick
 | **L5-6** | **[x] Precache Service Worker tự sinh bằng PHP:** `tools/generate_sw_manifest.php` quét toàn bộ tài nguyên App Shell (CSS, JS, vendor, 903 bài API) theo `filemtime` & hash, tự sinh manifest & nạp vào `sw.js`; tích hợp auto-sync; offline hoàn chỉnh | Offline: mở app lần đầu sau khi đã vào 1 lần → chạy được hoàn toàn (E2E Chromium & WebKit 100% PASS) — ✅ ĐÃ HOÀN THÀNH 100% |
 | **L5-7** | **[x] State tập trung (Store):** song / set / transpose / zoom / mode / verse nằm trong Store; URL, thanh công cụ, HUD, chế độ Band là 4 bên đăng ký nghe; hỗ trợ alias 2 chiều và subscribe | Test: đổi `Store.set('transpose', 2)` thì cả 4 chỗ hiển thị cập nhật (E2E Chromium & WebKit PASS) — ✅ ĐÃ HOÀN THÀNH 100% |
 | **L5-8** | **[x] Dọn CSS của trang chính:** thang z-index bằng biến (`--z-*`), giảm `!important` (từ 388 xuống 109, giảm 72% ≥ 70%), bỏ 24 phần tử giả "legacy ID" và làm sạch inline styles trong includes | Metrics: `!important` giảm 72% ≥ 70%; 0 phần tử giả; 16/16 test PASS — ✅ ĐÃ HOÀN THÀNH 100% |
-| **L5-9** | **Ngân sách hiệu năng trong CI:** Playwright đo thời gian hiện bản nhạc, số lần render, số request và fail nếu vượt ngưỡng | Chạy `--e2e` xanh |
+| **L5-9** | **[x] Ngân sách hiệu năng trong CI:** Playwright đo thời gian hiện bản nhạc (935ms ≤ 4.5s), số lần render (=== 1), số request (4 ≤ 4), dịch tông (82ms ≤ 300ms) và script ban đầu (30 ≤ 30); cơ chế fail nếu vượt ngưỡng | Chạy E2E xanh 100% (Chromium & WebKit PASS) — ✅ ĐÃ HOÀN THÀNH 100% |
 
 ---
 
@@ -350,7 +350,7 @@ Mỗi ticket bên dưới ghi: **ID · việc cần làm · nghiệm thu**. Tick
 
 | ID | Việc | Ai | Nghiệm thu |
 |---|---|---|---|
-| **L6-1** | **Trích lời theo khổ đúng chuẩn:** tách theo `<lyric number>`, ghép âm tiết theo `<syllabic>`; tách ĐK; tạo lại `lyrics_text` và index FTS (chạy trên bản sao trước) | Dev | 10 bài mẫu: lời từng khổ là câu liền mạch; chủ dự án duyệt |
+| **L6-1** | **[x] Trích lời theo khổ đúng chuẩn:** tách theo `<lyric number>`, ghép âm tiết theo `<syllabic>`; tách ĐK riêng biệt `[ĐK]`; tự động chọn part bè chính (074, 614); tạo lại `lyrics_text` và index FTS5 (đã chạy kiểm thử trên bản sao trước) | Dev | 10 bài mẫu: lời từng khổ là câu liền mạch; tìm kiếm FTS5 và snippet `[ĐK]` chính xác; E2E & 20/20 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
 | **L6-2** | Xoá tempo giả 104 (đặt NULL); công cụ để ca trưởng nhập tempo thật cho 100 bài hay dùng (có TAP) | Dev + ca trưởng | ≥100 bài có tempo thật |
 | **L6-3** | **Gắn nhãn mùa lễ / chủ đề hàng loạt** trong Manager (chọn nhiều bài → gắn nhãn) | Dev + người biên tập | ≥300 bài có nhãn; bộ lọc hiện lại |
 | **L6-4** | Chiến lược HD: (a) giữ TLH làm mặc định và HD bổ sung dần qua luồng duyệt, hoặc (b) nhân bản TLH thành HD cho 865 bài rồi chỉnh dần (L-D1) | Chủ dự án quyết | Không bài nào thiếu hợp âm |

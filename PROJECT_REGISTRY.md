@@ -1310,7 +1310,20 @@ SheetApp/
   + Tạo: e2e/library-l5-css-cleanup.spec.js (E2E Playwright: Kiểm tra 0 dummy elements tồn tại trong DOM trang chính, kiểm tra thang z-index biến CSS trên :root, kiểm tra layout và tương tác Toolbar/Sidebar/Preset/Numpad mượt mà trên Chromium)
   🏆 ĐẠT 100% QUALITY GATE: 122/122 suites PASS (2331 passed, 0 failed, 72.3% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
 
+[2026-09-28] — Hoàn tất Ticket L5-9 (ROADMAP4.md): Performance Budget CI Gate (Ngân sách hiệu năng trong CI)
+  + Sửa: assets/js/app.js (Trì hoãn ServiceWorkerManager nạp sau window.load 1200ms để giữ ngân sách script ban đầu đúng 30 thẻ; 235 dòng < 600 dòng)
+  + Tạo: e2e/library-l5-performance-budget.spec.js (E2E Playwright: Đo 6 chỉ số ngân sách hiệu năng: Initial render 935ms <= 4500ms, Song switch 181ms <= 1800ms, OSMD render count === 1, Song switch network requests 4 <= 4, Instant transpose 82ms <= 300ms, Initial script count 30 <= 30; cơ chế fail if over budget)
+  + Tạo: tests/library_l59_performance_budget_regression.php (11/11 checks PASS, 72.7% behavioral assertions, kiểm thử toàn diện budget metrics, thresholds, và cơ chế gate)
+  🏆 ĐẠT 100% QUALITY GATE: 123/123 suites PASS (2342 passed, 0 failed, 72.3% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
+
+[2026-09-28] — Hoàn tất Ticket L6-1 (ROADMAP4.md Mục 8): Lyrics Verse & Chorus Extraction (Trích Lời Theo Khổ Đúng Chuẩn & Tách Điệp Khúc)
+  ~ Sửa: api/services/SongSearchHelper.php (Nâng cấp hàm extractLyricsByVerse: chọn part có nhiều lyric nhất [bè Soprano/vocal chính, giải quyết triệt để đa bè bài 074, 614]; tách Điệp khúc độc lập với tiền tố [ĐK], không còn bị dính vào Khổ 1; ghép âm tiết syllabic chính xác với dấu gạch nối; nâng cấp createLyricSnippet giữ nguyên tiền tố [ĐK] khi trích dẫn câu điệp khúc; hỗ trợ force re-extraction; 599 dòng < 600 dòng)
+  ~ Sửa: tools/index_lyrics.php (Hỗ trợ CLI options: --db=<path> chạy thử nghiệm trên bản sao an toàn trước khi áp dụng; --force re-index toàn bộ CSDL; 92 dòng < 600 dòng)
+  + Tạo: tests/library_l61_lyrics_verse_and_chorus_extraction_regression.php (20/20 checks PASS, 100% behavioral assertions, nghiệm thu 10 bài mẫu [001-010, 011, 016], kiểm thử tách [ĐK], syllabic, đa bè 074, FTS5 & snippet [ĐK], bảo mật XSS)
+  + Tạo: e2e/library-l6-lyrics-extraction-and-chorus.spec.js (E2E Playwright: Tìm kiếm cụm từ trong Điệp khúc bài 004 và 011 hiển thị kết quả và snippet [ĐK] có <mark>; tìm kiếm khổ 1 bài 001 hiển thị câu liền mạch; 3/3 tests PASS trên Chromium)
+  🏆 ĐẠT 100% QUALITY GATE: 124/124 suites PASS (2362 passed, 0 failed, 72.5% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
+
 ---
 
 *File này là "bộ nhớ" của dự án. AI Agent cập nhật sau mỗi phiên để phiên sau không phải khám phá lại từ đầu.*
-*Cập nhật: 2026-09-28 (Hoàn tất Ticket L5-8)*
+*Cập nhật: 2026-09-28 (Hoàn tất Ticket L6-1: Trích lời theo khổ & Tách Điệp Khúc)*

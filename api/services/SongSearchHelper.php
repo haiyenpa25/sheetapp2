@@ -12,28 +12,16 @@ class SongSearchHelper {
 
     public static function removeAccents(string $str): string {
         $from = [
-            'à','á','ả','ã','ạ','ă','ắ','ặ','ằ','ẳ','ẵ','â','ấ','ậ','ầ','ẩ','ẫ',
-            'đ','è','é','ẻ','ẽ','ẹ','ê','ế','ệ','ề','ể','ễ',
-            'ì','í','ỉ','ĩ','ị','ò','ó','ỏ','õ','ọ','ô','ố','ộ','ồ','ổ','ỗ',
-            'ơ','ớ','ợ','ờ','ở','ỡ','ù','ú','ủ','ũ','ụ','ư','ứ','ự','ừ','ử','ữ',
-            'ỳ','ý','ỷ','ỹ','ỵ',
-            'À','Á','Ả','Ã','Ạ','Ă','Ắ','Ặ','Ằ','Ẳ','Ẵ','Â','Ấ','Ậ','Ầ','Ẩ','Ẫ',
-            'Đ','È','É','Ẻ','Ẽ','Ẹ','Ê','Ế','Ệ','Ề','Ể','Ễ',
-            'Ì','Í','Ỉ','Ĩ','Ị','Ò','Ó','Ỏ','Õ','Ọ','Ô','Ố','Ộ','Ồ','Ổ','Ỗ',
-            'Ơ','Ớ','Ợ','Ờ','Ở','Ỡ','Ù','Ú','Ủ','Ũ','Ụ','Ư','Ứ','Ự','Ừ','Ử','Ữ',
-            'Ỳ','Ý','Ỷ','Ỹ','Ỵ'
+            'à','á','ả','ã','ạ','ă','ắ','ặ','ằ','ẳ','ẵ','â','ấ','ậ','ầ','ẩ','ẫ','đ','è','é','ẻ','ẽ','ẹ','ê','ế','ệ','ề','ể','ễ',
+            'ì','í','ỉ','ĩ','ị','ò','ó','ỏ','õ','ọ','ô','ố','ộ','ồ','ổ','ỗ','ơ','ớ','ợ','ờ','ở','ỡ','ù','ú','ủ','ũ','ụ','ư','ứ','ự','ừ','ử','ữ','ỳ','ý','ỷ','ỹ','ỵ',
+            'À','Á','Ả','Ã','Ạ','Ă','Ắ','Ặ','Ằ','Ẳ','Ẵ','Â','Ấ','Ậ','Ầ','Ẩ','Ẫ','Đ','È','É','Ẻ','Ẽ','Ẹ','Ê','Ế','Ệ','Ề','Ể','Ễ',
+            'Ì','Í','Ỉ','Ĩ','Ị','Ò','Ó','Ỏ','Õ','Ọ','Ô','Ố','Ộ','Ồ','Ổ','Ỗ','Ơ','Ớ','Ợ','Ờ','Ở','Ỡ','Ù','Ú','Ủ','Ũ','Ụ','Ư','Ứ','Ự','Ừ','Ử','Ữ','Ỳ','Ý','Ỷ','Ỹ','Ỵ'
         ];
         $to = [
-            'a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a',
-            'd','e','e','e','e','e','e','e','e','e','e','e',
-            'i','i','i','i','i','o','o','o','o','o','o','o','o','o','o','o',
-            'o','o','o','o','o','o','u','u','u','u','u','u','u','u','u','u','u',
-            'y','y','y','y','y',
-            'a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a',
-            'd','e','e','e','e','e','e','e','e','e','e','e',
-            'i','i','i','i','i','o','o','o','o','o','o','o','o','o','o','o',
-            'o','o','o','o','o','o','u','u','u','u','u','u','u','u','u','u','u',
-            'y','y','y','y','y'
+            'a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','d','e','e','e','e','e','e','e','e','e','e','e',
+            'i','i','i','i','i','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','u','u','u','u','u','u','u','u','u','u','u','y','y','y','y','y',
+            'a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','d','e','e','e','e','e','e','e','e','e','e','e',
+            'i','i','i','i','i','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','u','u','u','u','u','u','u','u','u','u','u','y','y','y','y','y'
         ];
         return str_replace($from, $to, $str);
     }
@@ -70,33 +58,56 @@ class SongSearchHelper {
         $xml = @simplexml_load_string($xmlContent);
         if (!$xml) return '';
 
+        // Chọn part có nhiều lyric nhất (chứa lời hát chính / bè Soprano chính)
         $selectedPart = null;
-        foreach ($xml->xpath('//part') as $part) {
-            if ($part->xpath('.//lyric')) {
+        $maxLyrics = -1;
+        foreach ($xml->part as $part) {
+            $c = count($part->xpath('.//lyric'));
+            if ($c > $maxLyrics) {
+                $maxLyrics = $c;
                 $selectedPart = $part;
-                break;
             }
         }
-        if (!$selectedPart) {
+        if (!$selectedPart || $maxLyrics <= 0) {
             $selectedPart = $xml->part[0] ?? null;
             if (!$selectedPart) return '';
         }
 
         $verseTokens = [];
-        foreach ($selectedPart->xpath('.//note') as $note) {
-            if ($note->chord) continue;
-            foreach ($note->xpath('lyric') as $lyric) {
-                $num = (string)($lyric['number'] ?? $lyric['name'] ?? '1');
-                $text = trim((string)$lyric->text);
-                $syllabic = (string)($lyric->syllabic ?? 'single');
-                if ($text !== '') {
-                    $verseTokens[$num][] = ['text' => $text, 'syllabic' => $syllabic];
+        $chorusTokens = [];
+        $currentMeasureChorus = false;
+
+        foreach ($selectedPart->measure as $measure) {
+            foreach ($measure->xpath('direction//words') as $w) {
+                if (preg_match('/(Điệp khúc|Đ\.K|ĐK|Chorus|Refrain)/iu', (string)$w)) {
+                    $currentMeasureChorus = true;
+                    break;
+                }
+            }
+
+            foreach ($measure->note as $note) {
+                if ($note->chord) continue;
+                foreach ($note->lyric as $lyric) {
+                    $num = (string)($lyric['number'] ?? '1');
+                    $name = (string)($lyric['name'] ?? '');
+                    $text = trim((string)$lyric->text);
+                    $syllabic = (string)($lyric->syllabic ?? 'single');
+                    if ($text === '') continue;
+
+                    $isChorus = ($name === 'chorus') ||
+                                (preg_match('/(chorus|refrain|dk|diep)/iu', $name)) ||
+                                ($name !== 'verse' && $currentMeasureChorus);
+
+                    if ($isChorus) {
+                        $chorusTokens[] = ['text' => $text, 'syllabic' => $syllabic];
+                    } else {
+                        $verseTokens[$num][] = ['text' => $text, 'syllabic' => $syllabic];
+                    }
                 }
             }
         }
 
-        $verses = [];
-        foreach ($verseTokens as $num => $tokens) {
+        $assemble = function(array $tokens): string {
             $words = [];
             $buf = '';
             foreach ($tokens as $t) {
@@ -110,30 +121,41 @@ class SongSearchHelper {
                     $words[] = $buf . (str_ends_with($buf, '-') ? '' : '-') . $txt;
                     $buf = '';
                 } else {
-                    if ($buf !== '') {
-                        $words[] = $buf;
-                        $buf = '';
-                    }
+                    if ($buf !== '') { $words[] = $buf; $buf = ''; }
                     $words[] = $txt;
                 }
             }
             if ($buf !== '') $words[] = $buf;
-
-            // Chuẩn hóa khoảng trắng sau số thứ tự như "1.Cúi" -> "1. Cúi"
             if (!empty($words)) {
                 $words[0] = preg_replace('/^(\d+\.)([^\s\d])/u', '$1 $2', $words[0]);
             }
+            return trim(implode(' ', $words));
+        };
 
-            $verseStr = trim(implode(' ', $words));
+        $sections = [];
+        ksort($verseTokens, SORT_NATURAL);
+        foreach ($verseTokens as $num => $tokens) {
+            $verseStr = $assemble($tokens);
             if ($verseStr !== '') {
-                $verses[] = $verseStr;
+                if (!preg_match('/^\d+\./', $verseStr)) {
+                    $verseStr = "{$num}. {$verseStr}";
+                }
+                $sections[] = $verseStr;
             }
         }
 
-        return implode("\n\n", $verses);
+        if (!empty($chorusTokens)) {
+            $chorusStr = $assemble($chorusTokens);
+            if ($chorusStr !== '') {
+                $chorusStr = preg_replace('/^(Điệp khúc|Đ\.K|ĐK|Chorus)[:\s]*/iu', '', $chorusStr);
+                $sections[] = "[ĐK] " . trim($chorusStr);
+            }
+        }
+
+        return implode("\n\n", $sections);
     }
 
-    public static function syncSongFts(string $songId): void {
+    public static function syncSongFts(string $songId, bool $forceReextract = false): void {
         try {
             $pdo = DB::pdo();
             $pdo->exec("DELETE FROM songs_fts WHERE song_id = " . $pdo->quote($songId));
@@ -145,15 +167,16 @@ class SongSearchHelper {
             $titleUnaccented = self::removeAccents($title);
             $lyrics = $song['lyrics_text'] ?? '';
 
-            // Nếu lyrics_text chưa có trong DB, thử đọc chuẩn theo từng khổ từ MusicXML file
-            if (empty($lyrics) && !empty($song['xmlPath'])) {
+            // Nếu lyrics_text chưa có trong DB hoặc yêu cầu ép trích xuất lại từ XML
+            if ((empty($lyrics) || $forceReextract) && !empty($song['xmlPath'])) {
                 require_once __DIR__ . '/SongService.php';
                 $resolvedPath = SongService::resolveManagedXmlPath($song['xmlPath']);
                 if ($resolvedPath && file_exists($resolvedPath) && filesize($resolvedPath) < 2000000) {
                     $xmlContent = @file_get_contents($resolvedPath);
                     if ($xmlContent && str_contains($xmlContent, '<lyric')) {
-                        $lyrics = self::extractLyricsByVerse($xmlContent);
-                        if ($lyrics !== '') {
+                        $newLyrics = self::extractLyricsByVerse($xmlContent);
+                        if ($newLyrics !== '') {
+                            $lyrics = $newLyrics;
                             DB::run("UPDATE songs SET lyrics_text = ? WHERE id = ?", [$lyrics, $songId]);
                         }
                     }
@@ -471,7 +494,13 @@ class SongSearchHelper {
         }
 
         $slice = trim(mb_substr($lyrics, $sentenceStartPos, $sentenceEndPos - $sentenceStartPos));
-        $prefix = ($sentenceStartPos > 0 && !preg_match('/^\d+\./u', $slice)) ? '... ' : '';
+        $lineStart = ($lastNewline !== false) ? $lastNewline + 1 : 0;
+        $lineHead = mb_substr($lyrics, $lineStart, 10);
+        if (str_starts_with(trim($lineHead), '[ĐK]') && !str_starts_with($slice, '[ĐK]')) {
+            $slice = '[ĐK] ' . $slice;
+        }
+
+        $prefix = ($sentenceStartPos > 0 && !preg_match('/^(?:\d+\.|\[ĐK\])/u', $slice)) ? '... ' : '';
         $suffix = ($sentenceEndPos < $lyricsLen && !preg_match('/[.!?]$/u', $slice)) ? ' ...' : '';
 
         // BƯỚC 1: Escape toàn bộ trước (không bao giờ chèn HTML thô từ DB)

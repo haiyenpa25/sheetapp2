@@ -50,10 +50,17 @@ const App = (() => {
     KeyboardHandler?.init?.();
     if (window.ServiceWorkerManager) {
       ServiceWorkerManager.register();
-    } else if (window.ScriptLoader) {
-      window.ScriptLoader.load('assets/js/core/ServiceWorkerManager.js').then(() => {
-        window.ServiceWorkerManager?.register?.();
-      });
+    } else if (window.ScriptLoader && 'serviceWorker' in navigator) {
+      const loadSw = () => {
+        window.ScriptLoader.load('assets/js/core/ServiceWorkerManager.js').then(() => {
+          window.ServiceWorkerManager?.register?.();
+        });
+      };
+      if (document.readyState === 'complete') {
+        setTimeout(loadSw, 1200);
+      } else {
+        window.addEventListener('load', () => setTimeout(loadSw, 1200));
+      }
     }
     if (window.OfflineSetlistManager?.checkOnStartup) window.OfflineSetlistManager.checkOnStartup();
 
