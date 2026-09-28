@@ -351,7 +351,7 @@ Mỗi ticket bên dưới ghi: **ID · việc cần làm · nghiệm thu**. Tick
 | ID | Việc | Ai | Nghiệm thu |
 |---|---|---|---|
 | **L6-1** | **[x] Trích lời theo khổ đúng chuẩn:** tách theo `<lyric number>`, ghép âm tiết theo `<syllabic>`; tách ĐK riêng biệt `[ĐK]`; tự động chọn part bè chính (074, 614); tạo lại `lyrics_text` và index FTS5 (đã chạy kiểm thử trên bản sao trước) | Dev | 10 bài mẫu: lời từng khổ là câu liền mạch; tìm kiếm FTS5 và snippet `[ĐK]` chính xác; E2E & 20/20 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
-| **L6-2** | Xoá tempo giả 104 (đặt NULL); công cụ để ca trưởng nhập tempo thật cho 100 bài hay dùng (có TAP) | Dev + ca trưởng | ≥100 bài có tempo thật |
+| **L6-2** | **[x] Xoá tempo giả 104 (đặt NULL); công cụ để ca trưởng nhập tempo thật cho 100 bài hay dùng (có TAP):** migration 015 thêm cột `tempo`, xóa bỏ toàn bộ 104; công cụ `tools/manage_tempos.php` quản lý tempo & seed tempo chuẩn cho 100 bài hay dùng; nâng cấp song-info-bar và TempoPickerSheet hỗ trợ TAP tempo và lưu tempo tức thì cho ca trưởng | Dev + ca trưởng | 100 bài có tempo thật; 0 bài mang tempo 104; E2E Chromium & 23/23 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |
 | **L6-3** | **Gắn nhãn mùa lễ / chủ đề hàng loạt** trong Manager (chọn nhiều bài → gắn nhãn) | Dev + người biên tập | ≥300 bài có nhãn; bộ lọc hiện lại |
 | **L6-4** | Chiến lược HD: (a) giữ TLH làm mặc định và HD bổ sung dần qua luồng duyệt, hoặc (b) nhân bản TLH thành HD cho 865 bài rồi chỉnh dần (L-D1) | Chủ dự án quyết | Không bài nào thiếu hợp âm |
 | **L6-5** | Rà chính tả tên bài (ví dụ "NGUYỀN" → "NGUYỆN"); script liệt kê từ nghi sai | Dev + người duyệt | Danh sách sửa được duyệt |

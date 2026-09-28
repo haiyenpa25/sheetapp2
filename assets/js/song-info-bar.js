@@ -86,6 +86,10 @@ const SongInfoBar = (() => {
     if (!_songData.key && song?.defaultKey) {
       _songData.key = song.defaultKey;
     }
+    const realSongTempo = Number.parseInt(song?.tempo, 10);
+    if (realSongTempo && realSongTempo !== 104) {
+      _songData.tempo = realSongTempo;
+    }
     _render();
     document.getElementById('song-info-strip')?.classList.remove('si-hidden');
   }
@@ -131,13 +135,17 @@ const SongInfoBar = (() => {
         info.timeBeatType = timeEl.querySelector('beat-type')?.textContent || '';
       }
 
-      // Tempo
+      // Tempo (Ticket L6-2: Bỏ qua tempo giả 104 từ XML)
+      let parsedTempo = null;
       const perMin = doc.querySelector('per-minute');
       if (perMin) {
-        info.tempo = Math.round(parseFloat(perMin.textContent));
+        parsedTempo = Math.round(parseFloat(perMin.textContent));
       } else {
         const soundEl = doc.querySelector('sound[tempo]');
-        if (soundEl) info.tempo = Math.round(parseFloat(soundEl.getAttribute('tempo')));
+        if (soundEl) parsedTempo = Math.round(parseFloat(soundEl.getAttribute('tempo')));
+      }
+      if (parsedTempo && parsedTempo !== 104) {
+        info.tempo = parsedTempo;
       }
 
       // Measure count (first part only)
@@ -338,13 +346,26 @@ const SongInfoBar = (() => {
 
     // Wire sự kiện click vào Chip Tempo để đổi nhanh / gõ nhịp
     document.getElementById('si-tempo-chip')?.addEventListener('click', async () => {
-      const curBpm = window.Metronome?.getBpm?.() || effectiveBpm || 100;
+      const curBpm = window.Metronome?.getBpm?.() || effectiveBpm || 80;
+      if (!window.TempoPick && window.ScriptLoader?.loadModal) {
+        await window.ScriptLoader.loadModal('tempo');
+      }
       if (window.TempoPick) {
         const newBpm = await window.TempoPick.show(curBpm);
         if (newBpm && newBpm !== curBpm) {
           window.Metronome?.setBpm?.(newBpm);
           _updateTempoChip(newBpm);
-          window.App?.showToast?.(`⚡ Đã đặt Tempo: ♩ = ${newBpm} BPM`, 'info', 1500);
+          if (_songId && window.ApiService?.songs?.update) {
+            try {
+              await window.ApiService.songs.update(_songId, { tempo: newBpm });
+              if (_songData) _songData.tempo = newBpm;
+              window.App?.showToast?.(`⚡ Đã lưu Tempo: ♩ = ${newBpm} BPM vào bài hát`, 'success', 2000);
+            } catch (err) {
+              window.App?.showToast?.(`⚡ Đã đặt Tempo: ♩ = ${newBpm} BPM (phiên tập)`, 'info', 1500);
+            }
+          } else {
+            window.App?.showToast?.(`⚡ Đã đặt Tempo: ♩ = ${newBpm} BPM`, 'info', 1500);
+          }
         }
       } else if (window.Metronome) {
         window.Metronome.togglePanel();

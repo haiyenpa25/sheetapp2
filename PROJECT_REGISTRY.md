@@ -1323,7 +1323,19 @@ SheetApp/
   + Tạo: e2e/library-l6-lyrics-extraction-and-chorus.spec.js (E2E Playwright: Tìm kiếm cụm từ trong Điệp khúc bài 004 và 011 hiển thị kết quả và snippet [ĐK] có <mark>; tìm kiếm khổ 1 bài 001 hiển thị câu liền mạch; 3/3 tests PASS trên Chromium)
   🏆 ĐẠT 100% QUALITY GATE: 124/124 suites PASS (2362 passed, 0 failed, 72.5% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
 
+[2026-09-28] — Hoàn tất Ticket L6-2 (ROADMAP4.md Mục 8): Real Tempo Management & Tap Tool (Xóa Tempo Giả 104, Công Cụ Ca Trưởng Nhập Tempo Thật Có TAP)
+  + Tạo: api/migrations/015_song_tempo_and_tap.php (Thêm cột tempo INTEGER DEFAULT NULL vào bảng songs, xóa bỏ triệt để mọi tempo giả 104; an toàn transaction, tự động khôi phục WAL mode và foreign keys)
+  ~ Sửa: api/services/SongService.php (Bổ sung s.tempo vào SELECT của getAll() và getById(), thêm 'tempo' vào danh sách $allowed của update(), tự động invalidate cache khi cập nhật tempo; 241 dòng < 600 dòng)
+  ~ Sửa: api/services/SongSearchHelper.php (Bổ sung s.tempo vào tất cả các câu query danh sách, tìm kiếm thường và FTS5 search; 599 dòng < 600 dòng)
+  ~ Sửa: api/controllers/SongController.php (Chuyển quyền case PUT từ Auth::requireAdmin() sang Auth::requireLeader() cho phép Ca Trưởng và Admin cập nhật tempo/metadata bài hát; 221 dòng < 600 dòng)
+  ~ Sửa: assets/js/song-info-bar.js (Nhận diện tempo thật từ đối tượng bài hát, loại bỏ tempo giả 104 từ XML thô, tự động nạp lazy modal tempo qua ScriptLoader khi click chip #si-tempo-chip, lưu BPM mới trực tiếp vào CSDL qua ApiService.songs.update; 580 dòng < 600 dòng)
+  ~ Sửa: assets/js/modals/TempoPickerSheet.js (Khắc phục race condition thứ tự callback trong _closeTempo: lưu và đặt null _tCb trước khi đóng modal để tránh sự kiện modal:closed ghi đè null; 126 dòng < 600 dòng)
+  + Tạo: tools/manage_tempos.php (Công cụ CLI cho ca trưởng/kỹ thuật viên quản lý tempo: --status báo cáo, --clear-fake xóa triệt để tempo 104, --seed-top-100 nạp tempo thật chuẩn mực cho 100 bài hay dùng nhất theo nhạc học và tính chất bài hát 72-100 BPM, --set gán tempo thủ công, --db hỗ trợ staging DB; CLI-only guard an toàn; 228 dòng < 600 dòng)
+  + Tạo: tests/library_l62_tempo_management_and_tap_regression.php (23/23 checks PASS 100%, kiểm thử toàn diện cột tempo CSDL, 0 bài mang 104, 100 bài có tempo thật, SongService update & rollback, SongController RBAC Auth::requireLeader, math test thuật toán TAP nhịp ms -> BPM, bảo toàn K2 Checksum)
+  + Tạo: e2e/library-l6-tempo-tap-tool.spec.js (Playwright E2E: Bài có tempo thật [001] hiển thị đúng 92 bpm; bài chưa có tempo [150] hiển thị '♩ —'; bấm chip mở Bottom Sheet, dùng TAP tempo / preset 100 BPM, áp dụng tempo và chip cập nhật thành công; 3/3 tests PASS trên Chromium)
+  🏆 ĐẠT 100% QUALITY GATE: 125/125 suites PASS (2386 passed, 0 failed, 72.8% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
+
 ---
 
 *File này là "bộ nhớ" của dự án. AI Agent cập nhật sau mỗi phiên để phiên sau không phải khám phá lại từ đầu.*
-*Cập nhật: 2026-09-28 (Hoàn tất Ticket L6-1: Trích lời theo khổ & Tách Điệp Khúc)*
+*Cập nhật: 2026-09-28 (Hoàn tất Ticket L6-2: Xóa tempo giả 104, Công cụ Ca trưởng nhập tempo thật có TAP)*

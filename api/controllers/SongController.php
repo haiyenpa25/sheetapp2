@@ -196,7 +196,7 @@ class SongController {
                     break;
 
                 case 'PUT':
-                    Auth::requireAdmin();
+                    Auth::requireLeader();
                     $id   = $_GET['id'] ?? null;
                     $body = json_decode(file_get_contents('php://input'), true) ?? [];
                     if (!$id) { Response::error('Missing id'); return; }

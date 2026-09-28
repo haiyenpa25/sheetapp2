@@ -33,6 +33,8 @@
     }
 
     function _closeTempo(val) {
+      var cb = _tCb;
+      _tCb = null;
       if (tModal) {
         if (window.ModalManager) {
           window.ModalManager.close(tModal);
@@ -40,7 +42,7 @@
           tModal.classList.add('hidden');
         }
       }
-      if (_tCb) { _tCb(val); _tCb = null; }
+      if (cb) { cb(val); }
     }
 
     if (window.EventBus) {

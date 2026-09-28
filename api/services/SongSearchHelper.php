@@ -230,7 +230,7 @@ class SongSearchHelper {
         if ($cleanQuery === '') {
             $sql = "
                 SELECT s.id, s.title, s.httlvnId, s.xmlPath, s.defaultKey, s.category_id,
-                       s.liturgical_season, s.theme, s.composer, s.tags,
+                       s.liturgical_season, s.theme, s.composer, s.tags, s.tempo,
                        c.name as category
                 FROM songs s
                 LEFT JOIN categories c ON s.category_id = c.id
@@ -261,7 +261,7 @@ class SongSearchHelper {
             $songNum = (int)$m[1];
             $numSql = "
                 SELECT s.id, s.title, s.httlvnId, s.xmlPath, s.defaultKey, s.category_id,
-                       s.liturgical_season, s.theme, s.composer, s.tags,
+                       s.liturgical_season, s.theme, s.composer, s.tags, s.tempo,
                        c.name as category,
                        0 as relevance_tier, 0 as fts_rank,
                        'title' as match_type
@@ -309,7 +309,7 @@ class SongSearchHelper {
             $sql = "
                 SELECT f.song_id as id,
                        s.title, s.httlvnId, s.xmlPath, s.defaultKey, s.category_id,
-                       s.liturgical_season, s.theme, s.composer, s.tags, s.lyrics_text,
+                       s.liturgical_season, s.theme, s.composer, s.tags, s.lyrics_text, s.tempo,
                        c.name as category,
                        bm25(songs_fts) as fts_rank,
                        CASE
