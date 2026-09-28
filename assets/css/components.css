@@ -441,45 +441,55 @@ body.dark-mode .voice-selector {
 /* ========================================================
    Ticket L4-4: Bass Stage Lens (Nốt gốc to, Hợp âm đảo C/E -> E)
    ======================================================== */
-.bass-lens-bar {
-  width: 100%;
-  position: relative;
-  z-index: 20;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-  animation: fadeInDown 0.2s ease-out;
-}
-.btn-bass-tool {
-  transition: all var(--transition-fast, 0.15s ease);
-}
-.btn-bass-tool:hover {
-  background: var(--bg-hover) !important;
-  border-color: var(--accent-cyan, #06b6d4) !important;
-}
-.btn-bass-tool.active {
-  background: rgba(6, 182, 212, 0.2) !important;
-  border-color: var(--accent-cyan, #06b6d4) !important;
-  color: var(--accent-cyan, #06b6d4) !important;
-  font-weight: 700;
-}
-.lv-chord-bass {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 3px;
-}
-.lv-bass-root {
-  font-size: 1.28em;
-  font-weight: 900;
-  color: var(--accent-cyan, #06b6d4);
-  letter-spacing: -0.02em;
-  text-shadow: 0 0 1px rgba(6, 182, 212, 0.4);
-}
-.lv-bass-sub {
-  font-size: 0.68em;
-  font-weight: normal;
-  opacity: 0.72;
-  color: var(--text-muted, #94a3b8);
-  margin-left: 1px;
-}
+.bass-lens-bar { width: 100%; position: relative; z-index: 20; box-shadow: 0 2px 8px rgba(0,0,0,0.25); animation: fadeInDown 0.2s ease-out; }
+.btn-bass-tool { transition: all var(--transition-fast, 0.15s ease); }
+.btn-bass-tool:hover { background: var(--bg-hover) !important; border-color: var(--accent-cyan, #06b6d4) !important; }
+.btn-bass-tool.active { background: rgba(6, 182, 212, 0.2) !important; border-color: var(--accent-cyan, #06b6d4) !important; color: var(--accent-cyan, #06b6d4) !important; font-weight: 700; }
+.lv-chord-bass { display: inline-flex; align-items: baseline; gap: 3px; }
+.lv-bass-root { font-size: 1.28em; font-weight: 900; color: var(--accent-cyan, #06b6d4); letter-spacing: -0.02em; text-shadow: 0 0 1px rgba(6, 182, 212, 0.4); }
+.lv-bass-sub { font-size: 0.68em; font-weight: normal; opacity: 0.72; color: var(--text-muted, #94a3b8); margin-left: 1px; }
+
+/* ========================================================
+   Ticket L4-5: Drums Stage Lens (Bản đồ bài, BPM, đếm ô, đèn nhịp)
+   ======================================================== */
+.drums-stage-container { width: 100%; max-width: 900px; margin: 0 auto; padding: 16px 20px 40px; color: var(--text-primary, #f8fafc); animation: fadeInDown 0.2s ease-out; box-sizing: border-box; }
+.drums-stage-inner { display: flex; flex-direction: column; gap: 16px; }
+.drums-stage-header { display: flex; align-items: center; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px solid var(--border, #334155); }
+.drums-song-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.drums-badge { background: rgba(239, 68, 68, 0.2); color: var(--danger, #ef4444); font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(239, 68, 68, 0.4); }
+.drums-song-title { font-size: 1.25rem; font-weight: 800; margin: 0; color: #fff; }
+.drums-song-key { font-size: 0.85rem; color: var(--text-muted, #94a3b8); }
+.btn-drums-exit { background: transparent; border: 1px solid var(--border, #334155); color: var(--text-muted, #94a3b8); border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: 0.8rem; touch-action: manipulation; }
+.btn-drums-exit:hover { background: var(--bg-hover, #1e293b); color: #fff; }
+.drums-bpm-flasher-card, .drums-measure-card, .drums-roadmap-card { background: var(--bg-surface, #0f172a); border: 1px solid var(--border, #1e293b); border-radius: 12px; padding: 16px 20px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); }
+.drums-bpm-display { text-align: center; margin-bottom: 10px; }
+.drums-bpm-number { font-size: 3.5rem; font-weight: 900; line-height: 1; color: var(--accent-cyan, #06b6d4); font-variant-numeric: tabular-nums; letter-spacing: -0.04em; }
+.drums-bpm-label { font-size: 1rem; font-weight: 700; color: var(--text-muted, #94a3b8); margin-left: 6px; }
+.drums-bpm-actions { display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 16px; }
+.btn-drums-bpm { min-width: 44px; min-height: 40px; border-radius: 8px; border: 1px solid var(--border, #334155); background: var(--bg-overlay, rgba(255, 255, 255, 0.06)); color: #fff; font-size: 0.95rem; font-weight: 700; cursor: pointer; touch-action: manipulation; }
+.btn-drums-bpm:hover { background: var(--bg-hover, #1e293b); border-color: var(--accent-cyan, #06b6d4); }
+.drums-tap-btn { background: rgba(6, 182, 212, 0.15); border-color: var(--accent-cyan, #06b6d4); color: var(--accent-cyan, #06b6d4); min-width: 60px; }
+.drums-led-flasher { display: flex; justify-content: center; align-items: center; gap: 16px; margin-bottom: 16px; }
+.drums-led-dot { width: 44px; height: 44px; border-radius: 50%; background: #1e293b; border: 2px solid #334155; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; color: #64748b; transition: all 0.08s ease-out; }
+.drums-led-dot.accent { border-color: rgba(245, 158, 11, 0.4); }
+.drums-led-dot.flash { background: #06b6d4; border-color: #22d3ee; color: #0f172a; transform: scale(1.15); box-shadow: 0 0 20px #06b6d4, 0 0 35px rgba(6, 182, 212, 0.6); }
+.drums-led-dot.accent.flash { background: #f59e0b; border-color: #fbbf24; color: #0f172a; box-shadow: 0 0 20px #f59e0b, 0 0 35px rgba(245, 158, 11, 0.6); }
+.drums-play-action { display: flex; justify-content: center; }
+.btn-drums-play { display: inline-flex; align-items: center; gap: 8px; padding: 10px 24px; min-height: 48px; font-size: 1.1rem; font-weight: 800; border-radius: 10px; border: none; background: var(--accent-cyan, #06b6d4); color: #0f172a; cursor: pointer; box-shadow: 0 4px 14px rgba(6, 182, 212, 0.35); touch-action: manipulation; }
+.drums-sec-title { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.06em; color: var(--text-muted, #94a3b8); margin-bottom: 12px; display: block; }
+.drums-measure-counter { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.drums-measure-box { display: inline-flex; align-items: baseline; gap: 6px; padding: 6px 18px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border, #334155); border-radius: 8px; }
+.drums-measure-current { font-size: 2.2rem; font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; }
+.drums-measure-sep, .drums-measure-total { font-size: 1.2rem; color: var(--text-muted, #94a3b8); }
+.btn-measure-nav, .btn-measure-reset { min-height: 44px; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border, #334155); background: var(--bg-overlay, rgba(255, 255, 255, 0.06)); color: #fff; font-weight: 700; cursor: pointer; touch-action: manipulation; }
+.drums-roadmap-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.drums-section-chip { flex: 1 1 calc(33.333% - 8px); min-width: 100px; min-height: 48px; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border, #334155); background: var(--bg-overlay, rgba(255, 255, 255, 0.04)); color: #fff; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; transition: all 0.15s ease; touch-action: manipulation; }
+.drums-section-chip:hover { background: var(--bg-hover, #1e293b); border-color: var(--sec-color, #3b82f6); }
+.drums-section-chip.active { background: rgba(59, 130, 246, 0.2); border-color: var(--sec-color, #3b82f6); box-shadow: 0 0 12px rgba(59, 130, 246, 0.4); }
+.drums-sec-name { font-size: 1rem; font-weight: 800; }
+.drums-sec-range { font-size: 0.72rem; color: var(--text-muted, #94a3b8); }
+
+
 
 
 

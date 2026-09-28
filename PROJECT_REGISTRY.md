@@ -1193,12 +1193,23 @@ SheetApp/
   ~ Sửa: eslint.config.js (Khai báo global BassLens: 'writable')
   + Tạo: tests/library_l44_bass_lens_regression.php (19/19 checks PASS, 78.9% behavioral assertions)
   + Tạo: e2e/library-l4-bass-lens.spec.js (E2E Playwright: Chọn Bass Lens, thanh #bass-lens-bar xuất hiện, nốt bass chữ to trong Band mode, nốt đảo C/E → E, nút toggle nốt bass lớn, bảo toàn qua reload trên cả Chromium và WebKit)
-  🏆 ĐẠT 100% QUALITY GATE: 111/111 suites PASS (1944 passed, 0 failed, 67.1% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
+[2026-09-28] — Hoàn tất Ticket L4-5 (ROADMAP4.md): Drums Stage Lens (Bản Đồ Bài, BPM, Đếm Ô Nhịp, Đèn Nhịp LED)
+  + Tạo: assets/js/drums-lens.js (Quản lý chế độ Trống: BPM cực đại hiển thị nổi bật, nút TAP Tempo & tăng giảm nhanh; đèn nhịp LED trực quan flasher theo thời gian thực; bộ đếm ô nhịp Measure Counter tự động hoặc chuyển thủ công; bản đồ bài hát Song Roadmap Dạo · K1 · ĐK · K2 · ĐK · Kết; ẩn hoàn toàn nốt nhạc và hợp âm; 484 dòng < 600 dòng)
+  ~ Sửa: assets/js/metronome.js (Phát sự kiện EventBus 'metronome:tick' chuẩn xác cho đèn nhịp và bộ đếm ô nhịp của Trống)
+  ~ Sửa: assets/js/stage-lens.js (Thích ứng vai trò Trống: kích hoạt DrumsLens.activate() và deactivate() khi chuyển vai trò)
+  ~ Sửa: assets/css/components.css (Thêm CSS gọn gàng, tương phản cao sân khấu cho .drums-stage-container, .drums-bpm-number, .drums-led-dot, .drums-measure-box, .drums-section-chip; 496 dòng < 600 dòng)
+  ~ Sửa: assets/js/app.js (Khởi tạo DrumsLens.init() khi app boot)
+  ~ Sửa: index.php (Nạp drums-lens.js)
+  ~ Sửa: eslint.config.js (Khai báo global DrumsLens: 'writable')
+  + Tạo: tests/library_l45_drums_lens_regression.php (15/15 checks PASS, 66.7% behavioral assertions)
+  + Tạo: e2e/library-l4-drums-lens.spec.js (E2E Playwright: Chọn vai trò Trống 🥁, ẩn nốt nhạc và hợp âm, hiển thị BPM to, đèn nhịp LED, đếm ô nhịp, bản đồ bài, nhảy đoạn, bảo toàn qua reload và thoát chế độ trên cả Chromium và WebKit)
+  🏆 ĐẠT 100% QUALITY GATE: 112/112 suites PASS (1959 passed, 0 failed, 67.3% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
 
 ---
 
 *File này là "bộ nhớ" của dự án. AI Agent cập nhật sau mỗi phiên để phiên sau không phải khám phá lại từ đầu.*
 *Cập nhật: 2026-09-28*
+
 
 
 

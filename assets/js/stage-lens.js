@@ -117,8 +117,19 @@ const StageLens = (() => {
       if (guitarBar) guitarBar.classList.add('hidden');
       const bassBar = document.getElementById('bass-lens-bar');
       if (bassBar) bassBar.classList.add('hidden');
+      if (window.DrumsLens?.deactivate) window.DrumsLens.deactivate();
+    } else if (roleId === 'drums') {
+      // Ticket L4-5: Trống: bản đồ bài + BPM + đếm ô nhịp + đèn nhịp; không nốt, không hợp âm
+      const guitarBar = document.getElementById('guitar-lens-bar');
+      if (guitarBar) guitarBar.classList.add('hidden');
+      const bassBar = document.getElementById('bass-lens-bar');
+      if (bassBar) bassBar.classList.add('hidden');
+      if (window.DrumsLens?.activate) {
+        window.DrumsLens.activate();
+      }
     } else if (roleId === 'bass') {
       // Ticket L4-4: Bass: Nốt gốc chữ to & Hợp âm đảo lấy nốt bass (C/E -> E)
+      if (window.DrumsLens?.deactivate) window.DrumsLens.deactivate();
       const guitarBar = document.getElementById('guitar-lens-bar');
       if (guitarBar) guitarBar.classList.add('hidden');
       const bassBar = document.getElementById('bass-lens-bar');
@@ -127,6 +138,7 @@ const StageLens = (() => {
         window.DisplaySettings.renderLyricViewIfActive();
       }
     } else if (roleId === 'guitar') {
+      if (window.DrumsLens?.deactivate) window.DrumsLens.deactivate();
       const guitarBar = document.getElementById('guitar-lens-bar');
       if (guitarBar) guitarBar.classList.remove('hidden');
       const bassBar = document.getElementById('bass-lens-bar');
@@ -135,6 +147,7 @@ const StageLens = (() => {
         setTimeout(() => window.GuitarLens.refreshPalette(), 200);
       }
     } else {
+      if (window.DrumsLens?.deactivate) window.DrumsLens.deactivate();
       const guitarBar = document.getElementById('guitar-lens-bar');
       if (guitarBar) guitarBar.classList.add('hidden');
       const bassBar = document.getElementById('bass-lens-bar');

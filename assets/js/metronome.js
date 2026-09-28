@@ -219,6 +219,9 @@ const Metronome = (() => {
     setTimeout(() => {
       if (_isPlaying) {
         _flashBeatUI(beatNumber);
+        if (typeof EventBus !== 'undefined') {
+          EventBus.emit('metronome:tick', { beat: beatNumber, isAccent: isPrimaryAccent });
+        }
       }
     }, delayMs);
 
