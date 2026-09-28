@@ -169,8 +169,7 @@ const TransposeEngine = (() => {
   // Helpers
   function extractChordsFromXML(xmlString) {
       if (!xmlString) return [];
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(xmlString, 'text/xml');
+      const doc = window.XmlDocCache?.getDoc(xmlString) || new DOMParser().parseFromString(xmlString, 'text/xml');
       const chords = [];
       doc.querySelectorAll('harmony').forEach(h => {
           const r = h.querySelector('root > root-step');

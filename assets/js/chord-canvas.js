@@ -180,7 +180,7 @@ const ChordCanvas = (() => {
     }
   }
 
-  function clearSong() { _clear(); setAddMode(false); }
+  function clearSong() { _clear(); window.ChordCanvasDots?.clearGeomCache?.(); setAddMode(false); }
 
   function setAddMode(on) {
     _editEnabled = on;
@@ -482,24 +482,29 @@ const ChordCanvas = (() => {
     }
 
     selector.disabled = false;
+    if (!selector._hasLazyListener) {
+      selector._hasLazyListener = true;
+      selector.addEventListener('focus', () => _refreshSetDropdown(true));
+      selector.addEventListener('mousedown', () => _refreshSetDropdown(true));
+    }
+
     let sets = ['HD', 'default'];
     try {
-      const now = Date.now();
       const cached = _chordSetsCache.get(songId);
-      if (!forceRefresh && cached && (now - cached.timestamp < 15000)) {
-        sets = cached.sets;
-      } else {
+      if (cached) {
+        sets = cached;
+      } else if (forceRefresh) {
         const r = await window.ApiService.chordSets.list(songId);
         if (r.success) {
           const otherSets = r.sets.filter(s => s !== 'HD' && s !== 'default');
           sets = ['HD', 'default', ...otherSets];
-          _chordSetsCache.set(songId, { timestamp: now, sets });
+          _chordSetsCache.set(songId, sets);
         }
       }
     } catch(e) {}
 
     const chordCount = Object.keys(_customChords).length;
-    const tlhCount   = Object.keys(window.ChordCanvasXML?.readXmlChords?.() || {}).length;
+    const tlhCount   = (_currentSet === 'default') ? Object.keys(window.ChordCanvasXML?.readXmlChords?.() || {}).length : 0;
     const isFallback = (_currentSet === 'HD' && chordCount === 0);
     const countText  = isFallback
       ? '○ HD chưa có · đang hiện TLH'

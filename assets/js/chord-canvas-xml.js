@@ -9,7 +9,7 @@ const ChordCanvasXML = (() => {
   function readXmlChords() {
     const xml = window.Store?.get?.('originalXml') || window.App?.getOriginalXml?.() || window.OSMDRenderer?.getCurrentXml?.();
     if (!xml) return {};
-    const doc   = new DOMParser().parseFromString(xml, 'text/xml');
+    const doc = window.XmlDocCache?.getDoc(xml) || new DOMParser().parseFromString(xml, 'text/xml');
     const parts = doc.querySelectorAll('part');
     if (!parts.length) return {};
     const map = {};
@@ -46,7 +46,7 @@ const ChordCanvasXML = (() => {
   function buildAbsMap() {
     const xml = window.Store?.get?.('originalXml') || window.App?.getOriginalXml?.() || window.OSMDRenderer?.getCurrentXml?.();
     if (!xml) return {};
-    const doc = new DOMParser().parseFromString(xml, 'text/xml');
+    const doc = window.XmlDocCache?.getDoc(xml) || new DOMParser().parseFromString(xml, 'text/xml');
     const measures = doc.querySelectorAll('part')[0]?.querySelectorAll('measure');
     if (!measures?.length) return {};
 
@@ -85,13 +85,13 @@ const ChordCanvasXML = (() => {
     if (target) { _delAdj(target); m.insertBefore(h, target); }
     else        { _delEnd(m);      m.appendChild(h); }
     
-    await window.App.saveModifiedXML(new XMLSerializer().serializeToString(doc));
+    await window.App.saveModifiedXML(_serialize(doc));
   }
 
   async function removeXml(mIdx, nIdx) {
     const xml = window.App?.getOriginalXml?.();
     if (!xml) return;
-    const doc = new DOMParser().parseFromString(xml, 'text/xml');
+    const doc = window.XmlDocCache?.getClonedDoc(xml) || new DOMParser().parseFromString(xml, 'text/xml');
     const m   = doc.querySelectorAll('part')[0]?.querySelectorAll('measure')?.[mIdx];
     if (!m) return;
     
@@ -102,7 +102,13 @@ const ChordCanvasXML = (() => {
     }
     
     const d = target ? _delAdj(target) : _delEnd(m);
-    if (d) await window.App.saveModifiedXML(new XMLSerializer().serializeToString(doc));
+    if (d) await window.App.saveModifiedXML(_serialize(doc));
+  }
+
+  function _serialize(doc) {
+    if (window.XmlDocCache?.serializeDoc) return window.XmlDocCache.serializeDoc(doc);
+    const s = new XMLSerializer().serializeToString(doc);
+    return s.startsWith('<?xml') ? s : '<?xml version="1.0" encoding="UTF-8"?>\n' + s;
   }
 
   function _delAdj(noteEl) {
@@ -251,7 +257,7 @@ const ChordCanvasXML = (() => {
   /* ─── XML Memory Manipulation ──────────────────────── */
   function cloneAndInjectChords(xmlStr, customChordsMap) {
     if (!xmlStr) return xmlStr;
-    const doc = new DOMParser().parseFromString(xmlStr, 'text/xml');
+    const doc = window.XmlDocCache?.getClonedDoc(xmlStr) || new DOMParser().parseFromString(xmlStr, 'text/xml');
     
     // Xóa tất cả các thẻ <harmony> (hợp âm cũ Mặc định) hiện có
     const harmonies = doc.querySelectorAll('harmony');
@@ -271,7 +277,7 @@ const ChordCanvasXML = (() => {
 
     // Nếu không có customChordsMap hoặc Map trống, trả về XML trắng hợp âm
     if (!customChordsMap || Object.keys(customChordsMap).length === 0) {
-       return new XMLSerializer().serializeToString(doc);
+       return _serialize(doc);
     }
 
     // Nạp hợp âm tuỳ chỉnh vào
@@ -305,7 +311,7 @@ const ChordCanvasXML = (() => {
       }
     }
 
-    return new XMLSerializer().serializeToString(doc);
+    return _serialize(doc);
   }
 
   return { readXmlChords, buildAbsMap, injectXml, removeXml, cloneAndInjectChords };

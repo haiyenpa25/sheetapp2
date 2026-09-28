@@ -161,7 +161,26 @@ const ChordCanvasDots = (() => {
     });
   }
 
+  let _cachedChordTextPositions = null;
+  let _cachedChordTextKey = null;
+  let _cachedNoteMapping = null;
+  let _cachedNoteGeomKey = null;
+
+  function clearGeomCache() {
+    _cachedChordTextPositions = null;
+    _cachedChordTextKey = null;
+    _cachedNoteMapping = null;
+    _cachedNoteGeomKey = null;
+  }
+
   function buildChordTextPositions(mapped, container) {
+    const token = window.OSMDRenderer?.getRenderToken?.() || 0;
+    const cWidth = container?.clientWidth || 0;
+    const cacheKey = `${token}_${mapped.length}_${cWidth}`;
+    if (_cachedChordTextPositions && _cachedChordTextKey === cacheKey) {
+      return _cachedChordTextPositions;
+    }
+
     const cRect = container.getBoundingClientRect();
     const result = new Map();
     const svg = container.querySelector('svg');
@@ -195,13 +214,26 @@ const ChordCanvasDots = (() => {
       }
     });
 
+    _cachedChordTextPositions = result;
+    _cachedChordTextKey = cacheKey;
     return result;
   }
 
   function mapNotes(noteEls, chordMap) {
     const osmd = window.OSMDRenderer?.getInstance?.();
-    const ml   = osmd?.graphic?.measureList;
+    const token = window.OSMDRenderer?.getRenderToken?.() || 0;
+    const container = document.getElementById('osmd-container');
+    const cWidth = container?.clientWidth || 0;
+    const geomKey = `${token}_${noteEls.length}_${cWidth}`;
 
+    if (_cachedNoteMapping && _cachedNoteGeomKey === geomKey) {
+      return _cachedNoteMapping.map(m => ({
+        ...m,
+        chord: chordMap[`${m.measureIdx}_${m.noteIdx}`] || ''
+      }));
+    }
+
+    const ml = osmd?.graphic?.measureList;
     if (ml) {
       try {
         const byEl = new Map();
@@ -250,17 +282,24 @@ const ChordCanvasDots = (() => {
               chord: chordMap[`${m.mIdx}_${m.nIdx}`] || ''
             });
           }
-          if (result.some(r => r.measureIdx >= 0)) return result;
+          if (result.some(r => r.measureIdx >= 0)) {
+            _cachedNoteMapping = result;
+            _cachedNoteGeomKey = geomKey;
+            return result;
+          }
         }
       } catch(e) { console.warn('[ChordCanvasDots.mapNotes]', e); }
     }
 
     const absMap = window.ChordCanvasXML?.buildAbsMap?.() || [];
-    return noteEls.map((el, i) => ({
+    const fallbackResult = noteEls.map((el, i) => ({
       el, rect: el.getBoundingClientRect(),
       measureIdx: absMap[i]?.mi ?? -1, noteIdx: absMap[i]?.ni ?? i,
       chord: absMap[i] ? (chordMap[`${absMap[i].mi}_${absMap[i].ni}`] || '') : ''
     }));
+    _cachedNoteMapping = fallbackResult;
+    _cachedNoteGeomKey = geomKey;
+    return fallbackResult;
   }
 
   function placeDot({ el, rect, measureIdx, noteIdx, chord }, chordTextPositions, opts = {}) {
@@ -476,7 +515,8 @@ const ChordCanvasDots = (() => {
     alignDOMChordsFallback,
     buildChordTextPositions,
     mapNotes,
-    placeDot
+    placeDot,
+    clearGeomCache
   };
 })();
 

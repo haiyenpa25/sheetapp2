@@ -29,6 +29,8 @@ const SongLoader = (() => {
 
     // Reset nhanh các state cũ
     _resetCapoUI();
+    window.XmlDocCache?.clear?.();
+    window.ChordCanvasDots?.clearGeomCache?.();
     SheetAudioPlayer.stop();
     if (window.AutoScroller) AutoScroller.stop();
     if (window.InstrumentMixer?.clearState) InstrumentMixer.clearState();
@@ -49,6 +51,7 @@ const SongLoader = (() => {
     try {
       let xml = '';
       let processedXml = '';
+      let settings = null;
       const preloaded = isInstant ? window.SongPreloader?.get?.(song.id, profileOverride) : null;
 
       if (preloaded && preloaded.xml) {
@@ -73,11 +76,12 @@ const SongLoader = (() => {
           throw new Error('Không thể nạp file XML (Mất mạng và chưa lưu ngoại tuyến)');
         };
 
-        const [res, settings] = await Promise.all([
+        const [res, loadedSettings] = await Promise.all([
           fetchXml(),
           ApiService.sessions.load(song.id).catch(() => ({})),
           ChordCanvas.loadSong(song.id, profileOverride)  // đảm bảo chords ready trước render
         ]);
+        settings = loadedSettings;
         if (loadToken !== _currentLoadToken) return;
 
         xml = await res.text();
@@ -132,7 +136,7 @@ const SongLoader = (() => {
 
       // Các task phụ — không cần await
       if (window.SongInfoBar) SongInfoBar.loadSong(xml, song);
-      if (window.PerformanceNotes) PerformanceNotes.loadSong(song.id); // bỏ await
+      if (window.PerformanceNotes) PerformanceNotes.loadSong(song.id, settings); // Ticket L5-4: dùng chung sessions
       if (window.LiveSync?.ensureLoaded) window.LiveSync.ensureLoaded();
 
       _enableAudioControls();
@@ -449,8 +453,8 @@ const SongLoader = (() => {
     }
   }
 
-  /* ── Quản lý và nạp danh sách phiên bản của bài hát ── */
-  async function _updateVersionsUI(song) {
+  /* ── Quản lý và nạp danh sách phiên bản của bài hát (Nạp lười khi mở dropdown) ── */
+  function _updateVersionsUI(song) {
     const btn = document.getElementById('btn-song-versions');
     const label = document.getElementById('btn-version-label');
     const dropdown = document.getElementById('dropdown-song-versions');
@@ -463,12 +467,17 @@ const SongLoader = (() => {
     const currentVerName = song.versionName || 'Bản Gốc';
     if (label) label.textContent = currentVerName;
 
-    // Lắng nghe mở / đóng dropdown menu
+    // Lắng nghe mở / đóng dropdown menu và nạp lười khi mở
     if (!btn._hasVersionListener) {
       btn._hasVersionListener = true;
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', async (e) => {
         e.stopPropagation();
+        const willOpen = dropdown.classList.contains('hidden');
         dropdown.classList.toggle('hidden');
+        if (willOpen) {
+          const curSong = Store.get('currentSong') || song;
+          await _loadAndRenderVersions(curSong, dropdown, listContainer);
+        }
       });
       document.addEventListener('click', (e) => {
         if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
@@ -476,7 +485,9 @@ const SongLoader = (() => {
         }
       });
     }
+  }
 
+  async function _loadAndRenderVersions(song, dropdown, listContainer) {
     try {
       const data = await (window.ApiService?.songs?.getVersions
         ? window.ApiService.songs.getVersions(song.id)

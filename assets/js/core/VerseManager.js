@@ -195,9 +195,8 @@ const VerseManager = (() => {
    */
   function _filterSingleVerseXml(xmlString, targetVerse) {
     try {
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(xmlString, 'application/xml');
-      if (xmlDoc.querySelector('parsererror')) {
+      const xmlDoc = window.XmlDocCache?.getClonedDoc(xmlString) || new DOMParser().parseFromString(xmlString, 'application/xml');
+      if (!xmlDoc || xmlDoc.querySelector('parsererror')) {
         return xmlString;
       }
 
@@ -215,8 +214,7 @@ const VerseManager = (() => {
         }
       });
 
-      const serializer = new XMLSerializer();
-      return serializer.serializeToString(xmlDoc);
+      return window.XmlDocCache?.serializeDoc?.(xmlDoc) ?? new XMLSerializer().serializeToString(xmlDoc);
     } catch (e) {
       console.warn('[VerseManager] filter error:', e);
       return xmlString;
@@ -228,9 +226,8 @@ const VerseManager = (() => {
    */
   function _unrollVersesXml(xmlString, versesList) {
     try {
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(xmlString, 'application/xml');
-      if (xmlDoc.querySelector('parsererror')) {
+      const xmlDoc = window.XmlDocCache?.getClonedDoc(xmlString) || new DOMParser().parseFromString(xmlString, 'application/xml');
+      if (!xmlDoc || xmlDoc.querySelector('parsererror')) {
         return xmlString;
       }
 
@@ -283,8 +280,7 @@ const VerseManager = (() => {
         });
       });
 
-      const serializer = new XMLSerializer();
-      return serializer.serializeToString(xmlDoc);
+      return window.XmlDocCache?.serializeDoc?.(xmlDoc) ?? new XMLSerializer().serializeToString(xmlDoc);
     } catch (e) {
       console.warn('[VerseManager] unroll error:', e);
       return xmlString;

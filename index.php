@@ -207,6 +207,7 @@ echo jsTag('core/KeyService.js',   false);
 echo jsTag('core/ApiService.js',   false);
 echo jsTag('core/EventBus.js',     false);
 echo jsTag('core/Store.js',        false);
+echo jsTag('core/XmlDocCache.js',   false);
 echo jsTag('core/AppShell.js',     false);
 echo jsTag('core/ModalManager.js', false);
 echo jsTag('core/ModeManager.js',  false);

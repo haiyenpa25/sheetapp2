@@ -32,17 +32,21 @@ const PerformanceNotes = (() => {
   /* ══════════════════════════════════════
    *  loadSong — fetch notes từ server
    * ══════════════════════════════════════ */
-  async function loadSong(songId) {
+  async function loadSong(songId, sessionData = null) {
     _songId = songId;
     _cache  = {};
 
-    try {
-      const data = await window.ApiService?.sessions?.load?.(songId);
-      if (data && data.perfNotes) {
-        _cache = data.perfNotes;
+    if (sessionData && sessionData.perfNotes) {
+      _cache = sessionData.perfNotes;
+    } else {
+      try {
+        const data = await window.ApiService?.sessions?.load?.(songId);
+        if (data && data.perfNotes) {
+          _cache = data.perfNotes;
+        }
+      } catch (e) {
+        console.warn('[PerfNotes] Load error:', e);
       }
-    } catch (e) {
-      console.warn('[PerfNotes] Load error:', e);
     }
 
     // Refresh panel nếu đang mở

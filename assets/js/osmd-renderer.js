@@ -162,8 +162,7 @@ const OSMDRenderer = (() => {
       if (!prefs.hideVoices && !prefs.hideChordNotes) return xml;
 
       try {
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(xml, "application/xml");
+          const doc = window.XmlDocCache?.getClonedDoc(xml) || new DOMParser().parseFromString(xml, "application/xml");
 
           if (prefs.hideVoices) {
               doc.querySelectorAll("note voice").forEach(v => {
@@ -223,8 +222,7 @@ const OSMDRenderer = (() => {
               });
           }
 
-          const serializer = new XMLSerializer();
-          return serializer.serializeToString(doc);
+          return window.XmlDocCache?.serializeDoc?.(doc) ?? new XMLSerializer().serializeToString(doc);
       } catch (err) {
           console.error("XML Preprocess error:", err);
           return xml;

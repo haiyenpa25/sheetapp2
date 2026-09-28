@@ -61,7 +61,7 @@ const LyricExtractor = (() => {
 
   /* ─── Extract syllables per verse ─── */
   function extract(xmlString, transposeOffset = 0) {
-    const doc = new DOMParser().parseFromString(xmlString, 'text/xml');
+    const doc = window.XmlDocCache?.getDoc(xmlString) || new DOMParser().parseFromString(xmlString, 'text/xml');
     const part = doc.querySelector('part');
     if (!part) return [];
 

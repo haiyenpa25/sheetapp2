@@ -111,24 +111,75 @@ const ApiService = (() => {
     },
   };
 
+  const _chordSetsListCache = new Map();
+  const _chordSetsListInFlight = new Map();
+
   const chordSets = {
-    list:   (songId)             => _request(`api/index.php?route=chord_sets&action=list&songId=${encodeURIComponent(songId)}`),
+    list: (songId) => {
+      if (!songId) return Promise.resolve({ success: true, sets: ['HD', 'default'] });
+      if (_chordSetsListCache.has(songId)) return Promise.resolve(_chordSetsListCache.get(songId));
+      if (_chordSetsListInFlight.has(songId)) return _chordSetsListInFlight.get(songId);
+      const p = _request(`api/index.php?route=chord_sets&action=list&songId=${encodeURIComponent(songId)}`)
+        .then(d => { _chordSetsListCache.set(songId, d); _chordSetsListInFlight.delete(songId); return d; })
+        .catch(e => { _chordSetsListInFlight.delete(songId); throw e; });
+      _chordSetsListInFlight.set(songId, p);
+      return p;
+    },
     load:   (songId, name)       => _request(`api/index.php?route=chord_sets&action=load&songId=${encodeURIComponent(songId)}&name=${encodeURIComponent(name)}`),
-    save:   (songId, name, chords) => _json('POST', 'api/index.php?route=chord_sets', { action:'save', songId, name, chords }),
-    clone:  (songId, source, target) => _json('POST', 'api/index.php?route=chord_sets', { action:'clone', songId, source, target, sourceName: source, targetName: target, name: target }),
-    delete: (songId, name)       => _json('POST', 'api/index.php?route=chord_sets', { action:'delete', songId, name }),
+    save:   (songId, name, chords) => { _chordSetsListCache.delete(songId); return _json('POST', 'api/index.php?route=chord_sets', { action:'save', songId, name, chords }); },
+    clone:  (songId, source, target) => { _chordSetsListCache.delete(songId); return _json('POST', 'api/index.php?route=chord_sets', { action:'clone', songId, source, target, sourceName: source, targetName: target, name: target }); },
+    delete: (songId, name)       => { _chordSetsListCache.delete(songId); return _json('POST', 'api/index.php?route=chord_sets', { action:'delete', songId, name }); },
+    clearCache: (songId) => { if (songId) _chordSetsListCache.delete(songId); else _chordSetsListCache.clear(); }
   };
+
+  const _sessionsCache = new Map();
+  const _sessionsInFlight = new Map();
 
   const sessions = {
-    load:             (songId)           => _request(`api/index.php?route=sessions&songId=${encodeURIComponent(songId)}`),
-    saveUserSettings: (songId, settings) => _json('POST', 'api/index.php?route=sessions', { songId, userSettings: settings }),
-    savePerfNotes:    (songId, notes)    => _json('POST', 'api/index.php?route=sessions', { songId, perfNotes: notes }),
+    load: (songId) => {
+      if (!songId) return Promise.resolve({});
+      if (_sessionsCache.has(songId)) return Promise.resolve(_sessionsCache.get(songId));
+      if (_sessionsInFlight.has(songId)) return _sessionsInFlight.get(songId);
+      const p = _request(`api/index.php?route=sessions&songId=${encodeURIComponent(songId)}`)
+        .then(d => { _sessionsCache.set(songId, d); _sessionsInFlight.delete(songId); return d; })
+        .catch(e => { _sessionsInFlight.delete(songId); throw e; });
+      _sessionsInFlight.set(songId, p);
+      return p;
+    },
+    saveUserSettings: (songId, settings) => {
+      _sessionsCache.delete(songId);
+      return _json('POST', 'api/index.php?route=sessions', { songId, userSettings: settings });
+    },
+    savePerfNotes:    (songId, notes) => {
+      _sessionsCache.delete(songId);
+      return _json('POST', 'api/index.php?route=sessions', { songId, perfNotes: notes });
+    },
+    clearCache: (songId) => { if (songId) _sessionsCache.delete(songId); else _sessionsCache.clear(); }
   };
 
+  const _annotationsCache = new Map();
+  const _annotationsInFlight = new Map();
+
   const annotations = {
-    load: (songId)          => _request(`api/index.php?route=annotations&action=load&songId=${encodeURIComponent(songId)}`),
-    save: (songId, list)    => _json('POST', 'api/index.php?route=annotations', { action:'save', songId, annotations: list }),
+    load: (songId) => {
+      if (!songId) return Promise.resolve({ success: true, annotations: [] });
+      if (_annotationsCache.has(songId)) return Promise.resolve(_annotationsCache.get(songId));
+      if (_annotationsInFlight.has(songId)) return _annotationsInFlight.get(songId);
+      const p = _request(`api/index.php?route=annotations&action=load&songId=${encodeURIComponent(songId)}`)
+        .then(d => { _annotationsCache.set(songId, d); _annotationsInFlight.delete(songId); return d; })
+        .catch(e => { _annotationsInFlight.delete(songId); throw e; });
+      _annotationsInFlight.set(songId, p);
+      return p;
+    },
+    save: (songId, list) => {
+      _annotationsCache.delete(songId);
+      return _json('POST', 'api/index.php?route=annotations', { action:'save', songId, annotations: list });
+    },
+    clearCache: (songId) => { if (songId) _annotationsCache.delete(songId); else _annotationsCache.clear(); }
   };
+
+  const _usageCache = new Map();
+  const _usageInFlight = new Map();
 
   const setlists = {
     list:             ()                  => _request('api/index.php?route=setlists'),
@@ -143,7 +194,16 @@ const ApiService = (() => {
     assign:           (data)              => _json('POST',   'api/index.php?route=setlists&action=assign', data),
     removeAssignment: (id)                => _request(`api/index.php?route=setlists&action=remove_assignment&id=${id}`, { method: 'DELETE' }),
     respondAssignment:(id, status, notes) => _json('POST',   `api/index.php?route=setlists&action=respond_assignment&id=${id}`, { status, notes }),
-    songUsage:        (songId)            => _request(`api/index.php?route=setlists&action=song_usage&song_id=${encodeURIComponent(songId)}`),
+    songUsage: (songId) => {
+      if (!songId) return Promise.resolve({ success: false });
+      if (_usageCache.has(songId)) return Promise.resolve(_usageCache.get(songId));
+      if (_usageInFlight.has(songId)) return _usageInFlight.get(songId);
+      const p = _request(`api/index.php?route=setlists&action=song_usage&song_id=${encodeURIComponent(songId)}`)
+        .then(d => { _usageCache.set(songId, d); _usageInFlight.delete(songId); return d; })
+        .catch(e => { _usageInFlight.delete(songId); throw e; });
+      _usageInFlight.set(songId, p);
+      return p;
+    },
     checkRecentUsage: (songId, weeks = 4) => _request(`api/index.php?route=setlists&action=check_recent_usage&song_id=${encodeURIComponent(songId)}&weeks=${weeks}`),
     usageReport:      (params = {}) => {
       const qs = params instanceof URLSearchParams ? params.toString() : new URLSearchParams(params).toString();

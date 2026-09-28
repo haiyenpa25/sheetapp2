@@ -113,8 +113,7 @@ const SongInfoBar = (() => {
     };
 
     try {
-      const parser = new DOMParser();
-      const doc    = parser.parseFromString(xmlString, 'text/xml');
+      const doc = window.XmlDocCache?.getDoc(xmlString) || new DOMParser().parseFromString(xmlString, 'text/xml');
 
       // Key signature
       const keyEl = doc.querySelector('key');

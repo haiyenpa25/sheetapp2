@@ -23,7 +23,8 @@ const ArrangementEngine = (() => {
     _bindEvents();
 
     const curSong = window.Store?.get?.('currentSong');
-    if (curSong?.id) {
+    const isLive = window.LiveSession?.isActive?.() || window.Store?.get?.('currentRoom');
+    if (curSong?.id && (isLive || window.__enableArrangementsAutoLoad)) {
       loadForSong(curSong.id);
     }
 
@@ -33,10 +34,19 @@ const ArrangementEngine = (() => {
   function _bindEvents() {
     if (typeof EventBus === 'undefined') return;
 
-    EventBus.on('song:loaded', async ({ song }) => {
+    EventBus.on('song:loaded', ({ song }) => {
       const songId = song?.id;
       if (songId) {
-        await loadForSong(songId);
+        const isLive = window.LiveSession?.isActive?.() || window.Store?.get?.('currentRoom');
+        if (isLive || window.__enableArrangementsAutoLoad) {
+          loadForSong(songId);
+        } else {
+          _currentSongId = songId;
+          _sections = [];
+          _arrangements = [];
+          const container = document.getElementById('section-jump-bar-container');
+          if (container) container.classList.add('hidden');
+        }
       } else {
         clear();
       }
@@ -82,7 +92,10 @@ const ArrangementEngine = (() => {
     const btnEdit = document.getElementById('btn-section-edit');
     if (btnEdit && !btnEdit.dataset.bound) {
       btnEdit.dataset.bound = 'true';
-      btnEdit.addEventListener('click', () => {
+      btnEdit.addEventListener('click', async () => {
+        if (_currentSongId && (!_sections || _sections.length === 0)) {
+          await loadForSong(_currentSongId);
+        }
         openSectionEditor();
       });
     }

@@ -99,7 +99,7 @@ const SongPreloader = (() => {
         // Pre-parse XML Document trong RAM (giảm 30-50ms DOMParser lúc chuyển bài)
         let xmlDoc = null;
         try {
-          xmlDoc = new DOMParser().parseFromString(processedXml, 'application/xml');
+          xmlDoc = window.XmlDocCache?.getDoc(processedXml) || new DOMParser().parseFromString(processedXml, 'application/xml');
         } catch (e) {}
 
         const entry = {

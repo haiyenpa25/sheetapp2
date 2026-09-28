@@ -100,6 +100,7 @@ module.exports = [
         MidiEngineCore: 'writable',
         AudioUnlockerCore: 'writable',
         SongLoaderCore: 'writable',
+        XmlDocCache: 'writable',
         AppModes: 'writable',
         FeatureFlags: 'writable',
         LiveSyncTransport: 'writable',

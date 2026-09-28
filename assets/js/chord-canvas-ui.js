@@ -52,7 +52,7 @@ const ChordCanvasUI = (() => {
     const xml = window.App?.getOriginalXml?.();
     if (!xml) return null;
     try {
-      const doc = new DOMParser().parseFromString(xml, 'text/xml');
+      const doc = window.XmlDocCache?.getDoc(xml) || new DOMParser().parseFromString(xml, 'text/xml');
       const k   = doc.querySelector('key'); if (!k) return null;
       const f   = String(parseInt(k.querySelector('fifths')?.textContent ?? '0'));
       const m   = k.querySelector('mode')?.textContent?.toLowerCase() ?? 'major';

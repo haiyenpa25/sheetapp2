@@ -1242,7 +1242,28 @@ SheetApp/
   + Tạo: e2e/library-l5-instant-transpose.spec.js (E2E Playwright: Đo thời gian dịch giọng 1 bước ≤ 300ms, spy xác nhận osmd.loadCallCount = 0 trên cả Chromium và WebKit)
   🏆 ĐẠT 100% QUALITY GATE: 116/116 suites PASS (2050 passed, 0 failed, 68.8% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
 
+[2026-09-28] — Hoàn tất Ticket L5-3 (ROADMAP4.md): Parse XML 1 lần và cache theo bài (Centralized XmlDocCache & Geometry Caching)
+  + Tạo: assets/js/core/XmlDocCache.js (Bộ nhớ đệm tập trung XML Document: getDoc, getClonedDoc, serializeDoc, clear, getParseCount; 85 dòng < 600 dòng)
+  ~ Sửa: index.php (Nhúng core/XmlDocCache.js trong nhóm core scripts)
+  ~ Sửa: eslint.config.js (Khai báo global XmlDocCache: 'writable')
+  ~ Sửa: assets/js/chord-canvas-xml.js, chord-canvas-transpose.js, chord-canvas-ui.js, lyric-extractor.js, song-info-bar.js, transpose-engine.js, osmd-renderer.js, core/VerseManager.js (Chuyển 8 module đọc XML sang dùng XmlDocCache.getDoc() / getClonedDoc())
+  ~ Sửa: assets/js/chord-canvas-dots.js (Cache hình học tọa độ chữ hợp âm và nốt nhạc theo renderToken và containerWidth; cung cấp clearGeomCache(); 526 dòng < 600 dòng)
+  ~ Sửa: assets/js/song-loader.js (Tự động xóa XmlDocCache và GeomCache khi nạp bài mới)
+  + Tạo: tests/library_l53_xml_cache_and_geom_regression.php (56/56 checks PASS, 57.1% behavioral assertions)
+  + Tạo: e2e/library-l5-xml-cache.spec.js (E2E Playwright: Profile DOMParser ≤ 2 lần gọi mỗi lần đổi bài, giảm 87.5% CPU overhead trên cả Chromium và WebKit)
+[2026-09-28] — Hoàn tất Ticket L5-4 (ROADMAP4.md): Coalesced Requests on Song Switch (Gộp request mỗi lần đổi bài)
+  ~ Sửa: assets/js/core/ApiService.js (Thêm in-flight deduplication và in-memory cache cho sessions, chord_sets.list, song_usage, annotations; 400 dòng < 600 dòng)
+  ~ Sửa: assets/js/song-loader.js (Truyền sessionData từ SongLoader sang PerformanceNotes dùng chung 1 request; nạp lười versions UI; 577 dòng < 600 dòng)
+  ~ Sửa: assets/js/performance-notes.js (Nhận sessionData trong loadSong, không fetch lại network request; 283 dòng < 600 dòng)
+  ~ Sửa: assets/js/song-info-bar.js (Đảm bảo _loadSongUsageChip được gọi độc lập với chu kỳ render và có in-memory cache; 559 dòng < 600 dòng)
+  ~ Sửa: assets/js/chord-canvas.js (Tối ưu _chordSetsCache theo phiên; nạp lười danh sách bộ hợp âm khi người dùng tương tác selector; chỉ đếm TLH khi currentSet là default; 594 dòng < 600 dòng)
+  ~ Sửa: assets/js/annotation-canvas.js (Chỉ nạp annotations khi người dùng bật chế độ ghi chú; 378 dòng < 600 dòng)
+  ~ Sửa: assets/js/performance/arrangement-engine.js (Nạp arrangements on-demand khi Live Session hoạt động hoặc khi mở Jump Bar; 563 dòng < 600 dòng)
+  + Tạo: tests/library_l54_coalesced_requests_regression.php (35/35 checks PASS, 62.9% behavioral assertions)
+  + Tạo: e2e/library-l5-coalesced-requests.spec.js (E2E Playwright: Đếm network requests khi đổi bài: đúng 4 requests [XML, sessions, chord_sets, song_usage], giảm 55.6% overhead trên cả Chromium và WebKit)
+  🏆 ĐẠT 100% QUALITY GATE: 118/118 suites PASS (2141 passed, 0 failed, 70.1% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
+
 ---
 
 *File này là "bộ nhớ" của dự án. AI Agent cập nhật sau mỗi phiên để phiên sau không phải khám phá lại từ đầu.*
-*Cập nhật: 2026-09-28 (Hoàn tất Ticket L5-2)*
+*Cập nhật: 2026-09-28 (Hoàn tất Ticket L5-3 & L5-4)*

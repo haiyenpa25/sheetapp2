@@ -43,27 +43,36 @@ const AnnotationCanvas = (() => {
 
   function onOSMDRendered() { setTimeout(_build, 200); }
   function reposition() { setTimeout(_build, 100); }
+  let _loadedSongId = null;
 
-  async function loadSong(songId) {
-    _clear();
-    setAddMode(false);
-    _notes = {};
-    if (!songId) return;
-
+  async function _ensureLoaded(songId) {
+    if (!songId || _loadedSongId === songId) return;
     try {
       const res = await window.ApiService?.annotations?.load?.(songId);
-      // AnnotationController trả {success:true, annotations:[...]} via Response::ok()
       const list = res?.annotations ?? (Array.isArray(res) ? res : []);
       list.forEach(a => {
         _notes[`${a.measureIdx}_${a.noteIdx}`] = a;
       });
+      _loadedSongId = songId;
     } catch(e) {
       console.warn('Load annotation error:', e);
     }
-    _build();
   }
 
-  function clearSong() { _clear(); setAddMode(false); }
+  async function loadSong(songId, force = false) {
+    _clear();
+    setAddMode(false);
+    _notes = {};
+    _loadedSongId = null;
+    if (!songId) return;
+
+    if (force || _editEnabled || window.__annotationsAutoLoad) {
+      await _ensureLoaded(songId);
+      _build();
+    }
+  }
+
+  function clearSong() { _clear(); setAddMode(false); _loadedSongId = null; }
 
   /* ─── Mode ──────────────────────────────────────────────────── */
   function setAddMode(on) {
@@ -77,8 +86,13 @@ const AnnotationCanvas = (() => {
       window.ChordCanvas.setAddMode(false);
     }
 
-    if (on) { _build(); } 
-    else { _closePopup(); _build(); } // Vẽ lại để xoá nút [+] nếu có
+    if (on) {
+      const curId = window.Store?.get?.('currentSong')?.id;
+      _ensureLoaded(curId).then(() => _build());
+    } else {
+      _closePopup();
+      _build();
+    }
   }
 
   function toggleAddMode() { setAddMode(!_editEnabled); }

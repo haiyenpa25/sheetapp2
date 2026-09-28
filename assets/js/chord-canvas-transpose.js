@@ -19,7 +19,7 @@ const ChordCanvasTranspose = (() => {
     try {
       const xml = window.OSMDRenderer?.getCurrentXml?.() || window.App?.getOriginalXml?.();
       if (!xml) return null; // null = XML chưa sẵn, KHÔNG cache
-      const doc    = new DOMParser().parseFromString(xml, 'text/xml');
+      const doc = window.XmlDocCache?.getDoc(xml) || new DOMParser().parseFromString(xml, 'text/xml');
       const fifths = parseInt(doc.querySelector('key > fifths')?.textContent ?? 'NaN');
 
       // Đếm flat/sharp trong harmony để cross-check
