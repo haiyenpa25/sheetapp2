@@ -1378,7 +1378,7 @@ SheetApp/
   - **L3 (Chế độ chương trình lễ):** L3-1 đến L3-10 hoàn tất 100% (thanh chương trình, tải trước bài kế, theo ca trưởng Live Sync, thông điệp ca trưởng, bản đồ bài, gói Chúa nhật offline).
   - **L4 (Theo vai trò nhạc cụ - Stage Lens):** L4-1 đến L4-7 hoàn tất 100% (Guitar, Keyboard, Bass, Trống, Hát, số La Mã/Nashville).
   - **L5 (Hiệu năng & Nền kỹ thuật):** L5-1 đến L5-9 hoàn tất 100% (render 1 lần, dịch giọng tức thì, cache DOMParser, gộp ≤4 requests, tải theo nhu cầu ≤30 scripts, Service Worker precache tự sinh bằng PHP, Store tập trung, dọn CSS giảm 72% !important, ngân sách CI).
-  - **L6 (Chất lượng dữ liệu):** L6-1 (trích lời theo khổ & tách [ĐK]), L6-2 (xóa tempo 104 & công cụ TAP tempo), L6-3 (gắn nhãn 500 bài & kích hoạt bộ lọc), L6-5 (sửa lỗi chính tả 903 bài & bảo lưu từ cổ), L6-6 (bản đồ phân đoạn cho 100 bài hay dùng).
+  - **L6 (Chất lượng dữ liệu):** L6-1 (trích lời theo khổ & tách [ĐK]), L6-2 (xóa tempo 104 & công cụ TAP tempo), L6-3 (gắn nhãn 500 bài & kích hoạt bộ lọc), L6-4 (chiến lược HD: giữ TLH làm mặc định an toàn & phát triển HD qua xét duyệt), L6-5 (sửa lỗi chính tả 903 bài & bảo lưu từ cổ), L6-6 (bản đồ phân đoạn cho 100 bài hay dùng).
 
 *File này là "bộ nhớ" của dự án. AI Agent cập nhật sau mỗi phiên để phiên sau không phải khám phá lại từ đầu.*
 *Cập nhật: 2026-09-28 (Hoàn tất 100% Roadmap 1-4, sẵn sàng bàn giao)*
