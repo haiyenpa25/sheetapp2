@@ -54,7 +54,16 @@ const ApiService = (() => {
   const songs = {
     list:   (forceReload = false) => {
       if (forceReload || !_songsListPromise) {
-        _songsListPromise = _request('api/index.php?route=songs').catch(err => {
+        _songsListPromise = _request('api/index.php?route=songs').catch(async err => {
+          // Fallback offline: Nạp từ songs_cache.json đã precache trong Service Worker
+          try {
+            const baseHref = document.querySelector('base')?.getAttribute('href') || './';
+            const cacheResp = await fetch(`${baseHref}storage/data/songs_cache.json`);
+            if (cacheResp.ok) {
+              const data = await cacheResp.json();
+              if (Array.isArray(data) && data.length > 0) return data;
+            }
+          } catch (e) {}
           _songsListPromise = null;
           throw err;
         });

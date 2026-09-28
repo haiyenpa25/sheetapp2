@@ -12,16 +12,24 @@ if not exist "%NODE_EXE%" (
     set NODE_EXE=node
 )
 
-echo [1/3] Regenerate Gitnexus Second Brain Code Map...
+set PHP_EXE=C:\xampp\php\php.exe
+if not exist "%PHP_EXE%" (
+    set PHP_EXE=php
+)
+
+echo [1/4] Regenerate Service Worker Precache Manifest...
+"%PHP_EXE%" tools/generate_sw_manifest.php
+
+echo [2/4] Regenerate Gitnexus Second Brain Code Map...
 "%NODE_EXE%" tools/generate_code_map.js
 
-echo [2/3] Staging and committing changes...
+echo [3/4] Staging and committing changes...
 "%GIT_EXE%" config user.name "AI Agent"
 "%GIT_EXE%" config user.email "agent@sheet.hyb.io.vn"
 "%GIT_EXE%" add .
 "%GIT_EXE%" commit -m "Auto-sync from Antigravity: %date% %time%"
 
-echo [3/3] Pushing to GitHub repository...
+echo [4/4] Pushing to GitHub repository...
 set GIT_TERMINAL_PROMPT=0
 set GCM_INTERACTIVE=never
 "%GIT_EXE%" push origin main

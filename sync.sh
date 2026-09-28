@@ -1,8 +1,11 @@
 #!/bin/bash
-# 1. Regenerate Gitnexus Second Brain Code Map
+# 1. Regenerate Service Worker Precache Manifest
+php tools/generate_sw_manifest.php
+
+# 2. Regenerate Gitnexus Second Brain Code Map
 node tools/generate_code_map.js
 
-# 2. Stage, commit and push to GitHub
+# 3. Stage, commit and push to GitHub
 git config user.name "AI Agent"
 git config user.email "agent@sheet.hyb.io.vn"
 git add .

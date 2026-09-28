@@ -48,7 +48,13 @@ const App = (() => {
     ToolbarController?.init?.();
     if (window.MobileController) window.MobileController.init();
     KeyboardHandler?.init?.();
-    if (window.ServiceWorkerManager) ServiceWorkerManager.register();
+    if (window.ServiceWorkerManager) {
+      ServiceWorkerManager.register();
+    } else if (window.ScriptLoader) {
+      window.ScriptLoader.load('assets/js/core/ServiceWorkerManager.js').then(() => {
+        window.ServiceWorkerManager?.register?.();
+      });
+    }
     if (window.OfflineSetlistManager?.checkOnStartup) window.OfflineSetlistManager.checkOnStartup();
 
     // Library callbacks

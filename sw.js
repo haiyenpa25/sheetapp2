@@ -11,6 +11,7 @@
 
 const urlParams      = new URLSearchParams(self.location.search);
 const SW_VERSION     = urlParams.get('v') || 'v5';
+const SW_MANIFEST_HASH = 'c628d60e62';
 const CACHE_VENDOR   = `sheetapp-vendor-${SW_VERSION}`;
 const CACHE_APP      = `sheetapp-app-${SW_VERSION}`;
 const CACHE_MUSICXML = `sheetapp-musicxml-${SW_VERSION}`;
@@ -21,31 +22,55 @@ const SW_BASE = self.location.pathname.replace(/\/sw\.js$/, '');
 // ── Tài nguyên pre-cache khi install ──────────────────────────────
 const PRECACHE_VENDOR = [
   '/assets/js/vendor/opensheetmusicdisplay.min.js',
+  '/assets/js/vendor/tonal.min.js',
   '/assets/js/vendor/Tone.js',
   '/assets/js/vendor/OsmdAudioPlayer.min.js',
-  '/assets/js/vendor/tonal.min.js',
 ].map(p => SW_BASE + p);
 
 const PRECACHE_APP = [
   (SW_BASE ? `${SW_BASE}/` : '/'),
   (SW_BASE ? `${SW_BASE}/index.php` : '/index.php'),
+  '/manifest.json',
+  '/favicon.svg',
+  '/favicon.ico',
+  '/assets/img/icon-192.png',
   '/assets/css/base.css',
   '/assets/css/layout.css',
   '/assets/css/sheet.css',
   '/assets/css/components.css',
   '/assets/css/fab.css',
-  '/assets/js/core/Store.js',
+  '/assets/css/app-shell.css',
+  '/assets/js/core/ScriptLoader.js',
+  '/assets/js/core/FeatureFlags.js',
   '/assets/js/core/SafeHtml.js',
+  '/assets/js/core/KeyService.js',
   '/assets/js/core/ApiService.js',
+  '/assets/js/core/EventBus.js',
+  '/assets/js/core/Store.js',
+  '/assets/js/core/XmlDocCache.js',
+  '/assets/js/core/ModalManager.js',
+  '/assets/js/core/ModeManager.js',
+  '/assets/js/core/VerseManager.js',
+  '/assets/js/core/SongLoaderCore.js',
   '/assets/js/core/OfflineSetlistManager.js',
   '/assets/js/core/ServiceWorkerManager.js',
-  '/assets/js/app-ui.js',
   '/assets/js/osmd-renderer.js',
+  '/assets/js/transpose-engine.js',
+  '/assets/js/display-settings.js',
+  '/assets/js/chord-canvas-xml.js',
+  '/assets/js/chord-canvas-ui.js',
+  '/assets/js/chord-canvas-dots.js',
   '/assets/js/chord-canvas.js',
+  '/assets/js/song-info-bar.js',
   '/assets/js/song-loader.js',
   '/assets/js/library-ui.js',
-  '/assets/js/url-state.js',
-  '/assets/js/app.js'
+  '/assets/js/app-ui.js',
+  '/assets/js/toolbar-controller.js',
+  '/assets/js/keyboard-handler.js',
+  '/assets/js/mobile-controller.js',
+  '/assets/js/app.js',
+  '/assets/js/auth.js',
+  '/api/index.php?route=songs',
 ].map(p => (SW_BASE && !p.startsWith(SW_BASE)) ? SW_BASE + p : p);
 
 async function safeAddAll(cache, urls) {
@@ -97,8 +122,12 @@ self.addEventListener('message', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // 1. API: Network Only (không cache)
+  // 1. API: Network Only (không cache), NGOẠI TRỪ danh mục bài hát cho offline fallback
   if (url.pathname.includes('/api/')) {
+    if (url.searchParams.get('route') === 'songs' && !url.searchParams.has('action')) {
+      event.respondWith(networkFirstForApiSongs(event.request, CACHE_APP));
+      return;
+    }
     return; // browser xử lý bình thường
   }
 
@@ -129,6 +158,28 @@ self.addEventListener('fetch', event => {
 
 // ── Cache strategies ──────────────────────────────────────────────
 
+/** Network First cho API danh sách bài hát: lấy mới khi online, trả cache khi offline */
+async function networkFirstForApiSongs(request, cacheName) {
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(cacheName);
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch (err) {
+    const cache = await caches.open(cacheName);
+    let cached = await cache.match(request);
+    if (cached) return cached;
+    cached = await cache.match(request, { ignoreSearch: true });
+    if (cached) return cached;
+    const fallbackPath = SW_BASE ? `${SW_BASE}/api/index.php?route=songs` : '/api/index.php?route=songs';
+    cached = await cache.match(fallbackPath);
+    if (cached) return cached;
+    throw err;
+  }
+}
+
 /** Giới hạn số lượng file trong cache (FIFO/LRU eviction) tránh phình dung lượng */
 async function limitCacheSize(cacheName, maxItems = 60) {
   try {
@@ -143,11 +194,14 @@ async function limitCacheSize(cacheName, maxItems = 60) {
 
 /** Cache First: dùng cache nếu có, không thì fetch & cache */
 async function cacheFirst(request, cacheName) {
-  const cached = await caches.match(request);
+  const cache = await caches.open(cacheName);
+  let cached = await cache.match(request);
+  if (!cached) {
+    cached = await cache.match(request, { ignoreSearch: true });
+  }
   if (cached) return cached;
   const response = await fetch(request);
   if (response.ok) {
-    const cache = await caches.open(cacheName);
     cache.put(request, response.clone());
   }
   return response;
@@ -191,8 +245,11 @@ async function networkFirstWithQuota(request, cacheName, maxItems = 60) {
 
 /** Stale While Revalidate: trả cache ngay, update ngầm */
 async function staleWhileRevalidate(request, cacheName) {
-  const cache    = await caches.open(cacheName);
-  const cached   = await cache.match(request);
+  const cache = await caches.open(cacheName);
+  let cached = await cache.match(request);
+  if (!cached) {
+    cached = await cache.match(request, { ignoreSearch: true });
+  }
   const fetchPromise = fetch(request).then(response => {
     if (response.ok) cache.put(request, response.clone());
     return response;

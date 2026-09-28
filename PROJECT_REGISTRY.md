@@ -1275,7 +1275,17 @@ SheetApp/
   + Tạo: e2e/library-l5-on-demand.spec.js (E2E Playwright: Đo đúng 30 script tags ban đầu, 0 cảnh báo SkyBottomLine, 0 cảnh báo width not > 0, render sheet thành công, nạp on-demand Audio/Metronome thành công trên cả Chromium và WebKit)
   🏆 ĐẠT 100% QUALITY GATE: 119/119 suites PASS, bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
 
+[2026-09-28] — Hoàn tất Ticket L5-6 (ROADMAP4.md): Service Worker Precache Tự Động & Khởi Động Ngoại Tuyến 100% (Offline Startup)
+  + Tạo: tools/generate_sw_manifest.php (Tự động quét tài nguyên App Shell tĩnh và API songs theo filemtime và hash MD5; tự sinh storage/data/sw-manifest.json và đồng bộ tự động sw.js; có CLI guard; 211 dòng < 600 dòng)
+  ~ Sửa: sw.js (Bổ sung đầy đủ 43 assets cốt lõi trong PRECACHE_APP; xây dựng networkFirstForApiSongs lưu/trả 903 bài hát khi offline; hỗ trợ ignoreSearch: true cho cacheFirst và staleWhileRevalidate; 366 dòng < 600 dòng)
+  ~ Sửa: assets/js/core/ApiService.js (Bổ sung fallback Service Worker cache cho songs.list() khi offline; 408 dòng < 600 dòng)
+  ~ Sửa: assets/js/app.js (Tự động nạp và kích hoạt ServiceWorkerManager qua ScriptLoader; 227 dòng < 600 dòng)
+  ~ Sửa: sync.bat & sync.sh (Tích hợp bước tự động chạy php tools/generate_sw_manifest.php trước khi build code map và sync git)
+  + Tạo: tests/library_l56_service_worker_precache_regression.php (73/73 checks PASS, 75.3% behavioral assertions, kiểm thử toàn diện manifest generator, sw.js precache, offline lifecycle simulation)
+  + Tạo: e2e/library-l5-offline-precache.spec.js (E2E Playwright: Mở online lần đầu → ngắt mạng hoàn toàn offline → reload/khởi động lại 100% từ CacheStorage, hiển thị đầy đủ 903 bài hát trong bộ nhớ ngoại tuyến trên cả Chromium và WebKit)
+  🏆 ĐẠT 100% QUALITY GATE: 120/120 suites PASS (2264 passed, 0 failed, 71.7% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
+
 ---
 
 *File này là "bộ nhớ" của dự án. AI Agent cập nhật sau mỗi phiên để phiên sau không phải khám phá lại từ đầu.*
-*Cập nhật: 2026-09-28 (Hoàn tất Ticket L5-5)*
+*Cập nhật: 2026-09-28 (Hoàn tất Ticket L5-6)*
