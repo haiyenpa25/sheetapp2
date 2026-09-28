@@ -37,20 +37,10 @@ const OSMDRenderer = (() => {
       coloringEnabled: true,
       pageFormat: 'Endless',  // Scroll vertically, no page breaks
       engravingRules: {
-        // Chord symbols — size to hơn, cao hơn
         ChordSymbolFontFamily: "OSMDChordFont, sans-serif",
-        ChordSymbolTextHeight: 2.85,
-        ChordSymbolYOffset: 1.2,
-        DefaultColorChordSymbol: '#dc2626',
-        // Sheet layout
-        StaffLineWidth: 0.1,
-        StemWidth: 0.15,
-        TupletNumberTextHeight: 1.5,
-        // Title tự điều chỉnh đẹp hơn
-        TitleTopDistance: 1.5,        // Giảm khoảng trống phía trên
-        SheetTitleHeight: 2.0,        // Cỡ chữ title vừa phải (OSMD default ~4.0)
-        SheetComposerHeight: 1.5,     // Nhạc sĩ nhỏ gọn hơn
-        SheetAuthorHeight: 1.5,
+        ChordSymbolTextHeight: 2.85, ChordSymbolYOffset: 1.2, DefaultColorChordSymbol: '#dc2626',
+        StaffLineWidth: 0.1, StemWidth: 0.15, TupletNumberTextHeight: 1.5,
+        TitleTopDistance: 1.5, SheetTitleHeight: 2.0, SheetComposerHeight: 1.5, SheetAuthorHeight: 1.5
       },
       ...options
     });
@@ -152,14 +142,11 @@ const OSMDRenderer = (() => {
         osmd.rules.DefaultColorChordSymbol = prefs.color;
         osmd.rules.ChordSymbolTextHeight   = (prefs.size && prefs.size >= 2.6) ? Math.max(2.85, prefs.size) : 2.85;
         osmd.rules.ChordSymbolYOffset      = prefs.yOffset ?? 1.2;
-        
-        // --- ÉP KHOẢNG CÁCH HỢP ÂM CỐ ĐỊNH, KHÔNG BỊ ĐẨY LÊN CAO ---
-        osmd.rules.ChordSymbolYPadding = 0.0;
-        osmd.rules.ChordSymbolYSpacing = 0.0;
+        osmd.rules.ChordSymbolYPadding     = 0.0;
+        osmd.rules.ChordSymbolYSpacing     = 0.0;
         osmd.rules.ChordOverlapAllowedIntoNextMeasure = true;
 
-        // Title sizing — đặt lại mỗi lần refresh
-        if (osmd.rules.SheetTitleHeight !== undefined)   osmd.rules.SheetTitleHeight   = 2.0;
+        if (osmd.rules.SheetTitleHeight !== undefined)    osmd.rules.SheetTitleHeight   = 2.0;
         if (osmd.rules.SheetComposerHeight !== undefined) osmd.rules.SheetComposerHeight = 1.5;
         if (osmd.rules.SheetAuthorHeight !== undefined)   osmd.rules.SheetAuthorHeight   = 1.5;
         if (osmd.rules.TitleTopDistance !== undefined)    osmd.rules.TitleTopDistance    = 1.5;
@@ -179,17 +166,10 @@ const OSMDRenderer = (() => {
           const doc = parser.parseFromString(xml, "application/xml");
 
           if (prefs.hideVoices) {
-              const voices = doc.querySelectorAll("note voice");
-              voices.forEach(v => {
-                  if (parseInt(v.textContent) > 1) {
-                      v.parentNode.remove();
-                  }
+              doc.querySelectorAll("note voice").forEach(v => {
+                  if (parseInt(v.textContent) > 1) v.parentNode.remove();
               });
-
-              // Sau khi xóa notes voice>1, slur/tie có thể mất pair → xóa luôn trong compact mode
-              doc.querySelectorAll("notations slur").forEach(el => el.remove());
-              doc.querySelectorAll("notations tied").forEach(el => el.remove());
-              doc.querySelectorAll("note > tie").forEach(el => el.remove());
+              doc.querySelectorAll("notations slur, notations tied, note > tie").forEach(el => el.remove());
           }
 
           if (prefs.hideChordNotes) {
@@ -345,8 +325,43 @@ const OSMDRenderer = (() => {
   }
 
   /**
-   * Thay đổi mức zoom — nhận decimal (0.1 → 2.5), App.setZoom đã convert từ percent
+   * Dịch giọng in-memory không cần parse lại XML (L5-2)
+   * Đặt osmd.Sheet.Transpose rồi render lại trực tiếp.
    */
+  async function transpose(transposeValue = 0) {
+    if (!osmd || !osmd.Sheet) throw new Error('OSMD chưa load Sheet để transpose');
+    const token = ++_renderToken;
+    try {
+      if (opensheetmusicdisplay.TransposeCalculator) {
+        if (!osmd.TransposeCalculator) {
+          osmd.TransposeCalculator = new opensheetmusicdisplay.TransposeCalculator();
+        }
+        osmd.Sheet.Transpose = transposeValue;
+      }
+      refreshRules();
+      _forceLayoutRecalc();
+      _renderCount++;
+      await osmd.render();
+      if (token !== _renderToken) return osmd;
+
+      _forceLayoutRecalc();
+      const containerEl = document.getElementById(containerId);
+      if (containerEl) _lastContainerWidth = containerEl.clientWidth;
+      _titleCompacted = false;
+      _compactTitleSVG();
+      _tagChordSymbols();
+      if (window.ChordCanvas) window.ChordCanvas.reposition();
+      if (window.ChordOverlay) window.ChordOverlay.onOSMDRendered();
+      _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} });
+      return osmd;
+    } catch (err) {
+      if (token !== _renderToken) return osmd;
+      console.error('[OSMD] Lỗi transpose in-memory:', err);
+      throw err;
+    }
+  }
+
+  /** Thay đổi mức zoom — nhận decimal (0.1 → 2.5) */
   async function setZoom(level) {
     currentZoom = Math.max(0.1, Math.min(2.5, level));
     if (osmd && isLoaded) {
@@ -362,7 +377,6 @@ const OSMDRenderer = (() => {
     }
   }
 
-  /** Set zoom level mà không trigger render (dùng trước load()) */
   function setZoomSilent(level) {
     currentZoom = Math.max(0.5, Math.min(2.5, level));
     if (osmd) osmd.zoom = currentZoom;
@@ -548,36 +562,30 @@ const OSMDRenderer = (() => {
       return;
     }
     osmd.Sheet.Instruments.forEach((ins, insIndex) => {
-      if (ins.Staves) {
-        if (compactPrefs.hideBass) {
-          if (ins.Staves.length >= 2) {
-            for (let i = 1; i < ins.Staves.length; i++) ins.Staves[i].Visible = false;
-          }
-          if (insIndex > 0) {
-            ins.Visible = false;
-            ins.Staves.forEach(st => st.Visible = false);
-          }
-        }
-        if (compactPrefs.hideVoices && insIndex === 0 && ins.Voices) {
-          ins.Voices.forEach(voice => { if (voice.VoiceId > 1) voice.Visible = false; });
-        }
+      if (!ins.Staves) return;
+      if (compactPrefs.hideBass) {
+        if (ins.Staves.length >= 2) for (let i = 1; i < ins.Staves.length; i++) ins.Staves[i].Visible = false;
+        if (insIndex > 0) { ins.Visible = false; ins.Staves.forEach(st => st.Visible = false); }
+      }
+      if (compactPrefs.hideVoices && insIndex === 0 && ins.Voices) {
+        ins.Voices.forEach(voice => { if (voice.VoiceId > 1) voice.Visible = false; });
       }
     });
 
     const drawCredits = !compactPrefs.hideText;
     osmd.setOptions({
-      drawComposer: drawCredits,
-      drawCredits: drawCredits,
-      drawSubtitle: drawCredits,
-      drawLyricist: drawCredits,
-      drawTitle: !compactPrefs.hideTitle,
-      drawLyrics: !compactPrefs.hideLyrics,
-      drawMeasureNumbers: !compactPrefs.hideMeasureNumbers
+      drawComposer: drawCredits, drawCredits, drawSubtitle: drawCredits, drawLyricist: drawCredits,
+      drawTitle: !compactPrefs.hideTitle, drawLyrics: !compactPrefs.hideLyrics, drawMeasureNumbers: !compactPrefs.hideMeasureNumbers
     });
     setTimeout(() => _hideRepeatLabels(_isCompactMode), 400);
   }
 
-  return { init, load, reload, setZoom, setZoomSilent, getInstance, getIsLoaded, getCurrentXml, getCurrentZoom, onReady, destroy, setCompactMode, getCompactMode, refreshRules, tagChordSymbols: _tagChordSymbols, getRenderToken: () => _renderToken, getRenderCount: () => _renderCount, resetRenderCount: () => { _renderCount = 0; } };
+  return {
+    init, load, reload, transpose, setZoom, setZoomSilent, getInstance, getIsLoaded,
+    getCurrentXml, getCurrentZoom, onReady, destroy, setCompactMode, getCompactMode,
+    refreshRules, tagChordSymbols: _tagChordSymbols, getRenderToken: () => _renderToken,
+    getRenderCount: () => _renderCount, resetRenderCount: () => { _renderCount = 0; }
+  };
 })();
 
 window.OSMDRenderer = OSMDRenderer;

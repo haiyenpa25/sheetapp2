@@ -207,12 +207,15 @@ const SongLoader = (() => {
 
     try {
       if (window.InstrumentMixer?.preserveState) InstrumentMixer.preserveState();
-      await OSMDRenderer.reload(processedXml, transpose);
+      if (OSMDRenderer.getIsLoaded() && typeof OSMDRenderer.transpose === 'function') {
+        await OSMDRenderer.transpose(transpose);
+      } else {
+        await OSMDRenderer.reload(processedXml, transpose);
+      }
       SessionTracker.setTranspose(transpose);
       _updateCapoBadge(processedXml);
-      // INTENTIONAL: Không gọi thủ công onOSMDRendered nữa vì OSMDRenderer.reload đã tự kích hoạt thông qua onReady callback.
     } catch (err) {
-      console.warn('[SongLoader] reload lỗi:', err.message);
+      console.warn('[SongLoader] transpose/reload lỗi:', err.message);
     } finally {
       if (disp) disp.style.opacity = '';
       requestAnimationFrame(() => requestAnimationFrame(() => {

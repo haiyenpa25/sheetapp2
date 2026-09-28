@@ -87,12 +87,12 @@ const ChordCanvas = (() => {
 
   function onOSMDRendered() { 
     _alignOSMDChords();
-    setTimeout(() => requestAnimationFrame(_build), 350); 
+    requestAnimationFrame(_build); 
   }
 
   function reposition() { 
     _alignOSMDChords();
-    setTimeout(() => requestAnimationFrame(_build), 200); 
+    requestAnimationFrame(_build); 
   }
 
   function _alignOSMDChords() {
@@ -219,9 +219,7 @@ const ChordCanvas = (() => {
   function toggleAddMode() {
     if (!window.Auth?.isBanhat?.()) {
       window.App?.showToast?.('⚠️ Vui lòng đăng nhập tài khoản Nhạc công để chỉnh sửa hợp âm', 'info');
-      if (typeof window.Auth?.openModal === 'function') {
-        window.Auth.openModal();
-      }
+      window.Auth?.openModal?.();
       return;
     }
     setAddMode(!_editEnabled);
@@ -430,16 +428,11 @@ const ChordCanvas = (() => {
   function showNewSetModal() {
     if (!window.Auth?.isBanhat?.()) {
       window.App?.showToast?.('⚠️ Vui lòng đăng nhập tài khoản Nhạc công để tạo bản phối', 'info');
-      if (typeof window.Auth?.openModal === 'function') {
-        window.Auth.openModal();
-      }
+      window.Auth?.openModal?.();
       return;
     }
     const myChordCode = (window.Auth?.getChordCode?.() || '').toUpperCase();
-    if (myChordCode) {
-      createSet(myChordCode);
-      return;
-    }
+    if (myChordCode) { createSet(myChordCode); return; }
     ChordCanvasUI.showNewSetModal({ onCreate: (name) => createSet(name) });
   }
 
@@ -454,7 +447,6 @@ const ChordCanvas = (() => {
       window.App?.showToast?.(`Bạn chỉ được quyền xóa bộ hợp âm cá nhân của mình (${myChordCode})!`, 'error');
       return;
     }
-
     const songId = window.App?.getCurrentSongId?.();
     if (!songId) return;
     try {

@@ -107,7 +107,7 @@ const App = (() => {
       EventBus.emit('transpose:changed', { value: newVal });
     }
     clearTimeout(_transposeTimer);
-    _transposeTimer = setTimeout(() => SongLoader.commitTranspose(), 400);
+    _transposeTimer = setTimeout(() => SongLoader.commitTranspose(), 100);
   }
 
   async function resetTranspose() {

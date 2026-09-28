@@ -1233,8 +1233,16 @@ SheetApp/
   + Tạo: tests/library_l51_single_render_regression.php (29/29 checks PASS, 58.6% behavioral assertions)
   + Tạo: e2e/library-l5-single-render.spec.js (E2E Playwright: Bộ đếm render chuẩn xác: Tải bài ban đầu = 1, Đổi bài = 1, Resize = 1 trên cả Chromium và WebKit)
   🏆 ĐẠT 100% QUALITY GATE: 115/115 suites PASS (2022 passed, 0 failed, 68.3% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
+[2026-09-28] — Hoàn tất Ticket L5-2 (ROADMAP4.md): Instant Transpose Without Reparse (Dịch giọng không reparse)
+  ~ Sửa: assets/js/osmd-renderer.js (Thêm phương thức transpose(transposeValue) in-memory: gán trực tiếp osmd.Sheet.Transpose = transposeValue rồi render lại trực tiếp, không reparse MusicXML qua osmd.load(); 592 dòng < 600 dòng)
+  ~ Sửa: assets/js/song-loader.js (Cập nhật commitTranspose ưu tiên gọi OSMDRenderer.transpose(transpose) in-memory khi OSMD đã loaded; giữ fallback reload; 567 dòng < 600 dòng)
+  ~ Sửa: assets/js/chord-canvas.js (Triệt tiêu hoàn toàn độ trễ setTimeout 350ms trong onOSMDRendered và 200ms trong reposition, gọi requestAnimationFrame(_build) cập nhật overlay ngay trong khung hình tiếp theo; 590 dòng < 600 dòng)
+  ~ Sửa: assets/js/app.js (Giảm debounce _transposeTimer từ 400ms xuống 100ms; 222 dòng < 600 dòng)
+  + Tạo: tests/library_l52_instant_transpose_regression.php (28/28 checks PASS, 57.1% behavioral assertions, kiểm thử toàn diện logic in-memory transpose, 4 Core Rules, K2 DB Checksum)
+  + Tạo: e2e/library-l5-instant-transpose.spec.js (E2E Playwright: Đo thời gian dịch giọng 1 bước ≤ 300ms, spy xác nhận osmd.loadCallCount = 0 trên cả Chromium và WebKit)
+  🏆 ĐẠT 100% QUALITY GATE: 116/116 suites PASS (2050 passed, 0 failed, 68.8% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
 
 ---
 
 *File này là "bộ nhớ" của dự án. AI Agent cập nhật sau mỗi phiên để phiên sau không phải khám phá lại từ đầu.*
-*Cập nhật: 2026-09-28 (Hoàn tất Ticket L5-1)*
+*Cập nhật: 2026-09-28 (Hoàn tất Ticket L5-2)*
