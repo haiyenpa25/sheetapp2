@@ -83,7 +83,7 @@
     if (!tbody) return;
 
     if (!list.length) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:1.5rem;color:var(--text-muted);">Chưa có dữ liệu sử dụng bài hát trong phụng vụ</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:1.5rem;color:var(--text-muted);">Chưa có dữ liệu sử dụng bài hát trong chương trình thờ phượng</td></tr>';
       return;
     }
 
@@ -160,7 +160,7 @@
     if (!tbody) return;
 
     if (!list.length) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--text-muted);">Chưa có nhật ký phụng vụ</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--text-muted);">Chưa có nhật ký buổi nhóm thờ phượng</td></tr>';
       return;
     }
 
@@ -184,7 +184,7 @@
           <td style="font-weight:600;">${songTitle}</td>
           <td style="text-align:center;">${toneStr} (${profile})</td>
           <td style="text-align:center;">
-            <a href="${bookletUrl}" target="_blank" class="mgr-btn mgr-btn-sm mgr-btn-ghost" title="Mở Booklet phụng vụ của buổi nhóm này">📖 Booklet</a>
+            <a href="${bookletUrl}" target="_blank" class="mgr-btn mgr-btn-sm mgr-btn-ghost" title="Mở Booklet chương trình của buổi nhóm này">📖 Booklet</a>
           </td>
         </tr>
       `;

@@ -275,7 +275,7 @@
         <form id="form-create-setlist" onsubmit="return false;">
           <div style="margin-bottom: 0.75rem;">
             <label class="form-label-bold">Tên Chương Trình / Setlist <span style="color:#ef4444;">*</span></label>
-            <input type="text" id="create-setlist-title-input" class="form-input text-xs w-full box-border" placeholder="VD: Lễ Chúa Nhật 1, Worship 20/4, Phụng Vụ..." required autocomplete="off">
+            <input type="text" id="create-setlist-title-input" class="form-input text-xs w-full box-border" placeholder="VD: Lễ Chúa Nhật 1, Worship 20/4, Ban Hát..." required autocomplete="off">
           </div>
           <div style="display:flex; gap:0.5rem; margin-bottom: 0.75rem;">
             <div class="flex-1">
@@ -288,7 +288,7 @@
             </div>
           </div>
           <div style="margin-bottom: 0.85rem;">
-            <label class="form-label-bold">Chủ đề phụng vụ (Tùy chọn)</label>
+            <label class="form-label-bold">Chủ đề thờ phượng (Tùy chọn)</label>
             <input type="text" id="create-setlist-theme-input" class="form-input text-xs w-full box-border" placeholder="VD: Tình Yêu Cứu Rỗi, Phục Sinh, Tạ Ơn...">
           </div>
           <div style="display:flex;gap:0.5rem;">

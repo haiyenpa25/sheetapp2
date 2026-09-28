@@ -9,7 +9,7 @@
       <span id="song-title" class="song-title">Chọn bài hát...</span>
       <span id="song-key" class="song-key-badge" title="Tông gốc">--</span>
     </div>
-    <button id="btn-song-info-popover" class="icon-btn-pill btn-song-info-popover" title="Xem chi tiết: Tông, BPM, Nhịp, Số ô nhịp, Phụng vụ (ⓘ)" aria-label="Chi tiết bài hát">
+    <button id="btn-song-info-popover" class="icon-btn-pill btn-song-info-popover" title="Xem chi tiết: Tông, BPM, Nhịp, Số ô nhịp, Thờ phượng (ⓘ)" aria-label="Chi tiết bài hát">
       <span class="song-info-popover-icon">ⓘ</span>
     </button>
     <!-- Popover Chi Tiết Bài Hát (Ticket L1-3: Gộp thanh thông tin vào thanh công cụ) -->
@@ -329,10 +329,34 @@
               <option value="7">Ngăn 7</option>
             </select>
           </div>
-          <div class="audio-panel-row">
+          <div class="audio-panel-row mb-2">
             <span class="audio-panel-label">Giữ nhịp:</span>
             <button id="btn-menu-metronome" class="btn btn-ghost btn-xs btn-menu-item btn-menu-compact-action">
               <span>♩ Metronome</span>
+            </button>
+          </div>
+          <div class="audio-panel-row mb-2">
+            <span class="audio-panel-label">Cỡ hợp âm:</span>
+            <button id="btn-menu-chord-preset" class="btn btn-ghost btn-xs btn-menu-item btn-menu-compact-action" title="Đổi preset hiển thị hợp âm (Chuẩn / Sân khấu lớn / Tương phản cao)">
+              <span id="menu-chord-preset-label">Aa Chuẩn</span>
+            </button>
+          </div>
+          <div class="audio-panel-row mb-2">
+            <span class="audio-panel-label">Ký hiệu:</span>
+            <button id="btn-menu-chord-notation" class="btn btn-ghost btn-xs btn-menu-item btn-menu-compact-action" title="Đổi ký hiệu hợp âm (Chuẩn / Số La Mã / Nashville)">
+              <span id="menu-chord-notation-label">🔤 Chuẩn (C)</span>
+            </button>
+          </div>
+          <div class="audio-panel-row mb-2">
+            <span class="audio-panel-label">Vai trò:</span>
+            <button id="btn-menu-instrument-role" class="btn btn-ghost btn-xs btn-menu-item btn-menu-compact-action" title="Đổi vai trò nhạc công">
+              <span id="menu-instrument-role-label">🎸 Guitar</span>
+            </button>
+          </div>
+          <div class="audio-panel-row">
+            <span class="audio-panel-label">Khổ hát:</span>
+            <button id="btn-menu-verse-mode" class="btn btn-ghost btn-xs btn-menu-item btn-menu-compact-action" title="Đổi chế độ khổ">
+              <span id="menu-verse-mode-label">📖 Tất cả khổ</span>
             </button>
           </div>
         </div>

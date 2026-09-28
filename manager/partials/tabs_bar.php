@@ -18,7 +18,7 @@
         <span class="tab-icon">👥</span> Thành Viên & Phân Quyền
       </button>
       <button class="mgr-tab-btn" data-tab="tab-usage" id="mgr-nav-tab-usage">
-        <span class="tab-icon">📊</span> Thống Kê Phụng Vụ
+        <span class="tab-icon">📊</span> Thống Kê Thờ Phượng
       </button>
       <button class="mgr-tab-btn" data-tab="tab-reviews" id="mgr-nav-tab-reviews">
         <span class="tab-icon">📥</span> Chờ Duyệt

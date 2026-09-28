@@ -73,8 +73,16 @@ test.describe('E2E A11y & Focus Management: Modals', () => {
     // Modal phải đóng lại (có class hidden)
     await expect(helpModal).toHaveClass(/hidden/);
 
-    // Focus phải quay về chính nút #btn-help (Focus Restore)
-    await expect(btnHelp).toBeFocused();
+    // Focus Restore: menu ⋮ tự đóng khi chọn mục (L0-6) nên #btn-help đã bị ẩn;
+    // focus phải quay về nút mở menu #btn-more-options, không rơi về <body>.
+    const helpVisible = await btnHelp.isVisible();
+    if (helpVisible) {
+      await expect(btnHelp).toBeFocused();
+    } else {
+      await expect(btnMore).toBeFocused();
+    }
+    const activeIsBody = await page.evaluate(() => document.activeElement === document.body);
+    expect(activeIsBody).toBe(false);
   });
 
   test('2. Auth Modal: Đảm bảo WAI-ARIA, Focus Trap 20 Tab, và Escape Focus Restore', async ({ page }) => {

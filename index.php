@@ -140,13 +140,25 @@ echo cssTag('app-shell.css');
 </button>
 
 
-<!-- ===== SCRIPTS (Ticket L5-5: Giới hạn <= 30 script tags ban đầu) ===== -->
+<!-- ===== SCRIPTS =====
+  Toàn bộ module của trang Thư viện được nạp sẵn (defer). Việc gỡ bớt thẻ script
+  để đạt ngân sách "<= 30 script" (L5-5) đã làm mất đăng nhập, Band, setlist,
+  metronome, dịch hợp âm... nên đã được khôi phục. Chỉ tối ưu lại bằng bundling
+  hoặc lazy-load có trigger + E2E đầy đủ, không bằng cách bỏ module. -->
 <!-- OSMD from local vendor (fallback CDN) -->
 <script src="<?= $baseHref ?>assets/js/vendor/opensheetmusicdisplay.min.js" onerror="
   var s=document.createElement('script');
   s.src='https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.6/build/opensheetmusicdisplay.min.js';
   document.head.appendChild(s);"></script>
-<!-- Tonal.js — defer -->
+<!-- Tone.js / OSMD Audio Player / Tonal.js — defer: không cần cho render ban đầu -->
+<script src="<?= $baseHref ?>assets/js/vendor/Tone.js" defer onerror="
+  var s=document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js';
+  document.head.appendChild(s);"></script>
+<script src="<?= $baseHref ?>assets/js/vendor/OsmdAudioPlayer.min.js" defer onerror="
+  var s=document.createElement('script');
+  s.src='https://cdn.jsdelivr.net/npm/osmd-audio-player/umd/OsmdAudioPlayer.min.js';
+  document.head.appendChild(s);"></script>
 <script src="<?= $baseHref ?>assets/js/vendor/tonal.min.js" defer onerror="
   var s=document.createElement('script');
   s.src='https://cdn.jsdelivr.net/npm/tonal/browser/tonal.min.js';
@@ -182,49 +194,78 @@ echo jsTag('core/Store.js',        false);
 echo jsTag('core/XmlDocCache.js',   false);
 echo jsTag('core/ModalManager.js', false);
 echo jsTag('core/ModeManager.js',  false);
+echo jsTag('core/AppShell.js',     false);
 echo jsTag('core/VerseManager.js', false);
+echo jsTag('core/TapTempo.js',     false);
+echo jsTag('core/AudioUnlocker.js',false);
+echo jsTag('core/MidiEngine.js',   false);
 echo jsTag('core/SongLoaderCore.js', false);
-if (!empty($_GET['all_scripts'])) {
-    echo jsTag('key-service.js');
-    echo jsTag('core/OfflineSetlistManager.js');
-    echo jsTag('audio/TapTempo.js');
-    echo jsTag('audio/MidiEngine.js');
-}
+echo jsTag('core/ErrorReporter.js', false);
+echo jsTag('core/ServiceWorkerManager.js', false);
+echo jsTag('core/OfflineSetlistManager.js', false);
 
 // ── 2. Renderers & Engines ──
+echo jsTag('osmd-svg-text.js');
 echo jsTag('osmd-renderer.js');
+echo jsTag('lyric-extractor.js');
 echo jsTag('transpose-engine.js');
+echo jsTag('session-tracker.js');
+echo jsTag('auth.js');
+echo jsTag('history-manager.js');
+echo jsTag('url-state.js');
+
+// ── 3. Feature Modules ──
+echo jsTag('modals/HelpModal.js');
+echo jsTag('modals/TransposePickerModal.js');
+echo jsTag('modals/TempoPickerSheet.js');
+echo jsTag('modals/ServicePlanAssignModal.js');
+echo jsTag('modals/PracticeTeamBoardModal.js');
+echo jsTag('library-ui.js');
+echo jsTag('modals/QuickNumpadModal.js');
+echo jsTag('service-plan-ui.js');
+echo jsTag('leader-notes-banner.js');
+echo jsTag('liturgy-card.js');
+echo jsTag('setlist-player.js');
+echo jsTag('setlist-list.js');
+echo jsTag('setlist-detail.js');
+echo jsTag('setlist-ui.js');
+echo jsTag('importer.js');
+echo jsTag('admin-ui.js');
 echo jsTag('display-settings.js');
+echo jsTag('stage-lens.js');
+echo jsTag('guitar-lens.js');
+echo jsTag('bass-lens.js');
+echo jsTag('drums-lens.js');
+echo jsTag('vocals-lens.js');
+echo jsTag('harmonic-numeral.js');
 echo jsTag('chord-canvas-xml.js');
 echo jsTag('chord-canvas-ui.js');
+echo jsTag('chord-canvas-transpose.js');
 echo jsTag('chord-canvas-dots.js');
-if (!empty($_GET['all_scripts'])) {
-    echo jsTag('chord-canvas-transpose.js');
-    echo jsTag('chord-canvas-edit.js');
-}
+echo jsTag('chord-canvas-edit.js');
 echo jsTag('chord-canvas.js');
+echo jsTag('annotation-canvas.js');
+echo jsTag('performance-notes.js');
+echo jsTag('instruments.js');
+echo jsTag('audio-player.js');
+echo jsTag('metronome.js');
+echo jsTag('auto-scroller.js');
+echo jsTag('page-nav.js');
+echo jsTag('app-ui.js');
 echo jsTag('song-info-bar.js');
 
-// ── 3. App Controllers & UI ──
-if (!empty($_GET['all_scripts'])) {
-    echo jsTag('song-preloader.js');
-}
+// ── 4. Live Sync (live-sync.js tự lazy-load các engine biểu diễn khi cần) ──
+echo jsTag('live-sync.js');
+echo jsTag('follow-leader.js');
+
+// ── 5. App Controllers (phụ thuộc vào modules trên) ──
+echo jsTag('song-preloader.js');
 echo jsTag('song-loader.js');
-echo jsTag('library-ui.js');
-if (!empty($_GET['all_scripts'])) {
-    echo jsTag('modals/QuickNumpadModal.js');
-    echo jsTag('leader-notes-banner.js');
-    echo jsTag('liturgy-card.js');
-    echo jsTag('follow-leader.js');
-    echo jsTag('stage-lens.js');
-    echo jsTag('guitar-lens.js');
-    echo jsTag('harmonic-numeral.js');
-    echo jsTag('mobile-controller.js');
-}
-echo jsTag('app-ui.js');
-echo jsTag('toolbar-controller.js');
 echo jsTag('keyboard-handler.js');
+echo jsTag('toolbar-controller.js');
+echo jsTag('mobile-controller.js');
 echo jsTag('app.js');
+echo jsTag('fab.js');
 ?>
 
 

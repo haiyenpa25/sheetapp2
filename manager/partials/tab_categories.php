@@ -2,8 +2,8 @@
     <section id="tab-categories" class="mgr-tab-pane">
       <div class="mgr-section-header">
         <div>
-          <h3>📂 Cây Thể Loại Âm Nhạc Phụng Vụ</h3>
-          <p class="text-muted">Phân loại kho bài hát theo chủ đề, niên lịch phụng vụ và đối tượng sinh hoạt.</p>
+          <h3>📂 Cây Thể Loại Âm Nhạc Thờ Phượng</h3>
+          <p class="text-muted">Phân loại kho bài hát theo chủ đề, mùa lễ và đối tượng sinh hoạt.</p>
         </div>
         <button id="btn-add-category-modal" class="mgr-btn mgr-btn-primary">+ Thêm Danh Mục Mới</button>
       </div>

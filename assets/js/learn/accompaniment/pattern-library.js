@@ -30,9 +30,9 @@ const PatternLibrary = (() => {
     },
     {
       id: 'smart-rumba',
-      name: '🌴 Rumba Thánh Ca 4/4 (Trầm Ấm Phụng Vụ)',
+      name: '🌴 Rumba Thánh Ca 4/4 (Trầm Ấm Thờ Phượng)',
       shortName: 'Rumba 4/4',
-      description: 'Đảo phách Bùm ... Chát . Chát . Bùm . Chát đặc trưng phụng vụ nhà thờ Việt Nam',
+      description: 'Đảo phách Bùm ... Chát . Chát . Bùm . Chát đặc trưng thờ phượng nhà thờ Việt Nam',
       meter: '4/4',
       instrumentFamily: 'piano',
       category: 'latin',

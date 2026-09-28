@@ -115,10 +115,13 @@ $renderedHtml = ob_get_clean();
 preg_match_all('/<script\b/i', $renderedHtml, $scriptMatches);
 $initialScriptCount = count($scriptMatches[0]);
 
+// Ngân sách "<= 30 script" đã bị bỏ: nó đạt được bằng cách gỡ module chức năng.
+// Ngân sách thật là thời gian hiện bản nhạc / số lần render (đo trong E2E). Ở đây chỉ
+// chặn phình to bất thường (ví dụ nạp trùng module).
 check(
-    $initialScriptCount <= 30 && $initialScriptCount > 0,
+    $initialScriptCount > 0 && $initialScriptCount <= 100,
     'l59_script_count_budget',
-    "Số script tags ban đầu trong index.php đạt ngân sách <= 30 (Hiện có: {$initialScriptCount} scripts)",
+    "Số script tags ban đầu trong index.php không phình bất thường (Hiện có: {$initialScriptCount} scripts, trần 100)",
     true
 );
 

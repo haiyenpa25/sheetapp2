@@ -168,13 +168,16 @@
     // Ẩn modal
     modal.classList.add('hidden');
 
-    // Khôi phục focus cho phần tử trước đó (Focus Restore)
-    if (prevFocus && typeof prevFocus.focus === 'function') {
+    // Khôi phục focus cho phần tử trước đó (Focus Restore). Nếu phần tử đó nằm trong
+    // một menu đã tự đóng (vd. #btn-help trong menu ⋮), trả focus về nút mở menu
+    // thay vì để focus rơi về <body>.
+    const restoreTarget = _resolveRestoreTarget(prevFocus);
+    if (restoreTarget && typeof restoreTarget.focus === 'function') {
       try {
-        if (prevFocus instanceof HTMLElement && !prevFocus.hasAttribute('tabindex')) {
-          prevFocus.setAttribute('tabindex', '0');
+        if (restoreTarget instanceof HTMLElement && !restoreTarget.hasAttribute('tabindex')) {
+          restoreTarget.setAttribute('tabindex', '0');
         }
-        prevFocus.focus();
+        restoreTarget.focus();
       } catch (e) {}
     }
 
@@ -200,6 +203,18 @@
    */
   function getActiveModal() {
     return _modalStack.length > 0 ? _modalStack[_modalStack.length - 1].modal : null;
+  }
+
+  function _resolveRestoreTarget(el) {
+    if (!(el instanceof HTMLElement)) return el || null;
+    if (el.isConnected && el.offsetParent !== null) return el;
+    const menu = el.closest('.dropdown-menu');
+    if (menu) {
+      const opener = (menu.id && document.querySelector(`[aria-controls="${menu.id}"]`))
+        || (menu.id === 'main-dropdown-menu' ? document.getElementById('btn-more-options') : null);
+      if (opener && opener.offsetParent !== null) return opener;
+    }
+    return el;
   }
 
   /**

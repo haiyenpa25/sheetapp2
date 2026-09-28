@@ -273,7 +273,7 @@ select, input, label,
 .quick-jump-all { border-style: dashed; }
 
 /* ---- MAIN LAYOUT ---- */
-.main-content { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; }
+.main-content { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; container-type: inline-size; container-name: mainarea; }
 
 /* ---- TOOLBAR ---- */
 .toolbar { height: var(--toolbar-h); background: rgba(255, 255, 255, 0.78); border-bottom: 1px solid rgba(109, 40, 217, 0.08); display: flex; align-items: center; padding: 0 .75rem; gap: .5rem; flex-shrink: 0; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); position: relative; z-index: var(--z-toolbar); overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.02); }
@@ -1679,121 +1679,224 @@ body.sheet-only-mode .gig-floating-hud {
    RESPONSIVE OPTIMIZATIONS FOR SCREENS < 1300px (Ticket L0-4)
    Gom các nút phụ vào ⋮; Luôn hiện: Tên bài, Tông, Bộ hợp âm, Band/Nhạc, ⚡, ⋮, ◀ ▶
    ==================================================== */
+/* ====================================================
+   RESPONSIVE OPTIMIZATIONS FOR PRO BAND TOOLBAR (Ticket L0-4 & L1-3)
+   Gom các nút phụ vào ⋮; Luôn bảo toàn: Tên bài, Tông, Bộ hợp âm, Band/Nhạc, ⚡, ⋮, ◀ ▶
+   ==================================================== */
 @media (max-width: 1300px) {
   .toolbar.unified-toolbar {
     overflow-x: hidden !important;
   }
   .scroll-pill,
   .zoom-pill,
+  #btn-chord-preset,
+  #btn-chord-notation,
   #btn-add-chord-mode-bar,
   #btn-new-chord-set,
   .chord-set-count,
   #btn-transpose-reset,
+  #capo-wrap,
+  #capo-badge,
   #btn-toolbar-auth {
     display: none !important;
   }
   .menu-section-compact-only {
-    display: block;
+    display: block !important;
   }
-  .btn-gig-mode .gig-text {
+  .btn-gig-mode .gig-text,
+  .btn-follow-leader .follow-text {
     display: none !important;
   }
   .btn-gig-mode {
-    padding: 0 10px;
     min-width: 44px;
-    height: 44px !important;
-    min-height: 44px !important;
+    height: 44px;
+    min-height: 44px;
+    padding: 0 10px;
+  }
+  .btn-follow-leader {
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0 10px;
   }
   .song-info-pill {
-    max-width: 160px;
+    max-width: 170px;
   }
   .song-info-pill .song-title {
-    font-size: 0.8rem;
+    font-size: 0.82rem;
   }
   .chord-set-select {
-    max-width: 95px;
+    max-width: 90px;
   }
 }
 
-/* ====================================================
-   RESPONSIVE OPTIMIZATIONS FOR IPAD & TABLET (681px - 1024px)
-   ==================================================== */
-@media (max-width: 1024px) and (min-width: 681px) {
+/* Breakpoint iPad & Tablet (<= 1200px) */
+@media (max-width: 1200px) {
   .unified-toolbar {
     padding: 0 4px;
     gap: 3px;
     flex-wrap: nowrap;
-    overflow-x: hidden;
+    overflow-x: hidden !important;
   }
   .song-info-pill {
-    max-width: 120px;
+    max-width: 135px;
     padding: 0 6px;
-    height: 44px !important;
-    min-height: 44px !important;
+    height: 44px;
+    min-height: 44px;
   }
   .song-info-pill .song-title {
-    font-size: 0.75rem;
+    font-size: 0.78rem;
   }
   .song-info-pill .song-key-badge {
-    font-size: 0.62rem;
-    padding: 1px 3px;
+    font-size: 0.65rem;
+    padding: 1px 4px;
   }
   #capo-wrap,
   #capo-badge,
   .btn-pill-reset,
   .zoom-pill,
   .scroll-pill,
+  #btn-chord-preset,
+  #btn-chord-notation,
   .chord-set-count,
   .btn-chord-edit-pill,
   #btn-new-chord-set,
   #btn-toolbar-auth {
     display: none !important;
   }
-  .chord-set-select {
-    max-width: 80px;
-    font-size: 0.72rem;
-    height: 44px !important;
-    min-height: 44px !important;
+  .btn-instrument-role .role-label,
+  .btn-band-toggle .view-text,
+  .verse-pill .verse-mode-label {
+    display: none !important;
   }
-  .btn-gig-mode .gig-text {
+  .btn-instrument-role,
+  .btn-band-toggle {
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0 8px;
+  }
+  .chord-set-select {
+    max-width: 82px;
+    font-size: 0.72rem;
+    height: 44px;
+    min-height: 44px;
+  }
+  .btn-gig-mode .gig-text,
+  .btn-follow-leader .follow-text {
     display: none !important;
   }
   .btn-gig-mode {
-    padding: 0 10px;
     min-width: 44px;
-    height: 44px !important;
-    min-height: 44px !important;
+    height: 44px;
+    min-height: 44px;
+    padding: 0 10px;
+  }
+  .btn-follow-leader {
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0 10px;
   }
   .band-controls {
-    gap: 4px;
+    gap: 3px;
     flex-shrink: 1;
+    overflow-x: hidden !important;
   }
   .band-pill {
-    padding: 0 4px;
-    gap: 3px;
-    height: 44px !important;
-    min-height: 44px !important;
+    padding: 0 3px;
+    gap: 2px;
+    height: 44px;
+    min-height: 44px;
   }
   .toolbar-right {
-    gap: 4px;
+    gap: 3px;
   }
-  .nav-arrows .icon-btn {
-    width: 44px;
-    height: 44px !important;
-    min-width: 44px;
-    min-height: 44px !important;
-  }
-  #btn-more-options {
-    width: 44px;
-    height: 44px !important;
-    min-width: 44px;
-    min-height: 44px !important;
-  }
+  .nav-arrows .icon-btn,
+  #btn-more-options,
   .icon-btn-pill {
     width: 44px;
-    height: 44px !important;
+    height: 44px;
     min-width: 44px;
-    min-height: 44px !important;
+    min-height: 44px;
+  }
+}
+
+/* Breakpoint iPad Dọc / Tablet Hẹp (<= 880px) */
+@media (max-width: 880px) {
+  #btn-follow-leader,
+  #btn-instrument-role,
+  .verse-pill {
+    display: none !important;
+  }
+  .song-info-pill {
+    max-width: 110px;
+  }
+  .chord-set-select {
+    max-width: 75px;
+  }
+}
+
+/* Container Query đồng bộ cho .main-content (áp dụng khi mở sidebar 290px trên desktop) */
+@container mainarea (max-width: 1350px) {
+  .scroll-pill,
+  .zoom-pill,
+  #btn-chord-preset,
+  #btn-chord-notation,
+  #btn-add-chord-mode-bar,
+  #btn-new-chord-set,
+  .chord-set-count,
+  #btn-transpose-reset,
+  #capo-wrap,
+  #capo-badge,
+  #btn-toolbar-auth {
+    display: none !important;
+  }
+  .menu-section-compact-only {
+    display: block !important;
+  }
+  .btn-gig-mode .gig-text,
+  .btn-follow-leader .follow-text {
+    display: none !important;
+  }
+  .song-info-pill {
+    max-width: 160px;
+  }
+  .chord-set-select {
+    max-width: 90px;
+  }
+}
+
+@container mainarea (max-width: 1100px) {
+  .song-info-pill {
+    max-width: 130px;
+  }
+  .btn-instrument-role .role-label,
+  .btn-band-toggle .view-text,
+  .verse-pill .verse-mode-label {
+    display: none !important;
+  }
+  .btn-instrument-role,
+  .btn-band-toggle {
+    min-width: 44px;
+    padding: 0 8px;
+  }
+  .chord-set-select {
+    max-width: 80px;
+  }
+}
+
+@container mainarea (max-width: 850px) {
+  #btn-follow-leader,
+  #btn-instrument-role,
+  .verse-pill {
+    display: none !important;
+  }
+  .song-info-pill {
+    max-width: 105px;
+  }
+  .chord-set-select {
+    max-width: 72px;
   }
 }
 
@@ -2932,3 +3035,30 @@ body.dark-mode .btn-follow-leader.is-following,
 
 
 
+
+/* =============================================
+   Toolbar không tràn (≥681px): nhóm trái (tên bài) và nhóm phải
+   (Theo ca trưởng · ⚡ · ◀ ▶ · ⋮) luôn nằm trong màn hình; nhóm giữa
+   (tông, zoom, bộ hợp âm, preset, khổ, Band, vai trò...) co lại và cuộn ngang.
+   Trước đây cả thanh bị overflow:hidden nên ⚡, ◀ ▶, ⋮ bị đẩy ra ngoài iPad.
+   ============================================= */
+@media (min-width: 681px) {
+  .unified-toolbar {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
+  .unified-toolbar > .toolbar-left,
+  .unified-toolbar > .toolbar-right {
+    flex: 0 0 auto;
+  }
+  .unified-toolbar > .band-controls {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+  .unified-toolbar > .band-controls::-webkit-scrollbar { display: none; }
+  .unified-toolbar > .band-controls > * { flex-shrink: 0; }
+}

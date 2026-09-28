@@ -151,7 +151,8 @@ test.describe('L1-5 · Chế độ Sân khấu thật (Gig Mode Hardening)', () 
 
   test('5. Viewport điện thoại iPhone (390x844): Nút Thoát không bị cắt, 0 phần tử tràn khung', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('./?song=thanh-ca-001', { waitUntil: 'domcontentloaded' });
+    // Điện thoại mặc định mở chế độ Band (L-D2) → yêu cầu rõ chế độ bản nhạc.
+    await page.goto('./?song=thanh-ca-001&v=sheet', { waitUntil: 'domcontentloaded' });
 
     const osmdSvg = page.locator('#osmd-container svg').first();
     await expect(osmdSvg).toBeVisible({ timeout: 25000 });

@@ -64,6 +64,13 @@ body.stage-clean-mode .app-shell-navbar {
   display: none !important;
 }
 
+/* Ticket L1-3: Trên màn hình tablet & iPad (<= 1200px), đọc sheet chỉ dùng 1 thanh công cụ 48px duy nhất */
+@media (max-width: 1200px) {
+  .main-content > .app-shell-navbar {
+    display: none !important;
+  }
+}
+
 .shell-nav-inner {
   max-width: 100%;
   height: 100%;

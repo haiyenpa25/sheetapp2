@@ -223,8 +223,8 @@
     <div id="lyric-view-container" class="lyric-view-container hidden"></div>
   </div>
 
-  <!-- LITURGY CARD / NON-SONG PLACEHOLDER (Thẻ chờ phụng vụ — Ticket L3-4) -->
-  <div id="liturgy-card" class="liturgy-card hidden" role="region" aria-label="Tiết mục phụng vụ">
+  <!-- LITURGY CARD / NON-SONG PLACEHOLDER (Thẻ chờ chương trình — Ticket L3-4) -->
+  <div id="liturgy-card" class="liturgy-card hidden" role="region" aria-label="Tiết mục chương trình">
     <div class="liturgy-card-inner">
       <div class="liturgy-card-icon" id="lc-icon" aria-hidden="true">🙏</div>
       <div class="liturgy-card-badge" id="lc-badge">CẦU NGUYỆN</div>

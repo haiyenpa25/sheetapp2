@@ -406,6 +406,31 @@ const ToolbarController = (() => {
     document.getElementById('btn-menu-auth')?.addEventListener('click', () => {
       document.getElementById('btn-toolbar-auth')?.click();
     });
+    document.getElementById('btn-menu-chord-preset')?.addEventListener('click', () => {
+      document.getElementById('btn-chord-preset')?.click();
+      const txt = document.getElementById('chord-preset-label')?.textContent || 'Chuẩn';
+      const ml = document.getElementById('menu-chord-preset-label');
+      if (ml) ml.textContent = 'Aa ' + txt;
+    });
+    document.getElementById('btn-menu-chord-notation')?.addEventListener('click', () => {
+      document.getElementById('btn-chord-notation')?.click();
+      const txt = document.getElementById('chord-notation-label')?.textContent || 'C';
+      const ml = document.getElementById('menu-chord-notation-label');
+      if (ml) ml.textContent = '🔤 ' + txt;
+    });
+    document.getElementById('btn-menu-instrument-role')?.addEventListener('click', () => {
+      document.getElementById('btn-instrument-role')?.click();
+      const icon = document.getElementById('instrument-role-icon')?.textContent || '🎸';
+      const label = document.getElementById('instrument-role-label')?.textContent || 'Guitar';
+      const ml = document.getElementById('menu-instrument-role-label');
+      if (ml) ml.textContent = `${icon} ${label}`;
+    });
+    document.getElementById('btn-menu-verse-mode')?.addEventListener('click', () => {
+      document.getElementById('btn-verse-mode')?.click();
+      const txt = document.getElementById('verse-mode-label')?.textContent || 'Tất cả khổ';
+      const ml = document.getElementById('menu-verse-mode-label');
+      if (ml) ml.textContent = '📖 ' + txt;
+    });
   }
 
   function _debounce(fn, ms) { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); }; }

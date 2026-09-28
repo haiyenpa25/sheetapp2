@@ -198,7 +198,7 @@
               <div class="mgr-form-group">
                 <label class="mgr-label">Email nhận thông báo</label>
                 <input type="email" id="notif-email" class="mgr-input" placeholder="tenban@gmail.com">
-                <small class="text-xs text-muted">Nhận thông báo khi có lịch phụng vụ hoặc bài tập mới.</small>
+                <small class="text-xs text-muted">Nhận thông báo khi có lịch thờ phượng hoặc bài tập mới.</small>
               </div>
               <div class="mgr-form-group" style="max-width: 220px;">
                 <label class="mgr-label">Giờ yên lặng (Quiet Hours)</label>

@@ -11,7 +11,7 @@
 
 const urlParams      = new URLSearchParams(self.location.search);
 const SW_VERSION     = urlParams.get('v') || 'v5';
-const SW_MANIFEST_HASH = '38e6d0e282';
+const SW_MANIFEST_HASH = 'adf054ccf8';
 const CACHE_VENDOR   = `sheetapp-vendor-${SW_VERSION}`;
 const CACHE_APP      = `sheetapp-app-${SW_VERSION}`;
 const CACHE_MUSICXML = `sheetapp-musicxml-${SW_VERSION}`;
@@ -54,6 +54,7 @@ const PRECACHE_APP = [
   '/assets/js/core/SongLoaderCore.js',
   '/assets/js/core/OfflineSetlistManager.js',
   '/assets/js/core/ServiceWorkerManager.js',
+  '/assets/js/osmd-svg-text.js',
   '/assets/js/osmd-renderer.js',
   '/assets/js/transpose-engine.js',
   '/assets/js/display-settings.js',
@@ -323,7 +324,7 @@ async function networkFirstForNavigation(request, cacheName) {
 
 // ── Web Push Notifications (Epic 4.4) ─────────────────────────────
 self.addEventListener('push', event => {
-  let data = { title: 'SheetApp', body: 'Bạn có thông báo mới từ phụng vụ', url: SW_BASE || '/' };
+  let data = { title: 'SheetApp', body: 'Bạn có thông báo mới từ ban hát/chương trình', url: SW_BASE || '/' };
   if (event.data) {
     try {
       data = Object.assign(data, event.data.json());

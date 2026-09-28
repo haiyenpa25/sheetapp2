@@ -52,13 +52,16 @@ test.describe('L5-5: On-Demand Loading & No Hidden OSMD Render', () => {
     const svg = page.locator('#osmd-container svg');
     await expect(svg).toBeVisible({ timeout: 25000 });
 
-    // ── 1. NGHIỆM THU: SỐ LƯỢNG SCRIPT TAGS BAN ĐẦU ≤ 30 ──
-    const initialScriptCount = await page.evaluate(() => {
-      return document.querySelectorAll('script').length;
+    // ── 1. NGHIỆM THU: CÁC MODULE CHÍNH CỦA TRANG ĐÃ SẴN SÀNG ──
+    // (Ngân sách "≤ 30 script" cũ đạt được bằng cách gỡ module → mất đăng nhập, Band,
+    // setlist, metronome, dịch hợp âm. Giờ kiểm tra các module này thật sự có mặt.)
+    const missingModules = await page.evaluate(() => {
+      const names = ['Auth', 'HistoryManager', 'PageNav', 'LyricExtractor', 'Metronome', 'SetlistUI',
+        'ChordCanvasTranspose', 'ChordCanvasEdit', 'SongPreloader', 'StageLens', 'FollowLeader', 'SessionTracker'];
+      // @ts-ignore
+      return names.filter(n => typeof window[n] === 'undefined');
     });
-
-    console.log(`[L5-5 E2E] Initial Script Count in DOM: ${initialScriptCount}`);
-    expect(initialScriptCount).toBeLessThanOrEqual(30);
+    expect(missingModules).toEqual([]);
 
     // ── 2. NGHIỆM THU: KHÔNG CÒN CẢNH BÁO SkyBottomLine HOẶC "width not > 0" ──
     console.log(`[L5-5 E2E] SkyBottomLine warnings count: ${skyBottomWarnings.length}`);
@@ -114,20 +117,17 @@ test.describe('L5-5: On-Demand Loading & No Hidden OSMD Render', () => {
     expect(widthNotPositiveWarnings.length).toBe(0);
   });
 
-  test('Tải on-demand theo nhu cầu: Metronome tự động nạp dependencies khi kích hoạt', async ({ page }) => {
+  test('Audio & Metronome sẵn sàng; ScriptLoader.loadAudio() không nạp trùng', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('./?song=thanh-ca-001', { waitUntil: 'networkidle' });
 
     const svg = page.locator('#osmd-container svg');
     await expect(svg).toBeVisible({ timeout: 25000 });
 
-    // Kiểm tra ban đầu chưa nạp Metronome
-    const isMetronomeLoadedInitially = await page.evaluate(() => {
-      return typeof window.Metronome !== 'undefined' && window.ScriptLoader.isLoaded('assets/js/metronome.js');
-    });
-    expect(isMetronomeLoadedInitially).toBe(false);
+    const pageErrors = [];
+    page.on('pageerror', e => pageErrors.push(e.message));
 
-    // Kích hoạt on-demand bằng cách gọi ScriptLoader.loadAudio()
+    // Gọi loadAudio() khi module đã có sẵn: phải không nạp lại (không lỗi "already declared")
     const loadResult = await page.evaluate(async () => {
       await window.ScriptLoader.loadAudio();
       return {
@@ -140,5 +140,6 @@ test.describe('L5-5: On-Demand Loading & No Hidden OSMD Render', () => {
     expect(loadResult.metronomeDefined).toBe(true);
     expect(loadResult.toneDefined).toBe(true);
     expect(loadResult.audioPlayerDefined).toBe(true);
+    expect(pageErrors).toEqual([]);
   });
 });

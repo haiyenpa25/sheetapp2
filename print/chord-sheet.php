@@ -266,7 +266,7 @@ $pageTitle = htmlspecialchars($title) . ' — Lời & Hợp âm';
     </div>
 
     <footer class="sheet-footer">
-      <span>Thánh Ca Hội Thánh — SheetApp Phụng Vụ</span>
+      <span>Thánh Ca Hội Thánh — SheetApp Thờ Phượng</span>
       <span>In ngày: <?= date('d/m/Y H:i') ?></span>
     </footer>
   </main>

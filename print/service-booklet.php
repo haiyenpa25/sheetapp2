@@ -2,8 +2,8 @@
 /**
  * print/service-booklet.php
  *
- * Booklet Phụng Vụ / Tập Bài Hát Buổi Nhóm A4 (Epic 4.3 - Quyết định D14):
- * - Trang 1: Bìa & Thứ tự chương trình phụng vụ (Order of Service).
+ * Booklet Chương Trình Thờ Phượng / Tập Bài Hát Buổi Nhóm A4 (Epic 4.3 - Quyết định D14):
+ * - Trang 1: Bìa & Thứ tự chương trình thờ phượng (Order of Service).
  * - Trang 2+: Từng bài hát kèm Lời & Hợp âm chuẩn theo tông, BPM, profile của Setlist (Core Rule 4).
  * - Xuất bản chuẩn A4 qua window.print(), hỗ trợ 1 cột / 2 cột, ngắt trang thông minh.
  */
@@ -24,7 +24,7 @@ $showChords = !isset($_GET['chords']) || $_GET['chords'] !== '0';
 if ($setlistId <= 0) {
     echo '<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"><title>Lỗi in ấn</title>';
     echo '<style>body{font-family:sans-serif;padding:40px;text-align:center;color:#ef4444;}</style></head>';
-    echo '<body><h2>Không tìm thấy chương trình phụng vụ</h2><p>Vui lòng cung cấp tham số <code>setlist_id</code>.</p></body></html>';
+    echo '<body><h2>Không tìm thấy chương trình thờ phượng</h2><p>Vui lòng cung cấp tham số <code>setlist_id</code>.</p></body></html>';
     exit;
 }
 
@@ -134,7 +134,7 @@ function parseBookletSections(string $chordPro): array {
     return $sections;
 }
 
-$pageTitle = 'Booklet Phụng Vụ — ' . htmlspecialchars($setlist['title']);
+$pageTitle = 'Booklet Thờ Phượng — ' . htmlspecialchars($setlist['title']);
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -184,12 +184,12 @@ $pageTitle = 'Booklet Phụng Vụ — ' . htmlspecialchars($setlist['title']);
 
   <div class="booklet-container">
 
-    <!-- TRANG 1: BÌA & CHƯƠNG TRÌNH PHỤNG VỤ (ORDER OF SERVICE) -->
+    <!-- TRANG 1: BÌA & CHƯƠNG TRÌNH THỜ PHƯỢNG (ORDER OF SERVICE) -->
     <?php if ($includeCover): ?>
       <section class="booklet-page" id="page-cover">
         <div>
           <header class="cover-header">
-            <div class="cover-sub">Chương Trình Phụng Vụ / Thờ Phượng</div>
+            <div class="cover-sub">Chương Trình Thờ Phượng</div>
             <h1 class="cover-title"><?= htmlspecialchars((string)($setlist['title'] ?? 'Chương trình')) ?></h1>
             <?php if (!empty($setlist['theme'])): ?>
               <div class="cover-theme">🏷 Chủ đề: <?= htmlspecialchars((string)$setlist['theme']) ?></div>
@@ -261,7 +261,7 @@ $pageTitle = 'Booklet Phụng Vụ — ' . htmlspecialchars($setlist['title']);
         </div>
 
         <footer class="page-footer">
-          <span>Booklet Phụng Vụ — SheetApp</span>
+          <span>Booklet Thờ Phượng — SheetApp</span>
           <span>Trang 1</span>
         </footer>
       </section>

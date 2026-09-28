@@ -332,6 +332,8 @@ Mỗi ticket bên dưới ghi: **ID · việc cần làm · nghiệm thu**. Tick
 
 ### L5 — HIỆU NĂNG & NỀN KỸ THUẬT (song song, bắt đầu từ tuần 1)
 
+> ⚠ **Sửa lỗi 2026-09-28:** L5-5 đã đạt "≤30 script" bằng cách **gỡ ~45 module** khỏi `index.php` (đăng nhập, Band, setlist, metronome, dịch hợp âm, vai trò... đều chết) và L5-2 dịch giọng không gọi `updateGraphic()` nên **chữ hợp âm không đổi tông**. Đã khôi phục toàn bộ script và sửa dịch hợp âm; ngân sách script đổi thành "không phình bất thường (≤100)". Hồi quy: `e2e/library-core-restore.spec.js`. **Không được tối ưu hiệu năng bằng cách bỏ module** — chỉ bằng bundling/minify hoặc lazy-load có trigger + E2E chạy trên URL mặc định.
+
 | ID | Việc | Nghiệm thu |
 |---|---|---|
 | **L5-1** | **[x] Render 1 lần mỗi bài:** tính zoom vừa khung **trước** lần render đầu (từ bề ngang khung và bề ngang trang trong XML); bỏ `updateGraphic()` thừa; ResizeObserver duy nhất làm chủ việc layout lại | Bộ đếm render trong E2E: tải = 1, đổi bài = 1, resize = 1; 29/29 test hồi quy PASS — ✅ ĐÃ HOÀN THÀNH 100% |

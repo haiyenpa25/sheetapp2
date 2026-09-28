@@ -8,6 +8,9 @@ const ChordCanvasDots = (() => {
   const DOT_CLASS = 'cc-note-dot';
   const BTN_CLASS = 'cc-dot-btn';
 
+  const STAFF_LINE_MIN_WIDTH = 100;
+  const CHORD_GAP_RATIO = 0.35;
+
   function alignDOMChords() {
     const container = document.getElementById('osmd-container');
     if (!container) return;
@@ -32,9 +35,12 @@ const ChordCanvasDots = (() => {
     }
 
     if (!staffLineRects.length) {
-      Array.from(svg.querySelectorAll('line')).forEach(el => {
+      // OSMD 1.8.x vẽ dòng kẻ khuông bằng <path> (không có g.vf-stave / <line>),
+      // nên phải tính cả path nằm ngang dài; nếu không sẽ rơi vào fallback và hợp âm
+      // HD nằm cao hơn khuông ~76px, đè lên dòng tên tác giả.
+      Array.from(svg.querySelectorAll('line, path')).forEach(el => {
         const r = el.getBoundingClientRect();
-        if (r.width > 60 && r.height < 3 && r.top > 0) {
+        if (r.width > STAFF_LINE_MIN_WIDTH && r.height < 3 && r.top > 0) {
           staffLineRects.push(r.top - cRect.top);
         }
       });
@@ -102,7 +108,10 @@ const ChordCanvasDots = (() => {
     });
 
     for (const [sys, badges] of assigned.entries()) {
-      const fixedY = Math.round(sys.topLine - GAP_PX);
+      // top của badge = dòng kẻ trên cùng − chiều cao chữ − khe hở, để mép dưới
+      // chữ hợp âm luôn nằm ngay trên khuông (chữ đã to 28px theo preset).
+      const badgeH = Math.max(...badges.map(b => b.offsetHeight || 0), 0);
+      const fixedY = Math.round(sys.topLine - badgeH - GAP_PX * CHORD_GAP_RATIO);
       badges.sort((a, b) => (parseFloat(a.style.left) || 0) - (parseFloat(b.style.left) || 0));
       let prevRight = -Infinity;
       badges.forEach(badge => {

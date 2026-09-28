@@ -133,7 +133,8 @@ test.describe('L1-4 · Nút cảm ứng ≥ 44x44px (Chromium + WebKit)', () => 
 
   test('3. Điện thoại (390x844): Mọi nút điều khiển trên 2 hàng ≥ 44x44px và không tràn', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('./?song=thanh-ca-001', { waitUntil: 'domcontentloaded' });
+    // Điện thoại mặc định mở chế độ Band (L-D2) → yêu cầu rõ chế độ bản nhạc để đo nút.
+    await page.goto('./?song=thanh-ca-001&v=sheet', { waitUntil: 'domcontentloaded' });
     const osmdSvg = page.locator('#osmd-container svg').first();
     await expect(osmdSvg).toBeVisible({ timeout: 25000 });
 

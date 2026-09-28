@@ -1,7 +1,7 @@
 /**
  * assets/js/liturgy-card.js
  *
- * Quản lý Thẻ Chờ Phụng Vụ / Tiết mục không phải bài hát (Ticket L3-4):
+ * Quản lý Thẻ Chờ Chương Trình / Tiết mục không phải bài hát (Ticket L3-4):
  * - Hiển thị các tiết mục như: Cầu nguyện, Đọc Kinh Thánh, Thông báo, Dâng hiến, Giảng luận.
  * - Hiển thị thời lượng mục này và tổng thời lượng dự kiến của toàn bộ chương trình lễ.
  * - Tự động ẩn bản nhạc sheet và thay thế bằng thẻ chờ trang trọng.
@@ -19,7 +19,7 @@ const LiturgyCard = (() => {
     sermon: { icon: '✝️', label: 'Giảng Luận', badge: 'GIẢNG LUẬN' },
     benediction: { icon: '🕊️', label: 'Chúc Phước', badge: 'CHÚC PHƯỚC' },
     testimony: { icon: '💬', label: 'Làm Chứng', badge: 'LÀM CHỨNG' },
-    liturgy: { icon: '🕯️', label: 'Phụng Vụ', badge: 'PHỤNG VỤ' },
+    liturgy: { icon: '✝️', label: 'Chương Trình', badge: 'CHƯƠNG TRÌNH' },
     other: { icon: '⛪', label: 'Tiết Mục', badge: 'TIẾT MỤC' }
   };
 

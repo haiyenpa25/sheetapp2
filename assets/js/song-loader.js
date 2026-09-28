@@ -56,8 +56,12 @@ const SongLoader = (() => {
 
       if (preloaded && preloaded.xml) {
         xml = preloaded.xml;
-        processedXml = preloaded.processedXml || xml;
         window.ChordCanvas?.applyPreloaded?.(profileOverride, preloaded.chordsMap);
+        // processedXml của preloader được tính theo trạng thái khổ của bài TRƯỚC;
+        // phải cập nhật VerseManager theo bài mới rồi xử lý lại (áp selected_verses của setlist).
+        processedXml = _injectChords(xml);
+        if (window.VerseManager?.onSongLoaded) window.VerseManager.onSongLoaded(processedXml);
+        if (window.VerseManager?.processXml) processedXml = window.VerseManager.processXml(processedXml);
       } else {
         AppUI.setLoadingText('Đang tải dữ liệu...');
         const xmlUrl = (window.ApiService && typeof window.ApiService.resolveUrl === 'function')
@@ -214,7 +218,10 @@ const SongLoader = (() => {
 
     try {
       if (window.InstrumentMixer?.preserveState) InstrumentMixer.preserveState();
-      if (OSMDRenderer.getIsLoaded() && typeof OSMDRenderer.transpose === 'function') {
+      // Dịch nhanh in-memory chỉ khi XML không đổi. Nếu khổ/capo/bộ hợp âm đã đổi
+      // thì processedXml khác bản đang render → phải reload, nếu không thay đổi bị bỏ qua.
+      const sameXml = OSMDRenderer.getCurrentXml?.() === processedXml;
+      if (sameXml && OSMDRenderer.getIsLoaded() && typeof OSMDRenderer.transpose === 'function') {
         await OSMDRenderer.transpose(transpose);
       } else {
         await OSMDRenderer.reload(processedXml, transpose);

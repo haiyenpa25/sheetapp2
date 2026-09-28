@@ -1,6 +1,6 @@
 /**
  * service-plan-ui.js
- * Quản lý thông tin chương trình phụng vụ (Theme, Date, Time, Notes),
+ * Quản lý thông tin chương trình thờ phượng (Theme, Date, Time, Notes),
  * phân công nhân sự, in ấn chương trình A4 và copy danh sách cho Slide màn hình.
  */
 const ServicePlanUI = (() => {
@@ -133,7 +133,7 @@ const ServicePlanUI = (() => {
             <button id="btn-sp-practice-board" class="btn btn-sm btn-ghost" style="padding:3px 8px;font-size:0.72rem;border:1px solid rgba(139,92,246,0.4);color:#c084fc;" title="Xem bảng ma trận tiến độ tập luyện của ca đoàn">📊 Tiến Độ Tập</button>
           ` : ''}
           <button id="btn-sp-assign" class="btn btn-sm btn-ghost" style="padding:3px 8px;font-size:0.72rem;border:1px solid var(--border);">👥 Phân Công (${assignments.length})</button>
-          <button id="btn-sp-print-booklet" class="btn btn-sm btn-ghost" style="padding:3px 8px;font-size:0.72rem;border:1px solid rgba(16,185,129,0.4);color:#10b981;" title="In trọn bộ Booklet phụng vụ gồm bìa và các bài hát chuẩn A4">📖 In Booklet</button>
+          <button id="btn-sp-print-booklet" class="btn btn-sm btn-ghost" style="padding:3px 8px;font-size:0.72rem;border:1px solid rgba(16,185,129,0.4);color:#10b981;" title="In trọn bộ Booklet chương trình thờ phượng gồm bìa và các bài hát chuẩn A4">📖 In Booklet</button>
         </div>
       </div>
       ${themeStr}

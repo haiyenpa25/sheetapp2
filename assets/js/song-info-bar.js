@@ -91,7 +91,7 @@ const SongInfoBar = (() => {
       _songData.tempo = realSongTempo;
     }
     _render();
-    document.getElementById('song-info-strip')?.classList.remove('si-hidden');
+    // Ticket L1-3: Thông tin bài hát đã tích hợp vào Toolbar pill và popover ⓘ
   }
 
   function clearSong() {
@@ -490,7 +490,7 @@ const SongInfoBar = (() => {
     }
   }
 
-  /* Nạp thông tin lịch sử sử dụng bài hát trong phụng vụ (Tránh nhân đôi chip) */
+  /* Nạp thông tin lịch sử sử dụng bài hát trong chương trình thờ phượng (Tránh nhân đôi chip) */
   async function _loadSongUsageChip(songId) {
     if (!songId || !window.ApiService?.setlists?.songUsage) return;
     try {
@@ -508,7 +508,7 @@ const SongInfoBar = (() => {
         chip.id = 'si-usage-chip';
         chip.className = 'si-chip si-usage';
         chip.style.cssText = 'background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.25);color:#93c5fd;cursor:pointer;';
-        chip.title = `Đã dùng ${count} lần trong chương trình phụng vụ (Gần nhất: ${lastDate}). Bấm để xem chi tiết`;
+        chip.title = `Đã dùng ${count} lần trong chương trình thờ phượng (Gần nhất: ${lastDate}). Bấm để xem chi tiết`;
         chip.innerHTML = `📅 Dùng ${count} lần`;
         chip.addEventListener('click', () => {
           const historyList = (res.data.history || []).map(h => `• ${h.service_date}: ${h.service_title || 'Chương trình'} (Tone: ${h.transpose_key >= 0 ? '+' : ''}${h.transpose_key})`).join('\n');

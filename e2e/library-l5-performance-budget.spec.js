@@ -13,7 +13,8 @@ const { test, expect } = require('@playwright/test');
  * - BUDGET_RENDER_COUNT:      === 1 (Số lần gọi render OSMD khi đổi bài)
  * - BUDGET_NETWORK_REQUESTS:  ≤ 4 (Số request mạng khi đổi bài)
  * - BUDGET_TRANSPOSE_MS:      ≤ 300 ms (Thời gian dịch tông tức thời)
- * - BUDGET_INITIAL_SCRIPTS:   ≤ 30 (Số script nạp ban đầu)
+ * - BUDGET_INITIAL_SCRIPTS:   ≤ 100 (chỉ chặn nạp trùng/phình bất thường; ngân sách ≤ 30 cũ
+ *                             đã bị bỏ vì đạt được bằng cách gỡ module chức năng)
  */
 
 const BUDGETS = {
@@ -22,7 +23,7 @@ const BUDGETS = {
   RENDER_COUNT: 1,
   NETWORK_REQUESTS: 4,
   TRANSPOSE_MS: 300,
-  INITIAL_SCRIPTS: 30,
+  INITIAL_SCRIPTS: 100,
 };
 
 test.describe('L5-9 · Ngân Sách Hiệu Năng Trong CI (Performance Budget Quality Gate)', () => {
@@ -36,7 +37,7 @@ test.describe('L5-9 · Ngân Sách Hiệu Năng Trong CI (Performance Budget Qua
     });
   });
 
-  test('1. [Budget B1 & B6] Thời gian hiện bản nhạc lần đầu ≤ 4500ms và số script ban đầu ≤ 30', async ({ page }) => {
+  test('1. [Budget B1 & B6] Thời gian hiện bản nhạc lần đầu ≤ 4500ms và số script không phình bất thường', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
 
     const startTime = Date.now();

@@ -11,6 +11,9 @@ const StageLens = (() => {
   'use strict';
 
   const STORAGE_KEY = 'sheetapp_instrument_role';
+  const HINT_KEY = 'sheetapp_role_hint_shown';
+  const DEFAULT_ROLE = 'keyboard';
+  const HINT_DELAY_MS = 1500;
 
   const ROLES = [
     { id: 'guitar',   label: 'Guitar',   icon: '🎸', desc: 'Lời & Hợp âm chữ / Thế bấm Capo' },
@@ -20,7 +23,7 @@ const StageLens = (() => {
     { id: 'vocals',   label: 'Hát',      icon: '🎤', desc: 'Một khổ, giai điệu, ẩn khuông Fa' },
   ];
 
-  let _currentRole = 'guitar';
+  let _currentRole = DEFAULT_ROLE;
 
   function getRoles() {
     return ROLES.map(r => ({ ...r }));
@@ -265,6 +268,16 @@ const StageLens = (() => {
     }
   }
 
+  function _showFirstRunHint() {
+    try {
+      if (localStorage.getItem(HINT_KEY)) return;
+      localStorage.setItem(HINT_KEY, '1');
+    } catch (_) { return; }
+    setTimeout(() => {
+      window.AppUI?.showToast?.('🎹 Đang xem như Keyboard — bấm nút vai trò trên thanh công cụ để chọn nhạc cụ của bạn', 'info');
+    }, HINT_DELAY_MS);
+  }
+
   function init() {
     let savedRole = null;
     if (typeof localStorage !== 'undefined') {
@@ -276,14 +289,10 @@ const StageLens = (() => {
     if (savedRole && ROLES.some(r => r.id === savedRole)) {
       setRole(savedRole, false, false);
     } else {
-      // Lần đầu mở trên thiết bị: mặc định là Guitar và hiển thị picker
-      setRole('guitar', false, false);
-      // Hiển thị picker nhẹ sau khi trang nạp xong
-      setTimeout(() => {
-        if (!localStorage.getItem(STORAGE_KEY)) {
-          showPicker(true);
-        }
-      }, 600);
+      // Lần đầu mở trên thiết bị: dùng vai trò trung tính (bản nhạc đầy đủ + hợp âm)
+      // và KHÔNG tự bật modal — modal chặn màn hình khi mở link bài hát trên sân khấu.
+      setRole(DEFAULT_ROLE, false, false);
+      _showFirstRunHint();
     }
 
     // Gắn sự kiện cho nút 1-icon trên Toolbar

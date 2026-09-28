@@ -224,11 +224,7 @@ const OSMDRenderer = (() => {
 
       osmd.zoom = currentZoom;
       _applyCompactMode();
-      
-      if (transposeValue !== 0 && osmd.Sheet && opensheetmusicdisplay.TransposeCalculator) {
-          osmd.TransposeCalculator = new opensheetmusicdisplay.TransposeCalculator();
-          osmd.Sheet.Transpose = transposeValue;
-      }
+      _applyTranspose(transposeValue);
 
       refreshRules();
       if (!_canRender()) {
@@ -262,6 +258,18 @@ const OSMDRenderer = (() => {
    * @param {string} xmlString - Nội dung XML đã được xử lý
    * @param {number} transposeValue - Số nửa cung để dịch
    */
+  // osmd.load() đã dựng GraphicalMusicSheet: chỉ gán Transpose rồi render() thì nốt đổi
+  // nhưng chữ hợp âm giữ tông cũ → phải updateGraphic() để TransposeCalculator áp lên hợp âm.
+  function _applyTranspose(transposeValue, force = false) {
+    if (!osmd?.Sheet || !opensheetmusicdisplay.TransposeCalculator) return;
+    if (transposeValue === 0 && !force) return;
+    if (!osmd.TransposeCalculator) {
+      osmd.TransposeCalculator = new opensheetmusicdisplay.TransposeCalculator();
+    }
+    osmd.Sheet.Transpose = transposeValue;
+    osmd.updateGraphic?.();
+  }
+
   async function reload(xmlString, transposeValue = 0) {
     if (!osmd) throw new Error('OSMD chưa init');
     const token = ++_renderToken;
@@ -274,11 +282,7 @@ const OSMDRenderer = (() => {
       osmd.zoom = currentZoom;
       if (window.InstrumentMixer?.restoreState) window.InstrumentMixer.restoreState();
       _applyCompactMode();
-
-      if (transposeValue !== 0 && osmd.Sheet && opensheetmusicdisplay.TransposeCalculator) {
-          osmd.TransposeCalculator = new opensheetmusicdisplay.TransposeCalculator();
-          osmd.Sheet.Transpose = transposeValue;
-      }
+      _applyTranspose(transposeValue);
 
       refreshRules();
       _forceLayoutRecalc();
@@ -314,12 +318,7 @@ const OSMDRenderer = (() => {
     if (!osmd || !osmd.Sheet) throw new Error('OSMD chưa load Sheet để transpose');
     const token = ++_renderToken;
     try {
-      if (opensheetmusicdisplay.TransposeCalculator) {
-        if (!osmd.TransposeCalculator) {
-          osmd.TransposeCalculator = new opensheetmusicdisplay.TransposeCalculator();
-        }
-        osmd.Sheet.Transpose = transposeValue;
-      }
+      _applyTranspose(transposeValue, true);
       refreshRules();
       _forceLayoutRecalc();
       if (!_canRender()) {
@@ -407,6 +406,11 @@ const OSMDRenderer = (() => {
   function _debounce(fn, ms) { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); }; }
 
   /** Tinh chỉnh title SVG sau render — ẩn title bị duplicate, style đẹp hơn */
+  const _svgText = () => (typeof OSMDSvgText !== 'undefined' ? OSMDSvgText : null);
+  const CHORD_TEXT_REGEX = { test: s => !!_svgText()?.CHORD_TEXT_REGEX.test(s) };
+  const _getMetaTextNodes = () => _svgText()?.getMetaTextNodes(osmd) || { title: null, meta: [] };
+  const _getLyricTextNodes = () => _svgText()?.getLyricTextNodes(osmd) || new Set();
+
   function _compactTitleSVG() {
     if (_titleCompacted) return;
     const container = document.getElementById(containerId);
@@ -417,11 +421,23 @@ const OSMDRenderer = (() => {
     const texts = Array.from(svg.querySelectorAll('text')).filter(t => !(t.getAttribute('font-family') || '').includes('OSMDChordFont'));
     if (!texts.length) { _titleCompacted = true; return; }
 
-    let maxSize = 0, titleEl = null;
-    texts.forEach(t => {
-      const fs = parseFloat(t.getAttribute('font-size') || '0');
-      if (fs > maxSize) { maxSize = fs; titleEl = t; }
-    });
+    // Ưu tiên node thật của OSMD. Đoán "chữ to nhất = tiêu đề" sai khi hợp âm
+    // được phóng to (preset Sân khấu) — hợp âm đầu tiên bị gắn nhầm class tiêu đề.
+    const { title: graphicTitle, meta: metaNodes } = _getMetaTextNodes();
+    let titleEl = graphicTitle;
+    let maxSize = titleEl ? parseFloat(titleEl.getAttribute('font-size') || '0') : 0;
+    if (!titleEl) {
+      // OSMD không vẽ tiêu đề (vd. chế độ điện thoại) → chỉ nhận chữ thật sự lớn hơn lời,
+      // có ≥3 ký tự chữ; nếu không có thì bỏ qua (tránh gắn nhầm dấu "-" hay hợp âm).
+      const lyricNodes = _getLyricTextNodes();
+      const lyricFs = Math.max(0, ...[...lyricNodes].map(t => parseFloat(t.getAttribute('font-size') || '0')));
+      texts.forEach(t => {
+        const s = t.textContent.trim();
+        if (lyricNodes.has(t) || CHORD_TEXT_REGEX.test(s) || s.length < 3 || !/\p{L}{2}/u.test(s)) return;
+        const fs = parseFloat(t.getAttribute('font-size') || '0');
+        if (fs > lyricFs + 2 && fs > maxSize) { maxSize = fs; titleEl = t; }
+      });
+    }
 
     if (titleEl) {
       titleEl.classList.add('osmd-title-text');
@@ -435,16 +451,14 @@ const OSMDRenderer = (() => {
 
       const isMobile = typeof window !== 'undefined' && window.innerWidth <= 680;
       const titleContent = (titleEl.querySelector('tspan') || titleEl).textContent.trim().toLowerCase();
-      const titleY = parseFloat(titleEl.getAttribute('y') || '0');
       texts.forEach(t => {
         if (t === titleEl) return;
-        const content = t.textContent.trim().toLowerCase(), fs = parseFloat(t.getAttribute('font-size') || '0'), y = parseFloat(t.getAttribute('y') || '0');
+        const content = t.textContent.trim().toLowerCase(), fs = parseFloat(t.getAttribute('font-size') || '0');
         if (content === titleContent && fs < maxSize) t.style.display = 'none';
-        if (isMobile && fs < maxSize && Math.abs(y - titleY) < 160) {
-          t.classList.add('osmd-meta-text');
-          t.style.display = 'none';
-        }
       });
+      // Điện thoại: chỉ ẩn dòng tác giả/lời/bản quyền. Trước đây ẩn mọi chữ trong
+      // vòng 160 đơn vị quanh tiêu đề → mất luôn khổ 1–3 của hàng nhạc đầu tiên.
+      if (isMobile) metaNodes.forEach(t => { t.classList.add('osmd-meta-text'); t.style.display = 'none'; });
     }
 
     svg.querySelectorAll('rect').forEach(rect => {
@@ -483,11 +497,13 @@ const OSMDRenderer = (() => {
         : {};
       const chordSet = new Set(Object.values(xmlChordMap).map(c => String(c).trim()));
 
-      const CHORD_REGEX = /^[A-G][b#]?(m|maj|min|dim|aug|sus|add|M)?[0-9]?(\/[A-G][b#]?)?$/;
+      // Âm tiết lời như "A" (A-men) khớp regex hợp âm → phải loại trừ node lời trước.
+      const lyricNodes = _getLyricTextNodes();
 
       const texts = Array.from(svg.querySelectorAll('text'));
       texts.forEach(t => {
         if (t.classList.contains('osmd-title-text')) return;
+        if (lyricNodes.has(t)) return;
         if (t.parentElement && t.parentElement.classList.contains('vf-lyric')) return;
 
         const txt = t.textContent.trim();
@@ -495,7 +511,7 @@ const OSMDRenderer = (() => {
 
         const ff = t.getAttribute('font-family') || '';
         const isChordFont = ff.includes('OSMDChordFont');
-        const isKnownChord = chordSet.has(txt) || (CHORD_REGEX.test(txt) && !/^\d+$/.test(txt));
+        const isKnownChord = chordSet.has(txt) || (CHORD_TEXT_REGEX.test(txt) && !/^\d+$/.test(txt));
 
         if (isChordFont || isKnownChord) {
           t.classList.add('osmd-chord-symbol', 'osmd-chord-text');

@@ -34,43 +34,31 @@ echo "=== SUITE L5-5: Tải theo nhu cầu & Không render khi khung ẩn ===\n"
 
 $baseDir = dirname(__DIR__);
 
-// ── 1. KIỂM THỬ SỐ LƯỢNG SCRIPT TAGS BAN ĐẦU (Nghiệm thu <= 30 script tags) ──
-echo "\n--- 1. Nghiệm thu Script Tags trong index.php ---\n";
+// ── 1. MODULE BẮT BUỘC CỦA TRANG THƯ VIỆN ──
+// Ngân sách "<= 30 script" cũ đạt được bằng cách gỡ module → mất đăng nhập, Band, setlist,
+// metronome, dịch hợp âm, vai trò... Giờ kiểm tra ngược lại: các module này PHẢI được nạp.
+echo "\n--- 1. Module bắt buộc được nạp trong index.php ---\n";
 
 ob_start();
 $_SERVER['SCRIPT_NAME'] = '/index.php';
 include $baseDir . '/index.php';
 $html = ob_get_clean();
 
-preg_match_all('/<script\b/i', $html, $scriptMatches);
-$scriptCount = count($scriptMatches[0]);
+preg_match_all('/<script\b[^>]*\bsrc="([^"]+)"/i', $html, $scriptMatches);
+$allScriptSrcs = implode("\n", $scriptMatches[1]);
 
-it("Số thẻ <script> ban đầu trong index.php phải <= 30 (Thực tế: {$scriptCount})", $scriptCount <= 30 && $scriptCount > 0, true);
-
-// Kiểm tra danh sách script tĩnh KHÔNG chứa các module nặng cần nạp on-demand
-$heavyScripts = [
-    'Tone.js',
-    'OsmdAudioPlayer.min.js',
-    'admin-ui.js',
-    'importer.js',
-    'setlist-ui.js',
-    'setlist-player.js',
-    'guitar-lens.js',
-    'bass-lens.js',
-    'drums-lens.js',
-    'vocals-lens.js',
-    'HelpModal.js',
-    'QuickNumpadModal.js',
-    'live-sync.js',
-    'follow-leader.js'
+$requiredScripts = [
+    'auth.js', 'history-manager.js', 'page-nav.js', 'url-state.js', 'session-tracker.js',
+    'lyric-extractor.js', 'metronome.js', 'audio-player.js', 'auto-scroller.js',
+    'setlist-ui.js', 'setlist-player.js', 'chord-canvas-transpose.js', 'chord-canvas-edit.js',
+    'song-preloader.js', 'stage-lens.js', 'guitar-lens.js', 'bass-lens.js', 'drums-lens.js',
+    'vocals-lens.js', 'harmonic-numeral.js', 'follow-leader.js', 'core/AppShell.js',
+    'modals/HelpModal.js', 'modals/QuickNumpadModal.js', 'osmd-svg-text.js'
 ];
-
-$allScriptTags = implode("\n", $scriptMatches[0]);
-
-foreach ($heavyScripts as $scriptName) {
-    $contains = strpos($allScriptTags, $scriptName) !== false;
-    it("index.php ban đầu KHÔNG chứa script on-demand: {$scriptName}", !$contains, true);
+foreach ($requiredScripts as $scriptName) {
+    it("index.php nạp module bắt buộc: {$scriptName}", strpos($allScriptSrcs, $scriptName) !== false, true);
 }
+it("index.php không còn nhánh ?all_scripts ẩn module", strpos(file_get_contents($baseDir . '/index.php'), 'all_scripts') === false, true);
 
 // Kiểm tra includes/toolbar.php và includes/app_nav.php không chứa thẻ <script>
 $toolbarContent = file_get_contents($baseDir . '/includes/toolbar.php');

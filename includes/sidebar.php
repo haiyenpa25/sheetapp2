@@ -60,15 +60,15 @@
       </div>
 
       <div id="season-filter-wrap" class="sidebar-filter-item">
-        <label for="season-filter" class="sidebar-filter-label">Mùa phụng vụ:</label>
-        <select id="season-filter" class="form-input select-toolbar sidebar-filter-select" title="Lọc theo Mùa Phụng Vụ" aria-label="Lọc theo mùa phụng vụ">
+        <label for="season-filter" class="sidebar-filter-label">Mùa Lễ:</label>
+        <select id="season-filter" class="form-input select-toolbar sidebar-filter-select" title="Lọc theo Mùa Lễ" aria-label="Lọc theo mùa lễ">
           <option value="">Tất cả Mùa Lễ</option>
         </select>
       </div>
 
       <div id="theme-filter-wrap" class="sidebar-filter-item">
         <label for="theme-filter" class="sidebar-filter-label">Chủ đề:</label>
-        <select id="theme-filter" class="form-input select-toolbar sidebar-filter-select" title="Lọc theo Chủ Đề Phụng Vụ" aria-label="Lọc theo chủ đề phụng vụ">
+        <select id="theme-filter" class="form-input select-toolbar sidebar-filter-select" title="Lọc theo Chủ Đề Thờ Phượng" aria-label="Lọc theo chủ đề thờ phượng">
           <option value="">Tất cả Chủ Đề</option>
         </select>
       </div>

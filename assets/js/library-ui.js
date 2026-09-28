@@ -319,7 +319,7 @@ const LibraryUI = (() => {
       quickJumpEl.style.display = (mode === 'num' && !q && !cat && !season && !theme) ? '' : 'none';
     }
 
-    // Nếu có từ khóa hoặc bộ lọc phụng vụ -> gọi API FTS5
+    // Nếu có từ khóa hoặc bộ lọc mùa lễ -> gọi API FTS5
     if (q || season || theme) {
       try {
         const res = await window.ApiService?.songs?.search?.(q, { season, theme });
@@ -334,7 +334,7 @@ const LibraryUI = (() => {
           } else if (!q) {
             list = _sortSongs(list);
           }
-          render(list, { isSearch: !!q, emptyMsg: q ? `Không tìm thấy "${q}"` : 'Không có bài hát phù hợp', emptyHint: 'Thử đổi mùa phụng vụ hoặc từ khóa khác' });
+          render(list, { isSearch: !!q, emptyMsg: q ? `Không tìm thấy "${q}"` : 'Không có bài hát phù hợp', emptyHint: 'Thử đổi mùa lễ hoặc từ khóa khác' });
           return;
         }
       } catch (err) { /* fallback local */ }

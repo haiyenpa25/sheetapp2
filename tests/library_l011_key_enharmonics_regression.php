@@ -45,7 +45,9 @@ $keyServiceLines = count(file($keyServicePath));
 check($keyServiceLines > 0 && $keyServiceLines < 600, 'key_service_line_budget', "assets/js/key-service.js có {$keyServiceLines} dòng (< 600 dòng)");
 
 $indexContent = file_get_contents(__DIR__ . '/../index.php');
-check(strpos($indexContent, "jsTag('key-service.js')") !== false, 'index_includes_key_service', 'index.php nạp key-service.js');
+// Trang nạp bản KeyService chuẩn duy nhất ở core/ (bản assets/js/key-service.js cùng API,
+// dùng guard `window.KeyService ||` nên nạp thêm sẽ không có tác dụng).
+check(strpos($indexContent, "jsTag('core/KeyService.js'") !== false, 'index_includes_key_service', 'index.php nạp core/KeyService.js');
 
 // ── 2. Logic & Rule verification via Node.js ──────────────────
 $nodeCmd = 'node -e "'

@@ -1,4 +1,4 @@
-    <!-- ================= TAB 6: THỐNG KÊ PHỤNG VỤ & LỊCH SỬ SỬ DỤNG BÀI (EPIC 4.3) ================= -->
+    <!-- ================= TAB 6: THỐNG KÊ THỜ PHƯỢNG & LỊCH SỬ SỬ DỤNG BÀI (EPIC 4.3) ================= -->
     <section id="tab-usage" class="mgr-tab-pane">
       <!-- Filter Bar -->
       <div class="mgr-pane-filter-bar" style="margin-bottom: 16px;">
@@ -16,7 +16,7 @@
           <div class="kpi-icon">⛪</div>
           <div class="kpi-info">
             <div class="kpi-value" id="stat-usage-services">0</div>
-            <div class="kpi-label">Buổi Lễ Phụng Vụ</div>
+            <div class="kpi-label">Buổi Nhóm Thờ Phượng</div>
           </div>
         </div>
         <div class="mgr-kpi-card">
@@ -92,13 +92,13 @@
       <!-- Bảng 3: Nhật Ký Sử Dụng Bài Hát Gần Nhất -->
       <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:16px;">
         <h4 style="margin-bottom:12px;font-size:0.95rem;font-weight:700;display:flex;align-items:center;gap:6px;">
-          <span>📅</span> Nhật Ký Phụng Vụ Gần Đây
+          <span>📅</span> Nhật Ký Thờ Phượng Gần Đây
         </h4>
         <table class="mgr-table" style="font-size:0.82rem;">
           <thead>
             <tr>
               <th style="width:100px;">Ngày Diễn Ra</th>
-              <th>Buổi Lễ / Phụng Vụ</th>
+              <th>Buổi Nhóm / Thờ Phượng</th>
               <th>Bài Hát Đã Sử Dụng</th>
               <th style="width:110px;text-align:center;">Tông Biểu Diễn</th>
               <th style="width:85px;text-align:center;">Booklet</th>

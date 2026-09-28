@@ -65,6 +65,7 @@ $appAssets = [
     'assets/js/core/ServiceWorkerManager.js',
 
     // Renderers & UI Controllers
+    'assets/js/osmd-svg-text.js',
     'assets/js/osmd-renderer.js',
     'assets/js/transpose-engine.js',
     'assets/js/display-settings.js',

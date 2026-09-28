@@ -13,7 +13,7 @@
       <div class="mgr-kpi-icon icon-cat">📂</div>
       <div class="mgr-kpi-data">
         <span class="mgr-kpi-value" id="kpi-total-cats">...</span>
-        <span class="mgr-kpi-label">Thể Loại Phụng Vụ</span>
+        <span class="mgr-kpi-label">Thể Loại Thờ Phượng</span>
       </div>
       <span class="mgr-kpi-badge">Phân Loại Đa Tầng</span>
     </div>

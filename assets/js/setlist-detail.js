@@ -380,7 +380,7 @@ const SetlistDetail = (() => {
         const usageCheck = await window.ApiService.setlists.checkRecentUsage(songId, 4);
         const checkData = usageCheck?.data || usageCheck;
         if (checkData && checkData.is_recent) {
-          const warningText = `⚠️ Lưu ý lịch sử sử dụng bài hát:\nBài "${songName}" đã được dùng cách đây ${checkData.weeks_ago} tuần (${checkData.last_used_date} — "${checkData.service_title}").\n\n(Hệ thống không chặn — bạn vẫn có thể thêm bài theo nhu cầu phụng vụ).\nBạn có muốn tiếp tục thêm vào chương trình?`;
+          const warningText = `⚠️ Lưu ý lịch sử sử dụng bài hát:\nBài "${songName}" đã được dùng cách đây ${checkData.weeks_ago} tuần (${checkData.last_used_date} — "${checkData.service_title}").\n\n(Hệ thống không chặn — bạn vẫn có thể thêm bài theo nhu cầu chương trình thờ phượng).\nBạn có muốn tiếp tục thêm vào chương trình?`;
           if (!confirm(warningText)) {
             return;
           }
