@@ -127,7 +127,9 @@ const LibraryUI = (() => {
     if (urlSongId) selectSong(urlSongId, false);
   }
 
-  const ITEM_H = 38, V_BUFFER = 6;
+  // ITEM_H: chiều cao mỗi song-item tương ứng CSS compact desktop (28px) vs mobile (38px)
+  const ITEM_H = window.innerWidth >= 1024 ? 28 : 38, V_BUFFER = 6;
+
   let _virtualSongs = null, _virtualRaf = null, _vScrollBound = false;
 
   function _renderVirtualChunk() {
