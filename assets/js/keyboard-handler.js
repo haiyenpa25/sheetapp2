@@ -174,7 +174,13 @@ const KeyboardHandler = (() => {
       case 'd': case 'D': document.getElementById('btn-dark-toggle')?.click(); break;
       case '#':
         e.preventDefault();
-        window.QuickNumpadModal?.toggle?.();
+        if (!window.QuickNumpadModal && window.ScriptLoader?.loadModal) {
+          window.ScriptLoader.loadModal('numpad').then(() => {
+            window.QuickNumpadModal?.toggle?.();
+          });
+        } else {
+          window.QuickNumpadModal?.toggle?.();
+        }
         break;
       case '+': case '=': if (e.ctrlKey) { e.preventDefault(); _adjustZoom(+10); } break;
       case '-':           if (e.ctrlKey) { e.preventDefault(); _adjustZoom(-10); } break;

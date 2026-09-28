@@ -182,6 +182,12 @@
 
     // Bind grid buttons
     _modal.querySelectorAll('.btn-numpad-key').forEach(btn => {
+      btn.addEventListener('pointerdown', (e) => {
+        if (typeof btn.setPointerCapture === 'function' && e.pointerId !== undefined) {
+          try { btn.setPointerCapture(e.pointerId); } catch (err) {}
+        }
+      });
+
       btn.addEventListener('click', (e) => {
         if (e) {
           e.preventDefault();

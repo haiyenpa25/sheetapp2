@@ -195,7 +195,28 @@ const ScriptLoader = (() => {
       }
     }, true);
 
-    // 4. Keyboard shortcuts on-demand loader
+    // 4. Modal buttons on-demand loader (#btn-quick-numpad, #btn-help)
+    document.addEventListener('click', async (e) => {
+      const btnNumpad = e.target.closest('#btn-quick-numpad');
+      if (btnNumpad && !window.QuickNumpadModal) {
+        e.preventDefault();
+        e.stopPropagation();
+        await loadModal('numpad');
+        window.QuickNumpadModal?.open?.();
+        return;
+      }
+
+      const btnHelp = e.target.closest('#btn-help');
+      if (btnHelp && !window.HelpModal) {
+        e.preventDefault();
+        e.stopPropagation();
+        await loadModal('help');
+        window.HelpModal?.open?.();
+        return;
+      }
+    }, true);
+
+    // 5. Keyboard shortcuts on-demand loader
     document.addEventListener('keydown', async (e) => {
       const tag = document.activeElement?.tagName?.toLowerCase();
       if (['input','textarea','select'].includes(tag)) return;
@@ -207,13 +228,17 @@ const ScriptLoader = (() => {
             window.Metronome.toggle();
           }
         }
-      } else if (e.key === 'n' || e.key === 'N') {
+      } else if (e.key === '#' || e.key === 'n' || e.key === 'N') {
         if (!window.QuickNumpadModal) {
+          e.preventDefault();
+          e.stopPropagation();
           await loadModal('numpad');
           window.QuickNumpadModal?.open?.();
         }
       } else if (e.key === '?') {
         if (!window.HelpModal) {
+          e.preventDefault();
+          e.stopPropagation();
           await loadModal('help');
           window.HelpModal?.open?.();
         }

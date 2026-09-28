@@ -238,10 +238,18 @@
       });
     });
 
-    // 2. Click ngoài backdrop để đóng modal
+    // 2. Click ngoài backdrop để đóng modal an toàn
+    let _backdropDownTarget = null;
+    document.addEventListener('pointerdown', (e) => {
+      _backdropDownTarget = e.target;
+    }, true);
+    document.addEventListener('mousedown', (e) => {
+      _backdropDownTarget = e.target;
+    }, true);
+
     document.querySelectorAll('.modal-overlay, .mgr-modal-overlay, .stage-modal-overlay').forEach(overlay => {
       overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) {
+        if (e.target === overlay && (_backdropDownTarget === overlay || !_backdropDownTarget)) {
           close(overlay);
         }
       });
