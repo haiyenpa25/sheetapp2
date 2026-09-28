@@ -92,17 +92,7 @@
     <p id="loading-text" class="skeleton-loading-text">Đang tải sheet nhạc...</p>
   </div>
 
-  <!-- DUMMY HIDDEN PAGE BAR (Để JS cũ không bị lỗi khi tìm element) -->
-  <div id="page-bar" class="page-bar hidden" style="display:none !important;" aria-hidden="true">
-    <span id="page-indicator" style="display:none;">1 / 1</span>
-    <button id="btn-page-prev" style="display:none;"></button>
-    <button id="btn-page-next" style="display:none;"></button>
-    <button id="btn-perf-notes" style="display:none;"></button>
-    <button id="btn-add-chord-mode" style="display:none;"></button>
-    <span id="add-chord-hint" style="display:none;"></span>
-    <button id="btn-add-annotate-mode" style="display:none;"></button>
-    <span id="add-annotate-hint" style="display:none;"></span>
-  </div>
+  <!-- Ticket L5-8: Đã loại bỏ 9 phần tử giả legacy ID của page-bar -->
 
   <!-- HANDS-FREE EDGE-TAP & CENTER-TAP ZONES FOR GIG / BAND PLAYING (Ticket L1-5) -->
   <div id="edge-tap-prev" class="edge-tap-zone edge-tap-left" title="Chạm mép trái: Lật trang trước (PageUp)"></div>

@@ -1,17 +1,17 @@
 <!-- ===== ADMIN CONSOLE MODAL ===== -->
 <div id="admin-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
-  <div class="modal-box" style="max-width: 900px; width: 95%; height: 85vh; display: flex; flex-direction: column; overflow: hidden; padding: 0;">
-    <div class="modal-header" style="flex-shrink: 0; border-bottom: 1px solid var(--border); padding: 1rem 1.5rem;">
-      <h3 id="admin-modal-title" style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">⚙️ Bảng Điều Khiển Quản Trị</h3>
+  <div class="modal-box modal-box admin-modal-box">
+    <div class="modal-header" class="modal-header admin-modal-header">
+      <h3 id="admin-modal-title" class="m-0 d-flex items-center gap-2">⚙️ Bảng Điều Khiển Quản Trị</h3>
       <button id="btn-close-admin" class="icon-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     
-    <div class="modal-body" style="padding: 0; display: flex; flex: 1; min-height: 0; flex-direction: row; align-items: stretch;">
+    <div class="modal-body modal-body admin-modal-body">
       
       <!-- ADMIN SIDEBAR -->
-      <div class="admin-sidebar" style="width: 220px; background: var(--bg-surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; padding-top: 0.5rem;">
+      <div class="admin-sidebar" class="admin-sidebar">
         <button class="admin-tab-btn active" data-target="admin-tab-import">📥 Nạp Dữ Liệu (Import)</button>
         <button class="admin-tab-btn" data-target="admin-tab-categories">📂 Thể Loại Nhạc</button>
         <button class="admin-tab-btn" data-target="admin-tab-songs">🎼 Cơ Sở Bài Hát</button>
@@ -20,16 +20,16 @@
       </div>
 
       <!-- ADMIN CONTENT AREA -->
-      <div class="admin-content" style="flex: 1; padding: 1.5rem; overflow-y: auto; background: var(--bg-overlay);">
+      <div class="admin-content" class="admin-content">
 
         
         <!-- =============================================
              1. IMPORT & OMR (Kế thừa logic cũ của importer.js)
              ============================================= -->
         <div id="admin-tab-import" class="admin-panel">
-          <h4 style="margin-top:0; margin-bottom: 1rem;">Nạp Bài Hát Mới</h4>
+          <h4 class="mt-0 mb-4">Nạp Bài Hát Mới</h4>
           
-          <div class="tab-switcher" id="import-tabs" style="margin-bottom: 1rem; border-bottom: 1px solid var(--border); display: flex; gap: 1rem; padding-bottom: 0.5rem;">
+          <div class="tab-switcher" id="import-tabs" class="tab-switcher admin-import-tabs">
             <button class="tab-btn active" data-tab="url">🌐 URL Thánh Ca</button>
             <button class="tab-btn" data-tab="upload">📁 Upload File</button>
             <button class="tab-btn" data-tab="direct">🔗 URL XML</button>
@@ -218,7 +218,7 @@
              5. QUẢN LÝ TÀI KHOẢN NGƯỜI DÙNG (USERS)
              ============================================= -->
         <div id="admin-tab-users" class="admin-panel hidden">
-          <h4 style="margin-top:0; margin-bottom: 1rem;">🔐 Quản Lý & Tạo Tài Khoản Thành Viên</h4>
+          <h4 class="mt-0 mb-4">🔐 Quản Lý & Tạo Tài Khoản Thành Viên</h4>
           
           <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
             <h5 style="margin-top: 0; margin-bottom: 0.75rem;">➕ Tạo Tài Khoản Mới</h5>

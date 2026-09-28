@@ -3,6 +3,32 @@
    Sheet Viewer, OSMD, Chord Features, Page Bar
    ============================================= */
 
+/* ─── TOOLBAR PRO BAND STYLES (TICKET L5-8) ───────────────────────── */
+.btn-song-info-popover { margin-left: 2px; }
+.song-info-popover-icon { font-weight: 800; font-size: 0.95rem; font-family: serif; }
+.btn-chord-preset, .btn-chord-notation, .btn-instrument-role { cursor: pointer; padding: 0 8px; }
+.preset-icon { font-weight: 800; font-size: 0.95rem; letter-spacing: -0.5px; }
+.preset-label { font-size: 0.72rem; margin-left: 2px; opacity: 0.85; }
+.chord-notation-label { font-size: 0.76rem; font-weight: 700; margin-left: 2px; }
+.verse-icon { font-size: 0.88rem; }
+.verse-mode-label { font-size: 0.76rem; font-weight: 700; }
+.verse-nav-controls { display: inline-flex; align-items: center; gap: 2px; }
+.verse-indicator { font-size: 0.74rem; font-weight: 800; font-family: var(--font-mono); min-width: 26px; text-align: center; }
+.role-icon { font-size: 0.95rem; }
+.role-label { font-size: 0.72rem; margin-left: 2px; }
+.more-options-group { position: relative; }
+.icon-13 { width: 13px; height: 13px; }
+.icon-16 { width: 16px; height: 16px; }
+.audio-settings-panel { padding: 6px 10px; border-bottom: 1px solid var(--border); }
+.compact-settings-panel { padding: 4px 10px; font-size: 0.76rem; }
+.dropdown-song-versions { min-width: 240px; padding: 4px 0; }
+.menu-compact-controls { padding: 6px 10px; border-bottom: 1px solid var(--border); }
+.menu-zoom-val { font-size: 0.75rem; font-weight: 700; min-width: 36px; text-align: center; }
+.btn-menu-compact-action { padding: 2px 8px; margin: 0; }
+.select-menu-compact { font-size: 0.72rem; padding: 1px 4px; margin-left: 6px; }
+.fs-sm-p { font-size: 0.85rem; }
+.fs-md-p { font-size: 0.95rem; }
+
 /* ---- SHEET VIEWER WRAPPER ---- */
 .sheet-viewer-wrapper {
   flex: 1;
@@ -143,7 +169,7 @@
 .page-indicator { font-size: .75rem; font-weight: 600; color: var(--text-secondary); font-family: var(--font-mono); min-width: 48px; text-align: center; }
 
 /* Reset button nhỏ hơn */
-.pb-reset-btn { padding: .18rem .42rem !important; font-size: .73rem !important; }
+.pb-reset-btn { padding: .18rem .42rem; font-size: .73rem; }
 
 /* Capo badge (Ticket L0-12, L1-11) */
 .capo-badge {
@@ -279,7 +305,7 @@ body.dark-mode .capo-badge {
 /* Nút icon + text nhỏ */
 .pb-btn-icon-text {
   display: inline-flex; align-items: center; gap: .25rem;
-  color: var(--accent) !important; font-weight: 600 !important;
+  color: var(--accent); font-weight: 600;
 }
 .pb-btn-icon-text svg { width: 12px; height: 12px; }
 
@@ -328,7 +354,7 @@ body.dark-mode .capo-badge {
 #btn-chord-highlight.active {
   background: linear-gradient(135deg, rgba(109,40,217,.9), rgba(139,92,246,.9));
   border-color: #7c3aed;
-  color: #fff !important;
+  color: #fff;
   box-shadow: 0 2px 10px rgba(109,40,217,.4), 0 0 0 2px rgba(109,40,217,.18);
 }
 #btn-chord-highlight.active svg { stroke: #fff; }
@@ -388,7 +414,7 @@ body.dark-mode .hint-icon { color: #34d399; }
 }
 /* SVG luôn fit 100% chiều ngang container */
 .osmd-container svg {
-  width: 100% !important;
+  width: 100%;
   max-width: 100%;
   height: auto;
   display: block;
@@ -469,7 +495,7 @@ body.dark-mode .hint-icon { color: #34d399; }
 
 /* ---- THU NHỎ TIÊU ĐỀ BÀI HÁT TRONG OSMD ----
    OSMD render title rất to. CSS target tất cả text SVG có font-size > 18px.
-   Cách tiếp cận: dùng CSS font-size !important trên text trong #osmd-container
+   Cách tiếp cận: dùng CSS font-size trên text trong #osmd-container
    nhưng chỉ các text có class/position là title (thường là text đầu tiên, to nhất).
    Dùng .osmd-title-compact class (toggle bởi JS) để kiểm soát. */
 /* Subtitle / composer / lyricist — preserve default styling */
@@ -480,7 +506,7 @@ body.dark-mode .hint-icon { color: #34d399; }
 }
 /* Class để compact title — toggle thông qua .osmd-container.compact-title */
 #osmd-container.compact-title svg text:first-of-type {
-  font-size: 11px !important;
+  font-size: 11px;
 }
 /* Compact title thông qua CSS var — cách an toàn hơn */
 #osmd-container {
@@ -543,26 +569,26 @@ body.dark-mode .hint-icon { color: #34d399; }
 
 /* Mobile bottom sheet style */
 .cc-popup.cc-popup-mobile {
-  position: fixed !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  top: auto !important;
-  transform: translateY(100%) !important;
-  border-radius: 16px 16px 0 0 !important;
-  border: none !important;
-  border-top: 1px solid rgba(109, 40, 217, 0.3) !important;
-  padding: 1rem 1rem .5rem !important;
-  box-shadow: 0 -8px 32px rgba(109, 40, 217, .18) !important;
-  z-index: 99999 !important;
-  animation: none !important; /* Disable desktop pop-in */
-  transition: transform .28s cubic-bezier(0.32, 0.94, 0.6, 1) !important;
-  max-height: 75vh !important;
-  overflow-y: auto !important;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: auto;
+  transform: translateY(100%);
+  border-radius: 16px 16px 0 0;
+  border: none;
+  border-top: 1px solid rgba(109, 40, 217, 0.3);
+  padding: 1rem 1rem .5rem;
+  box-shadow: 0 -8px 32px rgba(109, 40, 217, .18);
+  z-index: var(--z-toast);
+  animation: none; /* Disable desktop pop-in */
+  transition: transform .28s cubic-bezier(0.32, 0.94, 0.6, 1);
+  max-height: 75vh;
+  overflow-y: auto;
 }
 
 .cc-popup.cc-popup-mobile.active {
-  transform: translateY(0) !important;
+  transform: translateY(0);
 }
 
 /* ---- CC CHIPS IN CHORD POPUP ---- */
@@ -608,15 +634,15 @@ body.dark-mode .hint-icon { color: #34d399; }
    1. SVG bản nhạc (z-index: auto)
    2. Chord text custom (cc-dot, z-index: 80) — hiển thị hợp âm
    3. Edit badge ✎ (z-index: 82) — chỉ khi edit mode
-   4. Popup nhập hợp âm (z-index: 99999) — trên cùng
+   4. Popup nhập hợp âm (z-index: var(--z-toast)) — trên cùng
 */
 
 .osmd-wrapper { position: relative; }
-.chord-dot-layer { position: absolute; inset: 0; pointer-events: none; z-index: 60; overflow: visible; }
+.chord-dot-layer { position: absolute; inset: 0; pointer-events: none; z-index: var(--z-sidebar); overflow: visible; }
 
 /* cc-dot: absolute element được đặt trực tiếp vào osmd-container bởi JS */
 /* z-index: 80 được set inline trong JS */
-.cc-dot { position: absolute !important; }
+.cc-dot { position: absolute; }
 
 /* Nút tròn "+" — visual scale theo zoom (JS set width/height inline)
    Touch area mở rộng qua ::after để đạt 44px tối thiểu (Apple HIG)
@@ -652,7 +678,7 @@ body.dark-mode .hint-icon { color: #34d399; }
 .cc-dot-btn:hover,
 .cc-dot-btn:active {
   background: rgba(109, 40, 217, 1);
-  transform: translateX(-50%) scale(1.2) !important;
+  transform: translateX(-50%) scale(1.2);
 }
 
 /* Edit badge ✎ */
@@ -662,8 +688,8 @@ body.dark-mode .hint-icon { color: #34d399; }
   transition: transform .12s, background .12s;
 }
 .cc-edit-badge:hover {
-  transform: translateX(-50%) scale(1.2) !important;
-  background: rgba(109, 40, 217, 1) !important;
+  transform: translateX(-50%) scale(1.2);
+  background: rgba(109, 40, 217, 1);
 }
 
 /* Chord text hiển thị */
@@ -684,7 +710,7 @@ body.dark-mode .hint-icon { color: #34d399; }
 /* Legacy class names still used in older CSS refs */
 .chord-dot-btn { display: none; width: 18px; height: 18px; border-radius: 50%; background: rgba(109,40,217,0.75); border: none; color: #fff; font-size: 15px; line-height: 17px; text-align: center; transition: background .15s, transform .15s; box-shadow: 0 1px 4px rgba(109,40,217,.4); }
 .chord-dot-btn span { display:block; }
-.chord-dot-btn:hover { background: rgba(109,40,217,1); transform: translateX(-50%) scale(1.3) !important; }
+.chord-dot-btn:hover { background: rgba(109,40,217,1); transform: translateX(-50%) scale(1.3); }
 .dots-visible .chord-dot-btn { display: block; }
 
 /* Chữ hợp âm — LUÔN hiện (legacy) */
@@ -737,7 +763,7 @@ body.dark-mode .sheet-viewer-wrapper,
 body.dark-mode .sheet-area,
 body.dark-mode .osmd-container,
 body.dark-mode #osmd-container {
-  background: #0B0B0C !important;
+  background: #0B0B0C;
   box-shadow: 0 4px 25px rgba(0,0,0,0.6);
 }
 body.dark-mode .page-bar {
@@ -764,7 +790,7 @@ body.dark-mode #btn-chord-highlight:hover:not(:disabled) {
 }
 body.dark-mode #btn-chord-highlight.active {
   background: linear-gradient(135deg, rgba(109,40,217,.8), rgba(139,92,246,.8));
-  border-color: #7c3aed; color: #fff !important;
+  border-color: #7c3aed; color: #fff;
   box-shadow: 0 2px 12px rgba(109,40,217,.5), 0 0 0 2px rgba(109,40,217,.25);
 }
 body.dark-mode .chord-edit-hint {
@@ -782,49 +808,49 @@ body.dark-mode .chord-edit-hint {
   .btn-add-chord-mode,.btn-cancel-add-chord { display: none !important; }
 
   /* Layout full */
-  body { display: block !important; background: #fff !important; color: #000 !important; overflow: visible !important; }
-  .main-content { display: block !important; overflow: visible !important; margin: 0 !important; }
-  .sheet-viewer-wrapper { overflow: visible !important; height: auto !important; padding: 0 !important; }
+  body { display: block; background: #fff; color: #000; overflow: visible; }
+  .main-content { display: block; overflow: visible; margin: 0; }
+  .sheet-viewer-wrapper { overflow: visible; height: auto; padding: 0; }
   .osmd-container { display: block !important; padding: 0 !important; max-width: 100% !important; margin: 0 !important; position: relative !important; }
-  .osmd-container svg { width: 100% !important; height: auto !important; }
-  .osmd-container svg path, .osmd-container svg line { stroke: #000 !important; }
-  .osmd-container svg text { fill: #000 !important; }
+  .osmd-container svg { width: 100%; height: auto; }
+  .osmd-container svg path, .osmd-container svg line { stroke: #000; }
+  .osmd-container svg text { fill: #000; }
 
   /* ── Custom chord badges (DOM Overlay) ── */
-  .cc-dot { display: block !important; }
+  .cc-dot { display: block; }
 
   /* Edit badge ✎ — ẩn khi in (không cần) */
   .cc-edit-badge, .cc-dot-btn { display: none !important; }
 
   /* View mode badge (pill đỏ nhạt) — in với màu đỏ rõ ràng */
   .cc-custom-chord-text {
-    display: block !important;
-    color: #c00 !important;
-    background: transparent !important;
-    border: 1px solid rgba(192,0,0,0.4) !important;
-    border-radius: 4px !important;
-    padding: 0 4px !important;
-    font-weight: 700 !important;
-    font-size: 11pt !important;
-    box-shadow: none !important;
-    print-color-adjust: exact !important;
-    -webkit-print-color-adjust: exact !important;
+    display: block;
+    color: #c00;
+    background: transparent;
+    border: 1px solid rgba(192,0,0,0.4);
+    border-radius: 4px;
+    padding: 0 4px;
+    font-weight: 700;
+    font-size: 11pt;
+    box-shadow: none;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 
   /* Highlight mode badge (tím) — in với màu tím đậm */
   .cc-custom-chord-text[style*="rgba(109,40,217"] {
-    color: #5b21b6 !important;
-    background: transparent !important;
-    border-color: #5b21b6 !important;
-    print-color-adjust: exact !important;
-    -webkit-print-color-adjust: exact !important;
+    color: #5b21b6;
+    background: transparent;
+    border-color: #5b21b6;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 
   /* Chord text (legacy default set) */
-  .chord-dot-text { color: #c00 !important; font-weight: 700 !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .chord-dot-text { color: #c00; font-weight: 700; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
 
   /* Annotation in ra — ẩn edit icon, giữ text */
-  .annotation-layer { display: block !important; }
+  .annotation-layer { display: block; }
   .ann-note-edit-btn { display: none !important; }
 
   /* Capo hint in ra nếu có */
@@ -866,7 +892,7 @@ body.dark-mode .lyric-view-container {
 }
 body.dark-mode .lv-chord {
   color: #fbbf24 !important; /* Hổ phách sáng chuẩn stage readability */
-  border-bottom-color: rgba(251,191,36,.35) !important;
+  border-bottom-color: rgba(251,191,36,.35);
 }
 body.dark-mode .lv-syl       { color: #f1f5f9; }
 body.dark-mode .lv-header    { border-bottom-color: rgba(255,255,255,.08); }
@@ -1036,7 +1062,7 @@ body.dark-mode .lv-title     { color: #e2e8f0; }
 }
 .lv-chord-empty {
   visibility: hidden;
-  border-bottom-color: transparent !important;
+  border-bottom-color: transparent;
   pointer-events: none;
 }
 
@@ -1049,19 +1075,19 @@ body.dark-mode .lv-title     { color: #e2e8f0; }
   color: var(--text-primary);
   white-space: nowrap;
 }
-.lv-rest { color: transparent !important; user-select: none; }
+.lv-rest { color: transparent; user-select: none; }
 
 /* ══ Active Verse Highlighting (Ticket L1-7 ⭐) ═══════════ */
 .lv-verse.lv-active-verse {
   border-color: #8b5cf6 !important;
-  box-shadow: 0 0 0 2.5px rgba(139,92,246,.45), 0 8px 32px rgba(139,92,246,.18) !important;
-  background: rgba(139,92,246,.08) !important;
+  box-shadow: 0 0 0 2.5px rgba(139,92,246,.45), 0 8px 32px rgba(139,92,246,.18);
+  background: rgba(139,92,246,.08);
   transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
 .lv-verse.lv-active-verse .lv-verse-pill {
-  background: #8b5cf6 !important;
-  color: #ffffff !important;
-  box-shadow: 0 2px 10px rgba(139,92,246,.4) !important;
+  background: #8b5cf6;
+  color: #ffffff;
+  box-shadow: 0 2px 10px rgba(139,92,246,.4);
 }
 
 /* ══ Inline mode tokens ══════════════════════ */
@@ -1128,7 +1154,7 @@ body.dark-mode .lv-title     { color: #e2e8f0; }
     margin: 0;
     padding: 1rem;
   }
-  .lv-verse { border: 1px solid #ddd !important; background: none !important; }
+  .lv-verse { border: 1px solid #ddd; background: none; }
   .lv-chorus::before { display: none; }
 }
 
@@ -1204,7 +1230,7 @@ body.dark-mode .lv-mode-btn {
 
 /* Dark mode inline */
 body.dark-mode .lvi-chord {
-  color: #f87171 !important;
+  color: #f87171;
 }
 body.dark-mode .lvi-line,
 body.dark-mode .lvi-word,
@@ -1228,9 +1254,9 @@ body.dark-mode .lvi-word-only {
 
 /* Title text được class bởi _compactTitleSVG */
 #osmd-container svg text.osmd-title-text {
-  font-weight: 600 !important;
-  letter-spacing: 0.03em !important;
-  fill: #1a1a2e !important;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  fill: #1a1a2e;
 }
 
 /* Ẩn mọi rect background xấu trong vùng title (nếu có) */
@@ -1381,7 +1407,7 @@ body.dark-mode .lvi-word-only {
 .si-btn-save-setlist {
   background: #059669;
   border: 1px solid #047857;
-  color: #ffffff !important;
+  color: #ffffff;
   font-weight: 700;
   box-shadow: 0 1px 3px rgba(5, 150, 105, 0.35);
 }
@@ -1508,11 +1534,11 @@ body.dark-mode .lvi-word-only {
 }
 .ano-icon-btn.active, .ano-icon-btn:hover { background: #ede9fe; border-color: #a78bfa; }
 /* Dynamic annotation dot colors */
-.ano-dot[data-color="blue"]   { background: #dbeafe !important; border-color: #3b82f6 !important; color: #1d4ed8 !important; }
-.ano-dot[data-color="red"]    { background: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
-.ano-dot[data-color="green"]  { background: #d1fae5 !important; border-color: #10b981 !important; color: #065f46 !important; }
+.ano-dot[data-color="blue"]   { background: #dbeafe; border-color: #3b82f6; color: #1d4ed8; }
+.ano-dot[data-color="red"]    { background: #fee2e2; border-color: #ef4444; color: #b91c1c; }
+.ano-dot[data-color="green"]  { background: #d1fae5; border-color: #10b981; color: #065f46; }
 .ano-dot[data-color="purple"] { background: #ede9fe !important; border-color: #8b5cf6 !important; color: #5b21b6 !important; }
-.ano-dot[data-color="yellow"] { background: #fef3c7 !important; border-color: #d97706 !important; color: #92400e !important; }
+.ano-dot[data-color="yellow"] { background: #fef3c7; border-color: #d97706; color: #92400e; }
 
 /* =============================================
    SPRINT E1 — Measure Progress Bar
@@ -1546,16 +1572,16 @@ body.dark-mode {
 }
 body.dark-mode .toolbar,
 body.dark-mode .page-bar {
-  background: rgba(26, 26, 36, 0.78) !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
-  color: var(--text-primary, #e4e4ec) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
+  background: rgba(26, 26, 36, 0.78);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary, #e4e4ec);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 body.dark-mode .song-info-strip {
-  background: var(--bg-surface, #1a1a24) !important;
-  border-color: var(--border, #2a2a38) !important;
-  color: var(--text-primary, #e4e4ec) !important;
+  background: var(--bg-surface, #1a1a24);
+  border-color: var(--border, #2a2a38);
+  color: var(--text-primary, #e4e4ec);
 }
 body.dark-mode .si-chip {
   background: #1e1e2c;
@@ -1584,45 +1610,45 @@ body.dark-mode #sheet-area,
 body.dark-mode .osmd-container,
 body.dark-mode #osmd-container,
 body.dark-mode #osmd-container svg {
-  background: #0B0B0C !important;
-  background-color: #0B0B0C !important;
+  background: #0B0B0C;
+  background-color: #0B0B0C;
 }
 
 /* Bỏ hoàn toàn mọi filter invert trên SVG và container */
 body.dark-mode #osmd-container,
 body.dark-mode .osmd-container,
 body.dark-mode #osmd-container svg {
-  filter: none !important;
+  filter: none;
 }
 
 /* Nốt, khuông, thanh nhịp màu ngà #E8E2D0 */
 body.dark-mode #osmd-container svg line {
-  stroke: #E8E2D0 !important;
+  stroke: #E8E2D0;
 }
 body.dark-mode #osmd-container svg path {
-  fill: #E8E2D0 !important;
-  stroke: #E8E2D0 !important;
+  fill: #E8E2D0;
+  stroke: #E8E2D0;
 }
 body.dark-mode #osmd-container svg ellipse,
 body.dark-mode #osmd-container svg polygon {
-  fill: #E8E2D0 !important;
-  stroke: #E8E2D0 !important;
+  fill: #E8E2D0;
+  stroke: #E8E2D0;
 }
 body.dark-mode #osmd-container svg rect:not([fill="none"]):not([fill="transparent"]):not([fill="#ffffff"]):not([fill="white"]) {
-  fill: #E8E2D0 !important;
-  stroke: #E8E2D0 !important;
+  fill: #E8E2D0;
+  stroke: #E8E2D0;
 }
 body.dark-mode #osmd-container svg rect[fill="#ffffff"],
 body.dark-mode #osmd-container svg rect[fill="white"] {
-  fill: #0B0B0C !important;
-  stroke: none !important;
+  fill: #0B0B0C;
+  stroke: none;
 }
 
 /* Lời bài hát & tiêu đề màu ngà #E8E2D0 */
 body.dark-mode #osmd-container svg text:not(.osmd-chord-symbol):not(.osmd-chord-text):not([data-chord-symbol="true"]),
 body.dark-mode #osmd-container svg text:not(.osmd-chord-symbol):not(.osmd-chord-text):not([data-chord-symbol="true"]) tspan {
-  fill: #E8E2D0 !important;
-  color: #E8E2D0 !important;
+  fill: #E8E2D0;
+  color: #E8E2D0;
 }
 
 /* Hợp âm màu hổ phách #FBBF24 */
@@ -1634,7 +1660,7 @@ body.dark-mode #osmd-container svg text[font-family*="OSMDChordFont"],
 body.dark-mode #osmd-container svg text[font-family*="OSMDChordFont"] tspan {
   fill: #FBBF24 !important;
   color: #FBBF24 !important;
-  stroke: none !important;
+  stroke: none;
 }
 
 /* Lớp hợp âm custom của ChordCanvas */
@@ -1643,45 +1669,45 @@ body.dark-mode .cc-custom-chord-text {
 }
 body.dark-mode .cc-custom-chord-text.edit-mode,
 body.dark-mode .cc-dot-selected {
-  background: rgba(20, 20, 30, 0.95) !important;
+  background: rgba(20, 20, 30, 0.95);
   border-color: #FBBF24 !important;
   color: #FBBF24 !important;
 }
 
-body.dark-mode .sidebar { background: var(--bg-sidebar, #12121a) !important; }
-body.dark-mode .song-item:hover { background: #1e1e2e !important; }
-body.dark-mode .song-item.active { background: #2d1f52 !important; }
+body.dark-mode .sidebar { background: var(--bg-sidebar, #12121a); }
+body.dark-mode .song-item:hover { background: #1e1e2e; }
+body.dark-mode .song-item.active { background: #2d1f52; }
 /* Dark mode toggle button glow khi active */
 #btn-dark-toggle.dark-active {
-  color: #a78bfa !important;
-  background: rgba(167,139,250,.12) !important;
+  color: #a78bfa;
+  background: rgba(167,139,250,.12);
 }
 
 /* Dark mode cho các modal, dropdown */
 body.dark-mode .dropdown-menu,
 body.dark-mode .cc-popup,
 body.dark-mode #perf-notes-panel {
-  background: #1e1e2e !important;
-  border-color: #3a3a50 !important;
-  color: #e4e4ec !important;
+  background: #1e1e2e;
+  border-color: #3a3a50;
+  color: #e4e4ec;
 }
 body.dark-mode input, body.dark-mode textarea, body.dark-mode select {
-  background: #2a2a38 !important; color: #e4e4ec !important; border-color: #3a3a50 !important;
+  background: #2a2a38; color: #e4e4ec; border-color: #3a3a50;
 }
 
 body.dark-mode .cc-popup.cc-popup-mobile {
-  border-top-color: rgba(167, 139, 250, 0.2) !important;
-  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5) !important;
+  border-top-color: rgba(167, 139, 250, 0.2);
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
 }
 body.dark-mode .cc-chip-hist {
-  background: #3a2a1a !important;
-  color: #f59e0b !important;
-  border-color: #78350f !important;
+  background: #3a2a1a;
+  color: #f59e0b;
+  border-color: #78350f;
 }
 body.dark-mode .cc-chip-dia {
-  background: #1e1b4b !important;
-  color: #a78bfa !important;
-  border-color: #4c1d95 !important;
+  background: #1e1b4b;
+  color: #a78bfa;
+  border-color: #4c1d95;
 }
 
 /* =============================================
@@ -1710,15 +1736,15 @@ body.dark-mode .cc-chip-dia {
 
 .metronome-mini-bar.hidden {
   display: flex !important;
-  transform: translateY(100%) !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* Không che vùng nhạc khi mini-bar hiển thị */
 .sheet-viewer-wrapper.has-metronome-bar,
 body.has-metronome-bar .sheet-viewer-wrapper {
-  margin-bottom: 52px !important;
+  margin-bottom: 52px;
 }
 
 .mm-inner {
@@ -1795,20 +1821,20 @@ body.has-metronome-bar .sheet-viewer-wrapper {
 }
 /* Phách 1: Downbeat - Tím rực rỡ */
 .beat-dot.beat-1.flash {
-  background: #7c3aed !important;
-  box-shadow: 0 0 14px #7c3aed, 0 0 3px #7c3aed !important;
+  background: #7c3aed;
+  box-shadow: 0 0 14px #7c3aed, 0 0 3px #7c3aed;
   transform: scale(1.3);
 }
 /* Phách 4 trong nhịp 6/8: Nhấn phụ - Hổ phách rực rỡ */
 .beat-dot.beat-4.flash {
-  background: #f59e0b !important;
-  box-shadow: 0 0 14px #f59e0b, 0 0 3px #f59e0b !important;
+  background: #f59e0b;
+  box-shadow: 0 0 14px #f59e0b, 0 0 3px #f59e0b;
   transform: scale(1.25);
 }
 /* Phách thường: Xanh Neon */
 .beat-dot.flash {
-  background: #10b981 !important;
-  box-shadow: 0 0 10px #10b981 !important;
+  background: #10b981;
+  box-shadow: 0 0 10px #10b981;
   transform: scale(1.15);
 }
 
@@ -2064,8 +2090,8 @@ body.dark-mode .beat-dot {
 
 /* Trạng thái đang chạy đổi sang màu Danger */
 .btn-metronome-play.active {
-  background: var(--danger) !important;
-  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3) !important;
+  background: var(--danger);
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3);
 }
 
 .btn-metronome-play.active:hover {
@@ -2175,7 +2201,7 @@ body.dark-mode .metronome-slider {
 #btn-toolbar-metronome.active svg {
   animation: metronome-swing 0.8s ease-in-out infinite alternate;
   transform-origin: 12px 18px; /* Trục xoay ở đế kim */
-  color: var(--danger, #dc2626) !important;
+  color: var(--danger, #dc2626);
 }
 
 @keyframes metronome-swing {
@@ -2185,12 +2211,12 @@ body.dark-mode .metronome-slider {
 
 /* Nút hoạt động trên toolbar */
 #btn-toolbar-metronome.active {
-  background: rgba(220, 38, 38, 0.1) !important;
-  border-color: rgba(220, 38, 38, 0.2) !important;
+  background: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.2);
 }
 body.dark-mode #btn-toolbar-metronome.active {
-  background: rgba(239, 68, 68, 0.15) !important;
-  border-color: rgba(239, 68, 68, 0.3) !important;
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
 }
 
 /* Responsive di động & iPad dọc */
@@ -2204,7 +2230,7 @@ body.dark-mode #btn-toolbar-metronome.active {
 /* Print override — ẩn hoàn toàn panel khi in */
 @media print {
   .metronome-mini-bar, .metronome-panel { display: none !important; }
-  body.dark-mode #osmd-container svg { filter: none !important; }
+  body.dark-mode #osmd-container svg { filter: none; }
 }
 
 
@@ -2372,9 +2398,9 @@ body.dark-mode .tp-btn:hover {
   color: var(--accent);
 }
 .zoom-lock-btn.locked {
-  background: linear-gradient(135deg, #10b981, #059669) !important;
-  color: #ffffff !important;
-  border-color: #059669 !important;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  border-color: #059669;
   box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
 }
 .zoom-lock-btn .lock-icon {
@@ -2423,7 +2449,7 @@ body.dark-mode .tp-btn:hover {
 .count-in-overlay {
   position: fixed;
   inset: 0;
-  z-index: 99999;
+  z-index: var(--z-toast);
   background: rgba(15, 23, 42, 0.78);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -2655,7 +2681,7 @@ body.dark-mode .tp-btn:hover {
   top: 76px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 9999;
+  z-index: var(--z-modal);
   pointer-events: none;
   animation: cueSlideIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   transition: opacity 0.2s ease, transform 0.2s ease;
@@ -2708,7 +2734,7 @@ body.dark-mode .tp-btn:hover {
   top: 76px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 9999;
+  z-index: var(--z-modal);
   pointer-events: auto;
   animation: cueSlideIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   transition: opacity 0.2s ease, transform 0.2s ease;
@@ -2775,7 +2801,7 @@ body.dark-mode .tp-btn:hover {
    SECTION EDITOR MODAL
    ============================================================= */
 .section-editor-card {
-  max-width: 650px !important;
+  max-width: 650px;
 }
 
 .section-editor-desc {
@@ -2826,9 +2852,9 @@ body.dark-mode .tp-btn:hover {
    ============================================================= */
 @media print {
   body {
-    background: #ffffff !important;
-    color: #000000 !important;
-    font-size: 12pt !important;
+    background: #ffffff;
+    color: #000000;
+    font-size: 12pt;
   }
 
   /* Hide UI controls during printing */
@@ -2840,20 +2866,20 @@ body.dark-mode .tp-btn:hover {
 
   /* Expand main sheet viewer to full page */
   .main-content, .sheet-viewer-wrapper, #osmd-container {
-    width: 100% !important;
-    height: auto !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    background: #ffffff !important;
-    overflow: visible !important;
+    width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    background: #ffffff;
+    overflow: visible;
   }
 
   /* SVG sheet music page break controls */
   #osmd-container svg {
     max-width: 100% !important;
-    height: auto !important;
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
+    height: auto;
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 }
 
@@ -2866,30 +2892,30 @@ body.dark-mode .tp-btn:hover {
 .chord-preset-stage #osmd-container svg text[font-family*="OSMDChordFont"],
 .chord-preset-stage #osmd-container svg text[font-family*="OSMDChordFont"] tspan,
 .chord-preset-stage #osmd-container svg .osmd-chord-text {
-  font-weight: 800 !important;
+  font-weight: 800;
 }
 .chord-preset-stage .cc-custom-chord-text {
-  font-weight: 800 !important;
+  font-weight: 800;
 }
 
 .chord-preset-high-contrast #osmd-container svg text[font-family*="OSMDChordFont"],
 .chord-preset-high-contrast #osmd-container svg text[font-family*="OSMDChordFont"] tspan,
 .chord-preset-high-contrast #osmd-container svg .osmd-chord-text {
   fill: #FBBF24 !important;
-  font-weight: 800 !important;
+  font-weight: 800;
   paint-order: stroke fill;
-  stroke: #0B0B0C !important;
-  stroke-width: 2px !important;
-  stroke-linejoin: round !important;
+  stroke: #0B0B0C;
+  stroke-width: 2px;
+  stroke-linejoin: round;
 }
 .chord-preset-high-contrast .cc-custom-chord-text {
-  background: #0F172A !important;
+  background: #0F172A;
   color: #FBBF24 !important;
-  border: 1.5px solid #F59E0B !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.75) !important;
-  font-weight: 800 !important;
-  padding: 1px 6px !important;
-  border-radius: 4px !important;
+  border: 1.5px solid #F59E0B;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.75);
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 4px;
 }
 
 #btn-chord-preset.band-pill {
@@ -3092,7 +3118,7 @@ body.dark-mode .tp-btn:hover {
   .sheet-viewer-wrapper,
   #sheet-container,
   #lyric-view-container {
-    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
   }
 
   /* 3. Tự vừa bề ngang & chống tràn chữ */
@@ -3104,7 +3130,7 @@ body.dark-mode .tp-btn:hover {
   }
   .sheet-container svg {
     max-width: 100% !important;
-    height: auto !important;
+    height: auto;
     box-sizing: border-box;
   }
 

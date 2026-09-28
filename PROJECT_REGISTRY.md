@@ -1294,7 +1294,23 @@ SheetApp/
   + Tạo: e2e/library-l5-centralized-store.spec.js (E2E Playwright: Store.set('transpose', 2) tự động cập nhật đồng thời cả 4 chỗ [URL ?t=2, Toolbar #song-key A & #transpose-display +2, HUD #gig-hud-key A & #gig-hud-trans +2, Band Mode .lv-key strong A]; kiểm thử alias, zoom, set, mode, reset về gốc thành công trên cả Chromium và WebKit)
   🏆 ĐẠT 100% QUALITY GATE: 121/121 suites PASS (2315 passed, 0 failed, 72.3% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
 
+[2026-09-28] — Hoàn tất Ticket L5-8 (ROADMAP4.md): Main CSS Cleanup & Modernization (Dọn CSS Trang Chính, Thang z-index, Giảm !important, Bỏ 24 Legacy Dummy Elements)
+  + Sửa: assets/css/base.css (Thang z-index chuẩn hóa phân cấp 18 biến: --z-base đến --z-topmost; bổ sung utility classes cho layout, flex, form, modal; 204 dòng < 600 dòng)
+  ~ Sửa: assets/css/components.css (Bổ sung utility styles thay thế inline styles cho Quick Numpad, Follow Leader modal, Admin modal; 579 dòng < 600 dòng)
+  ~ Sửa: assets/css/layout.css (Tối ưu hóa giảm !important; thay z-index cứng bằng biến --z-*; bổ sung sidebar filter styles; bảo toàn nghiêm ngặt các quy tắc cho sheet-only, faded hud, btn-gig-exit)
+  ~ Sửa: assets/css/sheet.css (Tối ưu hóa giảm !important; thay z-index cứng bằng biến --z-*; bổ sung Toolbar Pro Band classes; tổng !important giảm từ 388 xuống 109, tương đương giảm 71.9% >= 70%)
+  ~ Sửa: includes/sheet_viewer.php (Loại bỏ triệt để 9 dummy elements legacy ID; làm sạch 100% inline styles; 260 dòng < 600 dòng)
+  ~ Sửa: includes/toolbar.php (Loại bỏ triệt để 15 dummy elements legacy ID; làm sạch 100% inline styles; 396 dòng < 600 dòng)
+  ~ Sửa: includes/sidebar.php (Làm sạch 100% inline styles, chuyển sang CSS classes; 183 dòng < 600 dòng)
+  ~ Sửa: includes/quick_numpad_modal.php (Làm sạch 100% inline styles; 53 dòng < 600 dòng)
+  ~ Sửa: includes/follow_leader_modal.php (Làm sạch 100% inline styles; 153 dòng < 600 dòng)
+  ~ Sửa: includes/modals.php & includes/admin_console.php (Dọn dẹp mạnh inline styles, đảm bảo Line Budget < 600 dòng)
+  + Tạo: tools/clean_css_l58.js (Script tự động hóa dọn dẹp CSS và tối ưu !important)
+  + Tạo: tests/library_l58_css_cleanup_regression.php (16/16 checks PASS, 68.8% behavioral assertions, kiểm thử toàn diện z-index scale, !important metric <= 116, 0 legacy dummy IDs, 0 inline styles trong 5 core view partials, K2 DB Checksum)
+  + Tạo: e2e/library-l5-css-cleanup.spec.js (E2E Playwright: Kiểm tra 0 dummy elements tồn tại trong DOM trang chính, kiểm tra thang z-index biến CSS trên :root, kiểm tra layout và tương tác Toolbar/Sidebar/Preset/Numpad mượt mà trên Chromium)
+  🏆 ĐẠT 100% QUALITY GATE: 122/122 suites PASS (2331 passed, 0 failed, 72.3% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
+
 ---
 
 *File này là "bộ nhớ" của dự án. AI Agent cập nhật sau mỗi phiên để phiên sau không phải khám phá lại từ đầu.*
-*Cập nhật: 2026-09-28 (Hoàn tất Ticket L5-7)*
+*Cập nhật: 2026-09-28 (Hoàn tất Ticket L5-8)*

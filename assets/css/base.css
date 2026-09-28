@@ -40,18 +40,23 @@
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: ui-monospace, 'Menlo', 'Consolas', monospace; /* Không cần tải font ngoài */
 
-  /* ─── Z-INDEX SCALE (CHUẨN HÓA) ─────────────────────────────────── */
+  /* ─── Z-INDEX SCALE (CHUẨN HÓA - TICKET L5-8 & TASK 2.2) ────────── */
   --z-base:        1;
-  --z-dropdown:    100;
-  --z-sticky:      200;
+  --z-sheet:       10;
+  --z-chord-canvas:20;
+  --z-controls:    30;
+  --z-header:      50;
+  --z-toolbar:     50;
+  --z-sidebar:     60;
+  --z-hud:         100;
+  --z-popover:     150;
+  --z-dropdown:    200;
+  --z-sticky:      250;
   --z-app-shell:   500;
-  --z-header:      600;
-  --z-sidebar:     700;
-  --z-hud:         800;
-  --z-popup:       900;
-  --z-fab:         950;
-  --z-modal-bg:    1000;
-  --z-modal:       1010;
+  --z-popup:       800;
+  --z-fab:         850;
+  --z-modal-bg:    900;
+  --z-modal:       1000;
   --z-toast:       2000;
   --z-topmost:     9999;
 
@@ -145,14 +150,49 @@ body {
 
 /* Utilities */
 .hidden   { display: none !important; }
+.d-flex       { display: flex; }
+.d-inline-flex{ display: inline-flex; }
+.flex-col     { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.flex-1       { flex: 1; }
+.flex-2       { flex: 2; }
+.gap-1        { gap: 0.25rem; }
+.gap-2        { gap: 0.5rem; }
+.gap-3        { gap: 0.75rem; }
+.cursor-pointer { cursor: pointer; }
+.font-bold    { font-weight: 700; }
+.font-semibold{ font-weight: 600; }
+.font-heavy   { font-weight: 800; }
 .mt-half  { margin-top: .4rem; }
 .mt-1     { margin-top: .75rem; }
 .mt-2     { margin-top: 1.5rem; }
+.mb-1     { margin-bottom: 0.25rem; }
+.mb-2     { margin-bottom: 0.5rem; }
+.mb-3     { margin-bottom: 0.75rem; }
+.mb-4     { margin-bottom: 1rem; }
 .text-sm  { font-size: .825rem; }
 .text-xs  { font-size: .7rem; }
 .text-muted   { color: var(--text-muted); }
 .text-center  { text-align: center; }
 .w-full   { width: 100%; }
+.box-border   { box-sizing: border-box; }
+.overflow-hidden { overflow: hidden; }
+.d-block      { display: block; }
+.m-0          { margin: 0; }
+.mt-0         { margin-top: 0; }
+.p-1          { padding: 0.25rem; }
+.p-2          { padding: 0.5rem; }
+.p-3          { padding: 0.75rem; }
+.card-surface { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); }
+.text-accent  { color: var(--accent); }
+.text-success { color: #10b981; }
+.text-uppercase{ text-transform: uppercase; }
+.btn-success-solid { background: #10b981; color: #fff; border: none; }
+.modal-box-md { max-width: 460px; }
+.fs-lg        { font-size: 1.25rem; }
+.fs-base      { font-size: 1.05rem; }
+.bg-overlay   { background: var(--bg-overlay); }
 
 /* Tags */
 .tag { display: inline-block; padding: .15rem .5rem; border-radius: 99px; font-size: .7rem; font-weight: 500; background: var(--bg-raised); color: var(--text-secondary); border: 1px solid var(--border); }

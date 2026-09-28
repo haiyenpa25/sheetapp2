@@ -27,7 +27,7 @@ select, input, label,
   border-right: 1px solid var(--border);
   box-shadow: 2px 0 12px rgba(109,40,217,.06);
   transition: width var(--transition), transform var(--transition);
-  z-index: 100;
+  z-index: var(--z-hud);
   flex-shrink: 0;
   overflow: hidden;
 }
@@ -141,7 +141,7 @@ select, input, label,
   white-space: nowrap;
 }
 .audio-settings-panel .audio-volume-slider {
-  width: 120px !important;
+  width: 120px;
 }
 
 /* ---- AUTH USERNAME ---- */
@@ -181,15 +181,40 @@ select, input, label,
 .song-item.active .song-item-num { color: var(--accent); }
 .virtual-spacer { width: 100%; pointer-events: none; flex-shrink: 0; }
 
-/* ─── FILTERS PANEL & TOGGLE (TICKET L2-3) ────────────────────────── */
+/* ─── FILTERS PANEL & TOGGLE (TICKET L2-3 & L5-8) ─────────────────── */
+.sidebar-search-box { position: relative; padding-right: 68px; }
+.sidebar-search-actions { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 4px; }
+.btn-search-lyrics { font-size: .8rem; opacity: .55; padding: .2rem .4rem; border-radius: 4px; border: 1px solid var(--border); background: var(--bg-overlay); }
+.sidebar-controls-row { display: flex; gap: 4px; align-items: center; margin-top: 4px; }
+.sort-filter-select { flex: 1; height: 30px; border-color: var(--border); font-size: .8rem; }
+.btn-filter-toggle { height: 30px; padding: 0 10px; font-size: .8rem; display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--border); background: var(--bg-raised); border-radius: var(--radius-sm); cursor: pointer; }
 .btn-filter-toggle.active {
-  background: rgba(109, 40, 217, 0.15) !important;
-  border-color: var(--accent) !important;
-  color: var(--accent) !important;
+  background: rgba(109, 40, 217, 0.15);
+  border-color: var(--accent);
+  color: var(--accent);
 }
+.filter-active-badge { background: var(--accent); color: #fff; font-size: 0.65rem; border-radius: 999px; padding: 1px 5px; font-weight: 600; line-height: 1; }
+.sidebar-filters-panel { margin-top: 6px; padding: 8px; background: var(--bg-overlay); border: 1px solid var(--border); border-radius: var(--radius-sm); display: flex; flex-direction: column; gap: 6px; }
 .sidebar-filters-panel.hidden {
   display: none !important;
 }
+.sidebar-filter-item { display: flex; flex-direction: column; gap: 2px; }
+.sidebar-filter-label { font-size: 0.7rem; color: var(--text-muted); font-weight: 500; }
+.sidebar-filter-select { width: 100%; height: 28px; font-size: .75rem; border-color: var(--border); }
+.filter-empty-hint { font-size: 0.72rem; color: var(--text-muted); font-style: italic; text-align: center; padding: 4px 0; }
+.btn-clear-filters { align-self: flex-end; font-size: 0.7rem; padding: 2px 8px; margin-top: 2px; background: transparent; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; }
+.btn-pwa-install-sidebar { background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; margin-bottom: 0.5rem; }
+.btn-omr-sidebar { background: linear-gradient(135deg, #2563eb, #1e40af); color: #fff; border: none; margin-bottom: 0.5rem; }
+.btn-admin-sidebar { background: linear-gradient(135deg, #1e293b, #334155); color: #fff; border: none; }
+.upcoming-setlist-section { border-bottom: 1px solid var(--border); padding: .45rem .65rem; background: rgba(109, 40, 217, 0.05); }
+.recently-viewed-section { border-bottom: 1px solid var(--border); padding: .4rem 0 .3rem; }
+.quick-favorites-section { border-bottom: 1px solid var(--border); padding: .4rem 0 .3rem; }
+.sidebar-footer-tools { border-top: 1px solid var(--border); padding: 8px 12px; background: var(--bg-surface); flex-shrink: 0; }
+.sidebar-footer-title { font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px; }
+.sidebar-mini-learn { flex: 1; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 6px 8px; border-radius: 6px; background: rgba(79, 70, 229, 0.12); color: #818cf8; border: 1px solid rgba(79, 70, 229, 0.25); font-size: 0.75rem; font-weight: 600; }
+.sidebar-mini-live { flex: 1; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 6px 8px; border-radius: 6px; background: rgba(124, 58, 237, 0.12); color: #a78bfa; border: 1px solid rgba(124, 58, 237, 0.25); font-size: 0.75rem; font-weight: 600; }
+.sidebar-mini-mgr { padding: 6px 10px; text-decoration: none; display: flex; align-items: center; justify-content: center; border-radius: 6px; background: rgba(255, 255, 255, 0.06); color: var(--text-secondary); border: 1px solid var(--border); font-size: 0.75rem; font-weight: 600; }
+.icon-14 { width: 14px; height: 14px; margin-right: 4px; }
 
 /* ─── SEARCH GROUP HEADERS (TICKET L2-1) ────────────────────────── */
 .search-group-header {
@@ -251,7 +276,7 @@ select, input, label,
 .main-content { flex: 1; display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; }
 
 /* ---- TOOLBAR ---- */
-.toolbar { height: var(--toolbar-h); background: rgba(255, 255, 255, 0.78); border-bottom: 1px solid rgba(109, 40, 217, 0.08); display: flex; align-items: center; padding: 0 .75rem; gap: .5rem; flex-shrink: 0; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); position: relative; z-index: 50; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.02); }
+.toolbar { height: var(--toolbar-h); background: rgba(255, 255, 255, 0.78); border-bottom: 1px solid rgba(109, 40, 217, 0.08); display: flex; align-items: center; padding: 0 .75rem; gap: .5rem; flex-shrink: 0; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); position: relative; z-index: var(--z-toolbar); overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.02); }
 .toolbar::-webkit-scrollbar { display: none; }
 /* toolbar-left — chỉ chứa logo/hamburger, không có flex:1 để tránh phần trống */
 .toolbar-left { flex-shrink: 0; display: flex; align-items: center; gap: 0.35rem; }
@@ -262,7 +287,7 @@ select, input, label,
 .control-group { display: flex; align-items: center; gap: .5rem; }
 /* Scroll control: Cuộn + tốc độ sát nhau, gọn hơn */
 .scroll-control-group { gap: .2rem; }
-.select-scroll-speed { width: 42px !important; min-width: 32px; text-align: center; padding: .15rem .1rem; font-size: .85rem; }
+.select-scroll-speed { width: 42px; min-width: 32px; text-align: center; padding: .15rem .1rem; font-size: .85rem; }
 /* Mobile hamburger: sticky trái, không bị đẩy khi scroll */
 #btn-open-sidebar { position: sticky; left: 0; z-index: 10; background: var(--bg-surface); flex-shrink: 0; }
 .control-label { font-size: .7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .6px; font-weight: 500; white-space: nowrap; }
@@ -310,7 +335,7 @@ select, input, label,
 
 
 .transpose-controls { display: flex; align-items: center; background: var(--bg-overlay); border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
-.transpose-btn { width: 30px; height: 30px; border-radius: 0 !important; flex-shrink: 0; }
+.transpose-btn { width: 30px; height: 30px; border-radius: 0; flex-shrink: 0; }
 .transpose-btn:hover:not(:disabled) { background: var(--bg-raised); }
 .transpose-display { min-width: 36px; text-align: center; font-size: .85rem; font-weight: 600; font-family: var(--font-mono); color: var(--accent); padding: 0 .25rem; }
 
@@ -358,7 +383,7 @@ select, input, label,
 .toggle-switch input:disabled ~ .toggle-track { opacity: .4; cursor: not-allowed; }
 
 /* Fullscreen */
-.sidebar.fs-hidden { transform: translateX(-100%); width: 0 !important; overflow: hidden; border: none; }
+.sidebar.fs-hidden { transform: translateX(-100%); width: 0; overflow: hidden; border: none; }
 
 
 /* ─── Sheet-Only Mode (chỉ hiện sheet nhạc) ──────────────── */
@@ -375,27 +400,27 @@ body.sheet-only-mode #fab-main-btn {
   display: none !important;
 }
 body.sheet-only-mode {
-  background: #0c0d14 !important;
+  background: #0c0d14;
 }
 body.sheet-only-mode .main-content {
-  position: fixed; inset: 0; z-index: 9990;
-  background: #0c0d14 !important;
+  position: fixed; inset: 0; z-index: var(--z-modal-bg);
+  background: #0c0d14;
   overflow: hidden;
 }
 body.sheet-only-mode .sheet-viewer-wrapper {
   position: absolute; inset: 0;
-  background: #0c0d14 !important;
+  background: #0c0d14;
   overflow-y: auto; overflow-x: hidden;
-  height: 100% !important; max-height: 100% !important;
+  height: 100%; max-height: 100%;
 }
 body.sheet-only-mode .osmd-container {
   max-width: 100%; padding: 1.5rem 2rem; margin-top: 0;
-  background: #0c0d14 !important;
+  background: #0c0d14;
 }
 /* Nút thoát nổi góc trên phải (Ticket L1-4, L1-5: Touch target >= 44x44px) */
 #btn-exit-sheet-only {
   display: none;
-  position: fixed; top: 12px; right: 14px; z-index: 9999;
+  position: fixed; top: 12px; right: 14px; z-index: var(--z-modal);
   width: 44px; height: 44px; min-width: 44px; min-height: 44px; border-radius: 50%;
   background: var(--bg-surface); border: 1px solid var(--border);
   box-shadow: 0 3px 14px rgba(0,0,0,.22);
@@ -410,7 +435,7 @@ body.sheet-only-mode #btn-exit-sheet-only { display: flex; }
 body.fullscreen-mode .toolbar {
   position: absolute; top: 10px; right: 15px;
   width: auto; height: auto; background: transparent;
-  border: none; backdrop-filter: none; padding: 0; z-index: 9999;
+  border: none; backdrop-filter: none; padding: 0; z-index: var(--z-modal);
 }
 body.fullscreen-mode .toolbar-left,
 body.fullscreen-mode .control-group:not(:last-child),
@@ -441,7 +466,7 @@ body.fullscreen-mode .osmd-container { max-width: 100%; padding: 1rem; margin-to
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
-  z-index: 9999;
+  z-index: var(--z-modal);
   min-width: 150px;
   animation: fadeScaleIn .12s ease;
   pointer-events: auto;
@@ -493,7 +518,7 @@ body.fullscreen-mode .osmd-container { max-width: 100%; padding: 1rem; margin-to
   }
   .toolbar-controls::-webkit-scrollbar { display: none; }
   /* Fullscreen luôn hiện — quan trọng trên tablet/iPad */
-  #btn-fullscreen { display: inline-flex !important; }
+  #btn-fullscreen { display: inline-flex; }
 
   /* Ẩn label chữ, giữ icon */
   .control-label { display: none; }
@@ -517,7 +542,7 @@ body.fullscreen-mode .osmd-container { max-width: 100%; padding: 1rem; margin-to
 /* --- iPad / Tablet Portrait & Landscape (≤ 1200px) --- */
 /* Sidebar chuyển sang overlay dạng drawer trượt đẹp (Ticket L1-3 & L-D3) */
 @media (max-width: 1200px) {
-  .mobile-only { display: inline-flex !important; }
+  .mobile-only { display: inline-flex; }
 
   .sidebar {
     position: fixed;
@@ -560,7 +585,7 @@ body.fullscreen-mode .osmd-container { max-width: 100%; padding: 1rem; margin-to
   .main-content { margin-left: 0; }
 
   /* Touch targets tối thiểu 44px (Apple HIG) */
-  .transpose-btn { width: 36px !important; height: 36px !important; }
+  .transpose-btn { width: 36px; height: 36px; }
   .icon-btn { width: 40px; height: 40px; min-width: 36px; }
   .page-bar { min-height: 48px; }
   .zoom-select { min-width: 50px; }
@@ -591,7 +616,7 @@ body.fullscreen-mode .osmd-container { max-width: 100%; padding: 1rem; margin-to
     flex-wrap: nowrap;
   }
   /* Fullscreen luôn hiện trên mobile/iPad */
-  #btn-fullscreen { display: inline-flex !important; }
+  #btn-fullscreen { display: inline-flex; }
 
   /* Ẩn bớt một số tính năng ko cần trên mobile */
   #btn-session-panel, #btn-print { display: none !important; }
@@ -628,7 +653,7 @@ body.fullscreen-mode .osmd-container { max-width: 100%; padding: 1rem; margin-to
   #btn-new-chord-set { font-size: .65rem; padding: .2rem .4rem; flex-shrink: 0; }
 
   /* Transpose nút — tăng touch target */
-  .transpose-btn { width: 32px !important; height: 32px !important; }
+  .transpose-btn { width: 32px; height: 32px; }
   .transpose-display { min-width: 28px; font-size: .8rem; }
   #btn-transpose-reset { display: none; }
 }
@@ -674,7 +699,7 @@ body.fullscreen-mode .osmd-container { max-width: 100%; padding: 1rem; margin-to
 /* --- Landscape on small phone (≤ 600px landscape) --- */
 @media (max-width: 600px) and (orientation: landscape) {
   /* Sidebar ẩn hoàn toàn — viewport quá hẹp */
-  .sidebar { width: 240px !important; }
+  .sidebar { width: 240px; }
   .toolbar { min-height: 40px; padding: 0 .35rem; gap: .2rem; }
   .btn-sm svg { width: 14px; height: 14px; }
   .zoom-select-wrap { padding: .08rem .25rem; }
@@ -689,10 +714,10 @@ body.fullscreen-mode .osmd-container { max-width: 100%; padding: 1rem; margin-to
 @media print {
   /* Ép buộc nền trắng và chữ đen */
   body, html {
-    background: #ffffff !important;
-    color: #000000 !important;
-    height: auto !important;
-    overflow: visible !important;
+    background: #ffffff;
+    color: #000000;
+    height: auto;
+    overflow: visible;
   }
 
   /* Ẩn TOÀN BỘ Giao diện điều khiển */
@@ -709,25 +734,25 @@ body.fullscreen-mode .osmd-container { max-width: 100%; padding: 1rem; margin-to
 
   /* Giải phóng khung chứa bản nhạc */
   .main-content {
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100% !important;
-    display: block !important;
-    overflow: visible !important;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    display: block;
+    overflow: visible;
   }
 
   .sheet-viewer-wrapper {
-    height: auto !important;
-    min-height: auto !important;
-    overflow: visible !important;
-    padding: 0 !important;
+    height: auto;
+    min-height: auto;
+    overflow: visible;
+    padding: 0;
   }
 
   /* Bản nhạc bung tràn nề giấy */
   #osmd-container {
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
+    width: 100%;
+    margin: 0;
+    padding: 0;
   }
 
   /* Chord symbols giữ nguyên màu đỏ khi in */
@@ -792,10 +817,10 @@ body.fullscreen-mode .osmd-container { max-width: 100%; padding: 1rem; margin-to
 
 /* Search lyric mode indicator */
 #btn-search-lyrics.active {
-  opacity: 1 !important;
-  background: var(--accent) !important;
-  color: #fff !important;
-  border-color: var(--accent) !important;
+  opacity: 1;
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
 }
 
 /* =============================================
@@ -1119,9 +1144,9 @@ body.dark-mode .btn-chord-edit-pill:hover:not(:disabled) {
 }
 
 .btn-chord-edit-pill.active {
-  background: #10b981 !important;
-  color: #ffffff !important;
-  border-color: #059669 !important;
+  background: #10b981;
+  color: #ffffff;
+  border-color: #059669;
   box-shadow: 0 0 8px rgba(16, 185, 129, 0.45);
 }
 
@@ -1201,9 +1226,9 @@ body.dark-mode .btn-chord-edit-pill:hover:not(:disabled) {
 }
 
 .btn-gig-verse {
-  background: rgba(139, 92, 246, 0.25) !important;
-  border-color: rgba(139, 92, 246, 0.45) !important;
-  color: #c4b5fd !important;
+  background: rgba(139, 92, 246, 0.25);
+  border-color: rgba(139, 92, 246, 0.45);
+  color: #c4b5fd;
   font-weight: 800;
   white-space: nowrap;
 }
@@ -1264,7 +1289,7 @@ body.dark-mode .btn-chord-edit-pill:hover:not(:disabled) {
   justify-content: center;
   gap: 5px;
   background: linear-gradient(135deg, #7c3aed, #4f46e5);
-  color: #fff !important;
+  color: #fff;
   font-size: 0.82rem;
   font-weight: 800;
   height: 44px;
@@ -1438,7 +1463,7 @@ body.sheet-only-mode .edge-tap-center {
   bottom: max(16px, env(safe-area-inset-bottom, 16px));
   left: 50%;
   transform: translateX(-50%);
-  z-index: 9999;
+  z-index: var(--z-modal);
   align-items: center;
   gap: 12px;
   background: rgba(15, 15, 26, 0.94);
@@ -1457,7 +1482,7 @@ body.sheet-only-mode .edge-tap-center {
 .gig-floating-hud.faded {
   opacity: 0 !important;
   pointer-events: none !important;
-  transform: translateX(-50%) translateY(14px) !important;
+  transform: translateX(-50%) translateY(14px);
 }
 
 body.sheet-only-mode .gig-floating-hud {
@@ -1584,8 +1609,8 @@ body.sheet-only-mode .gig-floating-hud {
 }
 
 .btn-lock-zoom.locked, .btn-gig-lock.locked {
-  background: rgba(245, 158, 11, 0.2) !important;
-  border-color: rgba(245, 158, 11, 0.5) !important;
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.5);
   color: #fbbf24 !important;
 }
 
@@ -1668,25 +1693,25 @@ body.sheet-only-mode .gig-floating-hud {
     display: none !important;
   }
   .menu-section-compact-only {
-    display: block !important;
+    display: block;
   }
   .btn-gig-mode .gig-text {
     display: none !important;
   }
   .btn-gig-mode {
-    padding: 0 10px !important;
-    min-width: 44px !important;
+    padding: 0 10px;
+    min-width: 44px;
     height: 44px !important;
     min-height: 44px !important;
   }
   .song-info-pill {
-    max-width: 160px !important;
+    max-width: 160px;
   }
   .song-info-pill .song-title {
     font-size: 0.8rem;
   }
   .chord-set-select {
-    max-width: 95px !important;
+    max-width: 95px;
   }
 }
 
@@ -1695,14 +1720,14 @@ body.sheet-only-mode .gig-floating-hud {
    ==================================================== */
 @media (max-width: 1024px) and (min-width: 681px) {
   .unified-toolbar {
-    padding: 0 4px !important;
-    gap: 3px !important;
+    padding: 0 4px;
+    gap: 3px;
     flex-wrap: nowrap;
     overflow-x: hidden;
   }
   .song-info-pill {
-    max-width: 120px !important;
-    padding: 0 6px !important;
+    max-width: 120px;
+    padding: 0 6px;
     height: 44px !important;
     min-height: 44px !important;
   }
@@ -1725,7 +1750,7 @@ body.sheet-only-mode .gig-floating-hud {
     display: none !important;
   }
   .chord-set-select {
-    max-width: 80px !important;
+    max-width: 80px;
     font-size: 0.72rem;
     height: 44px !important;
     min-height: 44px !important;
@@ -1734,40 +1759,40 @@ body.sheet-only-mode .gig-floating-hud {
     display: none !important;
   }
   .btn-gig-mode {
-    padding: 0 10px !important;
-    min-width: 44px !important;
+    padding: 0 10px;
+    min-width: 44px;
     height: 44px !important;
     min-height: 44px !important;
   }
   .band-controls {
-    gap: 4px !important;
+    gap: 4px;
     flex-shrink: 1;
   }
   .band-pill {
-    padding: 0 4px !important;
+    padding: 0 4px;
     gap: 3px;
     height: 44px !important;
     min-height: 44px !important;
   }
   .toolbar-right {
-    gap: 4px !important;
+    gap: 4px;
   }
   .nav-arrows .icon-btn {
-    width: 44px !important;
+    width: 44px;
     height: 44px !important;
-    min-width: 44px !important;
+    min-width: 44px;
     min-height: 44px !important;
   }
   #btn-more-options {
-    width: 44px !important;
+    width: 44px;
     height: 44px !important;
-    min-width: 44px !important;
+    min-width: 44px;
     min-height: 44px !important;
   }
   .icon-btn-pill {
-    width: 44px !important;
+    width: 44px;
     height: 44px !important;
-    min-width: 44px !important;
+    min-width: 44px;
     min-height: 44px !important;
   }
 }
@@ -1781,10 +1806,10 @@ body.sheet-only-mode .gig-floating-hud {
     height: 44px !important;
     min-height: 44px !important;
     max-height: 44px !important;
-    padding: 0 8px !important;
+    padding: 0 8px;
     flex-wrap: nowrap !important;
-    align-items: center !important;
-    overflow: hidden !important;
+    align-items: center;
+    overflow: hidden;
   }
 
   /* Left: Hamburger + Tên bài + Tông gốc */
@@ -1799,8 +1824,8 @@ body.sheet-only-mode .gig-floating-hud {
   .song-info-pill {
     max-width: 100% !important;
     padding: 0 8px;
-    height: 38px !important;
-    min-height: 38px !important;
+    height: 38px;
+    min-height: 38px;
   }
   .song-info-pill .song-title {
     font-size: 0.82rem;
@@ -1831,9 +1856,9 @@ body.sheet-only-mode .gig-floating-hud {
     display: none !important;
   }
   #btn-more-options {
-    width: 44px !important;
+    width: 44px;
     height: 44px !important;
-    min-width: 44px !important;
+    min-width: 44px;
     min-height: 44px !important;
   }
 
@@ -1850,16 +1875,16 @@ body.sheet-only-mode .gig-floating-hud {
     gap: 2px;
   }
   .icon-btn-pill {
-    width: 44px !important;
+    width: 44px;
     height: 44px !important;
-    min-width: 44px !important;
+    min-width: 44px;
     min-height: 44px !important;
   }
   .btn-chord-preset {
     height: 44px !important;
     min-height: 44px !important;
-    min-width: 44px !important;
-    padding: 0 8px !important;
+    min-width: 44px;
+    padding: 0 8px;
   }
   .btn-chord-preset .preset-label {
     display: none !important;
@@ -1868,8 +1893,8 @@ body.sheet-only-mode .gig-floating-hud {
   .btn-toggle-view {
     height: 44px !important;
     min-height: 44px !important;
-    min-width: 44px !important;
-    padding: 0 8px !important;
+    min-width: 44px;
+    padding: 0 8px;
   }
   #capo-wrap,
   #capo-badge {
@@ -1885,7 +1910,7 @@ body.sheet-only-mode .gig-floating-hud {
     display: none !important;
   }
   .chord-set-select {
-    max-width: 70px !important;
+    max-width: 70px;
     font-size: 0.75rem;
     height: 44px !important;
     min-height: 44px !important;
@@ -1948,16 +1973,16 @@ body.sheet-only-mode .gig-floating-hud {
 
   /* Sheet container full width on phone */
   .sheet-viewer-wrapper {
-    padding: 0 !important;
+    padding: 0;
   }
   #sheet-area {
-    padding: 2px 0 !important;
+    padding: 2px 0;
   }
   .osmd-container {
-    padding: 4px 1px !important;
-    margin: 1px auto !important;
+    padding: 4px 1px;
+    margin: 1px auto;
     max-width: 100% !important;
-    width: 100% !important;
+    width: 100%;
   }
 }
 
@@ -2194,10 +2219,10 @@ body.sheet-only-mode .setlist-program-bar {
 }
 
 .btn-gig-sp-btn {
-  padding: 2px 8px !important;
-  font-size: 0.75rem !important;
-  min-width: 28px !important;
-  height: 24px !important;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  min-width: 28px;
+  height: 24px;
 }
 
 /* ========================================================
