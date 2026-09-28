@@ -206,28 +206,14 @@ const ToolbarController = (() => {
       const wDelta = Math.abs(w - _lastW);
       _lastW = w;
       if (wDelta > 100 && OSMDRenderer?.getIsLoaded?.()) {
-        setTimeout(async () => {
+        setTimeout(() => {
           try {
-            const osmdInstance = OSMDRenderer.getInstance();
+            // L5-1: Bàn giao toàn bộ việc layout lại và render khi resize cho ResizeObserver duy nhất làm chủ
             if (localStorage.getItem('sheetapp_zoom_locked') === 'true') {
-              await osmdInstance?.render?.();
               ChordCanvas?.reposition?.();
               return;
             }
-            const svg = document.getElementById('osmd-container')?.querySelector('svg');
-            const wrapper = document.querySelector('.sheet-viewer-wrapper');
-            if (svg && wrapper && osmdInstance) {
-              const avail = wrapper.clientWidth - 24;
-              if (avail > 0 && svg.clientWidth > 0) {
-                const ratio = avail / svg.clientWidth;
-                const currentZoom = Store.get('currentZoom') || 1.0;
-                const pct = Math.round(Math.max(0.3, Math.min(2.5, ratio * currentZoom)) * 20) * 5;
-                await App.setZoom(pct);
-              }
-            } else {
-              await osmdInstance?.render?.();
-              ChordCanvas?.reposition?.();
-            }
+            ChordCanvas?.reposition?.();
           } catch(e) {}
         }, 350);
       }
@@ -235,31 +221,17 @@ const ToolbarController = (() => {
 
     if ('onorientationchange' in window) {
       window.addEventListener('orientationchange', () => {
-        // Xử lý xoay màn hình: đóng sidebar rồi re-render
+        // Xử lý xoay màn hình: đóng sidebar
         if (window.innerWidth <= 900) _closeSidebar();
-        setTimeout(async () => {
+        setTimeout(() => {
           if (!OSMDRenderer?.getIsLoaded?.()) return;
           try {
-            const osmdInstance = OSMDRenderer.getInstance();
+            // L5-1: ResizeObserver duy nhất làm chủ việc layout lại và render khi xoay thiết bị
             if (localStorage.getItem('sheetapp_zoom_locked') === 'true') {
-              await osmdInstance?.render?.();
               ChordCanvas?.reposition?.();
               return;
             }
-            const svg = document.getElementById('osmd-container')?.querySelector('svg');
-            const wrapper = document.querySelector('.sheet-viewer-wrapper');
-            if (svg && wrapper && osmdInstance) {
-              const avail = wrapper.clientWidth - 24;
-              if (avail > 0 && svg.clientWidth > 0) {
-                const ratio = avail / svg.clientWidth;
-                const currentZoom = Store.get('currentZoom') || 1.0;
-                const pct = Math.round(Math.max(0.3, Math.min(2.5, ratio * currentZoom)) * 20) * 5;
-                await App.setZoom(pct);
-              }
-            } else {
-              await osmdInstance?.render?.();
-              ChordCanvas?.reposition?.();
-            }
+            ChordCanvas?.reposition?.();
           } catch(e) {}
         }, 500);
       });

@@ -176,7 +176,7 @@ const StageLens = (() => {
 
     modal = document.createElement('div');
     modal.id = 'modal-stage-lens';
-    modal.className = 'modal modal-stage-lens hidden';
+    modal.className = 'modal-overlay modal modal-stage-lens hidden';
     modal.setAttribute('role', 'dialog');
     modal.setAttribute('aria-modal', 'true');
     modal.setAttribute('aria-labelledby', 'stage-lens-modal-title');

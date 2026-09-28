@@ -16,6 +16,8 @@ const OSMDRenderer = (() => {
   let _isCompactMode = false;
   let _titleCompacted = false; // flag tránh compact title nhiều lần
   let _renderToken = 0; // Race-condition guard: ngăn các lần load/render cũ đè lên bài mới
+  let _renderCount = 0; // L5-1: Bộ đếm số lần render OSMD thực tế
+  let _lastContainerWidth = 0; // L5-1: Theo dõi bề rộng container để tránh render kép sau khi nạp
 
   /**
    * Khởi tạo OSMD vào một container DOM.
@@ -26,7 +28,7 @@ const OSMDRenderer = (() => {
     if (!container) throw new Error(`Container #${id} không tồn tại`);
 
     osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay(container, {
-      autoResize: true,
+      autoResize: false, // L5-1: Tắt autoResize nội bộ của OSMD, giao ResizeObserver duy nhất làm chủ
       backend: 'svg',
       drawTitle: true,
       drawSubtitle: true,
@@ -59,19 +61,18 @@ const OSMDRenderer = (() => {
         osmd.rules.ChordSymbolFontFamily = "OSMDChordFont, sans-serif";
     }
 
-    // Resize observer để auto-reflow khi container thay đổi kích thước
-    let lastWidth = container.clientWidth;
+    // L5-1: ResizeObserver duy nhất làm chủ việc layout lại khi container thay đổi kích thước
+    _lastContainerWidth = container.clientWidth;
     const resizeObserver = new ResizeObserver(_debounce(async () => {
       if (isLoaded) {
           const currentWidth = container.clientWidth;
-          // iPad/iPhone address bar co giãn thay đổi height nhưng giữ nguyên width.
-          // Chỉ kích hoạt render lại khi chiều rộng thực tế thay đổi > 8px (tránh giật lag khi cuộn).
-          if (currentWidth > 0 && Math.abs(currentWidth - lastWidth) < 8) {
+          if (currentWidth > 0 && Math.abs(currentWidth - _lastContainerWidth) < 8) {
               return;
           }
-          lastWidth = currentWidth;
+          _lastContainerWidth = currentWidth;
 
           if (window.ChordCanvas?.isPopupOpen?.()) return; // KHÔNG re-render nếu đang nhập popup hợp âm (tránh mất focus)
+          _renderCount++;
           await osmd.render();
           _titleCompacted = false; // reset để compact lại sau resize
           _compactTitleSVG();
@@ -83,60 +84,38 @@ const OSMDRenderer = (() => {
     resizeObserver.observe(container);
 
     // Pinch-to-Zoom (Multi-touch) using GPU scale transform for buttery 60fps feeling on iPad/Mobile
-    let initTouchDist = 0;
-    let initZoom = 1.0;
-    let isPinching = false;
-    let currentScaleRatio = 1.0;
+    let initTouchDist = 0, initZoom = 1.0, isPinching = false, currentScaleRatio = 1.0;
 
     container.addEventListener('touchstart', e => {
       if (e.touches.length === 2 && isLoaded) {
         isPinching = true;
-        initTouchDist = Math.hypot(
-          e.touches[0].clientX - e.touches[1].clientX,
-          e.touches[0].clientY - e.touches[1].clientY
-        );
+        initTouchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
         initZoom = currentZoom;
         currentScaleRatio = 1.0;
-        
         const svg = container.querySelector('svg');
-        if (svg) {
-          svg.style.transition = 'none';
-          svg.style.transformOrigin = 'top center';
-        }
+        if (svg) { svg.style.transition = 'none'; svg.style.transformOrigin = 'top center'; }
       }
     }, { passive: true });
 
     container.addEventListener('touchmove', e => {
       if (isPinching && e.touches.length === 2 && isLoaded) {
-        e.preventDefault(); // prevent native browser zoom
-        const dist = Math.hypot(
-          e.touches[0].clientX - e.touches[1].clientX,
-          e.touches[0].clientY - e.touches[1].clientY
-        );
+        e.preventDefault();
+        const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
         if (initTouchDist > 0) {
           currentScaleRatio = dist / initTouchDist;
           const svg = container.querySelector('svg');
-          if (svg) {
-            svg.style.transform = `scale(${currentScaleRatio})`;
-          }
+          if (svg) svg.style.transform = `scale(${currentScaleRatio})`;
         }
       }
     }, { passive: false });
 
-    container.addEventListener('touchend', async e => {
+    container.addEventListener('touchend', async () => {
       if (isPinching) {
         isPinching = false;
         const svg = container.querySelector('svg');
-        if (svg) {
-          svg.style.transform = '';
-        }
-        
-        // Calculate the final target zoom level (Snap to 5% steps)
+        if (svg) svg.style.transform = '';
         const finalZoomPercent = Math.round(Math.max(0.3, Math.min(2.5, initZoom * currentScaleRatio)) * 20) * 5;
-        
-        if (window.App?.setZoom) {
-          await App.setZoom(finalZoomPercent);
-        }
+        if (window.App?.setZoom) await App.setZoom(finalZoomPercent);
       }
     });
 
@@ -297,15 +276,17 @@ const OSMDRenderer = (() => {
       if (transposeValue !== 0 && osmd.Sheet && opensheetmusicdisplay.TransposeCalculator) {
           osmd.TransposeCalculator = new opensheetmusicdisplay.TransposeCalculator();
           osmd.Sheet.Transpose = transposeValue;
-          osmd.updateGraphic();
       }
 
       refreshRules();
+      _renderCount++;
       await osmd.render();
       if (token !== _renderToken) return osmd; // Bị hủy bởi lần render mới hơn
       window.SongPreloader?.markSvgReady?.();
 
       _forceLayoutRecalc(); // lần 2: sau render để clip SVG nếu vẫn rộng
+      const containerEl = document.getElementById(containerId);
+      if (containerEl) _lastContainerWidth = containerEl.clientWidth;
       _titleCompacted = false;
       _compactTitleSVG();
       _tagChordSymbols();
@@ -340,15 +321,17 @@ const OSMDRenderer = (() => {
       if (transposeValue !== 0 && osmd.Sheet && opensheetmusicdisplay.TransposeCalculator) {
           osmd.TransposeCalculator = new opensheetmusicdisplay.TransposeCalculator();
           osmd.Sheet.Transpose = transposeValue;
-          osmd.updateGraphic();
       }
 
       refreshRules();
       _forceLayoutRecalc();
+      _renderCount++;
       await osmd.render();
       if (token !== _renderToken) return osmd;
 
       _forceLayoutRecalc();
+      const reloadCont = document.getElementById(containerId);
+      if (reloadCont) _lastContainerWidth = reloadCont.clientWidth;
       _titleCompacted = false;
       _compactTitleSVG();
       _tagChordSymbols();
@@ -365,13 +348,15 @@ const OSMDRenderer = (() => {
    * Thay đổi mức zoom — nhận decimal (0.1 → 2.5), App.setZoom đã convert từ percent
    */
   async function setZoom(level) {
-    // level là decimal: 0.1 = 10%, 1.0 = 100%, 2.0 = 200%
     currentZoom = Math.max(0.1, Math.min(2.5, level));
     if (osmd && isLoaded) {
       osmd.zoom = currentZoom;
       _forceLayoutRecalc();
+      _renderCount++;
       await osmd.render();
       _forceLayoutRecalc();
+      const zoomCont = document.getElementById(containerId);
+      if (zoomCont) _lastContainerWidth = zoomCont.clientWidth;
       _tagChordSymbols();
       _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} });
     }
@@ -592,7 +577,7 @@ const OSMDRenderer = (() => {
     setTimeout(() => _hideRepeatLabels(_isCompactMode), 400);
   }
 
-  return { init, load, reload, setZoom, setZoomSilent, getInstance, getIsLoaded, getCurrentXml, getCurrentZoom, onReady, destroy, setCompactMode, getCompactMode, refreshRules, tagChordSymbols: _tagChordSymbols, getRenderToken: () => _renderToken };
+  return { init, load, reload, setZoom, setZoomSilent, getInstance, getIsLoaded, getCurrentXml, getCurrentZoom, onReady, destroy, setCompactMode, getCompactMode, refreshRules, tagChordSymbols: _tagChordSymbols, getRenderToken: () => _renderToken, getRenderCount: () => _renderCount, resetRenderCount: () => { _renderCount = 0; } };
 })();
 
 window.OSMDRenderer = OSMDRenderer;

@@ -1225,9 +1225,16 @@ SheetApp/
   + Tạo: tests/library_l47_harmonic_numeral_regression.php (18/18 checks PASS, 66.7% behavioral assertions, kiểm thử toàn diện các tông Key C, G, D, F, Bb, A, Am)
   + Tạo: e2e/library-l4-harmonic-numeral.spec.js (E2E Playwright: Chuyển đổi hợp âm Chuẩn ↔ La Mã ↔ Nashville bằng nút toolbar và phím tắt N, bảo toàn qua reload trên cả Chromium và WebKit)
   🏆 HOÀN TẤT TOÀN DIỆN CHƯƠNG L4 (7/7 vé L4-1 đến L4-7: 100% Hoàn Thành).
-  🏆 ĐẠT 100% QUALITY GATE: 114/114 suites PASS (1993 passed, 0 failed, 67.9% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
+[2026-09-28] — Hoàn tất Ticket L5-1 (ROADMAP4.md): Single Render Per Song (Render 1 lần mỗi bài)
+  ~ Sửa: assets/js/osmd-renderer.js (Tắt autoResize nội bộ của OSMD autoResize: false; loại bỏ các lệnh osmd.updateGraphic() thừa trước render; ResizeObserver duy nhất làm chủ việc layout lại với ngưỡng lọc giật lag delta > 8px; cung cấp bộ đếm render getRenderCount(), resetRenderCount(); 584 dòng < 600 dòng)
+  ~ Sửa: assets/js/song-loader.js (Thêm _computePreloadFitZoom tính toán mức zoom vừa khung trước lần render đầu; áp dụng fit zoom qua setZoomSilent trước load; loại bỏ setTimeout(_autoFitZoom, 80) thừa gây render kép; 564 dòng < 600 dòng)
+  ~ Sửa: assets/js/toolbar-controller.js (Bàn giao toàn bộ việc layout lại và re-render khi resize/xoay thiết bị cho ResizeObserver duy nhất làm chủ; loại bỏ App.setZoom trùng lặp; 311 dòng < 600 dòng)
+  ~ Sửa: assets/js/stage-lens.js (Sửa modal-stage-lens thành modal-overlay để có position:fixed, không chèn ép flex layout của body khi khởi tạo; 311 dòng < 600 dòng)
+  + Tạo: tests/library_l51_single_render_regression.php (29/29 checks PASS, 58.6% behavioral assertions)
+  + Tạo: e2e/library-l5-single-render.spec.js (E2E Playwright: Bộ đếm render chuẩn xác: Tải bài ban đầu = 1, Đổi bài = 1, Resize = 1 trên cả Chromium và WebKit)
+  🏆 ĐẠT 100% QUALITY GATE: 115/115 suites PASS (2022 passed, 0 failed, 68.3% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
 
 ---
 
 *File này là "bộ nhớ" của dự án. AI Agent cập nhật sau mỗi phiên để phiên sau không phải khám phá lại từ đầu.*
-*Cập nhật: 2026-09-28 (Hoàn tất Chương L4)*
+*Cập nhật: 2026-09-28 (Hoàn tất Ticket L5-1)*
