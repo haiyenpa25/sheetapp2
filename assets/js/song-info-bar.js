@@ -24,22 +24,36 @@ const SongInfoBar = (() => {
     const btnClosePopover = document.getElementById('btn-close-song-info-popover');
 
     if (btnPopover && popover) {
+      // R0-8: #toolbar có overflow-x:auto không điều kiện -> theo CSS2.1 §11.1.1 cũng
+      // clip overflow-y -> popover absolute bên trong bị cắt mất. Chuyển ra document.body
+      // khi mở (như #main-dropdown-menu), định vị bằng position:fixed theo vị trí nút ⓘ.
+      const _positionPopover = () => {
+        const r = btnPopover.getBoundingClientRect();
+        const w = popover.offsetWidth || 320;
+        let left = r.left;
+        if (left + w > window.innerWidth - 8) left = window.innerWidth - w - 8;
+        if (left < 8) left = 8;
+        popover.style.cssText = `position:fixed; top:${r.bottom + 6}px; left:${left}px; right:auto; z-index:99999;`;
+      };
       btnPopover.addEventListener('click', (e) => {
         e.stopPropagation();
-        popover.classList.toggle('hidden');
-        if (!popover.classList.contains('hidden')) {
+        const wasHidden = popover.classList.contains('hidden');
+        if (wasHidden) {
+          if (popover.parentNode !== document.body) document.body.appendChild(popover);
+          popover.classList.remove('hidden');
           _updatePopoverContent();
+          _positionPopover();
+        } else {
+          popover.classList.add('hidden');
         }
       });
-      btnClosePopover?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        popover.classList.add('hidden');
-      });
+      btnClosePopover?.addEventListener('click', (e) => { e.stopPropagation(); popover.classList.add('hidden'); });
       document.addEventListener('click', (e) => {
         if (!popover.classList.contains('hidden') && !popover.contains(e.target) && !btnPopover.contains(e.target)) {
           popover.classList.add('hidden');
         }
       });
+      window.addEventListener('resize', () => { if (!popover.classList.contains('hidden')) _positionPopover(); });
     }
 
     // Lắng nghe sự kiện đổi tông từ App / Store để cập nhật Tông tập tức thì
