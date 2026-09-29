@@ -79,7 +79,15 @@ const ModeManager = (() => {
       return true;
     }
 
-    // 2. Modals / Bottom sheets (đóng lớp trên cùng trước tiên)
+    // 2. Sidebar overlay nếu đang mở trên màn hình <= 1440px (Ticket R1-7)
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar && !sidebar.classList.contains('mobile-hidden') && window.innerWidth <= 1440) {
+      document.getElementById('sidebar-overlay')?.click();
+      e?.preventDefault?.();
+      return true;
+    }
+
+    // 3. Modals / Bottom sheets (đóng lớp trên cùng trước tiên)
     const openSheet = document.querySelector('.bottom-sheet:not(.hidden), .modal-overlay:not(.hidden), [role="dialog"]:not(.hidden)');
     if (window.ModalManager?.hasOpenModals?.() || openSheet) {
       if (window.ModalManager?.hasOpenModals?.()) {

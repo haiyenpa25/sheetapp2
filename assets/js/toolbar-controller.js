@@ -164,10 +164,21 @@ const ToolbarController = (() => {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebar-overlay');
 
+    function _updateToggleBtn(isOpen) {
+      const btn = document.getElementById('btn-open-sidebar');
+      if (!btn) return;
+      const title = isOpen ? 'Đóng danh sách bài hát [Phím S]' : 'Mở danh sách bài hát (903 bài) [Phím S]';
+      const label = isOpen ? 'Đóng danh sách bài hát' : 'Mở danh sách bài hát';
+      btn.setAttribute('title', title);
+      btn.setAttribute('aria-label', label);
+      btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    }
+
     function _openSidebar() {
       sidebar?.classList.remove('mobile-hidden');
+      sidebar?.classList.remove('collapsed');
       overlay?.classList.remove('hidden');
-      // Click overlay → đóng
+      _updateToggleBtn(true);
       if (overlay) {
         overlay.onclick = _closeSidebar;
       }
@@ -176,20 +187,22 @@ const ToolbarController = (() => {
     function _closeSidebar() {
       sidebar?.classList.add('mobile-hidden');
       overlay?.classList.add('hidden');
+      _updateToggleBtn(false);
     }
 
     function _toggle() {
       if (!sidebar) return;
-      if (window.innerWidth <= 1200) {
-        // Mobile/iPad: toggle ý nghĩa rõ ràng (Ticket L1-3 & L-D3)
+      if (window.innerWidth <= 1440) {
+        // Mobile / iPad / Laptop (<=1440px): Drawer overlay trượt (Ticket R1-7)
         if (sidebar.classList.contains('mobile-hidden')) {
           _openSidebar();
         } else {
           _closeSidebar();
         }
       } else {
-        // Desktop: collapse narrow
+        // Desktop >1440px: collapse narrow
         sidebar.classList.toggle('collapsed');
+        _updateToggleBtn(!sidebar.classList.contains('collapsed'));
       }
     }
 
@@ -197,16 +210,22 @@ const ToolbarController = (() => {
     document.getElementById('btn-toggle-sidebar')?.addEventListener('click', _toggle);
     document.getElementById('btn-open-sidebar')?.addEventListener('click', _toggle);
 
-    // Init: mobile/iPad bắt đầu ẩn sidebar (Ticket L1-3 & L-D3: đóng mặc định khi xem bài)
-    if (window.innerWidth <= 1200) {
+    // Init: màn hình <= 1440px khi đang mở bài (?song=) hoặc <= 1200px thì mặc định ẩn sidebar (R1-7)
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasSongParam = urlParams.has('song') && Boolean(urlParams.get('song'));
+    if (window.innerWidth <= 1200 || (window.innerWidth <= 1440 && hasSongParam)) {
       sidebar?.classList.add('mobile-hidden');
       overlay?.classList.add('hidden');
+      _updateToggleBtn(false);
+    } else {
+      const isOpen = !sidebar?.classList.contains('mobile-hidden') && !sidebar?.classList.contains('collapsed');
+      _updateToggleBtn(isOpen);
     }
 
-    // Đóng sidebar khi chọn bài trên tablet/mobile để nhạc chiếm trọn màn hình
+    // Đóng sidebar khi chọn bài trên tablet/laptop (<= 1440px) để nhạc chiếm trọn màn hình
     if (typeof EventBus !== 'undefined') {
       EventBus.on('song:loaded', () => {
-        if (window.innerWidth <= 1200) {
+        if (window.innerWidth <= 1440) {
           _closeSidebar();
         }
       });
@@ -216,16 +235,16 @@ const ToolbarController = (() => {
     let _lastW = window.innerWidth;
     window.addEventListener('resize', _debounce(() => {
       const w = window.innerWidth;
-      if (w <= 1200) {
-        // Chuyển sang mobile/iPad: ẩn sidebar nếu đang mở
-        if (!sidebar?.classList.contains('mobile-hidden')) {
-          _closeSidebar();
+      if (w <= 1440) {
+        if (hasSongParam || w <= 1200) {
+          if (!sidebar?.classList.contains('mobile-hidden')) {
+            _closeSidebar();
+          }
         }
-        sidebar?.classList.remove('collapsed');
       } else {
-        // Chuyển sang desktop: hiện sidebar
         sidebar?.classList.remove('mobile-hidden');
         overlay?.classList.add('hidden');
+        _updateToggleBtn(!sidebar?.classList.contains('collapsed'));
       }
       const wDelta = Math.abs(w - _lastW);
       _lastW = w;
