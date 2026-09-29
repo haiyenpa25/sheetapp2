@@ -399,19 +399,16 @@ const SongLoader = (() => {
   }
 
   function _resetCapoUI() {
-    const capoSel  = document.getElementById('capo-select');
-    const capoHint = document.getElementById('capo-hint');
-    if (capoSel)  capoSel.value = '0';
+    const capoSel = document.getElementById('capo-select'), capoHint = document.getElementById('capo-hint');
+    if (capoSel) capoSel.value = '0';
     if (capoHint) capoHint.textContent = '';
     AppUI.updateCapoBadge(0);
   }
 
   function _autoCloseSidebar() {
     if (window.innerWidth <= 900) {
-      // Dùng helper từ toolbar-controller nếu có (đồng bộ overlay)
-      if (typeof window._closeSidebar === 'function') {
-        window._closeSidebar();
-      } else {
+      if (typeof window._closeSidebar === 'function') window._closeSidebar();
+      else {
         document.getElementById('sidebar')?.classList.add('mobile-hidden');
         document.getElementById('sidebar-overlay')?.classList.add('hidden');
       }
@@ -419,10 +416,9 @@ const SongLoader = (() => {
   }
 
   function _enableAudioControls() {
-    const perfBtn = document.getElementById('btn-perf-notes');
+    const perfBtn = document.getElementById('btn-perf-notes'), vol = document.getElementById('audio-volume');
     if (perfBtn) perfBtn.disabled = false;
-    const vol = document.getElementById('audio-volume');
-    if (vol) { vol.disabled = false; }
+    if (vol) vol.disabled = false;
     window.SheetAudioPlayer?.enableBtn?.(true);
   }
 
@@ -451,14 +447,23 @@ const SongLoader = (() => {
     const hasExplicitViewParam = new URLSearchParams(location.search).has('v');
     const isMobile = window.innerWidth <= 680;
     const savedMode = localStorage.getItem('sheetapp_view_mode');
-    const shouldOpenBand = state.v === 'lyric' ||
-      (!hasExplicitViewParam && (savedMode === 'band' || (!savedMode && isMobile)));
+    const role = (localStorage.getItem('sheetapp_instrument_role') || '').toLowerCase();
+    // Q2: Nếu người dùng đã chọn trước đó, luôn giữ lựa chọn đó. Nếu chưa chọn: mobile guitar/vocals/khách mở Lời, đàn phím mở Nhạc.
+    const defaultMode = isMobile ? (role === 'keyboard' ? 'sheet' : 'band') : 'sheet';
+    const effectiveMode = savedMode || defaultMode;
+    const shouldOpenBand = state.v === 'lyric' || (!hasExplicitViewParam && effectiveMode === 'band');
 
     if (shouldOpenBand) {
       if (state.lv === 'inline') localStorage.setItem('sheetapp_lyric_mode', 'inline');
       const lyric = document.getElementById('lyric-view-container');
       if (lyric?.classList.contains('hidden')) {
-        const toggleBtn = document.getElementById('btn-band-toggle') || document.getElementById('btn-lyric-view');
+        const toggleBtn = document.getElementById('btn-band-toggle') || document.getElementById('btn-toggle-view');
+        toggleBtn?.click();
+      }
+    } else {
+      const lyric = document.getElementById('lyric-view-container');
+      if (lyric && !lyric.classList.contains('hidden')) {
+        const toggleBtn = document.getElementById('btn-band-toggle') || document.getElementById('btn-toggle-view');
         toggleBtn?.click();
       }
     }

@@ -353,7 +353,7 @@ Mỗi ticket ghi rõ việc cần làm và tiêu chí nghiệm thu. Ticket nào 
 | R4-1 ✅ | **Góc nhìn nhạc cụ** chuyển vào Công cụ → Hiển thị, nhãn tiếng Việt: Guitar · Đàn phím · Bass · Trống · Hát; bỏ nhãn "Stage Lens" | E2E: đổi góc nhìn thì giao diện đổi, và còn nguyên sau reload |
 | R4-2 ✅ | Chế độ **Lời & Hợp âm**: 2 cột trên iPad/laptop, tô sáng khổ đang hát, cỡ chữ theo "Cỡ hợp âm" | Ảnh chụp 1366: 2 cột; hợp âm ≥ 1.3 lần chữ lời |
 | R4-3 ✅ | Điện thoại ở chế độ Bản nhạc: ≥ 2 ô nhịp mỗi hàng; hợp âm không đè thân nốt | E2E 390: đếm ô nhịp mỗi hàng ≥ 2; không có hộp hợp âm nào giao với nốt |
-| R4-4 | Mặc định theo thiết bị (quyết định **Q2**) và **nhớ lựa chọn** của từng người | E2E: đổi sang Nhạc, reload thì vẫn là Nhạc |
+| R4-4 ✅ | Mặc định theo thiết bị (quyết định **Q2**) và **nhớ lựa chọn** của từng người | E2E: đổi sang Nhạc, reload thì vẫn là Nhạc |
 | R4-5 | Bản in "Lời & Hợp âm" và "Tập chương trình thờ phượng" dùng từ ngữ mới và đúng tông/bộ đang chọn | Kiểm tra bản in PDF |
 
 ### R5 — Nghiệm thu thật (3 ngày)

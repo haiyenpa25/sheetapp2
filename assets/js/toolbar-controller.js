@@ -416,15 +416,11 @@ const ToolbarController = (() => {
       });
 
       const handleOutside = (e) => {
-        if (!btnOptions.contains(e.target) && !menuOptions.contains(e.target)) {
-          closeMenu();
-        }
+        if (!btnOptions.contains(e.target) && !menuOptions.contains(e.target)) closeMenu();
       };
       document.addEventListener('click', handleOutside);
       document.addEventListener('pointerdown', handleOutside);
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeMenu();
-      });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
       window.addEventListener('scroll', () => {
         if (window.innerWidth > 680) closeMenu();
       }, { passive: true });
@@ -440,6 +436,10 @@ const ToolbarController = (() => {
         const isHidden = lyricContainer.classList.contains('hidden');
         lyricContainer.classList.toggle('hidden', !isHidden);
         document.getElementById('osmd-container')?.classList.toggle('hidden', isHidden);
+        try {
+          localStorage.setItem('sheetapp_view_mode', isHidden ? 'band' : 'sheet');
+          window.URLState?.update?.({ v: isHidden ? 'lyric' : 'sheet' });
+        } catch (_) {}
         if (isHidden) window.DisplaySettings?.renderLyricViewIfActive?.();
         else window.ChordCanvas?.build?.();
       });
