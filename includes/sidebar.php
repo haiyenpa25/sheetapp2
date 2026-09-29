@@ -13,8 +13,8 @@
         <span id="auth-username" class="sidebar-auth-name">Khách</span>
         <span id="auth-role-badge" class="sidebar-role-badge hidden"></span>
       </button>
-      <button id="btn-toggle-sidebar" class="icon-btn" title="Ẩn/Hiện sidebar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      <button id="btn-toggle-sidebar" class="icon-btn btn-close-sidebar" title="Đóng danh sách bài hát (Esc)" aria-label="Đóng danh sách bài hát">
+        <?= icon('x') ?>
       </button>
     </div>
   </div>
@@ -161,22 +161,13 @@
     </div>
   </div>
 
-  <!-- TIỆN ÍCH PHỤ TRỢ (Góc dưới cùng sidebar) -->
-  <div class="sidebar-footer-tools">
-    <div class="sidebar-footer-title">Tiện Ích Phụ Trợ</div>
+  <!-- TIỆN ÍCH PHỤ TRỢ (Ẩn hoàn toàn bằng d-none theo Ticket R1-8; bảo lưu anchor $bHref cho Ticket L0-14) -->
+  <div class="sidebar-footer-tools d-none" aria-hidden="true">
     <div class="d-flex gap-2">
       <?php $bHref = $baseHref ?? '/'; ?>
-      <a href="<?= $bHref ?>learn/" class="sidebar-mini-link sidebar-mini-learn" title="Góc tự tập đàn, điệu đệm & MIDI ở nhà">
-        <span><?= icon('keyboard') ?></span>
-        <span>Học Đàn</span>
-      </a>
-      <a href="<?= $bHref ?>live-band/" class="sidebar-mini-link sidebar-mini-live" title="Phòng biểu diễn đồng bộ ban nhạc & máy chiếu nhà thờ">
-        <span><?= icon('radio') ?></span>
-        <span>Live Band</span>
-      </a>
-      <a href="<?= $bHref ?>manager/" target="_blank" class="sidebar-mini-link sidebar-mini-mgr" title="Cổng Quản Lý Kho Nhạc & Bản Phối (/manager/)">
-        <span><?= icon('settings') ?></span>
-      </a>
+      <a href="<?= $bHref ?>learn/" class="sidebar-mini-link sidebar-mini-learn d-none"></a>
+      <a href="<?= $bHref ?>live-band/" class="sidebar-mini-link sidebar-mini-live d-none"></a>
+      <a href="<?= $bHref ?>manager/" class="sidebar-mini-link sidebar-mini-mgr d-none"></a>
     </div>
   </div>
 </aside>

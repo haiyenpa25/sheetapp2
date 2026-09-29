@@ -434,20 +434,34 @@ const ToolbarController = (() => {
     }
 
     const btnBandToggle = document.getElementById('btn-band-toggle') || document.getElementById('btn-toggle-view');
-    const btnLyric = document.getElementById('btn-lyric-view');
-    if (btnBandToggle && btnLyric) {
-      btnBandToggle.addEventListener('click', () => btnLyric.click());
-      const lyricContainer = document.getElementById('lyric-view-container');
-      if (lyricContainer) {
-        new MutationObserver(() => {
-          const isLyric = !lyricContainer.classList.contains('hidden');
-          btnBandToggle.classList.toggle('active', isLyric);
-          const txt = btnBandToggle.querySelector('.view-text') || btnBandToggle.querySelector('.band-toggle-text');
-          if (txt) txt.textContent = isLyric ? 'Nhạc' : 'Band';
-          btnBandToggle.title = isLyric ? 'Quay lại Bản Nhạc' : 'Chuyển sang chế độ Band (Lời + Hợp âm chữ)';
-        }).observe(lyricContainer, { attributes: true, attributeFilter: ['class'] });
-      }
+    const lyricContainer = document.getElementById('lyric-view-container');
+    if (btnBandToggle && lyricContainer) {
+      btnBandToggle.addEventListener('click', () => {
+        const isHidden = lyricContainer.classList.contains('hidden');
+        lyricContainer.classList.toggle('hidden', !isHidden);
+        document.getElementById('sheet-viewer-wrapper')?.classList.toggle('hidden', isHidden);
+      });
+      new MutationObserver(() => {
+        const isLyric = !lyricContainer.classList.contains('hidden');
+        btnBandToggle.classList.toggle('active', isLyric);
+        const txt = btnBandToggle.querySelector('.view-text') || btnBandToggle.querySelector('.band-toggle-text');
+        if (txt) txt.textContent = isLyric ? 'Nhạc' : 'Band';
+        btnBandToggle.title = isLyric ? 'Quay lại Bản Nhạc' : 'Chuyển sang chế độ Band (Lời + Hợp âm chữ)';
+      }).observe(lyricContainer, { attributes: true, attributeFilter: ['class'] });
     }
+
+    document.getElementById('btn-lyric-view')?.addEventListener('click', () => {
+      const songId = window.App?.getCurrentSongId?.() || new URLSearchParams(window.location.search).get('song') || '';
+      if (songId) {
+        const curSet = window.App?.getCurrentSet?.() || 'HD';
+        const curTranspose = window.App?.getCurrentTranspose?.() || 0;
+        const base = (typeof window.__APP_BASE__ !== 'undefined' ? window.__APP_BASE__ : '');
+        const url = `${base ? base + '/' : ''}print/chord-sheet.php?song=${encodeURIComponent(songId)}&set=${encodeURIComponent(curSet)}&t=${encodeURIComponent(curTranspose)}`;
+        window.open(url, '_blank');
+      } else {
+        window.App?.showToast?.('Vui lòng chọn bài hát để in lời & hợp âm', 'info');
+      }
+    });
 
     document.getElementById('btn-menu-zoom-out')?.addEventListener('click', () => {
       document.getElementById('btn-zoom-out')?.click();

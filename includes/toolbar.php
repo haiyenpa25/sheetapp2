@@ -135,15 +135,15 @@
 
   <!-- 3. CỤM PHẢI: BIỂU DIỄN & MENU CÔNG CỤ -->
   <div class="toolbar-right">
-    <!-- NÚT TÀI KHOẢN & PHÂN QUYỀN NHẠC CÔNG (USER PILL) -->
-    <button id="btn-toolbar-auth" class="btn-toolbar-user" title="Đăng nhập / Phân quyền nhạc công">
+    <!-- NÚT TÀI KHOẢN & PHÂN QUYỀN NHẠC CÔNG (Ẩn khỏi toolbar 48px, đăng nhập qua thanh điều hướng / đầu sidebar - Ticket R1-8) -->
+    <button id="btn-toolbar-auth" class="btn-toolbar-user d-none" aria-hidden="true" tabindex="-1" title="Đăng nhập / Phân quyền nhạc công">
       <span class="user-pill-icon"><?= icon('user') ?></span>
       <span id="toolbar-auth-name" class="user-pill-name">Khách</span>
       <span id="toolbar-auth-badge" class="user-pill-role hidden"></span>
     </button>
 
-    <!-- NÚT THEO CA TRƯỞNG (Ticket L3-5) -->
-    <button id="btn-follow-leader" class="btn-gig-mode btn-follow-leader" title="Theo ca trưởng / Đồng bộ ban nhạc">
+    <!-- NÚT THEO CA TRƯỞNG (Ticket L3-5, R1-8: Mặc định ẩn, chỉ hiện thành chip khi đang theo) -->
+    <button id="btn-follow-leader" class="btn-gig-mode btn-follow-leader hidden" title="Theo ca trưởng / Đồng bộ ban nhạc">
       <span class="follow-icon"><?= icon('radio') ?></span>
       <span class="follow-text">Theo ca trưởng</span>
     </button>
@@ -366,11 +366,6 @@
           <?= icon('users') ?>
           <span>Ban nhạc & Thành viên</span>
         </a>
-
-        <button id="btn-menu-auth" class="btn btn-ghost btn-sm btn-menu-item menu-section-compact-only" title="Đăng nhập / Phân quyền">
-          <?= icon('user') ?>
-          <span>Tài khoản / Đăng nhập</span>
-        </button>
 
         <button id="btn-help" class="btn btn-ghost btn-sm btn-menu-item" title="Hướng dẫn sử dụng (?)">
           <?= icon('help-circle') ?>

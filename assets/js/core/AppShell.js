@@ -142,9 +142,8 @@
     });
 
     // Bắt sự kiện Đăng nhập
-    document.getElementById('shell-btn-login')?.addEventListener('click', (e) => {
-      e.preventDefault();
-      // Nếu có modal đăng nhập (app chính)
+    const _openAuthModal = (e) => {
+      e?.preventDefault?.();
       const authModal = document.getElementById('auth-modal');
       if (authModal) {
         if (window.ModalManager) {
@@ -154,10 +153,12 @@
         }
         return;
       }
-      // Nếu ở sub-app, chuyển hướng về trang đăng nhập của Manager
       const base = _getBase();
       window.location.href = (base ? base : '') + '/manager/#login';
-    });
+    };
+
+    document.getElementById('shell-btn-login')?.addEventListener('click', _openAuthModal);
+    document.getElementById('shell-user-menu-btn')?.addEventListener('click', _openAuthModal);
 
     // Lắng nghe Fullscreen để ẩn App Shell trên sân khấu
     document.addEventListener('fullscreenchange', () => {
