@@ -1031,3 +1031,114 @@ body.dark-mode .quick-jump-btn:hover:not(.active) {
 .btn-apply-suggestion:hover {
   background: var(--lp-hover, rgba(109,40,217,0.15));
 }
+
+/* ==========================================================================
+   R2-2: Diatonic Chord Palette & Displayed Key
+   ========================================================================== */
+.cc-diatonic-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  align-items: center;
+}
+
+.cc-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--lp-radius, 6px);
+  padding: 2px 7px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--lp-border, rgba(0,0,0,0.1));
+  background: var(--lp-surface, #ffffff);
+  color: var(--lp-text, #1f2937);
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.cc-chip:hover {
+  background: var(--lp-hover, #f3f4f6);
+  border-color: var(--lp-accent, #6d28d9);
+  color: var(--lp-accent, #6d28d9);
+}
+
+.cc-chip-dia {
+  background: var(--lp-accent-soft, rgba(109, 40, 217, 0.08));
+  border-color: rgba(109, 40, 217, 0.22);
+  color: var(--lp-accent, #6d28d9);
+}
+
+.cc-chip-dia:hover {
+  background: var(--lp-accent, #6d28d9);
+  color: #ffffff;
+}
+
+.cc-chip-dia:hover .cc-deg-num {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.cc-deg-num {
+  font-size: var(--lp-font-sm, 12px);
+  font-weight: 800;
+  color: var(--lp-accent, #6d28d9);
+  opacity: 0.75;
+  margin-right: 3px;
+}
+
+.cc-chip-sec {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.25);
+  color: #b45309;
+}
+
+.cc-chip-sec:hover {
+  background: #f59e0b;
+  color: #ffffff;
+}
+
+.cc-palette-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--lp-border, rgba(0, 0, 0, 0.15));
+  margin: 0 3px;
+  display: inline-block;
+}
+
+.cc-shortcuts-hint {
+  font-size: 12px;
+  color: var(--lp-muted, #4b5563);
+  margin-bottom: 4px;
+}
+
+body.dark-mode .cc-chip {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #f1f5f9;
+}
+
+body.dark-mode .cc-chip-dia {
+  background: rgba(139, 92, 246, 0.18);
+  border-color: rgba(139, 92, 246, 0.35);
+  color: #c4b5fd;
+}
+
+body.dark-mode .cc-deg-num {
+  color: #a78bfa;
+}
+
+body.dark-mode .cc-chip-sec {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: #fcd34d;
+}
+
+body.dark-mode .cc-palette-divider {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+body.dark-mode .cc-shortcuts-hint {
+  color: var(--lp-muted, #94a3b8);
+}
+

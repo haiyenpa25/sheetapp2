@@ -24,10 +24,7 @@ const ChordCanvasUI = (() => {
   }
 
   function applyAbsolute(el, cx, cy, extras) {
-    el.style.cssText = [
-      'position:absolute', `left:${cx}px`, `top:${cy}px`,
-      'transform:translateX(-50%)', 'z-index:80', ...extras
-    ].join(';');
+    el.style.cssText = `position:absolute;left:${cx}px;top:${cy}px;transform:translateX(-50%);z-index:80;${extras.join(';')}`;
   }
 
 
@@ -40,35 +37,17 @@ const ChordCanvasUI = (() => {
     localStorage.setItem(_HK, JSON.stringify(h.slice(0,20)));
   }
 
-  /* ─── Key detection từ MusicXML ────────────────────────────── */
-  const _F2M = {'-6':'Gb','-5':'Db','-4':'Ab','-3':'Eb','-2':'Bb','-1':'F',
-                 '0':'C', '1':'G', '2':'D',  '3':'A',  '4':'E',  '5':'B',  '6':'F#'};
-  const _F2m = {'-6':'Eb','-5':'Bb','-4':'F','-3':'C','-2':'G','-1':'D',
-                 '0':'A', '1':'E', '2':'B',  '3':'F#', '4':'C#', '5':'G#','6':'D#'};
-  const _CR  = ['C','Db','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
-  const _SH  = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  /* ─── Key detection & Diatonic (R2-2, B15) ──────────────────── */
+  let _lastSavedChord = '';
 
   function _detectKey() {
     const xml = window.App?.getOriginalXml?.();
-    if (!xml) return null;
-    try {
-      const doc = window.XmlDocCache?.getDoc(xml) || new DOMParser().parseFromString(xml, 'text/xml');
-      const k   = doc.querySelector('key'); if (!k) return null;
-      const f   = String(parseInt(k.querySelector('fifths')?.textContent ?? '0'));
-      const m   = k.querySelector('mode')?.textContent?.toLowerCase() ?? 'major';
-      const r   = m === 'minor' ? (_F2m[f]??'A') : (_F2M[f]??'C');
-      return { root: r, mode: m, label: `${r} ${m==='minor'?'thứ':'trưởng'}` };
-    } catch { return null; }
+    const doc = window.XmlDocCache?.getDoc(xml);
+    return window.ChordCanvasTranspose?.detectDisplayKey?.(xml) || null;
   }
 
   function _diatonicChords(root, mode) {
-    const useFlat = ['F','Bb','Eb','Ab','Db','Gb'].includes(root);
-    const arr = useFlat ? _CR : _SH;
-    let ri = arr.indexOf(root); if (ri === -1) ri = _CR.indexOf(root); if (ri === -1) return [];
-    const pat = mode === 'minor'
-      ? [{d:0,s:'m'},{d:2,s:'dim'},{d:3,s:''},{d:5,s:'m'},{d:7,s:'m'},{d:7,s:'7'},{d:8,s:''},{d:10,s:''}]
-      : [{d:0,s:''},{d:2,s:'m'},{d:4,s:'m'},{d:5,s:''},{d:7,s:''},{d:7,s:'7'},{d:9,s:'m'},{d:11,s:'dim'}];
-    return [...new Set(pat.map(({d,s}) => arr[(ri+d)%12]+s))];
+    return window.ChordCanvasTranspose?.getDiatonicChords?.(root, mode) || [];
   }
 
   /* ─── Chord Library ─────────────────────────────────────────── */
@@ -89,11 +68,13 @@ const ChordCanvasUI = (() => {
     pop.className = 'cc-popup';
 
     const keyInfo  = _detectKey();
+    const displayedRoot = keyInfo ? (keyInfo.displayedRoot || keyInfo.root) : 'C';
+    const mode = keyInfo ? keyInfo.mode : 'major';
     const keyLabel = keyInfo ? keyInfo.label : '';
     const isDefault  = currentSet === 'default';
-    const semitones  = window.App?.getCurrentTranspose?.() ?? 0;
-    const keyHint    = semitones !== 0
-      ? `<span style="font-size:.6rem;color:#f59e0b;font-weight:600;margin-left:4px;">(tông ${semitones>0?'+':''}${semitones})</span>` : '';
+    const diatonicChords = _diatonicChords(displayedRoot, mode);
+    const seventhChords = window.ChordCanvasTranspose?.getSeventhChords?.(displayedRoot, mode) || [];
+    const secondaryChords = window.ChordCanvasTranspose?.getSecondaryChords?.(displayedRoot, mode) || [];
 
     if (isMobile) {
       // Mobile: bottom sheet cố định — sử dụng class CSS
@@ -108,20 +89,7 @@ const ChordCanvasUI = (() => {
       if (popLeft > vw - hw) popLeft = vw - hw;
       // Hiển thị bêN DƯỚI anchor (ar.bottom + 8px khoảng cách)
       const popTop = ar.bottom + 8;
-      pop.style.cssText = [
-        'position:fixed', `left:${popLeft}px`, `top:${popTop}px`,
-        'transform:translateX(-50%)',
-        'z-index:99999',
-        'background:var(--bg-surface,#fff)',
-        'border:1px solid rgba(109,40,217,0.3)',
-        'border-radius:var(--radius,12px)',
-        'padding:.8rem',
-        'box-shadow:0 8px 28px rgba(109,40,217,.22)',
-        'min-width:260px', 'max-width:320px',
-        'pointer-events:auto',
-        'opacity:0',
-        'transition:opacity .15s ease'
-      ].join(';');
+      pop.style.cssText = `position:fixed;left:${popLeft}px;top:${popTop}px;transform:translateX(-50%);z-index:99999;background:var(--bg-surface,#fff);border:1px solid rgba(109,40,217,0.3);border-radius:var(--radius,12px);padding:.8rem;box-shadow:0 8px 28px rgba(109,40,217,.22);min-width:260px;max-width:320px;pointer-events:auto;opacity:0;transition:opacity .15s ease;`;
       // Sau khi render, check viewport overflow → flip lên trên nếu cần
       requestAnimationFrame(() => {
         const pr = pop.getBoundingClientRect();
@@ -140,8 +108,7 @@ const ChordCanvasUI = (() => {
                   letter-spacing:.5px;margin-bottom:.35rem;display:flex;align-items:center;gap:4px;">
         ${existing ? 'Sửa' : 'Thêm'} hợp âm
         ${!isDefault ? `<span style="opacity:.6;font-weight:400">· ${window.SafeHtml.escape(currentSet)}</span>` : ''}
-        ${keyLabel ? `<span style="opacity:.5;font-weight:400;font-size:.6rem">· ${window.SafeHtml.escape(keyLabel)}</span>` : ''}
-        ${keyHint}
+        ${keyLabel ? `<span style="opacity:.7;font-weight:600;font-size:.65rem;color:#7c3aed">· ${window.SafeHtml.escape(keyLabel)}</span>` : ''}
       </div>
       <input id="cc-pop-inp" type="text" maxlength="12" autocomplete="off"
              placeholder="${suggestion ? `Gợi ý: ${window.SafeHtml.escape(suggestion)} (T)` : 'VD: Am, D7, G…'}" value="${window.SafeHtml.escape(existing)}"
@@ -152,8 +119,9 @@ const ChordCanvasUI = (() => {
              onfocus="this.style.borderColor='#6d28d9';this.style.boxShadow='0 0 0 3px rgba(109,40,217,.18)'"
              onblur="this.style.borderColor='#c4b5fd';this.style.boxShadow='none'">
       ${suggestion ? `<div class="cc-suggestion-hint">Gợi ý từ TLH: <strong>${window.SafeHtml.escape(suggestion)}</strong> <button type="button" class="btn-apply-suggestion" id="btn-apply-sug" title="Nhận gợi ý (Phím T)">Nhận (T)</button></div>` : ''}
-      <div id="cc-sug-hist" style="display:flex;align-items:flex-start;gap:4px;min-height:22px;margin-bottom:2px;"></div>
       <div id="cc-sug-key"  style="display:flex;align-items:flex-start;gap:4px;min-height:22px;margin-bottom:.35rem;"></div>
+      <div id="cc-sug-hist" style="display:flex;align-items:flex-start;gap:4px;min-height:22px;margin-bottom:2px;"></div>
+      <div class="cc-shortcuts-hint" style="font-size:.65rem;color:#6b7280;margin-bottom:.35rem;">1–7: hợp âm · Shift+1–7: hợp âm 7 · /+số: bass · . lặp</div>
       <details id="cc-lib-det" style="margin-bottom:.4rem;">
         <summary style="font-size:.65rem;color:#9ca3af;cursor:pointer;list-style:none;
                         display:flex;align-items:center;gap:4px;">
@@ -182,11 +150,17 @@ const ChordCanvasUI = (() => {
     let   activeGrp = 0;
 
     /* helper: make a chip — touch-action + pointerdown để instant tap trên iOS */
-    const makeChip = (label, isHist, onClick) => {
+    const makeChip = (label, isHist, onClick, deg) => {
       const b = document.createElement('button');
       b.type = 'button';
-      b.textContent = label;
-      b.className = isHist ? 'cc-chip cc-chip-hist' : 'cc-chip cc-chip-dia';
+      if (deg) {
+        b.innerHTML = `<span class="cc-deg-num">${deg}</span>${window.SafeHtml.escape(label)}`;
+      } else {
+        b.textContent = label;
+      }
+      b.className = isHist ? 'cc-chip cc-chip-hist' : (deg ? 'cc-chip cc-chip-dia' : 'cc-chip cc-chip-sec');
+      b.setAttribute('data-chord', label);
+      if (deg) b.setAttribute('data-degree', deg);
       // pointerdown = instant, không có 300ms delay iOS
       b.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); onClick(label); });
       return b;
@@ -205,19 +179,28 @@ const ChordCanvasUI = (() => {
       histDiv.appendChild(wrap);
     } else { histDiv.style.display = 'none'; }
 
-    /* populate key diatonic */
-    if (keyInfo) {
-      const diat = _diatonicChords(keyInfo.root, keyInfo.mode);
-      if (diat.length) {
-        const lbl = document.createElement('span');
-        lbl.textContent = '🎵';
-        lbl.style.cssText = 'font-size:.65rem;flex-shrink:0;margin-top:2px;';
-        keyDiv.appendChild(lbl);
-        const wrap = document.createElement('div');
-        wrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:3px;';
-        diat.forEach(c => wrap.appendChild(makeChip(c, false, v => { inp.value = v; inp.focus(); })));
-        keyDiv.appendChild(wrap);
+    /* populate key diatonic & secondary (R2-2) */
+    if (diatonicChords.length) {
+      const lbl = document.createElement('span');
+      lbl.textContent = '🎵';
+      lbl.style.cssText = 'font-size:.65rem;flex-shrink:0;margin-top:2px;';
+      keyDiv.appendChild(lbl);
+      const wrap = document.createElement('div');
+      wrap.className = 'cc-diatonic-bar';
+      wrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:3px;align-items:center;';
+      diatonicChords.forEach((c, idx) => {
+        wrap.appendChild(makeChip(c, false, v => { inp.value = v; doSaveNext(); }, idx + 1));
+      });
+      if (secondaryChords.length) {
+        const div = document.createElement('span');
+        div.className = 'cc-palette-divider';
+        div.style.cssText = 'width:1px;height:16px;background:var(--lp-border,#e5e7eb);margin:0 2px;';
+        wrap.appendChild(div);
+        secondaryChords.forEach(c => {
+          wrap.appendChild(makeChip(c, false, v => { inp.value = v; doSaveNext(); }));
+        });
       }
+      keyDiv.appendChild(wrap);
     } else { keyDiv.style.display = 'none'; }
 
     /* library tabs */
@@ -290,7 +273,7 @@ const ChordCanvasUI = (() => {
       const val = formatChord(inp.value.trim());
       if (document.activeElement === inp) inp.blur();
       // onSave TRƯỚC onClose — tránh popup bị remove trước khi save chạy
-      if (val)      { _pushHist(val); callbacks.onSave(val); }
+      if (val)      { _pushHist(val); _lastSavedChord = val; callbacks.onSave(val); }
       else if (existing) { callbacks.onDelete(); }
       callbacks.onClose();
     };
@@ -348,7 +331,7 @@ const ChordCanvasUI = (() => {
       const val = formatChord(inp.value.trim());
       if (document.activeElement === inp) inp.blur();
       callbacks.onClose();
-      if (val)            { _pushHist(val); callbacks.onSave(val, { skipRebuild: true }); }
+      if (val)            { _pushHist(val); _lastSavedChord = val; callbacks.onSave(val, { skipRebuild: true }); }
       else if (existing)  { callbacks.onDelete(); }
       callbacks.onNext?.(measureIdx, noteIdx);
     };
@@ -360,7 +343,7 @@ const ChordCanvasUI = (() => {
       const val = formatChord(inp.value.trim());
       if (document.activeElement === inp) inp.blur();
       callbacks.onClose();
-      if (val)            { _pushHist(val); callbacks.onSave(val, { skipRebuild: true }); }
+      if (val)            { _pushHist(val); _lastSavedChord = val; callbacks.onSave(val, { skipRebuild: true }); }
       else if (existing)  { callbacks.onDelete(); }
       callbacks.onPrev?.(measureIdx, noteIdx);
     };
@@ -403,6 +386,46 @@ const ChordCanvasUI = (() => {
         doSavePrev();
         return;
       }
+      // Phím 1–7 và Shift+1–7 (R2-2)
+      const isDigit = e.code && e.code.startsWith('Digit') ? parseInt(e.code.replace('Digit', ''), 10) : parseInt(e.key, 10);
+      if (!isNaN(isDigit) && isDigit >= 1 && isDigit <= 7 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        // Nếu trước đó đang gõ '/' (hợp âm đảo bass: / + số)
+        if (inp.value.endsWith('/')) {
+          e.preventDefault();
+          inp.value = window.ChordCanvasTranspose?.resolveSlashBass?.(inp.value.slice(0, -1), isDigit, displayedRoot, mode) || (inp.value + isDigit);
+          inp.select();
+          return;
+        }
+        // Shift+1..7: hợp âm 7
+        if (e.shiftKey) {
+          const c7 = seventhChords[isDigit - 1];
+          if (c7) {
+            e.preventDefault();
+            inp.value = c7;
+            inp.select();
+            return;
+          }
+        }
+        // 1..7: hợp âm thuận
+        if (!inp.value || (inp.selectionStart === 0 && inp.selectionEnd === inp.value.length)) {
+          const c = diatonicChords[isDigit - 1];
+          if (c) {
+            e.preventDefault();
+            inp.value = c;
+            inp.select();
+            return;
+          }
+        }
+      }
+      // Phím '.' lặp lại hợp âm gần nhất (R2-2)
+      if (e.key === '.' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        if (_lastSavedChord && (!inp.value || (inp.selectionStart === 0 && inp.selectionEnd === inp.value.length))) {
+          e.preventDefault();
+          inp.value = _lastSavedChord;
+          inp.select();
+          return;
+        }
+      }
       // Phím T: nhận gợi ý từ TLH (R2-1)
       if ((e.key === 't' || e.key === 'T') && suggestion && !e.ctrlKey && !e.metaKey && !e.altKey) {
         if (!inp.value.trim() || inp.value === suggestion) {
@@ -440,11 +463,7 @@ const ChordCanvasUI = (() => {
 
     const overlay = document.createElement('div');
     overlay.id = 'cc-new-set-modal';
-    overlay.style.cssText = [
-      'position:fixed','inset:0','background:rgba(0,0,0,.45)',
-      'display:flex','align-items:center','justify-content:center',
-      'z-index:99999','animation:fadeIn .15s ease'
-    ].join(';');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:99999;animation:fadeIn .15s ease;';
 
     overlay.innerHTML = `
       <div style="background:#fff;border-radius:12px;padding:1.5rem 1.75rem;
@@ -476,13 +495,13 @@ const ChordCanvasUI = (() => {
       if (n) callbacks.onCreate(n);
     };
 
-    overlay.querySelector('#cc-new-set-ok').addEventListener('click', doCreate);
-    overlay.querySelector('#cc-new-set-cancel').addEventListener('click', () => overlay.remove());
-    inp.addEventListener('keydown', e => {
+    overlay.querySelector('#cc-new-set-ok').onclick = doCreate;
+    overlay.querySelector('#cc-new-set-cancel').onclick = () => overlay.remove();
+    inp.onkeydown = e => {
       if (e.key === 'Enter')  { e.stopPropagation(); doCreate(); }
       if (e.key === 'Escape') { e.stopPropagation(); overlay.remove(); }
-    });
-    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+    };
+    overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
   }
 
   /* ─── Modal Xác nhận xoá ─────────────────────────────────── */
@@ -501,10 +520,7 @@ const ChordCanvasUI = (() => {
     document.body.appendChild(overlay);
     
     overlay.querySelector('#cc-del-cancel').onclick = () => overlay.remove();
-    overlay.querySelector('#cc-del-ok').onclick = () => {
-      overlay.remove();
-      callbacks.onConfirm();
-    };
+    overlay.querySelector('#cc-del-ok').onclick = () => { overlay.remove(); callbacks.onConfirm(); };
     overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
   }
 
