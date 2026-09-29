@@ -40,7 +40,7 @@ test.describe('L1-4 · Nút cảm ứng ≥ 44x44px (Chromium + WebKit)', () => 
       '#capo-select',
       '#chord-set-selector',
       '#btn-chord-preset',
-      '#btn-band-toggle',
+      '#btn-view-lyrics',
       '#btn-fullscreen',
       '#btn-prev-song',
       '#btn-next-song',
@@ -111,7 +111,7 @@ test.describe('L1-4 · Nút cảm ứng ≥ 44x44px (Chromium + WebKit)', () => 
       '#btn-transpose-up',
       '#chord-set-selector',
       '#btn-chord-preset',
-      '#btn-band-toggle',
+      '#btn-view-lyrics',
       '#btn-fullscreen',
       '#btn-prev-song',
       '#btn-next-song',
@@ -153,7 +153,7 @@ test.describe('L1-4 · Nút cảm ứng ≥ 44x44px (Chromium + WebKit)', () => 
       '#btn-transpose-up',
       '#chord-set-selector',
       '#btn-chord-preset',
-      '#btn-band-toggle'
+      '#btn-view-lyrics'
     ];
 
     for (const sel of mobileControls) {

@@ -1855,6 +1855,16 @@ body.sheet-only-mode .gig-floating-hud {
   .song-info-pill {
     max-width: 110px !important;
   }
+  /* R1-2 (ROADMAP5): công tắc 2 nút #view-switch (Bản nhạc | Lời & Hợp âm) thay cho nút
+     đơn #btn-band-toggle cũ rộng gấp ~4 lần (217px so với ~50-60px) -- tràn hẳn ra ngoài
+     viewport ở iPad dọc (~820px). Thu gọn về icon-only ở breakpoint này. */
+  .btn-view-mode span {
+    display: none !important;
+  }
+  .btn-view-mode {
+    padding: 0 10px;
+    min-width: 40px;
+  }
   .chord-set-select {
     max-width: 75px;
   }

@@ -22,7 +22,11 @@ test.describe('Ticket L0-12: Capo đúng nghĩa & Badge nghe ra [Key]', () => {
 
   test('1. Bài Eb + Capo 3: Nhạc thật giữ nguyên Eb, Badge hiện "Capo 3 · nghe ra Eb", Hint hiện thế C', async ({ page }) => {
     test.setTimeout(60000);
-    await page.setViewportSize({ width: 1280, height: 820 });
+    // Ticket R0-7 (ROADMAP5): ở dải hẹp/gọn (< ~1350-1400px main-content), #capo-wrap
+    // và #capo-badge chủ động ẩn để dồn chỗ cho các nút cốt lõi khác trên toolbar --
+    // dùng viewport rộng rãi ở đây vì bài test này kiểm tra ĐÚNG LOGIC gợi ý Capo,
+    // không phải hành vi thu gọn responsive của toolbar.
+    await page.setViewportSize({ width: 1920, height: 900 });
     await page.goto('./?song=thanh-ca-004', { waitUntil: 'domcontentloaded' });
 
     const osmdSvg = page.locator('#osmd-container svg').first();
@@ -51,8 +55,8 @@ test.describe('Ticket L0-12: Capo đúng nghĩa & Badge nghe ra [Key]', () => {
     await expect(capoHint).toContainText('thế C');
 
     // 4) Chế độ Band / Xem chữ: hợp âm được dịch xuống 3 bán cung thành thế C
-    const btnBand = page.locator('#btn-band-toggle, .btn-band-toggle').first();
-    await btnBand.click();
+    // (Ticket R1-2, ROADMAP5: #btn-band-toggle bị thay bằng công tắc #btn-view-lyrics)
+    await page.locator('#btn-view-lyrics').click();
 
     const lyricContainer = page.locator('#lyric-view-container');
     await expect(lyricContainer).toBeVisible({ timeout: 10000 });
@@ -63,7 +67,9 @@ test.describe('Ticket L0-12: Capo đúng nghĩa & Badge nghe ra [Key]', () => {
   });
 
   test('2. Gợi ý Capo hiển thị rõ ràng trên bài có thế bấm nâng cao', async ({ page }) => {
-    await page.setViewportSize({ width: 1180, height: 820 });
+    // Xem ghi chú Ticket R0-7 ở test 1 -- dùng viewport rộng để #capo-badge không bị
+    // ẩn bởi chế độ thu gọn responsive của toolbar.
+    await page.setViewportSize({ width: 1920, height: 900 });
     await page.goto('./?song=thanh-ca-004', { waitUntil: 'domcontentloaded' });
 
     const osmdSvg = page.locator('#osmd-container svg').first();

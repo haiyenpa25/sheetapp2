@@ -32,13 +32,18 @@ test.describe('Ticket L0-11: Tên tông thống nhất & Enharmonics chuẩn', (
     const osmdSvg = page.locator('#osmd-container svg').first();
     await expect(osmdSvg).toBeVisible({ timeout: 25000 });
 
+    // Ticket R1-3 (ROADMAP5): #si-tone-chip sống trong #song-info-strip đã bị ẩn hẳn --
+    // thông tin tông đang tập giờ nằm trong popover ⓘ (#si-pop-practice-key).
     const songKeyBadge = page.locator('#song-key');
-    const toneChip = page.locator('#si-tone-chip');
+    const popoverBtn = page.locator('#btn-song-info-popover');
+    const practiceKeyEl = page.locator('#si-pop-practice-key');
     const gigHudKey = page.locator('#gig-hud-key');
 
     // Tông gốc bài 001 là G
     await expect(songKeyBadge).toHaveText('G');
-    await expect(toneChip).toContainText('G');
+    await popoverBtn.click();
+    await expect(practiceKeyEl).toContainText('G');
+    await page.locator('#btn-close-song-info-popover').click();
 
     // Dịch tăng 1 bán cung: G + 1 -> Ab
     const btnTransUp = page.locator('#btn-transpose-up');
@@ -48,16 +53,16 @@ test.describe('Ticket L0-11: Tên tông thống nhất & Enharmonics chuẩn', (
     // 1) Kiểm tra Toolbar Badge
     await expect(songKeyBadge).toHaveText('Ab');
 
-    // 2) Kiểm tra Thanh thông tin (Song Info Bar)
-    await expect(toneChip).toContainText('Ab');
-    await expect(toneChip).toContainText('(+1)');
+    // 2) Kiểm tra Thanh thông tin (popover ⓘ)
+    await popoverBtn.click();
+    await expect(practiceKeyEl).toContainText('Ab');
+    await page.locator('#btn-close-song-info-popover').click();
 
     // 3) Kiểm tra Floating HUD trong chế độ Biểu Diễn
     await expect(gigHudKey).toHaveText('Ab');
 
-    // 4) Kiểm tra Chế độ Band / Xem chữ
-    const btnBand = page.locator('#btn-band-toggle, .btn-band-toggle').first();
-    await btnBand.click();
+    // 4) Kiểm tra Chế độ Band / Xem chữ (R1-2: công tắc #btn-view-lyrics)
+    await page.locator('#btn-view-lyrics').click();
 
     const lyricContainer = page.locator('#lyric-view-container');
     await expect(lyricContainer).toBeVisible({ timeout: 10000 });
@@ -75,7 +80,8 @@ test.describe('Ticket L0-11: Tên tông thống nhất & Enharmonics chuẩn', (
     await expect(osmdSvg).toBeVisible({ timeout: 25000 });
 
     const songKeyBadge = page.locator('#song-key');
-    const toneChip = page.locator('#si-tone-chip');
+    const popoverBtn = page.locator('#btn-song-info-popover');
+    const practiceKeyEl = page.locator('#si-pop-practice-key');
     const gigHudKey = page.locator('#gig-hud-key');
 
     // Tông gốc bài 004 là Eb
@@ -89,16 +95,16 @@ test.describe('Ticket L0-11: Tên tông thống nhất & Enharmonics chuẩn', (
     // 1) Toolbar Badge
     await expect(songKeyBadge).toHaveText('D');
 
-    // 2) Thanh thông tin
-    await expect(toneChip).toContainText('D');
-    await expect(toneChip).toContainText('(-1)');
+    // 2) Thanh thông tin (popover ⓘ -- xem ghi chú Ticket R1-3 ở test 1)
+    await popoverBtn.click();
+    await expect(practiceKeyEl).toContainText('D');
+    await page.locator('#btn-close-song-info-popover').click();
 
     // 3) HUD Biểu Diễn
     await expect(gigHudKey).toHaveText('D');
 
-    // 4) Chế độ Band
-    const btnBand = page.locator('#btn-band-toggle, .btn-band-toggle').first();
-    await btnBand.click();
+    // 4) Chế độ Band (R1-2: công tắc #btn-view-lyrics)
+    await page.locator('#btn-view-lyrics').click();
 
     const lyricContainer = page.locator('#lyric-view-container');
     await expect(lyricContainer).toBeVisible({ timeout: 10000 });

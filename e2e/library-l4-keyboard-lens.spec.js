@@ -62,10 +62,12 @@ test.describe('L4-3: Keyboard Stage Lens (Bản nhạc đầy đủ + Hợp âm)
     const guitarBar = page.locator('#guitar-lens-bar');
     await expect(guitarBar).toBeHidden();
 
-    // 5. Nút Band toggle không còn active
-    const btnBand = page.locator('#btn-band-toggle');
-    if (await btnBand.count() > 0) {
-      await expect(btnBand).not.toHaveClass(/active/);
+    // 5. Công tắc "Bản nhạc" active, "Lời & Hợp âm" không active (Ticket R1-2: thay
+    // #btn-band-toggle, nay đã ẩn, bằng #btn-view-sheet / #btn-view-lyrics)
+    const btnViewSheet = page.locator('#btn-view-sheet');
+    if (await btnViewSheet.count() > 0) {
+      await expect(btnViewSheet).toHaveClass(/active/);
+      await expect(page.locator('#btn-view-lyrics')).not.toHaveClass(/active/);
     }
 
     // 6. Reload trang -> Vai trò Keyboard và Bản nhạc vẫn được bảo tồn

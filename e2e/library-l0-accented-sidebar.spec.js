@@ -43,10 +43,14 @@ test.describe('Ticket L0-13: Tiếng Việt có dấu toàn bộ sidebar & Tông
     const quickJumpLabel = page.locator('.quick-jump-label');
     await expect(quickJumpLabel).toHaveText('Nhảy nhanh:');
 
-    // 6) Chip Tông trên SongInfoBar hiển thị "Tông:" thay vì "Tone:"
-    const toneChip = page.locator('#si-tone-chip');
-    await expect(toneChip).toBeVisible();
-    await expect(toneChip).toContainText('Tông:');
+    // 6) Tông gốc hiển thị "Tông" (không phải "Tone") -- kể từ Ticket R1-3 (ROADMAP5),
+    // #song-info-strip (chứa #si-tone-chip cũ) bị ẩn hẳn (display:none), thông tin
+    // tông chuyển vào popover ⓘ (#song-info-popover, xem #si-pop-key).
+    await page.locator('#btn-song-info-popover').click();
+    const popover = page.locator('#song-info-popover');
+    await expect(popover).toBeVisible();
+    await expect(popover).toContainText('Tông');
+    await expect(popover).not.toContainText('Tone:');
   });
 
 });

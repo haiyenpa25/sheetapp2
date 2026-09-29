@@ -65,7 +65,9 @@ test.describe('Ticket L0-4: Thanh công cụ không tràn dưới 1300px', () =>
         const gig = document.getElementById('btn-fullscreen');
         const more = document.getElementById('btn-more-options');
         const nav = document.getElementById('nav-arrows');
-        const toggleView = document.getElementById('btn-band-toggle') || document.getElementById('btn-toggle-view');
+        // #btn-band-toggle bị ẩn (aria-hidden) từ Ticket R1-2 -- thay bằng công tắc 2 nút
+        // #view-switch (#btn-view-sheet / #btn-view-lyrics) hiện tại đang hiển thị thật.
+        const toggleView = document.getElementById('view-switch');
         const songTitle = document.getElementById('song-title');
         const chordSel = document.getElementById('chord-set-selector');
         const trans = document.querySelector('.transpose-pill');
@@ -110,33 +112,40 @@ test.describe('Ticket L0-4: Thanh công cụ không tràn dưới 1300px', () =>
     });
   }
 
-  test('Nút Band/Nhạc chuyển đổi 1 chạm giữa Bản Nhạc và Chế độ Band', async ({ page }) => {
+  test('Công tắc Bản nhạc / Lời & Hợp âm chuyển đổi 1 chạm giữa 2 chế độ', async ({ page }) => {
+    // Ticket R1-2 (ROADMAP5) thay nút đơn #btn-band-toggle (đổi chữ Band<->Nhạc) bằng
+    // công tắc 2 nút độc lập #btn-view-sheet / #btn-view-lyrics (mỗi nút tự bật/tắt
+    // class active riêng, không đổi chữ) -- #btn-band-toggle vẫn còn trong DOM nhưng
+    // ẩn hẳn (chỉ nhận click ủy quyền từ 2 nút mới, xem toolbar-controller.js).
     await page.setViewportSize({ width: 1180, height: 820 });
     await page.goto('./?song=thanh-ca-001', { waitUntil: 'domcontentloaded' });
 
-    const toggleBtn = page.locator('#btn-band-toggle, .btn-band-toggle, .btn-toggle-view:not([aria-hidden="true"])').first();
-    await expect(toggleBtn).toBeVisible({ timeout: 25000 });
-    await expect(toggleBtn).toContainText('Band');
+    const btnSheet = page.locator('#btn-view-sheet');
+    const btnLyrics = page.locator('#btn-view-lyrics');
+    await expect(btnSheet).toBeVisible({ timeout: 25000 });
+    await expect(btnLyrics).toBeVisible();
 
     const osmdContainer = page.locator('#osmd-container');
     const lyricContainer = page.locator('#lyric-view-container');
 
     await expect(osmdContainer).toBeVisible();
     await expect(lyricContainer).toHaveClass(/hidden/);
+    await expect(btnSheet).toHaveClass(/active/);
+    await expect(btnLyrics).not.toHaveClass(/active/);
 
-    // Chạm vào nút Band -> chuyển sang chế độ Band
-    await toggleBtn.click();
+    // Chạm "Lời & Hợp âm" -> chuyển sang chế độ Band
+    await btnLyrics.click();
 
     await expect(lyricContainer).not.toHaveClass(/hidden/, { timeout: 10000 });
-    await expect(toggleBtn).toContainText('Nhạc');
-    await expect(toggleBtn).toHaveClass(/active/);
+    await expect(btnLyrics).toHaveClass(/active/);
+    await expect(btnSheet).not.toHaveClass(/active/);
 
-    // Chạm lại vào nút Nhạc -> quay lại bản nhạc
-    await toggleBtn.click();
+    // Chạm lại "Bản nhạc" -> quay lại bản nhạc
+    await btnSheet.click();
 
     await expect(lyricContainer).toHaveClass(/hidden/, { timeout: 10000 });
-    await expect(toggleBtn).toContainText('Band');
-    await expect(toggleBtn).not.toHaveClass(/active/);
+    await expect(btnSheet).toHaveClass(/active/);
+    await expect(btnLyrics).not.toHaveClass(/active/);
   });
 
 });

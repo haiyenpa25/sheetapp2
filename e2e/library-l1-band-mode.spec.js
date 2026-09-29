@@ -22,29 +22,32 @@ test.describe('L1-7 · Chế độ BAND (Lời & Hợp âm chữ lớn)', () => 
     });
   });
 
-  test('1. Bật chế độ Band qua nút #btn-band-toggle trên toolbar', async ({ page }) => {
+  test('1. Bật chế độ Band qua công tắc #btn-view-lyrics trên toolbar', async ({ page }) => {
+    // Ticket R1-2 (ROADMAP5): #btn-band-toggle (nút đơn, đổi chữ Band<->Nhạc) bị thay
+    // bằng công tắc 2 nút #btn-view-sheet / #btn-view-lyrics; #btn-band-toggle vẫn còn
+    // trong DOM nhưng ẩn hẳn, chỉ nhận click ủy quyền từ 2 nút mới.
     await page.setViewportSize({ width: 1180, height: 820 });
     await page.goto('./?song=thanh-ca-001', { waitUntil: 'domcontentloaded' });
 
     const osmdSvg = page.locator('#osmd-container svg').first();
     await expect(osmdSvg).toBeVisible({ timeout: 25000 });
 
-    const btnBand = page.locator('#btn-band-toggle');
-    await expect(btnBand).toBeVisible();
+    const btnLyrics = page.locator('#btn-view-lyrics');
+    await expect(btnLyrics).toBeVisible();
 
     const lyricContainer = page.locator('#lyric-view-container');
     await expect(lyricContainer).toBeHidden();
 
-    // Bấm nút chuyển sang chế độ Band
-    await btnBand.click();
+    // Bấm nút "Lời & Hợp âm" chuyển sang chế độ Band
+    await btnLyrics.click();
 
     // Container lời & hợp âm chữ hiển thị, container bản nhạc ẩn
     await expect(lyricContainer).toBeVisible();
     await expect(page.locator('#osmd-container')).toBeHidden();
 
-    // Nút toolbar active và đổi nhãn sang "Nhạc"
-    await expect(btnBand).toHaveClass(/active/);
-    await expect(btnBand.locator('.view-text')).toHaveText('Nhạc');
+    // Nút toolbar active
+    await expect(btnLyrics).toHaveClass(/active/);
+    await expect(page.locator('#btn-view-sheet')).not.toHaveClass(/active/);
   });
 
   test('2. Cỡ chữ hợp âm ≥ 24px và lời ≥ 20px chuẩn đọc sân khấu', async ({ page }) => {
@@ -149,8 +152,8 @@ test.describe('L1-7 · Chế độ BAND (Lời & Hợp âm chữ lớn)', () => 
     await expect(page.locator('#osmd-container')).toBeHidden();
 
     // Nút toolbar hiển thị trạng thái active
-    const btnBand = page.locator('#btn-band-toggle');
-    await expect(btnBand).toHaveClass(/active/);
+    const btnLyrics = page.locator('#btn-view-lyrics');
+    await expect(btnLyrics).toHaveClass(/active/);
   });
 
 });

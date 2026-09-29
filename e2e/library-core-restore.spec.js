@@ -142,7 +142,10 @@ test.describe('Khôi phục lõi trang Thư viện', () => {
   test('6. Chế độ Band có lời và hợp âm', async ({ page }) => {
     await page.setViewportSize({ width: 1180, height: 820 });
     await openSong(page, '?song=thanh-ca-001');
-    await page.locator('#btn-band-toggle, #btn-toggle-view').first().click();
+    // #btn-band-toggle/#btn-toggle-view bị thay bằng công tắc 2 nút #btn-view-sheet /
+    // #btn-view-lyrics kể từ Ticket R1-2 (ROADMAP5); nút cũ vẫn còn trong DOM nhưng ẩn
+    // (không dùng .first() với cả 2 vì thứ tự DOM không đảm bảo chọn đúng nút mới).
+    await page.locator('#btn-view-lyrics').click();
     await expect.poll(() => page.evaluate(() => (document.getElementById('lyric-view-container')?.innerText || '').length),
       { timeout: 6000 }).toBeGreaterThan(200);
     // Mỗi âm tiết là một phần tử riêng (hợp âm đặt trên âm tiết) nên kiểm tra từng từ.

@@ -78,7 +78,8 @@ test.describe('Ticket L0-4: Thanh công cụ không tràn dưới 1.300px', () =
       const chordSelector = page.locator('#chord-set-selector');
       await expect(chordSelector).toBeVisible();
 
-      const bandToggle = page.locator('#btn-band-toggle, #btn-toggle-view').first();
+      // Ticket R1-2 (ROADMAP5): #btn-band-toggle bị thay bằng công tắc #view-switch
+      const bandToggle = page.locator('#view-switch');
       await expect(bandToggle).toBeVisible();
 
       const gigBtn = page.locator('#btn-fullscreen');
@@ -144,23 +145,25 @@ test.describe('Ticket L0-4: Thanh công cụ không tràn dưới 1.300px', () =
       await closeAuthBtn.click();
     }
 
-    const bandBtn = page.locator('#btn-band-toggle, #btn-toggle-view').first();
-    await expect(bandBtn).toBeVisible({ timeout: 15000 });
+    // Ticket R1-2 (ROADMAP5): công tắc 2 nút #btn-view-sheet / #btn-view-lyrics thay
+    // cho nút đơn #btn-band-toggle (đổi chữ Band<->Nhạc).
+    const btnSheet = page.locator('#btn-view-sheet');
+    const btnLyrics = page.locator('#btn-view-lyrics');
+    await expect(btnLyrics).toBeVisible({ timeout: 15000 });
 
-    // Ban đầu ở chế độ Bản Nhạc, nút hiện "Band"
-    await expect(bandBtn).toContainText('Band');
+    // Ban đầu ở chế độ Bản Nhạc
+    await expect(btnSheet).toHaveClass(/active/);
 
-    // Click chuyển sang chế độ Band (Lời & Hợp âm chữ)
-    await bandBtn.click();
+    // Click "Lời & Hợp âm" chuyển sang chế độ Band
+    await btnLyrics.click();
 
-    // Nút đổi thành "Nhạc" và container Lời Nhạc hiển thị
-    await expect(bandBtn).toContainText('Nhạc');
+    await expect(btnLyrics).toHaveClass(/active/);
     const lyricContainer = page.locator('#lyric-view-container');
     await expect(lyricContainer).toBeVisible();
 
-    // Click lại để trở về Bản Nhạc
-    await bandBtn.click();
-    await expect(bandBtn).toContainText('Band');
+    // Click lại "Bản nhạc" để trở về
+    await btnSheet.click();
+    await expect(btnSheet).toHaveClass(/active/);
     await expect(lyricContainer).toBeHidden();
   });
 });

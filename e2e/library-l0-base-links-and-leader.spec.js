@@ -28,8 +28,12 @@ test.describe('Ticket L0-14: Base Links, confirmDeleteSet & Role Leader', () => 
     // Lấy __APP_BASE__ từ trang
     const appBase = await page.evaluate(() => window.__APP_BASE__ || '');
 
+    // Kể từ Ticket R4-1/App Shell (ROADMAP5), các liên kết Học Đàn/Live Band/Manager
+    // chuyển vào thanh điều hướng 4 trụ cột (includes/app_nav.php) và không còn cố định
+    // title tiếng Việt như bản cũ -- kiểm tra theo href (ổn định hơn, không phụ thuộc chữ).
+
     // Kiểm tra link Học đàn
-    const linkLearn = page.locator('a[title*="Góc tự tập đàn"]');
+    const linkLearn = page.locator('a[href*="learn/"]').first();
     const hrefLearn = await linkLearn.getAttribute('href');
     expect(hrefLearn).toContain('learn/');
     if (appBase) {
@@ -37,7 +41,7 @@ test.describe('Ticket L0-14: Base Links, confirmDeleteSet & Role Leader', () => 
     }
 
     // Kiểm tra link Live Band
-    const linkLive = page.locator('a[title*="Phòng biểu diễn đồng bộ"]');
+    const linkLive = page.locator('a[href*="live-band/"]').first();
     const hrefLive = await linkLive.getAttribute('href');
     expect(hrefLive).toContain('live-band/');
     if (appBase) {
@@ -45,8 +49,8 @@ test.describe('Ticket L0-14: Base Links, confirmDeleteSet & Role Leader', () => 
     }
 
     // Kiểm tra link Manager
-    const linkManager = page.locator('a[title*="Cổng Quản Lý Kho Nhạc"]');
-    const hrefManager = await linkManager.first().getAttribute('href');
+    const linkManager = page.locator('a[href*="manager/"]').first();
+    const hrefManager = await linkManager.getAttribute('href');
     expect(hrefManager).toContain('manager/');
     if (appBase) {
       expect(hrefManager).toContain(appBase);
