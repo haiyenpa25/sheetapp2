@@ -97,47 +97,24 @@ const ChordCanvasEdit = (() => {
       // R2-1: Shift+Tab/← lùi lại nốt trước
       onPrev: (mi, ni) => openPrevPopup(mi, ni)
     }, suggestion);
+    _popup?.setAttribute('data-measure-idx', measureIdx);
   }
 
+  function _findMapped(mi, ni) {
+    const app = _getApp(), notes = app.getNoteEls?.() || [], ch = app.getCustomChords?.() || {};
+    const m = window.ChordCanvasDots ? window.ChordCanvasDots.mapNotes(notes, ch) : [];
+    return { m, idx: m.findIndex(x => x.measureIdx === mi && x.noteIdx === ni) };
+  }
   function openNextPopup(curMeasureIdx, curNoteIdx) {
-    const app = _getApp();
-    const noteEls = app.getNoteEls ? app.getNoteEls() : [];
-    if (!noteEls.length) return;
-    const chords = app.getCustomChords ? app.getCustomChords() : {};
-    const mapped = window.ChordCanvasDots ? window.ChordCanvasDots.mapNotes(noteEls, chords) : [];
-    let foundIdx = -1;
-    for (let i = 0; i < mapped.length; i++) {
-      if (mapped[i].measureIdx === curMeasureIdx && mapped[i].noteIdx === curNoteIdx) {
-        foundIdx = i;
-        break;
-      }
-    }
-    if (foundIdx !== -1 && foundIdx + 1 < mapped.length) {
-      const next = mapped[foundIdx + 1];
-      setTimeout(() => {
-        showPopup(next.el, next.measureIdx, next.noteIdx, next.chord || '');
-      }, 40);
+    const { m, idx } = _findMapped(curMeasureIdx, curNoteIdx);
+    if (idx !== -1 && idx + 1 < m.length) {
+      const n = m[idx + 1]; setTimeout(() => showPopup(n.el, n.measureIdx, n.noteIdx, n.chord || ''), 40);
     }
   }
-
   function openPrevPopup(curMeasureIdx, curNoteIdx) {
-    const app = _getApp();
-    const noteEls = app.getNoteEls ? app.getNoteEls() : [];
-    if (!noteEls.length) return;
-    const chords = app.getCustomChords ? app.getCustomChords() : {};
-    const mapped = window.ChordCanvasDots ? window.ChordCanvasDots.mapNotes(noteEls, chords) : [];
-    let foundIdx = -1;
-    for (let i = 0; i < mapped.length; i++) {
-      if (mapped[i].measureIdx === curMeasureIdx && mapped[i].noteIdx === curNoteIdx) {
-        foundIdx = i;
-        break;
-      }
-    }
-    if (foundIdx > 0) {
-      const prev = mapped[foundIdx - 1];
-      setTimeout(() => {
-        showPopup(prev.el, prev.measureIdx, prev.noteIdx, prev.chord || '');
-      }, 40);
+    const { m, idx } = _findMapped(curMeasureIdx, curNoteIdx);
+    if (idx > 0) {
+      const p = m[idx - 1]; setTimeout(() => showPopup(p.el, p.measureIdx, p.noteIdx, p.chord || ''), 40);
     }
   }
 
@@ -258,16 +235,10 @@ const ChordCanvasEdit = (() => {
   let _offlineQueue = [];
 
   function _loadOfflineQueue() {
-    try {
-      const raw = localStorage.getItem(OFFLINE_QUEUE_KEY);
-      if (raw) _offlineQueue = JSON.parse(raw);
-    } catch (_) { _offlineQueue = []; }
+    try { const raw = localStorage.getItem(OFFLINE_QUEUE_KEY); if (raw) _offlineQueue = JSON.parse(raw); } catch (_) { _offlineQueue = []; }
   }
-
   function _saveOfflineQueue() {
-    try {
-      localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(_offlineQueue));
-    } catch (_) {}
+    try { localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(_offlineQueue)); } catch (_) {}
   }
 
   function _ensureStatusChip() {
@@ -275,16 +246,12 @@ const ChordCanvasEdit = (() => {
     let el = document.getElementById('cc-status-chip');
     if (!el) {
       el = document.createElement('div');
-      el.id = 'cc-status-chip';
-      el.className = 'cc-status-chip floating saved';
-      el.setAttribute('role', 'status');
-      el.setAttribute('aria-live', 'polite');
+      el.id = 'cc-status-chip'; el.className = 'cc-status-chip floating saved';
+      el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite');
       el.innerHTML = '<span class="cc-status-indicator"></span><span class="cc-status-text">Đã lưu ✓</span>';
-      const container = document.getElementById('sheet-container') || document.body;
-      container.appendChild(el);
+      (document.getElementById('sheet-container') || document.body).appendChild(el);
     }
-    _statusChipEl = el;
-    return _statusChipEl;
+    return (_statusChipEl = el);
   }
 
   function _updateStatusChip(state, text) {
@@ -443,48 +410,141 @@ const ChordCanvasEdit = (() => {
 
   function showConflictModal({ serverChords, serverChecksum, onOverwrite, onReload }) {
     const isDark = document.body.classList.contains('dark-mode');
-    const bgCard = isDark ? '#1e293b' : '#ffffff';
-    const textPrimary = isDark ? '#f8fafc' : '#0f172a';
-    const textSecondary = isDark ? '#94a3b8' : '#64748b';
-    const borderColor = isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0';
-
+    const bgCard = isDark ? '#1e293b' : '#ffffff', textPri = isDark ? '#f8fafc' : '#0f172a';
+    const textSec = isDark ? '#94a3b8' : '#64748b', border = isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0';
     const overlay = document.createElement('div');
     overlay.id = 'cc-conflict-modal';
-    overlay.setAttribute('role', 'dialog');
-    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('role', 'dialog'); overlay.setAttribute('aria-modal', 'true');
     overlay.setAttribute('aria-labelledby', 'cc-conflict-title');
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:99999;padding:16px;';
     overlay.innerHTML = `
-      <div style="background:${bgCard};color:${textPrimary};border:1px solid ${borderColor};border-radius:14px;padding:1.5rem;max-width:460px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.45);">
-        <div id="cc-conflict-title" style="font-size:1.1rem;font-weight:700;line-height:1.2;margin-bottom:.5rem;display:flex;align-items:center;gap:8px;color:#ef4444;">
-          ⚠ Phát hiện xung đột dữ liệu (409)
+      <div style="background:${bgCard};color:${textPri};border:1px solid ${border};border-radius:14px;padding:1.4rem;max-width:440px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.45);">
+        <div id="cc-conflict-title" style="font-size:1.05rem;font-weight:700;margin-bottom:.4rem;display:flex;align-items:center;gap:8px;color:#ef4444;">⚠ Phát hiện xung đột dữ liệu (409)</div>
+        <div style="font-size:0.85rem;color:${textSec};line-height:1.4;margin-bottom:1.1rem;">Bộ hợp âm đã thay đổi trên máy chủ bởi phiên khác. Bạn muốn giải quyết thế nào?</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">
+          <button id="cc-conflict-reload" class="btn btn-primary btn-sm" style="text-align:left;padding:8px 12px;border-radius:10px;font-weight:600;">⤓ Nạp lại bản từ máy chủ (Khuyên dùng)<div style="font-weight:400;font-size:12px;opacity:.9;margin-top:2px;">Cập nhật lại hợp âm mới nhất từ máy chủ.</div></button>
+          <button id="cc-conflict-overwrite" class="btn btn-sm" style="text-align:left;padding:8px 12px;border-radius:10px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);color:#dc2626;font-weight:600;">⚡ Ghi đè bằng bản hiện tại của tôi<div style="font-weight:400;font-size:12px;opacity:.9;margin-top:2px;">Giữ toàn bộ hợp âm vừa nhập và ghi đè máy chủ.</div></button>
         </div>
-        <div style="font-size:0.875rem;color:${textSecondary};line-height:1.5;margin-bottom:1.2rem;">
-          Bộ hợp âm của bài hát này đã được thay đổi từ một phiên làm việc khác trên máy chủ trong lúc bạn đang soạn. Bạn muốn giải quyết xung đột như thế nào?
-        </div>
-        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px;">
-          <button id="cc-conflict-reload" class="btn btn-primary btn-sm" style="text-align:left;padding:10px 14px;border-radius:10px;font-weight:600;">
-            ⤓ Nạp lại bản từ máy chủ (Khuyên dùng)
-            <div style="font-weight:400;font-size:12px;opacity:.9;margin-top:3px;">Cập nhật lại các hợp âm mới nhất từ máy chủ để tránh ghi đè dữ liệu.</div>
-          </button>
-          <button id="cc-conflict-overwrite" class="btn btn-sm" style="text-align:left;padding:10px 14px;border-radius:10px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);color:#dc2626;font-weight:600;">
-            ⚡ Ghi đè bằng bản hiện tại của tôi
-            <div style="font-weight:400;font-size:12px;opacity:.9;margin-top:3px;">Lưu giữ toàn bộ các hợp âm bạn vừa nhập và ghi đè lên máy chủ.</div>
-          </button>
-        </div>
-        <div style="display:flex;justify-content:flex-end;">
-          <button id="cc-conflict-close" class="btn btn-ghost btn-sm">Đóng</button>
-        </div>
-      </div>
-    `;
-
+        <div style="display:flex;justify-content:flex-end;"><button id="cc-conflict-close" class="btn btn-ghost btn-sm">Đóng</button></div>
+      </div>`;
     document.body.appendChild(overlay);
-
     const cleanup = () => overlay.remove();
     overlay.querySelector('#cc-conflict-reload').onclick = () => { cleanup(); onReload?.(); };
     overlay.querySelector('#cc-conflict-overwrite').onclick = () => { cleanup(); onOverwrite?.(); };
-    overlay.querySelector('#cc-conflict-close').onclick = () => cleanup();
+    overlay.querySelector('#cc-conflict-close').onclick = cleanup;
     overlay.onclick = e => { if (e.target === overlay) cleanup(); };
+  }
+
+  let _measureClipboard = null;
+
+  function copyMeasures(fromStart, fromEnd, toStart, toEnd) {
+    if (typeof fromStart === 'object' && fromStart !== null) {
+      toStart = fromStart.toStart ?? fromStart.targetMeasure;
+      toEnd = fromStart.toEnd; fromEnd = fromStart.fromEnd; fromStart = fromStart.fromStart;
+    }
+    fromStart = Number(fromStart); fromEnd = fromEnd !== undefined ? Number(fromEnd) : fromStart; toStart = Number(toStart);
+    if (isNaN(fromStart) || isNaN(fromEnd) || isNaN(toStart)) { window.App?.showToast?.('Số ô nhịp không hợp lệ', 'error'); return 0; }
+    const app = _getApp(), chords = app.getCustomChords();
+    if (!chords) return 0;
+    _pushUndo();
+    const delta = toStart - fromStart;
+    let isZero = false;
+    for (const k of Object.keys(chords)) {
+      const [m] = k.split('_').map(Number);
+      if (m === fromStart - 1 || m === fromEnd - 1) { isZero = true; break; }
+    }
+    const minM = isZero ? (fromStart - 1) : fromStart, maxM = isZero ? (fromEnd - 1) : fromEnd;
+    const toCopy = [];
+    for (const [k, c] of Object.entries(chords)) {
+      const [m, n] = k.split('_').map(Number);
+      if (m >= minM && m <= maxM) toCopy.push({ m, n, c });
+    }
+    if (!toCopy.length) { window.App?.showToast?.(`Không có hợp âm trong ô ${fromStart}–${fromEnd}`, 'info'); return 0; }
+    let count = 0;
+    toCopy.forEach(({ m, n, c }) => {
+      const targetM = m + delta;
+      if (targetM >= 0) { chords[`${targetM}_${n}`] = c; count++; }
+    });
+    scheduleSave(1500);
+    setTimeout(() => requestAnimationFrame(() => app.build()), 80);
+    const destEnd = toEnd || (toStart + (fromEnd - fromStart));
+    window.App?.showToast?.(`✨ Đã chép ${count} hợp âm từ ô ${fromStart}–${fromEnd} sang ô ${toStart}–${destEnd}`, 'success');
+    return count;
+  }
+
+  function showCopyMeasuresModal(defaultMeasureIdx) {
+    const isDark = document.body.classList.contains('dark-mode');
+    const bgCard = isDark ? '#1e293b' : '#ffffff', textPri = isDark ? '#f8fafc' : '#0f172a';
+    const textSec = isDark ? '#94a3b8' : '#64748b', border = isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0';
+    const defM = defaultMeasureIdx !== undefined ? (defaultMeasureIdx + 1) : 1;
+    const overlay = document.createElement('div');
+    overlay.id = 'cc-copy-measures-modal';
+    overlay.setAttribute('role', 'dialog'); overlay.setAttribute('aria-modal', 'true');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:99999;padding:16px;';
+    overlay.innerHTML = `
+      <div style="background:${bgCard};color:${textPri};border:1px solid ${border};border-radius:14px;padding:1.4rem;max-width:380px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.45);">
+        <div style="font-size:1.05rem;font-weight:700;margin-bottom:.35rem;">≡ Chép ô nhịp hợp âm</div>
+        <div style="font-size:0.8rem;color:${textSec};margin-bottom:1rem;">Sao chép hợp âm của điệp khúc hoặc đoạn lặp sang ô mới.</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <div style="flex:1;"><label style="font-size:12px;font-weight:600;display:block;margin-bottom:3px;">Từ ô</label><input id="cc-copy-from-start" type="number" min="1" value="${defM}" style="width:100%;box-sizing:border-box;padding:6px 8px;border-radius:8px;border:1px solid ${border};background:${isDark ? '#0f172a' : '#f8fafc'};color:${textPri};font-size:13px;"></div>
+          <div style="flex:1;"><label style="font-size:12px;font-weight:600;display:block;margin-bottom:3px;">Đến ô</label><input id="cc-copy-from-end" type="number" min="1" value="${defM}" style="width:100%;box-sizing:border-box;padding:6px 8px;border-radius:8px;border:1px solid ${border};background:${isDark ? '#0f172a' : '#f8fafc'};color:${textPri};font-size:13px;"></div>
+        </div>
+        <div style="margin-bottom:1.1rem;"><label style="font-size:12px;font-weight:600;display:block;margin-bottom:3px;">Dán sang ô</label><input id="cc-copy-to-start" type="number" min="1" placeholder="Ví dụ: 11" style="width:100%;box-sizing:border-box;padding:6px 8px;border-radius:8px;border:1px solid ${border};background:${isDark ? '#0f172a' : '#f8fafc'};color:${textPri};font-size:13px;"></div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;">
+          <button id="cc-copy-cancel" class="btn btn-ghost btn-sm" type="button">Hủy</button>
+          <button id="cc-btn-do-copy-measures" class="btn btn-primary btn-sm" type="button">✓ Sao chép</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    const cleanup = () => overlay.remove();
+    overlay.querySelector('#cc-copy-cancel').onclick = cleanup;
+    overlay.onclick = e => { if (e.target === overlay) cleanup(); };
+    overlay.querySelector('#cc-btn-do-copy-measures').onclick = () => {
+      const fs = parseInt(overlay.querySelector('#cc-copy-from-start').value, 10);
+      const fe = parseInt(overlay.querySelector('#cc-copy-from-end').value, 10);
+      const ts = parseInt(overlay.querySelector('#cc-copy-to-start').value, 10);
+      if (isNaN(fs) || isNaN(fe) || isNaN(ts)) { window.App?.showToast?.('Vui lòng điền đủ ô nhịp', 'error'); return; }
+      copyMeasures(fs, fe, ts); cleanup();
+    };
+  }
+
+  function _getCurM() {
+    if (_popup?.getAttribute('data-measure-idx')) return parseInt(_popup.getAttribute('data-measure-idx'), 10);
+    if (_currentCursorEl) {
+      const app = _getApp(), notes = app.getNoteEls?.() || [], ch = app.getCustomChords?.() || {};
+      const m = window.ChordCanvasDots?.mapNotes?.(notes, ch)?.find(x => x.el === _currentCursorEl || x.el.contains?.(_currentCursorEl));
+      if (m) return m.measureIdx;
+    }
+    return -1;
+  }
+
+  if (typeof document !== 'undefined') {
+    document.addEventListener('keydown', e => {
+      if (!window.ChordCanvas?.isAddMode?.()) return;
+      if (e.target?.tagName === 'INPUT' && e.target.id !== 'cc-pop-inp') return;
+      if (e.target?.tagName === 'TEXTAREA') return;
+      if ((e.ctrlKey || e.metaKey) && (e.code === 'KeyC' || e.key === 'c' || e.key === 'C')) {
+        const cur = _getCurM();
+        if (cur >= 0) {
+          const ch = _getApp().getCustomChords?.() || {}, items = [];
+          Object.entries(ch).forEach(([k, chord]) => {
+            const [m, n] = k.split('_').map(Number);
+            if (m === cur) items.push({ noteIdx: n, chord });
+          });
+          _measureClipboard = { cur, items };
+          window.App?.showToast?.(`📋 Đã chép hợp âm ô nhịp ${cur + 1} (Ctrl+V để dán)`, 'info');
+        }
+      } else if ((e.ctrlKey || e.metaKey) && (e.code === 'KeyV' || e.key === 'v' || e.key === 'V')) {
+        const cur = _getCurM();
+        if (cur >= 0 && _measureClipboard?.items?.length) {
+          e.preventDefault(); _pushUndo();
+          const ch = _getApp().getCustomChords();
+          _measureClipboard.items.forEach(({ noteIdx, chord }) => { ch[`${cur}_${noteIdx}`] = chord; });
+          scheduleSave(1500); setTimeout(() => requestAnimationFrame(() => _getApp().build()), 80);
+          window.App?.showToast?.(`✨ Đã dán ${_measureClipboard.items.length} hợp âm vào ô nhịp ${cur + 1}`, 'success');
+        }
+      }
+    });
   }
 
   if (typeof window !== 'undefined') {
@@ -519,6 +579,8 @@ const ChordCanvasEdit = (() => {
     flushOfflineQueue,
     setBaseChecksum,
     showConflictModal,
+    copyMeasures,
+    showCopyMeasuresModal,
     updateStatusChip: _updateStatusChip
   };
 })();

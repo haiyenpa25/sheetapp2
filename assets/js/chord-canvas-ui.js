@@ -135,6 +135,7 @@ const ChordCanvasUI = (() => {
         <div id="cc-lib-chips" style="display:flex;flex-wrap:wrap;gap:3px;margin-top:4px;max-height:72px;overflow-y:auto;"></div>
       </details>
       <div style="display:flex;gap:.35rem;justify-content:flex-end;">
+        <button id="cc-pop-copy-measures" class="btn btn-ghost btn-xs" type="button" title="Chép ô nhịp (Ctrl+C/V)">≡ Chép ô</button>
         <button id="cc-pop-save" class="btn btn-primary btn-xs">✓ Lưu</button>
         ${existing ? '<button id="cc-pop-del" class="btn btn-danger btn-xs">🗑</button>' : ''}
         <button id="cc-pop-cancel" class="btn btn-ghost btn-xs">✕</button>
@@ -292,10 +293,8 @@ const ChordCanvasUI = (() => {
 
     // Nút Lưu: pointerdown (instant) + click (fallback desktop)
     const saveBtn = pop.querySelector('#cc-pop-save');
-    if (saveBtn) {
-      saveBtn.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); doSave(); });
-      saveBtn.addEventListener('click', e => { e.stopPropagation(); doSave(); });
-    }
+    saveBtn?.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); doSave(); });
+    saveBtn?.addEventListener('click', e => { e.stopPropagation(); doSave(); });
 
     // Nút Xóa
     pop.querySelector('#cc-pop-del')?.addEventListener('pointerdown', e => {
@@ -306,12 +305,18 @@ const ChordCanvasUI = (() => {
       callbacks.onClose();
     });
 
-    // Nút Hủy
+    // Nút Hủy & Chép ô nhịp
     pop.querySelector('#cc-pop-cancel')?.addEventListener('pointerdown', e => {
-      e.preventDefault(); e.stopPropagation();
-      _saved = true; clearTimeout(_blurTimer);
-      callbacks.onClose();
+      e.preventDefault(); e.stopPropagation(); _saved = true; clearTimeout(_blurTimer); callbacks.onClose();
     });
+    const copyBtn = pop.querySelector('#cc-pop-copy-measures');
+    const handleCopy = (e) => {
+      e.preventDefault(); e.stopPropagation(); _saved = true; clearTimeout(_blurTimer);
+      window.ChordCanvasEdit?.showCopyMeasuresModal?.(measureIdx);
+      setTimeout(() => callbacks.onClose(), 50);
+    };
+    copyBtn?.addEventListener('pointerdown', handleCopy);
+    copyBtn?.addEventListener('click', handleCopy);
 
     // Nút Nhận gợi ý TLH
     const sugBtn = pop.querySelector('#btn-apply-sug');
