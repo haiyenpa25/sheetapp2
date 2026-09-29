@@ -22,7 +22,7 @@ if (php_sapi_name() !== 'cli') {
     exit('Forbidden: CLI only');
 }
 
-$options = getopt('', ['status', 'seed-top-100', 'clear-auto', 'db::']);
+$options = getopt('', ['status', 'seed-top-100', 'clear-auto', 'standardize', 'db::']);
 
 $dbPath = $options['db'] ?? __DIR__ . '/../storage/data/app.sqlite';
 if (!file_exists($dbPath)) {
@@ -57,16 +57,46 @@ function getXmlMaxMeasure(string $xmlPath): int {
 }
 
 /**
+ * Chuẩn hóa nhãn phân đoạn theo Ticket R3-5:
+ * Dạo đầu / Phiên khúc 1..n / Điệp khúc / Kết (0 nhãn Intro/Outro/Lời/Đoạn còn lại)
+ */
+function standardizeSectionName(string $name, string $type = ''): string {
+    $n = trim($name);
+    if (preg_match('/^(intro|dạo\s*đầu|dạo)$/ui', $n) || $type === 'intro') {
+        return 'Dạo đầu';
+    }
+    if (preg_match('/^(outro|kết)$/ui', $n) || $type === 'outro') {
+        return 'Kết';
+    }
+    if (preg_match('/^(điệp\s*khúc|chorus|đk)$/ui', $n) || $type === 'chorus') {
+        return 'Điệp khúc';
+    }
+    if (preg_match('/^(lời|đoạn|phiên\s*khúc|verse)\s*(\d+)$/ui', $n, $m)) {
+        return 'Phiên khúc ' . $m[2];
+    }
+    if (preg_match('/^(lời\s*hát|lời|đoạn|phiên\s*khúc|verse)$/ui', $n) || $type === 'verse') {
+        return 'Phiên khúc';
+    }
+    if (preg_match('/^(dạo\s*giữa|bridge)$/ui', $n) || $type === 'bridge') {
+        return 'Dạo giữa';
+    }
+    if (preg_match('/^(gian\s*tấu|interlude)$/ui', $n) || $type === 'interlude') {
+        return 'Gian tấu';
+    }
+    return $n !== '' ? $n : 'Phiên khúc';
+}
+
+/**
  * Sinh danh sách phân đoạn mẫu cho 1 bài hát dựa trên số ô nhịp và sự hiện diện của Điệp khúc
  */
 function generateSongSections(string $songId, int $maxMeasure, bool $hasChorus): array {
     $max = max(8, $maxMeasure);
 
-    // Intro: 2 ô nhịp đầu
+    // Dạo đầu: 2 ô nhịp đầu
     $introEnd = min(2, (int)floor($max * 0.15));
     $introEnd = max(1, $introEnd);
 
-    // Outro: 2 ô nhịp cuối
+    // Kết: 2 ô nhịp cuối
     $outroStart = max($introEnd + 4, $max - 1);
 
     // Vùng giữa
@@ -76,10 +106,10 @@ function generateSongSections(string $songId, int $maxMeasure, bool $hasChorus):
     $sections = [];
     $order = 0;
 
-    // 1. Intro
+    // 1. Dạo đầu
     $sections[] = [
         'song_id' => $songId,
-        'name' => 'Intro',
+        'name' => 'Dạo đầu',
         'type' => 'intro',
         'start_measure' => 1,
         'end_measure' => $introEnd,
@@ -88,11 +118,11 @@ function generateSongSections(string $songId, int $maxMeasure, bool $hasChorus):
     ];
 
     if ($hasChorus && ($bodyEnd - $bodyStart >= 6)) {
-        // Có Điệp khúc: chia Verse và Chorus
+        // Có Điệp khúc: chia Phiên khúc 1 và Điệp khúc
         $mid = $bodyStart + (int)floor(($bodyEnd - $bodyStart) / 2);
         $sections[] = [
             'song_id' => $songId,
-            'name' => 'Lời Hát',
+            'name' => 'Phiên khúc 1',
             'type' => 'verse',
             'start_measure' => $bodyStart,
             'end_measure' => $mid,
@@ -101,7 +131,7 @@ function generateSongSections(string $songId, int $maxMeasure, bool $hasChorus):
         ];
         $sections[] = [
             'song_id' => $songId,
-            'name' => 'Điệp Khúc',
+            'name' => 'Điệp khúc',
             'type' => 'chorus',
             'start_measure' => $mid + 1,
             'end_measure' => $bodyEnd,
@@ -109,12 +139,12 @@ function generateSongSections(string $songId, int $maxMeasure, bool $hasChorus):
             'display_order' => $order++,
         ];
     } else {
-        // Không có Điệp khúc: chia Đoạn 1 và Đoạn 2 (hoặc Lời Hát trọn vẹn)
+        // Không có Điệp khúc: chia Phiên khúc 1 và Phiên khúc 2 (hoặc Phiên khúc trọn vẹn)
         if ($bodyEnd - $bodyStart >= 8) {
             $mid = $bodyStart + (int)floor(($bodyEnd - $bodyStart) / 2);
             $sections[] = [
                 'song_id' => $songId,
-                'name' => 'Đoạn 1',
+                'name' => 'Phiên khúc 1',
                 'type' => 'verse',
                 'start_measure' => $bodyStart,
                 'end_measure' => $mid,
@@ -123,7 +153,7 @@ function generateSongSections(string $songId, int $maxMeasure, bool $hasChorus):
             ];
             $sections[] = [
                 'song_id' => $songId,
-                'name' => 'Đoạn 2',
+                'name' => 'Phiên khúc 2',
                 'type' => 'verse',
                 'start_measure' => $mid + 1,
                 'end_measure' => $bodyEnd,
@@ -133,7 +163,7 @@ function generateSongSections(string $songId, int $maxMeasure, bool $hasChorus):
         } else {
             $sections[] = [
                 'song_id' => $songId,
-                'name' => 'Lời Hát',
+                'name' => 'Phiên khúc',
                 'type' => 'verse',
                 'start_measure' => $bodyStart,
                 'end_measure' => $bodyEnd,
@@ -143,7 +173,7 @@ function generateSongSections(string $songId, int $maxMeasure, bool $hasChorus):
         }
     }
 
-    // Outro
+    // Kết
     $sections[] = [
         'song_id' => $songId,
         'name' => 'Kết',
@@ -161,7 +191,7 @@ function generateSongSections(string $songId, int $maxMeasure, bool $hasChorus):
 if (isset($_SERVER['SCRIPT_FILENAME']) && realpath(__FILE__) === realpath($_SERVER['SCRIPT_FILENAME'])) {
 
     // Thống kê
-    if (isset($options['status']) || (!isset($options['seed-top-100']) && !isset($options['clear-auto']))) {
+    if (isset($options['status']) || (!isset($options['seed-top-100']) && !isset($options['clear-auto']) && !isset($options['standardize']))) {
         $totalSections = (int)$pdo->query("SELECT COUNT(*) FROM song_sections")->fetchColumn();
         $totalSongsWithSec = (int)$pdo->query("SELECT COUNT(DISTINCT song_id) FROM song_sections")->fetchColumn();
         $top100Count = (int)$pdo->query("SELECT COUNT(DISTINCT s.id) FROM songs s JOIN song_sections ss ON s.id = ss.song_id WHERE s.httlvnId >= 1 AND s.httlvnId <= 100")->fetchColumn();
@@ -182,8 +212,29 @@ if (isset($_SERVER['SCRIPT_FILENAME']) && realpath(__FILE__) === realpath($_SERV
         }
 
         echo "\nCách dùng:\n";
+        echo "  php tools/seed_song_sections.php --standardize   (Chuẩn hóa nhãn phân đoạn theo R3-5: Dạo đầu, Phiên khúc n, Điệp khúc, Kết)\n";
         echo "  php tools/seed_song_sections.php --seed-top-100  (Soạn bản đồ cho 100 bài hay dùng nhất)\n";
         echo "  php tools/seed_song_sections.php --clear-auto    (Xóa các phân đoạn sinh tự động)\n";
+        exit(0);
+    }
+
+    // Chuẩn hóa toàn bộ nhãn phân đoạn theo R3-5 (0 nhãn Intro/Outro/Lời/Đoạn)
+    if (isset($options['standardize'])) {
+        $rows = $pdo->query("SELECT id, song_id, name, type FROM song_sections")->fetchAll();
+        $pdo->beginTransaction();
+        $updateStmt = $pdo->prepare("UPDATE song_sections SET name = :name WHERE id = :id");
+        $updatedCount = 0;
+        foreach ($rows as $r) {
+            $newName = standardizeSectionName((string)$r['name'], (string)$r['type']);
+            if ($newName !== $r['name']) {
+                $updateStmt->execute([':name' => $newName, ':id' => $r['id']]);
+                $updatedCount++;
+            }
+        }
+        $pdo->commit();
+        echo "✅ ĐÃ CHUẨN HÓA {$updatedCount} PHÂN ĐOẠN TRONG CSDL THEO R3-5!\n";
+        echo "  - Dạo đầu / Phiên khúc 1..n / Điệp khúc / Kết\n";
+        echo "  - 0 nhãn 'Intro/Outro/Lời/Đoạn' còn lại trong CSDL.\n";
         exit(0);
     }
 

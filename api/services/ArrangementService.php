@@ -19,13 +19,43 @@ class ArrangementService {
     }
 
     /**
+     * Chuẩn hóa tên phân đoạn theo Ticket R3-5 (Tin Lành):
+     * Dạo đầu / Phiên khúc 1..n / Điệp khúc / Kết (0 nhãn Intro/Outro/Lời/Đoạn)
+     */
+    public static function standardizeName(string $name, string $type = ''): string {
+        $n = trim($name);
+        if (preg_match('/^(intro|dạo\s*đầu|dạo)$/ui', $n) || $type === 'intro') {
+            return 'Dạo đầu';
+        }
+        if (preg_match('/^(outro|kết)$/ui', $n) || $type === 'outro') {
+            return 'Kết';
+        }
+        if (preg_match('/^(điệp\s*khúc|chorus|đk)$/ui', $n) || $type === 'chorus') {
+            return 'Điệp khúc';
+        }
+        if (preg_match('/^(lời|đoạn|phiên\s*khúc|verse)\s*(\d+)$/ui', $n, $m)) {
+            return 'Phiên khúc ' . $m[2];
+        }
+        if (preg_match('/^(lời\s*hát|lời|đoạn|phiên\s*khúc|verse)$/ui', $n) || $type === 'verse') {
+            return 'Phiên khúc';
+        }
+        if (preg_match('/^(dạo\s*giữa|bridge)$/ui', $n) || $type === 'bridge') {
+            return 'Dạo giữa';
+        }
+        if (preg_match('/^(gian\s*tấu|interlude)$/ui', $n) || $type === 'interlude') {
+            return 'Gian tấu';
+        }
+        return $n !== '' ? $n : 'Phiên khúc';
+    }
+
+    /**
      * Thêm hoặc Cập nhật 1 Section
      */
     public static function upsertSection(array $data): int {
         $id           = !empty($data['id']) ? (int)$data['id'] : null;
         $songId       = trim($data['song_id'] ?? '');
-        $name         = trim($data['name'] ?? 'Section');
         $type         = trim($data['type'] ?? 'verse');
+        $name         = self::standardizeName(trim($data['name'] ?? ''), $type);
         $startMeasure = max(1, (int)($data['start_measure'] ?? 1));
         $endMeasure   = max($startMeasure, (int)($data['end_measure'] ?? $startMeasure));
         $color        = trim($data['color'] ?? '#6366f1');

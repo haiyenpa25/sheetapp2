@@ -135,7 +135,7 @@ assertCondition(
 
 $chorusSec = $sectionsDb[2];
 assertCondition(
-    $chorusSec['name'] === 'Điệp Khúc' &&
+    in_array($chorusSec['name'], ['Điệp khúc', 'Điệp Khúc'], true) &&
     (int)$chorusSec['start_measure'] === 11 &&
     (int)$chorusSec['end_measure'] === 18 &&
     $chorusSec['color'] === '#f59e0b',

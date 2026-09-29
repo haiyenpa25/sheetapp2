@@ -341,18 +341,15 @@ const ArrangementEngine = (() => {
 
   function _normalizeSectionLabel(type, rawName = '') {
     const raw = String(rawName).trim();
-    switch (type) {
-      case 'intro': return 'Dạo đầu';
-      case 'verse': {
-        const numMatch = raw.match(/\d+/);
-        return numMatch ? `Phiên khúc ${numMatch[0]}` : 'Phiên khúc';
-      }
-      case 'chorus': return 'Điệp khúc';
-      case 'bridge': return 'Dạo giữa';
-      case 'interlude': return 'Gian tấu';
-      case 'outro': return 'Kết';
-      default: return raw || 'Đoạn';
-    }
+    if (/^(intro|dạo\s*đầu|dạo)$/i.test(raw) || type === 'intro') return 'Dạo đầu';
+    if (/^(outro|kết)$/i.test(raw) || type === 'outro') return 'Kết';
+    if (/^(điệp\s*khúc|chorus|đk)$/i.test(raw) || type === 'chorus') return 'Điệp khúc';
+    const numMatch = raw.match(/\d+/);
+    if (numMatch && (/^(lời|đoạn|phiên\s*khúc|verse)/i.test(raw) || type === 'verse')) return `Phiên khúc ${numMatch[0]}`;
+    if (/^(lời|lời\s*hát|đoạn|phiên\s*khúc|verse)$/i.test(raw) || type === 'verse') return 'Phiên khúc';
+    if (type === 'bridge') return 'Dạo giữa';
+    if (type === 'interlude') return 'Gian tấu';
+    return raw || 'Phiên khúc';
   }
 
   function _getSectionIcon(type) {
@@ -488,12 +485,12 @@ const ArrangementEngine = (() => {
     row.dataset.id = sec.id || '';
 
     const types = [
-      { id: 'intro', label: 'Dạo đầu (Intro)' },
-      { id: 'verse', label: 'Phiên khúc (Verse)' },
-      { id: 'chorus', label: 'Điệp khúc (Chorus)' },
-      { id: 'bridge', label: 'Dạo giữa (Bridge)' },
-      { id: 'interlude', label: 'Gian tấu (Interlude)' },
-      { id: 'outro', label: 'Kết (Outro)' }
+      { id: 'intro', label: 'Dạo đầu' },
+      { id: 'verse', label: 'Phiên khúc' },
+      { id: 'chorus', label: 'Điệp khúc' },
+      { id: 'bridge', label: 'Dạo giữa' },
+      { id: 'interlude', label: 'Gian tấu' },
+      { id: 'outro', label: 'Kết' }
     ];
 
     const typeOpts = types.map(t => `<option value="${t.id}" ${sec.type === t.id ? 'selected' : ''}>${t.label}</option>`).join('');
@@ -517,7 +514,7 @@ const ArrangementEngine = (() => {
       const colorInput = row.querySelector('.sec-row-color');
       if (nameInput && (!nameInput.value || ['Intro', 'Lời', 'Điệp Khúc', 'Dạo Giữa', 'Outro', 'Dạo đầu', 'Phiên khúc', 'Điệp khúc', 'Kết'].some(p => nameInput.value.includes(p)))) {
         const match = types.find(t => t.id === selectedType);
-        if (match) nameInput.value = match.label.split(' (')[0];
+        if (match) nameInput.value = match.label;
       }
       if (colorInput) {
         colorInput.value = _getSectionDefaultColor(selectedType);

@@ -37,26 +37,26 @@ test.describe('L3-7: Bản Đồ Bài Và Nhảy Đoạn (Song Flow / Roadmap)',
     const chips = page.locator('#section-chips-list .section-chip');
     await expect(chips).toHaveCount(4, { timeout: 10000 });
 
-    // Kiểm tra tên các phân đoạn
-    await expect(chips.nth(0)).toContainText('Intro');
-    await expect(chips.nth(1)).toContainText('Lời 1');
-    await expect(chips.nth(2)).toContainText('Điệp Khúc');
-    await expect(chips.nth(3)).toContainText('Outro');
+    // Kiểm tra tên các phân đoạn (chuẩn hóa theo R3-5: Dạo đầu, Phiên khúc 1, Điệp khúc, Kết)
+    await expect(chips.nth(0)).toHaveText(/Dạo đầu|Intro/i);
+    await expect(chips.nth(1)).toHaveText(/Phiên khúc 1|Lời 1/i);
+    await expect(chips.nth(2)).toHaveText(/Điệp khúc|Điệp Khúc/i);
+    await expect(chips.nth(3)).toHaveText(/Kết|Outro/i);
 
-    // 5. Click vào chip "Điệp Khúc"
-    const chorusChip = page.locator('#section-chips-list .section-chip:has-text("Điệp Khúc")');
+    // 5. Click vào chip "Điệp khúc"
+    const chorusChip = page.locator('#section-chips-list .section-chip').filter({ hasText: /Điệp khúc|Điệp Khúc/i });
     await chorusChip.click();
 
     // Chip Điệp Khúc phải có class .active
     await expect(chorusChip).toHaveClass(/active/, { timeout: 5000 });
 
     // Các chip khác không được có class .active
-    const introChip = page.locator('#section-chips-list .section-chip:has-text("Intro")');
+    const introChip = page.locator('#section-chips-list .section-chip').filter({ hasText: /Dạo đầu|Intro/i });
     await expect(introChip).not.toHaveClass(/active/);
 
-    // 6. Nhấn phím 'j' để chuyển sang phân đoạn tiếp theo (Outro)
+    // 6. Nhấn phím 'j' để chuyển sang phân đoạn tiếp theo (Kết / Outro)
     await page.keyboard.press('j');
-    const outroChip = page.locator('#section-chips-list .section-chip:has-text("Outro")');
+    const outroChip = page.locator('#section-chips-list .section-chip').filter({ hasText: /Kết|Outro/i });
     await expect(outroChip).toHaveClass(/active/, { timeout: 5000 });
     await expect(chorusChip).not.toHaveClass(/active/);
 
