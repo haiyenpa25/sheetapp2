@@ -86,7 +86,11 @@
     <!-- Cụm Bản Phối Hợp Âm (Chord Set Pill) -->
     <div class="band-pill chord-set-pill" id="chord-set-bar" role="group" aria-label="Chọn bản phối hợp âm" title="Bản phối hợp âm">
       <span class="pill-icon fs-md-p">🎸</span>
-      <select id="chord-set-selector" class="chord-set-select" disabled onchange="ChordCanvas.handleSelectChange ? ChordCanvas.handleSelectChange(this.value) : ChordCanvas.switchSet(this.value)" title="Chọn bản phối hợp âm" aria-label="Chọn bản phối hợp âm">
+      <!-- R0-6 (ROADMAP5, lỗi B11): KHÔNG dùng onchange inline ở đây -- chord-canvas.js
+           đã tự bind addEventListener('change', ...) trong _refreshSetDropdown() (đánh
+           dấu qua selector.dataset.boundCreateHandler). Có cả 2 khiến mỗi lần đổi bộ hợp
+           âm gọi handleSelectChange 2 LẦN -> gửi 2 request load thay vì 1. -->
+      <select id="chord-set-selector" class="chord-set-select" disabled title="Chọn bản phối hợp âm" aria-label="Chọn bản phối hợp âm">
         <option value="HD" selected>⭐ HD (Mặc định)</option>
         <option value="default">TLH (gốc)</option>
       </select>

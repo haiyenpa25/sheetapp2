@@ -409,7 +409,14 @@ const ChordCanvas = (() => {
     } catch(e) { return; }
 
     await switchSet(name);
-    setAddMode(true);
+    // R0-6 (ROADMAP5, lỗi B12): trước đây gọi thẳng setAddMode(true), không qua
+    // ModeManager -> ModeManager._currentMode vẫn là 'view' dù đang sửa hợp âm thật,
+    // nên phím Esc (do ModeManager làm chủ) không biết đường thoát chế độ sửa.
+    if (window.ModeManager?.setMode) {
+      window.ModeManager.setMode(window.ModeManager.MODES.EDIT_CHORDS);
+    } else {
+      setAddMode(true);
+    }
     await _refreshSetDropdown(true);
     window.App?.showToast?.(`Đã tạo bộ "${name}" - bắt đầu nhập!`, 'success');
   }

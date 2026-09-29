@@ -194,13 +194,13 @@ const KeyboardHandler = (() => {
         if (e.ctrlKey || e.metaKey) { e.preventDefault(); ChordCanvas?.redo?.(); }
         break;
       case 'Escape':
-        // Ticket L0-16: ModeManager làm chủ duy nhất việc điều phối phím Escape
-        if (window.ModeManager?.handleEscape) {
-          window.ModeManager.handleEscape(e);
-        } else if (window.ModeManager?.resetToView) {
-          window.ModeManager.resetToView();
-        } else if (window.ModalManager?.closeTopmost) {
-          window.ModalManager.closeTopmost();
+        // R0-6 (ROADMAP5, lỗi B17): ModeManager tự đăng ký listener 'keydown' Escape
+        // RIÊNG của nó (xem ModeManager.js _bindEvents -> handleEscape). Gọi lại
+        // handleEscape ở đây khiến CÙNG 1 lần bấm Esc bị xử lý 2 LẦN (vd: đóng popup
+        // hợp âm xong rồi lần gọi thứ 2 lại thoát luôn cả chế độ sửa hợp âm). Chỉ giữ
+        // nhánh dự phòng cho trường hợp hiếm ModeManager chưa kịp nạp.
+        if (!window.ModeManager) {
+          window.ModalManager?.closeTopmost?.();
         }
         break;
     }

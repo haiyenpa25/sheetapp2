@@ -59,12 +59,17 @@ check(
     "hasHandleSelect=" . ($hasHandleSelectChange ? 'true' : 'false')
 );
 
-// 3. Toolbar selector dùng handleSelectChange
-$toolbarUsesHandler = str_contains($toolbarSrc, "ChordCanvas.handleSelectChange");
+// 3. Toolbar selector liên kết tới handleSelectChange qua JS (KHÔNG dùng onchange inline).
+// R0-6 (ROADMAP5, lỗi B11): trước đây toolbar.php có CẢ onchange="ChordCanvas.handleSelectChange(...)"
+// inline LẪN chord-canvas.js tự bind addEventListener('change', ...) trong _refreshSetDropdown()
+// -> mỗi lần đổi bộ hợp âm, handleSelectChange bị gọi 2 LẦN (2 request load thay vì 1).
+// Đã bỏ onchange inline; giờ chỉ còn đúng 1 đường dây thật duy nhất qua JS.
+$toolbarHasNoInlineOnchange = !str_contains($toolbarSrc, 'onchange="ChordCanvas.handleSelectChange');
+$jsHasSingleChangeListener = str_contains($chordCanvasSrc, "selector.addEventListener('change', (e) => handleSelectChange(e.target.value));");
 check(
-    $toolbarUsesHandler,
-    'Toolbar selector liên kết an toàn tới ChordCanvas.handleSelectChange',
-    "toolbarUses=" . ($toolbarUsesHandler ? 'true' : 'false')
+    $toolbarHasNoInlineOnchange && $jsHasSingleChangeListener,
+    'Toolbar selector liên kết tới ChordCanvas.handleSelectChange qua đúng 1 đường dây JS (không còn onchange inline trùng lặp)',
+    "noInlineOnchange=" . ($toolbarHasNoInlineOnchange ? 'true' : 'false') . " jsListener=" . ($jsHasSingleChangeListener ? 'true' : 'false')
 );
 
 // 4. Backend ChordSetService::saveSet từ chối ghi đè TLH/default và action pseudo-names

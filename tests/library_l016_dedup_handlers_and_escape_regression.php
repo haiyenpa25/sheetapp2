@@ -68,11 +68,21 @@ check(
     'ModeManager.js export handleEscape'
 );
 
-// 5. Kiểm tra keyboard-handler.js ủy quyền Escape sang ModeManager
+// 5. R0-6 (ROADMAP5, lỗi B17): ModeManager tự đăng ký listener 'keydown' Escape RIÊNG
+// của nó (xem check bên dưới) -- nếu keyboard-handler.js CŨNG gọi lại
+// window.ModeManager.handleEscape(e), cùng 1 lần bấm Esc bị xử lý 2 LẦN (đóng popup
+// xong rồi lần gọi thứ 2 lại thoát luôn cả chế độ đang sửa). Vì vậy keyboard-handler.js
+// KHÔNG được gọi lại handleEscape nữa; ModeManager một mình làm chủ.
 check(
-    strpos($keyboardHandler, 'window.ModeManager?.handleEscape') !== false,
-    'keyboard_handler_delegates_escape',
-    'keyboard-handler.js ủy quyền Escape sang ModeManager'
+    strpos($keyboardHandler, 'window.ModeManager?.handleEscape') === false &&
+    strpos($keyboardHandler, 'window.ModeManager.handleEscape') === false,
+    'keyboard_handler_no_dup_escape_call',
+    'keyboard-handler.js KHÔNG gọi lại ModeManager.handleEscape (tránh xử lý Escape 2 lần)'
+);
+check(
+    (bool) preg_match('/addEventListener\(\'keydown\',[\s\S]{0,80}Escape[\s\S]{0,40}handleEscape/', $modeManagerJs),
+    'mode_manager_self_registers_escape_listener',
+    'ModeManager.js tự đăng ký listener keydown Escape riêng, làm chủ duy nhất việc điều phối'
 );
 
 // 6. Ngân sách file < 600 dòng
