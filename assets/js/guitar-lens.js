@@ -406,12 +406,12 @@ const GuitarLens = (() => {
     bar = document.createElement('div');
     bar.id = 'guitar-lens-bar';
     bar.className = 'guitar-lens-bar hidden';
-    bar.setAttribute('aria-label', 'Bảng điều khiển Guitar Stage Lens');
+    bar.setAttribute('aria-label', 'Bảng điều khiển Guitar — Góc nhìn nhạc cụ');
 
     bar.innerHTML = `
       <div class="guitar-lens-inner" style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:6px 12px;background:var(--bg-surface,#18181b);border-bottom:1px solid var(--border,#3f3f46);font-size:0.82rem;">
         <span class="guitar-lens-tag" style="font-weight:700;color:var(--accent-amber,#f59e0b);display:flex;align-items:center;gap:4px;">
-          <span>🎸</span> Guitar Lens:
+          <span>🎸</span> Góc nhìn Guitar:
         </span>
 
         <!-- Capo cá nhân -->

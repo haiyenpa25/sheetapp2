@@ -142,7 +142,7 @@ const DrumsLens = (() => {
     container = document.createElement('div');
     container.id = 'drums-stage-container';
     container.className = 'drums-stage-container hidden';
-    container.setAttribute('aria-label', 'Sân khấu Trống — Stage Lens');
+    container.setAttribute('aria-label', 'Sân khấu Trống — Góc nhìn nhạc cụ');
 
     const sheetArea = document.getElementById('sheet-area') || document.getElementById('main-container') || document.body;
     if (sheetArea && sheetArea.parentNode) {

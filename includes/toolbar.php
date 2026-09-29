@@ -129,7 +129,7 @@
         </div>
       </div>
 
-      <button id="btn-instrument-role" class="band-pill btn-instrument-role" title="Đổi vai trò nhạc cụ"><span id="instrument-role-icon" class="role-icon"><?= icon('guitar') ?></span><span id="instrument-role-label" class="role-label">Guitar</span></button>
+      <button id="btn-instrument-role" class="band-pill btn-instrument-role" title="Góc nhìn nhạc cụ"><span id="instrument-role-icon" class="role-icon"><?= icon('guitar') ?></span><span id="instrument-role-label" class="role-label">Guitar</span></button>
 
       <div class="band-pill scroll-pill">
         <button id="btn-auto-scroll" class="btn-pill-scroll" disabled><?= icon('scroll', 'icon-xs') ?><span class="btn-text">Cuộn</span></button>
