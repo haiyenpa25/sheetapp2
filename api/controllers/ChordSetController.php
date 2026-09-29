@@ -4,6 +4,7 @@
  * FIX: Thêm require_once Auth.php — thiếu dòng này gây HTTP 500 khi gọi Auth::requireBanhat()
  */
 require_once __DIR__ . '/../core/Response.php';
+require_once __DIR__ . '/../core/HttpException.php';
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../services/ChordSetService.php';
 
@@ -44,6 +45,13 @@ class ChordSetController {
             } elseif ($method === 'POST') {
                 // Yêu cầu ít nhất quyền Ban Hát để lưu/xóa hợp âm
                 Auth::requireBanhat();
+
+                // R0-1 (ROADMAP5): gán MỘT LẦN DUY NHẤT ở đây cho mọi nhánh action bên dưới
+                // (save/clone/fork/delete). Trước đây 2 biến này chỉ được gán bên trong nhánh
+                // clone/delete, nên nhánh save luôn dùng biến chưa gán -> mọi người không phải
+                // admin (kể cả chủ sở hữu HD thật) đều bị từ chối lưu hợp âm.
+                $myChordCode = Auth::chordCode();
+                $myUsername  = Auth::username();
 
                 $body = json_decode(file_get_contents('php://input'), true);
                 if (!$body) { Response::error('Body không hợp lệ'); return; }
@@ -138,8 +146,6 @@ class ChordSetController {
                         return;
                     }
 
-                    $myChordCode = Auth::chordCode();
-                    $myUsername  = Auth::username();
                     $source = trim($body['source'] ?? $body['sourceName'] ?? 'HD');
                     $target = trim($body['target'] ?? $body['targetName'] ?? $name ?? $myChordCode ?? $myUsername);
 
@@ -200,8 +206,6 @@ class ChordSetController {
                     }
 
                     if (!Auth::isAdmin()) {
-                        $myChordCode = Auth::chordCode();
-                        $myUsername  = Auth::username();
                         if (strcasecmp($name, $myChordCode) !== 0 && strcasecmp($name, $myUsername) !== 0) {
                             Response::forbidden('Bạn không thể xóa bộ hợp âm của người khác!');
                             return;
@@ -219,6 +223,12 @@ class ChordSetController {
             } else {
                 Response::methodNotAllowed();
             }
+        } catch (HttpException $httpEx) {
+            // Phải bắt riêng TRƯỚC catch(Throwable) bên dưới: Auth::requireBanhat() (dòng 46)
+            // ném HttpException(403) cho request không đủ quyền (vd. viewer). Nếu để lọt xuống
+            // catch(Throwable), lỗi 403 rõ ràng bị biến thành 500 "Lỗi hệ thống" chung chung,
+            // che mất lý do thật (phát hiện qua R0-1 test case viewer, ROADMAP5).
+            Response::error($httpEx->getMessage(), $httpEx->getStatusCode());
         } catch (Throwable $e) {
             Response::serverError($e, 'ChordSet');
         }
