@@ -1625,4 +1625,34 @@ body.dark-mode .lv-cp-textarea:focus {
   line-height: 1 !important;
 }
 
+/* ==========================================================================
+   R2-8: Hợp âm TLH mờ gợi ý khi soạn bộ cá nhân (BH) (B8, B10)
+   ========================================================================== */
+.cc-tlh-ghost-chord {
+  position: absolute;
+  transform: translateX(-50%);
+  font-family: "Georgia", serif;
+  font-style: italic;
+  font-weight: 600;
+  color: var(--text-muted, #9ca3af);
+  opacity: 0.42;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+  line-height: 1;
+  z-index: 9;
+}
 
+body.dark-mode .cc-tlh-ghost-chord {
+  color: #94a3b8;
+  opacity: 0.45;
+}
+
+.cc-toggle-tlh-wrap {
+  user-select: none;
+  transition: opacity 0.15s ease;
+}
+
+.cc-toggle-tlh-wrap:hover {
+  opacity: 0.85;
+}

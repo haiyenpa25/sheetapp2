@@ -154,7 +154,7 @@ const ChordCanvasUI = (() => {
                style="width:100%;box-sizing:border-box;border:1.5px solid #c4b5fd;border-radius:5px;padding:.35rem .55rem;font-size:.95rem;font-weight:700;font-family:monospace;color:#c00;outline:none;background:var(--bg-base,#fff);margin-bottom:.35rem;text-transform:capitalize;"
                onfocus="this.style.borderColor='#6d28d9';this.style.boxShadow='0 0 0 3px rgba(109,40,217,.18)'"
                onblur="this.style.borderColor='#c4b5fd';this.style.boxShadow='none'">
-        ${suggestion ? `<div class="cc-suggestion-hint">Gợi ý từ TLH: <strong>${window.SafeHtml.escape(suggestion)}</strong> <button type="button" class="btn-apply-suggestion" id="btn-apply-sug" title="Nhận gợi ý (Phím T)">Nhận (T)</button></div>` : ''}
+        ${suggestion ? `<div class="cc-suggestion-hint">Gợi ý từ TLH: <strong>${window.SafeHtml.escape(suggestion)}</strong> <button type="button" class="btn-apply-suggestion" id="btn-apply-sug" title="Nhận gợi ý (Phím T)">Nhận (T)</button><label class="cc-toggle-tlh-wrap" style="margin-left:auto;font-size:11px;color:var(--text-muted,#6b7280);cursor:pointer;display:inline-flex;align-items:center;gap:3px;"><input type="checkbox" id="cc-toggle-tlh-ghost" ${window.ChordCanvas?.isSuggestionMode?.() ? 'checked' : ''} style="margin:0;cursor:pointer;"> TLH mờ</label></div>` : ''}
         <div id="cc-sug-key" style="display:flex;align-items:flex-start;gap:4px;min-height:22px;margin-bottom:.35rem;"></div>
         <div id="cc-sug-hist" style="display:flex;align-items:flex-start;gap:4px;min-height:22px;margin-bottom:2px;"></div>
         <div class="cc-shortcuts-hint" style="font-size:12px;color:#6b7280;margin-bottom:.35rem;">1–7: hợp âm · Shift+1–7: hợp âm 7 · /+số: bass · . lặp</div>
@@ -333,6 +333,10 @@ const ChordCanvasUI = (() => {
     const sugBtn = pop.querySelector('#btn-apply-sug');
     sugBtn?.addEventListener('pointerdown', e => {
       e.preventDefault(); e.stopPropagation(); inp.value = suggestion; inp.focus();
+    });
+    const ghostToggle = pop.querySelector('#cc-toggle-tlh-ghost');
+    ghostToggle?.addEventListener('change', (e) => {
+      window.ChordCanvas?.setShowTlhSuggestions?.(e.target.checked);
     });
 
     const doSaveNext = () => {

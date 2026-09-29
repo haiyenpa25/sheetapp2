@@ -20,6 +20,7 @@ const ChordCanvas = (() => {
   let _songUseFlats   = null;
   let _chordLoadToken = 0; // Race condition guard
   let _pendingConfirm = false; // R0-2: chặn mở chồng hộp thoại chọn cách sửa hợp âm
+  let _showTlhHints   = false; // R2-8: Hiển thị hợp âm TLH mờ khi soạn bộ cá nhân
 
   const DOT_CLASS     = 'cc-dot';
   const BTN_CLASS     = 'cc-dot-btn';
@@ -43,6 +44,7 @@ const ChordCanvas = (() => {
       getNoteEls: () => _noteEls,
       switchSet,
       build: _build,
+      updateSetUI: _updateSetUI,
       getContainer: () => _containerEl
     });
 
@@ -176,10 +178,8 @@ const ChordCanvas = (() => {
   }
 
   function _loadOfflineChords(songId, set) {
-    if (window.OfflineSetlistManager?.hasOfflineChords?.(songId, set)) {
-      const chords = window.OfflineSetlistManager.getOfflineChords(songId, set) || [];
-      chords.forEach(({ measureIdx, noteIdx, chord }) => { _customChords[`${measureIdx}_${noteIdx}`] = chord; });
-    }
+    const chords = window.OfflineSetlistManager?.hasOfflineChords?.(songId, set) ? (window.OfflineSetlistManager.getOfflineChords(songId, set) || []) : [];
+    chords.forEach(({ measureIdx, noteIdx, chord }) => { _customChords[`${measureIdx}_${noteIdx}`] = chord; });
   }
 
   function clearSong() { _clear(); window.ChordCanvasDots?.clearGeomCache?.(); setAddMode(false); }
@@ -256,7 +256,7 @@ const ChordCanvas = (() => {
 
   function _clear() {
     window.ChordCanvasEdit?.closePopup?.();
-    document.querySelectorAll('.cc-dot, .cc-note-dot, .cc-custom-chord-text, .cc-edit-badge, .cc-chord-text, .cc-chord-highlight')
+    document.querySelectorAll('.cc-dot, .cc-note-dot, .cc-custom-chord-text, .cc-edit-badge, .cc-chord-text, .cc-chord-highlight, .cc-tlh-ghost-chord')
       .forEach(el => el.remove());
   }
 
@@ -290,7 +290,9 @@ const ChordCanvas = (() => {
     const customCount = Object.keys(_customChords || {}).length;
     const xmlChordMap = (typeof ChordCanvasXML !== 'undefined' && ChordCanvasXML.readXmlChords) ? ChordCanvasXML.readXmlChords() : {};
     const xmlCount = Object.keys(xmlChordMap).length;
-    const isFallbackToTlh = (_currentSet !== 'default' && customCount === 0 && xmlCount > 0);
+    // R2-8 (B8): Chỉ fallback TLH khi đang xem HD và HD chưa có hợp âm (và KHÔNG ở chế độ soạn).
+    // Tuyệt đối không fallback sang TLH khi đang ở bộ cá nhân (BH...) hoặc đang soạn!
+    const isFallbackToTlh = (_currentSet === 'HD' && customCount === 0 && xmlCount > 0 && !_editEnabled);
 
     if (_currentSet === 'default' || isFallbackToTlh) {
       styleBlock.textContent = '';
@@ -328,6 +330,8 @@ const ChordCanvas = (() => {
         editEnabled: _editEnabled,
         highlightEnabled: _highlightMode,
         currentSet: (_currentSet === 'default' || isFallbackToTlh) ? 'default' : _currentSet,
+        showTlhSuggestions: _showTlhHints,
+        tlhChordMap: xmlChordMap,
         onShowPopup: (anchor, mi, ni, chord) => window.ChordCanvasEdit?.showPopup(anchor, mi, ni, chord)
       });
     });
@@ -338,24 +342,10 @@ const ChordCanvas = (() => {
   /* ─── Switch / Create chord sets ────────────────────────────── */
   function handleSelectChange(val) {
     const sel = document.getElementById('chord-set-selector');
-    if (val === '__create_new_set__') {
-      if (sel) sel.value = _currentSet;
-      showNewSetModal();
-      return;
-    }
-    const base = (typeof window !== 'undefined' && typeof window.__APP_BASE__ === 'string')
-      ? window.__APP_BASE__.replace(/\/+$/, '')
-      : '';
-    if (val === '__open_members__') {
-      if (sel) sel.value = _currentSet;
-      window.open((base ? base : '') + '/manager/#tab-users', '_blank');
-      return;
-    }
-    if (val === '__open_manager__') {
-      if (sel) sel.value = _currentSet;
-      window.open((base ? base : '') + '/manager/', '_blank');
-      return;
-    }
+    if (val === '__create_new_set__') { if (sel) sel.value = _currentSet; showNewSetModal(); return; }
+    const base = (typeof window !== 'undefined' && typeof window.__APP_BASE__ === 'string') ? window.__APP_BASE__.replace(/\/+$/, '') : '';
+    if (val === '__open_members__') { if (sel) sel.value = _currentSet; window.open((base || '') + '/manager/#tab-users', '_blank'); return; }
+    if (val === '__open_manager__') { if (sel) sel.value = _currentSet; window.open((base || '') + '/manager/', '_blank'); return; }
     switchSet(val);
   }
 
@@ -434,14 +424,12 @@ const ChordCanvas = (() => {
 
   async function deleteSet(name) {
     if (!name || name === 'default' || name === 'TLH' || name === 'HD') {
-      window.App?.showToast?.('Bộ này được bảo vệ chuẩn, không thể xóa!', 'error');
-      return;
+      window.App?.showToast?.('Bộ này được bảo vệ chuẩn, không thể xóa!', 'error'); return;
     }
     const myChordCode = (window.Auth?.getChordCode?.() || '').toUpperCase();
     const isAdmin = window.Auth?.isAdmin?.() ?? false;
     if (!isAdmin && name.toUpperCase() !== myChordCode) {
-      window.App?.showToast?.(`Bạn chỉ được quyền xóa bộ hợp âm cá nhân của mình (${myChordCode})!`, 'error');
-      return;
+      window.App?.showToast?.(`Bạn chỉ được quyền xóa bộ hợp âm cá nhân của mình (${myChordCode})!`, 'error'); return;
     }
     const songId = window.App?.getCurrentSongId?.();
     if (!songId) return;
@@ -456,8 +444,7 @@ const ChordCanvas = (() => {
   async function confirmDeleteSet(name) {
     const target = name || _currentSet;
     if (!target || target === 'default' || target === 'TLH' || target === 'HD') {
-      window.App?.showToast?.('Bộ này được bảo vệ chuẩn, không thể xóa!', 'error');
-      return;
+      window.App?.showToast?.('Bộ này được bảo vệ chuẩn, không thể xóa!', 'error'); return;
     }
     if (window.confirm(`Bạn có chắc muốn xóa bộ hợp âm "${target}"?`)) await deleteSet(target);
   }
@@ -486,12 +473,12 @@ const ChordCanvas = (() => {
 
     let sets = ['HD', 'default'];
     try {
-      const cached = _chordSetsCache.get(songId);
+      let cached = !forceRefresh ? _chordSetsCache.get(songId) : null;
       if (cached) {
         sets = cached;
-      } else if (forceRefresh) {
+      } else {
         const r = await window.ApiService.chordSets.list(songId);
-        if (r.success) {
+        if (r && r.success && Array.isArray(r.sets)) {
           const otherSets = r.sets.filter(s => s !== 'HD' && s !== 'default');
           sets = ['HD', 'default', ...otherSets];
           _chordSetsCache.set(songId, sets);
@@ -499,20 +486,12 @@ const ChordCanvas = (() => {
       }
     } catch(e) {}
 
-    const chordCount = Object.keys(_customChords).length;
-    const tlhCount   = (_currentSet === 'default') ? Object.keys(window.ChordCanvasXML?.readXmlChords?.() || {}).length : 0;
-    const isFallback = (_currentSet === 'HD' && chordCount === 0);
-    const countText  = isFallback
-      ? '○ HD chưa có · đang hiện TLH'
-      : (_currentSet !== 'default'
-          ? (chordCount > 0 ? `● ${chordCount} hợp âm` : '○ Chưa có')
-          : (tlhCount > 0 ? `● ${tlhCount} hợp âm` : ''));
-    if (countBadge) {
-      countBadge.textContent = countText;
-      countBadge.style.color = isFallback
-        ? 'var(--warning,#d97706)'
-        : ((chordCount > 0 || (_currentSet === 'default' && tlhCount > 0)) ? 'var(--success,#16a34a)' : 'var(--text-muted,#9ca3af)');
+    // R2-8 (B10): Luôn đảm bảo _currentSet có mặt trong options
+    if (_currentSet && _currentSet !== 'default' && !sets.includes(_currentSet)) {
+      sets.push(_currentSet);
     }
+
+    _updateCountBadge();
 
     const myChordCode = (window.Auth?.getChordCode?.() || '').toUpperCase();
     const isAdmin     = window.Auth?.isAdmin?.()   ?? false;
@@ -553,7 +532,28 @@ const ChordCanvas = (() => {
     if (newBtn) newBtn.classList.toggle('hidden', !isLoggedIn);
   }
 
-  function _updateSetUI() { _refreshSetDropdown(); window.SongInfoBar?.refreshChordChip?.(); }
+  function _updateCountBadge() {
+    const countBadge = document.getElementById('chord-set-count');
+    if (!countBadge) return;
+    const chordCount = Object.keys(_customChords || {}).length;
+    const tlhCount   = (_currentSet === 'default') ? Object.keys(window.ChordCanvasXML?.readXmlChords?.() || {}).length : 0;
+    const isFallback = (_currentSet === 'HD' && chordCount === 0);
+    const countText  = isFallback
+      ? '○ HD chưa có · đang hiện TLH'
+      : (_currentSet !== 'default'
+          ? (chordCount > 0 ? `● ${chordCount} hợp âm` : '○ Chưa có')
+          : (tlhCount > 0 ? `● ${tlhCount} hợp âm` : ''));
+    countBadge.textContent = countText;
+    countBadge.style.color = isFallback
+      ? 'var(--warning,#d97706)'
+      : ((chordCount > 0 || (_currentSet === 'default' && tlhCount > 0)) ? 'var(--success,#16a34a)' : 'var(--text-muted,#9ca3af)');
+  }
+
+  function _updateSetUI() {
+    _updateCountBadge();
+    _refreshSetDropdown();
+    window.SongInfoBar?.refreshChordChip?.();
+  }
   function resetSet() { _currentSet = 'HD'; _prevSet = 'HD'; _customChords = {}; }
 
   /* ─── Exports ────────────────────────────────────────────────── */
@@ -562,6 +562,10 @@ const ChordCanvas = (() => {
     onOSMDRendered, reposition, handleSelectChange, switchSet, createSet, showNewSetModal,
     deleteSet, confirmDeleteSet, resetSet,
     refreshSetDropdown: (force) => _refreshSetDropdown(force),
+    updateSetUI: () => _updateSetUI(),
+    toggleSuggestions: (show) => { _showTlhHints = (show !== undefined ? !!show : !_showTlhHints); _build(); return _showTlhHints; },
+    isSuggestionMode: () => _showTlhHints,
+    setShowTlhSuggestions: (val) => { _showTlhHints = !!val; _build(); },
     clearSetsCache: (songId) => _chordSetsCache.delete(songId),
     undo: () => window.ChordCanvasEdit?.undo?.(),
     redo: () => window.ChordCanvasEdit?.redo?.(),
@@ -579,8 +583,8 @@ const ChordCanvas = (() => {
       const xmlCount = Object.keys(window.ChordCanvasXML?.readXmlChords?.() || {}).length;
       return {
         currentSet: _currentSet, customCount, xmlCount,
-        isFallback: (_currentSet !== 'default' && customCount === 0 && xmlCount > 0),
-        isSparse: (_currentSet !== 'default' && customCount > 0 && xmlCount > 0 && customCount < 0.3 * xmlCount)
+        isFallback: (_currentSet === 'HD' && customCount === 0 && xmlCount > 0),
+        isSparse: (_currentSet === 'HD' && customCount > 0 && xmlCount > 0 && customCount < 0.3 * xmlCount)
       };
     },
     getNoteEls: () => _noteEls,

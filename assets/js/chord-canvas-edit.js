@@ -161,6 +161,7 @@ const ChordCanvasEdit = (() => {
       window.ChordCanvas?.clearSetsCache?.(songId);
       window.App?.showToast?.(`✨ Đã sao chép hợp âm sang bộ "${targetSet}"!`, 'success', 3500);
       await _getApp().switchSet(targetSet);
+      _getApp()?.updateSetUI?.();
       window.ChordCanvas?.setAddMode?.(true, { skipConfirm: true });
     } catch(e) {
       window.App?.showToast?.('Lỗi sao chép bộ hợp âm: ' + e.message, 'error');
@@ -176,6 +177,7 @@ const ChordCanvasEdit = (() => {
     const prev = _undoStack.pop();
     app.setCurrentSet(prev.set); app.setCustomChords(prev.chords);
     if (app.getCurrentSet() !== 'default') scheduleSave(1500);
+    _getApp()?.updateSetUI?.();
     setTimeout(() => requestAnimationFrame(() => app.build()), 80);
     window.App?.showToast?.('↩ Đã hoàn tác', 'info');
   }
@@ -187,6 +189,7 @@ const ChordCanvasEdit = (() => {
     const next = _redoStack.pop();
     app.setCurrentSet(next.set); app.setCustomChords(next.chords);
     if (app.getCurrentSet() !== 'default') scheduleSave(1500);
+    _getApp()?.updateSetUI?.();
     setTimeout(() => requestAnimationFrame(() => app.build()), 80);
     window.App?.showToast?.('↪ Đã làm lại', 'info');
   }
@@ -213,6 +216,7 @@ const ChordCanvasEdit = (() => {
       const chords = app.getCustomChords();
       chords[`${measureIdx}_${noteIdx}`] = chordOriginalKey;
       scheduleSave(1500);
+      _getApp()?.updateSetUI?.();
       if (refreshLayout) setTimeout(() => requestAnimationFrame(() => app.build()), 80);
       if (!document.getElementById('lyric-view-container')?.classList.contains('hidden')) window.DisplaySettings?.renderLyricViewIfActive?.();
     }
@@ -228,6 +232,7 @@ const ChordCanvasEdit = (() => {
       const deleted = chords[`${measureIdx}_${noteIdx}`] || '';
       delete chords[`${measureIdx}_${noteIdx}`];
       scheduleSave(1500);
+      _getApp()?.updateSetUI?.();
       setTimeout(() => requestAnimationFrame(() => app.build()), 80);
       if (!document.getElementById('lyric-view-container')?.classList.contains('hidden')) window.DisplaySettings?.renderLyricViewIfActive?.();
       if (deleted) window.App?.showToast?.(`Đã xóa "${deleted}" — Ctrl+Z để hoàn tác`, 'info');
@@ -320,6 +325,7 @@ const ChordCanvasEdit = (() => {
         if (r.checksum) _baseChecksum = r.checksum;
         _lastConfirmedChords = { ...chordsObj };
         _updateStatusChip('saved', 'Đã lưu ✓');
+        _getApp()?.updateSetUI?.();
       } else {
         throw new Error(r?.message || 'Lỗi không xác định khi lưu hợp âm');
       }

@@ -505,6 +505,22 @@ const ChordCanvasDots = (() => {
       }
 
     } else if (editEnabled) {
+      if (opts.showTlhSuggestions && opts.tlhChordMap) {
+        const tlhChord = opts.tlhChordMap[`${measureIdx}_${noteIdx}`];
+        if (tlhChord) {
+          const ghost = document.createElement('span');
+          ghost.className = DOT_CLASS + ' cc-tlh-ghost-chord';
+          ghost.textContent = tlhChord;
+          ghost.title = `Gợi ý TLH: ${tlhChord} (Bấm + để đặt)`;
+          const ghostY = staffTop != null ? Math.max(staffTop - 36, Math.min(staffTop - 12, staffTop - 22 * scale)) : (cy - 18 * scale);
+          ChordCanvasUI.applyAbsolute(ghost, cx, ghostY, [
+            'opacity:0.42', 'color:var(--text-muted,#9ca3af)', 'font-style:italic',
+            'font-family:"Georgia",serif', `font-size:${fSize}px`,
+            'font-weight:600', 'pointer-events:none', 'user-select:none', 'z-index:9'
+          ]);
+          container.appendChild(ghost);
+        }
+      }
       const btn = document.createElement('div');
       btn.className = DOT_CLASS + ' ' + BTN_CLASS;
       btn.textContent = '+';
