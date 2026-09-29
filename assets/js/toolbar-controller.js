@@ -28,6 +28,27 @@ const ToolbarController = (() => {
     _bindDarkMode();
     _bindMisc();
     _bindMoreOptionsMenu();
+    _bindCompactWidthObserver();
+  }
+
+  // R0-7 (ROADMAP5): @container mainarea (định nghĩa trên .main-content) chỉ áp dụng cho
+  // hậu duệ DOM THẬT của .main-content. Nhưng #main-dropdown-menu bị chuyển hẳn ra
+  // document.body khi mở (để position:fixed định vị đúng, không bị overflow:hidden của
+  // ancestor cắt mất) -- một khi đã chuyển ra ngoài, @container không còn áp dụng được cho
+  // nó nữa, nên .menu-section-compact-only bên trong không bao giờ hiện được ở dải
+  // 1366-1650px (viewport đủ rộng để @media(max-width:1300px) không khớp, nhưng
+  // .main-content vẫn hẹp hơn 1350px do sidebar chiếm chỗ). ResizeObserver này bật/tắt
+  // class body.toolbar-controls-compact (không phụ thuộc vị trí DOM) làm nguồn thay thế.
+  function _bindCompactWidthObserver() {
+    const mainContentEl = document.querySelector('.main-content');
+    if (!mainContentEl || typeof ResizeObserver === 'undefined') return;
+    const COMPACT_THRESHOLD = 1350;
+    const ro = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect?.width;
+      if (typeof width !== 'number') return;
+      document.body.classList.toggle('toolbar-controls-compact', width <= COMPACT_THRESHOLD);
+    });
+    ro.observe(mainContentEl);
   }
 
   function _bindTranspose() {
@@ -430,6 +451,16 @@ const ToolbarController = (() => {
       const txt = document.getElementById('verse-mode-label')?.textContent || 'Tất cả khổ';
       const ml = document.getElementById('menu-verse-mode-label');
       if (ml) ml.textContent = '📖 ' + txt;
+    });
+    // R0-7 (ROADMAP5): "Điền hợp âm" và "Gốc" (dịch giọng) trước đây HOÀN TOÀN không có
+    // đường bấm nào ở laptop 1366-1650px (bị ẩn khỏi toolbar, không có mục dự phòng trong
+    // menu ⋮). Click ủy quyền sang đúng nút thật trên toolbar (giữ nguyên logic gốc, kể
+    // cả routing qua ModeManager của #btn-add-chord-mode-bar).
+    document.getElementById('btn-menu-add-chord-mode')?.addEventListener('click', () => {
+      document.getElementById('btn-add-chord-mode-bar')?.click();
+    });
+    document.getElementById('btn-menu-transpose-reset')?.addEventListener('click', () => {
+      document.getElementById('btn-transpose-reset')?.click();
     });
   }
 

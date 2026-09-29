@@ -363,6 +363,21 @@
               <span id="menu-verse-mode-label">📖 Tất cả khổ</span>
             </button>
           </div>
+          <!-- R0-7 (ROADMAP5): trước đây "Điền hợp âm" và "Gốc" (dịch giọng) không có
+               mục dự phòng nào ở đây, nên hoàn toàn không bấm được khi laptop 1366-1650px
+               ẩn 2 nút này khỏi toolbar. -->
+          <div class="audio-panel-row mb-2">
+            <span class="audio-panel-label">Điền hợp âm:</span>
+            <button id="btn-menu-add-chord-mode" class="btn btn-ghost btn-xs btn-menu-item btn-menu-compact-action" title="Điền / Sửa hợp âm trực tiếp trên sheet (phím C)">
+              <span>✎ Sửa hợp âm</span>
+            </button>
+          </div>
+          <div class="audio-panel-row">
+            <span class="audio-panel-label">Tông nhạc:</span>
+            <button id="btn-menu-transpose-reset" class="btn btn-ghost btn-xs btn-menu-item btn-menu-compact-action" title="Đưa về tông gốc (0)">
+              <span>↺ Về tông Gốc</span>
+            </button>
+          </div>
         </div>
 
         <button id="btn-menu-auth" class="btn btn-ghost btn-sm btn-menu-item menu-section-compact-only" title="Đăng nhập / Phân quyền">
