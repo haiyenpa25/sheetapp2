@@ -155,10 +155,16 @@ const ChordCanvasEdit = (() => {
     _pushUndo();
     const app = _getApp();
     const semitones = window.App?.getCurrentTranspose?.() ?? 0;
+    const capo = window.Store?.get?.('capoLevel') ?? 0;
+    // R0-5 (ROADMAP5, lỗi B7): ChordCanvasTranspose.applyTranspose() (hiển thị) dùng
+    // effectiveShift = semitones - capo để suy ra hợp âm HIỂN THỊ từ hợp âm GỐC đã
+    // lưu. Khi LƯU phải đảo NGƯỢC đúng công thức đó — trước đây chỉ đảo `semitones`
+    // và bỏ quên `capo`, nên có capo thì hợp âm lưu sai tông gốc.
+    const effectiveShift = semitones - capo;
     let chordOriginalKey;
-    if (semitones !== 0) {
+    if (effectiveShift !== 0) {
       const useFlatsOriginal = window.ChordCanvasTranspose?.getKeyUseFlats?.() ?? false;
-      chordOriginalKey = TransposeEngine.transposeChord(chordInput, -semitones, useFlatsOriginal);
+      chordOriginalKey = TransposeEngine.transposeChord(chordInput, -effectiveShift, useFlatsOriginal);
     } else {
       chordOriginalKey = chordInput;
     }
