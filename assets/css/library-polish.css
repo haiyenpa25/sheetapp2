@@ -10,16 +10,16 @@
    ===================================================================== */
 
 :root {
-  --lp-h: 30px;
-  --lp-h-inner: 24px;
+  --lp-h: 32px;
+  --lp-h-inner: 26px;
   --lp-radius: 8px;
   --lp-radius-sm: 6px;
   --lp-gap: 6px;
-  --lp-font: 12.5px;
-  --lp-font-sm: 11px;
+  --lp-font: 13px;
+  --lp-font-sm: 12px;
   --lp-ink: #1f2330;
-  --lp-muted: #6b7080;
-  --lp-faint: #9aa0ad;
+  --lp-muted: #4b5563;
+  --lp-faint: #64748b;
   --lp-surface: #ffffff;
   --lp-canvas: #f6f6f9;
   --lp-border: rgba(20, 24, 40, 0.09);
@@ -32,13 +32,13 @@
 }
 
 @media (pointer: coarse) {
-  :root { --lp-h: 36px; --lp-h-inner: 30px; }
+  :root { --lp-h: 40px; --lp-h-inner: 32px; }
 }
 
 body.dark-mode {
-  --lp-ink: #e7e7ee;
-  --lp-muted: #a3a3b4;
-  --lp-faint: #74748a;
+  --lp-ink: #f1f5f9;
+  --lp-muted: #cbd5e1;
+  --lp-faint: #94a3b8;
   --lp-surface: #16161c;
   --lp-canvas: #0e0e12;
   --lp-border: rgba(255, 255, 255, 0.09);
@@ -52,11 +52,21 @@ body.dark-mode {
 
 /* ─── 0. Sửa lỗi hiển thị ─────────────────────────────────────────── */
 
-/* Link "nhảy tới nội dung" bị hở một mẩu tím ở góc trên trái */
+/* Link "nhảy tới nội dung" */
 .skip-link:not(:focus):not(:focus-visible) {
-  top: 0 !important;
-  transform: translateY(-120%);
-  clip-path: inset(50%);
+  top: -120px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  clip-path: none !important;
+  transform: none !important;
+}
+.skip-link:focus,
+.skip-link:focus-visible {
+  top: 1rem !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  clip-path: none !important;
+  transform: none !important;
 }
 
 /* Logo trùng: thanh App Shell (≥1201px) đã có logo SheetApp */
@@ -177,7 +187,7 @@ body.dark-mode {
     box-shadow: var(--lp-shadow) !important; max-width: 280px;
   }
   .unified-toolbar .song-title { font-size: 13px !important; font-weight: 600 !important; letter-spacing: .01em; color: var(--lp-ink); }
-  .unified-toolbar .song-key-badge { font-size: 10.5px !important; font-weight: 700; padding: 1px 7px !important; line-height: 16px; }
+  .unified-toolbar .song-key-badge { font-size: 12px !important; font-weight: 700; padding: 1px 7px !important; line-height: 16px; }
 
   /* Ô chọn (select) nằm trong pill: không viền, cùng cỡ chữ */
   .unified-toolbar .band-pill select,
@@ -289,10 +299,10 @@ body.dark-mode {
   box-shadow: none;
   transform: none;
 }
-.section-chip .chip-icon { font-size: 11px; }
+.section-chip .chip-icon { font-size: 12px; }
 .section-chip .chip-measures {
   font-family: inherit;
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--lp-faint);
   opacity: 1;
@@ -300,26 +310,26 @@ body.dark-mode {
 .section-chip.active .chip-measures { color: rgba(255, 255, 255, 0.8); }
 
 /* ─── 3. Sidebar thư viện ─────────────────────────────────────────── */
-.sidebar-tab { font-size: 12.5px; }
+.sidebar-tab { font-size: 13px; }
 
 .quick-jump { padding: 6px 12px 8px; }
 .quick-jump-label {
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: .06em;
   color: var(--lp-faint);
   margin-bottom: 5px;
 }
 .quick-jump-btns { gap: 4px !important; }
 .quick-jump-btn {
-  height: 24px !important;
-  min-height: 24px !important;
+  height: 26px !important;
+  min-height: 26px !important;
   min-width: 0 !important;
   padding: 0 9px !important;
   border: 1px solid var(--lp-border) !important;
   border-radius: 999px !important;
   background: transparent !important;
   font-family: inherit !important;
-  font-size: 11px !important;
+  font-size: 12px !important;
   font-weight: 500 !important;
   font-variant-numeric: tabular-nums;
   color: var(--lp-muted) !important;
@@ -345,14 +355,14 @@ body.dark-mode {
 .song-item-num {
   min-width: 26px;
   font-family: inherit !important;
-  font-size: 11px !important;
+  font-size: 12px !important;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--lp-faint);
   letter-spacing: 0;
 }
 .song-item-title {
-  font-size: 12.5px !important;
+  font-size: 13px !important;
   font-weight: 500 !important;
   line-height: 1.35 !important;
   letter-spacing: .01em;
@@ -361,9 +371,9 @@ body.dark-mode {
 .song-item.active .song-item-title { font-weight: 600 !important; }
 .song-item-meta { gap: 4px !important; margin-top: 2px; flex-wrap: wrap; }
 .song-item-meta .song-key-badge {
-  font-size: 10px !important;
-  line-height: 15px !important;
-  padding: 0 6px !important;
+  font-size: 12px !important;
+  line-height: 16px !important;
+  padding: 1px 7px !important;
   height: auto !important;
 }
 .song-item-meta .song-key-badge ~ .song-key-badge {
@@ -521,7 +531,7 @@ body.dark-mode .toast-container .toast { background: #22222b; color: var(--lp-in
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
 }
 #main-dropdown-menu .menu-section-header {
-  font-size: 10.5px; font-weight: 700; letter-spacing: .08em;
+  font-size: 12px; font-weight: 700; letter-spacing: .08em;
   color: var(--lp-faint, #64748b); padding: 10px 10px 4px;
   text-transform: uppercase; user-select: none; display: block !important;
 }
@@ -682,7 +692,7 @@ body.sheet-only-mode .toast-container .toast {
 .gig-hud-key {
   background: var(--lp-accent) !important;
   color: #fff !important;
-  font-size: 11px !important;
+  font-size: 12px !important;
   font-weight: 700 !important;
   padding: 2px 7px !important;
   border-radius: 6px !important;
@@ -800,10 +810,10 @@ body.sheet-only-mode .toast-container .toast {
   }
   .gig-hud-title {
     max-width: 60px !important;
-    font-size: 11.5px !important;
+    font-size: 12px !important;
   }
   .gig-hud-key {
-    font-size: 10px !important;
+    font-size: 12px !important;
     padding: 1px 4px !important;
   }
   .gig-hud-actions {
@@ -814,7 +824,7 @@ body.sheet-only-mode .toast-container .toast {
     gap: 1px !important;
   }
   .gig-hud-trans-label {
-    font-size: 11px !important;
+    font-size: 12px !important;
     padding: 0 3px !important;
   }
   .btn-gig-action {
@@ -920,4 +930,58 @@ body.sheet-only-mode .toast-container .toast {
 .d-none,
 .sidebar-footer-tools.d-none {
   display: none !important;
+}
+
+/* ==========================================================================
+   R1-9: Design System Tokens, Neutral Chips & Dark Mode Synchronisation
+   ========================================================================== */
+
+/* Neutral chip styling in Light Mode */
+.section-chip,
+.song-key-badge,
+.si-chip,
+.filter-badge,
+.quick-jump-btn {
+  background: rgba(15, 23, 42, 0.05);
+  border: 1px solid var(--lp-border);
+  color: var(--lp-ink);
+}
+
+.section-chip.active,
+.quick-jump-btn.active {
+  background: var(--lp-accent) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+}
+
+/* Dark Mode chip synchronization: Không còn chip trắng */
+body.dark-mode .section-chip,
+body.dark-mode .si-chip,
+body.dark-mode .si-measures,
+body.dark-mode .si-chord-fallback,
+body.dark-mode .si-key,
+body.dark-mode .si-tone-diff,
+body.dark-mode .song-key-badge,
+body.dark-mode .filter-badge,
+body.dark-mode .filter-active-badge,
+body.dark-mode .quick-jump-btn,
+body.dark-mode .chord-set-count,
+body.dark-mode .verse-indicator {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  color: #f1f5f9 !important;
+}
+
+body.dark-mode .section-chip.active,
+body.dark-mode .quick-jump-btn.active {
+  background: var(--lp-accent) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+}
+
+body.dark-mode .section-chip:hover:not(.active),
+body.dark-mode .quick-jump-btn:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.14) !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+  color: #ffffff !important;
 }

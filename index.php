@@ -63,9 +63,9 @@ echo cssTag('library-polish.css'); // lớp hoàn thiện giao diện — luôn 
 
 <!-- Skip Navigation Links cho điều hướng bàn phím A11y (Ticket L1-11) -->
 <nav class="skip-links" aria-label="Điều hướng nhanh">
-  <a href="#unified-toolbar" class="skip-link">Nhảy tới thanh công cụ</a>
-  <a href="#sheet-viewer-wrapper" class="skip-link">Nhảy tới bản nhạc</a>
-  <a href="#sidebar" class="skip-link">Nhảy tới danh sách bài hát</a>
+  <a href="#unified-toolbar" class="skip-link" tabindex="0">Nhảy tới thanh công cụ</a>
+  <a href="#sheet-viewer-wrapper" class="skip-link" tabindex="0">Nhảy tới bản nhạc</a>
+  <a href="#sidebar" class="skip-link" tabindex="0">Nhảy tới danh sách bài hát</a>
 </nav>
 
 <!-- ===== MAIN CONTENT (Thanh công cụ & Bản nhạc focus trước Sidebar) ===== -->
