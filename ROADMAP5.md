@@ -11,6 +11,25 @@
 >
 > Mục đánh dấu ✅ là đã tự kiểm chứng trực tiếp trong code hoặc ảnh chụp.
 
+## TRẠNG THÁI TRIỂN KHAI (người thực thi cập nhật sau mỗi ticket)
+
+Nhánh làm việc: `feature/roadmap5`. `sync.bat`/`sync.sh` đã bị **tắt tạm thời** (có ghi chú cách bật lại ở đầu mỗi file) để tránh 2 tác nhân ghi đè nhau như đợt trước.
+
+| Ticket | Trạng thái | Tóm tắt | Bằng chứng |
+|---|:-:|---|---|
+| R0-1 | ✅ Xong (2026-09-29) | `$myChordCode`/`$myUsername` chưa gán trong nhánh `save` → mọi người không phải admin bị 403 khi lưu hợp âm, kể cả chủ sở hữu HD thật. Đã gán 1 lần sau `Auth::requireBanhat()`. **Phát hiện thêm:** cảnh báo PHP "Undefined variable" chèn thẳng vào JSON response (rủi ro thật nếu production bật `display_errors`); và `ChordSetController` tự nuốt `HttpException` từ `Auth::require*()` thành lỗi 500 chung chung — đã thêm `catch (HttpException)` riêng | `tests/chord_edit_permission_and_flow_regression.php` 10/10 (hành vi thật, gọi thẳng controller, không chép lại logic phân quyền). Full suite 129/129, 2487 checks, 0 fail. Commit `cf50ec5` |
+| R0-2 | ☐ | | |
+| R0-3 | ☐ | | |
+| R0-4 | ☐ | | |
+| R0-5 | ☐ | | |
+| R0-6 | ☐ | | |
+| R0-7 | ☐ | | |
+| R0-8 | ☐ | | |
+| R0-9 | ☐ | | |
+
+**Phát hiện mới, chưa có ticket riêng (ghi lại để không quên):**
+- **F-SYS-1:** 17/17 controller trong `api/controllers/` dùng chung khuôn `try { ... } catch (Throwable $e) { Response::serverError(...) }`, nên `HttpException` (401/403 từ `Auth::require*()`) bị nuốt thành 500 ở TẤT CẢ các route, không riêng ChordSet. Đã sửa cho `ChordSetController` (nằm trong phạm vi R0-1). 16 file còn lại (`ManagerController`, `SongController`, `ReviewController`, `SetlistController`, `PracticeController`, `NotificationPreferenceController`, `ExportController`, `PracticeAssignmentController`, `AuthController`, `UserController`, `LiveSyncController`, `LearningController`, `CategoryController`, `ArrangementController`, `ImportController`, `OmrController`) vẫn còn lỗi này — **cần một ticket riêng ngoài phạm vi trang Thư viện** (đề xuất: thêm `catch (HttpException $e) { Response::error($e->getMessage(), $e->getStatusCode()); }` vào một trait/base class dùng chung thay vì sửa tay 16 file).
+
 ---
 
 ## 0. TÓM TẮT
