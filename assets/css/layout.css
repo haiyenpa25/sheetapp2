@@ -2217,6 +2217,11 @@ body.dark-mode .song-info-popover {
 .si-popover-value {
   font-weight: 600;
 }
+/* #si-pop-tempo / #si-pop-chordset: ủy quyền click sang #si-tempo-chip / #si-chord-set-chip
+   (xem song-info-bar.js init()) -- cần affordance con trỏ tay cho 2 dòng bấm-được này. */
+#si-pop-tempo, #si-pop-chordset {
+  cursor: pointer;
+}
 
 /* ===== TICKET L3-1: THANH CHƯƠNG TRÌNH LỄ (SETLIST PROGRAM BAR 40px) ===== */
 .setlist-program-bar {

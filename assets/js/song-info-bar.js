@@ -6,7 +6,6 @@
  * - Nút 💾 Lưu vào Setlist (Luôn ưu tiên hiển thị ngay đầu trên mobile/iPad khi đang trong Setlist)
  * - Nút ✎ Sửa nhật ký
  * - Số chỉ nhịp (2/4, 4/4), Số ô nhịp, Bộ hợp âm, Ghi chú
- *
  * Tự động cập nhật Tông tập và Tempo realtime khi người dùng bấm dịch giọng hoặc chỉnh nhịp.
  */
 const SongInfoBar = (() => {
@@ -56,6 +55,16 @@ const SongInfoBar = (() => {
       window.addEventListener('resize', () => { if (!popover.classList.contains('hidden')) _positionPopover(); });
     }
 
+    // R1-3 ẩn hẳn #song-info-strip (display:none!important) nên #si-tempo-chip /
+    // #si-chord-set-chip không bấm trực tiếp được nữa -- ủy quyền từ dòng tương ứng
+    // trên popover ⓘ sang đúng chip ẩn đó (vẫn giữ nguyên listener gốc từ _render()).
+    document.getElementById('si-pop-tempo')?.addEventListener('click', () => {
+      document.getElementById('si-tempo-chip')?.click();
+    });
+    document.getElementById('si-pop-chordset')?.addEventListener('click', () => {
+      document.getElementById('si-chord-set-chip')?.click();
+    });
+
     // Lắng nghe sự kiện đổi tông từ App / Store để cập nhật Tông tập tức thì
     if (typeof EventBus !== 'undefined') {
       EventBus.on('transpose:changed', ({ value }) => {
@@ -69,6 +78,16 @@ const SongInfoBar = (() => {
         _updateTempoChip(bpm);
       });
     }
+  }
+
+  /* BPM hiệu lực: Setlist override > Nhật ký biểu diễn > Tempo thật của bài (bỏ qua
+     104 giả). Dùng chung cho chip (_render) và popover (_updatePopoverContent). */
+  function _computeEffectiveBpm(notes, setlist, idx, inSetlist) {
+    const raw = (inSetlist && setlist?.items?.[idx]?.bpm) ? setlist.items[idx].bpm
+      : notes?.bpm ? notes.bpm : _songData?.tempo;
+    if (!raw) return { effectiveBpm: null, hasRealTempo: false };
+    const bpm = Number.parseInt(raw, 10);
+    return { effectiveBpm: bpm, hasRealTempo: Boolean(bpm > 0 && bpm !== 104) };
   }
 
   function _updatePopoverContent() {
@@ -86,14 +105,18 @@ const SongInfoBar = (() => {
     const curTrans = window.Store?.get?.('currentTranspose') ?? 0;
     if (prKeyEl) prKeyEl.textContent = _calcPracticedKey(_songData.key, curTrans);
     if (timeEl) timeEl.textContent = _songData.timeBeats ? `${_songData.timeBeats}/${_songData.timeBeatType}` : '--';
-    if (tempoEl) tempoEl.textContent = _songData.tempo ? `♩ = ${_songData.tempo} bpm` : '♩ —';
+    const inSetlist = document.querySelector('.toolbar-left')?.classList.contains('in-setlist');
+    const setlist = window.SetlistUI?.getCurrentSetlist?.();
+    const idx = window.SetlistUI?.getCurrentIndex?.();
+    const { effectiveBpm, hasRealTempo } = _computeEffectiveBpm(_loadNotes(), setlist, idx, inSetlist);
+    if (tempoEl) tempoEl.textContent = (hasRealTempo && effectiveBpm) ? `♩ = ${effectiveBpm} bpm` : '♩ —';
     if (measuresEl) measuresEl.textContent = _songData.measureCount ? `${_songData.measureCount} ô nhịp` : '--';
     if (chordsetEl) {
       const curSet = window.ChordCanvas?.getCurrentSet?.() || 'HD';
       chordsetEl.textContent = curSet === 'default' ? 'TLH (Gốc)' : curSet;
     }
     const tempoVal = document.getElementById('toolbar-tempo-val');
-    if (tempoVal && _songData.tempo) tempoVal.textContent = _songData.tempo;
+    if (tempoVal) tempoVal.textContent = (hasRealTempo && effectiveBpm) ? effectiveBpm : '—';
   }
 
   function loadSong(xmlString, song) {
@@ -251,21 +274,7 @@ const SongInfoBar = (() => {
     chips.push(`<span class="si-chip si-key" id="si-tone-chip" role="button" tabindex="0" title="Click để chọn tông tập nhanh">${toneHtml}</span>`);
 
     // 3. Chip Tempo / BPM (Ticket L0-15: coi 104 là "chưa có tempo", hiện "♩ —", bấm để đặt)
-    let effectiveBpm = null;
-    let hasRealTempo = false;
-    if (inSetlist && setlist?.items?.[idx]?.bpm) {
-      effectiveBpm = Number.parseInt(setlist.items[idx].bpm, 10);
-      hasRealTempo = Boolean(effectiveBpm > 0 && effectiveBpm !== 104);
-    } else if (notes.bpm) {
-      effectiveBpm = Number.parseInt(notes.bpm, 10);
-      hasRealTempo = Boolean(effectiveBpm > 0 && effectiveBpm !== 104);
-    } else if (_songData.tempo) {
-      const parsed = Number.parseInt(_songData.tempo, 10);
-      if (parsed > 0 && parsed !== 104) {
-        effectiveBpm = parsed;
-        hasRealTempo = true;
-      }
-    }
+    const { effectiveBpm, hasRealTempo } = _computeEffectiveBpm(notes, setlist, idx, inSetlist);
     if (hasRealTempo && effectiveBpm) {
       chips.push(`<span class="si-chip si-tempo" id="si-tempo-chip" style="cursor:pointer;" title="Click để chỉnh Tempo (BPM) / Gõ nhịp">♩ = <strong>${effectiveBpm}</strong> bpm <span style="font-size:0.75em;opacity:0.8;">✎</span></span>`);
     } else {
@@ -498,7 +507,9 @@ const SongInfoBar = (() => {
   function _updateTempoChip(bpm) {
     const safeBpm = Number.parseInt(bpm, 10);
     const tempoVal = document.getElementById('toolbar-tempo-val');
-    if (tempoVal && safeBpm && safeBpm !== 104) tempoVal.textContent = safeBpm;
+    if (tempoVal) tempoVal.textContent = (safeBpm && safeBpm !== 104) ? safeBpm : '—';
+    const popTempoEl = document.getElementById('si-pop-tempo');
+    if (popTempoEl) popTempoEl.textContent = (safeBpm && safeBpm !== 104) ? `♩ = ${safeBpm} bpm` : '♩ —';
     const tempoChip = document.getElementById('si-tempo-chip');
     if (!tempoChip) return;
     if (!safeBpm || safeBpm === 104) {

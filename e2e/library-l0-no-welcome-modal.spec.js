@@ -51,8 +51,10 @@ test.describe('Ticket L0-9: Bỏ modal chào mừng mỗi phiên (Vào thẳng c
     const authModal = page.locator('#auth-modal');
     await expect(authModal).toHaveClass(/hidden/);
 
-    // Người dùng bấm vào nút tài khoản trên toolbar
-    const btnToolbarAuth = page.locator('#btn-toolbar-auth');
+    // Ticket R1-8 (ROADMAP5): #btn-toolbar-auth trên Toolbar bị ẩn vĩnh viễn
+    // (class="btn-toolbar-user d-none" aria-hidden="true" tabindex="-1") -- nút Đăng
+    // Nhập chuyển hẳn vào thanh điều hướng App Shell (#shell-btn-login), xem AppShell.js.
+    const btnToolbarAuth = page.locator('#shell-btn-login');
     await expect(btnToolbarAuth).toBeVisible();
     await btnToolbarAuth.click();
 

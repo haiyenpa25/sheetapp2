@@ -80,7 +80,10 @@ test.describe('E2E-06: Setlist BPM Preservation (Core Rule 4)', () => {
     expect(metronomeBpm).toBe(90);
 
     // 6. Kiểm tra hiển thị chip tempo trên thanh Song Info Bar
-    const tempoChip = page.locator('#si-tempo-chip');
+    // Ticket R1-3 (ROADMAP5): #si-tempo-chip sống trong #song-info-strip, nay bị ẩn
+    // vĩnh viễn (display:none!important) -- thông tin Tempo chuyển vào popover ⓘ.
+    await page.locator('#btn-song-info-popover').click();
+    const tempoChip = page.locator('#si-pop-tempo');
     await expect(tempoChip).toBeVisible();
     await expect(tempoChip).toContainText('90');
   });

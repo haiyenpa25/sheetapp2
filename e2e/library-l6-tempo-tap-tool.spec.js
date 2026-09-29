@@ -25,7 +25,10 @@ test.describe('L6-2 · Quản lý Tempo thật, Xóa 104 & Công cụ TAP Tempo'
     await page.goto('./?song=thanh-ca-001&v=sheet', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('#osmd-container svg').first()).toBeVisible({ timeout: 25000 });
 
-    const tempoChip = page.locator('#si-tempo-chip');
+    // Ticket R1-3 (ROADMAP5): #si-tempo-chip sống trong #song-info-strip, nay bị ẩn
+    // vĩnh viễn (display:none!important) -- thông tin Tempo chuyển vào popover ⓘ.
+    await page.locator('#btn-song-info-popover').click();
+    const tempoChip = page.locator('#si-pop-tempo');
     await expect(tempoChip).toBeVisible({ timeout: 10000 });
 
     const chipText = await tempoChip.innerText();
@@ -39,7 +42,8 @@ test.describe('L6-2 · Quản lý Tempo thật, Xóa 104 & Công cụ TAP Tempo'
     await page.goto('./?song=thanh-ca-150&v=sheet', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('#osmd-container svg').first()).toBeVisible({ timeout: 25000 });
 
-    const tempoChip = page.locator('#si-tempo-chip');
+    await page.locator('#btn-song-info-popover').click();
+    const tempoChip = page.locator('#si-pop-tempo');
     await expect(tempoChip).toBeVisible({ timeout: 10000 });
 
     const chipText = await tempoChip.innerText();
@@ -52,7 +56,8 @@ test.describe('L6-2 · Quản lý Tempo thật, Xóa 104 & Công cụ TAP Tempo'
     await page.goto('./?song=thanh-ca-001&v=sheet', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('#osmd-container svg').first()).toBeVisible({ timeout: 25000 });
 
-    const tempoChip = page.locator('#si-tempo-chip');
+    await page.locator('#btn-song-info-popover').click();
+    const tempoChip = page.locator('#si-pop-tempo');
     await expect(tempoChip).toBeVisible();
 
     // Click vào chip tempo để mở bottom sheet

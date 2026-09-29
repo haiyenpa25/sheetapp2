@@ -82,11 +82,18 @@ test.describe('Ticket L0-2: Core Rule 1 — Fallback HD rỗng sang TLH & Quyế
     // Đếm 5 hợp âm HD tùy biến trên màn hình (auto-wait)
     await expect(page.locator('.cc-custom-chord-text')).toHaveCount(5, { timeout: 10000 });
 
-    // Bấm 1 chạm vào chip để đổi nhanh sang TLH
-    await siChordChip.click();
+    // Ticket R1-3 (ROADMAP5): #si-chord-set-chip sống trong #song-info-strip, nay bị ẩn
+    // vĩnh viễn (display:none!important) nên không click được trực tiếp -- hành động
+    // 1-chạm đổi nhanh HD<->TLH được khôi phục trên popover ⓘ (#si-pop-chordset), xem
+    // song-info-bar.js (init()). toContainText() ở trên vẫn đọc được text vì nó không
+    // đòi hỏi visibility, chỉ click() mới cần.
+    await page.locator('#btn-song-info-popover').click();
+    const popChordset = page.locator('#si-pop-chordset');
+    await expect(popChordset).toBeVisible();
+    await popChordset.click();
 
     // Xác nhận đã chuyển sang TLH (gốc)
-    await expect(siChordChip).toContainText('TLH (gốc)', { timeout: 10000 });
+    await expect(popChordset).toContainText('TLH (Gốc)', { timeout: 10000 });
 
     // Kiểm tra số hợp âm TLH xuất hiện trên SVG
     const tlhChordsVisible = await page.evaluate(() => {

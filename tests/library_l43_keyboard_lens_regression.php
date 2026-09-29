@@ -52,10 +52,13 @@ assertCondition(
     "stage-lens.js có hàm _applyRoleAdaptations xử lý chuyên biệt cho Keyboard Lens"
 );
 
-// 4. Kiểm tra Keyboard Lens tự động chuyển về chế độ Bản nhạc (Sheet Mode)
+// 4. Kiểm tra Keyboard Lens tự động chuyển về chế độ Bản nhạc (Sheet Mode) -- ủy quyền
+// cho nút toggle thật (btnBand.click()) thay vì tự gán class/style, vì chỉ nút thật mới
+// nắm đúng logic toggle 2 chiều 'hidden' cho cả #lyric-view-container lẫn #osmd-container
+// (class .hidden dùng !important nên style.display='block' đơn thuần không đủ).
 assertCondition(
-    str_contains($stageSrc, "lyricContainer.classList.add('hidden')") &&
-    str_contains($stageSrc, "osmdContainer.style.display = 'block'"),
+    str_contains($stageSrc, "!lyricContainer.classList.contains('hidden')") &&
+    str_contains($stageSrc, 'btnBand.click()'),
     "Keyboard Lens tự động đóng chế độ Lời/Band và mở chế độ Bản nhạc đầy đủ"
 );
 
@@ -121,7 +124,14 @@ const window = {
       if (id === 'btn-band-toggle') {
         return {
           classList: { remove: () => {} },
-          querySelector: () => ({ textContent: '' })
+          querySelector: () => ({ textContent: '' }),
+          // Mô phỏng đúng logic toggle 2 chiều thật của toolbar-controller.js
+          click() {
+            const isHidden = lyricClassList.has('hidden');
+            if (isHidden) lyricClassList.delete('hidden'); else lyricClassList.add('hidden');
+            osmdStyle.display = isHidden ? 'none' : 'block';
+            window.URLState.update({ v: isHidden ? 'lyric' : 'sheet' });
+          }
         };
       }
       return null;

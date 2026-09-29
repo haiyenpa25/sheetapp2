@@ -40,7 +40,9 @@ test.describe('Ticket L0-16: Dedup Handlers & Escape Layering', () => {
     await expect(page.locator('body')).toHaveClass(/sheet-only-mode/);
 
     // Toast của chế độ Biểu Diễn phải xuất hiện đúng 1 lần duy nhất (không bị duplicate)
-    const gigToasts = page.locator('#toast-container .toast', { hasText: 'Biểu Diễn' });
+    // Ticket R1-5/ModeManager (ROADMAP5): nội dung toast đổi thành "Chế độ Toàn màn
+    // hình — Nhấn F hoặc Esc để thoát" (không còn chứa chữ "Biểu Diễn").
+    const gigToasts = page.locator('#toast-container .toast', { hasText: 'Chế độ Toàn màn hình' });
     await expect(gigToasts).toHaveCount(1);
   });
 
@@ -56,9 +58,17 @@ test.describe('Ticket L0-16: Dedup Handlers & Escape Layering', () => {
     await btnGig.click();
     await expect(page.locator('body')).toHaveClass(/sheet-only-mode/);
 
-    // 2. Mở một modal (modal tempo chẳng hạn)
-    const tempoChip = page.locator('#si-tempo-chip');
-    await tempoChip.click();
+    // 2. Mở một modal (modal tempo chẳng hạn). Ticket L1-8/library-polish.css
+    // (ROADMAP5): toàn bộ #toolbar (kể cả popover ⓘ nơi #si-pop-tempo sống) bị ẩn hẳn
+    // trong body.sheet-only-mode -- không còn đường click UI nào mở được TempoPick khi
+    // đang ở chế độ Biểu Diễn. Mở thẳng bằng API (hành vi tương đương người dùng bấm
+    // chip khi nó còn hiện được) để kiểm thử đúng trọng tâm của test này: phân lớp Esc.
+    await page.evaluate(async () => {
+      if (!window.TempoPick && window.ScriptLoader?.loadModal) {
+        await window.ScriptLoader.loadModal('tempo');
+      }
+      window.TempoPick?.show(100);
+    });
     const tempoModal = page.locator('#tempo-pick-modal');
     await expect(tempoModal).toBeVisible();
     await page.waitForTimeout(300);
