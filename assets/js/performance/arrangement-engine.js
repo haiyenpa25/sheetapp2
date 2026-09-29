@@ -62,6 +62,11 @@ const ArrangementEngine = (() => {
     EventBus.on('performance:measure_changed', ({ measure }) => {
       updateActiveSectionByMeasure(measure);
     });
+
+    // Lắng nghe thay đổi chế độ và chương trình để cập nhật hiển thị Jump Bar (Ticket R1-4)
+    EventBus.on('app:mode_change', () => renderJumpBar());
+    EventBus.on('setlist:played', () => renderJumpBar());
+    EventBus.on('setlist:ended', () => renderJumpBar());
   }
 
   /**
@@ -141,8 +146,28 @@ const ArrangementEngine = (() => {
     EventBus.emit('arrangements:loaded', { songId, sections: _sections, arrangements: _arrangements });
   }
 
+  function _isProgramOrSetlistActive() {
+    return Boolean(document.querySelector('.toolbar-left')?.classList.contains('in-setlist') ||
+      document.body.classList.contains('in-setlist') ||
+      (window.SetlistUI?.getCurrentSetlist?.() && (window.SetlistUI?.getCurrentIndex?.() ?? -1) >= 0) ||
+      !document.getElementById('setlist-program-bar')?.classList.contains('hidden'));
+  }
+  function _isPerformanceMode() {
+    return Boolean(document.body.classList.contains('sheet-only-mode') || document.body.dataset.appMode === 'performance' || window.ModeManager?.getMode?.() === 'performance');
+  }
+  function _isLiveSyncActive() {
+    const m = window.LiveSession?.getMode?.();
+    return Boolean(m === 'host' || m === 'join' || document.getElementById('follow-leader-banner')?.classList.contains('hidden') === false || window.Store?.get?.('currentRoom'));
+  }
+  function _shouldShowJumpBar() {
+    if (!_sections || _sections.length === 0) return false;
+    return Boolean(_isProgramOrSetlistActive() || _isPerformanceMode() || _isLiveSyncActive() ||
+      window.__forceShowSectionJumpBar || document.body.dataset.showSections === 'true' ||
+      (typeof window !== 'undefined' && (window.location.search.includes('v=sheet') || window.location.search.includes('sections=1'))));
+  }
+
   /**
-   * Render danh sách Section Chips trên Jump Bar
+   * Render danh sách Section Chips trên Jump Bar (Ticket R1-4)
    */
   function renderJumpBar() {
     const container = document.getElementById('section-jump-bar-container');
@@ -150,11 +175,10 @@ const ArrangementEngine = (() => {
     if (!container || !chipsList) return;
 
     if (!_sections || _sections.length === 0) {
-      // Ẩn bar nếu bài chưa có section nào (trừ khi là Admin/Ban Hát muốn tạo)
       const canEdit = window.Auth?.isAdmin?.() || window.Auth?.isBanhat?.();
-      if (canEdit && _currentSongId) {
+      if (canEdit && _currentSongId && (_isProgramOrSetlistActive() || _isPerformanceMode() || window.__forceShowSectionJumpBar)) {
         container.classList.remove('hidden');
-        chipsList.innerHTML = `<span class="section-empty-hint">Chưa có phân đoạn. Bấm [Phân đoạn] để tạo</span>`;
+        chipsList.innerHTML = '<span class="section-empty-hint">Chưa có phân đoạn. Bấm [Phân đoạn] để tạo</span>';
       } else {
         container.classList.add('hidden');
         chipsList.innerHTML = '';
@@ -162,10 +186,15 @@ const ArrangementEngine = (() => {
       return;
     }
 
+    if (!_shouldShowJumpBar()) {
+      container.classList.add('hidden');
+      return;
+    }
+
     container.classList.remove('hidden');
     chipsList.innerHTML = '';
 
-    _sections.forEach((sec, idx) => {
+    _sections.forEach((sec) => {
       const chip = document.createElement('button');
       chip.type = 'button';
       chip.className = 'section-chip';
@@ -174,14 +203,15 @@ const ArrangementEngine = (() => {
       chip.dataset.endMeasure = sec.end_measure;
       chip.dataset.type = sec.type;
 
-      // Icon biểu tượng theo loại
       const icon = _getSectionIcon(sec.type);
       const color = sec.color || _getSectionDefaultColor(sec.type);
+      const vnName = _normalizeSectionLabel(sec.type, sec.name);
 
       chip.style.setProperty('--chip-accent', color);
       chip.innerHTML = `
         <span class="chip-icon">${icon}</span>
-        <span class="chip-name">${_escapeHtml(sec.name)}</span>
+        <span class="chip-name">${_escapeHtml(vnName)}</span>
+        <span class="chip-legacy-tag sr-only" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;">${_escapeHtml(sec.name || '')}</span>
         <span class="chip-measures">m.${sec.start_measure}${sec.end_measure > sec.start_measure ? `-${sec.end_measure}` : ''}</span>
       `;
 
@@ -192,7 +222,6 @@ const ArrangementEngine = (() => {
       chipsList.appendChild(chip);
     });
 
-    // Cập nhật quyền hiển thị nút Sửa
     const btnEdit = document.getElementById('btn-section-edit');
     if (btnEdit) {
       const canEdit = window.Auth?.isAdmin?.() || window.Auth?.isBanhat?.();
@@ -230,11 +259,11 @@ const ArrangementEngine = (() => {
 
     // 3. Kích hoạt thông báo Cue Banner
     if (window.CueEngine) {
-      window.CueEngine.showBanner(`🎯 Đã nhảy đến: ${sec.name} (Ô nhịp ${sec.start_measure})`, 'jump', 2500);
+      window.CueEngine.showBanner(`Đã chuyển đến: ${sec.name} (Ô nhịp ${sec.start_measure})`, 'jump', 2500);
     } else if (window.AppUI?.showToast) {
-      window.AppUI.showToast(`🎯 Chuyển đoạn: ${sec.name}`, 'info');
+      window.AppUI.showToast(`Chuyển đoạn: ${sec.name}`, 'info');
     } else if (window.App?.showToast) {
-      window.App.showToast(`🎯 Chuyển đoạn: ${sec.name}`, 'info');
+      window.App.showToast(`Chuyển đoạn: ${sec.name}`, 'info');
     }
 
     EventBus.emit('section:jumped', { section: sec, measure: targetMeasure });
@@ -310,16 +339,34 @@ const ArrangementEngine = (() => {
     });
   }
 
-  function _getSectionIcon(type) {
+  function _normalizeSectionLabel(type, rawName = '') {
+    const raw = String(rawName).trim();
     switch (type) {
-      case 'intro':   return '🎵';
-      case 'verse':   return '📖';
-      case 'chorus':  return '⚡';
-      case 'bridge':  return '🎸';
-      case 'interlude': return '🎹';
-      case 'outro':   return '🏁';
-      default:        return '🔖';
+      case 'intro': return 'Dạo đầu';
+      case 'verse': {
+        const numMatch = raw.match(/\d+/);
+        return numMatch ? `Phiên khúc ${numMatch[0]}` : 'Phiên khúc';
+      }
+      case 'chorus': return 'Điệp khúc';
+      case 'bridge': return 'Dạo giữa';
+      case 'interlude': return 'Gian tấu';
+      case 'outro': return 'Kết';
+      default: return raw || 'Đoạn';
     }
+  }
+
+  function _getSectionIcon(type) {
+    let icon = 'music';
+    switch (type) {
+      case 'intro':     icon = 'music'; break;
+      case 'verse':     icon = 'book-open'; break;
+      case 'chorus':    icon = 'zap'; break;
+      case 'bridge':    icon = 'guitar'; break;
+      case 'interlude': icon = 'disc'; break;
+      case 'outro':     icon = 'check'; break;
+      default:          icon = 'music'; break;
+    }
+    return `<svg class="icon icon-sm" width="13" height="13" aria-hidden="true"><use href="#icon-${icon}"></use></svg>`;
   }
 
   function _getSectionDefaultColor(type) {
@@ -382,31 +429,20 @@ const ArrangementEngine = (() => {
         <div class="modal-card modal-lg section-editor-card">
           <div class="modal-header">
             <div class="modal-title-wrap">
-              <span class="modal-icon">📐</span>
+              <span class="modal-icon"><svg class="icon icon-md" width="18" height="18" aria-hidden="true"><use href="#icon-sliders"></use></svg></span>
               <h3 class="modal-title">Cấu Trúc Phân Đoạn Bài Hát</h3>
             </div>
             <button type="button" class="modal-close" onclick="document.getElementById('modal-section-editor').classList.add('hidden')">&times;</button>
           </div>
           <div class="modal-body">
-            <p class="section-editor-desc">Định nghĩa các đoạn nhạc (Intro, Lời 1, Điệp khúc, Dạo giữa, Outro) theo số thứ tự ô nhịp trong bản nhạc.</p>
+            <p class="section-editor-desc">Định nghĩa các đoạn nhạc (Dạo đầu, Phiên khúc 1, Điệp khúc, Dạo giữa, Kết) theo số thứ tự ô nhịp.</p>
             <div class="section-table-container">
               <table class="section-edit-table" id="section-edit-table">
-                <thead>
-                  <tr>
-                    <th style="width: 130px">Loại đoạn</th>
-                    <th>Tên hiển thị</th>
-                    <th style="width: 85px">Ô bắt đầu</th>
-                    <th style="width: 85px">Ô kết thúc</th>
-                    <th style="width: 60px">Màu</th>
-                    <th style="width: 50px"></th>
-                  </tr>
-                </thead>
+                <thead><tr><th style="width:130px">Loại đoạn</th><th>Tên hiển thị</th><th style="width:85px">Ô bắt đầu</th><th style="width:85px">Ô kết thúc</th><th style="width:60px">Màu</th><th style="width:50px"></th></tr></thead>
                 <tbody id="section-edit-tbody"></tbody>
               </table>
             </div>
-            <button type="button" class="btn btn-secondary btn-sm" id="btn-add-section-row" style="margin-top: 10px;">
-              + Thêm phân đoạn
-            </button>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-add-section-row" style="margin-top:10px;">+ Thêm phân đoạn</button>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" onclick="document.getElementById('modal-section-editor').classList.add('hidden')">Hủy</button>
@@ -437,11 +473,10 @@ const ArrangementEngine = (() => {
     if (_sections && _sections.length > 0) {
       _sections.forEach(s => _addSectionRow(s));
     } else {
-      // Mặc định tạo sẵn gợi ý
-      _addSectionRow({ type: 'intro', name: 'Intro', start_measure: 1, end_measure: 4, color: '#6366f1' });
-      _addSectionRow({ type: 'verse', name: 'Lời 1', start_measure: 5, end_measure: 12, color: '#10b981' });
-      _addSectionRow({ type: 'chorus', name: 'Điệp Khúc', start_measure: 13, end_measure: 20, color: '#f59e0b' });
-      _addSectionRow({ type: 'outro', name: 'Outro', start_measure: 21, end_measure: 24, color: '#8b5cf6' });
+      _addSectionRow({ type: 'intro', name: 'Dạo đầu', start_measure: 1, end_measure: 4, color: '#6366f1' });
+      _addSectionRow({ type: 'verse', name: 'Phiên khúc 1', start_measure: 5, end_measure: 12, color: '#10b981' });
+      _addSectionRow({ type: 'chorus', name: 'Điệp khúc', start_measure: 13, end_measure: 20, color: '#f59e0b' });
+      _addSectionRow({ type: 'outro', name: 'Kết', start_measure: 21, end_measure: 24, color: '#8b5cf6' });
     }
   }
 
@@ -453,35 +488,23 @@ const ArrangementEngine = (() => {
     row.dataset.id = sec.id || '';
 
     const types = [
-      { id: 'intro', label: '🎵 Intro' },
-      { id: 'verse', label: '📖 Lời (Verse)' },
-      { id: 'chorus', label: '⚡ Điệp khúc (Chorus)' },
-      { id: 'bridge', label: '🎸 Dạo giữa (Bridge)' },
-      { id: 'interlude', label: '🎹 Gian tấu (Interlude)' },
-      { id: 'outro', label: '🏁 Outro (Kết)' }
+      { id: 'intro', label: 'Dạo đầu (Intro)' },
+      { id: 'verse', label: 'Phiên khúc (Verse)' },
+      { id: 'chorus', label: 'Điệp khúc (Chorus)' },
+      { id: 'bridge', label: 'Dạo giữa (Bridge)' },
+      { id: 'interlude', label: 'Gian tấu (Interlude)' },
+      { id: 'outro', label: 'Kết (Outro)' }
     ];
 
     const typeOpts = types.map(t => `<option value="${t.id}" ${sec.type === t.id ? 'selected' : ''}>${t.label}</option>`).join('');
 
     row.innerHTML = `
-      <td>
-        <select class="form-select sec-row-type">${typeOpts}</select>
-      </td>
-      <td>
-        <input type="text" class="form-input sec-row-name" value="${_escapeHtml(sec.name || 'Phân đoạn')}" placeholder="VD: Lời 1, Điệp khúc">
-      </td>
-      <td>
-        <input type="number" class="form-input sec-row-start" value="${sec.start_measure || 1}" min="1" style="text-align: center">
-      </td>
-      <td>
-        <input type="number" class="form-input sec-row-end" value="${sec.end_measure || 4}" min="1" style="text-align: center">
-      </td>
-      <td>
-        <input type="color" class="sec-row-color" value="${sec.color || _getSectionDefaultColor(sec.type || 'verse')}" style="width: 100%; height: 32px; border: none; background: transparent; cursor: pointer;">
-      </td>
-      <td style="text-align: center">
-        <button type="button" class="btn-del-row" style="background: none; border: none; color: var(--danger, #ef4444); font-size: 18px; cursor: pointer;" title="Xóa dòng">&times;</button>
-      </td>
+      <td><select class="form-select sec-row-type">${typeOpts}</select></td>
+      <td><input type="text" class="form-input sec-row-name" value="${_escapeHtml(sec.name || 'Phân đoạn')}" placeholder="VD: Phiên khúc 1, Điệp khúc"></td>
+      <td><input type="number" class="form-input sec-row-start" value="${sec.start_measure || 1}" min="1" style="text-align: center"></td>
+      <td><input type="number" class="form-input sec-row-end" value="${sec.end_measure || 4}" min="1" style="text-align: center"></td>
+      <td><input type="color" class="sec-row-color" value="${sec.color || _getSectionDefaultColor(sec.type || 'verse')}" style="width: 100%; height: 32px; border: none; background: transparent; cursor: pointer;"></td>
+      <td style="text-align: center"><button type="button" class="btn-del-row" style="background: none; border: none; color: var(--danger, #ef4444); font-size: 18px; cursor: pointer;" title="Xóa dòng">&times;</button></td>
     `;
 
     row.querySelector('.btn-del-row')?.addEventListener('click', () => {
@@ -492,9 +515,9 @@ const ArrangementEngine = (() => {
       const selectedType = e.target.value;
       const nameInput = row.querySelector('.sec-row-name');
       const colorInput = row.querySelector('.sec-row-color');
-      if (nameInput && (!nameInput.value || ['Intro', 'Lời', 'Điệp Khúc', 'Dạo Giữa', 'Outro'].some(p => nameInput.value.includes(p)))) {
+      if (nameInput && (!nameInput.value || ['Intro', 'Lời', 'Điệp Khúc', 'Dạo Giữa', 'Outro', 'Dạo đầu', 'Phiên khúc', 'Điệp khúc', 'Kết'].some(p => nameInput.value.includes(p)))) {
         const match = types.find(t => t.id === selectedType);
-        if (match) nameInput.value = match.label.replace(/^[^\s]+\s+/, '').split(' (')[0];
+        if (match) nameInput.value = match.label.split(' (')[0];
       }
       if (colorInput) {
         colorInput.value = _getSectionDefaultColor(selectedType);

@@ -261,6 +261,10 @@ body.dark-mode {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   border-bottom: 1px solid var(--lp-border);
+  z-index: 9985 !important;
+}
+.section-jump-bar-container.hidden {
+  display: none !important;
 }
 .section-chips-list { gap: 4px; }
 .section-chip {

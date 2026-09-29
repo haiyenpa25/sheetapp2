@@ -17,7 +17,7 @@ test.describe('L3-7: Bản Đồ Bài Và Nhảy Đoạn (Song Flow / Roadmap)',
 
   test('Giao diện Song Flow: 4 phân đoạn hiển thị, Click nhảy đoạn, Phím tắt j/Shift+j', async ({ page }) => {
     // 1. Mở ứng dụng
-    await page.goto('./', { waitUntil: 'domcontentloaded' });
+    await page.goto('./?v=sheet', { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('#song-list', { timeout: 15000 });
 
     // 2. Mở bài hát thanh-ca-001
@@ -26,6 +26,9 @@ test.describe('L3-7: Bản Đồ Bài Và Nhảy Đoạn (Song Flow / Roadmap)',
 
     // 3. Chờ bản nhạc OSMD render xong
     await page.waitForSelector('#osmd-container svg', { timeout: 20000 });
+
+    // Vào chế độ Biểu Diễn để hiển thị dải phân đoạn (Ticket R1-4 / L3-7)
+    await page.locator('#btn-fullscreen').click();
 
     // 4. Kiểm tra Dải Bản Đồ Bài Hát #section-jump-bar-container
     const jumpBar = page.locator('#section-jump-bar-container');
@@ -61,6 +64,8 @@ test.describe('L3-7: Bản Đồ Bài Và Nhảy Đoạn (Song Flow / Roadmap)',
     await page.keyboard.press('Shift+J');
     await expect(chorusChip).toHaveClass(/active/, { timeout: 5000 });
     await expect(outroChip).not.toHaveClass(/active/);
+
+    await page.evaluate(() => window.ModeManager?.resetToView?.());
   });
 
   test('2 Browser Contexts: Host nhảy đoạn -> Follower đồng bộ ô nhịp và active chip <= 1s', async ({ browser }) => {
