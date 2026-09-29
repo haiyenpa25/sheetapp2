@@ -2,7 +2,7 @@
 <aside id="sidebar" class="sidebar">
   <div class="sidebar-header">
     <div class="logo">
-      <span class="logo-icon">🎵</span>
+      <span class="logo-icon"><?= icon('music') ?></span>
       <span class="logo-text">SheetApp</span>
       <span id="library-count" class="library-count-badge">...</span>
     </div>
@@ -24,7 +24,7 @@
   <div class="sidebar-tabs" id="sidebar-tabs">
     <button class="sidebar-tab active" id="sidebar-tab-lib" data-tab="library">Kho Nhạc</button>
     <button class="sidebar-tab" data-tab="setlist">Setlists</button>
-    <button class="sidebar-tab" id="sidebar-tab-favs" data-tab="favorites" title="Bài hát yêu thích">&#11088;</button>
+    <button class="sidebar-tab" id="sidebar-tab-favs" data-tab="favorites" title="Bài hát yêu thích"><?= icon('star') ?></button>
   </div>
 
   <div class="sidebar-search">
@@ -33,7 +33,7 @@
       <input id="search-input" type="text" placeholder="Tìm bài hát..." autocomplete="off">
       <div class="sidebar-search-actions">
         <button id="btn-quick-numpad" class="btn-quick-numpad" title="Bàn phím số nhanh (#)" aria-label="Mở bàn phím số nhanh">#</button>
-        <button id="btn-search-lyrics" class="icon-btn-xs btn-search-lyrics" title="Tìm theo lời bài hát">&#127925;</button>
+        <button id="btn-search-lyrics" class="icon-btn-xs btn-search-lyrics" title="Tìm theo lời bài hát"><?= icon('music') ?></button>
       </div>
     </div>
 
@@ -45,7 +45,7 @@
         <option value="key">Tông gốc</option>
       </select>
       <button id="btn-filter-toggle" class="btn btn-sm btn-filter-toggle" aria-expanded="false" aria-controls="sidebar-filters-panel" aria-label="Gom bộ lọc bài hát" title="Mở bộ lọc">
-        <span>⚡ Lọc</span>
+        <span><?= icon('filter') ?> Lọc</span>
         <span id="filter-active-badge" class="filter-active-badge hidden">0</span>
       </button>
     </div>
@@ -123,7 +123,7 @@
       <div id="quick-favorites-section" class="quick-favorites-section hidden"></div>
       <div id="song-list" class="song-list">
         <div class="empty-state">
-          <span class="empty-icon">🎶</span>
+          <span class="empty-icon"><?= icon('music') ?></span>
           <p>Chưa có bài hát nào</p>
           <small>Nhấn "Thêm Bài Hát" để nhập bài</small>
         </div>
@@ -134,7 +134,7 @@
     <div id="tab-content-setlist" class="sidebar-tab-content hidden">
       <div id="setlist-list" class="song-list">
         <div class="empty-state">
-          <span class="empty-icon">📋</span>
+          <span class="empty-icon"><?= icon('file-text') ?></span>
           <p>Chưa có Setlist nào</p>
           <small>Chỉ Quản trị mới có thể tạo</small>
         </div>
@@ -146,8 +146,8 @@
           </button>
           <h3 id="setlist-detail-title" class="setlist-detail-title">Setlist</h3>
           <div class="d-flex items-center gap-1">
-            <button id="btn-print-setlist" class="icon-btn-xs" title="🖨️ In Chương Trình Biểu Diễn A4">🖨️</button>
-            <button id="btn-copy-setlist-slide" class="icon-btn-xs" title="📋 Copy Danh Sách Cho Slide Màn Hình">📋</button>
+            <button id="btn-print-setlist" class="icon-btn-xs" title="In Chương Trình Biểu Diễn A4"><?= icon('printer') ?></button>
+            <button id="btn-copy-setlist-slide" class="icon-btn-xs" title="Copy Danh Sách Cho Slide Màn Hình"><?= icon('copy') ?></button>
             <button id="btn-play-setlist" class="btn btn-sm btn-primary">Phát</button>
           </div>
         </div>
@@ -167,15 +167,15 @@
     <div class="d-flex gap-2">
       <?php $bHref = $baseHref ?? '/'; ?>
       <a href="<?= $bHref ?>learn/" class="sidebar-mini-link sidebar-mini-learn" title="Góc tự tập đàn, điệu đệm & MIDI ở nhà">
-        <span>🎹</span>
+        <span><?= icon('keyboard') ?></span>
         <span>Học Đàn</span>
       </a>
       <a href="<?= $bHref ?>live-band/" class="sidebar-mini-link sidebar-mini-live" title="Phòng biểu diễn đồng bộ ban nhạc & máy chiếu nhà thờ">
-        <span>📡</span>
+        <span><?= icon('radio') ?></span>
         <span>Live Band</span>
       </a>
       <a href="<?= $bHref ?>manager/" target="_blank" class="sidebar-mini-link sidebar-mini-mgr" title="Cổng Quản Lý Kho Nhạc & Bản Phối (/manager/)">
-        <span>⚙️</span>
+        <span><?= icon('settings') ?></span>
       </a>
     </div>
   </div>

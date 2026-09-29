@@ -3,33 +3,33 @@
   <!-- WELCOME SCREEN -->
   <div id="welcome-screen" class="welcome-screen">
     <div class="welcome-content">
-      <div class="welcome-icon">🎼</div>
+      <div class="welcome-icon"><?= icon('music') ?></div>
       <h2>Chào mừng đến SheetApp</h2>
       <p>Hiển thị thánh ca tương tác với khả năng dịch giọng và ghi chú hợp âm</p>
       <div class="welcome-features">
         <div class="feature-item">
-          <span class="feat-icon">🎵</span>
+          <span class="feat-icon"><?= icon('music') ?></span>
           <div>
             <strong>Hiển thị Sheet Nhạc</strong>
             <small>Render MusicXML sắc nét qua OSMD</small>
           </div>
         </div>
         <div class="feature-item">
-          <span class="feat-icon">🎹</span>
+          <span class="feat-icon"><?= icon('keyboard') ?></span>
           <div>
             <strong>Dịch Giọng Tức Thì</strong>
             <small>Tăng/giảm tông, hợp âm tự động theo</small>
           </div>
         </div>
         <div class="feature-item">
-          <span class="feat-icon">✏️</span>
+          <span class="feat-icon"><?= icon('pencil') ?></span>
           <div>
             <strong>Chỉnh Hợp Âm</strong>
             <small>Click vào hợp âm để thay đổi</small>
           </div>
         </div>
         <div class="feature-item">
-          <span class="feat-icon">📋</span>
+          <span class="feat-icon"><?= icon('file-text') ?></span>
           <div>
             <strong>Nhật Ký Biểu Diễn</strong>
             <small>Lưu lịch sử mỗi buổi tập</small>
@@ -110,8 +110,8 @@
       <span id="gig-sp-pos" class="gig-sp-pos">--/--</span>
       <span id="gig-sp-next" class="gig-sp-next">Tiếp: --</span>
       <div class="gig-sp-navs">
-        <button id="btn-gig-sp-prev" class="btn-gig-action btn-gig-sp-btn" title="Bài trước (◀)">◀</button>
-        <button id="btn-gig-sp-next" class="btn-gig-action btn-gig-sp-btn" title="Bài tiếp theo (▶)">▶</button>
+        <button id="btn-gig-sp-prev" class="btn-gig-action btn-gig-sp-btn" title="Bài trước"><?= icon('chevron-left') ?></button>
+        <button id="btn-gig-sp-next" class="btn-gig-action btn-gig-sp-btn" title="Bài tiếp theo"><?= icon('chevron-right') ?></button>
       </div>
     </div>
     <div class="gig-hud-actions">
@@ -125,14 +125,14 @@
         <button id="btn-gig-zoom-out" class="btn-gig-action" title="Thu nhỏ zoom">−</button>
         <span id="gig-hud-zoom" class="gig-hud-zoom-val" title="Tỷ lệ zoom hiện tại">100%</span>
         <button id="btn-gig-zoom-in" class="btn-gig-action" title="Phóng to zoom">+</button>
-        <button id="btn-gig-lock-zoom" class="btn-gig-action btn-gig-lock" title="Khóa tỷ lệ zoom (khi đổi bài giữ nguyên)">🔓</button>
+        <button id="btn-gig-lock-zoom" class="btn-gig-action btn-gig-lock" title="Khóa tỷ lệ zoom (khi đổi bài giữ nguyên)"><?= icon('unlock') ?></button>
       </div>
 
-      <!-- Nút Chuyển Khổ trong Biểu Diễn (Ticket L1-6 ⭐) -->
+      <!-- Nút Chuyển Khổ trong Biểu Diễn (Ticket L1-6) -->
       <button id="btn-gig-verse" class="btn-gig-action btn-gig-verse hidden" title="Chuyển khổ hát (Phím V)">Khổ 1/1</button>
 
-      <button id="btn-gig-scroll-toggle" class="btn-gig-action btn-gig-scroll" title="Bật/Tắt cuộn (Space)">▼ Cuộn</button>
-      <button id="btn-gig-exit" class="btn-gig-action btn-gig-exit" title="Thoát Biểu Diễn (Esc)">✕ Thoát</button>
+      <button id="btn-gig-scroll-toggle" class="btn-gig-action btn-gig-scroll" title="Bật/Tắt cuộn (Space)"><?= icon('chevron-down') ?> Cuộn</button>
+      <button id="btn-gig-exit" class="btn-gig-action btn-gig-exit" title="Thoát Biểu Diễn (Esc)"><?= icon('x') ?> Thoát</button>
     </div>
   </div>
 
@@ -140,13 +140,13 @@
   <div id="chord-edit-hint" class="chord-edit-hint hidden" role="status">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="hint-icon"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
     <span>Chế độ điền hợp âm — Click vào nốt nhạc (+) để thêm hoặc click hợp âm để sửa</span>
-    <button class="hint-close-btn" onclick="window.ChordCanvas?.setAddMode(false)" title="Thoát chế độ điền hợp âm">✓ Hoàn tất</button>
+    <button class="hint-close-btn" onclick="window.ChordCanvas?.setAddMode(false)" title="Thoát chế độ điền hợp âm"><?= icon('check') ?> Hoàn tất</button>
   </div>
 
   <!-- Song Info Strip — Single Row Consolidate -->
   <div id="song-info-strip" class="song-info-strip si-hidden">
     <div id="si-inner" class="si-inner"></div>
-    <button id="btn-song-info-toggle" class="si-toggle" title="Thu gọn / Mở rộng thông tin">▼</button>
+    <button id="btn-song-info-toggle" class="si-toggle" title="Thu gọn / Mở rộng thông tin"><?= icon('chevron-down') ?></button>
   </div>
 
   <!-- FOLLOW LEADER BANNER (Dải trạng thái theo ca trưởng — Ticket L3-5) -->
@@ -154,7 +154,7 @@
     <div class="fl-banner-inner">
       <div class="fl-banner-left">
         <span class="fl-pulse-dot" id="fl-pulse-dot" aria-hidden="true"></span>
-        <span class="fl-banner-icon" aria-hidden="true">📡</span>
+        <span class="fl-banner-icon" aria-hidden="true"><?= icon('radio') ?></span>
         <span id="fl-leader-status" class="fl-leader-status">
           <span id="fl-leader-name" class="fl-leader-name">Đang theo: Ca Trưởng</span>
           <span id="fl-room-code-tag" class="fl-room-code-tag">BAND-1234</span>
@@ -162,7 +162,7 @@
       </div>
       <div class="fl-banner-actions">
         <button id="btn-follow-toggle-pause" class="btn-fl-pause" title="Tạm ngưng nhận đồng bộ từ ca trưởng">
-          <span id="fl-pause-icon">⏸️</span>
+          <span id="fl-pause-icon"><?= icon('pause') ?></span>
           <span id="fl-pause-label">Tạm ngưng</span>
         </button>
         <button id="btn-follow-leave" class="btn-fl-leave" title="Rời khỏi phòng theo dõi" aria-label="Rời">&times;</button>
@@ -173,13 +173,13 @@
   <!-- HOST QUICK CUES BAR (Thanh nhắc ban nhạc nhanh của Ca Trưởng — Ticket L3-6) -->
   <div id="host-quick-cues-bar" class="host-quick-cues-bar hidden" role="toolbar" aria-label="Thanh nhắc ban nhạc nhanh của Ca Trưởng">
     <div class="hqc-inner">
-      <span class="hqc-label">👑 Nhắc Band:</span>
+      <span class="hqc-label"><?= icon('crown') ?> Nhắc Band:</span>
       <div class="hqc-chips">
-        <button type="button" class="btn-cue-chip" data-cue="repeat" data-icon="🔁" data-text="Lặp Điệp Khúc" title="Gửi: Lặp Điệp Khúc">🔁 Lặp ĐK</button>
-        <button type="button" class="btn-cue-chip" data-cue="slow" data-icon="⏳" data-text="Khổ cuối chậm" title="Gửi: Khổ cuối chậm">⏳ Chậm lại</button>
-        <button type="button" class="btn-cue-chip" data-cue="key" data-icon="🎺" data-text="Lên tông (+1)" title="Gửi: Lên tông">🎺 Lên tông</button>
-        <button type="button" class="btn-cue-chip" data-cue="ending" data-icon="🛑" data-text="Chuẩn bị kết" title="Gửi: Chuẩn bị kết">🛑 Kết</button>
-        <button type="button" class="btn-cue-chip" data-cue="intro" data-icon="🎹" data-text="Dạo lại intro" title="Gửi: Dạo lại intro">🎹 Dạo lại</button>
+        <button type="button" class="btn-cue-chip" data-cue="repeat" data-icon="rotate-ccw" data-text="Lặp Điệp Khúc" title="Gửi: Lặp Điệp Khúc"><?= icon('rotate-ccw') ?> Lặp ĐK</button>
+        <button type="button" class="btn-cue-chip" data-cue="slow" data-icon="clock" data-text="Khổ cuối chậm" title="Gửi: Khổ cuối chậm"><?= icon('clock') ?> Chậm lại</button>
+        <button type="button" class="btn-cue-chip" data-cue="key" data-icon="arrow-right" data-text="Lên tông (+1)" title="Gửi: Lên tông"><?= icon('arrow-right') ?> Lên tông</button>
+        <button type="button" class="btn-cue-chip" data-cue="ending" data-icon="x" data-text="Chuẩn bị kết" title="Gửi: Chuẩn bị kết"><?= icon('x') ?> Kết</button>
+        <button type="button" class="btn-cue-chip" data-cue="intro" data-icon="keyboard" data-text="Dạo lại intro" title="Gửi: Dạo lại intro"><?= icon('keyboard') ?> Dạo lại</button>
       </div>
     </div>
   </div>
@@ -188,13 +188,13 @@
   <div id="leader-notes-banner" class="leader-notes-banner hidden" role="note" aria-label="Ghi chú ca trưởng">
     <div class="ln-banner-inner">
       <div class="ln-banner-left">
-        <span class="ln-banner-icon" aria-hidden="true">📌</span>
+        <span class="ln-banner-icon" aria-hidden="true"><?= icon('file-text') ?></span>
         <strong class="ln-banner-badge">Ghi chú ca trưởng:</strong>
         <span id="leader-notes-text" class="ln-banner-text"></span>
       </div>
       <div class="ln-banner-actions">
         <button id="btn-toggle-leader-notes" class="btn-ln-toggle" title="Thu gọn / Mở rộng ghi chú" aria-expanded="true">
-          <span id="ln-toggle-icon" class="ln-toggle-icon">▲</span>
+          <span id="ln-toggle-icon" class="ln-toggle-icon"><?= icon('chevron-up') ?></span>
           <span id="ln-toggle-label" class="ln-toggle-label">Thu gọn</span>
         </button>
         <button id="btn-close-leader-notes" class="btn-ln-close" title="Ẩn dải ghi chú" aria-label="Đóng">&times;</button>
@@ -226,24 +226,24 @@
   <!-- LITURGY CARD / NON-SONG PLACEHOLDER (Thẻ chờ chương trình — Ticket L3-4) -->
   <div id="liturgy-card" class="liturgy-card hidden" role="region" aria-label="Tiết mục chương trình">
     <div class="liturgy-card-inner">
-      <div class="liturgy-card-icon" id="lc-icon" aria-hidden="true">🙏</div>
+      <div class="liturgy-card-icon" id="lc-icon" aria-hidden="true"><?= icon('book-open') ?></div>
       <div class="liturgy-card-badge" id="lc-badge">CẦU NGUYỆN</div>
       <h2 class="liturgy-card-title" id="lc-title">Cầu Nguyện Khai Lễ</h2>
       
       <div class="liturgy-card-notes hidden" id="lc-notes-box">
-        <span class="lc-notes-label">📌 Ghi chú ca trưởng:</span>
+        <span class="lc-notes-label"><?= icon('file-text') ?> Ghi chú ca trưởng:</span>
         <p class="lc-notes-text" id="lc-notes-text"></p>
       </div>
 
       <div class="liturgy-card-meta">
-        <span class="lc-meta-item" id="lc-item-duration">⏱️ Thời lượng mục: 5 phút</span>
+        <span class="lc-meta-item" id="lc-item-duration"><?= icon('clock') ?> Thời lượng mục: 5 phút</span>
         <span class="lc-meta-divider">•</span>
-        <span class="lc-meta-item" id="lc-total-duration">⏱️ Tổng thời lượng chương trình: 45 phút</span>
+        <span class="lc-meta-item" id="lc-total-duration"><?= icon('clock') ?> Tổng thời lượng chương trình: 45 phút</span>
       </div>
 
       <div class="liturgy-card-actions">
-        <button id="btn-lc-prev" class="btn btn-ghost btn-lc-btn" title="Mục trước (◀)">◀ Mục trước</button>
-        <button id="btn-lc-next" class="btn btn-primary btn-lc-btn" title="Mục tiếp theo (▶)">Mục tiếp theo ▶</button>
+        <button id="btn-lc-prev" class="btn btn-ghost btn-lc-btn" title="Mục trước"><?= icon('chevron-left') ?> Mục trước</button>
+        <button id="btn-lc-next" class="btn btn-primary btn-lc-btn" title="Mục tiếp theo">Mục tiếp theo <?= icon('chevron-right') ?></button>
       </div>
     </div>
   </div>

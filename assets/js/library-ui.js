@@ -447,10 +447,10 @@ const LibraryUI = (() => {
       const isToday = item.scheduled_date === today;
       sec.style.display = ''; sec.classList.remove('hidden');
       sec.innerHTML = `<div class="upcoming-setlist-card" data-id="${_esc(item.id)}" style="display:flex;align-items:center;justify-content:space-between;gap:8px;touch-action:manipulation;">` +
-        `<div class="upcoming-setlist-info" style="flex:1;min-width:0;cursor:pointer;"><div style="font-size:0.68rem;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:4px;text-transform:uppercase;"><span>📅</span><span>${isToday ? 'Chương trình hôm nay' : 'Chương trình sắp tới'}</span></div>` +
+        `<div class="upcoming-setlist-info" style="flex:1;min-width:0;cursor:pointer;"><div style="font-size:0.68rem;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:4px;text-transform:uppercase;"><svg class="icon icon-xs"><use href="#icon-calendar"/></svg><span>${isToday ? 'Chương trình hôm nay' : 'Chương trình sắp tới'}</span></div>` +
         `<div class="upcoming-setlist-title" style="font-size:0.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;">${_esc(item.title)}</div>` +
         `<div style="font-size:0.68rem;color:var(--text-muted);margin-top:2px;">${item.item_count || 1} bài ${item.scheduled_date ? '· ' + item.scheduled_date : ''}</div></div>` +
-        `<button class="btn btn-xs btn-primary btn-play-upcoming" style="flex-shrink:0;padding:4px 8px;font-size:0.72rem;" title="Mở chương trình">▶ Mở</button></div>`;
+        `<button class="btn btn-xs btn-primary btn-play-upcoming" style="flex-shrink:0;padding:4px 8px;font-size:0.72rem;display:inline-flex;align-items:center;gap:3px;" title="Mở chương trình"><svg class="icon icon-xs"><use href="#icon-play"/></svg> Mở</button></div>`;
       const open = () => { document.querySelector('[data-tab="setlist"]')?.click(); window.SetlistUI?.selectSetlist?.(item.id); };
       sec.querySelector('.upcoming-setlist-info')?.addEventListener('click', open);
       sec.querySelector('.btn-play-upcoming')?.addEventListener('click', open);

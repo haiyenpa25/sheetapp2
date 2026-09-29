@@ -569,3 +569,31 @@ body.dark-mode .toast-container .toast { background: #22222b; color: var(--lp-in
   color: var(--lp-faint);
   padding: 8px 10px 4px;
 }
+
+/* ==========================================================================
+   R1-1: Lucide SVG Icon Styling
+   ========================================================================== */
+.icon {
+  width: 1.15em;
+  height: 1.15em;
+  display: inline-block;
+  vertical-align: -0.18em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+.icon-xs { width: 12px; height: 12px; }
+.icon-sm { width: 15px; height: 15px; }
+.icon-md { width: 18px; height: 18px; }
+.icon-lg { width: 22px; height: 22px; }
+.btn-menu-item .icon {
+  margin-right: 8px;
+  color: var(--lp-muted, #94a3b8);
+}
+.btn-menu-item:hover .icon {
+  color: currentColor;
+}
+

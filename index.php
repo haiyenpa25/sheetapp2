@@ -37,6 +37,7 @@ $baseHref = ($appBase ? $appBase : '') . '/';
   <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 
 <?php
+require_once __DIR__ . '/includes/icons.php';
 function cssTag(string $file): string {
     global $baseHref;
     $path = __DIR__ . '/assets/css/' . $file;
@@ -54,6 +55,11 @@ echo cssTag('library-polish.css'); // lớp hoàn thiện giao diện — luôn 
 ?>
 </head>
 <body>
+
+<!-- Lucide SVG Sprite (Ticket R1-1) -->
+<div id="lucide-sprite-container" style="display:none;" aria-hidden="true">
+  <?php @readfile(__DIR__ . '/assets/icons/lucide.svg'); ?>
+</div>
 
 <!-- Skip Navigation Links cho điều hướng bàn phím A11y (Ticket L1-11) -->
 <nav class="skip-links" aria-label="Điều hướng nhanh">
