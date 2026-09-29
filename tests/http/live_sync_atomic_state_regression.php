@@ -120,9 +120,9 @@ $pFollower = proc_open("\"$phpBin\" \"$followerWorkerScript\" \"$room\"", [
 proc_close($pHost);
 proc_close($pFollower);
 
-$hostHistory = json_decode(@file_get_contents($hostLogFile), true) ?? [];
+$hostHistory = json_decode(@file_get_contents($hostLogFile) ?: '[]', true) ?? [];
 $finalRoomFile = $tempDir . '/' . strtolower($room) . '.json';
-$finalData = json_decode(@file_get_contents($finalRoomFile), true);
+$finalData = json_decode(@file_get_contents($finalRoomFile) ?: '{}', true);
 $finalRevision = $finalData['revision'] ?? null;
 
 echo "Số lần Host đã cập nhật: " . count($hostHistory) . "\n";
