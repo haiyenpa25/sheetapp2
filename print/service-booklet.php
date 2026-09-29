@@ -154,8 +154,8 @@ $pageTitle = 'Tập chương trình thờ phượng — ' . htmlspecialchars($se
   <div class="control-bar no-print">
     <div class="ctrl-group">
       <a href="javascript:window.close()" class="btn">✕ Đóng</a>
-      <button onclick="window.print()" class="btn btn-primary" title="In Booklet hoặc Lưu file PDF đầy đủ (Ctrl+P)">
-        🖨️ In Cuốn Booklet / Lưu PDF
+      <button onclick="window.print()" class="btn btn-primary" title="In tập chương trình hoặc Lưu file PDF đầy đủ (Ctrl+P)">
+        🖨️ In tập chương trình / Lưu PDF
       </button>
     </div>
 
@@ -282,7 +282,7 @@ $pageTitle = 'Tập chương trình thờ phượng — ' . htmlspecialchars($se
         </div>
 
         <footer class="page-footer">
-          <span>Booklet Thờ Phượng — SheetApp</span>
+          <span>Tập chương trình thờ phượng — SheetApp</span>
           <span>Trang 1</span>
         </footer>
       </section>
@@ -333,7 +333,7 @@ $pageTitle = 'Tập chương trình thờ phượng — ' . htmlspecialchars($se
               <?php endif; ?>
               <span>Bộ hợp âm: <strong><?= htmlspecialchars($chordSet) ?></strong></span>
               <?php if (!empty($item['lead_singer'])): ?>
-                <span>Ca viên chính: <strong><?= htmlspecialchars($item['lead_singer']) ?></strong></span>
+                <span>Người hát chính: <strong><?= htmlspecialchars($item['lead_singer']) ?></strong></span>
               <?php endif; ?>
               <?php if (!empty($composer)): ?>
                 <span style="font-style:italic;margin-left:auto;">Tác giả: <?= htmlspecialchars($composer) ?></span>
