@@ -329,17 +329,24 @@ const ChordCanvasUI = (() => {
       callbacks.onClose();
     });
 
+    // R0-3 (ROADMAP5, lỗi B4): trước đây gọi window.ChordCanvas?.saveChordWithoutReload?.(...)
+    // và window.ChordCanvas?.openNextPopup?.(...) — CẢ HAI hàm này không tồn tại trên
+    // ChordCanvas (chỉ có trên ChordCanvasEdit), nên optional chaining âm thầm không làm gì:
+    // Tab/→ đóng popup mà KHÔNG lưu hợp âm vừa gõ. Sửa bằng cách dùng đúng callbacks đã có
+    // sẵn (onSave/onDelete, giống hệt doSave) và thêm callbacks.onNext do ChordCanvasEdit nối.
     const doSaveNext = () => {
       if (_saved) return;
       _saved = true; clearTimeout(_blurTimer);
       const val = formatChord(inp.value.trim());
       if (document.activeElement === inp) inp.blur();
       callbacks.onClose();
-      if (val) {
-        _pushHist(val);
-        window.ChordCanvas?.saveChordWithoutReload?.(measureIdx, noteIdx, val);
-      }
-      window.ChordCanvas?.openNextPopup?.(measureIdx, noteIdx);
+      // skipRebuild: onNext sắp mở popup của nốt kế tiếp ngay sau đây — nếu onSave ở đây
+      // tự lên lịch rebuild dots (_build(), vốn đóng MỌI popup đang mở qua _clear()) thì
+      // rebuild đó có thể chạy SAU khi popup mới đã mở và đóng nhầm nó (race condition).
+      // Dữ liệu hợp âm vẫn được lưu đúng; dots sẽ tự cập nhật ở lần rebuild kế tiếp.
+      if (val)            { _pushHist(val); callbacks.onSave(val, { skipRebuild: true }); }
+      else if (existing)  { callbacks.onDelete(); }
+      callbacks.onNext?.(measureIdx, noteIdx);
     };
 
     inp?.addEventListener('keydown', e => {
@@ -352,14 +359,16 @@ const ChordCanvasUI = (() => {
     pop.addEventListener('pointerdown', e => e.stopPropagation());
     pop.addEventListener('click', e => e.stopPropagation());
 
-    // Outside-click đóng popup (delay 300ms để tránh đóng ngay khi vừa mở trên iPad)
+    // Outside-click: LƯU rồi đóng (delay 300ms để tránh đóng ngay khi vừa mở trên iPad).
+    // R0-3 (lỗi B5): bản cũ set _saved=true TRƯỚC KHI gọi inp.blur(), nên blur-handler ở trên
+    // (dòng "inp.addEventListener('blur', ...)") luôn thấy _saved đã true và bỏ qua việc lưu —
+    // gõ hợp âm rồi bấm sang nốt khác làm MẤT hợp âm vừa gõ. Sửa bằng cách gọi thẳng doSave()
+    // (cùng logic với Enter/nút Lưu: lưu nếu có giá trị, xóa nếu để trống một hợp âm đã có).
     const outside = ev => {
       if (pop.contains(ev.target)) return;
       if (ev.target === anchor || anchor.contains(ev.target)) return;
-      _saved = true; clearTimeout(_blurTimer);
-      if (document.activeElement === inp) inp.blur();
-      callbacks.onClose();
       document.removeEventListener('pointerdown', outside, true);
+      doSave();
     };
     setTimeout(() => document.addEventListener('pointerdown', outside, true), 300);
 
@@ -441,42 +450,46 @@ const ChordCanvasUI = (() => {
     overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
   }
 
-  /* ─── Modal Xác nhận sao chép sang bộ cá nhân ─────────────── */
-  function showCloneConfirmModal({ sourceSet, targetSet, onConfirm, onCancel }) {
-    const isDark = document.body.classList.contains('dark-theme') || !document.body.classList.contains('light-mode');
+  /* ─── Modal chọn cách bắt đầu sửa hợp âm (R0-2, ROADMAP5 mục 2.6) ──────────
+   * Trước đây bấm C khi đang xem HD/TLH sẽ ÂM THẦM sao chép và GHI ĐÈ bộ cá
+   * nhân của bạn (lỗi B2), hoặc admin đứng ở TLH bấm C sẽ ghi đè luôn cả HD
+   * (lỗi B3). Modal này bắt buộc người dùng chọn rõ ràng giữa 2 hướng an toàn:
+   *   1) Sửa trên bản của tôi — KHÔNG đụng gì tới dữ liệu đang có sẵn của bạn.
+   *   2) Sao chép nguồn sang bản của tôi — ghi đè, phải bấm xác nhận riêng.
+   * ─────────────────────────────────────────────────────────────────────── */
+  function showCloneChoiceModal({ sourceLabel, targetSet, onEditMine, onCopyOverwrite, onCancel }) {
+    const isDark = document.body.classList.contains('dark-mode');
     const bgCard = isDark ? '#1e293b' : '#ffffff';
     const textPrimary = isDark ? '#f8fafc' : '#0f172a';
     const textSecondary = isDark ? '#94a3b8' : '#64748b';
     const borderColor = isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0';
-
-    const isBaseSet = (!sourceSet || sourceSet === 'default' || sourceSet === 'TLH' || sourceSet.includes('TLH') || sourceSet.includes('Gốc'));
-    const sourceLabel = isBaseSet ? 'TLH (Gốc)' : sourceSet;
+    const safeSource = window.SafeHtml ? window.SafeHtml.escape(sourceLabel) : sourceLabel;
+    const safeTarget = window.SafeHtml ? window.SafeHtml.escape(targetSet) : targetSet;
 
     const overlay = document.createElement('div');
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-labelledby', 'cc-clone-choice-title');
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:99999;padding:16px;';
     overlay.innerHTML = `
       <div style="background:${bgCard};color:${textPrimary};border:1px solid ${borderColor};border-radius:14px;padding:1.5rem;max-width:440px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.4);">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.75rem;">
-          <div style="width:36px;height:36px;border-radius:8px;background:rgba(16,185,129,0.15);color:#10b981;display:flex;align-items:center;justify-content:center;font-size:18px;">🛡️</div>
-          <div>
-            <div style="font-size:1rem;font-weight:700;line-height:1.2;">Bảo Vệ Bản Phối Hợp Âm</div>
-            <div style="font-size:0.75rem;color:${textSecondary};">Phân quyền nhạc công & bản gốc</div>
-          </div>
+        <div id="cc-clone-choice-title" style="font-size:1rem;font-weight:700;line-height:1.2;margin-bottom:.35rem;">Bắt đầu sửa hợp âm</div>
+        <div style="font-size:0.85rem;color:${textSecondary};line-height:1.5;margin-bottom:1.1rem;">
+          Bạn đang xem bộ <strong>${safeSource}</strong> — không thể sửa trực tiếp.
+          Bộ hợp âm cá nhân của bạn là <strong style="color:#10b981;">${safeTarget}</strong>.
         </div>
-
-        <div style="font-size:0.85rem;color:${textSecondary};line-height:1.5;margin-bottom:1.25rem;">
-          ${isBaseSet 
-            ? `Bản <strong>TLH (Gốc)</strong> là bản chuẩn bất biến của hệ thống và không thể sửa trực tiếp.`
-            : `Bộ hợp âm <strong>${window.SafeHtml.escape(sourceLabel)}</strong> thuộc quyền sở hữu riêng của nhạc công khác.`}
-          <br><br>
-          Hệ thống sẽ <strong>sao chép toàn bộ hợp âm hiện tại</strong> sang bộ cá nhân <strong><span style="color:#10b981;font-weight:700;">${window.SafeHtml.escape(targetSet)}</span></strong> của bạn để bạn tự do chỉnh sửa và lưu trữ.
-        </div>
-
-        <div style="display:flex;gap:10px;justify-content:flex-end;">
-          <button id="cc-clone-cancel" class="btn btn-ghost btn-sm" style="border-radius:8px;">Hủy</button>
-          <button id="cc-clone-ok" class="btn btn-primary btn-sm" style="background:#10b981;border-color:#10b981;border-radius:8px;font-weight:600;padding:6px 14px;">
-            ✨ Sao Chép Sang "${window.SafeHtml.escape(targetSet)}" & Sửa
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px;">
+          <button id="cc-clone-edit-mine" class="btn btn-primary btn-sm" style="text-align:left;padding:10px 12px;border-radius:10px;font-weight:600;">
+            ✎ Sửa trên bản của tôi (${safeTarget})
+            <div style="font-weight:400;font-size:.72rem;opacity:.85;margin-top:2px;">Giữ nguyên hợp âm đã có trong bản của bạn (nếu có); bắt đầu trống nếu chưa có.</div>
           </button>
+          <button id="cc-clone-copy" class="btn btn-sm" style="text-align:left;padding:10px 12px;border-radius:10px;background:rgba(217,119,6,.12);border:1px solid rgba(217,119,6,.35);color:#b45309;font-weight:600;">
+            ⧉ Sao chép ${safeSource} sang ${safeTarget} (ghi đè)
+            <div style="font-weight:400;font-size:.72rem;opacity:.9;margin-top:2px;">Thay thế toàn bộ hợp âm hiện có trong bản của bạn bằng nội dung của ${safeSource}.</div>
+          </button>
+        </div>
+        <div style="display:flex;justify-content:flex-end;">
+          <button id="cc-clone-cancel" class="btn btn-ghost btn-sm">Hủy</button>
         </div>
       </div>
     `;
@@ -484,23 +497,23 @@ const ChordCanvasUI = (() => {
     document.body.appendChild(overlay);
 
     const cleanup = () => overlay.remove();
-    overlay.querySelector('#cc-clone-cancel').onclick = () => {
-      cleanup();
-      if (typeof onCancel === 'function') onCancel();
-    };
-    overlay.querySelector('#cc-clone-ok').onclick = () => {
-      cleanup();
-      if (typeof onConfirm === 'function') onConfirm();
-    };
-    overlay.onclick = e => {
-      if (e.target === overlay) {
+    overlay.querySelector('#cc-clone-edit-mine').onclick = () => { cleanup(); onEditMine?.(); };
+    overlay.querySelector('#cc-clone-cancel').onclick = () => { cleanup(); onCancel?.(); };
+    overlay.querySelector('#cc-clone-copy').onclick = () => {
+      // Ghi đè là hành động phá hoại — bắt xác nhận thêm 1 lần nữa qua confirm() gốc
+      // trước khi thực sự gọi onCopyOverwrite (đủ ma sát để tránh bấm nhầm).
+      if (window.confirm(`Ghi đè TOÀN BỘ hợp âm hiện có trong bản "${targetSet}" bằng nội dung của "${sourceLabel}"?\n\nHành động này không thể hoàn tác.`)) {
         cleanup();
-        if (typeof onCancel === 'function') onCancel();
+        onCopyOverwrite?.();
       }
     };
+    overlay.onclick = e => { if (e.target === overlay) { cleanup(); onCancel?.(); } };
+    document.addEventListener('keydown', function escHandler(e) {
+      if (e.key === 'Escape') { document.removeEventListener('keydown', escHandler); cleanup(); onCancel?.(); }
+    });
   }
 
-  return { getScale, getTextSize, getDotSize, applyAbsolute, createPopup, showNewSetModal, showDeleteConfirmModal, showCloneConfirmModal };
+  return { getScale, getTextSize, getDotSize, applyAbsolute, createPopup, showNewSetModal, showDeleteConfirmModal, showCloneChoiceModal };
 })();
 
 window.ChordCanvasUI = ChordCanvasUI;

@@ -42,13 +42,15 @@ const ChordCanvasEdit = (() => {
     }
     _closePopup();
     _popup = ChordCanvasUI.createPopup(anchor, measureIdx, noteIdx, existing, app.getCurrentSet(), {
-      onSave: async (val) => {
-        await saveChord(measureIdx, noteIdx, val);
+      onSave: async (val, opts = {}) => {
+        await saveChord(measureIdx, noteIdx, val, !opts.skipRebuild);
       },
       onDelete: async () => {
         await deleteChord(measureIdx, noteIdx);
       },
-      onClose: () => _closePopup()
+      onClose: () => _closePopup(),
+      // R0-3: Tab/→ nhập nhanh — mở popup của nốt kế tiếp sau khi đã lưu nốt hiện tại
+      onNext: (mi, ni) => openNextPopup(mi, ni)
     });
   }
 
@@ -73,6 +75,42 @@ const ChordCanvasEdit = (() => {
         if (dotBtn) dotBtn.click();
         else showPopup(next.el, next.measureIdx, next.noteIdx, '');
       }, 50);
+    }
+  }
+
+  // R0-2 (ROADMAP5, lỗi B2/B3): chuyển sang bộ cá nhân và bật sửa NGAY, không đụng
+  // dữ liệu sẵn có (không tự sao chép). Chỉ gọi sau khi người dùng chọn "Sửa trên
+  // bản của tôi" trong showCloneChoiceModal (xem ChordCanvas.setAddMode).
+  async function startEditingWithoutCloning(targetSet) {
+    await _getApp().switchSet(targetSet);
+    window.ChordCanvas?.setAddMode?.(true, { skipConfirm: true });
+  }
+
+  // Sao chép TOÀN BỘ hợp âm sourceSet -> targetSet rồi bắt đầu sửa targetSet.
+  // Chỉ gọi khi người dùng đã CHỦ ĐỘNG xác nhận ghi đè (showCloneChoiceModal).
+  async function cloneAndStartEditing(songId, sourceSet, targetSet) {
+    if (!songId) { window.ChordCanvas?.setAddMode?.(true, { skipConfirm: true }); return; }
+    AppUI?.setLoadingText?.(`Đang sao chép sang bộ hợp âm "${targetSet}"...`);
+    try {
+      if (sourceSet === 'default') {
+        // TLH chỉ tồn tại trong XML -> server không clone được, tự dựng mảng rồi save().
+        const arr = Object.entries(ChordCanvasXML.readXmlChords()).map(([k, chord]) => {
+          const [measureIdx, noteIdx] = k.split('_').map(Number);
+          return { measureIdx, noteIdx, chord };
+        });
+        await window.ApiService.chordSets.save(songId, targetSet, arr);
+      } else {
+        // Nguồn có thật trên server (HD/bộ khác) -> dùng clone() để giữ attribution.
+        await window.ApiService.chordSets.clone(songId, sourceSet, targetSet);
+      }
+      window.ChordCanvas?.clearSetsCache?.(songId);
+      window.App?.showToast?.(`✨ Đã sao chép hợp âm sang bộ "${targetSet}"!`, 'success', 3500);
+      await _getApp().switchSet(targetSet);
+      window.ChordCanvas?.setAddMode?.(true, { skipConfirm: true });
+    } catch(e) {
+      window.App?.showToast?.('Lỗi sao chép bộ hợp âm: ' + e.message, 'error');
+    } finally {
+      AppUI?.hideLoading?.();
     }
   }
 
@@ -190,7 +228,9 @@ const ChordCanvasEdit = (() => {
     redo,
     saveChord,
     deleteChord,
-    saveCustomSet
+    saveCustomSet,
+    startEditingWithoutCloning,
+    cloneAndStartEditing
   };
 })();
 

@@ -19,6 +19,7 @@ const ChordCanvas = (() => {
   let _ro             = null;
   let _songUseFlats   = null;
   let _chordLoadToken = 0; // Race condition guard
+  let _pendingConfirm = false; // R0-2: chặn mở chồng hộp thoại chọn cách sửa hợp âm
 
   const DOT_CLASS     = 'cc-dot';
   const BTN_CLASS     = 'cc-dot-btn';
@@ -182,7 +183,39 @@ const ChordCanvas = (() => {
 
   function clearSong() { _clear(); window.ChordCanvasDots?.clearGeomCache?.(); setAddMode(false); }
 
-  function setAddMode(on) {
+  // R0-2 (ROADMAP5, lỗi B2/B3): trước đây bấm C khi xem HD/TLH sẽ ÂM THẦM sao
+  // chép & ghi đè bộ cá nhân (hoặc cả HD dùng chung, nếu admin ở TLH). Giờ phải
+  // chọn rõ giữa "sửa trên bản của tôi" và "sao chép, ghi đè" (xác nhận thêm 1 lần).
+  function setAddMode(on, opts = {}) {
+    if (on && !opts.skipConfirm) {
+      if (_pendingConfirm) return;
+      const myChordCode = (window.Auth?.getChordCode?.() || '').toUpperCase();
+      const myUsername  = window.Auth?.getUser?.() || '';
+      const curSetUpper  = (_currentSet || '').toUpperCase();
+      const isOwnSet     = !!myChordCode && curSetUpper === myChordCode;
+      // Thu hẹp đúng phạm vi lỗi B2/B3 — KHÔNG đổi hành vi cho bộ cá nhân tuỳ ý khác
+      // (không phá luồng "Tạo bộ mới rồi sửa ngay"): TLH luôn bất biến (Core Rule 3);
+      // HD là bộ DÙNG CHUNG — ai không phải chủ sở hữu (chord_code='HD') phải hỏi trước.
+      const needsConfirm = (_currentSet === 'default') || (curSetUpper === 'HD' && !isOwnSet);
+      if (needsConfirm) {
+        const targetSet = myChordCode || myUsername;
+        if (!targetSet) {
+          window.App?.showToast?.('⚠️ Tài khoản của bạn chưa có mã hợp âm cá nhân. Vào Quản Lý Kho Nhạc để thiết lập trước khi sửa hợp âm.', 'info', 4000);
+          return;
+        }
+        const songId = window.App?.getCurrentSongId?.();
+        const sourceLabel = (_currentSet === 'default') ? 'TLH (Gốc)' : _currentSet;
+        _pendingConfirm = true;
+        window.ChordCanvasUI?.showCloneChoiceModal({
+          sourceLabel,
+          targetSet,
+          onEditMine:      () => { _pendingConfirm = false; window.ChordCanvasEdit?.startEditingWithoutCloning?.(targetSet); },
+          onCopyOverwrite: () => { _pendingConfirm = false; window.ChordCanvasEdit?.cloneAndStartEditing?.(songId, _currentSet, targetSet); },
+          onCancel:        () => { _pendingConfirm = false; }
+        });
+        return; // KHÔNG bật _editEnabled ở đây — chờ người dùng chọn xong trong hộp thoại
+      }
+    }
     _editEnabled = on;
     const btn = document.getElementById('btn-add-chord-mode');
     const barBtn = document.getElementById('btn-add-chord-mode-bar');
@@ -191,26 +224,6 @@ const ChordCanvas = (() => {
     btn?.classList.toggle('active', on);
     barBtn?.classList.toggle('active', on);
     bar?.classList.toggle('hidden', !on);
-
-    if (on) {
-      if (_currentSet === 'default') {
-        const myChordCode = (window.Auth?.getChordCode?.() || '').toUpperCase();
-        const targetSet = myChordCode || 'HD';
-        const currentSongId = window.App?.getCurrentSongId?.();
-        _cloneAndStartEditing(currentSongId, 'default', targetSet);
-        return;
-      }
-
-      const myChordCode = (window.Auth?.getChordCode?.() || '').toUpperCase();
-      const isAdmin = window.Auth?.isAdmin?.() ?? false;
-      const curSetUpper = (_currentSet || '').toUpperCase();
-
-      if (myChordCode && curSetUpper !== myChordCode && !isAdmin) {
-        const currentSongId = window.App?.getCurrentSongId?.();
-        _cloneAndStartEditing(currentSongId, _currentSet, myChordCode);
-        return;
-      }
-    }
 
     if (!on) window.ChordCanvasEdit?.closePopup?.();
     _build();
@@ -223,32 +236,6 @@ const ChordCanvas = (() => {
       return;
     }
     setAddMode(!_editEnabled);
-  }
-
-  async function _cloneAndStartEditing(songId, sourceSet, targetSet) {
-    if (!songId) { _build(); return; }
-    AppUI?.setLoadingText?.(`Đang tạo bộ hợp âm cá nhân "${targetSet}"...`);
-
-    try {
-      const sourceChords = sourceSet === 'default'
-        ? ChordCanvasXML.readXmlChords()
-        : { ..._customChords };
-
-      const arr = Object.entries(sourceChords).map(([k, chord]) => {
-        const [measureIdx, noteIdx] = k.split('_').map(Number);
-        return { measureIdx, noteIdx, chord };
-      });
-
-      await window.ApiService.chordSets.save(songId, targetSet, arr);
-      _chordSetsCache.delete(songId);
-      window.App?.showToast?.(`✨ Đã tự động tạo bộ cá nhân "${targetSet}" từ bản gốc!`, 'success', 3500);
-      await switchSet(targetSet);
-    } catch(e) {
-      window.App?.showToast?.('Lỗi tạo bộ cá nhân: ' + e.message, 'error');
-    } finally {
-      AppUI?.hideLoading?.();
-      _build();
-    }
   }
 
   function toggleHighlight() {
@@ -566,6 +553,7 @@ const ChordCanvas = (() => {
     onOSMDRendered, reposition, handleSelectChange, switchSet, createSet, showNewSetModal,
     deleteSet, confirmDeleteSet, resetSet,
     refreshSetDropdown: (force) => _refreshSetDropdown(force),
+    clearSetsCache: (songId) => _chordSetsCache.delete(songId),
     undo: () => window.ChordCanvasEdit?.undo?.(),
     redo: () => window.ChordCanvasEdit?.redo?.(),
     getCurrentSet: () => _currentSet,
