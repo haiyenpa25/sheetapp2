@@ -530,6 +530,8 @@ const ChordCanvas = (() => {
     if (deleteBtn) deleteBtn.style.display = isDeletable ? 'inline-flex' : 'none';
     const newBtn = document.getElementById('btn-new-chord-set');
     if (newBtn) newBtn.classList.toggle('hidden', !isLoggedIn);
+    const proposeBtn = document.getElementById('btn-propose-hd');
+    if (proposeBtn) proposeBtn.classList.toggle('hidden', !(_currentSet !== 'default' && _currentSet !== 'HD' && canCreate));
   }
 
   function _updateCountBadge() {
@@ -538,15 +540,9 @@ const ChordCanvas = (() => {
     const chordCount = Object.keys(_customChords || {}).length;
     const tlhCount   = (_currentSet === 'default') ? Object.keys(window.ChordCanvasXML?.readXmlChords?.() || {}).length : 0;
     const isFallback = (_currentSet === 'HD' && chordCount === 0);
-    const countText  = isFallback
-      ? '○ HD chưa có · đang hiện TLH'
-      : (_currentSet !== 'default'
-          ? (chordCount > 0 ? `● ${chordCount} hợp âm` : '○ Chưa có')
-          : (tlhCount > 0 ? `● ${tlhCount} hợp âm` : ''));
+    const countText  = isFallback ? '○ HD chưa có · đang hiện TLH' : (_currentSet !== 'default' ? (chordCount > 0 ? `● ${chordCount} hợp âm` : '○ Chưa có') : (tlhCount > 0 ? `● ${tlhCount} hợp âm` : ''));
     countBadge.textContent = countText;
-    countBadge.style.color = isFallback
-      ? 'var(--warning,#d97706)'
-      : ((chordCount > 0 || (_currentSet === 'default' && tlhCount > 0)) ? 'var(--success,#16a34a)' : 'var(--text-muted,#9ca3af)');
+    countBadge.style.color = isFallback ? 'var(--warning,#d97706)' : ((chordCount > 0 || (_currentSet === 'default' && tlhCount > 0)) ? 'var(--success,#16a34a)' : 'var(--text-muted,#9ca3af)');
   }
 
   function _updateSetUI() {
@@ -561,6 +557,7 @@ const ChordCanvas = (() => {
     init, loadSong, clearSong, setAddMode, toggleAddMode, toggleHighlight, setHighlightMode,
     onOSMDRendered, reposition, handleSelectChange, switchSet, createSet, showNewSetModal,
     deleteSet, confirmDeleteSet, resetSet,
+    showProposeHdModal: (name) => window.ChordCanvasUI?.showProposeHdModal?.(name || _currentSet),
     refreshSetDropdown: (force) => _refreshSetDropdown(force),
     updateSetUI: () => _updateSetUI(),
     toggleSuggestions: (show) => { _showTlhHints = (show !== undefined ? !!show : !_showTlhHints); _build(); return _showTlhHints; },

@@ -496,7 +496,85 @@ const ChordCanvasUI = (() => {
     });
   }
 
-  return { getScale, getTextSize, getDotSize, applyAbsolute, createPopup, showNewSetModal, showDeleteConfirmModal, showCloneChoiceModal };
+  function showProposeHdModal(setName, callbacks = {}) {
+    const songId = window.App?.getCurrentSongId?.();
+    if (!songId) {
+      window.App?.showToast?.('Không tìm thấy bài hát hiện tại!', 'error');
+      return;
+    }
+    const currentSet = setName || window.ChordCanvas?.getCurrentSet?.() || 'HD';
+    if (currentSet === 'default' || currentSet === 'TLH') {
+      window.App?.showToast?.('Không thể đề xuất bản TLH gốc làm bản cập nhật!', 'error');
+      return;
+    }
+    if (currentSet === 'HD') {
+      window.App?.showToast?.('Đây đã là bộ HD chuẩn dùng chung.', 'info');
+      return;
+    }
+    if (!window.Auth?.isBanhat?.()) {
+      window.App?.showToast?.('Vui lòng đăng nhập với vai trò Nhạc công để gửi đề xuất', 'info');
+      window.Auth?.openModal?.();
+      return;
+    }
+
+    document.getElementById('cc-propose-hd-modal')?.remove();
+    const isDark = document.body.classList.contains('dark-mode');
+    const bgCard = isDark ? '#1e293b' : '#ffffff', textPri = isDark ? '#f8fafc' : '#0f172a';
+    const textSec = isDark ? '#94a3b8' : '#64748b', border = isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0';
+    const safeSet = window.SafeHtml ? window.SafeHtml.escape(currentSet) : currentSet;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'cc-propose-hd-modal';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-labelledby', 'cc-propose-hd-title');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:99999;padding:16px;';
+    overlay.innerHTML = `<div style="background:${bgCard};color:${textPri};border:1px solid ${border};border-radius:14px;padding:1.5rem;max-width:440px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.4);"><div id="cc-propose-hd-title" style="font-size:1.05rem;font-weight:700;line-height:1.3;margin-bottom:.35rem;">Đề xuất lên bộ HD (chuẩn dùng chung)</div><div style="font-size:12.5px;color:${textSec};line-height:1.5;margin-bottom:1rem;">Gửi bộ hợp âm <strong>"${safeSet}"</strong> đến Ca Trưởng / Admin để xem xét cập nhật vào bộ HD chính.</div><div style="margin-bottom:1rem;"><label for="cc-propose-note" style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:${textSec};">Ghi chú đề xuất (tùy chọn):</label><textarea id="cc-propose-note" rows="3" placeholder="Ví dụ: Bổ sung hợp âm điệp khúc, tinh chỉnh bè 2..." style="width:100%;box-sizing:border-box;border:1.5px solid ${border};background:transparent;color:${textPri};border-radius:8px;padding:.5rem .7rem;font-size:13px;outline:none;resize:vertical;"></textarea></div><div style="display:flex;gap:.5rem;justify-content:flex-end;"><button id="cc-propose-cancel" class="btn btn-ghost btn-sm">Hủy</button><button id="cc-propose-submit" class="btn btn-primary btn-sm" style="display:inline-flex;align-items:center;gap:6px;"><svg class="icon icon-send icon-xs" aria-hidden="true" style="width:14px;height:14px;"><use href="#icon-send"/></svg><span>Gửi đề xuất</span></button></div></div>`;
+
+    document.body.appendChild(overlay);
+    const textarea = overlay.querySelector('#cc-propose-note');
+    setTimeout(() => textarea?.focus(), 50);
+
+    const cleanup = () => overlay.remove();
+    overlay.querySelector('#cc-propose-cancel').onclick = cleanup;
+    overlay.onclick = e => { if (e.target === overlay) cleanup(); };
+    document.addEventListener('keydown', function escHandler(e) {
+      if (e.key === 'Escape') { document.removeEventListener('keydown', escHandler); cleanup(); }
+    });
+
+    const submitBtn = overlay.querySelector('#cc-propose-submit');
+    submitBtn.onclick = async () => {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span>Đang gửi…</span>`;
+      try {
+        if (window.ChordCanvasEdit?.executeSave) {
+          await window.ChordCanvasEdit.executeSave();
+        }
+        const note = textarea ? textarea.value.trim() : '';
+        const payload = {
+          target_type: 'chord_set',
+          song_id: songId,
+          set_name: currentSet,
+          review_type: 'update_hd',
+          submit_note: note
+        };
+        const res = await window.ApiService.reviews.submit(payload);
+        cleanup();
+        if (res && (res.success || res.id)) {
+          window.App?.showToast?.('✓ Đã gửi đề xuất lên bộ HD thành công!', 'success');
+          callbacks.onSuccess?.(res);
+        } else {
+          throw new Error(res?.message || 'Không thể tạo đề xuất');
+        }
+      } catch (err) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<svg class="icon icon-send icon-xs" aria-hidden="true" style="width:14px;height:14px;"><use href="#icon-send"/></svg><span>Gửi đề xuất</span>`;
+        window.App?.showToast?.(err.message || 'Lỗi khi gửi đề xuất', 'error');
+      }
+    };
+  }
+
+  return { getScale, getTextSize, getDotSize, applyAbsolute, createPopup, showNewSetModal, showDeleteConfirmModal, showCloneChoiceModal, showProposeHdModal };
 })();
 
 window.ChordCanvasUI = ChordCanvasUI;

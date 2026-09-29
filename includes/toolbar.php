@@ -71,6 +71,11 @@
       <button id="btn-new-chord-set" class="icon-btn-pill" title="Tạo bản phối mới" onclick="ChordCanvas.showNewSetModal()">
         <span class="fs-sm-p"><?= icon('plus') ?></span>
       </button>
+
+      <!-- Nút Đề xuất lên HD (Ticket R2-9) -->
+      <button id="btn-propose-hd" class="icon-btn-pill btn-propose-hd hidden" title="Đề xuất bản phối này lên bộ HD (chuẩn dùng chung)" onclick="ChordCanvas.showProposeHdModal()">
+        <span class="fs-sm-p"><?= icon('send', 'icon-xs') ?></span>
+      </button>
     </div>
 
     <!-- Nhóm 4: Cụm Tempo / Gõ Nhịp (Ticket R1-2) -->

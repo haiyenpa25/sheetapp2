@@ -22,6 +22,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../core/Response.php';
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../services/ReviewService.php';
+require_once __DIR__ . '/../services/ChordSetService.php';
 
 class ReviewController {
     public function handleRequest(string $method): void {
@@ -108,6 +109,38 @@ class ReviewController {
                 $songId = trim($body['song_id'] ?? ($_POST['song_id'] ?? ''));
                 $reviewType = trim($body['review_type'] ?? ($_POST['review_type'] ?? 'recommend'));
                 $submitNote = trim($body['submit_note'] ?? ($_POST['submit_note'] ?? ''));
+
+                if ($targetType === 'chord_set' && $targetId <= 0 && $songId !== '') {
+                    $setName = trim($body['set_name'] ?? ($body['target_name'] ?? ($_POST['set_name'] ?? '')));
+                    if ($setName !== '') {
+                        if ($setName === 'HD' || $setName === 'default' || $setName === 'TLH') {
+                            Response::error("Không thể đề xuất bộ chuẩn {$setName}", 400);
+                            return;
+                        }
+                        $pdo = DB::get();
+                        $stmtUser = $pdo->prepare("SELECT id FROM user_chord_sets WHERE song_id = ? AND user_id = ? AND (set_name = ? OR username || '__' || set_name = ?) LIMIT 1");
+                        $stmtUser->execute([$songId, $userId, $setName, $setName]);
+                        $foundId = $stmtUser->fetchColumn();
+                        if ($foundId) {
+                            $targetId = (int)$foundId;
+                        } else {
+                            $details = ChordSetService::getSetDetails($songId, $setName);
+                            if ($details && isset($details['id'])) {
+                                $targetId = (int)$details['id'];
+                                if ((int)($details['user_id'] ?? 0) === 0 && $userId > 0) {
+                                    $pdo->prepare("UPDATE user_chord_sets SET user_id = ?, username = ? WHERE id = ?")->execute([$userId, Auth::username() ?: 'user', $targetId]);
+                                }
+                            } else {
+                                $chords = ChordSetService::loadSet($songId, $setName);
+                                ChordSetService::saveSet($songId, $setName, $chords, (int)$userId, Auth::username() ?: 'user');
+                                $details = ChordSetService::getSetDetails($songId, $setName);
+                                if ($details && isset($details['id'])) {
+                                    $targetId = (int)$details['id'];
+                                }
+                            }
+                        }
+                    }
+                }
 
                 $result = ReviewService::submit((int)$userId, $targetType, $targetId, $songId, $reviewType, $submitNote ?: null);
                 Response::ok($result);
