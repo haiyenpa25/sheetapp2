@@ -82,7 +82,7 @@ const ChordCanvasUI = (() => {
   ];
 
   /* ─── Popup Hợp âm ─────────────────────────────────────────── */
-  function createPopup(anchor, measureIdx, noteIdx, existing, currentSet, callbacks) {
+  function createPopup(anchor, measureIdx, noteIdx, existing, currentSet, callbacks, suggestion = '') {
     const ar  = anchor.getBoundingClientRect();
     const isMobile = window.innerWidth <= 900;
     const pop = document.createElement('div');
@@ -144,13 +144,14 @@ const ChordCanvasUI = (() => {
         ${keyHint}
       </div>
       <input id="cc-pop-inp" type="text" maxlength="12" autocomplete="off"
-             placeholder="VD: Am, D7, G…" value="${window.SafeHtml.escape(existing)}"
+             placeholder="${suggestion ? `Gợi ý: ${window.SafeHtml.escape(suggestion)} (T)` : 'VD: Am, D7, G…'}" value="${window.SafeHtml.escape(existing)}"
              style="width:100%;box-sizing:border-box;border:1.5px solid #c4b5fd;border-radius:5px;
                     padding:.35rem .55rem;font-size:.95rem;font-weight:700;font-family:monospace;
                     color:#c00;outline:none;background:var(--bg-base,#fff);margin-bottom:.35rem;
                     text-transform:capitalize;transition:border-color .15s;"
              onfocus="this.style.borderColor='#6d28d9';this.style.boxShadow='0 0 0 3px rgba(109,40,217,.18)'"
              onblur="this.style.borderColor='#c4b5fd';this.style.boxShadow='none'">
+      ${suggestion ? `<div class="cc-suggestion-hint">Gợi ý từ TLH: <strong>${window.SafeHtml.escape(suggestion)}</strong> <button type="button" class="btn-apply-suggestion" id="btn-apply-sug" title="Nhận gợi ý (Phím T)">Nhận (T)</button></div>` : ''}
       <div id="cc-sug-hist" style="display:flex;align-items:flex-start;gap:4px;min-height:22px;margin-bottom:2px;"></div>
       <div id="cc-sug-key"  style="display:flex;align-items:flex-start;gap:4px;min-height:22px;margin-bottom:.35rem;"></div>
       <details id="cc-lib-det" style="margin-bottom:.4rem;">
@@ -329,30 +330,87 @@ const ChordCanvasUI = (() => {
       callbacks.onClose();
     });
 
-    // R0-3 (ROADMAP5, lỗi B4): trước đây gọi window.ChordCanvas?.saveChordWithoutReload?.(...)
-    // và window.ChordCanvas?.openNextPopup?.(...) — CẢ HAI hàm này không tồn tại trên
-    // ChordCanvas (chỉ có trên ChordCanvasEdit), nên optional chaining âm thầm không làm gì:
-    // Tab/→ đóng popup mà KHÔNG lưu hợp âm vừa gõ. Sửa bằng cách dùng đúng callbacks đã có
-    // sẵn (onSave/onDelete, giống hệt doSave) và thêm callbacks.onNext do ChordCanvasEdit nối.
+    // Nút Nhận gợi ý TLH
+    const sugBtn = pop.querySelector('#btn-apply-sug');
+    if (sugBtn) {
+      sugBtn.addEventListener('pointerdown', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        inp.value = suggestion;
+        inp.focus();
+      });
+    }
+
+    // R0-3 (ROADMAP5, lỗi B4) & R2-1: Enter / Tab / → lưu và tiến tới nốt tiếp theo
     const doSaveNext = () => {
       if (_saved) return;
       _saved = true; clearTimeout(_blurTimer);
       const val = formatChord(inp.value.trim());
       if (document.activeElement === inp) inp.blur();
       callbacks.onClose();
-      // skipRebuild: onNext sắp mở popup của nốt kế tiếp ngay sau đây — nếu onSave ở đây
-      // tự lên lịch rebuild dots (_build(), vốn đóng MỌI popup đang mở qua _clear()) thì
-      // rebuild đó có thể chạy SAU khi popup mới đã mở và đóng nhầm nó (race condition).
-      // Dữ liệu hợp âm vẫn được lưu đúng; dots sẽ tự cập nhật ở lần rebuild kế tiếp.
       if (val)            { _pushHist(val); callbacks.onSave(val, { skipRebuild: true }); }
       else if (existing)  { callbacks.onDelete(); }
       callbacks.onNext?.(measureIdx, noteIdx);
     };
 
+    // R2-1: Shift+Tab / ← lùi lại nốt trước
+    const doSavePrev = () => {
+      if (_saved) return;
+      _saved = true; clearTimeout(_blurTimer);
+      const val = formatChord(inp.value.trim());
+      if (document.activeElement === inp) inp.blur();
+      callbacks.onClose();
+      if (val)            { _pushHist(val); callbacks.onSave(val, { skipRebuild: true }); }
+      else if (existing)  { callbacks.onDelete(); }
+      callbacks.onPrev?.(measureIdx, noteIdx);
+    };
+
     inp?.addEventListener('keydown', e => {
-      if (e.key==='Enter')  { e.stopPropagation(); doSave(); e.preventDefault(); }
-      if (e.key==='Escape') { e.stopPropagation(); _saved=true; clearTimeout(_blurTimer); callbacks.onClose(); e.preventDefault(); }
-      if (e.key==='Tab'||e.key==='ArrowRight') { e.stopPropagation(); e.preventDefault(); doSaveNext(); }
+      // Enter = đặt hợp âm + tiến 1 nốt (R2-1)
+      if (e.key === 'Enter') {
+        e.stopPropagation();
+        e.preventDefault();
+        doSaveNext();
+        return;
+      }
+      // Escape = thoát
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        _saved = true;
+        clearTimeout(_blurTimer);
+        callbacks.onClose();
+        e.preventDefault();
+        return;
+      }
+      // Shift+Tab: lùi lại 1 nốt (R2-1)
+      if (e.key === 'Tab' && e.shiftKey) {
+        e.stopPropagation();
+        e.preventDefault();
+        doSavePrev();
+        return;
+      }
+      // Tab / ArrowRight (ở cuối text): tiến 1 nốt
+      if (e.key === 'Tab' || (e.key === 'ArrowRight' && inp.selectionStart === inp.value.length)) {
+        e.stopPropagation();
+        e.preventDefault();
+        doSaveNext();
+        return;
+      }
+      // ArrowLeft (ở đầu text): lùi 1 nốt
+      if (e.key === 'ArrowLeft' && inp.selectionStart === 0 && inp.selectionEnd === 0) {
+        e.stopPropagation();
+        e.preventDefault();
+        doSavePrev();
+        return;
+      }
+      // Phím T: nhận gợi ý từ TLH (R2-1)
+      if ((e.key === 't' || e.key === 'T') && suggestion && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        if (!inp.value.trim() || inp.value === suggestion) {
+          e.preventDefault();
+          inp.value = suggestion;
+          inp.select();
+        }
+      }
     });
 
     // Ngăn event lan ra ngoài popup

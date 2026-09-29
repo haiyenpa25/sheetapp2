@@ -18,7 +18,27 @@ const ChordCanvasEdit = (() => {
     return _ctx || window.ChordCanvas;
   }
 
+  let _currentCursorEl = null;
+
+  function _clearNoteCursor() {
+    if (_currentCursorEl) {
+      _currentCursorEl.classList.remove('cc-note-cursor');
+      _currentCursorEl = null;
+    }
+    document.querySelectorAll('.cc-note-cursor').forEach(el => el.classList.remove('cc-note-cursor'));
+  }
+
+  function _scrollToNote(el) {
+    if (!el || typeof el.getBoundingClientRect !== 'function') return;
+    const r = el.getBoundingClientRect();
+    const vh = window.innerHeight || document.documentElement.clientHeight;
+    if (r.top < 110 || r.bottom > vh - 100) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+    }
+  }
+
   function _closePopup() {
+    _clearNoteCursor();
     _popup?.remove();
     _popup = null;
   }
@@ -50,6 +70,20 @@ const ChordCanvasEdit = (() => {
       await app.switchSet('HD');
     }
     _closePopup();
+
+    // R2-1: Con trỏ nốt viền sáng và tự cuộn
+    const noteEl = anchor?.closest?.('g.vf-stavenote') || anchor;
+    if (noteEl) {
+      noteEl.classList.add('cc-note-cursor');
+      _currentCursorEl = noteEl;
+      _scrollToNote(noteEl);
+    }
+
+    // R2-1: Gợi ý hợp âm từ TLH / XML
+    let suggestion = '';
+    const xmlMap = (typeof ChordCanvasXML !== 'undefined' && ChordCanvasXML.readXmlChords) ? ChordCanvasXML.readXmlChords() : {};
+    suggestion = xmlMap[`${measureIdx}_${noteIdx}`] || '';
+
     _popup = ChordCanvasUI.createPopup(anchor, measureIdx, noteIdx, existing, app.getCurrentSet(), {
       onSave: async (val, opts = {}) => {
         await saveChord(measureIdx, noteIdx, val, !opts.skipRebuild);
@@ -58,16 +92,19 @@ const ChordCanvasEdit = (() => {
         await deleteChord(measureIdx, noteIdx);
       },
       onClose: () => _closePopup(),
-      // R0-3: Tab/→ nhập nhanh — mở popup của nốt kế tiếp sau khi đã lưu nốt hiện tại
-      onNext: (mi, ni) => openNextPopup(mi, ni)
-    });
+      // R0-3 & R2-1: Tab/Enter/→ nhập nhanh — mở popup của nốt kế tiếp
+      onNext: (mi, ni) => openNextPopup(mi, ni),
+      // R2-1: Shift+Tab/← lùi lại nốt trước
+      onPrev: (mi, ni) => openPrevPopup(mi, ni)
+    }, suggestion);
   }
 
   function openNextPopup(curMeasureIdx, curNoteIdx) {
     const app = _getApp();
     const noteEls = app.getNoteEls ? app.getNoteEls() : [];
     if (!noteEls.length) return;
-    const mapped = window.ChordCanvasDots ? window.ChordCanvasDots.mapNotes(noteEls, {}) : [];
+    const chords = app.getCustomChords ? app.getCustomChords() : {};
+    const mapped = window.ChordCanvasDots ? window.ChordCanvasDots.mapNotes(noteEls, chords) : [];
     let foundIdx = -1;
     for (let i = 0; i < mapped.length; i++) {
       if (mapped[i].measureIdx === curMeasureIdx && mapped[i].noteIdx === curNoteIdx) {
@@ -77,13 +114,30 @@ const ChordCanvasEdit = (() => {
     }
     if (foundIdx !== -1 && foundIdx + 1 < mapped.length) {
       const next = mapped[foundIdx + 1];
-      const container = document.getElementById('osmd-container');
-      if (!container) return;
-      const dotBtn = container.querySelector(`.cc-dot-btn[style*="left:${(next.rect.left - container.getBoundingClientRect().left) + next.rect.width / 2}px"]`);
       setTimeout(() => {
-        if (dotBtn) dotBtn.click();
-        else showPopup(next.el, next.measureIdx, next.noteIdx, '');
-      }, 50);
+        showPopup(next.el, next.measureIdx, next.noteIdx, next.chord || '');
+      }, 40);
+    }
+  }
+
+  function openPrevPopup(curMeasureIdx, curNoteIdx) {
+    const app = _getApp();
+    const noteEls = app.getNoteEls ? app.getNoteEls() : [];
+    if (!noteEls.length) return;
+    const chords = app.getCustomChords ? app.getCustomChords() : {};
+    const mapped = window.ChordCanvasDots ? window.ChordCanvasDots.mapNotes(noteEls, chords) : [];
+    let foundIdx = -1;
+    for (let i = 0; i < mapped.length; i++) {
+      if (mapped[i].measureIdx === curMeasureIdx && mapped[i].noteIdx === curNoteIdx) {
+        foundIdx = i;
+        break;
+      }
+    }
+    if (foundIdx > 0) {
+      const prev = mapped[foundIdx - 1];
+      setTimeout(() => {
+        showPopup(prev.el, prev.measureIdx, prev.noteIdx, prev.chord || '');
+      }, 40);
     }
   }
 
