@@ -170,17 +170,74 @@
         <?= icon('more-horizontal') ?>
       </button>
 
-      <div class="dropdown-menu hidden" id="main-dropdown-menu">
+      <div class="dropdown-menu hidden" id="main-dropdown-menu" role="menu" aria-label="Bảng công cụ và cài đặt">
         <!-- Menu ⋮ behavior: close on 'Escape', item click (item classList.add('hidden')), and handleOutside (!btnOptions.contains(e.target)) handled in ToolbarController -->
-        <!-- NHÓM 1: ÂM THANH & TÁCH BÈ SATB -->
-        <div class="menu-section-header">ÂM THANH & BÈ SATB</div>
+        <!-- Handle bar cho mobile bottom sheet (Ticket R1-5) -->
+        <div class="sheet-drag-handle"></div>
+
+        <!-- NHÓM 1: HIỂN THỊ (Display) -->
+        <div class="menu-section-header" role="presentation">HIỂN THỊ</div>
+
+        <div class="tools-row tools-zoom-row menu-section-compact-only" role="group" aria-label="Thu phóng bản nhạc">
+          <span class="tools-row-label"><?= icon('search') ?> Thu phóng</span>
+          <div class="tools-zoom-controls">
+            <button id="btn-menu-zoom-out" class="icon-btn-xs" title="Thu nhỏ">−</button>
+            <span id="menu-zoom-val" class="menu-zoom-val">100%</span>
+            <button id="btn-menu-zoom-in" class="icon-btn-xs" title="Phóng to">+</button>
+            <button id="btn-menu-lock-zoom" class="icon-btn-xs" title="Khóa tỷ lệ zoom"><?= icon('unlock') ?></button>
+          </div>
+        </div>
+
+        <button id="btn-compact-mode" class="btn btn-ghost btn-sm btn-menu-item" title="Bật/Tắt chế độ tối giản bản nhạc">
+          <?= icon('layout') ?>
+          <span class="btn-text">Tối giản bản nhạc</span>
+        </button>
+        <div id="compact-settings-panel" class="compact-settings-panel hidden">
+          <label class="check-row"><input type="checkbox" id="chk-compact-bass" checked> Ẩn Khóa Fa</label>
+          <label class="check-row"><input type="checkbox" id="chk-compact-voices" checked> Ẩn Bè Phụ</label>
+          <label class="check-row"><input type="checkbox" id="chk-compact-chordnotes" checked> Ẩn Nốt Chùm</label>
+          <label class="check-row"><input type="checkbox" id="chk-compact-lyrics"> Ẩn Lời Ca (Nhạc cụ)</label>
+          <label class="check-row"><input type="checkbox" id="chk-compact-measures"> Ẩn Số Ô Nhịp</label>
+          <label class="check-row"><input type="checkbox" id="chk-compact-texts" checked> Tối giản Tác Giả</label>
+          <label class="check-row"><input type="checkbox" id="chk-compact-title"> Ẩn Tên Bài Hát</label>
+        </div>
+
+        <button id="btn-menu-verse-mode" class="btn btn-ghost btn-sm btn-menu-item" title="Đổi chế độ khổ">
+          <?= icon('book-open') ?>
+          <span id="menu-verse-mode-label">Khổ hát: Tất cả khổ</span>
+        </button>
+
+        <button id="btn-menu-chord-preset" class="btn btn-ghost btn-sm btn-menu-item" title="Đổi cỡ hiển thị hợp âm">
+          <?= icon('type') ?>
+          <span id="menu-chord-preset-label">Cỡ hợp âm: Chuẩn</span>
+        </button>
+
+        <button id="btn-menu-chord-notation" class="btn btn-ghost btn-sm btn-menu-item" title="Đổi ký hiệu hợp âm">
+          <?= icon('hash') ?>
+          <span id="menu-chord-notation-label">Ký hiệu: Chuẩn (C)</span>
+        </button>
+
+        <button id="btn-menu-instrument-role" class="btn btn-ghost btn-sm btn-menu-item" title="Đổi góc nhìn nhạc cụ">
+          <?= icon('guitar') ?>
+          <span id="menu-instrument-role-label">Góc nhìn: Guitar</span>
+        </button>
+
+        <button id="btn-dark-toggle" class="btn btn-ghost btn-sm btn-menu-item" title="Đổi chế độ Sáng / Tối (D)">
+          <?= icon('moon') ?>
+          <span>Chế độ Sáng / Tối</span>
+        </button>
+
+
+        <!-- NHÓM 2: NHẠC (Music) -->
+        <div class="menu-section-header" role="presentation">NHẠC</div>
+
         <div class="menu-audio-actions">
           <button id="btn-play-audio" class="btn btn-ghost btn-xs btn-menu-item" disabled title="Phát nhạc đệm bè">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-13"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor"/></svg>
-            <span class="btn-text">Phát Bè</span>
+            <?= icon('play') ?>
+            <span class="btn-text">Phát bè</span>
           </button>
           <button id="btn-stop-audio" class="btn btn-ghost btn-xs btn-stop hidden" title="Dừng phát nhạc">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-13"><rect x="6" y="6" width="12" height="12" fill="currentColor"/></svg>
+            <?= icon('pause') ?>
             <span class="btn-text">Dừng</span>
           </button>
           <button id="btn-audio-settings" class="icon-btn-xs" disabled title="Tùy chỉnh bè phát"><?= icon('settings') ?></button>
@@ -207,83 +264,16 @@
             <span class="audio-panel-label">Âm lượng:</span>
             <input id="audio-volume" type="range" class="audio-volume-slider" min="-20" max="24" step="1" value="18" data-touch-allow="true" disabled>
           </div>
-          <!-- btn-metronome & audio-playback-mode legacy removed in L5-8 -->
         </div>
 
         <button id="btn-mixer" class="btn btn-ghost btn-sm btn-menu-item" disabled title="Bật/Tắt nhạc cụ">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
-          Bộ Trộn Âm (Mixer)
+          <?= icon('sliders') ?>
+          <span>Bộ trộn âm (Mixer)</span>
         </button>
 
-        <!-- NHÓM 2: HIỂN THỊ & GỌN NHẸ -->
-        <div class="menu-section-header">HIỂN THỊ & GỌN NHẸ</div>
-
-        <button id="btn-compact-mode" class="btn btn-ghost btn-sm btn-menu-item" title="Bật/Tắt chế độ Gọn Nhẹ">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14h6v6H4zm10 0h6v6h-6zM4 4h6v6H4zm10 0h6v6h-6z"/></svg>
-          Tối Giản Bản Nhạc
-        </button>
-        <!-- btn-compact-settings legacy removed in L5-8 -->
-        <div id="compact-settings-panel" class="compact-settings-panel hidden">
-          <label class="check-row"><input type="checkbox" id="chk-compact-bass" checked> Ẩn Khóa Fa</label>
-          <label class="check-row"><input type="checkbox" id="chk-compact-voices" checked> Ẩn Bè Phụ</label>
-          <label class="check-row"><input type="checkbox" id="chk-compact-chordnotes" checked> Ẩn Nốt Chùm</label>
-          <label class="check-row"><input type="checkbox" id="chk-compact-lyrics"> Ẩn Lời Ca (Nhạc cụ)</label>
-          <label class="check-row"><input type="checkbox" id="chk-compact-measures"> Ẩn Số Ô Nhịp</label>
-          <label class="check-row"><input type="checkbox" id="chk-compact-texts" checked> Tối giản Tác Giả</label>
-          <label class="check-row"><input type="checkbox" id="chk-compact-title"> Ẩn Tên Bài Hát</label>
-        </div>
-
-        <button id="btn-lyric-view" class="btn btn-ghost btn-sm btn-menu-item" title="Xem lời nhạc hợp âm dạng chữ">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          Xem Lời & Hợp Âm Chữ
-        </button>
-
-        <!-- NHÓM 3: BẢN PHỐI & BIÊN TẬP -->
-        <div class="menu-section-header">BẢN PHỐI & BIÊN TẬP</div>
-        <button id="btn-menu-chord-edit" class="btn btn-ghost btn-sm btn-menu-item" title="Điền / Chỉnh sửa hợp âm trực tiếp trên sheet (phím C)" onclick="window.ChordCanvas?.toggleAddMode?.()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          Điền Hợp Âm Trực Tiếp (phím C)
-        </button>
-        <button id="btn-song-versions" class="btn btn-ghost btn-sm btn-menu-item" disabled title="Chọn phiên bản MusicXML">
-          <span class="fs-sm-p"><?= icon('users') ?></span>
-          <span id="btn-version-label">Bản Gốc</span>
-        </button>
-        <div id="dropdown-song-versions" class="dropdown-menu dropdown-song-versions hidden">
-          <div id="version-list-items"></div>
-          <!-- btn-create-new-version legacy removed in L5-8 -->
-        </div>
-
-        <button id="btn-toolbar-editor" class="btn btn-ghost btn-sm btn-menu-item" title="Mở Editor nốt 4 bè SATB" onclick="(function(){ var sid = window.App?.getCurrentSongId?.(); window.location.href = sid ? ('/editor/?song=' + sid) : '/editor/'; })()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          Sửa Sheet (Editor SATB)
-        </button>
-        <!-- btn-menu-open-editor legacy removed in L5-8 -->
-
-        <?php $bHref = $baseHref ?? '/'; ?>
-        <a href="<?= $bHref ?>manager/#tab-users" data-target="/manager/#tab-users" target="_blank" class="btn btn-ghost btn-sm btn-menu-item" title="Quản lý thành viên ban nhạc & bộ hợp âm nhạc công">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-16"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span>Ban Nhạc & Thành Viên</span>
-        </a>
-
-        <a href="<?= $bHref ?>manager/" target="_blank" class="btn btn-ghost btn-sm btn-menu-item" title="Cổng Quản Lý Kho Nhạc & Hợp Âm">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-16"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          <span>Quản Lý Kho Nhạc (/manager/)</span>
-        </a>
-
-        <!-- NHÓM PHỤ THU VÀO TỪ TOOLBAR (< 1300px, Ticket L0-4) -->
-        <div class="menu-section-header menu-section-compact-only">ĐIỀU KHIỂN BẢN NHẠC</div>
-        <div class="menu-compact-controls menu-section-compact-only">
-          <div class="audio-panel-row mb-2">
-            <span class="audio-panel-label">Thu phóng:</span>
-            <div class="d-inline-flex items-center gap-1">
-              <button id="btn-menu-zoom-out" class="icon-btn-xs" title="Thu nhỏ">−</button>
-              <span id="menu-zoom-val" class="menu-zoom-val">100%</span>
-              <button id="btn-menu-zoom-in" class="icon-btn-xs" title="Phóng to">+</button>
-              <button id="btn-menu-lock-zoom" class="icon-btn-xs" title="Khóa tỷ lệ zoom"><?= icon('unlock') ?></button>
-            </div>
-          </div>
-          <div class="audio-panel-row mb-2">
-            <span class="audio-panel-label">Tự cuộn:</span>
+        <div class="tools-row tools-scroll-row menu-section-compact-only">
+          <span class="tools-row-label"><?= icon('scroll') ?> Tự cuộn</span>
+          <div class="tools-scroll-controls">
             <button id="btn-menu-auto-scroll" class="btn btn-ghost btn-xs btn-menu-item btn-menu-compact-action">
               <span class="btn-text">Cuộn</span>
             </button>
@@ -291,86 +281,100 @@
               <option value="1" selected>1×</option><option value="2">2×</option><option value="3">3×</option><option value="4">4×</option>
             </select>
           </div>
-          <div class="audio-panel-row mb-2">
-            <span class="audio-panel-label">Kẹp Capo:</span>
-            <select id="menu-capo-select" class="select-toolbar select-menu-compact" title="Chọn ngăn kẹp Capo" aria-label="Chọn ngăn kẹp Capo">
-              <option value="0" selected>0 (Không kẹp)</option>
-              <option value="1">Ngăn 1</option><option value="2">Ngăn 2</option>
-              <option value="3">Ngăn 3</option><option value="4">Ngăn 4</option>
-              <option value="5">Ngăn 5</option><option value="6">Ngăn 6</option>
-              <option value="7">Ngăn 7</option>
-            </select>
-          </div>
-          <div class="audio-panel-row mb-2">
-            <span class="audio-panel-label">Giữ nhịp:</span>
-            <button id="btn-menu-metronome" class="btn btn-ghost btn-xs btn-menu-item btn-menu-compact-action">
-              <span>♩ Metronome</span>
-            </button>
-          </div>
-          <div class="audio-panel-row mb-2">
-            <span class="audio-panel-label">Cỡ hợp âm:</span>
-            <button id="btn-menu-chord-preset" class="btn btn-ghost btn-xs btn-menu-item btn-menu-compact-action" title="Đổi preset hiển thị hợp âm (Chuẩn / Sân khấu lớn / Tương phản cao)">
-              <span id="menu-chord-preset-label">Aa Chuẩn</span>
-            </button>
-          </div>
-          <div class="audio-panel-row mb-2">
-            <span class="audio-panel-label">Ký hiệu:</span>
-            <button id="btn-menu-chord-notation" class="btn btn-ghost btn-xs btn-menu-item btn-menu-compact-action" title="Đổi ký hiệu hợp âm (Chuẩn / Số La Mã / Nashville)">
-              <span id="menu-chord-notation-label"><?= icon('type') ?> Chuẩn (C)</span>
-            </button>
-          </div>
-          <div class="audio-panel-row mb-2">
-            <span class="audio-panel-label">Vai trò:</span>
-            <button id="btn-menu-instrument-role" class="btn btn-ghost btn-xs btn-menu-item btn-menu-compact-action" title="Đổi vai trò nhạc công">
-              <span id="menu-instrument-role-label"><?= icon('guitar') ?> Guitar</span>
-            </button>
-          </div>
-          <div class="audio-panel-row">
-            <span class="audio-panel-label">Khổ hát:</span>
-            <button id="btn-menu-verse-mode" class="btn btn-ghost btn-xs btn-menu-item btn-menu-compact-action" title="Đổi chế độ khổ">
-              <span id="menu-verse-mode-label"><?= icon('book-open') ?> Tất cả khổ</span>
-            </button>
-          </div>
-          <!-- R0-7 (ROADMAP5): trước đây "Điền hợp âm" và "Gốc" (dịch giọng) không có
-               mục dự phòng nào ở đây, nên hoàn toàn không bấm được khi laptop 1366-1650px
-               ẩn 2 nút này khỏi toolbar. -->
-          <div class="audio-panel-row mb-2">
-            <span class="audio-panel-label">Điền hợp âm:</span>
-            <button id="btn-menu-add-chord-mode" class="btn btn-ghost btn-xs btn-menu-item btn-menu-compact-action" title="Điền / Sửa hợp âm trực tiếp trên sheet (phím C)">
-              <span><?= icon('pencil') ?> Sửa hợp âm</span>
-            </button>
-          </div>
-          <div class="audio-panel-row">
-            <span class="audio-panel-label">Tông nhạc:</span>
-            <button id="btn-menu-transpose-reset" class="btn btn-ghost btn-xs btn-menu-item btn-menu-compact-action" title="Đưa về tông gốc (0)">
-              <span><?= icon('rotate-ccw') ?> Về tông Gốc</span>
-            </button>
-          </div>
         </div>
 
-        <button id="btn-menu-auth" class="btn btn-ghost btn-sm btn-menu-item menu-section-compact-only" title="Đăng nhập / Phân quyền">
-          <span><?= icon('user') ?> Tài Khoản / Đăng Nhập</span>
+        <button id="btn-menu-metronome" class="btn btn-ghost btn-sm btn-menu-item" title="Giữ nhịp (Metronome)">
+          <?= icon('clock') ?>
+          <span>Giữ nhịp (Metronome)</span>
         </button>
 
-        <!-- NHÓM 4: HỆ THỐNG & IN ẤN -->
-        <div class="menu-section-header">HỆ THỐNG & IN ẤN</div>
+        <div class="tools-row tools-capo-row">
+          <span class="tools-row-label"><?= icon('guitar') ?> Kẹp Capo</span>
+          <select id="menu-capo-select" class="select-toolbar select-menu-compact" title="Chọn ngăn kẹp Capo" aria-label="Chọn ngăn kẹp Capo">
+            <option value="0" selected>0 (Không kẹp)</option>
+            <option value="1">Ngăn 1</option><option value="2">Ngăn 2</option>
+            <option value="3">Ngăn 3</option><option value="4">Ngăn 4</option>
+            <option value="5">Ngăn 5</option><option value="6">Ngăn 6</option>
+            <option value="7">Ngăn 7</option>
+          </select>
+        </div>
+
+        <button id="btn-menu-transpose-reset" class="btn btn-ghost btn-sm btn-menu-item" title="Đưa về tông gốc (0)">
+          <?= icon('rotate-ccw') ?>
+          <span>Về tông gốc (0)</span>
+        </button>
+
+
+        <!-- NHÓM 3: BAN NHẠC (Band) -->
+        <div class="menu-section-header" role="presentation">BAN NHẠC</div>
+
+        <button id="btn-menu-follow-leader" class="btn btn-ghost btn-sm btn-menu-item" title="Theo người hướng dẫn / Kết nối nhóm ban nhạc">
+          <?= icon('radio') ?>
+          <span>Theo người hướng dẫn (Live Sync)</span>
+        </button>
+
+
+        <!-- NHÓM 4: SOẠN (Edit) -->
+        <div class="menu-section-header" role="presentation">SOẠN</div>
+
+        <button id="btn-menu-add-chord-mode" class="btn btn-ghost btn-sm btn-menu-item" title="Soạn / Điền hợp âm trực tiếp trên sheet (phím C)">
+          <?= icon('pencil') ?>
+          <span>Soạn hợp âm (phím C)</span>
+        </button>
+        <!-- Nút dự phòng backward compat cho selector cũ -->
+        <button id="btn-menu-chord-edit" class="hidden" aria-hidden="true" tabindex="-1" onclick="document.getElementById('btn-menu-add-chord-mode')?.click()"></button>
+
+        <button id="btn-menu-create-chordset" class="btn btn-ghost btn-sm btn-menu-item" title="Tạo bộ hợp âm mới" onclick="document.getElementById('btn-add-set')?.click() || window.ChordCanvas?.showCreateSetModal?.()">
+          <?= icon('plus') ?>
+          <span>Bộ hợp âm mới</span>
+        </button>
+
+        <button id="btn-song-versions" class="btn btn-ghost btn-sm btn-menu-item" disabled title="Chọn phiên bản MusicXML">
+          <?= icon('layers') ?>
+          <span id="btn-version-label">Bản Gốc</span>
+        </button>
+        <div id="dropdown-song-versions" class="dropdown-menu dropdown-song-versions hidden">
+          <div id="version-list-items"></div>
+        </div>
+
+        <button id="btn-toolbar-editor" class="btn btn-ghost btn-sm btn-menu-item" title="Mở Editor nốt 4 bè SATB" onclick="(function(){ var sid = window.App?.getCurrentSongId?.(); window.location.href = sid ? ('/editor/?song=' + sid) : '/editor/'; })()">
+          <?= icon('music') ?>
+          <span>Sửa bản nhạc (SATB)</span>
+        </button>
+
+
+        <!-- NHÓM 5: KHÁC (Other) -->
+        <div class="menu-section-header" role="presentation">KHÁC</div>
+
+        <button id="btn-lyric-view" class="btn btn-ghost btn-sm btn-menu-item" title="Xem lời & hợp âm dạng chữ">
+          <?= icon('file-text') ?>
+          <span>In lời & hợp âm</span>
+        </button>
+
         <button id="btn-print" class="btn btn-ghost btn-sm btn-menu-item" disabled title="In sheet nhạc">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-          In Bản Nhạc
+          <?= icon('printer') ?>
+          <span>In bản nhạc</span>
         </button>
-        <button id="btn-menu-follow-leader" class="btn btn-ghost btn-sm btn-menu-item" title="Theo ca trưởng / Kết nối nhóm ban nhạc">
-          <span class="fs-md-p"><?= icon('radio') ?></span>
-          <span>Theo Ca Trưởng (Live Sync)</span>
+
+        <?php $bHref = $baseHref ?? '/'; ?>
+        <a href="<?= $bHref ?>manager/" target="_blank" class="btn btn-ghost btn-sm btn-menu-item" title="Cổng quản lý kho nhạc & hợp âm">
+          <?= icon('folder') ?>
+          <span>Quản lý kho nhạc</span>
+        </a>
+
+        <a href="<?= $bHref ?>manager/#tab-users" data-target="/manager/#tab-users" target="_blank" class="btn btn-ghost btn-sm btn-menu-item" title="Quản lý thành viên ban nhạc & bộ hợp âm">
+          <?= icon('users') ?>
+          <span>Ban nhạc & Thành viên</span>
+        </a>
+
+        <button id="btn-menu-auth" class="btn btn-ghost btn-sm btn-menu-item menu-section-compact-only" title="Đăng nhập / Phân quyền">
+          <?= icon('user') ?>
+          <span>Tài khoản / Đăng nhập</span>
         </button>
-        <button id="btn-dark-toggle" class="btn btn-ghost btn-sm btn-menu-item" title="Đổi chế độ Sáng / Tối (D)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-          Chế Độ Sáng / Tối
-        </button>
-        <!-- Ticket L5-8: Đã loại bỏ 4 nút giả legacy ID (dark-mode, session-panel, live-sync, live-sync-badge) -->
 
         <button id="btn-help" class="btn btn-ghost btn-sm btn-menu-item" title="Hướng dẫn sử dụng (?)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          Hướng Dẫn Sử Dụng
+          <?= icon('help-circle') ?>
+          <span>Hướng dẫn sử dụng</span>
         </button>
       </div>
     </div>

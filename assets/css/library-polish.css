@@ -506,29 +506,57 @@ body.dark-mode .toast-container .toast { background: #22222b; color: var(--lp-in
   .lv-flow { row-gap: .55em !important; }
 }
 
-/* ─── 7. Menu ⋮: mục gọn hơn ──────────────────────────────────────── */
+/* ─── 7. Menu Công Cụ (⋯): Popover laptop 320px, Bottom sheet mobile (R1-5) ── */
 #main-dropdown-menu {
-  max-height: calc(100vh - 64px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  border-radius: 12px;
-  border: 1px solid var(--lp-border);
-  box-shadow: var(--lp-shadow-pop);
-  padding: 6px;
+  width: 320px; box-sizing: border-box; max-width: calc(100vw - 16px);
+  max-height: calc(100vh - 64px); overflow-y: auto; overflow-x: hidden;
+  overscroll-behavior: contain; background: var(--lp-surface, #ffffff);
+  color: var(--lp-text, #0f172a); border-radius: 12px;
+  border: 1px solid var(--lp-border, #e2e8f0);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+  padding: 8px 6px; z-index: 99999;
+}
+[data-theme="dark"] #main-dropdown-menu, body.dark-mode #main-dropdown-menu {
+  background: #18181b; border-color: #27272a; color: #f4f4f5;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+}
+#main-dropdown-menu .menu-section-header {
+  font-size: 10.5px; font-weight: 700; letter-spacing: .08em;
+  color: var(--lp-faint, #64748b); padding: 10px 10px 4px;
+  text-transform: uppercase; user-select: none; display: block !important;
 }
 #main-dropdown-menu .btn-menu-item {
-  min-height: 32px;
-  padding: 6px 10px;
-  border-radius: var(--lp-radius);
-  font-size: 12.5px;
-  border-color: transparent;
+  width: 100%; min-height: 36px; padding: 7px 10px; border-radius: var(--lp-radius, 8px);
+  font-size: 13px; color: inherit; border: 1px solid transparent; display: flex !important;
+  align-items: center; justify-content: flex-start; text-decoration: none;
+  background: transparent; cursor: pointer; box-sizing: border-box;
 }
-#main-dropdown-menu .btn-menu-item:hover { background: var(--lp-hover); }
-#main-dropdown-menu .menu-section-header {
-  font-size: 10px;
-  letter-spacing: .06em;
-  color: var(--lp-faint);
-  padding: 8px 10px 4px;
+#main-dropdown-menu .btn-menu-item:hover { background: var(--lp-hover, rgba(0, 0, 0, 0.05)); }
+#main-dropdown-menu .btn-menu-item .icon { width: 18px; height: 18px; margin-right: 10px; color: var(--lp-muted, #64748b); flex-shrink: 0; }
+#main-dropdown-menu .btn-menu-item:hover .icon { color: currentColor; }
+#main-dropdown-menu .tools-row {
+  display: flex !important; align-items: center; justify-content: space-between;
+  min-height: 36px; padding: 6px 10px; box-sizing: border-box; width: 100%;
+}
+#main-dropdown-menu .tools-row-label { font-size: 13px; color: inherit; display: inline-flex; align-items: center; gap: 8px; }
+#main-dropdown-menu .tools-row-label .icon { width: 18px; height: 18px; color: var(--lp-muted, #64748b); flex-shrink: 0; }
+#main-dropdown-menu .tools-zoom-controls, #main-dropdown-menu .tools-scroll-controls { display: inline-flex; align-items: center; gap: 4px; }
+#main-dropdown-menu .sheet-drag-handle { display: none; }
+.main-dropdown-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(2px); z-index: 99998; }
+.main-dropdown-backdrop.hidden { display: none !important; }
+
+@media (max-width: 680px) {
+  #main-dropdown-menu {
+    position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; top: auto !important;
+    width: 100% !important; max-width: 100% !important; max-height: 85vh !important;
+    border-radius: 16px 16px 0 0 !important; border: none !important;
+    padding: 8px 14px calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.25) !important;
+    overflow-x: hidden !important; overflow-y: auto !important; z-index: 99999 !important;
+  }
+  #main-dropdown-menu .sheet-drag-handle { display: block !important; width: 40px; height: 5px !important; min-height: 5px !important; flex-shrink: 0 !important; background: var(--lp-border, #cbd5e1); border-radius: 3px; margin: 6px auto 12px; }
+  #main-dropdown-menu .btn-menu-item, #main-dropdown-menu .tools-row { min-height: 48px !important; padding: 10px 14px !important; font-size: 14px !important; }
+  #main-dropdown-menu .tools-row-label { font-size: 14px !important; }
 }
 
 /* ==========================================================================

@@ -340,13 +340,40 @@ const ToolbarController = (() => {
     const btnOptions = document.getElementById('btn-more-options');
     const menuOptions = document.getElementById('main-dropdown-menu');
     if (btnOptions && menuOptions) {
+      let backdrop = document.getElementById('main-dropdown-backdrop');
+      if (!backdrop) {
+        backdrop = document.createElement('div');
+        backdrop.id = 'main-dropdown-backdrop';
+        backdrop.className = 'main-dropdown-backdrop hidden';
+        document.body.appendChild(backdrop);
+        backdrop.addEventListener('click', () => closeMenu());
+      }
+
       function positionMenu() {
-        const r = btnOptions.getBoundingClientRect();
-        const w = menuOptions.offsetWidth || 230;
-        let left = r.right - w;
-        if (left < 8) left = 8;
-        if (left + w > window.innerWidth - 8) left = window.innerWidth - w - 8;
-        menuOptions.style.cssText = `position:fixed; top:${r.bottom + 6}px; left:${left}px; right:auto; z-index:99999;`;
+        const isMobile = window.innerWidth <= 680;
+        if (isMobile) {
+          menuOptions.style.cssText = '';
+          menuOptions.classList.add('is-bottom-sheet');
+          backdrop.classList.remove('hidden');
+          document.body.classList.add('tools-menu-open');
+        } else {
+          menuOptions.classList.remove('is-bottom-sheet');
+          backdrop.classList.add('hidden');
+          document.body.classList.remove('tools-menu-open');
+          const r = btnOptions.getBoundingClientRect();
+          const w = 320;
+          let left = r.right - w;
+          if (left < 8) left = 8;
+          if (left + w > window.innerWidth - 8) left = window.innerWidth - w - 8;
+          menuOptions.style.cssText = `position:fixed; top:${r.bottom + 6}px; left:${left}px; width:${w}px; right:auto; z-index:99999;`;
+        }
+      }
+
+      function closeMenu() {
+        menuOptions.classList.add('hidden');
+        backdrop?.classList.add('hidden');
+        document.body.classList.remove('tools-menu-open');
+        btnOptions.setAttribute('aria-expanded', 'false');
       }
 
       btnOptions.addEventListener('click', (e) => {
@@ -355,31 +382,36 @@ const ToolbarController = (() => {
         if (isHidden) {
           if (menuOptions.parentNode !== document.body) document.body.appendChild(menuOptions);
           menuOptions.classList.remove('hidden');
+          btnOptions.setAttribute('aria-expanded', 'true');
           positionMenu();
         } else {
-          menuOptions.classList.add('hidden');
+          closeMenu();
         }
       });
 
       menuOptions.addEventListener('click', (e) => {
         const item = e.target.closest('.btn-menu-item, a');
-        if (item && !item.closest('.menu-compact-controls') && item.id !== 'btn-audio-settings') {
-          menuOptions.classList.add('hidden');
+        if (item && !item.closest('.tools-zoom-row, .tools-scroll-row, .tools-capo-row, .compact-settings-panel, .audio-settings-panel') && item.id !== 'btn-audio-settings' && item.id !== 'btn-song-versions') {
+          closeMenu();
         }
       });
 
       const handleOutside = (e) => {
         if (!btnOptions.contains(e.target) && !menuOptions.contains(e.target)) {
-          menuOptions.classList.add('hidden');
+          closeMenu();
         }
       };
       document.addEventListener('click', handleOutside);
       document.addEventListener('pointerdown', handleOutside);
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') menuOptions.classList.add('hidden');
+        if (e.key === 'Escape') closeMenu();
       });
-      window.addEventListener('scroll', () => menuOptions.classList.add('hidden'), { passive: true });
-      window.addEventListener('resize', () => menuOptions.classList.add('hidden'));
+      window.addEventListener('scroll', () => {
+        if (window.innerWidth > 680) closeMenu();
+      }, { passive: true });
+      window.addEventListener('resize', () => {
+        if (!menuOptions.classList.contains('hidden')) positionMenu();
+      });
     }
 
     const btnBandToggle = document.getElementById('btn-band-toggle') || document.getElementById('btn-toggle-view');
@@ -414,7 +446,7 @@ const ToolbarController = (() => {
       document.getElementById('btn-lock-zoom')?.click();
       const isLocked = localStorage.getItem('sheetapp_zoom_locked') === 'true';
       const btn = document.getElementById('btn-menu-lock-zoom');
-      if (btn) btn.textContent = isLocked ? '🔒' : '🔓';
+      if (btn) btn.innerHTML = isLocked ? '<svg class="icon icon-xs"><use href="#icon-lock"/></svg>' : '<svg class="icon icon-xs"><use href="#icon-unlock"/></svg>';
     });
     document.getElementById('btn-menu-auto-scroll')?.addEventListener('click', () => {
       document.getElementById('btn-auto-scroll')?.click();
@@ -433,31 +465,26 @@ const ToolbarController = (() => {
       document.getElementById('btn-chord-preset')?.click();
       const txt = document.getElementById('chord-preset-label')?.textContent || 'Chuẩn';
       const ml = document.getElementById('menu-chord-preset-label');
-      if (ml) ml.textContent = 'Aa ' + txt;
+      if (ml) ml.textContent = 'Cỡ hợp âm: ' + txt;
     });
     document.getElementById('btn-menu-chord-notation')?.addEventListener('click', () => {
       document.getElementById('btn-chord-notation')?.click();
       const txt = document.getElementById('chord-notation-label')?.textContent || 'C';
       const ml = document.getElementById('menu-chord-notation-label');
-      if (ml) ml.textContent = '🔤 ' + txt;
+      if (ml) ml.textContent = 'Ký hiệu: ' + txt;
     });
     document.getElementById('btn-menu-instrument-role')?.addEventListener('click', () => {
       document.getElementById('btn-instrument-role')?.click();
-      const icon = document.getElementById('instrument-role-icon')?.textContent || '🎸';
       const label = document.getElementById('instrument-role-label')?.textContent || 'Guitar';
       const ml = document.getElementById('menu-instrument-role-label');
-      if (ml) ml.textContent = `${icon} ${label}`;
+      if (ml) ml.textContent = 'Góc nhìn: ' + label;
     });
     document.getElementById('btn-menu-verse-mode')?.addEventListener('click', () => {
       document.getElementById('btn-verse-mode')?.click();
       const txt = document.getElementById('verse-mode-label')?.textContent || 'Tất cả khổ';
       const ml = document.getElementById('menu-verse-mode-label');
-      if (ml) ml.textContent = '📖 ' + txt;
+      if (ml) ml.textContent = 'Khổ hát: ' + txt;
     });
-    // R0-7 (ROADMAP5): "Điền hợp âm" và "Gốc" (dịch giọng) trước đây HOÀN TOÀN không có
-    // đường bấm nào ở laptop 1366-1650px (bị ẩn khỏi toolbar, không có mục dự phòng trong
-    // menu ⋮). Click ủy quyền sang đúng nút thật trên toolbar (giữ nguyên logic gốc, kể
-    // cả routing qua ModeManager của #btn-add-chord-mode-bar).
     document.getElementById('btn-menu-add-chord-mode')?.addEventListener('click', () => {
       document.getElementById('btn-add-chord-mode-bar')?.click();
     });
