@@ -11,38 +11,37 @@ require_once __DIR__ . '/../core/DB.php';
 class SongSearchHelper {
 
     public static function removeAccents(string $str): string {
-        $from = [
-            'à','á','ả','ã','ạ','ă','ắ','ặ','ằ','ẳ','ẵ','â','ấ','ậ','ầ','ẩ','ẫ','đ','è','é','ẻ','ẽ','ẹ','ê','ế','ệ','ề','ể','ễ',
-            'ì','í','ỉ','ĩ','ị','ò','ó','ỏ','õ','ọ','ô','ố','ộ','ồ','ổ','ỗ','ơ','ớ','ợ','ờ','ở','ỡ','ù','ú','ủ','ũ','ụ','ư','ứ','ự','ừ','ử','ữ','ỳ','ý','ỷ','ỹ','ỵ',
-            'À','Á','Ả','Ã','Ạ','Ă','Ắ','Ặ','Ằ','Ẳ','Ẵ','Â','Ấ','Ậ','Ầ','Ẩ','Ẫ','Đ','È','É','Ẻ','Ẽ','Ẹ','Ê','Ế','Ệ','Ề','Ể','Ễ',
-            'Ì','Í','Ỉ','Ĩ','Ị','Ò','Ó','Ỏ','Õ','Ọ','Ô','Ố','Ộ','Ồ','Ổ','Ỗ','Ơ','Ớ','Ợ','Ờ','Ở','Ỡ','Ù','Ú','Ủ','Ũ','Ụ','Ư','Ứ','Ự','Ừ','Ử','Ữ','Ỳ','Ý','Ỷ','Ỹ','Ỵ'
-        ];
-        $to = [
-            'a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','d','e','e','e','e','e','e','e','e','e','e','e',
-            'i','i','i','i','i','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','u','u','u','u','u','u','u','u','u','u','u','y','y','y','y','y',
-            'a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','d','e','e','e','e','e','e','e','e','e','e','e',
-            'i','i','i','i','i','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','u','u','u','u','u','u','u','u','u','u','u','y','y','y','y','y'
-        ];
+        $from = ['à','á','ả','ã','ạ','ă','ắ','ặ','ằ','ẳ','ẵ','â','ấ','ậ','ầ','ẩ','ẫ','đ','è','é','ẻ','ẽ','ẹ','ê','ế','ệ','ề','ể','ễ','ì','í','ỉ','ĩ','ị','ò','ó','ỏ','õ','ọ','ô','ố','ộ','ồ','ổ','ỗ','ơ','ớ','ợ','ờ','ở','ỡ','ù','ú','ủ','ũ','ụ','ư','ứ','ự','ừ','ử','ữ','ỳ','ý','ỷ','ỹ','ỵ','À','Á','Ả','Ã','Ạ','Ă','Ắ','Ặ','Ằ','Ẳ','Ẵ','Â','Ấ','Ậ','Ầ','Ẩ','Ẫ','Đ','È','É','Ẻ','Ẽ','Ẹ','Ê','Ế','Ệ','Ề','Ể','Ễ','Ì','Í','Ỉ','Ĩ','Ị','Ò','Ó','Ỏ','Õ','Ọ','Ô','Ố','Ộ','Ồ','Ổ','Ỗ','Ơ','Ớ','Ợ','Ờ','Ở','Ỡ','Ù','Ú','Ủ','Ũ','Ụ','Ư','Ứ','Ự','Ừ','Ử','Ữ','Ỳ','Ý','Ỷ','Ỹ','Ỵ'];
+        $to   = ['a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','d','e','e','e','e','e','e','e','e','e','e','e','i','i','i','i','i','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','u','u','u','u','u','u','u','u','u','u','u','y','y','y','y','y','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','a','d','e','e','e','e','e','e','e','e','e','e','e','i','i','i','i','i','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','o','u','u','u','u','u','u','u','u','u','u','u','y','y','y','y','y'];
         return str_replace($from, $to, $str);
     }
 
     public static function getTaxonomy(): array {
         return [
             'seasons' => [
-                ['key' => 'christmas', 'name' => 'Lễ Giáng Sinh',     'color' => '#f59e0b'],
-                ['key' => 'lent',      'name' => 'Lễ Thương Khó',     'color' => '#ec4899'],
-                ['key' => 'easter',    'name' => 'Lễ Phục Sinh',     'color' => '#10b981'],
-                ['key' => 'solemnity', 'name' => 'Lễ nghi Hội Thánh', 'color' => '#eab308']
+                ['key' => 'christmas',        'name' => 'Lễ Giáng Sinh',               'color' => '#f59e0b'], ['key' => 'new-year',         'name' => 'Năm Mới',                     'color' => '#3b82f6'],
+                ['key' => 'palm-sunday',      'name' => 'Chúa Nhật Lễ Lá',             'color' => '#84cc16'], ['key' => 'lent',             'name' => 'Lễ Thương Khó',               'color' => '#ec4899'],
+                ['key' => 'easter',           'name' => 'Lễ Phục Sinh',                'color' => '#10b981'], ['key' => 'ascension',        'name' => 'Lễ Thăng Thiên',              'color' => '#06b6d4'],
+                ['key' => 'pentecost',        'name' => 'Lễ Đức Thánh Linh Giáng Lâm', 'color' => '#ef4444'], ['key' => 'thanksgiving',     'name' => 'Lễ Cảm Tạ',                   'color' => '#eab308'],
+                ['key' => 'baptism',          'name' => 'Lễ Báp-têm',                  'color' => '#0ea5e9'], ['key' => 'communion',        'name' => 'Lễ Tiệc Thánh',               'color' => '#8b5cf6'],
+                ['key' => 'wedding',          'name' => 'Hôn Lễ',                      'color' => '#d946ef'], ['key' => 'child-dedication', 'name' => 'Lễ Dâng Con',                 'color' => '#f43f5e'],
+                ['key' => 'funeral',          'name' => 'Tang Lễ',                     'color' => '#6b7280'], ['key' => 'dedication',       'name' => 'Lễ Cung Hiến',                'color' => '#14b8a6'],
+                ['key' => 'ordination',       'name' => 'Lễ Tấn Phong Mục Sư',         'color' => '#f97316'], ['key' => 'farewell',         'name' => 'Tiễn Biệt',                   'color' => '#64748b'],
+                ['key' => 'evangelism',       'name' => 'Buổi Truyền Giảng',           'color' => '#a855f7'], ['key' => 'solemnity',        'name' => 'Lễ nghi Hội Thánh',           'color' => '#eab308']
             ],
             'themes' => [
-                ['key' => 'nhap-le',    'name' => 'Khai lễ'],
-                ['key' => 'dap-ca',     'name' => 'Kinh tiết ca / Đoản ca'],
-                ['key' => 'dang-le',    'name' => 'Dâng hiến'],
-                ['key' => 'hiep-le',    'name' => 'Tiệc Thánh'],
-                ['key' => 'ta-le',      'name' => 'Tất lễ'],
-                ['key' => 'thanh-tam',  'name' => 'Huyết Chúa / Thập tự giá'],
-                ['key' => 'cau-nguyen', 'name' => 'Cầu Nguyện & Sám Hối'],
-                ['key' => 'ton-vinh',   'name' => 'Tôn Vinh & Cảm Tạ']
+                ['key' => 'tho-phuong',           'name' => 'Thờ phượng'],                ['key' => 'duc-chua-troi',        'name' => 'Đức Chúa Trời'],
+                ['key' => 'chua-jesus-christ',    'name' => 'Chúa Jêsus Christ'],        ['key' => 'duc-thanh-linh',       'name' => 'Đức Thánh Linh'],
+                ['key' => 'hoi-thanh',            'name' => 'Hội Thánh'],                 ['key' => 'kinh-thanh',           'name' => 'Kinh Thánh'],
+                ['key' => 'tin-lanh',             'name' => 'Tin Lành'],                  ['key' => 'doi-tin-do',           'name' => 'Đời tín đồ'],
+                ['key' => 'thien-dang',           'name' => 'Thiên đàng'],                ['key' => 'truyen-giang',         'name' => 'Truyền giảng'],
+                ['key' => 'thieu-nhi',            'name' => 'Thiếu nhi'],                 ['key' => 'thanh-nien',           'name' => 'Thanh niên'],
+                ['key' => 'don-ca-song-ca',       'name' => 'Đơn ca – Song ca'],          ['key' => 'hop-ca',               'name' => 'Hợp ca'],
+                ['key' => 'kinh-tiet-ca-doan-ca', 'name' => 'Kinh tiết ca & Đoản ca'],   ['key' => 'thi-thien',            'name' => 'Thi Thiên'],
+                ['key' => 'khai-le',              'name' => 'Khai lễ'],                   ['key' => 'kinh-tiet-ca',         'name' => 'Kinh tiết ca / Đoản ca'],
+                ['key' => 'dang-hien',            'name' => 'Dâng hiến'],                 ['key' => 'tiec-thanh',           'name' => 'Tiệc Thánh'],
+                ['key' => 'tat-le',               'name' => 'Tất lễ'],                    ['key' => 'huyet-chua',           'name' => 'Huyết Chúa / Thập tự giá'],
+                ['key' => 'cau-nguyen',           'name' => 'Cầu Nguyện & Sám Hối'],      ['key' => 'ton-vinh',             'name' => 'Tôn Vinh & Cảm Tạ']
             ]
         ];
     }

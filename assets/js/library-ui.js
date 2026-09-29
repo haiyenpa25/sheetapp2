@@ -404,7 +404,7 @@ const LibraryUI = (() => {
       if (wrap) wrap.style.display = list.length > (id === 'category-filter' ? 1 : 0) ? '' : 'none';
       if (el) {
         if (list.length <= (id === 'category-filter' ? 1 : 0)) el.value = '';
-        else {
+        else if (id === 'category-filter' || el.options.length <= 1) {
           const cur = el.value;
           el.innerHTML = `<option value="">${label}</option>` + list.map(v => `<option value="${_esc(v)}"${v === cur ? ' selected' : ''}>${_esc(v)}</option>`).join('');
         }

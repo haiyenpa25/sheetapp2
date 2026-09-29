@@ -52,6 +52,10 @@
 
     <!-- PANEL GOM BỘ LỌC (TỰ ẨN KHI KHÔNG CÓ DỮ LIỆU - TICKET L2-3) -->
     <div id="sidebar-filters-panel" class="sidebar-filters-panel hidden">
+      <?php
+      require_once __DIR__ . '/../api/services/SongSearchHelper.php';
+      $sidebarTaxonomy = SongSearchHelper::getTaxonomy();
+      ?>
       <div id="category-filter-wrap" class="sidebar-filter-item">
         <label for="category-filter" class="sidebar-filter-label">Danh mục:</label>
         <select id="category-filter" class="form-input select-toolbar sidebar-filter-select" aria-label="Lọc theo danh mục bài hát">
@@ -63,6 +67,9 @@
         <label for="season-filter" class="sidebar-filter-label">Dịp lễ:</label>
         <select id="season-filter" class="form-input select-toolbar sidebar-filter-select" title="Lọc theo Dịp lễ" aria-label="Lọc theo dịp lễ">
           <option value="">Tất cả Dịp lễ</option>
+          <?php foreach ($sidebarTaxonomy['seasons'] as $s): ?>
+            <option value="<?= htmlspecialchars($s['name']) ?>"><?= htmlspecialchars($s['name']) ?></option>
+          <?php endforeach; ?>
         </select>
       </div>
 
@@ -70,6 +77,9 @@
         <label for="theme-filter" class="sidebar-filter-label">Chủ đề:</label>
         <select id="theme-filter" class="form-input select-toolbar sidebar-filter-select" title="Lọc theo Chủ Đề Thờ Phượng" aria-label="Lọc theo chủ đề thờ phượng">
           <option value="">Tất cả Chủ Đề</option>
+          <?php foreach ($sidebarTaxonomy['themes'] as $t): ?>
+            <option value="<?= htmlspecialchars($t['name']) ?>"><?= htmlspecialchars($t['name']) ?></option>
+          <?php endforeach; ?>
         </select>
       </div>
 

@@ -66,7 +66,7 @@ check($ftsExists === 1, "Bảng ảo SQLite FTS5 songs_fts đã được khởi 
 
 // Kiểm tra taxonomy chuẩn
 $tax = SongService::getTaxonomy();
-check(!empty($tax['seasons']) && count($tax['seasons']) === 4, "Taxonomy có đúng 4 dịp lễ chuẩn");
+check(!empty($tax['seasons']) && count($tax['seasons']) >= 17, "Taxonomy có đầy đủ các dịp lễ chuẩn (Phụ lục B.1)");
 check(!empty($tax['themes']) && count($tax['themes']) >= 8, "Taxonomy có đầy đủ danh sách chủ đề");
 
 $seasonKeys = array_column($tax['seasons'], 'key');
