@@ -29,10 +29,13 @@ test.describe('L4-3: Keyboard Stage Lens (Bản nhạc đầy đủ + Hợp âm)
     const lyricContainer = page.locator('#lyric-view-container');
     await expect(lyricContainer).toBeVisible({ timeout: 25000 });
 
-    // 1. Mở modal chọn vai trò và chọn Keyboard
-    const roleBtn = page.locator('#btn-instrument-role');
-    await expect(roleBtn).toBeVisible({ timeout: 5000 });
-    await roleBtn.click();
+    // Ticket R4-1 (ROADMAP5): #btn-instrument-role trên toolbar bị ẩn vĩnh viễn
+    // (.toolbar-secondary-controls { display:none !important }, không điều kiện) --
+    // "Góc nhìn nhạc cụ" chuyển hẳn vào menu Công cụ (⋯) → Hiển thị. Nút cũ vẫn giữ
+    // logic click thật (menu ủy quyền click sang nó), nhưng phải mở qua menu.
+    await page.locator('#btn-more-options').click();
+    await expect(page.locator('#main-dropdown-menu')).toBeVisible({ timeout: 5000 });
+    await page.locator('#btn-menu-instrument-role').click();
 
     const modal = page.locator('#modal-stage-lens');
     await expect(modal).toBeVisible({ timeout: 5000 });
@@ -45,7 +48,8 @@ test.describe('L4-3: Keyboard Stage Lens (Bản nhạc đầy đủ + Hợp âm)
     const roleIcon = page.locator('#instrument-role-icon');
     const roleLabel = page.locator('#instrument-role-label');
     await expect(roleIcon).toHaveText('🎹');
-    await expect(roleLabel).toHaveText('Keyboard');
+    // Ticket R4-1 (ROADMAP5): nhãn vai trò đổi thuần Việt "Keyboard" -> "Đàn phím"
+    await expect(roleLabel).toHaveText('Đàn phím');
 
     const bodyLens = await page.evaluate(() => document.body.dataset.stageLens);
     expect(bodyLens).toBe('keyboard');

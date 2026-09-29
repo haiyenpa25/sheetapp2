@@ -72,31 +72,42 @@ test.describe('Ticket L0-4: Thanh công cụ không tràn dưới 1.300px', () =
       const songKey = page.locator('#song-key');
       await expect(songKey).toBeVisible();
 
-      const transposeDisplay = page.locator('#transpose-display');
+      // <=680px: #toolbar-controls (chứa #transpose-display, #chord-set-selector và
+      // #view-switch) ẩn hẳn (display:none), toàn bộ chuyển sang #mobile-thumb-bar
+      // riêng cho điện thoại (xem includes/toolbar.php, .mobile-transpose-group /
+      // .mobile-chordset-group / .mobile-view-group).
+      const isMobileThumbBar = vp.width <= 680;
+      const transposeDisplay = page.locator(isMobileThumbBar ? '#mobile-transpose-display' : '#transpose-display');
       await expect(transposeDisplay).toBeVisible();
-
-      const chordSelector = page.locator('#chord-set-selector');
+      const chordSelector = page.locator(isMobileThumbBar ? '#btn-mobile-chordset' : '#chord-set-selector');
       await expect(chordSelector).toBeVisible();
 
       // Ticket R1-2 (ROADMAP5): #btn-band-toggle bị thay bằng công tắc #view-switch
-      const bandToggle = page.locator('#view-switch');
+      // (hoặc #btn-mobile-view-toggle trên điện thoại, xem ghi chú ở trên)
+      const bandToggle = page.locator(isMobileThumbBar ? '#btn-mobile-view-toggle' : '#view-switch');
       await expect(bandToggle).toBeVisible();
 
-      const gigBtn = page.locator('#btn-fullscreen');
+      // Ticket L1-8 (ROADMAP5): <=680px, #btn-fullscreen (.btn-gig-mode) và #nav-arrows
+      // (.nav-arrows) bị ẩn hẳn khỏi thanh công cụ trên cùng (display:none!important,
+      // xem assets/css/layout.css) -- thay bằng #btn-mobile-gig trên mobile-thumb-bar.
+      // Không có nút ◀ ▶ tương đương trên điện thoại (chuyển bài qua sidebar).
+      const gigBtn = page.locator(isMobileThumbBar ? '#btn-mobile-gig' : '#btn-fullscreen');
       await expect(gigBtn).toBeVisible();
 
       const moreBtn = page.locator('#btn-more-options');
       await expect(moreBtn).toBeVisible();
 
-      const navArrows = page.locator('#nav-arrows');
-      await expect(navArrows).toBeVisible();
+      if (!isMobileThumbBar) {
+        const navArrows = page.locator('#nav-arrows');
+        await expect(navArrows).toBeVisible();
+      }
 
       // 3. Kiểm tra các nút ⚡, ◀ ▶, ⋮ nằm trọn trong khung nhìn (viewport)
-      const positions = await page.evaluate(() => {
+      const positions = await page.evaluate((mobileThumbBar) => {
         const vpW = window.innerWidth;
-        const gig = document.getElementById('btn-fullscreen')?.getBoundingClientRect();
+        const gig = document.getElementById(mobileThumbBar ? 'btn-mobile-gig' : 'btn-fullscreen')?.getBoundingClientRect();
         const more = document.getElementById('btn-more-options')?.getBoundingClientRect();
-        const nav = document.getElementById('nav-arrows')?.getBoundingClientRect();
+        const nav = mobileThumbBar ? null : document.getElementById('nav-arrows')?.getBoundingClientRect();
 
         return {
           viewportWidth: vpW,
@@ -104,10 +115,12 @@ test.describe('Ticket L0-4: Thanh công cụ không tràn dưới 1.300px', () =
           more: more ? { left: more.left, right: more.right, inView: more.left >= 0 && more.right <= vpW } : null,
           nav: nav ? { left: nav.left, right: nav.right, inView: nav.left >= 0 && nav.right <= vpW } : null,
         };
-      });
+      }, isMobileThumbBar);
 
       expect(positions.gig?.inView, `Nút ⚡ nằm ngoài khung nhìn: left=${positions.gig?.left}, right=${positions.gig?.right}, vpW=${positions.viewportWidth}`).toBe(true);
-      expect(positions.nav?.inView, `Nút ◀ ▶ nằm ngoài khung nhìn: left=${positions.nav?.left}, right=${positions.nav?.right}, vpW=${positions.viewportWidth}`).toBe(true);
+      if (!isMobileThumbBar) {
+        expect(positions.nav?.inView, `Nút ◀ ▶ nằm ngoài khung nhìn: left=${positions.nav?.left}, right=${positions.nav?.right}, vpW=${positions.viewportWidth}`).toBe(true);
+      }
       expect(positions.more?.inView, `Nút ⋮ nằm ngoài khung nhìn: left=${positions.more?.left}, right=${positions.more?.right}, vpW=${positions.viewportWidth}`).toBe(true);
 
       // 4. Kiểm tra các nút phụ đã được thu vào menu ⋮ (ẩn khỏi toolbar chính dưới 1300px)

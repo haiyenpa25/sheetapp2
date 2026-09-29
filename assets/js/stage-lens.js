@@ -94,20 +94,15 @@ const StageLens = (() => {
     if (roleId === 'keyboard') {
       // Ticket L4-3: Keyboard: Bản nhạc đầy đủ + Hợp âm
       const lyricContainer = document.getElementById('lyric-view-container');
-      const osmdContainer = document.getElementById('osmd-container');
       const btnBand = document.getElementById('btn-band-toggle') || document.getElementById('btn-lyric-view');
 
-      // Nếu đang mở chế độ Lời/Band: chuyển sang Bản nhạc
-      if (lyricContainer && !lyricContainer.classList.contains('hidden')) {
-        lyricContainer.classList.add('hidden');
-        if (osmdContainer) osmdContainer.style.display = 'block';
-        if (btnBand) {
-          btnBand.classList.remove('active');
-          const txt = btnBand.querySelector('.view-text') || btnBand.querySelector('.btn-text');
-          if (txt) txt.textContent = 'Lời Nhạc';
-        }
-        window.URLState?.update?.({ v: 'sheet' });
-        try { localStorage.setItem('sheetapp_view_mode', 'sheet'); } catch (_) {}
+      // Nếu đang mở chế độ Lời/Band: chuyển sang Bản nhạc. Ủy quyền hẳn cho nút toggle
+      // thật (btnBand.click()) thay vì tự tay gán class/style, vì nút thật mới nắm
+      // đúng logic toggle 2 chiều 'hidden' cho cả #lyric-view-container lẫn
+      // #osmd-container (class .hidden dùng !important, gán style.display='block' đơn
+      // thuần không đủ để hiện lại #osmd-container).
+      if (lyricContainer && !lyricContainer.classList.contains('hidden') && btnBand) {
+        btnBand.click();
         if (window.ChordCanvas?.reposition) {
           setTimeout(() => window.ChordCanvas.reposition(), 100);
         }
