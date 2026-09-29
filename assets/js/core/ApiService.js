@@ -37,7 +37,14 @@ const ApiService = (() => {
   async function _request(url, options = {}) {
     const finalUrl = resolveUrl(url);
     const res = await fetch(finalUrl, options);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) {
+      let data = null;
+      try { data = await res.json(); } catch (_) {}
+      const err = new Error((data && data.error) ? data.error : `HTTP ${res.status}`);
+      err.status = res.status;
+      err.data = data;
+      throw err;
+    }
     return res.json();
   }
 
@@ -135,7 +142,14 @@ const ApiService = (() => {
       return p;
     },
     load:   (songId, name)       => _request(`api/index.php?route=chord_sets&action=load&songId=${encodeURIComponent(songId)}&name=${encodeURIComponent(name)}`),
-    save:   (songId, name, chords) => { _chordSetsListCache.delete(songId); return _json('POST', 'api/index.php?route=chord_sets', { action:'save', songId, name, chords }); },
+    save:   (songId, name, chords, baseChecksum = null) => { 
+      _chordSetsListCache.delete(songId); 
+      const payload = { action:'save', songId, name, chords };
+      if (baseChecksum !== null && baseChecksum !== undefined) {
+        payload.baseChecksum = baseChecksum;
+      }
+      return _json('POST', 'api/index.php?route=chord_sets', payload); 
+    },
     clone:  (songId, source, target) => { _chordSetsListCache.delete(songId); return _json('POST', 'api/index.php?route=chord_sets', { action:'clone', songId, source, target, sourceName: source, targetName: target, name: target }); },
     delete: (songId, name)       => { _chordSetsListCache.delete(songId); return _json('POST', 'api/index.php?route=chord_sets', { action:'delete', songId, name }); },
     clearCache: (songId) => { if (songId) _chordSetsListCache.delete(songId); else _chordSetsListCache.clear(); }

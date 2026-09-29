@@ -130,6 +130,29 @@ class ChordSetService {
     }
 
     /**
+     * Lấy checksum MD5 hiện tại của bộ hợp âm (phát hiện xung đột R2-3)
+     */
+    public static function getChecksum(string $songId, string $name): string {
+        try {
+            $pdo = DB::get();
+            $stmt = $pdo->prepare("
+                SELECT checksum 
+                FROM user_chord_sets 
+                WHERE song_id = ? AND set_name = ? COLLATE NOCASE
+                LIMIT 1
+            ");
+            $stmt->execute([$songId, $name]);
+            $cs = $stmt->fetchColumn();
+            if ($cs !== false && $cs !== null && $cs !== '') {
+                return (string)$cs;
+            }
+        } catch (Throwable $e) {}
+
+        $chords = self::loadSet($songId, $name);
+        return md5(json_encode($chords));
+    }
+
+    /**
      * Lưu bộ hợp âm vào DB và đồng bộ ra file disk
      */
     public static function saveSet(

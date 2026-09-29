@@ -317,7 +317,7 @@ Mỗi ticket ghi rõ việc cần làm và tiêu chí nghiệm thu. Ticket nào 
 |---|---|---|
 | R2-1 ✅ | **Con trỏ nốt** theo thứ tự của `mapNotes`: viền nốt đang chọn, hiện hợp âm mờ gợi ý, tự cuộn tới con trỏ | E2E: Enter đặt hợp âm và con trỏ tiến 1 nốt; Shift+Tab lùi lại |
 | R2-2 ✅ | **Bảng hợp âm theo tông đang hiển thị** (sửa B15): 7 hợp âm thuận, hợp âm 7, hợp âm đảo, gần đây, gợi ý TLH; phím 1–7, `/`, `.`, `T` | Unit test: tông A → A Bm C#m D E F#m G#dim; E2E: phím 4 đặt "D" |
-| R2-3 | **Lưu gộp** (debounce 1.5 giây) kèm `baseChecksum`; một chip trạng thái; hàng đợi ngoại tuyến (IndexedDB); nếu lỗi thì hoàn tác hiển thị | E2E: gõ nhanh 10 hợp âm thì ≤ 3 request; server trả 409 (xung đột) thì hiện hộp thoại chọn giữ bản nào |
+| R2-3 ✅ | **Lưu gộp** (debounce 1.5 giây) kèm `baseChecksum`; một chip trạng thái; hàng đợi ngoại tuyến (IndexedDB); nếu lỗi thì hoàn tác hiển thị | E2E: gõ nhanh 10 hợp âm thì ≤ 3 request; server trả 409 (xung đột) thì hiện hộp thoại chọn giữ bản nào |
 | R2-4 | **Chép ô nhịp** (Ctrl+C/V hoặc nút "≡ chép ô nhịp") cho điệp khúc và phần lặp | E2E: chép ô 3–4 sang 11–12 thì 4 hợp âm mới đúng vị trí |
 | R2-5 | **Điện thoại:** bảng hợp âm 38% màn hình, chip 48px, chạm một lần là đặt và tiến; vùng chạm theo nốt gần nhất; tự dời khi mở bàn phím | E2E 390: 24 hợp âm ≤ 30 chạm; nút Lưu/Xong ≥ 44px và không bị che |
 | R2-6 | **Soạn trên chế độ Lời & Hợp âm:** chạm âm tiết rồi chọn hợp âm, hoặc gõ ChordPro | E2E: chạm "Vua" rồi chọn "F" thì chế độ Bản nhạc cũng hiện F ở đúng nốt |
