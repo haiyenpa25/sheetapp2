@@ -102,6 +102,7 @@
   <!-- FLOATING GIG HUD (Xuất hiện khi ở chế độ Biểu Diễn) -->
   <div id="gig-floating-hud" class="gig-floating-hud">
     <div class="gig-hud-info" onclick="App?.toggleSidebar?.()" title="Bấm đổi bài">
+      <span class="gig-hud-nav-icon" aria-hidden="true"><?= icon('chevron-left') ?></span>
       <span id="gig-hud-title" class="gig-hud-title">Bài hát</span>
       <span id="gig-hud-key" class="gig-hud-key">--</span>
     </div>
@@ -116,23 +117,28 @@
     </div>
     <div class="gig-hud-actions">
       <!-- Cụm Dịch Tông -->
-      <button id="btn-gig-trans-down" class="btn-gig-action" title="Hạ 1 nửa cung (Phím [ )">−</button>
-      <span id="gig-hud-trans" class="gig-hud-trans-val" title="Tông đang dịch">0</span>
-      <button id="btn-gig-trans-up" class="btn-gig-action" title="Tăng 1 nửa cung (Phím ] )">+</button>
-      
-      <!-- Cụm Thu Phóng & Khóa Zoom (GIG MODE) -->
-      <div class="gig-hud-zoom-wrap" title="Thu phóng & Khóa View trong Biểu Diễn">
-        <button id="btn-gig-zoom-out" class="btn-gig-action" title="Thu nhỏ zoom">−</button>
-        <span id="gig-hud-zoom" class="gig-hud-zoom-val" title="Tỷ lệ zoom hiện tại">100%</span>
-        <button id="btn-gig-zoom-in" class="btn-gig-action" title="Phóng to zoom">+</button>
-        <button id="btn-gig-lock-zoom" class="btn-gig-action btn-gig-lock" title="Khóa tỷ lệ zoom (khi đổi bài giữ nguyên)"><?= icon('unlock') ?></button>
+      <div class="gig-hud-segment gig-hud-transpose-segment" title="Dịch tông">
+        <button id="btn-gig-trans-down" class="btn-gig-action btn-gig-step" title="Hạ 1 nửa cung (Phím [ )">−</button>
+        <span class="gig-hud-trans-label">Tông <span id="gig-hud-trans" class="gig-hud-trans-val" title="Tông đang dịch">0</span></span>
+        <button id="btn-gig-trans-up" class="btn-gig-action btn-gig-step" title="Tăng 1 nửa cung (Phím ] )">+</button>
       </div>
-
+      
       <!-- Nút Chuyển Khổ trong Biểu Diễn (Ticket L1-6) -->
       <button id="btn-gig-verse" class="btn-gig-action btn-gig-verse hidden" title="Chuyển khổ hát (Phím V)">Khổ 1/1</button>
 
-      <button id="btn-gig-scroll-toggle" class="btn-gig-action btn-gig-scroll" title="Bật/Tắt cuộn (Space)"><?= icon('chevron-down') ?> Cuộn</button>
-      <button id="btn-gig-exit" class="btn-gig-action btn-gig-exit" title="Thoát Biểu Diễn (Esc)"><?= icon('x') ?> Thoát</button>
+      <!-- Bật/tắt tự cuộn -->
+      <button id="btn-gig-scroll-toggle" class="btn-gig-action btn-gig-scroll" title="Bật/Tắt cuộn (Space)"><?= icon('chevron-down') ?> <span>Cuộn</span></button>
+
+      <!-- Cụm Thu Phóng & Khóa Zoom (GIG MODE) -->
+      <div class="gig-hud-zoom-wrap" title="Thu phóng & Khóa View trong Biểu Diễn">
+        <button id="btn-gig-zoom-out" class="btn-gig-action btn-gig-step" title="Thu nhỏ zoom">−</button>
+        <span id="gig-hud-zoom" class="gig-hud-zoom-val" title="Tỷ lệ zoom hiện tại">100%</span>
+        <button id="btn-gig-zoom-in" class="btn-gig-action btn-gig-step" title="Phóng to zoom">+</button>
+        <button id="btn-gig-lock-zoom" class="btn-gig-action btn-gig-lock" title="Khóa tỷ lệ zoom (khi đổi bài giữ nguyên)"><?= icon('unlock') ?></button>
+      </div>
+
+      <!-- Thoát Biểu Diễn -->
+      <button id="btn-gig-exit" class="btn-gig-action btn-gig-exit" title="Thoát Biểu Diễn (Esc)"><span>Thoát</span> <?= icon('x') ?></button>
     </div>
   </div>
 

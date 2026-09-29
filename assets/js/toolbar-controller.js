@@ -134,11 +134,11 @@ const ToolbarController = (() => {
       if (!btn) return;
       if (isLocked) {
         btn.classList.add('locked');
-        btn.innerHTML = '<span class="lock-icon">🔒</span>';
+        btn.innerHTML = '<svg class="lucide-icon" width="16" height="16" aria-hidden="true"><use href="assets/icons/lucide.svg#lock"/></svg>';
         btn.title = 'Khóa tỷ lệ View ĐANG BẬT (Bấm để mở khóa)';
       } else {
         btn.classList.remove('locked');
-        btn.innerHTML = '<span class="lock-icon">🔓</span>';
+        btn.innerHTML = '<svg class="lucide-icon" width="16" height="16" aria-hidden="true"><use href="assets/icons/lucide.svg#unlock"/></svg>';
         btn.title = 'Khóa tỷ lệ zoom (khi đổi bài khác sẽ giữ nguyên tỷ lệ này)';
       }
     });

@@ -156,7 +156,11 @@ const ModeManager = (() => {
       _requestWakeLock();
       window.KeyboardHandler?.enableMIDI?.();
       window.LiveSync?.ensureLoaded?.();
-      window.AppUI?.showToast?.('Chế độ Biểu Diễn — Toàn màn hình, nhấn F hoặc Esc để thoát', 'info');
+      const HINT_KEY = 'sheetapp_gig_hint_shown';
+      if (!sessionStorage.getItem(HINT_KEY)) {
+        sessionStorage.setItem(HINT_KEY, '1');
+        window.AppUI?.showToast?.('Chế độ Biểu Diễn — Toàn màn hình, nhấn F hoặc Esc để thoát', 'info');
+      }
     } else if (prevMode === MODES.PERFORMANCE) {
       _clearHudTimer();
       // Khôi phục trạng thái ban đầu của người dùng nếu trước đó không bật dark-mode
