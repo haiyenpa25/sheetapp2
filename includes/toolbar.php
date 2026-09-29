@@ -33,19 +33,19 @@
   <!-- 2. CỤM ĐIỀU KHIỂN TRỌNG TÂM CHO BAN NHẠC (PRO BAND CONTROLS) -->
   <div class="toolbar-center band-controls" id="toolbar-controls">
     
-    <!-- Cụm Dịch Tông (Transpose Pill) -->
+    <!-- Nhóm 2: Cụm Dịch Tông (Transpose Pill) -->
     <div class="band-pill transpose-pill" role="group" aria-label="Điều chỉnh tông nhạc" title="Dịch giọng bài hát (Phím [ và ] )">
       <button id="btn-transpose-down" class="icon-btn-pill" title="Hạ 1 nửa cung (Phím [ )" disabled>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        <?= icon('minus', 'icon-xs') ?>
       </button>
-      <span id="transpose-display" class="transpose-value" title="Số nửa cung đang dịch">0</span>
+      <span id="transpose-display" class="transpose-value" title="Bấm để về tông gốc">0</span>
       <button id="btn-transpose-up" class="icon-btn-pill" title="Tăng 1 nửa cung (Phím ] )" disabled>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+        <?= icon('plus', 'icon-xs') ?>
       </button>
       <button id="btn-transpose-reset" class="btn-pill-reset" title="Về tông gốc của bài (phím 0)" disabled>Gốc</button>
 
-      <!-- Capo (Chọn ngăn kẹp Capo & Gợi ý cho Guitar, Ticket L0-12) -->
-      <div id="capo-wrap" class="capo-wrap">
+      <!-- Capo (Chọn ngăn kẹp Capo) -->
+      <div id="capo-wrap" class="capo-wrap hidden">
         <label for="capo-select" class="capo-label">Capo</label>
         <select id="capo-select" class="capo-select" title="Chọn ngăn kẹp Capo (0-7)" aria-label="Chọn ngăn kẹp Capo (0-7)">
           <option value="0" selected>0</option><option value="1">1</option><option value="2">2</option>
@@ -57,111 +57,78 @@
       <span id="capo-badge" class="capo-badge hidden">Capo 0</span>
     </div>
 
-    <!-- Cụm Thu Phóng & Khóa Zoom (Zoom Pill) -->
-    <div class="band-pill zoom-pill" role="group" aria-label="Thu phóng bản nhạc" title="Thu phóng bản nhạc (Zoom & Khóa View)">
-      <button id="btn-zoom-out" class="icon-btn-pill" title="Thu nhỏ bản nhạc (−)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      </button>
-      <select id="zoom-slider" class="select-zoom-pill" disabled title="Chọn tỷ lệ thu phóng" aria-label="Chọn tỷ lệ thu phóng">
-        <option value="50">50%</option>
-        <option value="65">65%</option>
-        <option value="80">80%</option>
-        <option value="90">90%</option>
-        <option value="100" selected>100%</option>
-        <option value="115">115%</option>
-        <option value="130">130%</option>
-        <option value="150">150%</option>
-        <option value="175">175%</option>
-        <option value="200">200%</option>
-      </select>
-      <button id="btn-zoom-in" class="icon-btn-pill" title="Phóng to bản nhạc (+)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      </button>
-      <button id="btn-lock-zoom" class="icon-btn-pill btn-lock-zoom" title="Khóa tỷ lệ zoom (khi đổi bài giữ nguyên)">
-        <span class="lock-icon"><?= icon('unlock') ?></span>
-      </button>
-      <!-- zoom-value-label legacy removed in L5-8 -->
-    </div>
-
-    <!-- Cụm Bản Phối Hợp Âm (Chord Set Pill) -->
+    <!-- Nhóm 3: Cụm Bản Phối Hợp Âm (Chord Set Pill) -->
     <div class="band-pill chord-set-pill" id="chord-set-bar" role="group" aria-label="Chọn bản phối hợp âm" title="Bản phối hợp âm">
       <span class="pill-icon fs-md-p"><?= icon('guitar') ?></span>
-      <!-- R0-6 (ROADMAP5, lỗi B11): KHÔNG dùng onchange inline ở đây -- chord-canvas.js
-           đã tự bind addEventListener('change', ...) trong _refreshSetDropdown() (đánh
-           dấu qua selector.dataset.boundCreateHandler). Có cả 2 khiến mỗi lần đổi bộ hợp
-           âm gọi handleSelectChange 2 LẦN -> gửi 2 request load thay vì 1. -->
       <select id="chord-set-selector" class="chord-set-select" disabled title="Chọn bản phối hợp âm" aria-label="Chọn bản phối hợp âm">
         <option value="HD" selected>HD (Mặc định)</option>
         <option value="default">TLH (gốc)</option>
       </select>
       <span id="chord-set-count" class="chord-set-count"></span>
 
-      <!-- Nút Điền Hợp Âm — toggle chế độ điền/sửa hợp âm trực tiếp trên sheet -->
-      <button id="btn-add-chord-mode-bar" class="btn-chord-edit-pill btn-chord-edit" title="Điền / Sửa hợp âm trực tiếp trên sheet (phím C)" disabled>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chord-edit-icon"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        <span class="chord-edit-text">Điền HÂ</span>
-      </button>
-
       <!-- Nút Tạo bộ hợp âm mới -->
       <button id="btn-new-chord-set" class="icon-btn-pill" title="Tạo bản phối mới" onclick="ChordCanvas.showNewSetModal()">
         <span class="fs-sm-p"><?= icon('plus') ?></span>
       </button>
-
-      <!-- Ticket L5-8: Đã loại bỏ 4 nút giả legacy ID (chord-highlight, delete, clear, cancel) -->
     </div>
 
-    <!-- Cụm Preset Hiển Thị Hợp Âm (Aa) (Ticket L1-2) -->
-    <button id="btn-chord-preset" class="band-pill btn-chord-preset" title="Preset hiển thị hợp âm: Chuẩn / Sân khấu lớn / Tương phản cao (nút Aa)" aria-label="Preset hiển thị hợp âm">
-      <span class="preset-icon">Aa</span>
-      <span id="chord-preset-label" class="preset-label">Chuẩn</span>
+    <!-- Nhóm 4: Cụm Tempo / Gõ Nhịp (Ticket R1-2) -->
+    <button type="button" id="btn-toolbar-tempo" class="band-pill btn-toolbar-tempo" title="Tốc độ bài hát (Bấm để chỉnh BPM / Gõ nhịp)">
+      <span class="tempo-note-icon font-bold">♩</span>
+      <span id="toolbar-tempo-val" class="tempo-val">100</span>
     </button>
+    <button id="btn-toolbar-metronome" class="icon-btn-pill hidden" disabled title="Mở máy gõ nhịp" aria-hidden="true" tabindex="-1"><span class="metronome-icon-pulse">♩</span></button>
 
-    <!-- Cụm Ký Hiệu Hợp Âm Số La Mã / Nashville (Ticket L4-7) -->
-    <button id="btn-chord-notation" class="band-pill btn-chord-notation" title="Chế độ hợp âm: Chuẩn / Số La Mã / Nashville (Bấm để đổi, Phím N)" aria-label="Chế độ ký hiệu hợp âm">
-      <span><?= icon('type') ?></span> <span id="chord-notation-label" class="chord-notation-label">C</span>
-    </button>
-
-    <!-- Cụm Chọn Khổ (Ticket L1-6: Tất cả khổ / Một khổ / Trải khổ) -->
-    <div class="band-pill verse-pill hidden" id="verse-pill" role="group" aria-label="Chọn khổ hát" title="Chế độ hiển thị khổ">
-      <button id="btn-verse-mode" class="btn-verse-mode" title="Đổi chế độ: Tất cả khổ ↔ Một khổ ↔ Trải khổ (Phím V)">
-        <span class="verse-icon"><?= icon('book-open') ?></span>
-        <span id="verse-mode-label" class="verse-mode-label">Tất cả khổ</span>
+    <!-- Nhóm 5: Công Tắc 2 Chế Độ: Bản Nhạc | Lời & Hợp Âm (Ticket R1-2) -->
+    <div class="band-pill view-switch-pill" id="view-switch" role="group" aria-label="Chế độ xem">
+      <button type="button" class="btn-view-mode active" id="btn-view-sheet" data-view="sheet" title="Xem bản nhạc khuông (SATB)">
+        <?= icon('music', 'icon-xs') ?>
+        <span>Bản nhạc</span>
       </button>
-      <div id="verse-nav-controls" class="verse-nav-controls hidden">
-        <button id="btn-verse-prev" class="icon-btn-pill btn-verse-nav" title="Khổ trước (Shift+V)"><?= icon('chevron-left') ?></button>
-        <span id="verse-indicator" class="verse-indicator" title="Khổ hiện tại / Tổng số khổ">1/1</span>
-        <button id="btn-verse-next" class="icon-btn-pill btn-verse-nav" title="Khổ tiếp theo (V)"><?= icon('chevron-right') ?></button>
+      <button type="button" class="btn-view-mode" id="btn-view-lyrics" data-view="lyrics" title="Xem lời & hợp âm">
+        <?= icon('file-text', 'icon-xs') ?>
+        <span>Lời &amp; Hợp âm</span>
+      </button>
+      <button id="btn-band-toggle" class="btn-band-toggle hidden" aria-hidden="true" tabindex="-1"></button>
+    </div>
+
+    <!-- Nhóm 6: Nút Soạn Hợp Âm (Ticket R1-2) -->
+    <button id="btn-add-chord-mode-bar" class="band-pill btn-chord-edit-pill btn-chord-edit" title="Soạn hợp âm trên sheet (phím C)" disabled>
+      <?= icon('pencil', 'icon-xs chord-edit-icon') ?>
+      <span class="chord-edit-text">Soạn</span>
+    </button>
+
+    <!-- Secondary / Compact Controls (Ẩn trên thanh laptop 48px, truy cập qua Bảng Công Cụ ⋯) -->
+    <div class="toolbar-secondary-controls d-none">
+      <div class="band-pill zoom-pill" role="group" aria-label="Thu phóng bản nhạc">
+        <button id="btn-zoom-out" class="icon-btn-pill" title="Thu nhỏ (−)"><?= icon('minus', 'icon-xs') ?></button>
+        <select id="zoom-slider" class="select-zoom-pill" disabled aria-label="Chọn tỷ lệ thu phóng">
+          <option value="50">50%</option><option value="65">65%</option><option value="80">80%</option><option value="90">90%</option>
+          <option value="100" selected>100%</option><option value="115">115%</option><option value="130">130%</option>
+          <option value="150">150%</option><option value="175">175%</option><option value="200">200%</option>
+        </select>
+        <button id="btn-zoom-in" class="icon-btn-pill" title="Phóng to (+)"><?= icon('plus', 'icon-xs') ?></button>
+        <button id="btn-lock-zoom" class="icon-btn-pill btn-lock-zoom" title="Khóa tỷ lệ zoom"><span class="lock-icon"><?= icon('unlock') ?></span></button>
       </div>
-    </div>
 
-    <!-- Cụm Xem Band (Lời + Hợp âm chữ) / Bản Nhạc (Ticket L0-4 & L1-7) -->
-    <button id="btn-band-toggle" class="band-pill btn-toggle-view btn-band-toggle" title="Chuyển chế độ: Band (Lời & Hợp âm chữ) ↔ Bản Nhạc">
-      <span class="view-icon"><?= icon('play') ?></span>
-      <span class="view-text">Band</span>
-    </button>
-    <!-- btn-toggle-view legacy removed in L5-8 -->
+      <button id="btn-chord-preset" class="band-pill btn-chord-preset" title="Preset hiển thị hợp âm"><span class="preset-icon">Aa</span><span id="chord-preset-label" class="preset-label">Chuẩn</span></button>
+      <button id="btn-chord-notation" class="band-pill btn-chord-notation" title="Chế độ hợp âm"><span><?= icon('type') ?></span> <span id="chord-notation-label" class="chord-notation-label">C</span></button>
 
-    <!-- Cụm Vai Trò Nhạc Cụ / Stage Lens (Ticket L4-1) -->
-    <button id="btn-instrument-role" class="band-pill btn-instrument-role" title="Đổi vai trò: Guitar · Keyboard · Bass · Trống · Hát" aria-label="Vai trò nhạc công">
-      <span id="instrument-role-icon" class="role-icon"><?= icon('guitar') ?></span>
-      <span id="instrument-role-label" class="role-label">Guitar</span>
-    </button>
+      <div class="band-pill verse-pill hidden" id="verse-pill" role="group" aria-label="Chọn khổ hát">
+        <button id="btn-verse-mode" class="btn-verse-mode"><span class="verse-icon"><?= icon('book-open') ?></span><span id="verse-mode-label" class="verse-mode-label">Tất cả khổ</span></button>
+        <div id="verse-nav-controls" class="verse-nav-controls hidden">
+          <button id="btn-verse-prev" class="icon-btn-pill btn-verse-nav"><?= icon('chevron-left') ?></button>
+          <span id="verse-indicator" class="verse-indicator">1/1</span>
+          <button id="btn-verse-next" class="icon-btn-pill btn-verse-nav"><?= icon('chevron-right') ?></button>
+        </div>
+      </div>
 
-    <!-- Cụm Cuộn Trang & Gõ Nhịp (Scroll & Tempo Pill) -->
-    <div class="band-pill scroll-pill">
-      <button id="btn-auto-scroll" class="btn-pill-scroll" disabled title="Tự động cuộn bản nhạc (Phím Space)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
-        <span class="btn-text">Cuộn</span>
-      </button>
-      <select id="scroll-speed" class="select-scroll-speed" disabled title="Tốc độ cuộn" aria-label="Chọn tốc độ cuộn tự động">
-        <option value="1" selected>1×</option>
-        <option value="2">2×</option>
-        <option value="3">3×</option>
-        <option value="4">4×</option>
-      </select>
-      <button id="btn-toolbar-metronome" class="icon-btn-pill" disabled title="Mở máy gõ nhịp (♩ Metronome)">
-        <span class="metronome-icon-pulse">♩</span>
-      </button>
+      <button id="btn-instrument-role" class="band-pill btn-instrument-role" title="Đổi vai trò nhạc cụ"><span id="instrument-role-icon" class="role-icon"><?= icon('guitar') ?></span><span id="instrument-role-label" class="role-label">Guitar</span></button>
+
+      <div class="band-pill scroll-pill">
+        <button id="btn-auto-scroll" class="btn-pill-scroll" disabled><?= icon('scroll', 'icon-xs') ?><span class="btn-text">Cuộn</span></button>
+        <select id="scroll-speed" class="select-scroll-speed" disabled aria-label="Tốc độ cuộn"><option value="1" selected>1×</option><option value="2">2×</option><option value="3">3×</option><option value="4">4×</option></select>
+      </div>
     </div>
   </div>
 
@@ -180,26 +147,26 @@
       <span class="follow-text">Theo ca trưởng</span>
     </button>
 
-    <!-- NÚT SÂN KHẤU / BIỂU DIỄN (BAND GIG MODE) -->
+    <!-- Nhóm 7: Nút Sân Khấu / Biểu Diễn (Band Gig Mode, Ticket R1-2) -->
     <button id="btn-fullscreen" class="btn-gig-mode" title="Vào chế độ Biểu Diễn Toàn Màn Hình (Phím F)">
-      <span class="gig-icon"><?= icon('zap') ?></span>
+      <span class="gig-icon"><?= icon('maximize') ?></span>
       <span class="gig-text">Biểu Diễn</span>
     </button>
 
-    <!-- NÚT CHUYỂN BÀI TRƯỚC / SAU -->
+    <!-- Nhóm 8: Nút Chuyển Bài Trước / Sau -->
     <div class="nav-arrows" id="nav-arrows">
       <button id="btn-prev-song" class="icon-btn" title="Bài trước (↑)" disabled>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        <?= icon('chevron-left') ?>
       </button>
       <button id="btn-next-song" class="icon-btn" title="Bài tiếp theo (↓)" disabled>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        <?= icon('chevron-right') ?>
       </button>
     </div>
 
-    <!-- MENU CÔNG CỤ & CÀI ĐẶT MỞ RỘNG (GOM TOÀN BỘ TÍNH NĂNG PHỤ) -->
+    <!-- Nhóm 9: Menu Công Cụ & Cài Đặt (Phím ?) -->
     <div class="control-group more-options-group" id="more-options-group">
       <button id="btn-more-options" class="icon-btn" title="Menu Công Cụ & Cài Đặt">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+        <?= icon('more-horizontal') ?>
       </button>
 
       <div class="dropdown-menu hidden" id="main-dropdown-menu">

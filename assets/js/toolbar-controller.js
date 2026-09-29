@@ -29,6 +29,8 @@ const ToolbarController = (() => {
     _bindMisc();
     _bindMoreOptionsMenu();
     _bindCompactWidthObserver();
+    _bindViewSwitch();
+    _bindToolbarTempo();
   }
 
   // R0-7 (ROADMAP5): @container mainarea (định nghĩa trên .main-content) chỉ áp dụng cho
@@ -461,6 +463,53 @@ const ToolbarController = (() => {
     });
     document.getElementById('btn-menu-transpose-reset')?.addEventListener('click', () => {
       document.getElementById('btn-transpose-reset')?.click();
+    });
+  }
+
+  function _bindViewSwitch() {
+    const btnViewSheet = document.getElementById('btn-view-sheet');
+    const btnViewLyrics = document.getElementById('btn-view-lyrics');
+    const lyricContainer = document.getElementById('lyric-view-container');
+    const btnLyric = document.getElementById('btn-lyric-view');
+
+    if (lyricContainer) {
+      const syncViewButtons = () => {
+        const isLyric = !lyricContainer.classList.contains('hidden');
+        btnViewSheet?.classList.toggle('active', !isLyric);
+        btnViewLyrics?.classList.toggle('active', isLyric);
+      };
+      new MutationObserver(syncViewButtons).observe(lyricContainer, { attributes: true, attributeFilter: ['class'] });
+      syncViewButtons();
+    }
+
+    btnViewSheet?.addEventListener('click', () => {
+      if (lyricContainer && !lyricContainer.classList.contains('hidden')) {
+        btnLyric?.click();
+      }
+    });
+
+    btnViewLyrics?.addEventListener('click', () => {
+      if (lyricContainer && lyricContainer.classList.contains('hidden')) {
+        btnLyric?.click();
+      }
+    });
+  }
+
+  function _bindToolbarTempo() {
+    const tempoBtn = document.getElementById('btn-toolbar-tempo');
+    if (!tempoBtn) return;
+    tempoBtn.addEventListener('click', async () => {
+      const valEl = document.getElementById('toolbar-tempo-val');
+      const curBpm = parseInt(valEl?.textContent, 10) || 100;
+      if (window.TempoPick?.show) {
+        const newBpm = await window.TempoPick.show(curBpm);
+        if (newBpm && valEl) {
+          valEl.textContent = newBpm;
+          if (window.Metronome?.setBpm) window.Metronome.setBpm(newBpm);
+        }
+      } else {
+        document.getElementById('btn-toolbar-metronome')?.click();
+      }
     });
   }
 
