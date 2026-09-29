@@ -149,6 +149,7 @@ const ChordCanvas = (() => {
   async function loadSong(songId, initialSet = 'HD') {
     const token = ++_chordLoadToken;
     _clear();
+    window.ChordCanvasEdit?.resetUndo?.(); // R0-4: tránh Ctrl+Z ghi nhầm sang bài mới
     _songUseFlats = null;
     window.ChordCanvasTranspose?.resetCache?.();
     _currentSet   = initialSet;
@@ -365,6 +366,7 @@ const ChordCanvas = (() => {
       if (sel) sel.value = _currentSet;
       return;
     }
+    window.ChordCanvasEdit?.resetUndo?.(); // R0-4: tránh Ctrl+Z ghi nhầm sang bộ mới
     _currentSet   = name;
     _customChords = {};
     if (name !== 'default') {

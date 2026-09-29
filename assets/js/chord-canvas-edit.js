@@ -30,6 +30,15 @@ const ChordCanvasEdit = (() => {
     _redoStack = [];
   }
 
+  // R0-4 (ROADMAP5, lỗi B6): loadSong/switchSet phải gọi hàm này. Trước đây stack
+  // undo/redo sống sót qua lần chuyển bài/bộ hợp âm, nên Ctrl+Z sau khi đã chuyển
+  // sang bài/bộ khác sẽ pop lại state của bài/bộ CŨ rồi lưu (saveCustomSet) dùng
+  // songId của bài MỚI đang xem — ghi nhầm dữ liệu bài cũ đè lên bài mới.
+  function resetUndo() {
+    _undoStack = [];
+    _redoStack = [];
+  }
+
   async function showPopup(anchor, measureIdx, noteIdx, existing) {
     const app = _getApp();
     if (!window.Auth?.isBanhat?.()) {
@@ -230,7 +239,8 @@ const ChordCanvasEdit = (() => {
     deleteChord,
     saveCustomSet,
     startEditingWithoutCloning,
-    cloneAndStartEditing
+    cloneAndStartEditing,
+    resetUndo
   };
 })();
 
