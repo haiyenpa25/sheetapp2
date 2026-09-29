@@ -19,7 +19,7 @@ const ChordCanvasUI = (() => {
   }
 
   function getDotSize(scale) {
-    return Math.max(10, Math.round(14 * scale));
+    return Math.max(14, Math.min(20, Math.round(16 * scale)));
   }
 
   function applyAbsolute(el, cx, cy, extras) {

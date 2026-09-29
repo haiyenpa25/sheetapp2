@@ -1607,3 +1607,22 @@ body.dark-mode .lv-cp-textarea:focus {
   justify-content: flex-end;
 }
 
+/* ==========================================================================
+   R2-7: Sửa vị trí ✎ và chấm (B9, B16)
+   ========================================================================== */
+@media (pointer: fine) {
+  .cc-dot-btn::after {
+    display: none !important;
+  }
+}
+
+.cc-dot-btn::after {
+  max-width: 28px;
+  max-height: 28px;
+}
+
+.cc-edit-badge {
+  line-height: 1 !important;
+}
+
+
