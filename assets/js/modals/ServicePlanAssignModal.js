@@ -26,19 +26,19 @@ const ServicePlanAssignModal = (() => {
     'pastor':           '✝ Mục sư / Truyền đạo',
     'worship_leader':   '🙏 Hướng dẫn chương trình',
     'scripture_reader': '📖 Đọc Kinh Thánh',
-    'leader':           '👑 Ca Trưởng / Hát Chính',
-    'piano':            '🎹 Piano / Đệm Chính',
+    'leader':           '👑 Người hướng dẫn / Hát chính',
+    'vocal':            '🎤 Hát dẫn',
+    'piano':            '🎹 Piano / Đệm chính',
     'organ':            '🎼 Organ',
     'guitar':           '🎸 Guitar Acoustic / Solo',
     'bass':             '🎸 Guitar Bass',
-    'drums':            '🥁 Trống / Bộ Gõ',
-    'vocal':            '🎤 Ca Viên / Hát dẫn',
-    'vocal_soprano':    '🎤 Nữ Cao (Soprano)',
-    'vocal_alto':       '🎤 Nữ Trầm (Alto)',
-    'vocal_tenor':      '🎤 Nam Cao (Tenor)',
-    'vocal_bass':       '🎤 Nam Trầm (Bass)',
-    'sound':            '🎛 Kỹ Thuật Âm Thanh',
-    'slides':           '📽 Trình Chiếu / Máy Chiếu'
+    'drums':            '🥁 Trống / Bộ gõ',
+    'vocal_soprano':    '🎤 Nữ cao (Soprano)',
+    'vocal_alto':       '🎤 Nữ trầm (Alto)',
+    'vocal_tenor':      '🎤 Nam cao (Tenor)',
+    'vocal_bass':       '🎤 Nam trầm (Bass)',
+    'sound':            '🎛 Kỹ thuật âm thanh',
+    'slides':           '📽 Trình chiếu / Máy chiếu'
   };
 
   let _modalEl = null;
@@ -60,7 +60,7 @@ const ServicePlanAssignModal = (() => {
           <div style="display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 1.25rem;">👥</span>
             <div>
-              <h3 id="spa-modal-title" style="margin: 0; font-size: 1.05rem; font-weight: 700;">Phân Công Ban Nhạc</h3>
+              <h3 id="spa-modal-title" style="margin: 0; font-size: 1.05rem; font-weight: 700;">Phân Công Chương Trình Thờ Phượng</h3>
               <p id="spa-modal-subtitle" style="margin: 2px 0 0; font-size: 0.76rem; color: var(--text-muted);"></p>
             </div>
           </div>

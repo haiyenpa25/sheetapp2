@@ -175,7 +175,26 @@ class NotificationService {
             case 'assignment.created':
                 $targetUserId = (int)($payload['user_id'] ?? 0);
                 $setlistId    = (int)($payload['setlist_id'] ?? 0);
-                $roleName     = $payload['role'] ?? 'thành viên';
+                $rawRole      = (string)($payload['role'] ?? '');
+                $roleMap = [
+                    'pastor'           => 'Mục sư / Truyền đạo',
+                    'worship_leader'   => 'Hướng dẫn chương trình',
+                    'scripture_reader' => 'Đọc Kinh Thánh',
+                    'leader'           => 'Người hướng dẫn / Hát chính',
+                    'vocal'            => 'Hát dẫn',
+                    'piano'            => 'Piano / Đệm chính',
+                    'organ'            => 'Organ',
+                    'guitar'           => 'Guitar Acoustic / Solo',
+                    'bass'             => 'Guitar Bass',
+                    'drums'            => 'Trống / Bộ gõ',
+                    'vocal_soprano'    => 'Nữ cao (Soprano)',
+                    'vocal_alto'       => 'Nữ trầm (Alto)',
+                    'vocal_tenor'      => 'Nam cao (Tenor)',
+                    'vocal_bass'       => 'Nam trầm (Bass)',
+                    'sound'            => 'Kỹ thuật âm thanh',
+                    'slides'           => 'Trình chiếu / Máy chiếu',
+                ];
+                $roleName = $roleMap[$rawRole] ?? ($rawRole !== '' ? $rawRole : 'thành viên');
 
                 if ($targetUserId > 0) {
                     self::notifyUser(

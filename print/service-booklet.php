@@ -209,9 +209,30 @@ $pageTitle = 'Tập chương trình thờ phượng — ' . htmlspecialchars($se
           <?php if (!empty($assignments)): ?>
             <div class="cover-section-title">Nhân Sự Phục Vụ Buổi Nhóm</div>
             <div class="assignments-grid">
-              <?php foreach ($assignments as $a): ?>
+              <?php 
+              $roleLabels = [
+                'pastor'           => 'Mục sư / Truyền đạo',
+                'worship_leader'   => 'Hướng dẫn chương trình',
+                'scripture_reader' => 'Đọc Kinh Thánh',
+                'leader'           => 'Người hướng dẫn / Hát chính',
+                'vocal'            => 'Hát dẫn',
+                'piano'            => 'Piano / Đệm chính',
+                'organ'            => 'Organ',
+                'guitar'           => 'Guitar Acoustic / Solo',
+                'bass'             => 'Guitar Bass',
+                'drums'            => 'Trống / Bộ gõ',
+                'vocal_soprano'    => 'Nữ cao (Soprano)',
+                'vocal_alto'       => 'Nữ trầm (Alto)',
+                'vocal_tenor'      => 'Nam cao (Tenor)',
+                'vocal_bass'       => 'Nam trầm (Bass)',
+                'sound'            => 'Kỹ thuật âm thanh',
+                'slides'           => 'Trình chiếu / Máy chiếu',
+              ];
+              foreach ($assignments as $a): 
+                $rLabel = $roleLabels[$a['role']] ?? $a['role'];
+              ?>
                 <div class="assign-card">
-                  <div class="assign-role"><?= htmlspecialchars($a['role']) ?></div>
+                  <div class="assign-role"><?= htmlspecialchars($rLabel) ?></div>
                   <div class="assign-name"><?= htmlspecialchars($a['display_name'] ?: $a['username']) ?></div>
                 </div>
               <?php endforeach; ?>
