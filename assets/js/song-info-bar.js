@@ -83,7 +83,8 @@ const SongInfoBar = (() => {
 
     if (titleEl) titleEl.textContent = _songData.title || '--';
     if (keyEl) keyEl.textContent = _songData.key ? `${_songData.key} ${_songData.mode}` : '--';
-    if (prKeyEl) prKeyEl.textContent = _calcPracticedKey();
+    const curTrans = window.Store?.get?.('currentTranspose') ?? 0;
+    if (prKeyEl) prKeyEl.textContent = _calcPracticedKey(_songData.key, curTrans);
     if (timeEl) timeEl.textContent = _songData.timeBeats ? `${_songData.timeBeats}/${_songData.timeBeatType}` : '--';
     if (tempoEl) tempoEl.textContent = _songData.tempo ? `♩ = ${_songData.tempo} bpm` : '♩ —';
     if (measuresEl) measuresEl.textContent = _songData.measureCount ? `${_songData.measureCount} ô nhịp` : '--';
@@ -91,6 +92,8 @@ const SongInfoBar = (() => {
       const curSet = window.ChordCanvas?.getCurrentSet?.() || 'HD';
       chordsetEl.textContent = curSet === 'default' ? 'TLH (Gốc)' : curSet;
     }
+    const tempoVal = document.getElementById('toolbar-tempo-val');
+    if (tempoVal && _songData.tempo) tempoVal.textContent = _songData.tempo;
   }
 
   function loadSong(xmlString, song) {
@@ -117,6 +120,8 @@ const SongInfoBar = (() => {
     if (strip) strip.classList.add('si-hidden');
     const inner = document.getElementById('si-inner');
     if (inner) inner.innerHTML = '';
+    const popUsage = document.getElementById('si-pop-usage');
+    if (popUsage) popUsage.textContent = '--';
   }
 
   /* ─── Parse MusicXML ─────────────────────────────────────── */
@@ -182,12 +187,8 @@ const SongInfoBar = (() => {
     const sharps = ['C','G','D','A','E','B','F#','C#'];
     const flats  = ['C','F','Bb','Eb','Ab','Db','Gb','Cb'];
     const key = fifths >= 0 ? sharps[Math.min(fifths, 7)] : flats[Math.min(-fifths, 7)];
-
     if (mode === 'minor') {
-      const minorMap = {
-        C:'Am', G:'Em', D:'Bm', A:'F#m', E:'C#m', B:'G#m', 'F#':'D#m', 'C#':'A#m',
-        F:'Dm', Bb:'Gm', Eb:'Cm', Ab:'Fm', Db:'Bbm', Gb:'Ebm', Cb:'Abm',
-      };
+      const minorMap = { C:'Am', G:'Em', D:'Bm', A:'F#m', E:'C#m', B:'G#m', 'F#':'D#m', 'C#':'A#m', F:'Dm', Bb:'Gm', Eb:'Cm', Ab:'Fm', Db:'Bbm', Gb:'Ebm', Cb:'Abm' };
       return minorMap[key] || key + 'm';
     }
     return key;
@@ -468,6 +469,7 @@ const SongInfoBar = (() => {
 
   /* Cập nhật chip Tông khi bấm nút dịch giọng trên toolbar */
   function _updateToneChip(semitones) {
+    _updatePopoverContent();
     const toneChip = document.getElementById('si-tone-chip');
     if (!toneChip) return;
 
@@ -494,9 +496,11 @@ const SongInfoBar = (() => {
 
   /* Cập nhật chip Tempo khi BPM thay đổi từ Metronome / TempoPick (Ticket L0-15) */
   function _updateTempoChip(bpm) {
+    const safeBpm = Number.parseInt(bpm, 10);
+    const tempoVal = document.getElementById('toolbar-tempo-val');
+    if (tempoVal && safeBpm && safeBpm !== 104) tempoVal.textContent = safeBpm;
     const tempoChip = document.getElementById('si-tempo-chip');
     if (!tempoChip) return;
-    const safeBpm = Number.parseInt(bpm, 10);
     if (!safeBpm || safeBpm === 104) {
       tempoChip.innerHTML = `♩ — <span style="font-size:0.75em;opacity:0.8;">✎</span>`;
       tempoChip.title = 'Chưa có tempo · Click để đặt Tempo (BPM) / Gõ nhịp';
@@ -514,12 +518,13 @@ const SongInfoBar = (() => {
       if (songId !== _songId) return;
       if (res.success && res.data && res.data.total_used > 0) {
         const inner = document.getElementById('si-inner');
+        const count = res.data.total_used;
+        const lastDate = res.data.last_used_date || '';
+        const popUsage = document.getElementById('si-pop-usage');
+        if (popUsage) popUsage.textContent = `${count} lần${lastDate ? ' (' + lastDate + ')' : ''}`;
         if (!inner) return;
         // Xóa chip usage cũ nếu đã tồn tại để chống nhân đôi (Ticket L0-6)
         inner.querySelectorAll('.si-usage, #si-usage-chip').forEach(el => el.remove());
-
-        const count = res.data.total_used;
-        const lastDate = res.data.last_used_date || '';
         const chip = document.createElement('span');
         chip.id = 'si-usage-chip';
         chip.className = 'si-chip si-usage';
@@ -542,15 +547,8 @@ const SongInfoBar = (() => {
   }
 
   /* Refresh khi đổi chord set */
-  function refreshChordChip() {
-    if (_songData) _render();
-  }
-
-  /* Refresh khi lưu ghi chú / nhật ký */
-  function refreshNotesChip(songId) {
-    if (songId && songId !== _songId) return;
-    if (_songData) _render();
-  }
+  function refreshChordChip() { if (_songData) _render(); }
+  function refreshNotesChip(songId) { if ((!songId || songId === _songId) && _songData) _render(); }
 
   /* Bật / tắt thu gọn thanh thông tin */
   function _toggle() {
@@ -566,15 +564,8 @@ const SongInfoBar = (() => {
 
   /* Escape HTML */
   function _esc(str) {
-    if (window.SafeHtml && typeof window.SafeHtml.escape === 'function') {
-      return window.SafeHtml.escape(str);
-    }
-    return String(str ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
+    if (window.SafeHtml?.escape) return window.SafeHtml.escape(str);
+    return String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
   }
 
   function getSongInfo() { return _songData; }

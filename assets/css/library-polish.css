@@ -250,6 +250,9 @@ body.dark-mode {
   .unified-toolbar .btn-gig-mode { padding: 0 9px !important; }
 }
 
+/* R1-3: Bỏ dải chip #song-info-strip, chuyển thông tin vào popover ⓘ */
+#song-info-strip, .song-info-strip { display: none !important; }
+
 /* ─── 2. Dải phân đoạn bài (Intro · Lời 1 · Điệp khúc…) ───────────── */
 .section-jump-bar-container {
   min-height: 34px;

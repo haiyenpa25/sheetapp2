@@ -26,6 +26,7 @@
         <div class="si-popover-row"><span class="si-popover-label">Tempo:</span><span class="si-popover-value" id="si-pop-tempo">--</span></div>
         <div class="si-popover-row"><span class="si-popover-label">Số ô nhịp:</span><span class="si-popover-value" id="si-pop-measures">--</span></div>
         <div class="si-popover-row"><span class="si-popover-label">Bộ hợp âm:</span><span class="si-popover-value" id="si-pop-chordset">--</span></div>
+        <div class="si-popover-row"><span class="si-popover-label">Sử dụng:</span><span class="si-popover-value" id="si-pop-usage">--</span></div>
       </div>
     </div>
   </div>
