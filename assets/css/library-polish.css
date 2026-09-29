@@ -1207,3 +1207,217 @@ body.dark-mode .cc-status-chip {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
 }
 
+/* ==========================================================================
+   R2-5: Mobile Chord Palette 38% Height, 48px Chips & Action Buttons
+   ========================================================================== */
+.cc-popup.cc-popup-mobile {
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  top: auto !important;
+  height: 38vh;
+  min-height: 260px;
+  max-height: 42vh;
+  box-sizing: border-box;
+  border-radius: 16px 16px 0 0 !important;
+  border: none !important;
+  border-top: 1px solid rgba(109, 40, 217, 0.3) !important;
+  background: var(--lp-surface, #ffffff);
+  box-shadow: 0 -8px 32px rgba(109, 40, 217, 0.22);
+  z-index: 99999 !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  transform: translateY(100%);
+  transition: transform 0.24s cubic-bezier(0.32, 0.94, 0.6, 1);
+}
+
+.cc-popup.cc-popup-mobile.active {
+  transform: translateY(0);
+}
+
+/* Tạm ẩn thanh dưới và FAB khi mở bảng hợp âm mobile */
+body.cc-palette-open #fab-wrap,
+body.cc-palette-open .fab-wrap,
+body.cc-palette-open .measure-progress-bar {
+  display: none !important;
+}
+
+/* Thanh tiêu đề mobile: ◀ nốt X/Y ▶, ô nhịp M · Lời X "...", [⌫] [↶] [Xong] */
+.cc-mob-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  min-height: 44px;
+  width: 100%;
+  border-bottom: 1px solid var(--lp-border, rgba(0, 0, 0, 0.08));
+  padding-bottom: 4px;
+  margin-bottom: 4px;
+}
+
+.cc-mob-nav-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cc-mob-note-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--lp-accent, #6d28d9);
+  padding: 0 4px;
+  white-space: nowrap;
+}
+
+.cc-mob-info-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--lp-muted, #4b5563);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 135px;
+  text-align: center;
+}
+
+.cc-mob-act-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Nút điều hướng và hành động trên mobile touch target ≥ 44px */
+.cc-mob-act-btn,
+.cc-mob-nav-btn {
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 8px;
+  border: 1px solid var(--lp-border, rgba(0, 0, 0, 0.12));
+  background: var(--lp-surface, #ffffff);
+  color: var(--lp-text, #1f2937);
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  transition: transform 0.1s ease, background 0.15s ease;
+}
+
+.cc-mob-act-btn:active,
+.cc-mob-nav-btn:active {
+  transform: scale(0.95);
+}
+
+.cc-mob-btn-done {
+  min-width: 52px !important;
+  min-height: 44px !important;
+  background: var(--lp-accent, #6d28d9) !important;
+  color: #ffffff !important;
+  border: none !important;
+  font-weight: 700 !important;
+}
+
+/* Chip hợp âm 48px trên mobile (R2-5) */
+.cc-popup-mobile .cc-chip {
+  min-height: 48px;
+  min-width: 48px;
+  height: 48px;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+}
+
+.cc-mob-chips-row {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 2px 0 4px;
+  scrollbar-width: none;
+  align-items: center;
+}
+
+.cc-mob-chips-row::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hàng phím bổ trợ modifiers & thao tác nhanh */
+.cc-mob-modifiers-row {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 2px 0 4px;
+  scrollbar-width: none;
+  align-items: center;
+}
+
+.cc-mob-modifiers-row::-webkit-scrollbar {
+  display: none;
+}
+
+.cc-mob-mod-chip {
+  min-height: 40px;
+  min-width: 44px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--lp-surface, #f3f4f6);
+  border: 1px solid var(--lp-border, rgba(0, 0, 0, 0.1));
+  color: var(--lp-text, #374151);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.cc-mob-mod-chip:hover {
+  border-color: var(--lp-accent, #6d28d9);
+  color: var(--lp-accent, #6d28d9);
+}
+
+/* Mobile Dark Mode Sync */
+body.dark-mode .cc-popup.cc-popup-mobile {
+  background: #1e293b;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.55);
+}
+
+body.dark-mode .cc-mob-header {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .cc-mob-info-label {
+  color: #94a3b8;
+}
+
+body.dark-mode .cc-mob-act-btn,
+body.dark-mode .cc-mob-nav-btn {
+  background: #0f172a;
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+}
+
+body.dark-mode .cc-mob-mod-chip {
+  background: #0f172a;
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+}
+

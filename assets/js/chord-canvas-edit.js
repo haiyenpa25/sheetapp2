@@ -84,6 +84,16 @@ const ChordCanvasEdit = (() => {
     const xmlMap = (typeof ChordCanvasXML !== 'undefined' && ChordCanvasXML.readXmlChords) ? ChordCanvasXML.readXmlChords() : {};
     suggestion = xmlMap[`${measureIdx}_${noteIdx}`] || '';
 
+    const { m, idx } = _findMapped(measureIdx, noteIdx);
+    const totalNotes = m.length;
+    const curNoteNum = idx >= 0 ? idx + 1 : 1;
+    let lyricInfo = `ô nhịp ${measureIdx + 1}`;
+    const lyric = window.ChordCanvasXML?.getNoteLyric?.(measureIdx, noteIdx);
+    if (lyric && lyric.text) {
+      lyricInfo = `ô nhịp ${measureIdx + 1} · Lời ${lyric.verse || 1} "${lyric.text}"`;
+    }
+    const meta = { totalNotes, curNoteNum, lyricInfo };
+
     _popup = ChordCanvasUI.createPopup(anchor, measureIdx, noteIdx, existing, app.getCurrentSet(), {
       onSave: async (val, opts = {}) => {
         await saveChord(measureIdx, noteIdx, val, !opts.skipRebuild);
@@ -92,17 +102,18 @@ const ChordCanvasEdit = (() => {
         await deleteChord(measureIdx, noteIdx);
       },
       onClose: () => _closePopup(),
-      // R0-3 & R2-1: Tab/Enter/→ nhập nhanh — mở popup của nốt kế tiếp
       onNext: (mi, ni) => openNextPopup(mi, ni),
-      // R2-1: Shift+Tab/← lùi lại nốt trước
-      onPrev: (mi, ni) => openPrevPopup(mi, ni)
-    }, suggestion);
+      onPrev: (mi, ni) => openPrevPopup(mi, ni),
+      onUndo: () => undo()
+    }, suggestion, meta);
     _popup?.setAttribute('data-measure-idx', measureIdx);
   }
 
   function _findMapped(mi, ni) {
     const app = _getApp(), notes = app.getNoteEls?.() || [], ch = app.getCustomChords?.() || {};
-    const m = window.ChordCanvasDots ? window.ChordCanvasDots.mapNotes(notes, ch) : [];
+    const raw = window.ChordCanvasDots ? window.ChordCanvasDots.mapNotes(notes, ch) : [];
+    const seen = new Set(), m = [];
+    for (const it of raw) { const k = `${it.measureIdx}_${it.noteIdx}`; if (!seen.has(k)) { seen.add(k); m.push(it); } }
     return { m, idx: m.findIndex(x => x.measureIdx === mi && x.noteIdx === ni) };
   }
   function openNextPopup(curMeasureIdx, curNoteIdx) {
@@ -159,11 +170,8 @@ const ChordCanvasEdit = (() => {
     if (!_undoStack.length) { window.App?.showToast?.('Không có hành động để hoàn tác', 'info'); return; }
     _redoStack.push({ set: app.getCurrentSet(), chords: { ...app.getCustomChords() } });
     const prev = _undoStack.pop();
-    app.setCurrentSet(prev.set);
-    app.setCustomChords(prev.chords);
-    if (app.getCurrentSet() !== 'default') {
-      scheduleSave(1500);
-    }
+    app.setCurrentSet(prev.set); app.setCustomChords(prev.chords);
+    if (app.getCurrentSet() !== 'default') scheduleSave(1500);
     setTimeout(() => requestAnimationFrame(() => app.build()), 80);
     window.App?.showToast?.('↩ Đã hoàn tác', 'info');
   }
@@ -173,11 +181,8 @@ const ChordCanvasEdit = (() => {
     if (!_redoStack.length) { window.App?.showToast?.('Không có hành động để làm lại', 'info'); return; }
     _undoStack.push({ set: app.getCurrentSet(), chords: { ...app.getCustomChords() } });
     const next = _redoStack.pop();
-    app.setCurrentSet(next.set);
-    app.setCustomChords(next.chords);
-    if (app.getCurrentSet() !== 'default') {
-      scheduleSave(1500);
-    }
+    app.setCurrentSet(next.set); app.setCustomChords(next.chords);
+    if (app.getCurrentSet() !== 'default') scheduleSave(1500);
     setTimeout(() => requestAnimationFrame(() => app.build()), 80);
     window.App?.showToast?.('↪ Đã làm lại', 'info');
   }
@@ -481,20 +486,7 @@ const ChordCanvasEdit = (() => {
     overlay.id = 'cc-copy-measures-modal';
     overlay.setAttribute('role', 'dialog'); overlay.setAttribute('aria-modal', 'true');
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:99999;padding:16px;';
-    overlay.innerHTML = `
-      <div style="background:${bgCard};color:${textPri};border:1px solid ${border};border-radius:14px;padding:1.4rem;max-width:380px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.45);">
-        <div style="font-size:1.05rem;font-weight:700;margin-bottom:.35rem;">≡ Chép ô nhịp hợp âm</div>
-        <div style="font-size:0.8rem;color:${textSec};margin-bottom:1rem;">Sao chép hợp âm của điệp khúc hoặc đoạn lặp sang ô mới.</div>
-        <div style="display:flex;gap:8px;margin-bottom:10px;">
-          <div style="flex:1;"><label style="font-size:12px;font-weight:600;display:block;margin-bottom:3px;">Từ ô</label><input id="cc-copy-from-start" type="number" min="1" value="${defM}" style="width:100%;box-sizing:border-box;padding:6px 8px;border-radius:8px;border:1px solid ${border};background:${isDark ? '#0f172a' : '#f8fafc'};color:${textPri};font-size:13px;"></div>
-          <div style="flex:1;"><label style="font-size:12px;font-weight:600;display:block;margin-bottom:3px;">Đến ô</label><input id="cc-copy-from-end" type="number" min="1" value="${defM}" style="width:100%;box-sizing:border-box;padding:6px 8px;border-radius:8px;border:1px solid ${border};background:${isDark ? '#0f172a' : '#f8fafc'};color:${textPri};font-size:13px;"></div>
-        </div>
-        <div style="margin-bottom:1.1rem;"><label style="font-size:12px;font-weight:600;display:block;margin-bottom:3px;">Dán sang ô</label><input id="cc-copy-to-start" type="number" min="1" placeholder="Ví dụ: 11" style="width:100%;box-sizing:border-box;padding:6px 8px;border-radius:8px;border:1px solid ${border};background:${isDark ? '#0f172a' : '#f8fafc'};color:${textPri};font-size:13px;"></div>
-        <div style="display:flex;justify-content:flex-end;gap:8px;">
-          <button id="cc-copy-cancel" class="btn btn-ghost btn-sm" type="button">Hủy</button>
-          <button id="cc-btn-do-copy-measures" class="btn btn-primary btn-sm" type="button">✓ Sao chép</button>
-        </div>
-      </div>`;
+    overlay.innerHTML = `<div style="background:${bgCard};color:${textPri};border:1px solid ${border};border-radius:14px;padding:1.4rem;max-width:380px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.45);"><div style="font-size:1.05rem;font-weight:700;margin-bottom:.35rem;">≡ Chép ô nhịp hợp âm</div><div style="font-size:0.8rem;color:${textSec};margin-bottom:1rem;">Sao chép hợp âm của điệp khúc hoặc đoạn lặp sang ô mới.</div><div style="display:flex;gap:8px;margin-bottom:10px;"><div style="flex:1;"><label style="font-size:12px;font-weight:600;display:block;margin-bottom:3px;">Từ ô</label><input id="cc-copy-from-start" type="number" min="1" value="${defM}" style="width:100%;box-sizing:border-box;padding:6px 8px;border-radius:8px;border:1px solid ${border};background:${isDark ? '#0f172a' : '#f8fafc'};color:${textPri};font-size:13px;"></div><div style="flex:1;"><label style="font-size:12px;font-weight:600;display:block;margin-bottom:3px;">Đến ô</label><input id="cc-copy-from-end" type="number" min="1" value="${defM}" style="width:100%;box-sizing:border-box;padding:6px 8px;border-radius:8px;border:1px solid ${border};background:${isDark ? '#0f172a' : '#f8fafc'};color:${textPri};font-size:13px;"></div></div><div style="margin-bottom:1.1rem;"><label style="font-size:12px;font-weight:600;display:block;margin-bottom:3px;">Dán sang ô</label><input id="cc-copy-to-start" type="number" min="1" placeholder="Ví dụ: 11" style="width:100%;box-sizing:border-box;padding:6px 8px;border-radius:8px;border:1px solid ${border};background:${isDark ? '#0f172a' : '#f8fafc'};color:${textPri};font-size:13px;"></div><div style="display:flex;justify-content:flex-end;gap:8px;"><button id="cc-copy-cancel" class="btn btn-ghost btn-sm" type="button">Hủy</button><button id="cc-btn-do-copy-measures" class="btn btn-primary btn-sm" type="button">✓ Sao chép</button></div></div>`;
     document.body.appendChild(overlay);
     const cleanup = () => overlay.remove();
     overlay.querySelector('#cc-copy-cancel').onclick = cleanup;
@@ -516,6 +508,22 @@ const ChordCanvasEdit = (() => {
       if (m) return m.measureIdx;
     }
     return -1;
+  }
+
+  // R2-5: Vùng chạm theo nốt gần nhất, không chồng lên nhau (Voronoi nearest note calculation)
+  function findNearestNote(clientX, clientY, maxDist = 90) {
+    const app = _getApp(), notes = app.getNoteEls?.() || [], ch = app.getCustomChords?.() || {};
+    const m = window.ChordCanvasDots ? window.ChordCanvasDots.mapNotes(notes, ch) : [];
+    if (!m.length) return null;
+    let best = null, minDist = Infinity;
+    for (const item of m) {
+      const r = item.rect || item.el?.getBoundingClientRect?.();
+      if (!r || r.width === 0) continue;
+      const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      const d = Math.hypot(clientX - cx, clientY - cy);
+      if (d < minDist) { minDist = d; best = item; }
+    }
+    return (minDist <= maxDist) ? best : null;
   }
 
   if (typeof document !== 'undefined') {
@@ -545,13 +553,23 @@ const ChordCanvasEdit = (() => {
         }
       }
     });
+
+    // R2-5: Chạm vào khuông nhạc để chọn nốt gần nhất không chồng lấn
+    document.addEventListener('pointerdown', e => {
+      if (!window.ChordCanvas?.isAddMode?.()) return;
+      if (e.target?.closest?.('.cc-popup, .cc-popup-mobile, .modal, .cc-dot-btn, .cc-dot-badge, input, textarea, button')) return;
+      const container = document.getElementById('osmd-container');
+      if (!container || !container.contains(e.target)) return;
+      const nearest = findNearestNote(e.clientX, e.clientY);
+      if (nearest) {
+        showPopup(nearest.el, nearest.measureIdx, nearest.noteIdx, nearest.chord || '');
+      }
+    });
   }
 
   if (typeof window !== 'undefined') {
     _loadOfflineQueue();
-    window.addEventListener('online', () => {
-      flushOfflineQueue();
-    });
+    window.addEventListener('online', () => flushOfflineQueue());
   }
 
   async function saveCustomSet(immediate = false) {
@@ -560,28 +578,12 @@ const ChordCanvasEdit = (() => {
   }
 
   return {
-    init,
-    showPopup,
-    openNextPopup,
-    closePopup: _closePopup,
-    pushUndo: _pushUndo,
-    undo,
-    redo,
-    saveChord,
-    deleteChord,
-    saveCustomSet,
-    startEditingWithoutCloning,
-    cloneAndStartEditing,
-    resetUndo,
-    scheduleSave,
-    flushSave,
-    executeSave,
-    flushOfflineQueue,
-    setBaseChecksum,
-    showConflictModal,
-    copyMeasures,
-    showCopyMeasuresModal,
-    updateStatusChip: _updateStatusChip
+    init, showPopup, openNextPopup, closePopup: _closePopup,
+    pushUndo: _pushUndo, undo, redo, saveChord, deleteChord,
+    saveCustomSet, startEditingWithoutCloning, cloneAndStartEditing,
+    resetUndo, scheduleSave, flushSave, executeSave, flushOfflineQueue,
+    setBaseChecksum, showConflictModal, copyMeasures, showCopyMeasuresModal,
+    updateStatusChip: _updateStatusChip, findNearestNote
   };
 })();
 

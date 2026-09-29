@@ -314,7 +314,29 @@ const ChordCanvasXML = (() => {
     return _serialize(doc);
   }
 
-  return { readXmlChords, buildAbsMap, injectXml, removeXml, cloneAndInjectChords };
+  function getNoteLyric(mIdx, nIdx) {
+    const xml = window.Store?.get?.('originalXml') || window.App?.getOriginalXml?.() || window.OSMDRenderer?.getCurrentXml?.();
+    if (!xml) return null;
+    const doc = window.XmlDocCache?.getDoc(xml) || new DOMParser().parseFromString(xml, 'text/xml');
+    const measures = doc.querySelectorAll('part')[0]?.querySelectorAll('measure');
+    if (!measures || !measures[mIdx]) return null;
+    let ni = -1;
+    for (const c of measures[mIdx].children) {
+      if (c.tagName !== 'note') continue;
+      if (c.querySelector('chord') || c.querySelector('grace')) continue;
+      ni++;
+      if (ni === nIdx) {
+        const lyr = c.querySelector('lyric');
+        if (!lyr) return null;
+        const text = lyr.querySelector('text')?.textContent?.trim() || '';
+        const num = lyr.getAttribute('number') || '1';
+        return { text, verse: num };
+      }
+    }
+    return null;
+  }
+
+  return { readXmlChords, buildAbsMap, injectXml, removeXml, cloneAndInjectChords, getNoteLyric };
 })();
 
 window.ChordCanvasXML = ChordCanvasXML;
