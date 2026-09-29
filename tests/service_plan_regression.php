@@ -137,7 +137,7 @@ check($items[2]['custom_title'] === 'Cầu nguyện khai lễ & chúc phước',
 
 // ─── TEST 3: Phân công nhân sự & xác nhận tham gia ────────────────
 $assign1 = SetlistService::assignUser($planId, $banhatId, 'piano', 'Đệm piano chính & intro bài 1', $adminId);
-$assign2 = SetlistService::assignUser($planId, $viewerId, 'vocal', 'Hát solo phiên khúc 1 & lĩnh xướng', $adminId);
+$assign2 = SetlistService::assignUser($planId, $viewerId, 'vocal', 'Hát solo phiên khúc 1 & hát dẫn', $adminId);
 
 check($assign1 > 0 && $assign2 > 0, "Phân công thành công 2 nhân sự cho ban nhạc");
 

@@ -22,7 +22,7 @@ require_once __DIR__ . '/PracticeAssignmentCreationHelper.php';
 class PracticeAssignmentService {
 
     /**
-     * Tạo bài tập luyện bè tự động từ Chương trình Phụng vụ (Service Plan)
+     * Tạo bài tập luyện bè tự động từ Chương trình thờ phượng (Service Plan)
      */
     public static function createFromServicePlan(int $planId, int $actorId): array {
         return PracticeAssignmentCreationHelper::createFromServicePlan($planId, $actorId);

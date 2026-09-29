@@ -42,7 +42,7 @@ if ($appBase === '/' || $appBase === '\\') $appBase = '';
   <!-- Header -->
   <header class="projector-header" id="projector-header">
     <div class="projector-title-wrap">
-      <span class="projector-plan-badge" id="projector-plan-badge">PHỤNG VỤ</span>
+      <span class="projector-plan-badge" id="projector-plan-badge">THỜ PHƯỢNG</span>
       <span class="projector-title" id="projector-header-title">LIVE BAND STUDIO</span>
     </div>
     <div class="projector-header-meta">

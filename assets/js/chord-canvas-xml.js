@@ -6,6 +6,20 @@ const ChordCanvasXML = (() => {
   'use strict';
 
   /* ─── Read XML chords ─────────────────────────── */
+  function _parseHarmonyNode(c) {
+    const step  = c.querySelector('root-step')?.textContent?.trim() || '';
+    const alter = c.querySelector('root-alter')?.textContent?.trim();
+    const kind  = c.querySelector('kind')?.getAttribute('text') || '';
+    let chordStr = step + (alter === '1' ? '#' : alter === '-1' ? 'b' : '') + kind;
+    const bassStep = c.querySelector('bass > bass-step')?.textContent?.trim();
+    if (bassStep) {
+      const bassAlter = c.querySelector('bass > bass-alter')?.textContent?.trim();
+      const bAcc = bassAlter === '1' ? '#' : bassAlter === '-1' ? 'b' : '';
+      chordStr += '/' + bassStep + bAcc;
+    }
+    return chordStr;
+  }
+
   function readXmlChords() {
     const xml = window.Store?.get?.('originalXml') || window.App?.getOriginalXml?.() || window.OSMDRenderer?.getCurrentXml?.();
     if (!xml) return {};
@@ -14,28 +28,66 @@ const ChordCanvasXML = (() => {
     if (!parts.length) return {};
     const map = {};
     parts[0].querySelectorAll('measure').forEach((m, mi) => {
-      let ni = -1, pChord = null;
-      for (const c of m.children) {
-        if (c.tagName === 'harmony') {
-          const step  = c.querySelector('root-step')?.textContent?.trim() || '';
-          const alter = c.querySelector('root-alter')?.textContent?.trim();
-          const kind  = c.querySelector('kind')?.getAttribute('text') || '';
-          
-          let chordStr = step + (alter === '1' ? '#' : alter === '-1' ? 'b' : '') + kind;
-          
-          // Phân tích nốt Bass (nếu có hợp âm đảo / Slash Chords: ví dụ C/E)
-          const bassStep = c.querySelector('bass > bass-step')?.textContent?.trim();
-          if (bassStep) {
-            const bassAlter = c.querySelector('bass > bass-alter')?.textContent?.trim();
-            const bAcc = bassAlter === '1' ? '#' : bassAlter === '-1' ? 'b' : '';
-            chordStr += '/' + bassStep + bAcc;
+      const hasBackup = !!m.querySelector('backup');
+      if (!hasBackup) {
+        let ni = -1, pChord = null;
+        for (const c of m.children) {
+          if (c.tagName === 'harmony') {
+            pChord = _parseHarmonyNode(c);
+          } else if (c.tagName === 'note') {
+            if (!c.querySelector('chord') && !c.querySelector('grace')) ni++;
+            if (pChord !== null && !c.querySelector('chord')) {
+              map[`${mi}_${ni}`] = pChord; pChord = null;
+            }
           }
-          
-          pChord = chordStr;
-        } else if (c.tagName === 'note') {
-          if (!c.querySelector('chord') && !c.querySelector('grace')) ni++;
-          if (pChord !== null && !c.querySelector('chord')) {
-            map[`${mi}_${ni}`] = pChord; pChord = null;
+        }
+      } else {
+        // R2-10: Timeline-aware mapping cho các bài polyphonic nhiều bè (<backup>)
+        let currentDiv = 0;
+        const staff1Times = [];
+        for (const c of m.children) {
+          if (c.tagName === 'note') {
+            const isChord = !!c.querySelector('chord');
+            const isGrace = !!c.querySelector('grace');
+            const dur = parseInt(c.querySelector('duration')?.textContent || '0', 10);
+            const staff = c.querySelector('staff')?.textContent?.trim() || '1';
+            if (staff === '1' && !isGrace) {
+              if (!staff1Times.includes(currentDiv)) staff1Times.push(currentDiv);
+            }
+            if (!isChord && !isGrace) currentDiv += dur;
+          } else if (c.tagName === 'backup') {
+            const dur = parseInt(c.querySelector('duration')?.textContent || '0', 10);
+            currentDiv = Math.max(0, currentDiv - dur);
+          } else if (c.tagName === 'forward') {
+            const dur = parseInt(c.querySelector('duration')?.textContent || '0', 10);
+            currentDiv += dur;
+          }
+        }
+        staff1Times.sort((a, b) => a - b);
+
+        currentDiv = 0;
+        for (const c of m.children) {
+          if (c.tagName === 'harmony') {
+            const chordStr = _parseHarmonyNode(c);
+            const offset = parseInt(c.querySelector('offset')?.textContent || '0', 10);
+            const hTime = currentDiv + offset;
+            let bestIdx = 0, minDiff = Infinity;
+            staff1Times.forEach((t, idx) => {
+              const diff = Math.abs(t - hTime);
+              if (diff < minDiff) { minDiff = diff; bestIdx = idx; }
+            });
+            map[`${mi}_${bestIdx}`] = chordStr;
+          } else if (c.tagName === 'note') {
+            const isChord = !!c.querySelector('chord');
+            const isGrace = !!c.querySelector('grace');
+            const dur = parseInt(c.querySelector('duration')?.textContent || '0', 10);
+            if (!isChord && !isGrace) currentDiv += dur;
+          } else if (c.tagName === 'backup') {
+            const dur = parseInt(c.querySelector('duration')?.textContent || '0', 10);
+            currentDiv = Math.max(0, currentDiv - dur);
+          } else if (c.tagName === 'forward') {
+            const dur = parseInt(c.querySelector('duration')?.textContent || '0', 10);
+            currentDiv += dur;
           }
         }
       }
@@ -53,13 +105,42 @@ const ChordCanvasXML = (() => {
     const map = {};
     let abs = 0;
     measures.forEach((m, mi) => {
-      let ni = -1;
-      for (const c of m.children) {
-        if (c.tagName !== 'note') continue;
-        if (c.querySelector('chord') || c.querySelector('grace')) continue;
-        ni++;
-        map[abs] = { mi, ni };
-        abs++;
+      const hasBackup = !!m.querySelector('backup');
+      if (!hasBackup) {
+        let ni = -1;
+        for (const c of m.children) {
+          if (c.tagName !== 'note') continue;
+          if (c.querySelector('chord') || c.querySelector('grace')) continue;
+          ni++;
+          map[abs] = { mi, ni };
+          abs++;
+        }
+      } else {
+        let currentDiv = 0;
+        const staff1Times = [];
+        for (const c of m.children) {
+          if (c.tagName === 'note') {
+            const isChord = !!c.querySelector('chord');
+            const isGrace = !!c.querySelector('grace');
+            const dur = parseInt(c.querySelector('duration')?.textContent || '0', 10);
+            const staff = c.querySelector('staff')?.textContent?.trim() || '1';
+            if (staff === '1' && !isGrace) {
+              if (!staff1Times.includes(currentDiv)) staff1Times.push(currentDiv);
+            }
+            if (!isChord && !isGrace) currentDiv += dur;
+          } else if (c.tagName === 'backup') {
+            const dur = parseInt(c.querySelector('duration')?.textContent || '0', 10);
+            currentDiv = Math.max(0, currentDiv - dur);
+          } else if (c.tagName === 'forward') {
+            const dur = parseInt(c.querySelector('duration')?.textContent || '0', 10);
+            currentDiv += dur;
+          }
+        }
+        staff1Times.sort((a, b) => a - b);
+        staff1Times.forEach((_, ni) => {
+          map[abs] = { mi, ni };
+          abs++;
+        });
       }
     });
     return map;
@@ -314,7 +395,29 @@ const ChordCanvasXML = (() => {
     return _serialize(doc);
   }
 
-  return { readXmlChords, buildAbsMap, injectXml, removeXml, cloneAndInjectChords };
+  function getNoteLyric(mIdx, nIdx) {
+    const xml = window.Store?.get?.('originalXml') || window.App?.getOriginalXml?.() || window.OSMDRenderer?.getCurrentXml?.();
+    if (!xml) return null;
+    const doc = window.XmlDocCache?.getDoc(xml) || new DOMParser().parseFromString(xml, 'text/xml');
+    const measures = doc.querySelectorAll('part')[0]?.querySelectorAll('measure');
+    if (!measures || !measures[mIdx]) return null;
+    let ni = -1;
+    for (const c of measures[mIdx].children) {
+      if (c.tagName !== 'note') continue;
+      if (c.querySelector('chord') || c.querySelector('grace')) continue;
+      ni++;
+      if (ni === nIdx) {
+        const lyr = c.querySelector('lyric');
+        if (!lyr) return null;
+        const text = lyr.querySelector('text')?.textContent?.trim() || '';
+        const num = lyr.getAttribute('number') || '1';
+        return { text, verse: num };
+      }
+    }
+    return null;
+  }
+
+  return { readXmlChords, buildAbsMap, injectXml, removeXml, cloneAndInjectChords, getNoteLyric };
 })();
 
 window.ChordCanvasXML = ChordCanvasXML;

@@ -100,7 +100,7 @@ assertCondition(
 
 assertCondition(
     strpos($viewerContent, 'btn-cue-chip') !== false &&
-    strpos($viewerContent, '👑 Nhắc Band:') !== false,
+    (strpos($viewerContent, 'Nhắc Band:') !== false || strpos($viewerContent, 'icon(\'crown\'') !== false),
     "Thanh host-quick-cues-bar có nhãn và các chip thông điệp 1-chạm",
     true
 );

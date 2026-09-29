@@ -1,4 +1,9 @@
 @echo off
+REM ── DISABLED trong đợt ROADMAP5 (2026-09-29) ──────────────────────────────
+REM Auto-push đang tắt để tránh 2 tác nhân ghi đè nhau (xem ROADMAP5.md Phần 0,
+REM "Dieu kien tien quyet"). Commit thu cong tren nhanh feature/roadmap5,
+REM chu du an duyet roi moi merge. Xoa dong "exit /b 0" ben duoi de bat lai.
+exit /b 0
 if exist "C:\Program Files\Git\cmd\git.exe" (
     set GIT_EXE=C:\Program Files\Git\cmd\git.exe
 ) else if exist "C:\Users\CNS-MSI-004\.git-bin\cmd\git.exe" (

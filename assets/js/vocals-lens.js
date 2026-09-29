@@ -70,7 +70,7 @@ const VocalsLens = (() => {
     bar = document.createElement('div');
     bar.id = 'vocals-lens-bar';
     bar.className = 'vocals-lens-bar hidden';
-    bar.setAttribute('aria-label', 'Bảng điều khiển Hát Stage Lens');
+    bar.setAttribute('aria-label', 'Bảng điều khiển Hát — Góc nhìn nhạc cụ');
 
     bar.innerHTML = `
       <div class="vocals-lens-inner">

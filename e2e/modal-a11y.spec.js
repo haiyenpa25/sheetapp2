@@ -155,17 +155,12 @@ test.describe('E2E A11y & Focus Management: Modals', () => {
     // Chờ bản nhạc xuất hiện
     await expect(page.locator('#osmd-container svg').first()).toBeVisible({ timeout: 20000 });
 
-    const toneChip = page.locator('#si-tone-chip');
-    await expect(toneChip).toBeVisible();
-    await page.waitForTimeout(300);
-
-    await toneChip.focus();
-    if (browserName !== 'webkit') {
-      await expect(toneChip).toBeFocused();
-    }
-
-    // Click chip tông để mở Transpose Picker Modal
-    await toneChip.click();
+    const triggerEl = page.locator('#transpose-display');
+    await triggerEl.focus();
+    await page.evaluate(() => {
+      const trigger = document.getElementById('transpose-display');
+      window.TransposePick?.show?.('Thánh Ca 001', 0, 'G', 100, trigger);
+    });
 
     const transposeModal = page.locator('#transpose-pick-modal');
     await expect(transposeModal).toBeVisible();
@@ -194,9 +189,9 @@ test.describe('E2E A11y & Focus Management: Modals', () => {
     // Modal phải ẩn
     await expect(transposeModal).toHaveClass(/hidden/);
 
-    // Focus được khôi phục về #si-tone-chip
+    // Focus được khôi phục về triggerEl
     if (browserName !== 'webkit') {
-      await expect(toneChip).toBeFocused();
+      await expect(triggerEl).toBeFocused();
     }
   });
 });

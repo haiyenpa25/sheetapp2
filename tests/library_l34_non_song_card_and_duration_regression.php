@@ -66,7 +66,7 @@ $it2 = SetlistService::addItem($planId, '', 'HD', 0, null, null, [
 $it3 = SetlistService::addItem($planId, '', 'HD', 0, null, null, [
     'item_type' => 'scripture',
     'custom_title' => 'Đọc Lời Chúa: Thi Thiên 91',
-    'leader_notes' => 'Chấp sự lĩnh xướng, hội chúng đọc đối đáp',
+    'leader_notes' => 'Chấp sự hướng dẫn, hội chúng đọc đối đáp',
     'duration_minutes' => 3
 ]);
 

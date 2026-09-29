@@ -1,15 +1,10 @@
 /**
  * chord-canvas-dots.js — Note Mapping, Staff Alignment & Chord Dot Placement
- * Part of SheetApp Sheet Reader
  */
 const ChordCanvasDots = (() => {
   'use strict';
-
-  const DOT_CLASS = 'cc-note-dot';
-  const BTN_CLASS = 'cc-dot-btn';
-
-  const STAFF_LINE_MIN_WIDTH = 100;
-  const CHORD_GAP_RATIO = 0.35;
+  const DOT_CLASS = 'cc-note-dot', BTN_CLASS = 'cc-dot-btn';
+  const STAFF_LINE_MIN_WIDTH = 100, CHORD_GAP_RATIO = 0.35;
 
   function alignDOMChords() {
     const container = document.getElementById('osmd-container');
@@ -107,18 +102,36 @@ const ChordCanvasDots = (() => {
       }
     });
 
+    const staveNotes = Array.from(svg.querySelectorAll('g.vf-stavenote'));
+    const noteRects = staveNotes.map(sn => {
+      const r = sn.getBoundingClientRect();
+      return { top: r.top - cRect.top, bottom: r.bottom - cRect.top, left: r.left - cRect.left, right: r.right - cRect.left };
+    }).filter(nr => nr.bottom > 0);
+
     for (const [sys, badges] of assigned.entries()) {
-      // top của badge = dòng kẻ trên cùng − chiều cao chữ − khe hở, để mép dưới
-      // chữ hợp âm luôn nằm ngay trên khuông (chữ đã to 28px theo preset).
       const badgeH = Math.max(...badges.map(b => b.offsetHeight || 0), 0);
-      const fixedY = Math.round(sys.topLine - badgeH - GAP_PX * CHORD_GAP_RATIO);
+      let fixedY = Math.round(sys.topLine - badgeH - GAP_PX * CHORD_GAP_RATIO);
+      const sysNotes = noteRects.filter(nr => nr.top >= sys.topLine - 65 && nr.bottom <= sys.bottomLine + 65);
+      if (sysNotes.length) {
+        const minNoteTop = Math.min(...sysNotes.map(nr => nr.top));
+        if (minNoteTop < sys.topLine) {
+          const safeFixedY = Math.round(minNoteTop - badgeH - 8);
+          if (safeFixedY < fixedY) fixedY = safeFixedY;
+        }
+      }
       badges.sort((a, b) => (parseFloat(a.style.left) || 0) - (parseFloat(b.style.left) || 0));
       let prevRight = -Infinity;
       badges.forEach(badge => {
-        badge.style.top = fixedY + 'px';
-        const curLeft = parseFloat(badge.style.left) || 0;
-        let curW = badge.offsetWidth;
-        if (!curW || curW <= 0) curW = badge.textContent.trim().length * 14 + 12;
+        let curLeft = parseFloat(badge.style.left) || 0;
+        let curW = badge.offsetWidth || (badge.textContent.trim().length * 14 + 12);
+        let badgeY = fixedY;
+        const bLeft = curLeft - curW / 2, bRight = curLeft + curW / 2;
+        const overlappingNotes = sysNotes.filter(nr => !(nr.right < bLeft || nr.left > bRight));
+        if (overlappingNotes.length) {
+          const localMinTop = Math.min(...overlappingNotes.map(nr => nr.top));
+          if (badgeY + badgeH > localMinTop - 6) badgeY = Math.round(localMinTop - badgeH - 6);
+        }
+        badge.style.top = badgeY + 'px';
         if (curLeft < prevRight + 6) {
           const newLeft = prevRight + 6;
           badge.style.left = newLeft + 'px';
@@ -195,7 +208,8 @@ const ChordCanvasDots = (() => {
     const svg = container.querySelector('svg');
     if (!svg) return result;
 
-    const chordGroups = Array.from(svg.querySelectorAll('g.vf-chordsymbol'));
+    const rawChords = Array.from(svg.querySelectorAll('g.vf-chordsymbol, g.osmd-chord-symbol, [data-chord-symbol="true"], text.osmd-chord-symbol, text.osmd-chord-text'));
+    const chordGroups = rawChords.filter(el => el.tagName.toLowerCase() === 'g' || !el.closest('g.osmd-chord-symbol, g.vf-chordsymbol'));
     if (!chordGroups.length) return result;
 
     chordGroups.forEach(g => {
@@ -311,6 +325,23 @@ const ChordCanvasDots = (() => {
     return fallbackResult;
   }
 
+  function _getStaffTop(measureIdx) {
+    try {
+      const osmd = window.OSMDRenderer?.getInstance?.();
+      const ml = osmd?.graphic?.measureList;
+      if (ml && ml[measureIdx]) {
+        const s0 = ml[measureIdx][0];
+        const sl = s0?.ParentStaffLine;
+        const y = sl?.PositionAndShape?.AbsolutePosition?.y;
+        if (y != null) {
+          const unit = osmd.graphic?.unitInPixels || 10;
+          return y * unit;
+        }
+      }
+    } catch (_) {}
+    return null;
+  }
+
   function placeDot({ el, rect, measureIdx, noteIdx, chord }, chordTextPositions, opts = {}) {
     if (!rect || rect.width === 0 || rect.height === 0) return;
     const container = document.getElementById('osmd-container');
@@ -323,8 +354,9 @@ const ChordCanvasDots = (() => {
     const presetMultiplier = (preset === 'stage' ? 1.6 : (preset === 'high_contrast' ? 1.3 : 1.0));
     const fSize   = Math.max(16, Math.round(20 * scale * 1.35 * presetMultiplier));
 
+    const staffTop = _getStaffTop(measureIdx);
     const cx = (rect.left - cRect.left) + rect.width / 2;
-    const cy = (rect.top  - cRect.top)  - (28 * scale);
+    const cy = staffTop != null ? (staffTop - 20 * scale) : ((rect.top - cRect.top) - (28 * scale));
 
     const editEnabled = opts.editEnabled ?? false;
     const highlightEnabled = opts.highlightEnabled ?? false;
@@ -337,8 +369,17 @@ const ChordCanvasDots = (() => {
       const textPos = chordTextPositions?.get(`${measureIdx}_${noteIdx}`);
 
       if (currentSet === 'default') {
-        const badgeX = textPos ? textPos.bx + textPos.bw / 2 : cx;
-        const badgeY = textPos ? textPos.by - 6 : cy - dotSize / 2;
+        const badgeX = textPos ? (textPos.bx + textPos.bw / 2) : cx;
+        let badgeY;
+        if (staffTop != null) {
+          if (textPos && textPos.by < staffTop && textPos.by > staffTop - 45) {
+            badgeY = Math.max(staffTop - 36, Math.min(staffTop - 12, textPos.by - 4));
+          } else {
+            badgeY = Math.max(staffTop - 36, Math.min(staffTop - 12, staffTop - 22 * scale));
+          }
+        } else {
+          badgeY = textPos ? (textPos.by - 6) : (cy - dotSize / 2);
+        }
 
         const badge = document.createElement('div');
         badge.className = DOT_CLASS + ' cc-edit-badge';
@@ -354,11 +395,11 @@ const ChordCanvasDots = (() => {
           'box-shadow:0 2px 7px rgba(109,40,217,0.55)',
           'pointer-events:auto', 'cursor:pointer', 'user-select:none', 'z-index:12',
           'touch-action:manipulation', '-webkit-tap-highlight-color:transparent',
-          'transform: translateX(-50%) translateY(-100%)',
+          'transform: translateX(-50%)',
           'transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease'
         ]);
-        badge.addEventListener('mouseenter', () => { badge.style.transform = 'translateX(-50%) translateY(-100%) scale(1.15)'; badge.style.background = 'rgba(109,40,217,1)'; badge.style.boxShadow = '0 4px 12px rgba(109,40,217,0.7)'; });
-        badge.addEventListener('mouseleave', () => { badge.style.transform = 'translateX(-50%) translateY(-100%) scale(1)'; badge.style.background = 'rgba(109,40,217,0.87)'; badge.style.boxShadow = '0 2px 7px rgba(109,40,217,0.55)'; });
+        badge.addEventListener('mouseenter', () => { badge.style.transform = 'translateX(-50%) scale(1.15)'; badge.style.background = 'rgba(109,40,217,1)'; badge.style.boxShadow = '0 4px 12px rgba(109,40,217,0.7)'; });
+        badge.addEventListener('mouseleave', () => { badge.style.transform = 'translateX(-50%) scale(1)'; badge.style.background = 'rgba(109,40,217,0.87)'; badge.style.boxShadow = '0 2px 7px rgba(109,40,217,0.55)'; });
         badge.addEventListener('pointerdown', e => { e.stopPropagation(); onShowPopup?.(badge, measureIdx, noteIdx, chord); });
         container.appendChild(badge);
 
@@ -380,19 +421,15 @@ const ChordCanvasDots = (() => {
         container.appendChild(span);
 
       } else {
-        let spanX = textPos ? textPos.bx + textPos.bw / 2 : cx;
-        let spanY = cy - (18 * scale);
-        if (textPos) {
-          spanY = textPos.by - 4;
-        } else if (chordTextPositions) {
-          let closestDist = Infinity;
-          for (let pos of chordTextPositions.values()) {
-            let dist = Math.abs(pos.by - cy);
-            if (dist < 120 * scale && dist < closestDist) {
-              closestDist = dist;
-              spanY = pos.by - 4;
-            }
-          }
+        let spanX = textPos ? (textPos.bx + textPos.bw / 2) : cx;
+        let spanY;
+        if (staffTop != null) {
+          spanY = Math.max(staffTop - 36, Math.min(staffTop - 12, staffTop - 22 * scale));
+        } else {
+          spanY = textPos ? (textPos.by - 4) : (cy - 18 * scale);
+        }
+        if (rect && rect.top - cRect.top < (staffTop || 9999)) {
+          spanY = Math.min(spanY, (rect.top - cRect.top) - fSize - 6);
         }
 
         const textBadge = document.createElement('div');
@@ -484,10 +521,27 @@ const ChordCanvasDots = (() => {
       }
 
     } else if (editEnabled) {
+      if (opts.showTlhSuggestions && opts.tlhChordMap) {
+        const tlhChord = opts.tlhChordMap[`${measureIdx}_${noteIdx}`];
+        if (tlhChord) {
+          const ghost = document.createElement('span');
+          ghost.className = DOT_CLASS + ' cc-tlh-ghost-chord';
+          ghost.textContent = tlhChord;
+          ghost.title = `Gợi ý TLH: ${tlhChord} (Bấm + để đặt)`;
+          const ghostY = staffTop != null ? Math.max(staffTop - 36, Math.min(staffTop - 12, staffTop - 22 * scale)) : (cy - 18 * scale);
+          ChordCanvasUI.applyAbsolute(ghost, cx, ghostY, [
+            'opacity:0.42', 'color:var(--text-muted,#9ca3af)', 'font-style:italic',
+            'font-family:"Georgia",serif', `font-size:${fSize}px`,
+            'font-weight:600', 'pointer-events:none', 'user-select:none', 'z-index:9'
+          ]);
+          container.appendChild(ghost);
+        }
+      }
       const btn = document.createElement('div');
       btn.className = DOT_CLASS + ' ' + BTN_CLASS;
       btn.textContent = '+';
-      ChordCanvasUI.applyAbsolute(btn, cx, cy, [
+      const dotY = staffTop != null ? Math.max(staffTop - 34, Math.min(staffTop - 10, staffTop - 20 * scale)) : cy;
+      ChordCanvasUI.applyAbsolute(btn, cx, dotY, [
         'display:' + (editEnabled ? 'flex' : 'none'),
         'align-items:center', 'justify-content:center',
         `width:${dotSize}px`, `height:${dotSize}px`,

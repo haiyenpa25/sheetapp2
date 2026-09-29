@@ -3,8 +3,8 @@
  * api/services/SetlistService.php
  *
  * Service Plan & Setlist Architecture (Epic 3.1):
- * - Quản lý chương trình buổi nhóm thờ phượng / phụng vụ (ngày, giờ, chủ đề, trạng thái).
- * - Quản lý bài hát, tiết mục phụng vụ, tông, BPM, profile hợp âm và ghi chú ban nhạc.
+ * - Quản lý chương trình buổi nhóm thờ phượng (ngày, giờ, chủ đề, trạng thái).
+ * - Quản lý bài hát, tiết mục buổi nhóm, tông, BPM, profile hợp âm và ghi chú ban nhạc.
  * - Phân công nhân sự ban hát (ca trưởng, piano, guitar, trống, ca viên) & xác nhận tham gia.
  * - Theo dõi lịch sử sử dụng bài hát qua các buổi nhóm (Song Usage History).
  * - Nhật ký kiểm toán (Audit Trail) cho mọi thao tác quan trọng.
@@ -110,7 +110,7 @@ class SetlistService {
         $setlist = DB::run($sql, [$id])->fetch(PDO::FETCH_ASSOC);
         if (!$setlist) return null;
 
-        // Lấy danh sách bài hát & tiết mục phụng vụ
+        // Lấy danh sách bài hát & tiết mục buổi nhóm
         $hasSongTable = self::hasTable('songs');
         $itemsSql = $hasSongTable
             ? "SELECT i.*, so.title AS song_title FROM setlist_items i LEFT JOIN songs so ON so.id = i.song_id WHERE i.setlist_id = ? ORDER BY i.display_order ASC"
@@ -232,7 +232,7 @@ class SetlistService {
                 $actorId,
                 'setlist',
                 (string)$id,
-                ['title' => $plan['title'] ?? 'Chương trình Phụng vụ']
+                ['title' => $plan['title'] ?? 'Chương trình thờ phượng']
             );
         }
         return $res;

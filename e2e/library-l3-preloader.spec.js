@@ -28,7 +28,7 @@ test.describe('L3-2 · Tải trước bài kế tiếp & Chuyển bài tức th�
     await page.evaluate(() => {
       const sampleSetlist = {
         id: 888,
-        name: 'Chương trình Thánh Lễ Preloader',
+        name: 'Chương trình Buổi Nhóm Preloader',
         items: [
           { song_id: 'thanh-ca-001', title: 'HỠI THÁNH VƯƠNG, KÍP NGỰ LAI', key: 'G', transpose_key: 0, chord_profile: 'HD', bpm: 80 },
           { song_id: 'thanh-ca-002', title: 'NGUYỀN TỤNG MỸ CHÚA LINH NĂNG', key: 'G', transpose_key: 0, chord_profile: 'HD', bpm: 90 },

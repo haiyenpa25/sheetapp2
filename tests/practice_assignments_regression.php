@@ -72,7 +72,7 @@ $songStmt->execute(['004-ha-le-lu-gia', 'Ha-lê-lu-gia Vinh Danh Ngài', 'songs/
 // [2/6] Tạo từ Service Plan & Chống trùng lặp
 echo "\n[2/6] Kiểm tra createFromServicePlan & Chống tạo trùng lặp...\n";
 // Tạo 1 Service Plan với 2 bài hát và 2 ca viên được phân công
-$planId = SetlistService::create('Thánh Lễ Chúa Nhật Phụng Vụ', '2026-10-01', 10, ['status' => 'draft']);
+$planId = SetlistService::create('Thờ Phượng Chúa Nhật', '2026-10-01', 10, ['status' => 'draft']);
 SetlistService::addItem($planId, '001-hoi-thanh-vuong', 'HD', 0, 84);
 SetlistService::addItem($planId, '002-nguyen-tung-my-chua', 'HD', 2, 90);
 

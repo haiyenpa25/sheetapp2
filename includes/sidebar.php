@@ -2,7 +2,7 @@
 <aside id="sidebar" class="sidebar">
   <div class="sidebar-header">
     <div class="logo">
-      <span class="logo-icon">🎵</span>
+      <span class="logo-icon"><?= icon('music') ?></span>
       <span class="logo-text">SheetApp</span>
       <span id="library-count" class="library-count-badge">...</span>
     </div>
@@ -13,8 +13,8 @@
         <span id="auth-username" class="sidebar-auth-name">Khách</span>
         <span id="auth-role-badge" class="sidebar-role-badge hidden"></span>
       </button>
-      <button id="btn-toggle-sidebar" class="icon-btn" title="Ẩn/Hiện sidebar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+      <button id="btn-toggle-sidebar" class="icon-btn btn-close-sidebar" title="Đóng danh sách bài hát (Esc)" aria-label="Đóng danh sách bài hát">
+        <?= icon('x') ?>
       </button>
     </div>
   </div>
@@ -23,8 +23,8 @@
   <!-- SIDEBAR TABS -->
   <div class="sidebar-tabs" id="sidebar-tabs">
     <button class="sidebar-tab active" id="sidebar-tab-lib" data-tab="library">Kho Nhạc</button>
-    <button class="sidebar-tab" data-tab="setlist">Setlists</button>
-    <button class="sidebar-tab" id="sidebar-tab-favs" data-tab="favorites" title="Bài hát yêu thích">&#11088;</button>
+    <button class="sidebar-tab" data-tab="setlist">Chương trình</button>
+    <button class="sidebar-tab" id="sidebar-tab-favs" data-tab="favorites" title="Bài hát yêu thích"><?= icon('star') ?></button>
   </div>
 
   <div class="sidebar-search">
@@ -33,25 +33,29 @@
       <input id="search-input" type="text" placeholder="Tìm bài hát..." autocomplete="off">
       <div class="sidebar-search-actions">
         <button id="btn-quick-numpad" class="btn-quick-numpad" title="Bàn phím số nhanh (#)" aria-label="Mở bàn phím số nhanh">#</button>
-        <button id="btn-search-lyrics" class="icon-btn-xs btn-search-lyrics" title="Tìm theo lời bài hát">&#127925;</button>
+        <button id="btn-search-lyrics" class="icon-btn-xs btn-search-lyrics" title="Tìm theo lời bài hát"><?= icon('music') ?></button>
       </div>
     </div>
 
     <!-- Hàng điều khiển: Sắp xếp + Nút gom bộ lọc Lọc (Ticket L2-3) -->
     <div class="mt-half sidebar-controls-row">
       <select id="sort-filter" class="form-input select-toolbar sort-filter-select" title="Sắp xếp bài hát" aria-label="Sắp xếp danh sách bài hát">
-        <option value="num" selected>STT HTTLVN</option>
+        <option value="num" selected>Số bài Thánh Ca</option>
         <option value="title">Tên (A-Z)</option>
         <option value="key">Tông gốc</option>
       </select>
       <button id="btn-filter-toggle" class="btn btn-sm btn-filter-toggle" aria-expanded="false" aria-controls="sidebar-filters-panel" aria-label="Gom bộ lọc bài hát" title="Mở bộ lọc">
-        <span>⚡ Lọc</span>
+        <span><?= icon('filter') ?> Lọc</span>
         <span id="filter-active-badge" class="filter-active-badge hidden">0</span>
       </button>
     </div>
 
     <!-- PANEL GOM BỘ LỌC (TỰ ẨN KHI KHÔNG CÓ DỮ LIỆU - TICKET L2-3) -->
     <div id="sidebar-filters-panel" class="sidebar-filters-panel hidden">
+      <?php
+      require_once __DIR__ . '/../api/services/SongSearchHelper.php';
+      $sidebarTaxonomy = SongSearchHelper::getTaxonomy();
+      ?>
       <div id="category-filter-wrap" class="sidebar-filter-item">
         <label for="category-filter" class="sidebar-filter-label">Danh mục:</label>
         <select id="category-filter" class="form-input select-toolbar sidebar-filter-select" aria-label="Lọc theo danh mục bài hát">
@@ -60,9 +64,12 @@
       </div>
 
       <div id="season-filter-wrap" class="sidebar-filter-item">
-        <label for="season-filter" class="sidebar-filter-label">Mùa Lễ:</label>
-        <select id="season-filter" class="form-input select-toolbar sidebar-filter-select" title="Lọc theo Mùa Lễ" aria-label="Lọc theo mùa lễ">
-          <option value="">Tất cả Mùa Lễ</option>
+        <label for="season-filter" class="sidebar-filter-label">Dịp lễ:</label>
+        <select id="season-filter" class="form-input select-toolbar sidebar-filter-select" title="Lọc theo Dịp lễ" aria-label="Lọc theo dịp lễ">
+          <option value="">Tất cả Dịp lễ</option>
+          <?php foreach ($sidebarTaxonomy['seasons'] as $s): ?>
+            <option value="<?= htmlspecialchars($s['name']) ?>"><?= htmlspecialchars($s['name']) ?></option>
+          <?php endforeach; ?>
         </select>
       </div>
 
@@ -70,6 +77,9 @@
         <label for="theme-filter" class="sidebar-filter-label">Chủ đề:</label>
         <select id="theme-filter" class="form-input select-toolbar sidebar-filter-select" title="Lọc theo Chủ Đề Thờ Phượng" aria-label="Lọc theo chủ đề thờ phượng">
           <option value="">Tất cả Chủ Đề</option>
+          <?php foreach ($sidebarTaxonomy['themes'] as $t): ?>
+            <option value="<?= htmlspecialchars($t['name']) ?>"><?= htmlspecialchars($t['name']) ?></option>
+          <?php endforeach; ?>
         </select>
       </div>
 
@@ -102,7 +112,7 @@
     </button>
     <button id="btn-create-setlist" class="btn btn-primary btn-sm w-full hidden">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Tạo Setlist Mới
+      Tạo Chương Trình Mới
     </button>
   </div>
 
@@ -123,7 +133,7 @@
       <div id="quick-favorites-section" class="quick-favorites-section hidden"></div>
       <div id="song-list" class="song-list">
         <div class="empty-state">
-          <span class="empty-icon">🎶</span>
+          <span class="empty-icon"><?= icon('music') ?></span>
           <p>Chưa có bài hát nào</p>
           <small>Nhấn "Thêm Bài Hát" để nhập bài</small>
         </div>
@@ -134,8 +144,8 @@
     <div id="tab-content-setlist" class="sidebar-tab-content hidden">
       <div id="setlist-list" class="song-list">
         <div class="empty-state">
-          <span class="empty-icon">📋</span>
-          <p>Chưa có Setlist nào</p>
+          <span class="empty-icon"><?= icon('file-text') ?></span>
+          <p>Chưa có chương trình nào</p>
           <small>Chỉ Quản trị mới có thể tạo</small>
         </div>
       </div>
@@ -144,10 +154,10 @@
           <button id="btn-back-setlists" class="icon-btn" title="Quay lại">
             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
-          <h3 id="setlist-detail-title" class="setlist-detail-title">Setlist</h3>
+          <h3 id="setlist-detail-title" class="setlist-detail-title">Chương trình</h3>
           <div class="d-flex items-center gap-1">
-            <button id="btn-print-setlist" class="icon-btn-xs" title="🖨️ In Chương Trình Biểu Diễn A4">🖨️</button>
-            <button id="btn-copy-setlist-slide" class="icon-btn-xs" title="📋 Copy Danh Sách Cho Slide Màn Hình">📋</button>
+            <button id="btn-print-setlist" class="icon-btn-xs" title="In Tập Chương Trình A4"><?= icon('printer') ?></button>
+            <button id="btn-copy-setlist-slide" class="icon-btn-xs" title="Copy Danh Sách Cho Slide Màn Hình"><?= icon('copy') ?></button>
             <button id="btn-play-setlist" class="btn btn-sm btn-primary">Phát</button>
           </div>
         </div>
@@ -161,22 +171,13 @@
     </div>
   </div>
 
-  <!-- TIỆN ÍCH PHỤ TRỢ (Góc dưới cùng sidebar) -->
-  <div class="sidebar-footer-tools">
-    <div class="sidebar-footer-title">Tiện Ích Phụ Trợ</div>
+  <!-- TIỆN ÍCH PHỤ TRỢ (Ẩn hoàn toàn bằng d-none theo Ticket R1-8; bảo lưu anchor $bHref cho Ticket L0-14) -->
+  <div class="sidebar-footer-tools d-none" aria-hidden="true">
     <div class="d-flex gap-2">
       <?php $bHref = $baseHref ?? '/'; ?>
-      <a href="<?= $bHref ?>learn/" class="sidebar-mini-link sidebar-mini-learn" title="Góc tự tập đàn, điệu đệm & MIDI ở nhà">
-        <span>🎹</span>
-        <span>Học Đàn</span>
-      </a>
-      <a href="<?= $bHref ?>live-band/" class="sidebar-mini-link sidebar-mini-live" title="Phòng biểu diễn đồng bộ ban nhạc & máy chiếu nhà thờ">
-        <span>📡</span>
-        <span>Live Band</span>
-      </a>
-      <a href="<?= $bHref ?>manager/" target="_blank" class="sidebar-mini-link sidebar-mini-mgr" title="Cổng Quản Lý Kho Nhạc & Bản Phối (/manager/)">
-        <span>⚙️</span>
-      </a>
+      <a href="<?= $bHref ?>learn/" class="sidebar-mini-link sidebar-mini-learn d-none"></a>
+      <a href="<?= $bHref ?>live-band/" class="sidebar-mini-link sidebar-mini-live d-none"></a>
+      <a href="<?= $bHref ?>manager/" class="sidebar-mini-link sidebar-mini-mgr d-none"></a>
     </div>
   </div>
 </aside>

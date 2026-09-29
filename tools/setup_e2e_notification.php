@@ -38,7 +38,7 @@ try {
         $userId = (int)$user['id'];
 
         // 1. Tạo 1 setlist thử nghiệm
-        $planTitle = 'Thánh Lễ Chúa Nhật E2E ' . bin2hex(random_bytes(3));
+        $planTitle = 'Thờ Phượng Chúa Nhật E2E ' . bin2hex(random_bytes(3));
         $planDate = date('Y-m-d', strtotime('+3 days'));
         $planId = SetlistService::create($planTitle, $planDate, 1, ['status' => 'draft']);
 
@@ -73,7 +73,7 @@ try {
         }
         $userId = isset($argv[3]) ? (int)$argv[3] : 0;
         if ($userId > 0) {
-            $db->prepare("DELETE FROM notifications WHERE user_id = ? AND title LIKE '%Chương trình Phụng vụ%'")->execute([$userId]);
+            $db->prepare("DELETE FROM notifications WHERE user_id = ? AND (title LIKE '%Chương trình Phụng vụ%' OR title LIKE '%Chương trình thờ phượng%')")->execute([$userId]);
         }
         echo json_encode(['success' => true, 'cleaned_plan_id' => $planId]);
         exit(0);

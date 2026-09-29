@@ -15,7 +15,7 @@ require_once __DIR__ . '/DomainEventService.php';
 class PracticeAssignmentCreationHelper {
 
     /**
-     * Tạo bài tập luyện bè tự động từ Chương trình Phụng vụ (Service Plan)
+     * Tạo bài tập luyện bè tự động từ Chương trình thờ phượng (Service Plan)
      */
     public static function createFromServicePlan(int $planId, int $actorId): array {
         $pdo = DB::get();
@@ -25,7 +25,7 @@ class PracticeAssignmentCreationHelper {
         $planStmt->execute([$planId]);
         $plan = $planStmt->fetch(PDO::FETCH_ASSOC);
         if (!$plan) {
-            throw new InvalidArgumentException("Không tìm thấy chương trình phụng vụ #{$planId}");
+            throw new InvalidArgumentException("Không tìm thấy chương trình thờ phượng #{$planId}");
         }
 
         // 2. Lấy danh sách các bài hát trong plan
@@ -78,7 +78,7 @@ class PracticeAssignmentCreationHelper {
                             completion_rule, status
                         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'manual', 'active')
                     ");
-                    $title = "Tập bài: " . $songId . " — " . ($plan['title'] ?? 'Phụng vụ');
+                    $title = "Tập bài: " . $songId . " — " . ($plan['title'] ?? 'Buổi nhóm');
                     $dueAt = !empty($plan['scheduled_date']) ? $plan['scheduled_date'] . ' 23:59:59' : null;
                     $bpm = !empty($song['bpm']) ? (int)$song['bpm'] : null;
                     $transpose = isset($song['transpose_key']) ? (int)$song['transpose_key'] : 0;

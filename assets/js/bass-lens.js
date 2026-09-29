@@ -118,12 +118,12 @@ const BassLens = (() => {
     bar = document.createElement('div');
     bar.id = 'bass-lens-bar';
     bar.className = 'bass-lens-bar hidden';
-    bar.setAttribute('aria-label', 'Bảng điều khiển Bass Stage Lens');
+    bar.setAttribute('aria-label', 'Bảng điều khiển Bass — Góc nhìn nhạc cụ');
 
     bar.innerHTML = `
       <div class="bass-lens-inner" style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:6px 12px;background:var(--bg-surface,#18181b);border-bottom:1px solid var(--border,#3f3f46);font-size:0.82rem;">
         <span class="bass-lens-tag" style="font-weight:700;color:var(--accent-cyan,#06b6d4);display:flex;align-items:center;gap:4px;">
-          <span>🎻</span> Bass Lens:
+          <span>🎻</span> Góc nhìn Bass:
         </span>
 
         <button type="button" id="btn-bass-toggle-big" class="btn-bass-tool ${_bigBassActive ? 'active' : ''}" title="Hiển thị nốt Bass cỡ lớn dễ nhìn từ xa" style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;border:1px solid var(--border,#3f3f46);background:var(--bg-overlay,rgba(255,255,255,0.06));color:var(--text-primary,#fff);cursor:pointer;touch-action:manipulation;min-height:32px;">

@@ -28,7 +28,7 @@ test.describe('L3-4 · Thẻ chờ phụng vụ & Tổng thời lượng dự ki
     await page.evaluate(async () => {
       const sampleSetlist = {
         id: 777,
-        name: 'Chương trình Thánh Lễ L3-4',
+        name: 'Chương trình Buổi Nhóm L3-4',
         items: [
           {
             id: 201,
@@ -54,7 +54,7 @@ test.describe('L3-4 · Thẻ chờ phụng vụ & Tổng thời lượng dự ki
             song_id: '',
             item_type: 'scripture',
             custom_title: 'Đọc Lời Chúa: Thi Thiên 23',
-            leader_notes: 'Chấp sự lĩnh xướng hội chúng đọc đối đáp',
+            leader_notes: 'Chấp sự hướng dẫn hội chúng đọc đối đáp',
             duration_minutes: 3
           },
           {

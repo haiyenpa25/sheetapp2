@@ -29,7 +29,7 @@ class PracticeAssignmentController {
                 AuthPolicy::authorize('view_team_progress');
                 $setlistId = (int)($_GET['setlist_id'] ?? 0);
                 if ($setlistId <= 0) {
-                    Response::error('Thiếu mã chương trình phụng vụ (setlist_id)');
+                    Response::error('Thiếu mã chương trình thờ phượng (setlist_id)');
                     return;
                 }
                 $board = PracticeAssignmentService::getTeamBoard($setlistId, (int)Auth::userId());
@@ -61,7 +61,7 @@ class PracticeAssignmentController {
                 $body = json_decode(file_get_contents('php://input'), true) ?? [];
                 $setlistId = (int)($body['setlist_id'] ?? 0);
                 if ($setlistId <= 0) {
-                    Response::error('Thiếu mã chương trình phụng vụ (setlist_id)');
+                    Response::error('Thiếu mã chương trình thờ phượng (setlist_id)');
                     return;
                 }
                 try {

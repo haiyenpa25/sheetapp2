@@ -158,7 +158,7 @@ test.describe('L1-5 · Chế độ Sân khấu thật (Gig Mode Hardening)', () 
     await expect(osmdSvg).toBeVisible({ timeout: 25000 });
 
     // Vào Biểu Diễn
-    const btnGig = page.locator('#btn-fullscreen');
+    const btnGig = page.locator('#btn-mobile-gig, #btn-fullscreen').locator('visible=true').first();
     await expect(btnGig).toBeVisible();
     await btnGig.click();
 

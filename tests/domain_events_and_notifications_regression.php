@@ -74,7 +74,7 @@ if (class_exists('DomainEvents')) {
         1,
         'test_fixture',
         '9999',
-        ['title' => 'Chương Trình Thánh Lễ Giáng Sinh', 'season' => 'Giáng Sinh']
+        ['title' => 'Chương Trình Thờ Phượng Giáng Sinh', 'season' => 'Giáng Sinh']
     );
 
     check($eventId > 0, "DomainEvents::record trả về ID sự kiện hợp lệ (> 0, nhận được: {$eventId})", $failures, $totalChecks);
@@ -84,7 +84,7 @@ if (class_exists('DomainEvents')) {
     check($evtRow && (int)$evtRow['actor_user_id'] === 1, 'Sự kiện lưu đúng actor_user_id = 1', $failures, $totalChecks);
     
     $payload = json_decode($evtRow['payload_json'] ?? '{}', true);
-    check(is_array($payload) && ($payload['title'] ?? '') === 'Chương Trình Thánh Lễ Giáng Sinh', 'Payload JSON được bọc và lưu trữ nguyên vẹn', $failures, $totalChecks);
+    check(is_array($payload) && ($payload['title'] ?? '') === 'Chương Trình Thờ Phượng Giáng Sinh', 'Payload JSON được bọc và lưu trữ nguyên vẹn', $failures, $totalChecks);
 }
 
 // ── 3. Kiểm tra NotificationService ──
@@ -176,7 +176,7 @@ if (class_exists('DomainEvents') && class_exists('NotificationService')) {
         $notifs = NotificationService::getList($caVienId);
         $found = false;
         foreach ($notifs['items'] as $item) {
-            if (str_contains($item['title'], 'Phụng vụ') || str_contains($item['body'], 'Lễ Tạ Ơn 2026')) {
+            if (str_contains($item['title'], 'thờ phượng') || str_contains($item['title'], 'Phụng vụ') || str_contains($item['body'], 'Lễ Tạ Ơn 2026')) {
                 $found = true;
                 break;
             }

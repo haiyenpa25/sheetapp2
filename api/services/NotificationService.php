@@ -145,7 +145,7 @@ class NotificationService {
         switch ($type) {
             case 'plan.published':
                 $setlistId = (int)$subjectId;
-                $planTitle = $payload['title'] ?? 'Chương trình Phụng vụ';
+                $planTitle = $payload['title'] ?? 'Chương trình thờ phượng';
 
                 // Tìm tất cả thành viên được phân công trong chương trình này
                 $stmt = $pdo->prepare("
@@ -164,7 +164,7 @@ class NotificationService {
                         $targetUserId,
                         $eventId,
                         'plan.published',
-                        'Chương trình Phụng vụ đã phát hành',
+                        'Chương trình thờ phượng đã phát hành',
                         "Chương trình '{$planTitle}' vừa được phát hành. Nhiệm vụ của bạn: {$userRole}.",
                         "?setlist={$setlistId}"
                     );
@@ -175,14 +175,33 @@ class NotificationService {
             case 'assignment.created':
                 $targetUserId = (int)($payload['user_id'] ?? 0);
                 $setlistId    = (int)($payload['setlist_id'] ?? 0);
-                $roleName     = $payload['role'] ?? 'thành viên';
+                $rawRole      = (string)($payload['role'] ?? '');
+                $roleMap = [
+                    'pastor'           => 'Mục sư / Truyền đạo',
+                    'worship_leader'   => 'Hướng dẫn chương trình',
+                    'scripture_reader' => 'Đọc Kinh Thánh',
+                    'leader'           => 'Người hướng dẫn / Hát chính',
+                    'vocal'            => 'Hát dẫn',
+                    'piano'            => 'Piano / Đệm chính',
+                    'organ'            => 'Organ',
+                    'guitar'           => 'Guitar Acoustic / Solo',
+                    'bass'             => 'Guitar Bass',
+                    'drums'            => 'Trống / Bộ gõ',
+                    'vocal_soprano'    => 'Nữ cao (Soprano)',
+                    'vocal_alto'       => 'Nữ trầm (Alto)',
+                    'vocal_tenor'      => 'Nam cao (Tenor)',
+                    'vocal_bass'       => 'Nam trầm (Bass)',
+                    'sound'            => 'Kỹ thuật âm thanh',
+                    'slides'           => 'Trình chiếu / Máy chiếu',
+                ];
+                $roleName = $roleMap[$rawRole] ?? ($rawRole !== '' ? $rawRole : 'thành viên');
 
                 if ($targetUserId > 0) {
                     self::notifyUser(
                         $targetUserId,
                         $eventId,
                         'plan.role_assigned',
-                        'Bạn có nhiệm vụ mới trong Phụng vụ',
+                        'Bạn có nhiệm vụ mới trong chương trình thờ phượng',
                         "Bạn vừa được phân công vai trò {$roleName}.",
                         $setlistId > 0 ? "?setlist={$setlistId}" : ''
                     );

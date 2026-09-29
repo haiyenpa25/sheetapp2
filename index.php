@@ -18,8 +18,8 @@ $baseHref = ($appBase ? $appBase : '') . '/';
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="mobile-web-app-capable" content="yes">
-  <title>SheetApp — Nhạc Thánh Ca Tương Tác</title>
-  <meta name="description" content="Ứng dụng xem, dịch giọng và ghi chép nhạc thánh ca tương tác. Hỗ trợ MusicXML, transpose và nhật ký biểu diễn.">
+  <title>SheetApp — Thánh Ca tương tác</title>
+  <meta name="description" content="Ứng dụng xem, dịch giọng và ghi chép nhạc thánh ca tương tác. Hỗ trợ MusicXML, transpose và nhật ký phục vụ.">
   <!-- PWA / Add to Homescreen -->
   <link rel="manifest" href="<?= $baseHref ?>manifest.json">
   <meta name="theme-color" content="#6d28d9">
@@ -37,6 +37,7 @@ $baseHref = ($appBase ? $appBase : '') . '/';
   <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 
 <?php
+require_once __DIR__ . '/includes/icons.php';
 function cssTag(string $file): string {
     global $baseHref;
     $path = __DIR__ . '/assets/css/' . $file;
@@ -55,11 +56,16 @@ echo cssTag('library-polish.css'); // lớp hoàn thiện giao diện — luôn 
 </head>
 <body>
 
+<!-- Lucide SVG Sprite (Ticket R1-1) -->
+<div id="lucide-sprite-container" style="display:none;" aria-hidden="true">
+  <?php @readfile(__DIR__ . '/assets/icons/lucide.svg'); ?>
+</div>
+
 <!-- Skip Navigation Links cho điều hướng bàn phím A11y (Ticket L1-11) -->
 <nav class="skip-links" aria-label="Điều hướng nhanh">
-  <a href="#unified-toolbar" class="skip-link">Nhảy tới thanh công cụ</a>
-  <a href="#sheet-viewer-wrapper" class="skip-link">Nhảy tới bản nhạc</a>
-  <a href="#sidebar" class="skip-link">Nhảy tới danh sách bài hát</a>
+  <a href="#unified-toolbar" class="skip-link" tabindex="0">Nhảy tới thanh công cụ</a>
+  <a href="#sheet-viewer-wrapper" class="skip-link" tabindex="0">Nhảy tới bản nhạc</a>
+  <a href="#sidebar" class="skip-link" tabindex="0">Nhảy tới danh sách bài hát</a>
 </nav>
 
 <!-- ===== MAIN CONTENT (Thanh công cụ & Bản nhạc focus trước Sidebar) ===== -->

@@ -39,7 +39,7 @@ const SetlistDetail = (() => {
 
   async function viewSetlistDetail(id) {
     const ctx = getContext();
-    window.App?.showLoading?.('Đang tải Setlist...');
+    window.App?.showLoading?.('Đang tải chương trình...');
     try {
       const data = await window.ApiService.setlists.get(id);
       if (data && data.success) {
@@ -59,7 +59,7 @@ const SetlistDetail = (() => {
         ctx.setCurrentSetlist?.(offSl);
         _applyDetailView(offSl);
         await renderSetlistItems();
-        window.App?.showToast?.('⚡ Đang dùng dữ liệu Setlist ngoại tuyến (Offline)', 'info');
+        window.App?.showToast?.('⚡ Đang dùng dữ liệu chương trình ngoại tuyến (Offline)', 'info');
         window.App?.hideLoading?.();
         return;
       }

@@ -132,7 +132,7 @@ if ($appBase === '/' || $appBase === '\\') $appBase = '';
         <li>
           <a href="#mod-10" class="sidebar-link">
             <span class="sidebar-icon">👥</span>
-            <span>10. Phụng Vụ & Ca Đoàn</span>
+            <span>10. Chương Trình Thờ Phượng & Ban Hát</span>
           </a>
         </li>
       </ul>

@@ -50,7 +50,20 @@ $keyboardJs = file_get_contents($keyboardPath);
 
 check(str_contains($keyboardJs, 'ModeManager.toggleEditChords'), 'Phím C được điều hướng qua ModeManager.toggleEditChords');
 check(str_contains($keyboardJs, 'ModeManager.togglePerformance'), 'Phím F được điều hướng qua ModeManager.togglePerformance');
-check(str_contains($keyboardJs, 'ModeManager.resetToView'), 'Phím Escape được điều hướng qua ModeManager.resetToView');
+// R0-6 (ROADMAP5, lỗi B17): ModeManager tự đăng ký listener 'keydown' Escape RIÊNG của
+// nó (document.addEventListener bên trong ModeManager.js), rồi handleEscape() bên trong
+// tự gọi resetToView() khi cần thoát mode. Nếu keyboard-handler.js CŨNG gọi lại
+// ModeManager.resetToView/handleEscape, cùng 1 lần bấm Esc bị xử lý 2 lần. Nên giờ
+// keyboard-handler.js không còn gọi trực tiếp nữa -- kiểm tra đúng chỗ ModeManager.js
+// tự làm chủ, và keyboard-handler.js không gọi trùng.
+check(
+    !str_contains($keyboardJs, 'ModeManager.resetToView') && !str_contains($keyboardJs, 'ModeManager.handleEscape') && !str_contains($keyboardJs, 'ModeManager?.handleEscape'),
+    'Phím Escape KHÔNG bị keyboard-handler.js gọi trùng sang ModeManager (tránh xử lý 2 lần)'
+);
+check(
+    (bool) preg_match('/addEventListener\(\'keydown\',[\s\S]{0,80}Escape[\s\S]{0,40}handleEscape/', $modeManagerJs) && str_contains($modeManagerJs, 'resetToView();'),
+    'Phím Escape được ModeManager tự làm chủ (listener riêng gọi handleEscape, rồi resetToView khi cần thoát mode)'
+);
 
 // --- TEST 3: Giấu FAB và chrome trong Performance / Sheet-Only Mode ---
 $layoutCss = file_get_contents($root . '/assets/css/layout.css');

@@ -321,12 +321,12 @@
       </section>
 
       <!-- ══════════════════════════════════════════════════════════
-           MÔ-ĐUN 10: QUẢN LÝ PHỤNG VỤ & CỘNG TÁC CA ĐOÀN (GIAI ĐOẠN 4)
+           MÔ-ĐUN 10: QUẢN LÝ CHƯƠNG TRÌNH THỜ PHƯỢNG & CỘNG TÁC BAN HÁT (GIAI ĐOẠN 4)
            ══════════════════════════════════════════════════════════ -->
       <section id="mod-10" class="docs-chapter">
         <div class="chapter-header">
           <span class="chapter-badge">CHƯƠNG 10</span>
-          <h2 class="chapter-title">Quản Lý Phụng Vụ & Cộng Tác Ca Đoàn (Giai Đoạn 4)</h2>
+          <h2 class="chapter-title">Quản Lý Chương Trình Thờ Phượng & Cộng Tác Ban Hát (Giai Đoạn 4)</h2>
         </div>
 
         <div class="doc-card" data-roles="all leader admin">
@@ -335,7 +335,7 @@
             Từ phiên bản 2.0, hệ thống phân định rõ 4 cấp bậc phân quyền: <code>viewer</code> &lt; <code>member</code> &lt; <code>leader (Ca Trưởng)</code> &lt; <code>admin</code>.
           </p>
           <ul style="padding-left: 20px; color: var(--text-secondary); line-height: 1.8;">
-            <li><strong>Đặc quyền của Ca Trưởng:</strong> Soạn và phát hành Chương trình Phụng vụ, giao bài tập ca đoàn, theo dõi bảng tiến độ luyện tập của toàn ban, và phê duyệt các đề xuất bộ hợp âm HD.</li>
+            <li><strong>Đặc quyền của Ca Trưởng:</strong> Soạn và phát hành Chương trình thờ phượng, giao bài tập ca đoàn, theo dõi bảng tiến độ luyện tập của toàn ban, và phê duyệt các đề xuất bộ hợp âm HD.</li>
             <li><strong>Phân bè mặc định:</strong> Mỗi thành viên được chỉ định một bè mặc định trong hồ sơ (Soprano, Alto, Tenor, Bass hoặc Nhạc cụ). Khi được giao bài, hệ thống sẽ tự động solo đúng bè của ca viên đó trong Smart Learning.</li>
           </ul>
         </div>
@@ -343,13 +343,13 @@
         <div class="doc-card" data-roles="all leader vocal">
           <h3 class="card-title"><span class="topic-icon">📋</span> 10.2. Giao Bài Tập & Bảng Tiến Độ Ca Đoàn (Team Board)</h3>
           <p class="card-desc">
-            Ca Trưởng có thể giao bài tập trực tiếp từ một Chương trình Phụng vụ hoặc tạo bài tập tùy ý (Ad-hoc) cho từng ca viên hay cả nhóm bè:
+            Ca Trưởng có thể giao bài tập trực tiếp từ một Chương trình thờ phượng hoặc tạo bài tập tùy ý (Ad-hoc) cho từng ca viên hay cả nhóm bè:
           </p>
           <div class="steps-grid">
             <div class="step-box">
               <span class="step-num">BƯỚC 01</span>
               <div class="step-title">Giao bài từ Service Plan</div>
-              <div class="step-text">Trong modal soạn thảo Phụng vụ, nhấn <strong>"📋 Giao Tập"</strong> để hệ thống tự động gán bài hát và bè tương ứng cho các ca viên tham gia buổi lễ.</div>
+              <div class="step-text">Trong modal soạn thảo Chương trình thờ phượng, nhấn <strong>"📋 Giao Tập"</strong> để hệ thống tự động gán bài hát và bè tương ứng cho các ca viên tham gia buổi nhóm.</div>
             </div>
             <div class="step-box">
               <span class="step-num">BƯỚC 02</span>
@@ -365,13 +365,13 @@
         </div>
 
         <div class="doc-card" data-roles="all leader musician vocal">
-          <h3 class="card-title"><span class="topic-icon">🖨️</span> 10.3. Xuất Bản In Lời & Hợp Âm ChordPro & In Booklet Phụng Vụ A4</h3>
+          <h3 class="card-title"><span class="topic-icon">🖨️</span> 10.3. Xuất Bản In Lời & Hợp Âm ChordPro & In Tập Chương Trình Lễ A4</h3>
           <p class="card-desc">
             Không cần phụ thuộc vào phần mềm đồ họa hay chép tay, SheetApp tạo bản in chuyên dụng tự động căn chuẩn khổ giấy A4:
           </p>
           <ul style="padding-left: 20px; color: var(--text-secondary); line-height: 1.8;">
             <li><strong>Bản in Lời + Hợp âm chuyên dụng (Chord Sheet):</strong> Nhấn <strong>"🖨️ In Lời & Hợp âm"</strong> trên thanh thông tin bài hát. Hỗ trợ đổi tông (+/-), ẩn/hiện dòng hợp âm, tùy chỉnh cỡ chữ và tự động bố trí 1 cột hoặc 2 cột cho bài dài.</li>
-            <li><strong>In Booklet Phụng Vụ (Service Booklet):</strong> Trong danh sách Setlist, bấm <strong>"📖 In Booklet"</strong> để xuất trọn bộ tập bài hát của buổi lễ: Trang bìa thứ tự chương trình (Order of Service) + mỗi bài hát ngắt trang độc lập theo đúng Tông tập, Profile hợp âm và Tempo.</li>
+            <li><strong>In tập chương trình lễ (Service Booklet):</strong> Trong danh sách Setlist, bấm <strong>"📖 In Booklet"</strong> để xuất trọn bộ tập bài hát của buổi nhóm: Trang bìa thứ tự chương trình (Order of Service) + mỗi bài hát ngắt trang độc lập theo đúng Tông tập, Profile hợp âm và Tempo.</li>
             <li><strong>Cảnh báo lặp bài D15:</strong> Khi thêm bài hát vào Setlist, hệ thống tự động kiểm tra và cảnh báo nếu bài đã từng được sử dụng trong vòng 4 tuần gần nhất để đảm bảo phong phú danh mục thờ phượng.</li>
           </ul>
         </div>
@@ -394,7 +394,7 @@
             Kiểm soát thông báo nhận được theo đúng nhu cầu và thói quen cá nhân:
           </p>
           <ul style="padding-left: 20px; color: var(--text-secondary); line-height: 1.8;">
-            <li><strong>Ma trận sự kiện × kênh:</strong> Tùy chỉnh bật/tắt riêng cho từng kênh (Chuông trong App, Email, Web Push) với từng loại sự kiện: Khi phát hành chương trình phụng vụ, khi được giao bài tập, khi bài tập sắp đến hạn, hoặc khi đề xuất hợp âm được duyệt.</li>
+            <li><strong>Ma trận sự kiện × kênh:</strong> Tùy chỉnh bật/tắt riêng cho từng kênh (Chuông trong App, Email, Web Push) với từng loại sự kiện: Khi phát hành chương trình thờ phượng, khi được giao bài tập, khi bài tập sắp đến hạn, hoặc khi đề xuất hợp âm được duyệt.</li>
             <li><strong>Bảo vệ giờ nghỉ ngơi (Quiet Hours):</strong> Cài đặt khung giờ yên lặng cá nhân (ví dụ: 22:00 đến 07:00 sáng). Hệ thống sẽ tự động hoãn gửi email và chờ đến hết khung giờ yên lặng mới chuyển phát tiếp.</li>
             <li><strong>Bảo mật thông tin:</strong> Email chỉ gửi tiêu đề tóm tắt và đường link bảo mật, tuyệt đối không đưa điểm số, nốt nhạc hay ghi chú riêng tư vào hộp thư điện tử.</li>
           </ul>

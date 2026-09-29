@@ -328,14 +328,14 @@ const SongLoader = (() => {
     }
     const contentW = Math.max(100, wrapW - padX);
     const ratio = avail / contentW;
-    const pct = Math.round(Math.max(0.5, Math.min(2.0, ratio)) * 20) * 5;
+    let pct = Math.round(Math.max(0.5, Math.min(2.0, ratio)) * 20) * 5;
+    if (window.innerWidth <= 680 && pct > 75) pct = 75; // R4-3: Preload zoom <= 75% on mobile
     return pct / 100;
   }
 
   function _autoFitZoom() {
     if (localStorage.getItem('sheetapp_zoom_locked') === 'true') return;
     const svg = document.getElementById('osmd-container')?.querySelector('svg');
-
     const wrapper = document.querySelector('.sheet-viewer-wrapper');
     if (!svg || !wrapper) return;
     const avail = wrapper.clientWidth - 20; // 20px = padding
@@ -349,7 +349,6 @@ const SongLoader = (() => {
         if (parts.length >= 3) svgW = parseFloat(parts[2]);
       }
     }
-
     if (!svgW) {
       if (_autoFitRetryCount < 5) {
         _autoFitRetryCount++;
@@ -357,14 +356,13 @@ const SongLoader = (() => {
       }
       return;
     }
-    _autoFitRetryCount = 0; // reset
+    _autoFitRetryCount = 0;
 
     const ratio = avail / svgW;
-    // Snap sang bước zoom gần nhất (10%, 15%, ..., 200%)
-    const pct = Math.round(Math.max(0.1, Math.min(2.0, ratio)) * 20) * 5; // bước 5%
+    let pct = Math.round(Math.max(0.1, Math.min(2.0, ratio)) * 20) * 5;
     const isMobile = window.innerWidth <= 680;
+    if (isMobile && pct > 75) pct = 75; // R4-3: Mobile autofit max 75%
     const curZoom = Store.get('currentZoom') || 1.0;
-    // Task 2.8 (F13 fix): Chỉ apply autofit nếu user chưa chỉnh zoom và tỷ lệ khác zoom hiện tại đáng kể (> 3%)
     if (isMobile) {
       if (Math.abs((pct / 100) - curZoom) > 0.03) {
         window.App?.setZoom?.(pct);
@@ -377,7 +375,7 @@ const SongLoader = (() => {
     }
   }
 
-  function _ensureMinMeasuresPerSystem(targetPct) {
+  function _ensureMinMeasuresPerSystem(targetPct, attempt = 0) {
     if (window.innerWidth > 680) return;
     const osmd = window.OSMDRenderer?.getInstance?.();
     if (!osmd?.graphic?.measureList) return;
@@ -394,23 +392,23 @@ const SongLoader = (() => {
     if (hasSingleMeasure && targetPct > 25) {
       const adjustedPct = Math.max(25, targetPct - 5);
       window.App?.setZoom?.(adjustedPct);
+      if (attempt < 5 && adjustedPct > 25) {
+        setTimeout(() => _ensureMinMeasuresPerSystem(adjustedPct, attempt + 1), 120);
+      }
     }
   }
 
   function _resetCapoUI() {
-    const capoSel  = document.getElementById('capo-select');
-    const capoHint = document.getElementById('capo-hint');
-    if (capoSel)  capoSel.value = '0';
+    const capoSel = document.getElementById('capo-select'), capoHint = document.getElementById('capo-hint');
+    if (capoSel) capoSel.value = '0';
     if (capoHint) capoHint.textContent = '';
     AppUI.updateCapoBadge(0);
   }
 
   function _autoCloseSidebar() {
     if (window.innerWidth <= 900) {
-      // Dùng helper từ toolbar-controller nếu có (đồng bộ overlay)
-      if (typeof window._closeSidebar === 'function') {
-        window._closeSidebar();
-      } else {
+      if (typeof window._closeSidebar === 'function') window._closeSidebar();
+      else {
         document.getElementById('sidebar')?.classList.add('mobile-hidden');
         document.getElementById('sidebar-overlay')?.classList.add('hidden');
       }
@@ -418,10 +416,9 @@ const SongLoader = (() => {
   }
 
   function _enableAudioControls() {
-    const perfBtn = document.getElementById('btn-perf-notes');
+    const perfBtn = document.getElementById('btn-perf-notes'), vol = document.getElementById('audio-volume');
     if (perfBtn) perfBtn.disabled = false;
-    const vol = document.getElementById('audio-volume');
-    if (vol) { vol.disabled = false; }
+    if (vol) vol.disabled = false;
     window.SheetAudioPlayer?.enableBtn?.(true);
   }
 
@@ -450,14 +447,23 @@ const SongLoader = (() => {
     const hasExplicitViewParam = new URLSearchParams(location.search).has('v');
     const isMobile = window.innerWidth <= 680;
     const savedMode = localStorage.getItem('sheetapp_view_mode');
-    const shouldOpenBand = state.v === 'lyric' ||
-      (!hasExplicitViewParam && (savedMode === 'band' || (!savedMode && isMobile)));
+    const role = (localStorage.getItem('sheetapp_instrument_role') || '').toLowerCase();
+    // Q2: Nếu người dùng đã chọn trước đó, luôn giữ lựa chọn đó. Nếu chưa chọn: mobile guitar/vocals/khách mở Lời, đàn phím mở Nhạc.
+    const defaultMode = isMobile ? (role === 'keyboard' ? 'sheet' : 'band') : 'sheet';
+    const effectiveMode = savedMode || defaultMode;
+    const shouldOpenBand = state.v === 'lyric' || (!hasExplicitViewParam && effectiveMode === 'band');
 
     if (shouldOpenBand) {
       if (state.lv === 'inline') localStorage.setItem('sheetapp_lyric_mode', 'inline');
       const lyric = document.getElementById('lyric-view-container');
       if (lyric?.classList.contains('hidden')) {
-        const toggleBtn = document.getElementById('btn-band-toggle') || document.getElementById('btn-lyric-view');
+        const toggleBtn = document.getElementById('btn-band-toggle') || document.getElementById('btn-toggle-view');
+        toggleBtn?.click();
+      }
+    } else {
+      const lyric = document.getElementById('lyric-view-container');
+      if (lyric && !lyric.classList.contains('hidden')) {
+        const toggleBtn = document.getElementById('btn-band-toggle') || document.getElementById('btn-toggle-view');
         toggleBtn?.click();
       }
     }

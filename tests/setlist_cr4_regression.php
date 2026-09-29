@@ -101,7 +101,7 @@ $pdo->exec("
     );
 ");
 
-$slId = SetlistService::create('Thánh Lễ Chúa Nhật', '2026-10-04', 1);
+$slId = SetlistService::create('Thờ Phượng Chúa Nhật', '2026-10-04', 1);
 SetlistService::addItem($slId, 'song_tc_10', 'HD', 2, 85, 3);
 $sl = SetlistService::getById($slId);
 $itm = $sl['items'][0] ?? null;

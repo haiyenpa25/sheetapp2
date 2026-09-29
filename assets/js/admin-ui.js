@@ -101,7 +101,7 @@ const AdminUI = (() => {
           <td style="text-align:center; display:flex; gap:0.25rem; justify-content:center;">
              <button class="btn btn-sm btn-ghost" onclick="AdminUI.editCategory(${cat.id})" id="btn-edit-cat-${cat.id}" title="Sửa tên">✏️</button>
              <button class="btn btn-sm btn-primary hidden" onclick="AdminUI.saveCategory(${cat.id})" id="btn-save-cat-${cat.id}">Lưu</button>
-             <button class="btn btn-sm btn-ghost" style="color:var(--danger);" onclick="AdminUI.deleteCategory(${cat.id})" title="Xoá">🗑</button>
+             <button class="btn btn-sm btn-ghost" style="color:var(--danger);" onclick="AdminUI.deleteCategory(${cat.id})" title="Xóa">🗑</button>
           </td>
         `;
         tbody.appendChild(tr);
@@ -152,16 +152,16 @@ const AdminUI = (() => {
   }
 
   async function deleteCategory(id) {
-    if(!confirm("Bạn có chắc chắn muốn xoá danh mục này? (Các bài hát bên trong sẽ trở thành Không Xác Định)")) return;
+    if(!confirm("Bạn có chắc chắn muốn xóa danh mục này? (Các bài hát bên trong sẽ trở thành Không Xác Định)")) return;
     try {
       const res = await window.ApiService.categories.delete(id);
       if (res.success) {
-        showToast('Đã xoá danh mục');
+        showToast('Đã xóa danh mục');
         loadCategories();
         loadSongs(); // Update bài hát
       }
     } catch (e) {
-      showToast('Xoá thất bại', 'error');
+      showToast('Xóa thất bại', 'error');
     }
   }
 
@@ -195,7 +195,7 @@ const AdminUI = (() => {
                </select>
             </td>
             <td style="text-align:center;">
-              <button class="btn btn-sm btn-ghost" style="color:var(--danger);" onclick="AdminUI.deleteSong('${safeSongIdJs}')" title="Xoá Bài Hát">🗑 Xoá</button>
+              <button class="btn btn-sm btn-ghost" style="color:var(--danger);" onclick="AdminUI.deleteSong('${safeSongIdJs}')" title="Xóa Bài Hát">🗑 Xóa</button>
             </td>
           `;
           tbody.appendChild(tr);
@@ -223,16 +223,16 @@ const AdminUI = (() => {
   }
 
   async function deleteSong(id) {
-    if(!confirm('Xoá vĩnh viễn bài hát này?')) return;
+    if(!confirm('Xóa vĩnh viễn bài hát này?')) return;
     try {
       const res = await window.ApiService.songs.delete(id);
       if (res.success) {
-        showToast('Đã xoá bài hát');
+        showToast('Đã xóa bài hát');
         loadSongs();
         window.dispatchEvent(new Event('libraryLibraryUpdated'));
       }
     } catch (e) {
-      showToast('Xoá thất bại', 'error');
+      showToast('Xóa thất bại', 'error');
     }
   }
 
@@ -325,10 +325,10 @@ const AdminUI = (() => {
   }
 
   async function deleteUser(id) {
-    if(!confirm('Xoá tài khoản này?')) return;
+    if(!confirm('Xóa tài khoản này?')) return;
     try {
        await window.ApiService.users.delete(id);
-       showToast('Đã xoá tài khoản');
+       showToast('Đã xóa tài khoản');
        loadUsers();
     } catch(e){}
   }

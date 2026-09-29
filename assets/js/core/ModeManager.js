@@ -79,7 +79,15 @@ const ModeManager = (() => {
       return true;
     }
 
-    // 2. Modals / Bottom sheets (đóng lớp trên cùng trước tiên)
+    // 2. Sidebar overlay nếu đang mở trên màn hình <= 1440px (Ticket R1-7)
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar && !sidebar.classList.contains('mobile-hidden') && window.innerWidth <= 1440) {
+      document.getElementById('sidebar-overlay')?.click();
+      e?.preventDefault?.();
+      return true;
+    }
+
+    // 3. Modals / Bottom sheets (đóng lớp trên cùng trước tiên)
     const openSheet = document.querySelector('.bottom-sheet:not(.hidden), .modal-overlay:not(.hidden), [role="dialog"]:not(.hidden)');
     if (window.ModalManager?.hasOpenModals?.() || openSheet) {
       if (window.ModalManager?.hasOpenModals?.()) {
@@ -156,7 +164,11 @@ const ModeManager = (() => {
       _requestWakeLock();
       window.KeyboardHandler?.enableMIDI?.();
       window.LiveSync?.ensureLoaded?.();
-      window.AppUI?.showToast?.('Chế độ Biểu Diễn — Toàn màn hình, nhấn F hoặc Esc để thoát', 'info');
+      const HINT_KEY = 'sheetapp_gig_hint_shown';
+      if (!sessionStorage.getItem(HINT_KEY)) {
+        sessionStorage.setItem(HINT_KEY, '1');
+        window.AppUI?.showToast?.('Chế độ Toàn màn hình — Nhấn F hoặc Esc để thoát', 'info');
+      }
     } else if (prevMode === MODES.PERFORMANCE) {
       _clearHudTimer();
       // Khôi phục trạng thái ban đầu của người dùng nếu trước đó không bật dark-mode
@@ -177,12 +189,12 @@ const ModeManager = (() => {
       window.AppUI?.showToast?.('Chế độ Sửa Hợp Âm — Chạm vào nốt nhạc để điền hợp âm (phím C/Esc để thoát)', 'info');
     }
 
-    // 3. Đồng bộ giao diện Nút Biểu Diễn
+    // 3. Đồng bộ giao diện Nút Toàn Màn Hình
     const btnGig = document.getElementById('btn-fullscreen');
     if (btnGig) {
       const icon = btnGig.querySelector('.gig-icon');
       const text = btnGig.querySelector('.gig-text');
-      if (text) text.textContent = isPerformance ? 'Thu Nhỏ' : 'Biểu Diễn';
+      if (text) text.textContent = isPerformance ? 'Thu Nhỏ' : 'Toàn Màn Hình';
       if (icon) icon.textContent = isPerformance ? '✕' : '⚡';
     }
 

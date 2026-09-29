@@ -134,7 +134,7 @@ function parseBookletSections(string $chordPro): array {
     return $sections;
 }
 
-$pageTitle = 'Booklet Thờ Phượng — ' . htmlspecialchars($setlist['title']);
+$pageTitle = 'Tập chương trình thờ phượng — ' . htmlspecialchars($setlist['title']);
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -154,8 +154,8 @@ $pageTitle = 'Booklet Thờ Phượng — ' . htmlspecialchars($setlist['title']
   <div class="control-bar no-print">
     <div class="ctrl-group">
       <a href="javascript:window.close()" class="btn">✕ Đóng</a>
-      <button onclick="window.print()" class="btn btn-primary" title="In Booklet hoặc Lưu file PDF đầy đủ (Ctrl+P)">
-        🖨️ In Cuốn Booklet / Lưu PDF
+      <button onclick="window.print()" class="btn btn-primary" title="In tập chương trình hoặc Lưu file PDF đầy đủ (Ctrl+P)">
+        🖨️ In tập chương trình / Lưu PDF
       </button>
     </div>
 
@@ -209,9 +209,30 @@ $pageTitle = 'Booklet Thờ Phượng — ' . htmlspecialchars($setlist['title']
           <?php if (!empty($assignments)): ?>
             <div class="cover-section-title">Nhân Sự Phục Vụ Buổi Nhóm</div>
             <div class="assignments-grid">
-              <?php foreach ($assignments as $a): ?>
+              <?php 
+              $roleLabels = [
+                'pastor'           => 'Mục sư / Truyền đạo',
+                'worship_leader'   => 'Hướng dẫn chương trình',
+                'scripture_reader' => 'Đọc Kinh Thánh',
+                'leader'           => 'Người hướng dẫn / Hát chính',
+                'vocal'            => 'Hát dẫn',
+                'piano'            => 'Piano / Đệm chính',
+                'organ'            => 'Organ',
+                'guitar'           => 'Guitar Acoustic / Solo',
+                'bass'             => 'Guitar Bass',
+                'drums'            => 'Trống / Bộ gõ',
+                'vocal_soprano'    => 'Nữ cao (Soprano)',
+                'vocal_alto'       => 'Nữ trầm (Alto)',
+                'vocal_tenor'      => 'Nam cao (Tenor)',
+                'vocal_bass'       => 'Nam trầm (Bass)',
+                'sound'            => 'Kỹ thuật âm thanh',
+                'slides'           => 'Trình chiếu / Máy chiếu',
+              ];
+              foreach ($assignments as $a): 
+                $rLabel = $roleLabels[$a['role']] ?? $a['role'];
+              ?>
                 <div class="assign-card">
-                  <div class="assign-role"><?= htmlspecialchars($a['role']) ?></div>
+                  <div class="assign-role"><?= htmlspecialchars($rLabel) ?></div>
                   <div class="assign-name"><?= htmlspecialchars($a['display_name'] ?: $a['username']) ?></div>
                 </div>
               <?php endforeach; ?>
@@ -225,7 +246,7 @@ $pageTitle = 'Booklet Thờ Phượng — ' . htmlspecialchars($setlist['title']
               <tr>
                 <th style="width: 40px; text-align: center;">STT</th>
                 <th>Tiết mục / Bài hát</th>
-                <th style="width: 130px; text-align: center;">Tông biểu diễn</th>
+                <th style="width: 130px; text-align: center;">Tông hát</th>
                 <th style="width: 90px; text-align: center;">Tốc độ</th>
                 <th style="width: 90px; text-align: center;">Bộ hợp âm</th>
                 <th>Người phụ trách / Ghi chú</th>
@@ -261,7 +282,7 @@ $pageTitle = 'Booklet Thờ Phượng — ' . htmlspecialchars($setlist['title']
         </div>
 
         <footer class="page-footer">
-          <span>Booklet Thờ Phượng — SheetApp</span>
+          <span>Tập chương trình thờ phượng — SheetApp</span>
           <span>Trang 1</span>
         </footer>
       </section>
@@ -306,13 +327,13 @@ $pageTitle = 'Booklet Thờ Phượng — ' . htmlspecialchars($setlist['title']
             <div class="song-number-tag">Bài <?= sprintf('%02d', $songIdx++) ?> / Trong Buổi Nhóm</div>
             <h2 class="song-booklet-title"><?= htmlspecialchars($title) ?></h2>
             <div class="song-booklet-meta">
-              <span>Tông biểu diễn: <strong><?= htmlspecialchars($practicedKey) ?></strong> (<?= $transpose >= 0 ? "+{$transpose}" : $transpose ?>)</span>
+              <span>Tông hát: <strong><?= htmlspecialchars($practicedKey) ?></strong> (<?= $transpose >= 0 ? "+{$transpose}" : $transpose ?>)</span>
               <?php if (!empty($bpm)): ?>
                 <span>Tốc độ: <strong>♩ = <?= htmlspecialchars((string)$bpm) ?> BPM</strong></span>
               <?php endif; ?>
               <span>Bộ hợp âm: <strong><?= htmlspecialchars($chordSet) ?></strong></span>
               <?php if (!empty($item['lead_singer'])): ?>
-                <span>Ca viên chính: <strong><?= htmlspecialchars($item['lead_singer']) ?></strong></span>
+                <span>Người hát chính: <strong><?= htmlspecialchars($item['lead_singer']) ?></strong></span>
               <?php endif; ?>
               <?php if (!empty($composer)): ?>
                 <span style="font-style:italic;margin-left:auto;">Tác giả: <?= htmlspecialchars($composer) ?></span>

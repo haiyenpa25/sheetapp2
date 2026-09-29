@@ -17,7 +17,7 @@ const StageLens = (() => {
 
   const ROLES = [
     { id: 'guitar',   label: 'Guitar',   icon: '🎸', desc: 'Lời & Hợp âm chữ / Thế bấm Capo' },
-    { id: 'keyboard', label: 'Keyboard', icon: '🎹', desc: 'Bản nhạc 2 khuông + Hợp âm' },
+    { id: 'keyboard', label: 'Đàn phím', alias: 'Keyboard', icon: '🎹', desc: 'Bản nhạc 2 khuông + Hợp âm (Keyboard)' },
     { id: 'bass',     label: 'Bass',     icon: '🎻', desc: 'Nốt gốc Bass to & Hợp âm đảo' },
     { id: 'drums',    label: 'Trống',    icon: '🥁', desc: 'Bản đồ bài hát, BPM & Đèn nhịp' },
     { id: 'vocals',   label: 'Hát',      icon: '🎤', desc: 'Một khổ, giai điệu, ẩn khuông Fa' },
@@ -46,9 +46,12 @@ const StageLens = (() => {
 
     const btn = document.getElementById('btn-instrument-role');
     if (btn) {
-      btn.title = `Vai trò: ${info.icon} ${info.label} (Bấm để đổi vai trò)`;
-      btn.setAttribute('aria-label', `Vai trò hiện tại: ${info.label}`);
+      btn.title = `Góc nhìn nhạc cụ: ${info.icon} ${info.label} (Bấm để đổi)`;
+      btn.setAttribute('aria-label', `Góc nhìn hiện tại: ${info.label}`);
     }
+
+    const menuLabelEl = document.getElementById('menu-instrument-role-label');
+    if (menuLabelEl) menuLabelEl.textContent = `Góc nhìn: ${info.label}`;
   }
 
   function setRole(roleId, persist = true, notify = true) {
@@ -75,7 +78,7 @@ const StageLens = (() => {
     _applyRoleAdaptations(_currentRole);
 
     if (notify && window.App?.showToast) {
-      window.App.showToast(`🎯 Vai trò: ${info.icon} ${info.label}`, 'info', 1800);
+      window.App.showToast(`🎯 Góc nhìn: ${info.icon} ${info.label}`, 'info', 1800);
     }
 
     if (typeof EventBus !== 'undefined') {
@@ -190,7 +193,7 @@ const StageLens = (() => {
         <div class="modal-header" style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:10px;">
           <div>
             <h3 id="stage-lens-modal-title" style="margin:0;font-size:1.1rem;display:flex;align-items:center;gap:6px;">
-              <span>🎯</span> Chọn Vai Trò Của Bạn
+              <span>🎯</span> Góc Nhìn Nhạc Cụ
             </h3>
             <small id="stage-lens-modal-desc" style="color:var(--text-muted);font-size:0.75rem;">Giao diện sẽ tối ưu hóa theo nhạc cụ bạn chơi trên sân khấu:</small>
           </div>
@@ -274,7 +277,7 @@ const StageLens = (() => {
       localStorage.setItem(HINT_KEY, '1');
     } catch (_) { return; }
     setTimeout(() => {
-      window.AppUI?.showToast?.('🎹 Đang xem như Keyboard — bấm nút vai trò trên thanh công cụ để chọn nhạc cụ của bạn', 'info');
+      window.AppUI?.showToast?.('🎹 Đang xem như Đàn phím — mở Công cụ → Hiển thị để chọn nhạc cụ của bạn', 'info');
     }, HINT_DELAY_MS);
   }
 
@@ -299,6 +302,15 @@ const StageLens = (() => {
     const toolbarBtn = document.getElementById('btn-instrument-role');
     if (toolbarBtn) {
       toolbarBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        showPicker(false);
+      });
+    }
+
+    // Gắn sự kiện cho mục menu trong Công cụ -> Hiển thị
+    const menuBtn = document.getElementById('btn-menu-instrument-role');
+    if (menuBtn) {
+      menuBtn.addEventListener('click', (e) => {
         e.preventDefault();
         showPicker(false);
       });

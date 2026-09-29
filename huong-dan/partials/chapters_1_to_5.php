@@ -10,7 +10,7 @@
         <div class="doc-card" data-roles="all">
           <h3 class="card-title"><span class="topic-icon">🌟</span> 1.1. Giới thiệu nền tảng SheetApp</h3>
           <p class="card-desc">
-            SheetApp 2.0 là hệ thống ứng dụng Web tương tác hiệu năng cao được thiết kế nhằm mục đích thay thế hoàn toàn tập sách nhạc giấy truyền thống trong các buổi thờ phượng, thánh lễ và tập dượt ban nhạc. Ứng dụng chạy trực tiếp trên trình duyệt hiện đại (Chrome, Safari, Edge) mà không cần cài đặt phần mềm nặng, hỗ trợ mượt mà từ màn hình máy tính để bàn đến máy tính bảng iPad và điện thoại thông minh.
+            SheetApp 2.0 là hệ thống ứng dụng Web tương tác hiệu năng cao được thiết kế nhằm mục đích thay thế hoàn toàn tập sách nhạc giấy truyền thống trong các buổi thờ phượng, buổi nhóm và tập dượt ban nhạc. Ứng dụng chạy trực tiếp trên trình duyệt hiện đại (Chrome, Safari, Edge) mà không cần cài đặt phần mềm nặng, hỗ trợ mượt mà từ màn hình máy tính để bàn đến máy tính bảng iPad và điện thoại thông minh.
           </p>
           <div class="steps-grid">
             <div class="step-box">

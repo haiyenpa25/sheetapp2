@@ -16,7 +16,7 @@ const LiturgyCard = (() => {
     scripture: { icon: '📖', label: 'Kinh Thánh', badge: 'ĐỌC KINH THÁNH' },
     announcement: { icon: '📢', label: 'Thông Báo', badge: 'THÔNG BÁO' },
     offering: { icon: '🎁', label: 'Dâng Hiến', badge: 'DÂNG HIẾN' },
-    sermon: { icon: '✝️', label: 'Giảng Luận', badge: 'GIẢNG LUẬN' },
+    sermon: { icon: '✝️', label: 'Giảng Lời Chúa', badge: 'GIẢNG LỜI CHÚA' },
     benediction: { icon: '🕊️', label: 'Chúc Phước', badge: 'CHÚC PHƯỚC' },
     testimony: { icon: '💬', label: 'Làm Chứng', badge: 'LÀM CHỨNG' },
     liturgy: { icon: '✝️', label: 'Chương Trình', badge: 'CHƯƠNG TRÌNH' },

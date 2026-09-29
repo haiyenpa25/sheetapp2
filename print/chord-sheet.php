@@ -224,7 +224,7 @@ $pageTitle = htmlspecialchars($title) . ' — Lời & Hợp âm';
       <h1 class="song-title"><?= htmlspecialchars($title) ?></h1>
       <div class="song-meta-strip">
         <div class="meta-pills">
-          <span class="meta-pill">Tông biểu diễn: <strong><?= htmlspecialchars($practicedKey) ?></strong></span>
+          <span class="meta-pill">Tông hát: <strong><?= htmlspecialchars($practicedKey) ?></strong></span>
           <?php if ($origKey !== $practicedKey): ?>
             <span class="meta-pill">Tông gốc: <strong><?= htmlspecialchars($origKey) ?></strong> (<?= $transpose >= 0 ? "+{$transpose}" : $transpose ?>)</span>
           <?php endif; ?>

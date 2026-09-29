@@ -195,24 +195,40 @@ class ManagerRepertoireHelper {
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
-        $kw = '%' . $q . '%';
-        $stmt = $pdo->prepare("
+        $variants = class_exists('SongSearchHelper') ? SongSearchHelper::getQueryVariants($q) : [$q];
+        $whereClauses = []; $params = [];
+        foreach ($variants as $v) {
+            $kw = '%' . $v . '%';
+            $whereClauses[] = "(s.title LIKE ? OR s.id LIKE ? OR CAST(s.httlvnId AS TEXT) LIKE ? OR s.lyrics_text LIKE ?)";
+            $params[] = $kw; $params[] = $kw; $params[] = $kw; $params[] = $kw;
+        }
+        $preClauses = []; $preParams = [];
+        foreach ($variants as $v) {
+            $preClauses[] = "s.title LIKE ?";
+            $preParams[] = $v . '%';
+        }
+        $preSql = implode(' OR ', $preClauses);
+        $whereSql = implode(' OR ', $whereClauses);
+
+        $sql = "
             SELECT s.id, s.title, s.httlvnId, s.defaultKey, s.category_id,
                    c.name as category_name, c.icon as category_icon,
                    (SELECT COUNT(*) FROM user_chord_sets WHERE song_id = s.id AND is_public = 1) as chord_sets_count
             FROM songs s
             LEFT JOIN categories c ON s.category_id = c.id
-            WHERE s.title LIKE ? OR s.id LIKE ? OR CAST(s.httlvnId AS TEXT) LIKE ? OR s.lyrics_text LIKE ?
+            WHERE {$whereSql}
             ORDER BY 
                 CASE 
                     WHEN CAST(s.httlvnId AS TEXT) = ? THEN 1
-                    WHEN s.title LIKE ? THEN 2
+                    WHEN ({$preSql}) THEN 2
                     ELSE 3
                 END,
                 s.httlvnId ASC
             LIMIT 30
-        ");
-        $stmt->execute([$kw, $kw, $kw, $kw, $q, $q . '%']);
+        ";
+        $execParams = array_merge($params, [$q], $preParams);
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($execParams);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

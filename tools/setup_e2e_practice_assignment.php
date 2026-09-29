@@ -39,7 +39,7 @@ try {
         $song = $songStmt->fetch(PDO::FETCH_ASSOC);
         $songId = $song ? $song['id'] : 'thanh-ca-001';
 
-        $title = 'Luyện tập Phụng Vụ E2E ' . bin2hex(random_bytes(2));
+        $title = 'Luyện tập Thờ Phượng E2E ' . bin2hex(random_bytes(2));
         $dueAt = date('Y-m-d H:i:s', strtotime('+5 days'));
 
         $assignmentId = PracticeAssignmentService::createAdHoc([
@@ -51,7 +51,7 @@ try {
             'target_bpm'           => 92,
             'target_transpose'     => 1,
             'completion_rule'      => 'manual',
-            'notes'                => 'Hãy tập nhuần nhuyễn bè này trước giờ phụng vụ'
+            'notes'                => 'Hãy tập nhuần nhuyễn bè này trước giờ thờ phượng'
         ], 1); // created_by admin
 
         echo json_encode([

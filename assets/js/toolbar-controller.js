@@ -28,6 +28,29 @@ const ToolbarController = (() => {
     _bindDarkMode();
     _bindMisc();
     _bindMoreOptionsMenu();
+    _bindCompactWidthObserver();
+    _bindViewSwitch();
+    _bindToolbarTempo();
+  }
+
+  // R0-7 (ROADMAP5): @container mainarea (định nghĩa trên .main-content) chỉ áp dụng cho
+  // hậu duệ DOM THẬT của .main-content. Nhưng #main-dropdown-menu bị chuyển hẳn ra
+  // document.body khi mở (để position:fixed định vị đúng, không bị overflow:hidden của
+  // ancestor cắt mất) -- một khi đã chuyển ra ngoài, @container không còn áp dụng được cho
+  // nó nữa, nên .menu-section-compact-only bên trong không bao giờ hiện được ở dải
+  // 1366-1650px (viewport đủ rộng để @media(max-width:1300px) không khớp, nhưng
+  // .main-content vẫn hẹp hơn 1350px do sidebar chiếm chỗ). ResizeObserver này bật/tắt
+  // class body.toolbar-controls-compact (không phụ thuộc vị trí DOM) làm nguồn thay thế.
+  function _bindCompactWidthObserver() {
+    const mainContentEl = document.querySelector('.main-content');
+    if (!mainContentEl || typeof ResizeObserver === 'undefined') return;
+    const COMPACT_THRESHOLD = 1350;
+    const ro = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect?.width;
+      if (typeof width !== 'number') return;
+      document.body.classList.toggle('toolbar-controls-compact', width <= COMPACT_THRESHOLD);
+    });
+    ro.observe(mainContentEl);
   }
 
   function _bindTranspose() {
@@ -111,11 +134,11 @@ const ToolbarController = (() => {
       if (!btn) return;
       if (isLocked) {
         btn.classList.add('locked');
-        btn.innerHTML = '<span class="lock-icon">🔒</span>';
+        btn.innerHTML = '<svg class="lucide-icon" width="16" height="16" aria-hidden="true"><use href="assets/icons/lucide.svg#lock"/></svg>';
         btn.title = 'Khóa tỷ lệ View ĐANG BẬT (Bấm để mở khóa)';
       } else {
         btn.classList.remove('locked');
-        btn.innerHTML = '<span class="lock-icon">🔓</span>';
+        btn.innerHTML = '<svg class="lucide-icon" width="16" height="16" aria-hidden="true"><use href="assets/icons/lucide.svg#unlock"/></svg>';
         btn.title = 'Khóa tỷ lệ zoom (khi đổi bài khác sẽ giữ nguyên tỷ lệ này)';
       }
     });
@@ -141,10 +164,21 @@ const ToolbarController = (() => {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebar-overlay');
 
+    function _updateToggleBtn(isOpen) {
+      const btn = document.getElementById('btn-open-sidebar');
+      if (!btn) return;
+      const title = isOpen ? 'Đóng danh sách bài hát [Phím S]' : 'Mở danh sách bài hát (903 bài) [Phím S]';
+      const label = isOpen ? 'Đóng danh sách bài hát' : 'Mở danh sách bài hát';
+      btn.setAttribute('title', title);
+      btn.setAttribute('aria-label', label);
+      btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    }
+
     function _openSidebar() {
       sidebar?.classList.remove('mobile-hidden');
+      sidebar?.classList.remove('collapsed');
       overlay?.classList.remove('hidden');
-      // Click overlay → đóng
+      _updateToggleBtn(true);
       if (overlay) {
         overlay.onclick = _closeSidebar;
       }
@@ -153,20 +187,22 @@ const ToolbarController = (() => {
     function _closeSidebar() {
       sidebar?.classList.add('mobile-hidden');
       overlay?.classList.add('hidden');
+      _updateToggleBtn(false);
     }
 
     function _toggle() {
       if (!sidebar) return;
-      if (window.innerWidth <= 1200) {
-        // Mobile/iPad: toggle ý nghĩa rõ ràng (Ticket L1-3 & L-D3)
+      if (window.innerWidth <= 1440) {
+        // Mobile / iPad / Laptop (<=1440px): Drawer overlay trượt (Ticket R1-7)
         if (sidebar.classList.contains('mobile-hidden')) {
           _openSidebar();
         } else {
           _closeSidebar();
         }
       } else {
-        // Desktop: collapse narrow
+        // Desktop >1440px: collapse narrow
         sidebar.classList.toggle('collapsed');
+        _updateToggleBtn(!sidebar.classList.contains('collapsed'));
       }
     }
 
@@ -174,16 +210,22 @@ const ToolbarController = (() => {
     document.getElementById('btn-toggle-sidebar')?.addEventListener('click', _toggle);
     document.getElementById('btn-open-sidebar')?.addEventListener('click', _toggle);
 
-    // Init: mobile/iPad bắt đầu ẩn sidebar (Ticket L1-3 & L-D3: đóng mặc định khi xem bài)
-    if (window.innerWidth <= 1200) {
+    // Init: màn hình <= 1440px khi đang mở bài (?song=) hoặc <= 1200px thì mặc định ẩn sidebar (R1-7)
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasSongParam = urlParams.has('song') && Boolean(urlParams.get('song'));
+    if (window.innerWidth <= 1200 || (window.innerWidth <= 1440 && hasSongParam)) {
       sidebar?.classList.add('mobile-hidden');
       overlay?.classList.add('hidden');
+      _updateToggleBtn(false);
+    } else {
+      const isOpen = !sidebar?.classList.contains('mobile-hidden') && !sidebar?.classList.contains('collapsed');
+      _updateToggleBtn(isOpen);
     }
 
-    // Đóng sidebar khi chọn bài trên tablet/mobile để nhạc chiếm trọn màn hình
+    // Đóng sidebar khi chọn bài trên tablet/laptop (<= 1440px) để nhạc chiếm trọn màn hình
     if (typeof EventBus !== 'undefined') {
       EventBus.on('song:loaded', () => {
-        if (window.innerWidth <= 1200) {
+        if (window.innerWidth <= 1440) {
           _closeSidebar();
         }
       });
@@ -193,16 +235,16 @@ const ToolbarController = (() => {
     let _lastW = window.innerWidth;
     window.addEventListener('resize', _debounce(() => {
       const w = window.innerWidth;
-      if (w <= 1200) {
-        // Chuyển sang mobile/iPad: ẩn sidebar nếu đang mở
-        if (!sidebar?.classList.contains('mobile-hidden')) {
-          _closeSidebar();
+      if (w <= 1440) {
+        if (hasSongParam || w <= 1200) {
+          if (!sidebar?.classList.contains('mobile-hidden')) {
+            _closeSidebar();
+          }
         }
-        sidebar?.classList.remove('collapsed');
       } else {
-        // Chuyển sang desktop: hiện sidebar
         sidebar?.classList.remove('mobile-hidden');
         overlay?.classList.add('hidden');
+        _updateToggleBtn(!sidebar?.classList.contains('collapsed'));
       }
       const wDelta = Math.abs(w - _lastW);
       _lastW = w;
@@ -317,13 +359,40 @@ const ToolbarController = (() => {
     const btnOptions = document.getElementById('btn-more-options');
     const menuOptions = document.getElementById('main-dropdown-menu');
     if (btnOptions && menuOptions) {
+      let backdrop = document.getElementById('main-dropdown-backdrop');
+      if (!backdrop) {
+        backdrop = document.createElement('div');
+        backdrop.id = 'main-dropdown-backdrop';
+        backdrop.className = 'main-dropdown-backdrop hidden';
+        document.body.appendChild(backdrop);
+        backdrop.addEventListener('click', () => closeMenu());
+      }
+
       function positionMenu() {
-        const r = btnOptions.getBoundingClientRect();
-        const w = menuOptions.offsetWidth || 230;
-        let left = r.right - w;
-        if (left < 8) left = 8;
-        if (left + w > window.innerWidth - 8) left = window.innerWidth - w - 8;
-        menuOptions.style.cssText = `position:fixed; top:${r.bottom + 6}px; left:${left}px; right:auto; z-index:99999;`;
+        const isMobile = window.innerWidth <= 680;
+        if (isMobile) {
+          menuOptions.style.cssText = '';
+          menuOptions.classList.add('is-bottom-sheet');
+          backdrop.classList.remove('hidden');
+          document.body.classList.add('tools-menu-open');
+        } else {
+          menuOptions.classList.remove('is-bottom-sheet');
+          backdrop.classList.add('hidden');
+          document.body.classList.remove('tools-menu-open');
+          const r = btnOptions.getBoundingClientRect();
+          const w = 320;
+          let left = r.right - w;
+          if (left < 8) left = 8;
+          if (left + w > window.innerWidth - 8) left = window.innerWidth - w - 8;
+          menuOptions.style.cssText = `position:fixed; top:${r.bottom + 6}px; left:${left}px; width:${w}px; right:auto; z-index:99999;`;
+        }
+      }
+
+      function closeMenu() {
+        menuOptions.classList.add('hidden');
+        backdrop?.classList.add('hidden');
+        document.body.classList.remove('tools-menu-open');
+        btnOptions.setAttribute('aria-expanded', 'false');
       }
 
       btnOptions.addEventListener('click', (e) => {
@@ -332,48 +401,69 @@ const ToolbarController = (() => {
         if (isHidden) {
           if (menuOptions.parentNode !== document.body) document.body.appendChild(menuOptions);
           menuOptions.classList.remove('hidden');
+          btnOptions.setAttribute('aria-expanded', 'true');
           positionMenu();
         } else {
-          menuOptions.classList.add('hidden');
+          closeMenu();
         }
       });
 
       menuOptions.addEventListener('click', (e) => {
         const item = e.target.closest('.btn-menu-item, a');
-        if (item && !item.closest('.menu-compact-controls') && item.id !== 'btn-audio-settings') {
-          menuOptions.classList.add('hidden');
+        if (item && !item.closest('.tools-zoom-row, .tools-scroll-row, .tools-capo-row, .compact-settings-panel, .audio-settings-panel') && item.id !== 'btn-audio-settings' && item.id !== 'btn-song-versions') {
+          closeMenu();
         }
       });
 
       const handleOutside = (e) => {
-        if (!btnOptions.contains(e.target) && !menuOptions.contains(e.target)) {
-          menuOptions.classList.add('hidden');
-        }
+        if (!btnOptions.contains(e.target) && !menuOptions.contains(e.target)) closeMenu();
       };
       document.addEventListener('click', handleOutside);
       document.addEventListener('pointerdown', handleOutside);
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') menuOptions.classList.add('hidden');
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
+      window.addEventListener('scroll', () => {
+        if (window.innerWidth > 680) closeMenu();
+      }, { passive: true });
+      window.addEventListener('resize', () => {
+        if (!menuOptions.classList.contains('hidden')) positionMenu();
       });
-      window.addEventListener('scroll', () => menuOptions.classList.add('hidden'), { passive: true });
-      window.addEventListener('resize', () => menuOptions.classList.add('hidden'));
     }
 
     const btnBandToggle = document.getElementById('btn-band-toggle') || document.getElementById('btn-toggle-view');
-    const btnLyric = document.getElementById('btn-lyric-view');
-    if (btnBandToggle && btnLyric) {
-      btnBandToggle.addEventListener('click', () => btnLyric.click());
-      const lyricContainer = document.getElementById('lyric-view-container');
-      if (lyricContainer) {
-        new MutationObserver(() => {
-          const isLyric = !lyricContainer.classList.contains('hidden');
-          btnBandToggle.classList.toggle('active', isLyric);
-          const txt = btnBandToggle.querySelector('.view-text') || btnBandToggle.querySelector('.band-toggle-text');
-          if (txt) txt.textContent = isLyric ? 'Nhạc' : 'Band';
-          btnBandToggle.title = isLyric ? 'Quay lại Bản Nhạc' : 'Chuyển sang chế độ Band (Lời + Hợp âm chữ)';
-        }).observe(lyricContainer, { attributes: true, attributeFilter: ['class'] });
-      }
+    const lyricContainer = document.getElementById('lyric-view-container');
+    if (btnBandToggle && lyricContainer) {
+      btnBandToggle.addEventListener('click', () => {
+        const isHidden = lyricContainer.classList.contains('hidden');
+        lyricContainer.classList.toggle('hidden', !isHidden);
+        document.getElementById('osmd-container')?.classList.toggle('hidden', isHidden);
+        try {
+          localStorage.setItem('sheetapp_view_mode', isHidden ? 'band' : 'sheet');
+          window.URLState?.update?.({ v: isHidden ? 'lyric' : 'sheet' });
+        } catch (_) {}
+        if (isHidden) window.DisplaySettings?.renderLyricViewIfActive?.();
+        else window.ChordCanvas?.build?.();
+      });
+      new MutationObserver(() => {
+        const isLyric = !lyricContainer.classList.contains('hidden');
+        btnBandToggle.classList.toggle('active', isLyric);
+        const txt = btnBandToggle.querySelector('.view-text') || btnBandToggle.querySelector('.band-toggle-text');
+        if (txt) txt.textContent = isLyric ? 'Nhạc' : 'Band';
+        btnBandToggle.title = isLyric ? 'Quay lại Bản Nhạc' : 'Chuyển sang chế độ Band (Lời + Hợp âm chữ)';
+      }).observe(lyricContainer, { attributes: true, attributeFilter: ['class'] });
     }
+
+    document.getElementById('btn-lyric-view')?.addEventListener('click', () => {
+      const songId = window.App?.getCurrentSongId?.() || new URLSearchParams(window.location.search).get('song') || '';
+      if (songId) {
+        const curSet = window.App?.getCurrentSet?.() || 'HD';
+        const curTranspose = window.App?.getCurrentTranspose?.() || 0;
+        const base = (typeof window.__APP_BASE__ !== 'undefined' ? window.__APP_BASE__ : '');
+        const url = `${base ? base + '/' : ''}print/chord-sheet.php?song=${encodeURIComponent(songId)}&set=${encodeURIComponent(curSet)}&t=${encodeURIComponent(curTranspose)}`;
+        window.open(url, '_blank');
+      } else {
+        window.App?.showToast?.('Vui lòng chọn bài hát để in lời & hợp âm', 'info');
+      }
+    });
 
     document.getElementById('btn-menu-zoom-out')?.addEventListener('click', () => {
       document.getElementById('btn-zoom-out')?.click();
@@ -391,7 +481,7 @@ const ToolbarController = (() => {
       document.getElementById('btn-lock-zoom')?.click();
       const isLocked = localStorage.getItem('sheetapp_zoom_locked') === 'true';
       const btn = document.getElementById('btn-menu-lock-zoom');
-      if (btn) btn.textContent = isLocked ? '🔒' : '🔓';
+      if (btn) btn.innerHTML = isLocked ? '<svg class="icon icon-xs"><use href="#icon-lock"/></svg>' : '<svg class="icon icon-xs"><use href="#icon-unlock"/></svg>';
     });
     document.getElementById('btn-menu-auto-scroll')?.addEventListener('click', () => {
       document.getElementById('btn-auto-scroll')?.click();
@@ -410,26 +500,80 @@ const ToolbarController = (() => {
       document.getElementById('btn-chord-preset')?.click();
       const txt = document.getElementById('chord-preset-label')?.textContent || 'Chuẩn';
       const ml = document.getElementById('menu-chord-preset-label');
-      if (ml) ml.textContent = 'Aa ' + txt;
+      if (ml) ml.textContent = 'Cỡ hợp âm: ' + txt;
     });
     document.getElementById('btn-menu-chord-notation')?.addEventListener('click', () => {
       document.getElementById('btn-chord-notation')?.click();
       const txt = document.getElementById('chord-notation-label')?.textContent || 'C';
       const ml = document.getElementById('menu-chord-notation-label');
-      if (ml) ml.textContent = '🔤 ' + txt;
+      if (ml) ml.textContent = 'Ký hiệu: ' + txt;
     });
     document.getElementById('btn-menu-instrument-role')?.addEventListener('click', () => {
       document.getElementById('btn-instrument-role')?.click();
-      const icon = document.getElementById('instrument-role-icon')?.textContent || '🎸';
       const label = document.getElementById('instrument-role-label')?.textContent || 'Guitar';
       const ml = document.getElementById('menu-instrument-role-label');
-      if (ml) ml.textContent = `${icon} ${label}`;
+      if (ml) ml.textContent = 'Góc nhìn: ' + label;
     });
     document.getElementById('btn-menu-verse-mode')?.addEventListener('click', () => {
       document.getElementById('btn-verse-mode')?.click();
       const txt = document.getElementById('verse-mode-label')?.textContent || 'Tất cả khổ';
       const ml = document.getElementById('menu-verse-mode-label');
-      if (ml) ml.textContent = '📖 ' + txt;
+      if (ml) ml.textContent = 'Khổ hát: ' + txt;
+    });
+    document.getElementById('btn-menu-add-chord-mode')?.addEventListener('click', () => {
+      document.getElementById('btn-add-chord-mode-bar')?.click();
+    });
+    document.getElementById('btn-menu-transpose-reset')?.addEventListener('click', () => {
+      document.getElementById('btn-transpose-reset')?.click();
+    });
+  }
+
+  function _bindViewSwitch() {
+    const btnViewSheet = document.getElementById('btn-view-sheet');
+    const btnViewLyrics = document.getElementById('btn-view-lyrics');
+    const lyricContainer = document.getElementById('lyric-view-container');
+    const btnLyric = document.getElementById('btn-lyric-view');
+
+    if (lyricContainer) {
+      const syncViewButtons = () => {
+        const isLyric = !lyricContainer.classList.contains('hidden');
+        btnViewSheet?.classList.toggle('active', !isLyric);
+        btnViewLyrics?.classList.toggle('active', isLyric);
+      };
+      new MutationObserver(syncViewButtons).observe(lyricContainer, { attributes: true, attributeFilter: ['class'] });
+      syncViewButtons();
+    }
+
+    btnViewSheet?.addEventListener('click', () => {
+      if (lyricContainer && !lyricContainer.classList.contains('hidden')) {
+        const toggleBtn = document.getElementById('btn-band-toggle') || document.getElementById('btn-toggle-view');
+        if (toggleBtn) toggleBtn.click();
+      }
+    });
+
+    btnViewLyrics?.addEventListener('click', () => {
+      if (lyricContainer && lyricContainer.classList.contains('hidden')) {
+        const toggleBtn = document.getElementById('btn-band-toggle') || document.getElementById('btn-toggle-view');
+        if (toggleBtn) toggleBtn.click();
+      }
+    });
+  }
+
+  function _bindToolbarTempo() {
+    const tempoBtn = document.getElementById('btn-toolbar-tempo');
+    if (!tempoBtn) return;
+    tempoBtn.addEventListener('click', async () => {
+      const valEl = document.getElementById('toolbar-tempo-val');
+      const curBpm = parseInt(valEl?.textContent, 10) || 100;
+      if (window.TempoPick?.show) {
+        const newBpm = await window.TempoPick.show(curBpm);
+        if (newBpm && valEl) {
+          valEl.textContent = newBpm;
+          if (window.Metronome?.setBpm) window.Metronome.setBpm(newBpm);
+        }
+      } else {
+        document.getElementById('btn-toolbar-metronome')?.click();
+      }
     });
   }
 

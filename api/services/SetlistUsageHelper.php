@@ -1,7 +1,7 @@
 <?php
 /**
  * api/services/SetlistUsageHelper.php
- * Trợ thủ phân tích lịch sử sử dụng bài hát & thống kê phụng vụ cho SetlistService (Epic 4.3)
+ * Trợ thủ phân tích lịch sử sử dụng bài hát & thống kê thờ phượng cho SetlistService (Epic 4.3)
  */
 
 declare(strict_types=1);
@@ -135,7 +135,7 @@ class SetlistUsageHelper {
 
         $serviceTitle = $lastRecord['service_title'] ?: 'Chương trình buổi nhóm';
         $warningMsg = $isRecent
-            ? "Bài này đã được dùng cách đây {$weeksAgo} tuần ({$lastDate} — \"{$serviceTitle}\"). Bạn vẫn có thể chọn theo nhu cầu phụng vụ."
+            ? "Bài này đã được dùng cách đây {$weeksAgo} tuần ({$lastDate} — \"{$serviceTitle}\"). Bạn vẫn có thể chọn theo nhu cầu buổi nhóm."
             : null;
 
         return [
@@ -153,7 +153,7 @@ class SetlistUsageHelper {
     }
 
     /**
-     * Báo cáo Thống kê Lịch sử Sử dụng Bài hát trong Phụng vụ (Epic 4.3)
+     * Báo cáo Thống kê Lịch sử Sử dụng Bài hát trong Thờ Phượng (Epic 4.3)
      */
     public static function getUsageReport(?string $fromDate = null, ?string $toDate = null, int $limit = 20): array {
         if (!self::hasTable('song_usage_history')) {

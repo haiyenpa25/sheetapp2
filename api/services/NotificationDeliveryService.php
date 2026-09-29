@@ -202,7 +202,7 @@ class NotificationDeliveryService {
         $encodedName    = '=?UTF-8?B?' . base64_encode($safeToName) . '?=';
         $encodedSubject = '=?UTF-8?B?' . base64_encode($safeSubject) . '?=';
 
-        $headers  = "From: SheetApp Phụng Vụ <{$safeFrom}>\r\n";
+        $headers  = "From: SheetApp Thờ Phượng <{$safeFrom}>\r\n";
         $headers .= "To: {$encodedName} <{$safeToEmail}>\r\n";
         $headers .= "Subject: {$encodedSubject}\r\n";
         $headers .= "MIME-Version: 1.0\r\n";
@@ -410,7 +410,7 @@ class NotificationDeliveryService {
           <!-- Header -->
           <tr>
             <td style="padding:24px 32px;background:#090d16;border-bottom:1px solid #334155;">
-              <span style="font-size:20px;font-weight:700;color:#38bdf8;">🎵 SheetApp Phụng Vụ</span>
+              <span style="font-size:20px;font-weight:700;color:#38bdf8;">🎵 SheetApp Thờ Phượng</span>
             </td>
           </tr>
           <!-- Body -->

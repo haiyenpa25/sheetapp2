@@ -1,6 +1,6 @@
 /**
  * session-tracker.js
- * Quản lý nhật ký biểu diễn (performance sessions).
+ * Quản lý nhật ký phục vụ (service sessions).
  * Mỗi bài hát có file session riêng: /api/sessions.php?songId=xxx
  */
 const SessionTracker = (() => {
