@@ -330,6 +330,19 @@ const LyricExtractor = (() => {
         if (view) _showChordProModal(view);
       });
     });
+
+    // 3. Chạm vào khổ để kích hoạt và tô sáng khổ đang hát (Ticket R4-2)
+    container.querySelectorAll('.lv-verse').forEach(sec => {
+      sec.addEventListener('click', (e) => {
+        if (e.target.closest('button') || e.target.closest('.lv-pair')) return;
+        const vNum = sec.getAttribute('data-verse-num');
+        if (vNum && window.VerseManager?.setVerse) {
+          window.VerseManager.setVerse(parseInt(vNum, 10) || 1);
+        } else if (vNum) {
+          highlightVerse(vNum);
+        }
+      });
+    });
   }
 
   function _parseChordProToSyllables(text, syllables) {
@@ -439,22 +452,22 @@ const LyricExtractor = (() => {
   }
 
   function _applyStyles(container) {
-    // Ticket L1-7: Hợp âm lớn 24-32px chuẩn sân khấu
+    // Ticket L1-7 & R4-2: Hợp âm theo Cỡ hợp âm, đảm bảo chord >= 1.3x lyric font size
     const preset = window.DisplaySettings?.getChordPreset?.() || 'standard';
-    let baseChordSize = '26px';
+    let baseChordPx = 28;
+    const baseSylPx = 20;
+
     if (preset === 'stage') {
-      baseChordSize = '30px';
-    } else if (preset === 'high-contrast') {
-      baseChordSize = '28px';
+      baseChordPx = 34; // 34 / 20 = 1.7x >= 1.3x
+    } else if (preset === 'high_contrast' || preset === 'high-contrast') {
+      baseChordPx = 30; // 30 / 20 = 1.5x >= 1.3x
     }
-    container.style.setProperty('--lv-chord-size', baseChordSize);
-    container.style.setProperty('--lv-syl-size', '21px');
 
     const p = window.DisplaySettings?.getChordPrefs?.();
     if (p) {
       if (p.color) container.style.setProperty('--lv-chord-color', p.color);
-      if (p.size && p.size > 3.0) {
-        container.style.setProperty('--lv-chord-size', Math.round(p.size * 8.5) + 'px');
+      if (p.size && p.size > 2.0) {
+        baseChordPx = Math.max(28, Math.round(p.size * 10));
       }
     } else {
       try {
@@ -462,9 +475,15 @@ const LyricExtractor = (() => {
         if (s) {
           const c = JSON.parse(s);
           if (c.color) container.style.setProperty('--lv-chord-color', c.color);
+          if (c.size && c.size > 2.0) {
+            baseChordPx = Math.max(28, Math.round(c.size * 10));
+          }
         }
       } catch (_) {}
     }
+
+    container.style.setProperty('--lv-chord-size', baseChordPx + 'px');
+    container.style.setProperty('--lv-syl-size', baseSylPx + 'px');
   }
 
   function reloadIfActive() {
@@ -477,6 +496,18 @@ const LyricExtractor = (() => {
     const raw = window.App?.getOriginalXml?.();
     if (!raw) return;
     render('lyric-view-container', raw, window.App?.getCurrentTranspose?.() || 0);
+  }
+
+  // Đăng ký EventBus lắng nghe đổi khổ và đổi preset cỡ hợp âm (Ticket R4-2)
+  if (typeof EventBus !== 'undefined') {
+    EventBus.on('verse:changed', (data) => {
+      const v = typeof data === 'object' ? (data?.verse ?? data?.verseNum) : data;
+      highlightVerse(v);
+    });
+    EventBus.on('chord:preset_changed', () => {
+      const container = document.getElementById('lyric-view-container');
+      if (container) _applyStyles(container);
+    });
   }
 
   return { render, extract, reloadIfActive, highlightVerse, parseChordProToSyllables: _parseChordProToSyllables, showChordProModal: _showChordProModal };

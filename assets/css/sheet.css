@@ -1048,14 +1048,14 @@ body.dark-mode .lv-title     { color: #e2e8f0; }
 .lv-chord {
   display: block;
   font-family: 'JetBrains Mono', 'Courier New', monospace;
-  font-size: var(--lv-chord-size, 1.65rem);
+  font-size: var(--lv-chord-size, 1.75rem);
   font-weight: 800;
   color: var(--lv-chord-color);
   line-height: 1.1;
   white-space: nowrap;
   letter-spacing: -0.01em;
   margin-bottom: 0.25em;
-  min-height: calc(var(--lv-chord-size, 1.65rem) * 1.25);
+  min-height: calc(var(--lv-chord-size, 1.75rem) * 1.25);
   padding-bottom: 1px;
   border-bottom: 1.5px dotted rgba(225,29,72,.28);
 }
@@ -1068,7 +1068,7 @@ body.dark-mode .lv-title     { color: #e2e8f0; }
 /* ══ Lyric syllable (Ticket L1-7 ⭐: Lời 20-24px) ════════ */
 .lv-syl {
   display: block;
-  font-size: var(--lv-syl-size, 1.35rem);
+  font-size: var(--lv-syl-size, 1.25rem);
   font-weight: 600;
   line-height: 1.35;
   color: var(--text-primary);
@@ -1114,8 +1114,8 @@ body.dark-mode .lv-title     { color: #e2e8f0; }
 .lv-empty strong { color: var(--text-secondary); }
 .lv-empty p { font-size: 0.85rem; }
 
-/* ══ 2 Cột trên iPad ngang (1180x820) và Màn hình rộng (Ticket L1-7 ⭐) ══ */
-@media (min-width: 820px) and (orientation: landscape), (min-width: 992px) {
+/* ══ 2 Cột trên iPad (≥768px) và Laptop/Desktop (Ticket L1-7 & R4-2 ⭐) ══ */
+@media (min-width: 820px) and (orientation: landscape), (min-width: 768px) {
   .lyric-view-container {
     padding: 2rem 2.5rem 4rem;
   }
