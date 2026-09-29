@@ -11,7 +11,7 @@
 
 const urlParams      = new URLSearchParams(self.location.search);
 const SW_VERSION     = urlParams.get('v') || 'v5';
-const SW_MANIFEST_HASH = '691967099a';
+const SW_MANIFEST_HASH = '59f8eec9b0';
 const CACHE_VENDOR   = `sheetapp-vendor-${SW_VERSION}`;
 const CACHE_APP      = `sheetapp-app-${SW_VERSION}`;
 const CACHE_MUSICXML = `sheetapp-musicxml-${SW_VERSION}`;

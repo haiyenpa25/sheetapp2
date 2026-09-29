@@ -6,19 +6,10 @@
 const OSMDRenderer = (() => {
   'use strict';
 
-  let osmd = null;
-  let containerId = null;
-  let currentXmlString = null;
-  let currentZoom = 1.0;
-  // NOTE: currentTranspose không lưu ở đây — dùng Store.get('currentTranspose')
-  let isLoaded = false;
-  let _onReadyCallbacks = []; // BUG-C fix: array thay vì single callback
-  let _isCompactMode = false;
-  let _titleCompacted = false; // flag tránh compact title nhiều lần
-  let _renderToken = 0; // Race-condition guard: ngăn các lần load/render cũ đè lên bài mới
-  let _renderCount = 0; // L5-1: Bộ đếm số lần render OSMD thực tế
-  let _lastContainerWidth = 0; // L5-1: Theo dõi bề rộng container để tránh render kép sau khi nạp
-  let _pendingRender = false; // L5-5: Hoãn render khi khung đang ẩn
+  let osmd = null, containerId = null, currentXmlString = null, currentZoom = 1.0;
+  let isLoaded = false, _onReadyCallbacks = [], _isCompactMode = false, _titleCompacted = false;
+  let _renderToken = 0;
+  let _renderCount = 0, _lastContainerWidth = 0, _pendingRender = false;
 
   /** L5-5: Kiểm tra container có đang hiển thị và có bề rộng hợp lệ để render OSMD hay không */
   function _canRender() {
@@ -138,11 +129,12 @@ const OSMDRenderer = (() => {
   /** Cập nhật lại Engraving Rules trước khi render */
   function refreshRules() {
     if (osmd && osmd.rules) {
-        let prefs = { size: 2.85, yOffset: 1.2, color: '#dc2626' };
+        const isMobile = typeof window !== 'undefined' && window.innerWidth <= 680;
+        let prefs = { size: 2.85, yOffset: isMobile ? 1.8 : 1.4, color: '#dc2626' };
         if (window.DisplaySettings) prefs = DisplaySettings.getChordPrefs();
         osmd.rules.DefaultColorChordSymbol = prefs.color;
         osmd.rules.ChordSymbolTextHeight   = (prefs.size && prefs.size >= 2.6) ? Math.max(2.85, prefs.size) : 2.85;
-        osmd.rules.ChordSymbolYOffset      = prefs.yOffset ?? 1.2;
+        osmd.rules.ChordSymbolYOffset      = Math.max(isMobile ? 1.8 : 1.4, prefs.yOffset ?? 1.4);
         osmd.rules.ChordSymbolYPadding     = 0.0;
         osmd.rules.ChordSymbolYSpacing     = 0.0;
         osmd.rules.ChordOverlapAllowedIntoNextMeasure = true;

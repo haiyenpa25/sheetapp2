@@ -1,15 +1,10 @@
 /**
  * chord-canvas-dots.js — Note Mapping, Staff Alignment & Chord Dot Placement
- * Part of SheetApp Sheet Reader
  */
 const ChordCanvasDots = (() => {
   'use strict';
-
-  const DOT_CLASS = 'cc-note-dot';
-  const BTN_CLASS = 'cc-dot-btn';
-
-  const STAFF_LINE_MIN_WIDTH = 100;
-  const CHORD_GAP_RATIO = 0.35;
+  const DOT_CLASS = 'cc-note-dot', BTN_CLASS = 'cc-dot-btn';
+  const STAFF_LINE_MIN_WIDTH = 100, CHORD_GAP_RATIO = 0.35;
 
   function alignDOMChords() {
     const container = document.getElementById('osmd-container');
@@ -107,18 +102,36 @@ const ChordCanvasDots = (() => {
       }
     });
 
+    const staveNotes = Array.from(svg.querySelectorAll('g.vf-stavenote'));
+    const noteRects = staveNotes.map(sn => {
+      const r = sn.getBoundingClientRect();
+      return { top: r.top - cRect.top, bottom: r.bottom - cRect.top, left: r.left - cRect.left, right: r.right - cRect.left };
+    }).filter(nr => nr.bottom > 0);
+
     for (const [sys, badges] of assigned.entries()) {
-      // top của badge = dòng kẻ trên cùng − chiều cao chữ − khe hở, để mép dưới
-      // chữ hợp âm luôn nằm ngay trên khuông (chữ đã to 28px theo preset).
       const badgeH = Math.max(...badges.map(b => b.offsetHeight || 0), 0);
-      const fixedY = Math.round(sys.topLine - badgeH - GAP_PX * CHORD_GAP_RATIO);
+      let fixedY = Math.round(sys.topLine - badgeH - GAP_PX * CHORD_GAP_RATIO);
+      const sysNotes = noteRects.filter(nr => nr.top >= sys.topLine - 65 && nr.bottom <= sys.bottomLine + 65);
+      if (sysNotes.length) {
+        const minNoteTop = Math.min(...sysNotes.map(nr => nr.top));
+        if (minNoteTop < sys.topLine) {
+          const safeFixedY = Math.round(minNoteTop - badgeH - 8);
+          if (safeFixedY < fixedY) fixedY = safeFixedY;
+        }
+      }
       badges.sort((a, b) => (parseFloat(a.style.left) || 0) - (parseFloat(b.style.left) || 0));
       let prevRight = -Infinity;
       badges.forEach(badge => {
-        badge.style.top = fixedY + 'px';
-        const curLeft = parseFloat(badge.style.left) || 0;
-        let curW = badge.offsetWidth;
-        if (!curW || curW <= 0) curW = badge.textContent.trim().length * 14 + 12;
+        let curLeft = parseFloat(badge.style.left) || 0;
+        let curW = badge.offsetWidth || (badge.textContent.trim().length * 14 + 12);
+        let badgeY = fixedY;
+        const bLeft = curLeft - curW / 2, bRight = curLeft + curW / 2;
+        const overlappingNotes = sysNotes.filter(nr => !(nr.right < bLeft || nr.left > bRight));
+        if (overlappingNotes.length) {
+          const localMinTop = Math.min(...overlappingNotes.map(nr => nr.top));
+          if (badgeY + badgeH > localMinTop - 6) badgeY = Math.round(localMinTop - badgeH - 6);
+        }
+        badge.style.top = badgeY + 'px';
         if (curLeft < prevRight + 6) {
           const newLeft = prevRight + 6;
           badge.style.left = newLeft + 'px';
@@ -414,6 +427,9 @@ const ChordCanvasDots = (() => {
           spanY = Math.max(staffTop - 36, Math.min(staffTop - 12, staffTop - 22 * scale));
         } else {
           spanY = textPos ? (textPos.by - 4) : (cy - 18 * scale);
+        }
+        if (rect && rect.top - cRect.top < (staffTop || 9999)) {
+          spanY = Math.min(spanY, (rect.top - cRect.top) - fSize - 6);
         }
 
         const textBadge = document.createElement('div');

@@ -1,34 +1,17 @@
 /**
  * chord-canvas.js — Multi-Set Chord Manager (Core)
- *
- * Hỗ trợ:
- *  - "Mặc định": đọc/ghi hợp âm trực tiếp vào XML gốc (thông qua ChordCanvasXML)
- *  - Custom sets: lưu trong api/chord_sets.php (JSON)
- *  - Modularized: Delegates to ChordCanvasUI, ChordCanvasXML, ChordCanvasDots, ChordCanvasEdit, ChordCanvasTranspose.
+ * Delegates to ChordCanvasUI, ChordCanvasXML, ChordCanvasDots, ChordCanvasEdit, ChordCanvasTranspose.
  */
 const ChordCanvas = (() => {
   'use strict';
 
   /* ─── State ───────────────────────────────────────────────────────────────── */
-  let _editEnabled    = false;
-  let _highlightMode  = false;
-  let _currentSet     = 'HD';
-  let _prevSet        = 'HD';
-  let _customChords   = {};
-  let _noteEls        = [];
-  let _ro             = null;
-  let _songUseFlats   = null;
-  let _chordLoadToken = 0; // Race condition guard
-  let _pendingConfirm = false; // R0-2: chặn mở chồng hộp thoại chọn cách sửa hợp âm
-  let _showTlhHints   = false; // R2-8: Hiển thị hợp âm TLH mờ khi soạn bộ cá nhân
+  let _editEnabled = false, _highlightMode = false, _currentSet = 'HD', _prevSet = 'HD';
+  let _customChords = {}, _noteEls = [], _ro = null, _songUseFlats = null;
+  let _chordLoadToken = 0;
+  let _pendingConfirm = false, _showTlhHints = false, _isInitialized = false, _containerEl = null, _styleBlockEl = null;
 
-  const DOT_CLASS     = 'cc-dot';
-  const BTN_CLASS     = 'cc-dot-btn';
-  const HIGHLIGHT_KEY = 'sheetapp_chord_highlight';
-
-  let _isInitialized  = false;
-  let _containerEl    = null;
-  let _styleBlockEl   = null;
+  const DOT_CLASS = 'cc-dot', BTN_CLASS = 'cc-dot-btn', HIGHLIGHT_KEY = 'sheetapp_chord_highlight';
 
   /* ─── Init ──────────────────────────────────────────────────── */
   function init() {
@@ -37,14 +20,9 @@ const ChordCanvas = (() => {
 
     // Connect Edit Submodule
     window.ChordCanvasEdit?.init({
-      getCurrentSet: () => _currentSet,
-      setCurrentSet: (s) => { _currentSet = s; },
-      getCustomChords: () => _customChords,
-      setCustomChords: (c) => { _customChords = c; },
-      getNoteEls: () => _noteEls,
-      switchSet,
-      build: _build,
-      updateSetUI: _updateSetUI,
+      getCurrentSet: () => _currentSet, setCurrentSet: (s) => { _currentSet = s; },
+      getCustomChords: () => _customChords, setCustomChords: (c) => { _customChords = c; },
+      getNoteEls: () => _noteEls, switchSet, build: _build, updateSetUI: _updateSetUI,
       getContainer: () => _containerEl
     });
 
@@ -124,19 +102,37 @@ const ChordCanvas = (() => {
           break;
         }
       }
-      if (!found) {
-        systems.push({ avgY: y, minY: y, chords: [c] });
-      }
+      if (!found) systems.push({ avgY: y, minY: y, chords: [c] });
     });
 
+    const staveNotes = Array.from(svg.querySelectorAll('g.vf-stavenote'));
     systems.forEach(sys => {
+      let minNoteTop = Infinity;
+      staveNotes.forEach(sn => {
+        try {
+          const bb = sn.getBBox ? sn.getBBox() : null;
+          if (bb && Math.abs(bb.y - sys.avgY) < 90 && bb.y < minNoteTop) minNoteTop = bb.y;
+        } catch(e) {}
+      });
+      if (minNoteTop < Infinity && sys.minY + 4 >= minNoteTop - 6) {
+        sys.minY = Math.min(sys.minY, minNoteTop - 12);
+      }
       sys.chords.sort((a, b) => (parseFloat(a.getAttribute('x') || 0)) - (parseFloat(b.getAttribute('x') || 0)));
       let prevRight = -Infinity;
       sys.chords.forEach(c => {
-        c.setAttribute('y', sys.minY);
+        let chordY = sys.minY;
         const curX = parseFloat(c.getAttribute('x') || 0);
         let curW = 20;
         try { curW = c.getBBox ? c.getBBox().width : (c.textContent.trim().length * 10); } catch(e){}
+        staveNotes.forEach(sn => {
+          try {
+            const bb = sn.getBBox ? sn.getBBox() : null;
+            if (bb && !(bb.x + bb.width < curX || bb.x > curX + curW) && chordY + 3 >= bb.y - 4) {
+              chordY = Math.min(chordY, bb.y - 12);
+            }
+          } catch(e) {}
+        });
+        c.setAttribute('y', chordY);
         if (curX < prevRight + 6) {
           const newX = prevRight + 6;
           c.setAttribute('x', newX);
