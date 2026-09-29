@@ -165,7 +165,7 @@
             <div class="export-card-icon pdf-icon">📄</div>
             <div class="export-card-info">
               <h4>Xuất PDF Khổ A4 In Ấn</h4>
-              <p>Bản in Vector siêu nét, căn lề chuẩn trang in biểu diễn thánh lễ, lời ca và nốt nhạc rõ ràng.</p>
+              <p>Bản in Vector siêu nét, căn lề chuẩn trang in cho buổi thờ phượng, lời ca và nốt nhạc rõ ràng.</p>
               <button type="button" id="btn-export-pdf" class="btn-export-action btn-export-pdf">In / Lưu PDF (Ctrl+P)</button>
             </div>
           </div>

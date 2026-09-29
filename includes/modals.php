@@ -1,7 +1,7 @@
 <!-- ===== SESSION PANEL (SLIDE-IN) ===== -->
 <div id="session-panel" class="session-panel hidden" role="dialog" aria-modal="true" aria-labelledby="session-panel-title">
   <div class="panel-header">
-    <h3 id="session-panel-title"><?= icon('clipboard-list', 'icon-sm') ?> Nhật Ký Biểu Diễn</h3>
+    <h3 id="session-panel-title"><?= icon('clipboard-list', 'icon-sm') ?> Nhật ký phục vụ</h3>
     <button id="btn-close-session" class="icon-btn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
@@ -272,7 +272,7 @@
         <form id="form-create-setlist" onsubmit="return false;">
           <div style="margin-bottom: 0.75rem;">
             <label class="form-label-bold">Tên Chương Trình / Setlist <span style="color:#ef4444;">*</span></label>
-            <input type="text" id="create-setlist-title-input" class="form-input text-xs w-full box-border" placeholder="VD: Lễ Chúa Nhật 1, Worship 20/4, Ban Hát..." required autocomplete="off">
+            <input type="text" id="create-setlist-title-input" class="form-input text-xs w-full box-border" placeholder="VD: Thờ phượng Chúa Nhật 20/4, Lễ Tiệc Thánh, Ban Hát..." required autocomplete="off">
           </div>
           <div style="display:flex; gap:0.5rem; margin-bottom: 0.75rem;">
             <div class="flex-1">
@@ -557,7 +557,7 @@
 
     </div>
     <div style="padding:.75rem 1.25rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
-      <span style="font-size:.78rem;color:var(--text-secondary);">SheetApp — Nhạc Thánh Ca Tương Tác | Nhấn <kbd style="padding:.1rem .35rem;border:1px solid var(--border);border-radius:4px;font-size:.75rem;">?</kbd> để mở bất cứ lúc nào</span>
+      <span style="font-size:.78rem;color:var(--text-secondary);">SheetApp — Thánh Ca tương tác | Nhấn <kbd style="padding:.1rem .35rem;border:1px solid var(--border);border-radius:4px;font-size:.75rem;">?</kbd> để mở bất cứ lúc nào</span>
       <button id="btn-close-help-footer" class="btn btn-ghost btn-sm">Đóng</button>
     </div>
   </div>

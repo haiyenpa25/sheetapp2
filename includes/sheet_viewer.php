@@ -31,7 +31,7 @@
         <div class="feature-item">
           <span class="feat-icon"><?= icon('file-text') ?></span>
           <div>
-            <strong>Nhật Ký Biểu Diễn</strong>
+            <strong>Nhật ký phục vụ</strong>
             <small>Lưu lịch sử mỗi buổi tập</small>
           </div>
         </div>

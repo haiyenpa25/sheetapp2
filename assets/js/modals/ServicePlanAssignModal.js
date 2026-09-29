@@ -23,19 +23,22 @@ const ServicePlanAssignModal = (() => {
   }
 
   const ROLES = {
-    'leader':       '👑 Ca Trưởng / Hát Chính',
-    'piano':        '🎹 Piano / Đệm Chính',
-    'organ':        '🎼 Organ',
-    'guitar':       '🎸 Guitar Acoustic / Solo',
-    'bass':         '🎸 Guitar Bass',
-    'drums':        '🥁 Trống / Bộ Gõ',
-    'vocal':        '🎤 Ca Viên / Lĩnh Xướng',
-    'vocal_soprano':'🎤 Nữ Cao (Soprano)',
-    'vocal_alto':   '🎤 Nữ Trầm (Alto)',
-    'vocal_tenor':  '🎤 Nam Cao (Tenor)',
-    'vocal_bass':   '🎤 Nam Trầm (Bass)',
-    'sound':        '🎛 Kỹ Thuật Âm Thanh',
-    'slides':       '📽 Trình Chiếu / Máy Chiếu'
+    'pastor':           '✝ Mục sư / Truyền đạo',
+    'worship_leader':   '🙏 Hướng dẫn chương trình',
+    'scripture_reader': '📖 Đọc Kinh Thánh',
+    'leader':           '👑 Ca Trưởng / Hát Chính',
+    'piano':            '🎹 Piano / Đệm Chính',
+    'organ':            '🎼 Organ',
+    'guitar':           '🎸 Guitar Acoustic / Solo',
+    'bass':             '🎸 Guitar Bass',
+    'drums':            '🥁 Trống / Bộ Gõ',
+    'vocal':            '🎤 Ca Viên / Hát dẫn',
+    'vocal_soprano':    '🎤 Nữ Cao (Soprano)',
+    'vocal_alto':       '🎤 Nữ Trầm (Alto)',
+    'vocal_tenor':      '🎤 Nam Cao (Tenor)',
+    'vocal_bass':       '🎤 Nam Trầm (Bass)',
+    'sound':            '🎛 Kỹ Thuật Âm Thanh',
+    'slides':           '📽 Trình Chiếu / Máy Chiếu'
   };
 
   let _modalEl = null;
@@ -96,7 +99,7 @@ const ServicePlanAssignModal = (() => {
               </div>
               <div>
                 <label class="form-label text-xs">Ghi chú riêng (không bắt buộc)</label>
-                <input id="spa-notes-input" type="text" class="form-input text-xs" placeholder="VD: Dạo intro bài 1, bè Nam phụ, hát lĩnh xướng...">
+                <input id="spa-notes-input" type="text" class="form-input text-xs" placeholder="VD: Dạo intro bài 1, bè Nam phụ, hát dẫn...">
               </div>
               <button id="btn-spa-submit" type="button" class="btn btn-primary btn-sm" style="font-weight: 700; align-self: flex-end; padding: 6px 14px;">
                 ✓ Thêm Phân Công

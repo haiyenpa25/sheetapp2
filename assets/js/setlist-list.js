@@ -159,7 +159,7 @@ const SetlistList = (() => {
     }
 
     if (!modalCreate) {
-      const title = prompt("Tên Setlist mới (VD: Worship CN 20/4):");
+      const title = prompt("Tên Chương trình mới (VD: Thờ phượng Chúa Nhật 20/4, Lễ Tiệc Thánh):");
       if (!title) return;
       window.ApiService.setlists.create({ title, scheduled_date: new Date().toISOString().split('T')[0] }).then(data => {
         if (data.success) fetchSetlists();

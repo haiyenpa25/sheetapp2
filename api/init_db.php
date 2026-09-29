@@ -25,12 +25,12 @@ try {
         echo "Đã áp dụng " . count($executed) . " migrations thành công.\n";
     }
 
-    // 2. Tạo các danh mục phụng vụ chuẩn (nếu chưa có)
+    // 2. Tạo các danh mục chuẩn (nếu chưa có)
     $defaultCategories = [
         ['name' => 'Thánh Ca', 'slug' => 'thanh-ca', 'icon' => '📖', 'description' => 'Thánh ca truyền thống HTTLVN 1 - 540', 'order' => 1],
         ['name' => 'Tôn Vinh & Thờ Phượng', 'slug' => 'ton-vinh-tho-phuong', 'icon' => '🙌', 'description' => 'Ca khúc thờ phượng hiện đại, ca ngợi', 'order' => 2],
         ['name' => 'Biệt Thánh Ca & Hợp Xướng', 'slug' => 'biet-thanh-ca', 'icon' => '🎼', 'description' => 'Bài thánh ca biểu diễn hợp xướng 4 bè SATB', 'order' => 3],
-        ['name' => 'Giáng Sinh & Phục Sinh', 'slug' => 'giang-sinh-phuc-sinh', 'icon' => '✨', 'description' => 'Thánh ca theo mùa lễ phụng vụ lớn', 'order' => 4],
+        ['name' => 'Giáng Sinh & Phục Sinh', 'slug' => 'giang-sinh-phuc-sinh', 'icon' => '✨', 'description' => 'Thánh ca các dịp lễ lớn của Hội Thánh', 'order' => 4],
         ['name' => 'Giới Trẻ & Thiếu Nhi', 'slug' => 'gioi-tre-thieu-nhi', 'icon' => '🎸', 'description' => 'Bài hát sinh hoạt, thanh niên và thiếu nhi', 'order' => 5],
     ];
 

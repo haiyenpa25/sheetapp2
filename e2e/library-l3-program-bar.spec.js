@@ -28,7 +28,7 @@ test.describe('L3-1 · Thanh chương trình 40px cạnh dưới & HUD Sân kh�
     await page.evaluate(() => {
       const sampleSetlist = {
         id: 999,
-        name: 'Chương trình Thánh Lễ 5 bài',
+        name: 'Chương trình Buổi Nhóm 5 bài',
         items: [
           { song_id: 'thanh-ca-001', title: 'HỠI THÁNH VƯƠNG, KÍP NGỰ LAI', key: 'G', transpose_key: 0, chord_profile: 'HD', bpm: 80 },
           { song_id: 'thanh-ca-002', title: 'NGUYỀN TỤNG MỸ CHÚA LINH NĂNG', key: 'G', transpose_key: 2, chord_profile: 'HD', bpm: 90 },

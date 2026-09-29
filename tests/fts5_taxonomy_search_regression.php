@@ -66,11 +66,11 @@ check($ftsExists === 1, "Bảng ảo SQLite FTS5 songs_fts đã được khởi 
 
 // Kiểm tra taxonomy chuẩn
 $tax = SongService::getTaxonomy();
-check(!empty($tax['seasons']) && count($tax['seasons']) === 6, "Taxonomy có đúng 6 mùa phụng vụ chuẩn");
-check(!empty($tax['themes']) && count($tax['themes']) >= 8, "Taxonomy có đầy đủ danh sách chủ đề phụng vụ");
+check(!empty($tax['seasons']) && count($tax['seasons']) === 4, "Taxonomy có đúng 4 dịp lễ chuẩn");
+check(!empty($tax['themes']) && count($tax['themes']) >= 8, "Taxonomy có đầy đủ danh sách chủ đề");
 
 $seasonKeys = array_column($tax['seasons'], 'key');
-check(in_array('advent', $seasonKeys, true) && in_array('christmas', $seasonKeys, true) && in_array('lent', $seasonKeys, true), "Danh sách mùa có Mùa Vọng, Giáng Sinh, Mùa Chay");
+check(in_array('christmas', $seasonKeys, true) && in_array('lent', $seasonKeys, true) && in_array('easter', $seasonKeys, true), "Danh sách dịp lễ có Giáng Sinh, Thương Khó, Phục Sinh");
 
 // ─── TEST 2: Accent-Insensitive Search ──────────────────────────────
 echo "\n--- TEST 2: Accent-Insensitive Search ---\n";
@@ -125,9 +125,9 @@ check($mariaSearch[2]['id'] === $sC['id'], "Hạng 3: Bài 'Dâng Lời Cầu' k
 // ─── TEST 4: Liturgical Season & Theme Taxonomy Filtering ───────────
 echo "\n--- TEST 4: Taxonomy Filtering ---\n";
 
-$sAdventNhap = SongService::add([
+$sSolemnityNhap = SongService::add([
     'title'             => 'Trời Gieo Sương Xuống',
-    'liturgical_season' => 'advent',
+    'liturgical_season' => 'solemnity',
     'theme'             => 'nhap-le'
 ]);
 
@@ -144,14 +144,14 @@ $sLentCauNguyen = SongService::add([
 ]);
 
 // Lọc theo mùa
-$adventOnly = SongService::search('', ['season' => 'advent']);
-$adventIds = array_column($adventOnly, 'id');
-check(in_array($sAdventNhap['id'], $adventIds, true) && !in_array($sChristmasNhap['id'], $adventIds, true), "Lọc season=advent chỉ lấy bài Mùa Vọng");
+$solemnityOnly = SongService::search('', ['season' => 'solemnity']);
+$solemnityIds = array_column($solemnityOnly, 'id');
+check(in_array($sSolemnityNhap['id'], $solemnityIds, true) && !in_array($sChristmasNhap['id'], $solemnityIds, true), "Lọc season=solemnity chỉ lấy bài Lễ nghi Hội Thánh");
 
 // Lọc theo chủ đề
 $nhapLeOnly = SongService::search('', ['theme' => 'nhap-le']);
 $nhapLeIds = array_column($nhapLeOnly, 'id');
-check(in_array($sAdventNhap['id'], $nhapLeIds, true) && in_array($sChristmasNhap['id'], $nhapLeIds, true) && !in_array($sLentCauNguyen['id'], $nhapLeIds, true), "Lọc theme=nhap-le lấy đúng các bài Nhập Lễ");
+check(in_array($sSolemnityNhap['id'], $nhapLeIds, true) && in_array($sChristmasNhap['id'], $nhapLeIds, true) && !in_array($sLentCauNguyen['id'], $nhapLeIds, true), "Lọc theme=nhap-le lấy đúng các bài Khai lễ");
 
 // Lọc kết hợp Mùa + Chủ Đề
 $lentCauNguyen = SongService::search('', ['season' => 'lent', 'theme' => 'cau-nguyen']);

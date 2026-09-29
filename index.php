@@ -18,8 +18,8 @@ $baseHref = ($appBase ? $appBase : '') . '/';
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="mobile-web-app-capable" content="yes">
-  <title>SheetApp — Nhạc Thánh Ca Tương Tác</title>
-  <meta name="description" content="Ứng dụng xem, dịch giọng và ghi chép nhạc thánh ca tương tác. Hỗ trợ MusicXML, transpose và nhật ký biểu diễn.">
+  <title>SheetApp — Thánh Ca tương tác</title>
+  <meta name="description" content="Ứng dụng xem, dịch giọng và ghi chép nhạc thánh ca tương tác. Hỗ trợ MusicXML, transpose và nhật ký phục vụ.">
   <!-- PWA / Add to Homescreen -->
   <link rel="manifest" href="<?= $baseHref ?>manifest.json">
   <meta name="theme-color" content="#6d28d9">

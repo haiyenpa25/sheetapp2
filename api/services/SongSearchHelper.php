@@ -29,23 +29,20 @@ class SongSearchHelper {
     public static function getTaxonomy(): array {
         return [
             'seasons' => [
-                ['key' => 'advent',      'name' => 'Mùa Vọng',        'color' => '#8b5cf6'],
-                ['key' => 'christmas',   'name' => 'Mùa Giáng Sinh',   'color' => '#f59e0b'],
-                ['key' => 'lent',        'name' => 'Mùa Chay',        'color' => '#ec4899'],
-                ['key' => 'easter',      'name' => 'Mùa Phục Sinh',   'color' => '#10b981'],
-                ['key' => 'ordinary',    'name' => 'Mùa Thường Niên', 'color' => '#06b6d4'],
-                ['key' => 'solemnity',   'name' => 'Lễ Trọng & Kính', 'color' => '#eab308']
+                ['key' => 'christmas', 'name' => 'Lễ Giáng Sinh',     'color' => '#f59e0b'],
+                ['key' => 'lent',      'name' => 'Lễ Thương Khó',     'color' => '#ec4899'],
+                ['key' => 'easter',    'name' => 'Lễ Phục Sinh',     'color' => '#10b981'],
+                ['key' => 'solemnity', 'name' => 'Lễ nghi Hội Thánh', 'color' => '#eab308']
             ],
             'themes' => [
-                ['key' => 'nhap-le',     'name' => 'Ca Nhập Lễ'],
-                ['key' => 'dap-ca',      'name' => 'Đáp Ca / Tung Hô'],
-                ['key' => 'dang-le',     'name' => 'Dâng Lễ / Tiến Lễ'],
-                ['key' => 'hiep-le',     'name' => 'Hiệp Lễ / Thánh Thể'],
-                ['key' => 'ta-le',       'name' => 'Tạ Lễ / Kết Lễ'],
-                ['key' => 'duc-me',      'name' => 'Đức Mẹ Maria'],
-                ['key' => 'thanh-tam',   'name' => 'Thánh Tâm Chúa'],
-                ['key' => 'cau-nguyen',  'name' => 'Cầu Nguyện & Sám Hối'],
-                ['key' => 'ton-vinh',    'name' => 'Tôn Vinh & Cảm Tạ']
+                ['key' => 'nhap-le',    'name' => 'Khai lễ'],
+                ['key' => 'dap-ca',     'name' => 'Kinh tiết ca / Đoản ca'],
+                ['key' => 'dang-le',    'name' => 'Dâng hiến'],
+                ['key' => 'hiep-le',    'name' => 'Tiệc Thánh'],
+                ['key' => 'ta-le',      'name' => 'Tất lễ'],
+                ['key' => 'thanh-tam',  'name' => 'Huyết Chúa / Thập tự giá'],
+                ['key' => 'cau-nguyen', 'name' => 'Cầu Nguyện & Sám Hối'],
+                ['key' => 'ton-vinh',   'name' => 'Tôn Vinh & Cảm Tạ']
             ]
         ];
     }

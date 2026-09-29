@@ -40,7 +40,7 @@
     <!-- Hàng điều khiển: Sắp xếp + Nút gom bộ lọc Lọc (Ticket L2-3) -->
     <div class="mt-half sidebar-controls-row">
       <select id="sort-filter" class="form-input select-toolbar sort-filter-select" title="Sắp xếp bài hát" aria-label="Sắp xếp danh sách bài hát">
-        <option value="num" selected>STT HTTLVN</option>
+        <option value="num" selected>Số bài Thánh Ca</option>
         <option value="title">Tên (A-Z)</option>
         <option value="key">Tông gốc</option>
       </select>
@@ -60,9 +60,9 @@
       </div>
 
       <div id="season-filter-wrap" class="sidebar-filter-item">
-        <label for="season-filter" class="sidebar-filter-label">Mùa Lễ:</label>
-        <select id="season-filter" class="form-input select-toolbar sidebar-filter-select" title="Lọc theo Mùa Lễ" aria-label="Lọc theo mùa lễ">
-          <option value="">Tất cả Mùa Lễ</option>
+        <label for="season-filter" class="sidebar-filter-label">Dịp lễ:</label>
+        <select id="season-filter" class="form-input select-toolbar sidebar-filter-select" title="Lọc theo Dịp lễ" aria-label="Lọc theo dịp lễ">
+          <option value="">Tất cả Dịp lễ</option>
         </select>
       </div>
 

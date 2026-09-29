@@ -18,8 +18,8 @@ class NotificationPreferenceService {
     public const CHANNELS = ['inapp', 'email', 'push'];
 
     public const EVENT_TYPES = [
-        'plan.published'       => 'Chương trình phụng vụ mới',
-        'plan.role_assigned'   => 'Phân công nhiệm vụ phụng vụ',
+        'plan.published'       => 'Chương trình thờ phượng mới',
+        'plan.role_assigned'   => 'Phân công phục vụ buổi nhóm',
         'practice.assigned'    => 'Được giao bài tập mới',
         'assignment.due_soon'  => 'Nhắc bài tập sắp tới hạn',
         'review.decided'       => 'Kết quả xét duyệt hợp âm',

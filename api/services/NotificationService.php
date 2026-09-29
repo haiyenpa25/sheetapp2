@@ -145,7 +145,7 @@ class NotificationService {
         switch ($type) {
             case 'plan.published':
                 $setlistId = (int)$subjectId;
-                $planTitle = $payload['title'] ?? 'Chương trình Phụng vụ';
+                $planTitle = $payload['title'] ?? 'Chương trình thờ phượng';
 
                 // Tìm tất cả thành viên được phân công trong chương trình này
                 $stmt = $pdo->prepare("
@@ -164,7 +164,7 @@ class NotificationService {
                         $targetUserId,
                         $eventId,
                         'plan.published',
-                        'Chương trình Phụng vụ đã phát hành',
+                        'Chương trình thờ phượng đã phát hành',
                         "Chương trình '{$planTitle}' vừa được phát hành. Nhiệm vụ của bạn: {$userRole}.",
                         "?setlist={$setlistId}"
                     );
@@ -182,7 +182,7 @@ class NotificationService {
                         $targetUserId,
                         $eventId,
                         'plan.role_assigned',
-                        'Bạn có nhiệm vụ mới trong Phụng vụ',
+                        'Bạn có nhiệm vụ mới trong chương trình thờ phượng',
                         "Bạn vừa được phân công vai trò {$roleName}.",
                         $setlistId > 0 ? "?setlist={$setlistId}" : ''
                     );

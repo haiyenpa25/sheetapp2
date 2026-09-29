@@ -46,7 +46,7 @@
           <div class="learn-consent-box">
             <div class="learn-consent-info">
               <strong>🔒 Quyền riêng tư & Chia sẻ với Ca Trưởng</strong>
-              <p>Cho phép Ca Trưởng và Ban Hát theo dõi tiến độ luyện tập của bạn để sắp xếp phụng vụ. Nếu tắt, tiến độ của bạn sẽ được ẩn danh hoàn toàn.</p>
+              <p>Cho phép Ca Trưởng và Ban Hát theo dõi tiến độ luyện tập của bạn để sắp xếp buổi nhóm. Nếu tắt, tiến độ của bạn sẽ được ẩn danh hoàn toàn.</p>
             </div>
             <label class="learn-switch">
               <input type="checkbox" id="learn-consent-checkbox" checked>

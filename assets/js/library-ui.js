@@ -336,7 +336,7 @@ const LibraryUI = (() => {
           } else if (!q) {
             list = _sortSongs(list);
           }
-          render(list, { isSearch: !!q, emptyMsg: q ? `Không tìm thấy "${q}"` : 'Không có bài hát phù hợp', emptyHint: 'Thử đổi mùa lễ hoặc từ khóa khác' });
+          render(list, { isSearch: !!q, emptyMsg: q ? `Không tìm thấy "${q}"` : 'Không có bài hát phù hợp', emptyHint: 'Thử đổi dịp lễ hoặc từ khóa khác' });
           return;
         }
       } catch (err) { /* fallback local */ }
@@ -404,7 +404,7 @@ const LibraryUI = (() => {
       }
     };
     sync('category-filter', 'category-filter-wrap', cats, 'Tất cả danh mục');
-    sync('season-filter', 'season-filter-wrap', seasons, 'Tất cả Mùa Lễ');
+    sync('season-filter', 'season-filter-wrap', seasons, 'Tất cả Dịp lễ');
     sync('theme-filter', 'theme-filter-wrap', themes, 'Tất cả Chủ Đề');
     const avail = (cats.length > 1 ? 1 : 0) + (seasons.length > 0 ? 1 : 0) + (themes.length > 0 ? 1 : 0);
     document.getElementById('filter-empty-hint')?.classList.toggle('hidden', avail > 0);

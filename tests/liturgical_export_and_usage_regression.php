@@ -38,7 +38,7 @@ curl_close($ch);
 
 check($code === 200, "Truy cập print/chord-sheet.php trả về HTTP 200 OK");
 check(str_contains($html, 'HỠI THÁNH VƯƠNG, KÍP NGỰ LAI'), "HTML chứa đúng tựa bài hát");
-check(str_contains($html, 'Tông biểu diễn: <strong>A</strong>'), "Dịch giọng +2 bán âm (G -> A) hiển thị chính xác trên tiêu đề");
+check(str_contains($html, 'Tông hát: <strong>A</strong>') || str_contains($html, 'Tông biểu diễn: <strong>A</strong>'), "Dịch giọng +2 bán âm (G -> A) hiển thị chính xác trên tiêu đề");
 check(str_contains($html, 'two-columns'), "Hỗ trợ tùy chọn 2 cột (cols=2) cho bài hát dài");
 check(str_contains($html, 'chord-pair'), "Chứa các cặp từ ngữ và hợp âm nổi (chord-pair)");
 check(str_contains($html, 'window.print()'), "Tích hợp sẵn nút gọi in trình duyệt window.print()");

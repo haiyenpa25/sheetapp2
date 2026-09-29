@@ -10,7 +10,7 @@
  * - POST   /api/setlists?action=update&id={id}   -> Cập nhật thông tin/trạng thái plan
  * - POST   /api/setlists?action=publish&id={id}  -> Phát hành plan cho toàn ban nhạc
  * - DELETE /api/setlists?id={id}                 -> Xóa service plan
- * - POST   /api/setlists?action=add_item         -> Thêm bài hát/tiết mục phụng vụ
+ * - POST   /api/setlists?action=add_item         -> Thêm bài hát/tiết mục buổi nhóm
  * - PATCH  /api/setlists?action=update_item&id={id} -> Cập nhật tông, BPM, profile, ghi chú mục
  * - DELETE /api/setlists?action=remove_item&id={id} -> Xóa mục khỏi plan
  * - POST   /api/setlists?action=assign           -> Phân công nhân sự
@@ -46,7 +46,7 @@ class SetlistController {
                 if ($action === 'usage_report') {
                     require_once __DIR__ . '/../core/FeatureFlags.php';
                     if (!FeatureFlags::isEnabled('USAGE_REPORT')) {
-                        Response::notFound('Tính năng báo cáo phụng vụ hiện đang tắt');
+                        Response::notFound('Tính năng báo cáo sử dụng bài hát hiện đang tắt');
                         return;
                     }
                     Auth::requireLeader();
@@ -147,7 +147,7 @@ class SetlistController {
                 return;
             }
 
-            // ── Thêm bài hát / tiết mục phụng vụ ──
+            // ── Thêm bài hát / tiết mục buổi nhóm ──
             if ($method === 'POST' && $action === 'add_item') {
                 Auth::requireLogin();
                 $setlistId = (int)($data['setlist_id'] ?? 0);

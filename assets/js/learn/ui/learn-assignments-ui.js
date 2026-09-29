@@ -61,7 +61,7 @@
         <div class="lac-meta-grid">
           <div class="lac-meta-item">
             <span class="lac-meta-label">Chương trình:</span>
-            <span class="lac-meta-val">${_escape(item.title || 'Phụng vụ')}</span>
+            <span class="lac-meta-val">${_escape(item.title || 'Buổi nhóm')}</span>
           </div>
           <div class="lac-meta-item">
             <span class="lac-meta-label">Hạn chót:</span>

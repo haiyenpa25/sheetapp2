@@ -192,7 +192,7 @@ const CueEngine = (() => {
     } else if (role === 'vocal') {
       switch (sectionType) {
         case 'chorus': return '🎤 Đồng ca';
-        case 'verse':  return '🎤 Đơn ca / Lĩnh xướng';
+        case 'verse':  return '🎤 Đơn ca / Hát dẫn';
         default: return '🎤 Chuẩn bị hát';
       }
     } else if (role === 'piano') {
