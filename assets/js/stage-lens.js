@@ -49,6 +49,14 @@ const StageLens = (() => {
       btn.title = `Vai trò: ${info.icon} ${info.label} (Bấm để đổi vai trò)`;
       btn.setAttribute('aria-label', `Vai trò hiện tại: ${info.label}`);
     }
+
+    // R0-9 (ROADMAP5): nhãn vai trò trong menu ⋮ (#menu-instrument-role-label) trước đây
+    // chỉ được cập nhật khi người dùng bấm ĐÚNG mục đó trong menu (toolbar-controller.js
+    // ủy quyền click rồi mới đọc lại nhãn) -- nếu đổi vai trò qua nút toolbar hoặc modal,
+    // menu vẫn hiện nhãn CŨ cho tới lần bấm qua menu kế tiếp. Cập nhật đồng thời ở đây để
+    // 2 nơi luôn khớp nhau ngay lập tức.
+    const menuLabelEl = document.getElementById('menu-instrument-role-label');
+    if (menuLabelEl) menuLabelEl.textContent = `${info.icon} ${info.label}`;
   }
 
   function setRole(roleId, persist = true, notify = true) {

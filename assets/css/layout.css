@@ -1825,6 +1825,20 @@ body.sheet-only-mode .gig-floating-hud {
   }
 }
 
+/* R0-9 (ROADMAP5): ở dải 1201-1400px, nhãn "🎹 Keyboard" đầy đủ của nút Vai Trò (chỉ
+   thu gọn hẳn ở @media(max-width:1200px) phía trên) vẫn còn quá rộng cho phần
+   .toolbar-center còn lại -- đè lên nút "Theo ca trưởng" bên .toolbar-right ở đúng
+   1366px (laptop phổ biến nhất). Thu gọn riêng nhãn này sớm hơn 1 chút, không đụng gì
+   tới các quy tắc khác trong khối @media(max-width:1200px) ở trên. */
+@media (min-width: 1201px) and (max-width: 1400px) {
+  .btn-instrument-role .role-label {
+    display: none !important;
+  }
+  .btn-instrument-role {
+    padding: 0 8px;
+  }
+}
+
 /* Breakpoint iPad Dọc / Tablet Hẹp (<= 880px) */
 @media (max-width: 880px) {
   #btn-follow-leader,
@@ -1832,8 +1846,14 @@ body.sheet-only-mode .gig-floating-hud {
   .verse-pill {
     display: none !important;
   }
+  /* R0-9 (ROADMAP5): library-polish.css nạp SAU CÙNG trong index.php và có luật
+     ".unified-toolbar .song-info-pill { max-width: 280px; }" -- đặc trưng (0,2,0) cao
+     hơn luật ".song-info-pill { max-width: 110px; }" ở đây (0,1,0), nên LUÔN thắng bất
+     kể breakpoint nào, khiến ô tên bài không co lại đúng 110px. Hệ quả: nút ⓘ và nhóm
+     nút Band/Nhạc bị đẩy tràn ra ngoài, chồng lên nút Biểu Diễn ở iPad dọc (~820px).
+     Thêm !important ở đây để breakpoint thật sự thắng. */
   .song-info-pill {
-    max-width: 110px;
+    max-width: 110px !important;
   }
   .chord-set-select {
     max-width: 75px;
