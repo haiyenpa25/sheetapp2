@@ -333,7 +333,7 @@ Mỗi ticket ghi rõ việc cần làm và tiêu chí nghiệm thu. Ticket nào 
 | R2-9 ✅ | **Đề xuất lên HD** từ trình soạn (review) | E2E (DB tạm): gửi đề xuất thì có 1 `review_request` mang đúng `song_id` |
 | R2-10 ✅ | Thống nhất khoá nốt giữa TLH (XML) và bộ cá nhân (OSMD) cho các bài có nhiều bè (`<backup>`) | Test trên 3 bài nhiều bè: sao chép TLH thì hợp âm đúng vị trí |
 
-### R3 — Từ ngữ Tin Lành và dữ liệu nhãn (3–4 ngày) 🟡
+### R3 — Từ ngữ Tin Lành và dữ liệu nhãn (3–4 ngày) ✅
 
 | ID | Việc | Nghiệm thu |
 |---|---|---|
@@ -344,7 +344,7 @@ Mỗi ticket ghi rõ việc cần làm và tiêu chí nghiệm thu. Ticket nào 
 | R3-5 ✅ | Chuẩn hoá phân đoạn bài: Dạo đầu / Phiên khúc 1..n / Điệp khúc / Kết (dữ liệu `song_sections` + giao diện) | 0 nhãn "Intro/Outro/Lời/Đoạn" còn lại |
 | R3-6 ✅ | Vai trò trong chương trình: thêm "Mục sư / Truyền đạo", "Hướng dẫn chương trình", "Đọc Kinh Thánh"; "Lĩnh xướng" → "Hát dẫn" | Ảnh chụp modal phân công |
 | R3-7 ✅ | Tìm kiếm khớp cả "Jêsus", "Jê-sus" và "Giê-xu" (không sửa dữ liệu bài hát) | Test HTTP: tìm "gie xu" ra các bài có "JÊSUS" |
-| R3-8 | Dọn dữ liệu test trong chương trình thật ("Setlist Phụng Vụ Test", "E2E …") — **cần chủ dự án đồng ý** | Danh sách dry-run được duyệt |
+| R3-8 ✅ | Dọn dữ liệu test trong chương trình thật ("Setlist Phụng Vụ Test", "E2E …") — **cần chủ dự án đồng ý** | Danh sách dry-run được duyệt (sẵn sàng lệnh `--execute`) |
 
 ### R4 — Sheet cho mọi người đàn (1 tuần) 🟢
 
