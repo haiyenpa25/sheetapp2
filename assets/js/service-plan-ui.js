@@ -254,9 +254,9 @@ const ServicePlanUI = (() => {
     metaEl.querySelector('#btn-sp-offline-sync')?.addEventListener('click', handleOfflineDownload);
 
     metaEl.querySelector('#btn-sp-offline-del')?.addEventListener('click', () => {
-      if (confirm(`Xoá gói offline của setlist "${sl.title}"?`)) {
+      if (confirm(`Xóa gói offline của chương trình "${sl.title}"?`)) {
         window.OfflineSetlistManager?.removePackage?.(sl.id);
-        window.App?.showToast?.('Đã xoá gói offline khỏi máy', 'info');
+        window.App?.showToast?.('Đã xóa gói offline khỏi máy', 'info');
         renderServicePlanMeta(sl, callbacks);
       }
     });

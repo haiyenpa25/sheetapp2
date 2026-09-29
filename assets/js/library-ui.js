@@ -17,10 +17,14 @@ const LibraryUI = (() => {
       clearTimeout(_searchDebounce);
       _searchDebounce = setTimeout(_onSearch, 200);
     });
-    // Enter mở kết quả đầu tiên (Ticket L0-7)
+    // Enter mở kết quả đầu tiên (Ticket L0-7, R3-2)
     searchEl()?.addEventListener('keydown', async (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
+        const qRaw = (searchEl()?.value || '').trim().toLowerCase();
+        if (qRaw === 'setlist' || _removeAccents(qRaw) === 'chuong trinh') {
+          document.querySelector('[data-tab="setlist"]')?.click(); searchEl()?.blur(); return;
+        }
         clearTimeout(_searchDebounce);
         await _onSearch();
         const first = listEl()?.querySelector('.song-item');
@@ -88,7 +92,7 @@ const LibraryUI = (() => {
     const item = btn.closest('.song-item');
     if (!item) return;
     const id = item.dataset.id, name = songs.find(s => s.id === id)?.title || 'bài này';
-    if (confirm(`Xoá "${name}" khỏi thư viện?`)) deleteSong(id);
+    if (confirm(`Xóa "${name}" khỏi thư viện?`)) deleteSong(id);
   }
 
   function _handleFav(btn) {
@@ -167,7 +171,10 @@ const LibraryUI = (() => {
 
     if (!list || list.length === 0) {
       _virtualSongs = null;
-      el.innerHTML = `<div class="empty-state"><span class="empty-icon">🎶</span><p>${opts.emptyMsg || 'Không tìm thấy bài hát'}</p><small>${opts.emptyHint || 'Thử từ khóa khác'}</small></div>`;
+      const qVal = (searchEl()?.value || '').trim().toLowerCase();
+      el.innerHTML = (qVal === 'setlist' || _removeAccents(qVal) === 'chuong trinh')
+        ? `<div class="empty-state"><span class="empty-icon">📋</span><p>Tìm chương trình (Setlist)?</p><button class="btn btn-sm btn-primary" onclick="document.querySelector('[data-tab=setlist]')?.click()" style="margin-top:6px;">Mở tab Chương trình</button></div>`
+        : `<div class="empty-state"><span class="empty-icon">🎶</span><p>${opts.emptyMsg || 'Không tìm thấy bài hát'}</p><small>${opts.emptyHint || 'Thử từ khóa khác'}</small></div>`;
       return;
     }
 
@@ -267,8 +274,8 @@ const LibraryUI = (() => {
     acts.className = 'song-item-actions';
     const isFav = window.HistoryManager?.isFavorite?.(song.id) ?? false;
     acts.appendChild(_createActionBtn(`song-fav-btn icon-btn-xs${isFav ? ' fav-active' : ''}`, isFav ? 'Bỏ yêu thích' : 'Thêm yêu thích', isFav ? '★' : '☆'));
-    if (canEdit) acts.appendChild(_createActionBtn('song-add-setlist-btn icon-btn-xs', 'Thêm vào Setlist', '+'));
-    if (canAdmin) acts.appendChild(_createActionBtn('song-delete-btn icon-btn-xs', 'Xoá bài hát', '🗑'));
+    if (canEdit) acts.appendChild(_createActionBtn('song-add-setlist-btn icon-btn-xs', 'Thêm vào chương trình', '+'));
+    if (canAdmin) acts.appendChild(_createActionBtn('song-delete-btn icon-btn-xs', 'Xóa bài hát', '🗑'));
     div.appendChild(acts);
 
     return div;
@@ -499,7 +506,7 @@ const LibraryUI = (() => {
   async function _promptAddToSetlist(songId) {
     if (!songId) return;
     const resp = await ApiService.setlists.list(), data = Array.isArray(resp) ? resp : (resp?.data ?? []);
-    if (!data.length) { window.App?.showToast('Chưa có Setlist nào được tạo', 'error'); return; }
+    if (!data.length) { window.App?.showToast('Chưa có chương trình nào được tạo', 'error'); return; }
     const modal = document.getElementById('add-to-setlist-modal'), opts = document.getElementById('add-to-setlist-options');
     if (!modal || !opts) return;
     opts.innerHTML = data.map(sl => `<div class="song-item" data-id="${_esc(sl.id)}" style="touch-action:manipulation"><div class="song-item-info"><div class="song-item-title">${_esc(sl.title)}</div></div></div>`).join('');

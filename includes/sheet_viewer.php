@@ -130,15 +130,15 @@
       <button id="btn-gig-scroll-toggle" class="btn-gig-action btn-gig-scroll" title="Bật/Tắt cuộn (Space)"><?= icon('chevron-down') ?> <span>Cuộn</span></button>
 
       <!-- Cụm Thu Phóng & Khóa Zoom (GIG MODE) -->
-      <div class="gig-hud-zoom-wrap" title="Thu phóng & Khóa View trong Biểu Diễn">
+      <div class="gig-hud-zoom-wrap" title="Thu phóng & Khóa tỷ lệ trong Toàn Màn Hình">
         <button id="btn-gig-zoom-out" class="btn-gig-action btn-gig-step" title="Thu nhỏ zoom">−</button>
         <span id="gig-hud-zoom" class="gig-hud-zoom-val" title="Tỷ lệ zoom hiện tại">100%</span>
         <button id="btn-gig-zoom-in" class="btn-gig-action btn-gig-step" title="Phóng to zoom">+</button>
         <button id="btn-gig-lock-zoom" class="btn-gig-action btn-gig-lock" title="Khóa tỷ lệ zoom (khi đổi bài giữ nguyên)"><?= icon('unlock') ?></button>
       </div>
 
-      <!-- Thoát Biểu Diễn -->
-      <button id="btn-gig-exit" class="btn-gig-action btn-gig-exit" title="Thoát Biểu Diễn (Esc)"><span>Thoát</span> <?= icon('x') ?></button>
+      <!-- Thoát Toàn Màn Hình -->
+      <button id="btn-gig-exit" class="btn-gig-action btn-gig-exit" title="Thoát Toàn Màn Hình (Esc)"><span>Thoát</span> <?= icon('x') ?></button>
     </div>
   </div>
 
@@ -179,7 +179,7 @@
   <!-- HOST QUICK CUES BAR (Thanh nhắc ban nhạc nhanh của Ca Trưởng — Ticket L3-6) -->
   <div id="host-quick-cues-bar" class="host-quick-cues-bar hidden" role="toolbar" aria-label="Thanh nhắc ban nhạc nhanh của Ca Trưởng">
     <div class="hqc-inner">
-      <span class="hqc-label"><?= icon('crown') ?> Nhắc Band:</span>
+      <span class="hqc-label"><?= icon('crown') ?> Nhắc ban nhạc:</span>
       <div class="hqc-chips">
         <button type="button" class="btn-cue-chip" data-cue="repeat" data-icon="rotate-ccw" data-text="Lặp Điệp Khúc" title="Gửi: Lặp Điệp Khúc"><?= icon('rotate-ccw') ?> Lặp ĐK</button>
         <button type="button" class="btn-cue-chip" data-cue="slow" data-icon="clock" data-text="Khổ cuối chậm" title="Gửi: Khổ cuối chậm"><?= icon('clock') ?> Chậm lại</button>

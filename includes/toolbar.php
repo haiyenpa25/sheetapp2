@@ -153,10 +153,10 @@
       <span class="follow-text">Theo ca trưởng</span>
     </button>
 
-    <!-- Nhóm 7: Nút Sân Khấu / Biểu Diễn (Band Gig Mode, Ticket R1-2) -->
-    <button id="btn-fullscreen" class="btn-gig-mode" title="Vào chế độ Biểu Diễn Toàn Màn Hình (Phím F)">
+    <!-- Nhóm 7: Nút Toàn Màn Hình (Ticket R1-2, R3-2 Q1) -->
+    <button id="btn-fullscreen" class="btn-gig-mode" title="Vào chế độ Toàn Màn Hình (Phím F)">
       <span class="gig-icon"><?= icon('maximize') ?></span>
-      <span class="gig-text">Biểu Diễn</span>
+      <span class="gig-text">Toàn Màn Hình</span>
     </button>
 
     <!-- Nhóm 8: Nút Chuyển Bài Trước / Sau -->
@@ -315,7 +315,7 @@
 
         <button id="btn-menu-follow-leader" class="btn btn-ghost btn-sm btn-menu-item" title="Theo người hướng dẫn / Kết nối nhóm ban nhạc">
           <?= icon('radio') ?>
-          <span>Theo người hướng dẫn (Live Sync)</span>
+          <span>Theo người hướng dẫn</span>
         </button>
 
 
@@ -402,8 +402,8 @@
     </button>
   </div>
 
-  <div class="mobile-thumb-group mobile-gig-group" role="group" aria-label="Biểu diễn">
-    <button id="btn-mobile-gig" class="btn-thumb-gig" title="Chế độ Biểu Diễn sân khấu" aria-label="Biểu diễn">
+  <div class="mobile-thumb-group mobile-gig-group" role="group" aria-label="Toàn màn hình">
+    <button id="btn-mobile-gig" class="btn-thumb-gig" title="Chế độ Toàn Màn Hình" aria-label="Toàn màn hình">
       <span class="thumb-icon"><?= icon('zap') ?></span>
     </button>
   </div>

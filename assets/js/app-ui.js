@@ -315,7 +315,7 @@ const AppUI = (() => {
       updateTransposeDisplay(curTrans);
       _requestFullscreen();
       _requestWakeLock();
-      showToast('Chế độ Biểu Diễn — Màn hình luôn sáng, chạm 2 mép để lật trang, nhấn Thoát hoặc Esc', 'info');
+      showToast('Chế độ Toàn màn hình — Màn hình luôn sáng, chạm 2 mép để lật trang, nhấn Thoát hoặc Esc', 'info');
     } else {
       _exitFullscreen();
       _releaseWakeLock();
@@ -324,7 +324,7 @@ const AppUI = (() => {
     if (btnFS) {
       const icon = btnFS.querySelector('.gig-icon');
       const text = btnFS.querySelector('.gig-text');
-      if (text) text.textContent = isOn ? 'Thu Nhỏ' : 'Biểu Diễn';
+      if (text) text.textContent = isOn ? 'Thu Nhỏ' : 'Toàn Màn Hình';
       if (icon) icon.textContent = isOn ? '✕' : '⚡';
     }
   }

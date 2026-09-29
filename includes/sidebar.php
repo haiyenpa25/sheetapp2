@@ -23,7 +23,7 @@
   <!-- SIDEBAR TABS -->
   <div class="sidebar-tabs" id="sidebar-tabs">
     <button class="sidebar-tab active" id="sidebar-tab-lib" data-tab="library">Kho Nhạc</button>
-    <button class="sidebar-tab" data-tab="setlist">Setlists</button>
+    <button class="sidebar-tab" data-tab="setlist">Chương trình</button>
     <button class="sidebar-tab" id="sidebar-tab-favs" data-tab="favorites" title="Bài hát yêu thích"><?= icon('star') ?></button>
   </div>
 
@@ -102,7 +102,7 @@
     </button>
     <button id="btn-create-setlist" class="btn btn-primary btn-sm w-full hidden">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Tạo Setlist Mới
+      Tạo Chương Trình Mới
     </button>
   </div>
 
@@ -135,7 +135,7 @@
       <div id="setlist-list" class="song-list">
         <div class="empty-state">
           <span class="empty-icon"><?= icon('file-text') ?></span>
-          <p>Chưa có Setlist nào</p>
+          <p>Chưa có chương trình nào</p>
           <small>Chỉ Quản trị mới có thể tạo</small>
         </div>
       </div>
@@ -144,9 +144,9 @@
           <button id="btn-back-setlists" class="icon-btn" title="Quay lại">
             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
-          <h3 id="setlist-detail-title" class="setlist-detail-title">Setlist</h3>
+          <h3 id="setlist-detail-title" class="setlist-detail-title">Chương trình</h3>
           <div class="d-flex items-center gap-1">
-            <button id="btn-print-setlist" class="icon-btn-xs" title="In Chương Trình Biểu Diễn A4"><?= icon('printer') ?></button>
+            <button id="btn-print-setlist" class="icon-btn-xs" title="In Tập Chương Trình A4"><?= icon('printer') ?></button>
             <button id="btn-copy-setlist-slide" class="icon-btn-xs" title="Copy Danh Sách Cho Slide Màn Hình"><?= icon('copy') ?></button>
             <button id="btn-play-setlist" class="btn btn-sm btn-primary">Phát</button>
           </div>

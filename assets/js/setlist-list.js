@@ -4,7 +4,7 @@
  * - Tải danh sách Setlist (Online / Offline fallback)
  * - Render giao diện danh sách Setlist & thẻ trạng thái
  * - Tạo Setlist mới (Modal & Inline Form)
- * - Xoá Setlist
+ * - Xóa chương trình
  */
 const SetlistList = (() => {
   'use strict';
@@ -73,7 +73,7 @@ const SetlistList = (() => {
       listEl.innerHTML = `
         <div class="empty-state">
           <span class="empty-icon">📋</span>
-          <p>Chưa có Setlist nào</p>
+          <p>Chưa có chương trình nào</p>
           <small>Chỉ Quản trị mới có thể tạo</small>
         </div>`;
       return;
@@ -115,7 +115,7 @@ const SetlistList = (() => {
             📅 ${_esc(sl.scheduled_date)}${timeStr} • ${_esc(String(sl.item_count))} bài${teamStr}${themeStr}
           </div>
         </div>
-        ${window.Auth && window.Auth.isAdmin() ? `<button class="icon-btn-xs text-danger btn-del" title="Xoá">✕</button>` : ''}
+        ${window.Auth && window.Auth.isAdmin() ? `<button class="icon-btn-xs text-danger btn-del" title="Xóa">✕</button>` : ''}
       `;
 
       item.addEventListener('click', (e) => {
@@ -127,7 +127,7 @@ const SetlistList = (() => {
       if (delBtn) {
         delBtn.addEventListener('click', async (e) => {
           e.stopPropagation();
-          if (confirm(`Bạn chắc muốn xoá setlist: ${sl.title}?`)) {
+          if (confirm(`Bạn chắc muốn xóa chương trình: ${sl.title}?`)) {
             await window.ApiService.setlists.delete(sl.id);
             if (ctx.getCurrentSetlist?.()?.id === sl.id) {
               ctx.backToSetlists?.();
@@ -148,7 +148,7 @@ const SetlistList = (() => {
     const titleInp = document.getElementById('create-setlist-title-input');
     const dateInp = document.getElementById('create-setlist-date-input');
 
-    if (modalTitle) modalTitle.textContent = 'Tạo Setlist Mới';
+    if (modalTitle) modalTitle.textContent = 'Tạo Chương Trình Mới';
     if (pickView) pickView.classList.add('hidden');
     if (addModal) {
       if (window.ModalManager) {

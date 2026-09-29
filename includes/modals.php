@@ -249,7 +249,7 @@
     <div class="modal-header">
       <div class="d-flex items-center gap-2">
         <span class="fs-lg text-accent"><?= icon('clipboard-list', 'icon-md') ?></span>
-        <h3 id="setlist-modal-title" class="m-0 fs-base">Thêm vào Setlist</h3>
+        <h3 id="setlist-modal-title" class="m-0 fs-base">Thêm vào Chương trình</h3>
       </div>
       <button id="btn-close-add-setlist" class="icon-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -258,11 +258,11 @@
     <div class="modal-body" style="min-height: 150px; max-height: 380px; overflow-y: auto;">
       <!-- Pick Existing Setlist View -->
       <div id="add-setlist-pick-view">
-        <p style="margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.85rem;">Chọn một Setlist để lưu bài hát này:</p>
+        <p style="margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.85rem;">Chọn một chương trình để lưu bài hát này:</p>
         <div id="add-to-setlist-options" class="song-list" style="padding: 0;"></div>
         <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border);">
           <button type="button" id="btn-toggle-inline-create-setlist" class="btn btn-ghost w-full" style="color:var(--accent);font-weight:600;font-size:0.85rem;border:1px dashed var(--border);">
-            <?= icon('plus', 'icon-xs') ?> Tạo Setlist Mới
+            <?= icon('plus', 'icon-xs') ?> Tạo Chương Trình Mới
           </button>
         </div>
       </div>

@@ -516,8 +516,8 @@ const ChordCanvas = (() => {
       return `<option value="${safeVal}" ${s === _currentSet ? 'selected' : ''}>${safeLabel}</option>`;
     }).join('') 
     + (canCreate ? `<option value="__create_new_set__" style="color: var(--accent,#6d28d9); font-weight: bold;">➕ Tạo Bộ Hợp Âm Mới (${window.SafeHtml ? window.SafeHtml.escape(myChordCode || 'Cá nhân') : (myChordCode || 'Cá nhân')})...</option>` : '')
-    + (canCreate ? `<option value="__open_members__" style="color: var(--emerald,#10b981); font-weight: bold;">👥 Quản Lý Nhạc Công & Hợp Âm (/manager/#tab-users)...</option>` : '')
-    + (canCreate ? `<option value="__open_manager__" style="color: var(--cyan,#06b6d4);">📂 Mở Quản Lý Kho Nhạc (/manager/)...</option>` : '');
+    + (canCreate ? `<option value="__open_members__" style="color: var(--emerald,#10b981); font-weight: bold;">👥 Quản Lý Nhạc Công & Hợp Âm...</option>` : '')
+    + (canCreate ? `<option value="__open_manager__" style="color: var(--cyan,#06b6d4);">📂 Mở Quản Lý Kho Nhạc...</option>` : '');
 
     selector.value = _currentSet;
 

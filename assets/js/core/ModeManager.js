@@ -167,7 +167,7 @@ const ModeManager = (() => {
       const HINT_KEY = 'sheetapp_gig_hint_shown';
       if (!sessionStorage.getItem(HINT_KEY)) {
         sessionStorage.setItem(HINT_KEY, '1');
-        window.AppUI?.showToast?.('Chế độ Biểu Diễn — Toàn màn hình, nhấn F hoặc Esc để thoát', 'info');
+        window.AppUI?.showToast?.('Chế độ Toàn màn hình — Nhấn F hoặc Esc để thoát', 'info');
       }
     } else if (prevMode === MODES.PERFORMANCE) {
       _clearHudTimer();
@@ -189,12 +189,12 @@ const ModeManager = (() => {
       window.AppUI?.showToast?.('Chế độ Sửa Hợp Âm — Chạm vào nốt nhạc để điền hợp âm (phím C/Esc để thoát)', 'info');
     }
 
-    // 3. Đồng bộ giao diện Nút Biểu Diễn
+    // 3. Đồng bộ giao diện Nút Toàn Màn Hình
     const btnGig = document.getElementById('btn-fullscreen');
     if (btnGig) {
       const icon = btnGig.querySelector('.gig-icon');
       const text = btnGig.querySelector('.gig-text');
-      if (text) text.textContent = isPerformance ? 'Thu Nhỏ' : 'Biểu Diễn';
+      if (text) text.textContent = isPerformance ? 'Thu Nhỏ' : 'Toàn Màn Hình';
       if (icon) icon.textContent = isPerformance ? '✕' : '⚡';
     }
 

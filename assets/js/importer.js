@@ -294,7 +294,7 @@ const Importer = (() => {
   };
   
   window.Importer.deleteOmrJob = async function(id) {
-    if(!confirm('Xoá bản nhận diện này?')) return;
+    if(!confirm('Xóa bản nhận diện này?')) return;
     await window.ApiService.omr.delete(id);
     _fetchOmrQueue();
   };

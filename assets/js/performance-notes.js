@@ -118,7 +118,7 @@ const PerformanceNotes = (() => {
         </div>
 
         <div class="pnp-row pnp-row-full">
-          <label>📝 Ghi chú biểu diễn / bài tập</label>
+          <label>📝 Ghi chú phục vụ / bài tập</label>
           <textarea id="pnp-text" rows="5"
             placeholder="VD:&#10;- Dạo guitar 2 lần&#10;- Nữ hát câu 1, Nam hát câu 2&#10;- Điệp khúc: Cả ban hợp xướng&#10;- Kết: Fade out nhẹ"></textarea>
         </div>
