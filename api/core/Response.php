@@ -2,6 +2,8 @@
 /**
  * api/core/Response.php — JSON response helpers
  */
+require_once __DIR__ . '/HttpException.php';
+
 class Response {
     public static function ok(mixed $data = [], bool|string $pretty = false): void {
         $message = is_string($pretty) ? $pretty : null;
@@ -18,7 +20,6 @@ class Response {
     }
 
     public static function abort(int $code, string $msg = ''): never {
-        require_once __DIR__ . '/HttpException.php';
         throw new HttpException($code, $msg);
     }
 
@@ -49,6 +50,10 @@ class Response {
     }
 
     public static function serverError(Throwable $error, string $context = 'API'): void {
+        if ($error instanceof HttpException) {
+            self::error($error->getMessage(), $error->getStatusCode());
+            return;
+        }
         error_log(sprintf(
             'SheetApp %s error: %s in %s:%d',
             $context,

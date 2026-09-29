@@ -142,6 +142,8 @@ class AuthController {
                         'must_change_password' => !empty($_SESSION['must_change_password']),
                         'message' => 'Cập nhật thông tin tài khoản thành công!'
                     ]));
+                } catch (HttpException $e) {
+                    Response::error($e->getMessage(), $e->getStatusCode());
                 } catch (Throwable $e) {
                     Response::error($e->getMessage(), 400);
                 }

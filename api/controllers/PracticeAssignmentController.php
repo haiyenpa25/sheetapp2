@@ -67,6 +67,8 @@ class PracticeAssignmentController {
                 try {
                     $result = PracticeAssignmentService::createFromServicePlan($setlistId, (int)Auth::userId());
                     Response::ok($result);
+                } catch (HttpException $e) {
+                    Response::error($e->getMessage(), $e->getStatusCode());
                 } catch (Throwable $e) {
                     Response::error($e->getMessage());
                 }
@@ -85,6 +87,8 @@ class PracticeAssignmentController {
                         'assignment_id' => $assignmentId,
                         'message'       => 'Đã tạo bài tập thành công'
                     ]);
+                } catch (HttpException $e) {
+                    Response::error($e->getMessage(), $e->getStatusCode());
                 } catch (Throwable $e) {
                     Response::error($e->getMessage());
                 }
