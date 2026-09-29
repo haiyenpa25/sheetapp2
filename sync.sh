@@ -1,9 +1,4 @@
 #!/bin/bash
-# ── DISABLED trong đợt ROADMAP5 (2026-09-29) ──────────────────────────────
-# Auto-push đang tắt để tránh 2 tác nhân ghi đè nhau (xem ROADMAP5.md Phần 0,
-# "Dieu kien tien quyet"). Commit thu cong tren nhanh feature/roadmap5,
-# chu du an duyet roi moi merge. Xoa dong "exit 0" ben duoi de bat lai.
-exit 0
 # 1. Regenerate Service Worker Precache Manifest
 php tools/generate_sw_manifest.php
 
