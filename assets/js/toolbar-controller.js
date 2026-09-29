@@ -439,7 +439,9 @@ const ToolbarController = (() => {
       btnBandToggle.addEventListener('click', () => {
         const isHidden = lyricContainer.classList.contains('hidden');
         lyricContainer.classList.toggle('hidden', !isHidden);
-        document.getElementById('sheet-viewer-wrapper')?.classList.toggle('hidden', isHidden);
+        document.getElementById('osmd-container')?.classList.toggle('hidden', isHidden);
+        if (isHidden) window.DisplaySettings?.renderLyricViewIfActive?.();
+        else window.ChordCanvas?.build?.();
       });
       new MutationObserver(() => {
         const isLyric = !lyricContainer.classList.contains('hidden');
@@ -544,13 +546,15 @@ const ToolbarController = (() => {
 
     btnViewSheet?.addEventListener('click', () => {
       if (lyricContainer && !lyricContainer.classList.contains('hidden')) {
-        btnLyric?.click();
+        const toggleBtn = document.getElementById('btn-band-toggle') || document.getElementById('btn-toggle-view');
+        if (toggleBtn) toggleBtn.click();
       }
     });
 
     btnViewLyrics?.addEventListener('click', () => {
       if (lyricContainer && lyricContainer.classList.contains('hidden')) {
-        btnLyric?.click();
+        const toggleBtn = document.getElementById('btn-band-toggle') || document.getElementById('btn-toggle-view');
+        if (toggleBtn) toggleBtn.click();
       }
     });
   }

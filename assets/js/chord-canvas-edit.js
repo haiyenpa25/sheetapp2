@@ -119,13 +119,17 @@ const ChordCanvasEdit = (() => {
   function openNextPopup(curMeasureIdx, curNoteIdx) {
     const { m, idx } = _findMapped(curMeasureIdx, curNoteIdx);
     if (idx !== -1 && idx + 1 < m.length) {
-      const n = m[idx + 1]; setTimeout(() => showPopup(n.el, n.measureIdx, n.noteIdx, n.chord || ''), 40);
+      const n = m[idx + 1], isBand = !document.getElementById('lyric-view-container')?.classList.contains('hidden');
+      const el = isBand ? (document.querySelector(`#lyric-view-container .lv-pair[data-measure-idx="${n.measureIdx}"][data-note-idx="${n.noteIdx}"]`) || n.el) : n.el;
+      setTimeout(() => showPopup(el, n.measureIdx, n.noteIdx, n.chord || ''), 40);
     }
   }
   function openPrevPopup(curMeasureIdx, curNoteIdx) {
     const { m, idx } = _findMapped(curMeasureIdx, curNoteIdx);
     if (idx > 0) {
-      const p = m[idx - 1]; setTimeout(() => showPopup(p.el, p.measureIdx, p.noteIdx, p.chord || ''), 40);
+      const p = m[idx - 1], isBand = !document.getElementById('lyric-view-container')?.classList.contains('hidden');
+      const el = isBand ? (document.querySelector(`#lyric-view-container .lv-pair[data-measure-idx="${p.measureIdx}"][data-note-idx="${p.noteIdx}"]`) || p.el) : p.el;
+      setTimeout(() => showPopup(el, p.measureIdx, p.noteIdx, p.chord || ''), 40);
     }
   }
 
@@ -209,9 +213,8 @@ const ChordCanvasEdit = (() => {
       const chords = app.getCustomChords();
       chords[`${measureIdx}_${noteIdx}`] = chordOriginalKey;
       scheduleSave(1500);
-      if (refreshLayout) {
-        setTimeout(() => requestAnimationFrame(() => app.build()), 80);
-      }
+      if (refreshLayout) setTimeout(() => requestAnimationFrame(() => app.build()), 80);
+      if (!document.getElementById('lyric-view-container')?.classList.contains('hidden')) window.DisplaySettings?.renderLyricViewIfActive?.();
     }
   }
 
@@ -226,25 +229,17 @@ const ChordCanvasEdit = (() => {
       delete chords[`${measureIdx}_${noteIdx}`];
       scheduleSave(1500);
       setTimeout(() => requestAnimationFrame(() => app.build()), 80);
-      if (deleted) {
-        window.App?.showToast?.(`Đã xóa "${deleted}" — Ctrl+Z để hoàn tác`, 'info');
-      }
+      if (!document.getElementById('lyric-view-container')?.classList.contains('hidden')) window.DisplaySettings?.renderLyricViewIfActive?.();
+      if (deleted) window.App?.showToast?.(`Đã xóa "${deleted}" — Ctrl+Z để hoàn tác`, 'info');
     }
   }
 
   let _saveDebounceTimer = null;
-  let _baseChecksum = '';
-  let _lastConfirmedChords = {};
-  let _statusChipEl = null;
+  let _baseChecksum = '', _lastConfirmedChords = {}, _statusChipEl = null;
   const OFFLINE_QUEUE_KEY = 'sheetapp_offline_chord_queue_v1';
   let _offlineQueue = [];
-
-  function _loadOfflineQueue() {
-    try { const raw = localStorage.getItem(OFFLINE_QUEUE_KEY); if (raw) _offlineQueue = JSON.parse(raw); } catch (_) { _offlineQueue = []; }
-  }
-  function _saveOfflineQueue() {
-    try { localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(_offlineQueue)); } catch (_) {}
-  }
+  function _loadOfflineQueue() { try { const raw = localStorage.getItem(OFFLINE_QUEUE_KEY); if (raw) _offlineQueue = JSON.parse(raw); } catch (_) { _offlineQueue = []; } }
+  function _saveOfflineQueue() { try { localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(_offlineQueue)); } catch (_) {} }
 
   function _ensureStatusChip() {
     if (_statusChipEl && document.body.contains(_statusChipEl)) return _statusChipEl;

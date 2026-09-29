@@ -71,7 +71,8 @@ const LyricExtractor = (() => {
     let currentChord = null;
     const known = new Set();
 
-    measures.forEach(m => {
+    measures.forEach((m, mi) => {
+      let ni = -1;
       for (const c of m.children) {
         if (c.tagName === 'harmony') {
           let str = parseHarmonyToText(c);
@@ -82,10 +83,11 @@ const LyricExtractor = (() => {
 
         } else if (c.tagName === 'note') {
           if (c.querySelector('chord') || c.querySelector('grace')) continue;
+          ni++;
 
           if (c.querySelector('rest')) {
             if (currentChord) {
-              known.forEach(n => { verseMap[n].push({ text: '\u00a0', chord: currentChord, isWordEnd: true }); });
+              known.forEach(n => { verseMap[n].push({ text: '\u00a0', chord: currentChord, isWordEnd: true, measureIdx: mi, noteIdx: ni }); });
               currentChord = null;
             }
             continue;
@@ -104,14 +106,14 @@ const LyricExtractor = (() => {
                 const { text: cleaned, isChorus } = cleanFirstSyl(raw);
                 verseLabel[num] = isChorus ? 'chorus' : ('verse:' + num);
                 known.add(num);
-                verseMap[num].push({ text: cleaned, chord: currentChord, isWordEnd: isEnd });
+                verseMap[num].push({ text: cleaned, chord: currentChord, isWordEnd: isEnd, measureIdx: mi, noteIdx: ni });
               } else {
-                verseMap[num].push({ text: raw, chord: currentChord, isWordEnd: isEnd });
+                verseMap[num].push({ text: raw, chord: currentChord, isWordEnd: isEnd, measureIdx: mi, noteIdx: ni });
               }
             });
             currentChord = null;
           } else if (currentChord) {
-            known.forEach(n => { verseMap[n]?.push({ text: '\u00a0', chord: currentChord, isWordEnd: true }); });
+            known.forEach(n => { verseMap[n]?.push({ text: '\u00a0', chord: currentChord, isWordEnd: true, measureIdx: mi, noteIdx: ni }); });
             currentChord = null;
           }
         }
@@ -135,21 +137,24 @@ const LyricExtractor = (() => {
   function _renderInlineSection(syllables, key) {
     // Ghép syllable thành words, chord lấy từ syl đầu của mỗi word
     const words = [];
-    let buf = '', chordBuf = null, firstOfWord = true;
+    let buf = '', chordBuf = null, firstOfWord = true, firstSyl = null;
 
     for (const syl of syllables) {
-      if (firstOfWord && syl.chord) chordBuf = syl.chord;
+      if (firstOfWord) {
+        firstSyl = syl;
+        if (syl.chord) chordBuf = syl.chord;
+      }
       const t = (syl.text === '\u00a0' || !syl.text) ? '' : syl.text;
       buf += t;
       if (syl.isWordEnd) {
         const wordText = buf.trim();
-        if (chordBuf || wordText) words.push({ chord: chordBuf, text: wordText });
-        buf = ''; chordBuf = null; firstOfWord = true;
+        if (chordBuf || wordText) words.push({ chord: chordBuf, text: wordText, measureIdx: firstSyl?.measureIdx, noteIdx: firstSyl?.noteIdx });
+        buf = ''; chordBuf = null; firstOfWord = true; firstSyl = null;
       } else {
         firstOfWord = false;
       }
     }
-    if (buf.trim() || chordBuf) words.push({ chord: chordBuf, text: buf.trim() });
+    if (buf.trim() || chordBuf) words.push({ chord: chordBuf, text: buf.trim(), measureIdx: firstSyl?.measureIdx, noteIdx: firstSyl?.noteIdx });
 
     let html = '';
     for (const w of words) {
@@ -161,10 +166,12 @@ const LyricExtractor = (() => {
       }
       const safeChord = cStr ? (window.SafeHtml ? window.SafeHtml.escape(cStr) : cStr) : '';
       const safeText  = w.text  ? (window.SafeHtml ? window.SafeHtml.escape(w.text)  : w.text)  : '';
+      const mAttr = (w.measureIdx !== undefined) ? ` data-measure-idx="${w.measureIdx}"` : '';
+      const nAttr = (w.noteIdx !== undefined) ? ` data-note-idx="${w.noteIdx}"` : '';
       if (w.chord) {
-        html += `<span class="lvi-token"><span class="lvi-chord">[${safeChord}]</span>${w.text ? ` <span class="lvi-word">${safeText}</span>` : ''}</span> `;
+        html += `<span class="lvi-token lv-pair"${mAttr}${nAttr}><span class="lvi-chord lv-chord" data-chord="${safeChord}">[${safeChord}]</span>${w.text ? ` <span class="lvi-word lv-syl">${safeText}</span>` : ''}</span> `;
       } else if (w.text) {
-        html += `<span class="lvi-token lvi-word-only">${safeText}</span> `;
+        html += `<span class="lvi-token lv-pair lvi-word-only"${mAttr}${nAttr}><span class="lvi-word lv-syl">${safeText}</span></span> `;
       }
     }
     return html;
@@ -230,6 +237,7 @@ const LyricExtractor = (() => {
             <span class="lv-verse-pill ${view.isChorus ? 'lv-pill-chorus' : 'lv-pill-verse'}">
               ${labelIcon ? `<span class="lv-pill-icon">${labelIcon}</span>` : ''}${window.SafeHtml ? window.SafeHtml.escape(view.label) : view.label}
             </span>
+            <button type="button" class="lv-edit-chordpro-btn" data-verse-num="${safeNum}" title="Gõ hoặc sửa hợp âm dạng [G]Lời">✎ Gõ ChordPro</button>
           </div>`;
 
       if (isInline) {
@@ -261,13 +269,15 @@ const LyricExtractor = (() => {
           }
           const safeChord = cStr ? (window.SafeHtml ? window.SafeHtml.escape(cStr) : cStr) : '';
           const safeText = syl.text ? (window.SafeHtml ? window.SafeHtml.escape(syl.text) : syl.text) : '';
+          const mIdxAttr = (syl.measureIdx !== undefined) ? ` data-measure-idx="${syl.measureIdx}"` : '';
+          const nIdxAttr = (syl.noteIdx !== undefined) ? ` data-note-idx="${syl.noteIdx}"` : '';
           const chordEl = cStr
             ? `<b class="lv-chord ${isBassRole ? 'lv-chord-bass' : ''}" data-chord="${safeChord}">${chordDisplay}</b>`
-            : `<b class="lv-chord lv-chord-empty"></b>`;
+            : `<b class="lv-chord lv-chord-empty" data-chord=""></b>`;
           const sylEl = rest
             ? `<span class="lv-syl lv-rest">\u00a0\u00a0</span>`
             : `<span class="lv-syl">${safeText}</span>`;
-          html += `<span class="lv-pair ${spClass}">${chordEl}${sylEl}</span>`;
+          html += `<span class="lv-pair ${spClass}"${mIdxAttr}${nIdxAttr}>${chordEl}${sylEl}</span>`;
         }
         html += `</div>`;
       }
@@ -279,6 +289,7 @@ const LyricExtractor = (() => {
     container.innerHTML = html;
     _applyStyles(container);
     highlightVerse(window.VerseManager?.getCurrentVerse?.() || 1);
+    _bindLyricInteractions(container, views);
 
     // Bind toggle
     document.getElementById('lv-mode-toggle')?.addEventListener('click', () => {
@@ -290,6 +301,129 @@ const LyricExtractor = (() => {
       } else {
         render(containerId, xmlString, transposeOffset);
       }
+    });
+  }
+
+  function _bindLyricInteractions(container, views) {
+    // 1. Chạm âm tiết mở bảng hợp âm
+    container.querySelectorAll('.lv-pair[data-measure-idx]').forEach(pair => {
+      pair.addEventListener('click', (e) => {
+        if (e.target.closest('button')) return;
+        const mi = parseInt(pair.getAttribute('data-measure-idx'), 10);
+        const ni = parseInt(pair.getAttribute('data-note-idx'), 10);
+        if (isNaN(mi) || isNaN(ni)) return;
+        const currentChord = pair.querySelector('.lv-chord')?.getAttribute('data-chord') || '';
+
+        container.querySelectorAll('.lv-pair-selected').forEach(x => x.classList.remove('lv-pair-selected'));
+        pair.classList.add('lv-pair-selected');
+
+        window.ChordCanvasEdit?.showPopup?.(pair, mi, ni, currentChord);
+      });
+    });
+
+    // 2. Nút gõ ChordPro
+    container.querySelectorAll('.lv-edit-chordpro-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const vNum = btn.getAttribute('data-verse-num');
+        const view = views.find(v => String(v.num) === String(vNum));
+        if (view) _showChordProModal(view);
+      });
+    });
+  }
+
+  function _parseChordProToSyllables(text, syllables) {
+    const regex = /\[([A-G][#b]?[^\]]*)\]|([^\s\[\]]+)/g;
+    let match, pendingChord = null, sylIdx = 0;
+    const updates = {};
+
+    while ((match = regex.exec(text)) !== null) {
+      if (match[1]) {
+        pendingChord = match[1].trim();
+      } else if (match[2]) {
+        const word = match[2].trim();
+        while (sylIdx < syllables.length) {
+          const s = syllables[sylIdx++];
+          if (pendingChord) {
+            updates[`${s.measureIdx}_${s.noteIdx}`] = pendingChord;
+            pendingChord = null;
+            break;
+          }
+          if (s.text && s.text !== '\u00a0' && word.toLowerCase().includes(s.text.toLowerCase())) {
+            break;
+          }
+        }
+      }
+    }
+    if (pendingChord && sylIdx < syllables.length) {
+      const s = syllables[sylIdx];
+      updates[`${s.measureIdx}_${s.noteIdx}`] = pendingChord;
+    }
+    return updates;
+  }
+
+  function _showChordProModal(view) {
+    document.getElementById('lv-chordpro-modal')?.remove();
+    const modal = document.createElement('div');
+    modal.id = 'lv-chordpro-modal';
+    modal.className = 'lv-chordpro-modal-overlay';
+
+    let cpText = '';
+    for (const s of view.syllables) {
+      if (s.chord) cpText += `[${s.chord}]`;
+      cpText += (s.text === '\u00a0' ? ' ' : s.text);
+      if (s.isWordEnd) cpText += ' ';
+    }
+    cpText = cpText.trim();
+
+    modal.innerHTML = `
+      <div class="lv-chordpro-dialog" role="dialog" aria-modal="true" aria-labelledby="lv-cp-title">
+        <div class="lv-cp-header">
+          <h3 id="lv-cp-title">✎ Soạn Hợp Âm ChordPro — ${window.SafeHtml ? window.SafeHtml.escape(view.label) : view.label}</h3>
+          <button type="button" id="lv-cp-close" class="lv-cp-close" aria-label="Đóng">✕</button>
+        </div>
+        <p class="lv-cp-hint">Gõ hợp âm trong ngoặc vuông ngay trước âm tiết (Ví dụ: <code>[G]Cúi xin [F]Vua</code>). Hợp âm sẽ đồng bộ sang cả chế độ Bản Nhạc.</p>
+        <textarea id="lv-cp-textarea" class="lv-cp-textarea" rows="5">${window.SafeHtml ? window.SafeHtml.escape(cpText) : cpText}</textarea>
+        <div class="lv-cp-actions">
+          <button type="button" id="lv-cp-cancel" class="btn btn-ghost btn-sm">Hủy</button>
+          <button type="button" id="lv-cp-apply" class="btn btn-primary btn-sm">✓ Áp dụng</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    const textarea = modal.querySelector('#lv-cp-textarea');
+    textarea?.focus();
+
+    const doClose = () => modal.remove();
+    modal.querySelector('#lv-cp-close')?.addEventListener('click', doClose);
+    modal.querySelector('#lv-cp-cancel')?.addEventListener('click', doClose);
+    modal.addEventListener('click', e => { if (e.target === modal) doClose(); });
+
+    modal.querySelector('#lv-cp-apply')?.addEventListener('click', async () => {
+      const val = textarea.value.trim();
+      const updates = _parseChordProToSyllables(val, view.syllables);
+      const app = window.ChordCanvas;
+      if (app) {
+        if (!window.Auth?.isBanhat?.()) {
+          window.App?.showToast?.('⚠️ Cần đăng nhập với quyền Ban Hát để sửa hợp âm', 'error');
+          doClose();
+          return;
+        }
+        if (app.getCurrentSet() === 'default') {
+          await app.switchSet('HD');
+        }
+        const chords = app.getCustomChords();
+        for (const [key, ch] of Object.entries(updates)) {
+          if (ch) chords[key] = ch;
+          else delete chords[key];
+        }
+        window.ChordCanvasEdit?.scheduleSave?.(1200);
+        app.build();
+        window.DisplaySettings?.renderLyricViewIfActive?.();
+        window.App?.showToast?.(`✨ Đã cập nhật hợp âm từ ChordPro cho ${view.label}!`, 'success', 3000);
+      }
+      doClose();
     });
   }
 
@@ -345,7 +479,7 @@ const LyricExtractor = (() => {
     render('lyric-view-container', raw, window.App?.getCurrentTranspose?.() || 0);
   }
 
-  return { render, extract, reloadIfActive, highlightVerse };
+  return { render, extract, reloadIfActive, highlightVerse, parseChordProToSyllables: _parseChordProToSyllables, showChordProModal: _showChordProModal };
 })();
 
 window.LyricExtractor = LyricExtractor;
