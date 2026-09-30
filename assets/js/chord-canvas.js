@@ -87,16 +87,16 @@ const ChordCanvas = (() => {
 
     const systems = [];
     chords.forEach(c => {
-      const yStr = c.getAttribute('y');
-      if (!yStr) return;
-      const y = parseFloat(yStr);
+      if (!c.getAttribute('data-orig-y')) c.setAttribute('data-orig-y', c.getAttribute('y') || '0');
+      if (!c.getAttribute('data-orig-x')) c.setAttribute('data-orig-x', c.getAttribute('x') || '0');
+      const y = parseFloat(c.getAttribute('data-orig-y'));
       let found = false;
       for (const sys of systems) {
         if (Math.abs(sys.avgY - y) < 80) {
           sys.chords.push(c);
           sys.minY = Math.min(sys.minY, y);
           let sum = 0;
-          sys.chords.forEach(txt => sum += parseFloat(txt.getAttribute('y')));
+          sys.chords.forEach(txt => sum += parseFloat(txt.getAttribute('data-orig-y')));
           sys.avgY = sum / sys.chords.length;
           found = true;
           break;
@@ -117,17 +117,17 @@ const ChordCanvas = (() => {
       if (minNoteTop < Infinity && sys.minY + 4 >= minNoteTop - 6) {
         sys.minY = Math.min(sys.minY, minNoteTop - 12);
       }
-      sys.chords.sort((a, b) => (parseFloat(a.getAttribute('x') || 0)) - (parseFloat(b.getAttribute('x') || 0)));
+      sys.chords.sort((a, b) => (parseFloat(a.getAttribute('data-orig-x') || 0)) - (parseFloat(b.getAttribute('data-orig-x') || 0)));
       let prevRight = -Infinity;
       sys.chords.forEach(c => {
         let chordY = sys.minY;
-        const curX = parseFloat(c.getAttribute('x') || 0);
+        const curX = parseFloat(c.getAttribute('data-orig-x') || 0);
         let curW = 20;
         try { curW = c.getBBox ? c.getBBox().width : (c.textContent.trim().length * 10); } catch(e){}
         staveNotes.forEach(sn => {
           try {
             const bb = sn.getBBox ? sn.getBBox() : null;
-            if (bb && !(bb.x + bb.width < curX || bb.x > curX + curW) && chordY + 3 >= bb.y - 4) {
+            if (bb && Math.abs(bb.y - sys.avgY) < 90 && !(bb.x + bb.width < curX || bb.x > curX + curW) && chordY + 3 >= bb.y - 4) {
               chordY = Math.min(chordY, bb.y - 12);
             }
           } catch(e) {}
@@ -138,6 +138,7 @@ const ChordCanvas = (() => {
           c.setAttribute('x', newX);
           prevRight = newX + curW;
         } else {
+          c.setAttribute('x', curX);
           prevRight = curX + curW;
         }
       });
