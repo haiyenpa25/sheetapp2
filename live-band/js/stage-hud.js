@@ -224,6 +224,16 @@
       b.addEventListener('click', () => h.onSetBandState(b.getAttribute('data-state')));
     });
 
+    document.querySelectorAll('.btn-quick-cue').forEach(b => {
+      b.addEventListener('click', () => {
+        const sec = b.getAttribute('data-section');
+        if (sec && typeof h.onCueSection === 'function') h.onCueSection(sec);
+      });
+    });
+    document.getElementById('btn-cue-2bars-warning')?.addEventListener('click', () => {
+      if (typeof h.onCue2BarsWarning === 'function') h.onCue2BarsWarning();
+    });
+
     document.getElementById('btn-vocal-toggle-view')?.addEventListener('click', h.onToggleVocalView);
     document.getElementById('btn-vocal-font-down')?.addEventListener('click', () => adjustVocalFontSize(-0.15));
     document.getElementById('btn-vocal-font-up')?.addEventListener('click', () => adjustVocalFontSize(0.15));

@@ -256,7 +256,7 @@ $pageTitle = htmlspecialchars($title) . ' — Lời & Hợp âm';
 
           <?php foreach ($sec['lines'] as $lineItem): ?>
             <?php if (!empty($lineItem['is_comment'])): ?>
-              <div class="comment-line">💡 <?= htmlspecialchars($lineItem['text']) ?></div>
+              <div class="comment-line"><span class="comment-bullet">●</span> <?= htmlspecialchars($lineItem['text'] ?? '') ?></div>
             <?php else: ?>
               <?= renderChordProLine($lineItem['text'], $showChords) ?>
             <?php endif; ?>

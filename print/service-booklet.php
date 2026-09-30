@@ -333,10 +333,10 @@ $pageTitle = 'Tập chương trình thờ phượng — ' . htmlspecialchars($se
               <?php endif; ?>
               <span>Bộ hợp âm: <strong><?= htmlspecialchars($chordSet) ?></strong></span>
               <?php if (!empty($item['lead_singer'])): ?>
-                <span>Người hát chính: <strong><?= htmlspecialchars($item['lead_singer']) ?></strong></span>
+                <span>Người hát chính: <strong><?= htmlspecialchars($item['lead_singer'] ?? '') ?></strong></span>
               <?php endif; ?>
               <?php if (!empty($composer)): ?>
-                <span style="font-style:italic;margin-left:auto;">Tác giả: <?= htmlspecialchars($composer) ?></span>
+                <span style="font-style:italic;margin-left:auto;">Tác giả: <?= htmlspecialchars($composer ?? '') ?></span>
               <?php endif; ?>
             </div>
           </header>
@@ -344,7 +344,7 @@ $pageTitle = 'Tập chương trình thờ phượng — ' . htmlspecialchars($se
           <div class="sections-container <?= $cols === 2 ? 'two-columns' : '' ?>">
             <?php if (empty($sections)): ?>
               <div style="padding: 40px 20px; text-align: center; color: #64748b; font-style: italic; border: 1px dashed #cbd5e1; border-radius: 6px;">
-                📖 (Tiết mục / Bài hát chưa có dữ liệu hợp âm số MusicXML)
+                (Tiết mục / Bài hát chưa có dữ liệu hợp âm số MusicXML)
               </div>
             <?php else: ?>
               <?php foreach ($sections as $sec): ?>
@@ -360,7 +360,7 @@ $pageTitle = 'Tập chương trình thờ phượng — ' . htmlspecialchars($se
 
                   <?php foreach ($sec['lines'] as $lineItem): ?>
                     <?php if (!empty($lineItem['is_comment'])): ?>
-                      <div class="comment-line">💡 <?= htmlspecialchars($lineItem['text']) ?></div>
+                      <div class="comment-line"><span class="comment-bullet">●</span> <?= htmlspecialchars($lineItem['text'] ?? '') ?></div>
                     <?php else: ?>
                       <?= renderBookletChordLine($lineItem['text'], $showChords) ?>
                     <?php endif; ?>
@@ -372,13 +372,13 @@ $pageTitle = 'Tập chương trình thờ phượng — ' . htmlspecialchars($se
 
           <?php if (!empty($notes)): ?>
             <div class="song-notes-box">
-              <strong>📝 Ghi chú cho ban nhạc:</strong> <?= htmlspecialchars($notes) ?>
+              <strong>Ghi chú cho ban nhạc:</strong> <?= htmlspecialchars($notes ?? '') ?>
             </div>
           <?php endif; ?>
         </div>
 
         <footer class="page-footer">
-          <span><?= htmlspecialchars($setlist['title']) ?> — <?= htmlspecialchars($setlist['scheduled_date']) ?></span>
+          <span><?= htmlspecialchars($setlist['title'] ?? '') ?><?= !empty($setlist['scheduled_date']) ? ' — ' . htmlspecialchars($setlist['scheduled_date']) : '' ?></span>
           <span>Trang <?= $songPageNum++ ?></span>
         </footer>
       </section>

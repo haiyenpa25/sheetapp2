@@ -451,10 +451,11 @@ body.dark-mode {
   .toast-container {
     left: 50% !important;
     right: auto !important;
-    top: auto !important;
-    bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important;
+    top: calc(54px + env(safe-area-inset-top, 0px)) !important;
+    bottom: auto !important;
     transform: translateX(-50%) !important;
     align-items: center !important;
+    z-index: 9999 !important;
   }
 }
 .toast-container .toast {
@@ -509,10 +510,6 @@ body.dark-mode .toast-container .toast { background: #22222b; color: var(--lp-in
   body:not(.dark-mode) .btn-thumb-chordset { color: var(--lp-ink); }
   body:not(.dark-mode) .btn-thumb-view:not(.active) { color: var(--lp-accent); }
   .btn-thumb-gig { background: var(--lp-accent); border-color: transparent; color: #fff; }
-
-  /* Toast nằm trên thanh ngón cái */
-  .toast-container { bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important; }
-
   /* Sidebar điện thoại */
   .sidebar-header { padding-top: 10px; padding-bottom: 10px; }
 }

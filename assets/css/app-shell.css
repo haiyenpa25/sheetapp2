@@ -148,6 +148,19 @@ body.stage-clean-mode .app-shell-navbar {
   border-radius: 2px 2px 0 0;
 }
 
+/* Core Lucide SVG Icon Definition */
+.icon {
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  vertical-align: -0.125em;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
 .pillar-icon {
   display: inline-flex;
   align-items: center;
@@ -161,6 +174,8 @@ body.stage-clean-mode .app-shell-navbar {
 .shell-logout-btn .icon {
   width: 16px;
   height: 16px;
+  stroke: currentColor;
+  fill: none;
   stroke-width: 2;
   vertical-align: -2px;
 }
@@ -499,10 +514,20 @@ body.dark-mode .shell-notif-item.unread,
   }
 
   .shell-tab {
-    padding: 0.3rem 0.5rem;
+    padding: 0.35rem 0.65rem;
+    min-width: 38px;
+    justify-content: center;
   }
 
   .pillar-icon {
     font-size: 1.1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pillar-icon .icon {
+    width: 20px;
+    height: 20px;
   }
 }

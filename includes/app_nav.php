@@ -62,6 +62,17 @@ $helpAnchor = match($activePillar) {
     default   => '#mod-2'  // Chương 02: Đọc sheet & hợp âm
 };
 ?>
+<?php if (!defined('LUCIDE_SPRITE_LOADED')): ?>
+  <?php define('LUCIDE_SPRITE_LOADED', true); ?>
+  <div id="lucide-sprite-container-nav" style="display:none;" aria-hidden="true">
+    <?php
+    $spriteFile = __DIR__ . '/../assets/icons/lucide.svg';
+    if (file_exists($spriteFile)) {
+        @readfile($spriteFile);
+    }
+    ?>
+  </div>
+<?php endif; ?>
 <nav id="app-shell-navbar" class="app-shell-navbar" data-active-pillar="<?= htmlspecialchars($activePillar) ?>" aria-label="Thanh điều hướng chính của SheetApp">
   <div class="shell-nav-inner">
     <!-- 1. Logo & Nhãn Thương Hiệu -->

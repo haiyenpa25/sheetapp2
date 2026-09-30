@@ -36,6 +36,9 @@
 }
 
 body.stage-dark {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
   margin: 0;
   padding: 0;
   background-color: var(--stage-bg);
@@ -2065,3 +2068,189 @@ body.stage-dark {
   padding: 3px 10px;
   border-radius: 6px;
 }
+
+/* ══════════════════════════════════════════════════════════════
+   MOBILE & TABLET RESPONSIVE RULES (TICKET AUDIT FIX)
+   ══════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .stage-navbar {
+    height: auto;
+    min-height: 48px;
+    padding: 6px 10px;
+    flex-wrap: wrap;
+    gap: 6px;
+    overflow-x: hidden;
+  }
+
+  .nav-left {
+    flex: 1 1 auto;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .stage-brand-text {
+    font-size: 0.9rem;
+  }
+
+  .role-pill {
+    padding: 2px 6px;
+    font-size: 0.75rem;
+    max-width: 140px;
+  }
+
+  .nav-role-dropdown {
+    max-width: 110px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .nav-center {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    margin-top: 2px;
+  }
+
+  .stage-song-pill {
+    width: 100%;
+    justify-content: space-between;
+    padding: 3px 8px;
+    font-size: 0.75rem;
+    overflow: hidden;
+  }
+
+  .nav-song-title {
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .nav-right {
+    flex: 0 0 auto;
+    gap: 4px;
+    flex-wrap: nowrap;
+  }
+
+  .stage-pill-badge {
+    padding: 3px 6px;
+    font-size: 0.72rem;
+  }
+
+  /* Band Sync Strip Responsive */
+  .band-sync-strip {
+    padding: 6px 10px;
+    gap: 6px;
+    overflow-x: hidden;
+  }
+
+  .band-tempo-sync-box {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .band-beat-pulser {
+    gap: 4px;
+  }
+
+  .pulse-led {
+    width: 22px;
+    height: 22px;
+  }
+
+  .pulse-led .led-num {
+    font-size: 0.65rem;
+  }
+
+  .band-bpm-badge {
+    font-size: 0.8rem;
+    padding: 2px 6px;
+  }
+
+  .btn-tap-tempo, .btn-click-audio {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+  }
+
+  .band-dynamic-actions {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+    padding-bottom: 2px;
+    max-width: 100%;
+  }
+
+  .btn-band-state {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    flex-shrink: 0;
+  }
+
+  .band-section-sync-substrip {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .substrip-left {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+    padding-bottom: 2px;
+  }
+
+  .section-quick-cues {
+    flex-wrap: nowrap;
+  }
+
+  .btn-quick-cue {
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    padding: 3px 8px;
+  }
+
+  .btn-cue-2bars {
+    width: 100%;
+    text-align: center;
+    font-size: 0.72rem;
+    padding: 5px 8px;
+  }
+
+  /* Viewport and Canvas container sizing */
+  #stage-viewport {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+
+  #stage-osmd-container {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+
+  #stage-empty-state {
+    width: 100% !important;
+    max-width: 100vw !important;
+    padding: 2rem 1rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  #btn-stage-timer {
+    display: none;
+  }
+
+  #btn-stage-pad {
+    padding: 2px 5px;
+    font-size: 0.7rem;
+  }
+
+  .stage-brand-text {
+    display: none;
+  }
+}
+

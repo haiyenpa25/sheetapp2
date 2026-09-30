@@ -56,6 +56,7 @@ echo cssTag('library-polish.css'); // lớp hoàn thiện giao diện — luôn 
 </head>
 <body>
 
+<?php define('LUCIDE_SPRITE_LOADED', true); ?>
 <!-- Lucide SVG Sprite (Ticket R1-1) -->
 <div id="lucide-sprite-container" style="display:none;" aria-hidden="true">
   <?php @readfile(__DIR__ . '/assets/icons/lucide.svg'); ?>

@@ -200,17 +200,17 @@ function liveBandCssTag(string $file): string {
       <div class="substrip-left">
         <span class="substrip-label">CHUYỂN KHÚC:</span>
         <div class="section-quick-cues" id="band-section-quick-cues">
-          <button class="btn-quick-cue" data-section="Intro" title="Báo vào khúc Mở đầu (Intro)">⚡ Intro</button>
-          <button class="btn-quick-cue" data-section="Lời (Verse)" title="Báo vào Lời (Verse)">⚡ Verse</button>
-          <button class="btn-quick-cue highlight-chorus" data-section="Điệp Khúc" title="Báo vào Điệp Khúc (Chorus)">⚡ Điệp Khúc</button>
-          <button class="btn-quick-cue" data-section="Giang Tấu / Solo" title="Báo vào Giang Tấu / Solo">⚡ Solo</button>
-          <button class="btn-quick-cue" data-section="Bridge" title="Báo vào Bridge">⚡ Bridge</button>
-          <button class="btn-quick-cue highlight-outro" data-section="Kết (Outro)" title="Báo vào Kết bài">⚡ Outro</button>
+          <button class="btn-quick-cue" data-section="Dạo đầu" title="Báo vào khúc Dạo đầu"><svg class="icon icon-xs" width="13" height="13" style="stroke:currentColor;fill:none;vertical-align:-1px;"><use href="#icon-zap"/></svg> Dạo đầu</button>
+          <button class="btn-quick-cue" data-section="Phiên khúc" title="Báo vào Phiên khúc"><svg class="icon icon-xs" width="13" height="13" style="stroke:currentColor;fill:none;vertical-align:-1px;"><use href="#icon-zap"/></svg> Phiên khúc</button>
+          <button class="btn-quick-cue highlight-chorus" data-section="Điệp khúc" title="Báo vào Điệp khúc"><svg class="icon icon-xs" width="13" height="13" style="stroke:currentColor;fill:none;vertical-align:-1px;"><use href="#icon-zap"/></svg> Điệp khúc</button>
+          <button class="btn-quick-cue" data-section="Giang tấu" title="Báo vào khúc Giang tấu"><svg class="icon icon-xs" width="13" height="13" style="stroke:currentColor;fill:none;vertical-align:-1px;"><use href="#icon-zap"/></svg> Giang tấu</button>
+          <button class="btn-quick-cue" data-section="Cầu nối" title="Báo vào Cầu nối"><svg class="icon icon-xs" width="13" height="13" style="stroke:currentColor;fill:none;vertical-align:-1px;"><use href="#icon-zap"/></svg> Cầu nối</button>
+          <button class="btn-quick-cue highlight-outro" data-section="Kết bài" title="Báo vào Kết bài"><svg class="icon icon-xs" width="13" height="13" style="stroke:currentColor;fill:none;vertical-align:-1px;"><use href="#icon-zap"/></svg> Kết bài</button>
         </div>
       </div>
       <div class="substrip-right">
         <button id="btn-cue-2bars-warning" class="btn-cue-2bars" title="Phát lệnh cảnh báo toàn ban: CHUẨN BỊ CHUYỂN KHÚC SAU 2 Ô NHỊP">
-          ⚠️ BÁO TRƯỚC 2 Ô NHỊP
+          <svg class="icon icon-xs" width="13" height="13" style="stroke:currentColor;fill:none;vertical-align:-1px;"><use href="#icon-alert-triangle"/></svg> BÁO TRƯỚC 2 Ô NHỊP
         </button>
       </div>
     </div>

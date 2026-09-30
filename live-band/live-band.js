@@ -535,9 +535,8 @@ const LiveBandApp = (() => {
       onHideRoom: window.StageRoomManager.hideRoomModal,
       onCreateRoom: () => {
         const input = document.getElementById('host-room-input');
-        let custom = input ? input.value.trim() : '';
-        if (!custom) custom = 'BAND-' + Math.floor(1000 + Math.random() * 9000);
-        createHostRoom(custom.toUpperCase().replace(/[^A-Z0-9_\-]/g, ''));
+        const custom = (input?.value?.trim() || ('BAND-' + Math.floor(1000 + Math.random() * 9000))).toUpperCase().replace(/[^A-Z0-9_\-]/g, '');
+        createHostRoom(custom);
       },
       onJoinRoom: () => {
         const code = document.getElementById('join-room-input')?.value?.trim()?.toUpperCase();
@@ -561,6 +560,8 @@ const LiveBandApp = (() => {
       onToggleLoop: () => window.StageRehearsal?.toggleAbLoop((m) => window.MusicalPosition?.scrollToMeasure?.(m, true), broadcastState),
       onToggleInk: window.StageRehearsal?.toggleInkMode,
       onSetBandState: (st) => window.StageRehearsal?.setBandState(st, broadcastState),
+      onCueSection: (sec) => window.StageRehearsal?.cueSectionTransition(sec, window.StageCatalog?.getSections?.() || [], (m) => window.MusicalPosition?.scrollToMeasure?.(m, true), broadcastState),
+      onCue2BarsWarning: () => window.StageRehearsal?.cue2BarsWarning(broadcastState),
       onToggleVocalView: () => window.StageHud?.toggleVocalView(_role, _currentSongId)
     });
   }
