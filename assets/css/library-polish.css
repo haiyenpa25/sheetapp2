@@ -157,13 +157,11 @@ body.dark-mode {
   body.toolbar-controls-compact .unified-toolbar #btn-new-chord-set { display: inline-flex !important; }
   .unified-toolbar .toolbar-secondary-controls { display: none !important; }
 
-  /* ROADMAP5 2.2: Thu gọn cụm Capo và các nút phụ trên màn hình laptop <= 1440px tránh tràn toolbar */
+  /* ROADMAP5 2.2: Thu gọn cụm Capo và nhãn đếm trên màn hình laptop <= 1440px tránh tràn toolbar */
   @media (max-width: 1440px) {
     .unified-toolbar #capo-wrap { display: none !important; }
     .unified-toolbar #capo-badge:not(.capo-active) { display: none !important; }
-    .unified-toolbar .chord-set-count,
-    .unified-toolbar #btn-new-chord-set,
-    .unified-toolbar #btn-propose-hd { display: none !important; }
+    .unified-toolbar .chord-set-count { display: none !important; }
   }
 
   /* Nút icon bên trong pill */

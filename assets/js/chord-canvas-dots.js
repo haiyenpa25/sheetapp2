@@ -132,12 +132,17 @@ const ChordCanvasDots = (() => {
           if (badgeY + badgeH > localMinTop - 6) badgeY = Math.round(localMinTop - badgeH - 6);
         }
         badge.style.top = badgeY + 'px';
-        if (curLeft < prevRight + 6) {
-          const newLeft = prevRight + 6;
-          badge.style.left = newLeft + 'px';
-          prevRight = newLeft + curW;
+        if (badge.classList.contains('cc-dot-btn')) {
+          prevRight = Math.max(prevRight, curLeft + 8);
         } else {
-          prevRight = curLeft + curW;
+          const halfW = curW / 2;
+          if (curLeft < prevRight || (curLeft - halfW < prevRight + 6)) {
+            const newCenter = prevRight + 6 + halfW;
+            badge.style.left = newCenter + 'px';
+            prevRight = newCenter + halfW;
+          } else {
+            prevRight = curLeft + halfW;
+          }
         }
       });
     }
@@ -172,12 +177,17 @@ const ChordCanvasDots = (() => {
         it.el.style.top = `${minY}px`;
         const curLeft = parseFloat(it.el.style.left) || 0;
         let curW = it.el.offsetWidth || (it.el.textContent.trim().length * 14 + 12);
-        if (curLeft < prevRight + 6) {
-          const newLeft = prevRight + 6;
-          it.el.style.left = newLeft + 'px';
-          prevRight = newLeft + curW;
+        if (it.el.classList.contains('cc-dot-btn')) {
+          prevRight = Math.max(prevRight, curLeft + 8);
         } else {
-          prevRight = curLeft + curW;
+          const halfW = curW / 2;
+          if (curLeft < prevRight || (curLeft - halfW < prevRight + 6)) {
+            const newCenter = prevRight + 6 + halfW;
+            it.el.style.left = newCenter + 'px';
+            prevRight = newCenter + halfW;
+          } else {
+            prevRight = curLeft + halfW;
+          }
         }
       });
     });
@@ -495,12 +505,14 @@ const ChordCanvasDots = (() => {
             textBadge.style.boxShadow = `0 2px 8px rgba(${cr},${cg},${cb},0.22)`;
             textBadge.style.zIndex = '12';
           });
+          let _badgeHandled = false;
           textBadge.addEventListener('pointerdown', e => {
-            e.stopPropagation();
+            e.stopPropagation(); _badgeHandled = true;
             onShowPopup?.(textBadge, measureIdx, noteIdx, chord);
           });
           textBadge.addEventListener('click', e => {
             e.stopPropagation();
+            if (_badgeHandled) { _badgeHandled = false; return; }
             onShowPopup?.(textBadge, measureIdx, noteIdx, chord);
           });
         }
@@ -534,6 +546,8 @@ const ChordCanvasDots = (() => {
             'font-family:"Georgia",serif', `font-size:${fSize}px`,
             'font-weight:600', 'pointer-events:none', 'user-select:none', 'z-index:9'
           ]);
+          ghost.style.opacity = '0.42';
+          ghost.style.pointerEvents = 'none';
           container.appendChild(ghost);
         }
       }
@@ -550,25 +564,14 @@ const ChordCanvasDots = (() => {
         'color:#fff', `font-size:${Math.round(dotSize * 0.65)}px`,
         'line-height:1', 'font-weight:700',
         'box-shadow:0 1px 4px rgba(109,40,217,0.35)',
-        'pointer-events:auto', 'cursor:pointer', 'user-select:none',
-        'touch-action:manipulation',
-        '-webkit-tap-highlight-color:transparent',
-        'transition:transform 0.15s ease, background 0.15s ease',
-        'position:absolute'
+        'pointer-events:auto', 'cursor:pointer', 'user-select:none', 'touch-action:manipulation',
+        '-webkit-tap-highlight-color:transparent', 'transition:transform 0.15s ease, background 0.15s ease', 'position:absolute'
       ]);
       btn.addEventListener('mouseenter', () => { btn.style.transform = 'translateX(-50%) scale(1.2)'; btn.style.background = 'rgba(109,40,217,1)'; });
       btn.addEventListener('mouseleave', () => { btn.style.transform = 'translateX(-50%) scale(1)';   btn.style.background = 'rgba(109,40,217,0.82)'; });
       let _pointerHandled = false;
-      btn.addEventListener('pointerdown', e => {
-        e.stopPropagation();
-        _pointerHandled = true;
-        onShowPopup?.(btn, measureIdx, noteIdx, '');
-      });
-      btn.addEventListener('click', e => {
-        e.stopPropagation();
-        if (_pointerHandled) { _pointerHandled = false; return; }
-        onShowPopup?.(btn, measureIdx, noteIdx, '');
-      });
+      btn.addEventListener('pointerdown', e => { e.stopPropagation(); _pointerHandled = true; onShowPopup?.(btn, measureIdx, noteIdx, ''); });
+      btn.addEventListener('click', e => { e.stopPropagation(); if (_pointerHandled) { _pointerHandled = false; return; } onShowPopup?.(btn, measureIdx, noteIdx, ''); });
       container.appendChild(btn);
     }
   }

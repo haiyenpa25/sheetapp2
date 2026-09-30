@@ -37,11 +37,8 @@ const ChordCanvasEdit = (() => {
     }
   }
 
-  function _closePopup() {
-    _clearNoteCursor();
-    _popup?.remove();
-    _popup = null;
-  }
+  function _destroyPopup() { _clearNoteCursor(); _popup?.remove(); _popup = null; }
+  function _closePopup(rebuild = true) { _destroyPopup(); if (rebuild) _getApp()?.build?.(); }
 
   function _pushUndo() {
     const app = _getApp();
@@ -66,10 +63,11 @@ const ChordCanvasEdit = (() => {
       return;
     }
     if (app.getCurrentSet() === 'default') {
-      window.App?.showToast?.('⚡ Tự động chuyển sang bộ HD (Ưu tiên) để sửa hợp âm...', 'info', 2000);
-      await app.switchSet('HD');
+      const myChordCode = window.Auth?.getChordCode?.() || window.Auth?.getUser?.() || 'HD';
+      window.App?.showToast?.(`⚡ Tự động chuyển sang bộ ${myChordCode} để sửa hợp âm...`, 'info', 2000);
+      await app.switchSet(myChordCode);
     }
-    _closePopup();
+    _destroyPopup();
 
     // R2-1: Con trỏ nốt viền sáng và tự cuộn
     const noteEl = anchor?.closest?.('g.vf-stavenote') || anchor;
@@ -217,7 +215,7 @@ const ChordCanvasEdit = (() => {
       chords[`${measureIdx}_${noteIdx}`] = chordOriginalKey;
       scheduleSave(1500);
       _getApp()?.updateSetUI?.();
-      if (refreshLayout) setTimeout(() => requestAnimationFrame(() => app.build()), 80);
+      setTimeout(() => requestAnimationFrame(() => app.build()), 40);
       if (!document.getElementById('lyric-view-container')?.classList.contains('hidden')) window.DisplaySettings?.renderLyricViewIfActive?.();
     }
   }

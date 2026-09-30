@@ -147,6 +147,7 @@ const ChordCanvas = (() => {
 
   async function loadSong(songId, initialSet = 'HD') {
     const token = ++_chordLoadToken;
+    window.ChordCanvasEdit?.closePopup?.();
     _clear();
     window.ChordCanvasEdit?.resetUndo?.(); // R0-4: tránh Ctrl+Z ghi nhầm sang bài mới
     _songUseFlats = null;
@@ -179,7 +180,7 @@ const ChordCanvas = (() => {
     chords.forEach(({ measureIdx, noteIdx, chord }) => { _customChords[`${measureIdx}_${noteIdx}`] = chord; });
   }
 
-  function clearSong() { _clear(); window.ChordCanvasDots?.clearGeomCache?.(); setAddMode(false); }
+  function clearSong() { window.ChordCanvasEdit?.closePopup?.(); _clear(); window.ChordCanvasDots?.clearGeomCache?.(); setAddMode(false); }
 
   // R0-2 (ROADMAP5, lỗi B2/B3): trước đây bấm C khi xem HD/TLH sẽ ÂM THẦM sao
   // chép & ghi đè bộ cá nhân (hoặc cả HD dùng chung, nếu admin ở TLH). Giờ phải
@@ -209,7 +210,7 @@ const ChordCanvas = (() => {
           targetSet,
           onEditMine:      () => { _pendingConfirm = false; window.ChordCanvasEdit?.startEditingWithoutCloning?.(targetSet); },
           onCopyOverwrite: () => { _pendingConfirm = false; window.ChordCanvasEdit?.cloneAndStartEditing?.(songId, _currentSet, targetSet); },
-          onCancel:        () => { _pendingConfirm = false; }
+          onCancel:        () => { _pendingConfirm = false; window.ModeManager?.resetToView?.(); }
         });
         return; // KHÔNG bật _editEnabled ở đây — chờ người dùng chọn xong trong hộp thoại
       }
@@ -252,7 +253,6 @@ const ChordCanvas = (() => {
   }
 
   function _clear() {
-    window.ChordCanvasEdit?.closePopup?.();
     document.querySelectorAll('.cc-dot, .cc-note-dot, .cc-custom-chord-text, .cc-edit-badge, .cc-chord-text, .cc-chord-highlight, .cc-tlh-ghost-chord')
       .forEach(el => el.remove());
   }
@@ -581,6 +581,7 @@ const ChordCanvas = (() => {
         isSparse: (_currentSet === 'HD' && customCount > 0 && xmlCount > 0 && customCount < 0.3 * xmlCount)
       };
     },
+    isAddMode: () => _editEnabled, isEditMode: () => _editEnabled,
     getNoteEls: () => _noteEls,
     build: _build
   };

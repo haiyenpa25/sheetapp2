@@ -142,6 +142,7 @@ const ModeManager = (() => {
         : Boolean(window.Store?.get?.('currentUser')?.role === 'admin' || window.Store?.get?.('currentUser')?.role === 'banhat');
       if (!canEdit) {
         window.AppUI?.showToast?.('Chỉ nhạc công Ban Hát hoặc Quản Trị Viên mới có quyền điền hợp âm', 'warning');
+        window.Auth?.openModal?.();
         return;
       }
     }
