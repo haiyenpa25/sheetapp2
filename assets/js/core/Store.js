@@ -275,6 +275,18 @@ const Store = (() => {
         dispEl.style.color = tVal === 0 ? 'var(--text-muted)' : (tVal > 0 ? 'var(--success)' : 'var(--danger)');
       }
 
+      const soundBadge = document.getElementById('transpose-sounding-badge');
+      if (soundBadge) {
+        if (tVal !== 0 && sounding) {
+          soundBadge.textContent = `(${sounding})`;
+          soundBadge.classList.remove('hidden');
+          soundBadge.title = `Tông phát ra: ${sounding} (gốc: ${baseKey})`;
+        } else {
+          soundBadge.textContent = '';
+          soundBadge.classList.add('hidden');
+        }
+      }
+
       // Cập nhật độ mờ nút bấm
       const btnUp = document.getElementById('btn-transpose-up');
       const btnDown = document.getElementById('btn-transpose-down');

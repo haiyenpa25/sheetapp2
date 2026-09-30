@@ -110,6 +110,21 @@ const AppUI = (() => {
                        : 'var(--danger)';
     }
 
+    const soundingBadge = document.getElementById('transpose-sounding-badge');
+    if (soundingBadge) {
+      const curSong = window.Store?.get?.('currentSong');
+      const baseKey = curSong?.defaultKey || window.SongInfoBar?.getSongKey?.() || '';
+      if (currentTranspose !== 0 && baseKey && window.KeyService?.displayKey) {
+        const sounded = window.KeyService.displayKey(baseKey, currentTranspose);
+        soundingBadge.textContent = sounded ? `(${sounded})` : '';
+        soundingBadge.classList.remove('hidden');
+        soundingBadge.title = `Tông phát ra: ${sounded} (gốc: ${baseKey})`;
+      } else {
+        soundingBadge.textContent = '';
+        soundingBadge.classList.add('hidden');
+      }
+    }
+
     const gigTrans = document.getElementById('gig-hud-trans');
     if (gigTrans) {
       gigTrans.textContent = currentTranspose === 0 ? '0'

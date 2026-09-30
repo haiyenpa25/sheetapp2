@@ -471,13 +471,10 @@ const Metronome = (() => {
     const mainToolbarBtn = document.getElementById('btn-toolbar-metronome');
     if (mainToolbarBtn) {
       mainToolbarBtn.classList.toggle('active', _isPlaying);
+      mainToolbarBtn.classList.toggle('btn-active', _isPlaying);
       mainToolbarBtn.style.color = _isPlaying ? 'var(--danger)' : '';
-      if (_isPlaying) {
-        mainToolbarBtn.classList.add('btn-active');
-      } else {
-        mainToolbarBtn.classList.remove('btn-active');
-      }
     }
+    document.getElementById('btn-toolbar-tempo')?.classList.toggle('metronome-active', _isPlaying);
   }
 
   /* ── PANEL VISIBILITY & MUSIC AREA COVERAGE ── */

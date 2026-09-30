@@ -1674,3 +1674,168 @@ body.dark-mode .cc-tlh-ghost-chord {
 .cc-toggle-tlh-wrap:hover {
   opacity: 0.85;
 }
+
+/* ==========================================================================
+   Sounding Key Indicator in Transpose Pill
+   ========================================================================== */
+.transpose-sounding-badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent, #7c3aed);
+  padding: 0 4px;
+  user-select: none;
+}
+body.dark-mode .transpose-sounding-badge {
+  color: #a78bfa;
+}
+.transpose-sounding-badge.hidden {
+  display: none !important;
+}
+
+/* ==========================================================================
+   1-Tap Metronome Pulse on Toolbar
+   ========================================================================== */
+.btn-toolbar-tempo.metronome-active .tempo-note-icon {
+  color: var(--danger, #ef4444) !important;
+  animation: metronome-pulse 0.6s infinite alternate ease-in-out;
+}
+@keyframes metronome-pulse {
+  from { transform: scale(1); opacity: 0.8; }
+  to { transform: scale(1.3); opacity: 1; }
+}
+
+/* ==========================================================================
+   Song Info Popover Sections
+   ========================================================================== */
+.si-popover-sections-row {
+  align-items: flex-start !important;
+}
+.si-popover-sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+.si-section-chip {
+  background: var(--bg-hover, rgba(0, 0, 0, 0.05));
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.1));
+  border-radius: 99px;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary, #1e293b);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.si-section-chip:hover {
+  background: var(--accent, #7c3aed);
+  color: #ffffff;
+  border-color: var(--accent, #7c3aed);
+}
+body.dark-mode .si-section-chip {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #e2e8f0;
+}
+body.dark-mode .si-section-chip:hover {
+  background: var(--accent, #7c3aed);
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   Floating SATB Practice Mini Player Bar
+   ========================================================================== */
+.satb-mini-player {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border, #e2e8f0);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border-radius: 99px;
+  padding: 4px 8px;
+  transition: all 0.2s ease;
+}
+body.dark-mode .satb-mini-player {
+  background: #1e293b;
+  border-color: #334155;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+.satb-mini-player.hidden {
+  display: none !important;
+}
+.satb-mini-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.satb-mini-play-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent, #7c3aed);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+.satb-mini-play-btn:hover {
+  transform: scale(1.08);
+}
+.satb-mini-play-btn.active {
+  background: var(--danger, #ef4444);
+}
+.satb-mini-voices {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.satb-mini-voices .voice-btn {
+  min-width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--border, #e2e8f0);
+  background: transparent;
+  color: var(--text-primary, #334155);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+}
+body.dark-mode .satb-mini-voices .voice-btn {
+  color: #cbd5e1;
+  border-color: #475569;
+}
+.satb-mini-voices .voice-btn:hover {
+  background: var(--bg-hover, rgba(0, 0, 0, 0.05));
+}
+.satb-mini-voices .voice-btn.active {
+  background: var(--accent, #7c3aed);
+  color: #ffffff;
+  border-color: var(--accent, #7c3aed);
+}
+.satb-mini-close {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-muted, #94a3b8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+.satb-mini-close:hover {
+  color: var(--danger, #ef4444);
+}

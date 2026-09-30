@@ -54,22 +54,16 @@ const ToolbarController = (() => {
   }
 
   function _bindTranspose() {
-    document.getElementById('btn-transpose-up')?.addEventListener('click', e =>
-      { e.currentTarget.blur(); App?.transposeBy?.(+1); });
-    document.getElementById('btn-transpose-down')?.addEventListener('click', e =>
-      { e.currentTarget.blur(); App?.transposeBy?.(-1); });
-    document.getElementById('btn-transpose-reset')?.addEventListener('click', e =>
-      { e.currentTarget.blur(); App?.resetTranspose?.(); });
-    // Tap vào số hiển thị để reset nhanh về 0
-    document.getElementById('transpose-display')?.addEventListener('click', e =>
-      { App?.resetTranspose?.(); });
+    document.getElementById('btn-transpose-up')?.addEventListener('click', e => { e.currentTarget.blur(); App?.transposeBy?.(+1); });
+    document.getElementById('btn-transpose-down')?.addEventListener('click', e => { e.currentTarget.blur(); App?.transposeBy?.(-1); });
+    document.getElementById('btn-transpose-reset')?.addEventListener('click', e => { e.currentTarget.blur(); App?.resetTranspose?.(); });
+    document.getElementById('transpose-display')?.addEventListener('click', () => App?.resetTranspose?.());
 
     const _onCapoChanged = (e) => {
       const newCapo = parseInt(e.target.value) || 0;
       Store.set('capoLevel', newCapo);
       AppUI.updateCapoBadge(newCapo);
-      const sel1 = document.getElementById('capo-select');
-      const sel2 = document.getElementById('menu-capo-select');
+      const sel1 = document.getElementById('capo-select'), sel2 = document.getElementById('menu-capo-select');
       if (sel1 && sel1.value !== String(newCapo)) sel1.value = String(newCapo);
       if (sel2 && sel2.value !== String(newCapo)) sel2.value = String(newCapo);
       window.ChordCanvas?.reposition?.();
@@ -89,71 +83,43 @@ const ToolbarController = (() => {
     const stepZoom = (delta) => {
       const curPct = Math.round((Store.get('currentZoom') || 1.0) * 100);
       const steps = [50, 65, 80, 90, 100, 115, 130, 150, 175, 200];
-      let target;
-      if (delta > 0) {
-        target = steps.find(s => s > curPct + 2) || steps[steps.length - 1];
-      } else {
-        target = [...steps].reverse().find(s => s < curPct - 2) || steps[0];
-      }
+      const target = delta > 0 ? (steps.find(s => s > curPct + 2) || steps[steps.length - 1]) : ([...steps].reverse().find(s => s < curPct - 2) || steps[0]);
       App?.setZoom?.(target);
     };
 
-    // Zoom buttons trên Toolbar chính
     document.getElementById('btn-zoom-out')?.addEventListener('click', () => stepZoom(-1));
     document.getElementById('btn-zoom-in')?.addEventListener('click', () => stepZoom(+1));
-
-    // Zoom buttons trên Floating HUD (Biểu Diễn Sân Khấu)
-    document.getElementById('btn-gig-zoom-out')?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      stepZoom(-1);
-    });
-    document.getElementById('btn-gig-zoom-in')?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      stepZoom(+1);
-    });
+    document.getElementById('btn-gig-zoom-out')?.addEventListener('click', (e) => { e.stopPropagation(); stepZoom(-1); });
+    document.getElementById('btn-gig-zoom-in')?.addEventListener('click', (e) => { e.stopPropagation(); stepZoom(+1); });
 
     _initLockZoomUI();
     document.getElementById('btn-lock-zoom')?.addEventListener('click', () => _toggleLockZoom());
-    document.getElementById('btn-gig-lock-zoom')?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      _toggleLockZoom();
-    });
+    document.getElementById('btn-gig-lock-zoom')?.addEventListener('click', (e) => { e.stopPropagation(); _toggleLockZoom(); });
   }
 
   function _initLockZoomUI() {
-    const isLocked = localStorage.getItem('sheetapp_zoom_locked') === 'true';
-    _updateLockButtonsUI(isLocked);
+    _updateLockButtonsUI(localStorage.getItem('sheetapp_zoom_locked') === 'true');
   }
 
   function _updateLockButtonsUI(isLocked) {
-    const btns = [
-      document.getElementById('btn-lock-zoom'),
-      document.getElementById('btn-gig-lock-zoom')
-    ];
-    btns.forEach(btn => {
+    const iconName = isLocked ? 'lock' : 'unlock';
+    const title = isLocked ? 'Khóa tỷ lệ View ĐANG BẬT (Bấm để mở khóa)' : 'Khóa tỷ lệ zoom (khi đổi bài khác sẽ giữ nguyên tỷ lệ này)';
+    [document.getElementById('btn-lock-zoom'), document.getElementById('btn-gig-lock-zoom')].forEach(btn => {
       if (!btn) return;
-      if (isLocked) {
-        btn.classList.add('locked');
-        btn.innerHTML = '<svg class="lucide-icon" width="16" height="16" aria-hidden="true"><use href="assets/icons/lucide.svg#lock"/></svg>';
-        btn.title = 'Khóa tỷ lệ View ĐANG BẬT (Bấm để mở khóa)';
-      } else {
-        btn.classList.remove('locked');
-        btn.innerHTML = '<svg class="lucide-icon" width="16" height="16" aria-hidden="true"><use href="assets/icons/lucide.svg#unlock"/></svg>';
-        btn.title = 'Khóa tỷ lệ zoom (khi đổi bài khác sẽ giữ nguyên tỷ lệ này)';
-      }
+      btn.classList.toggle('locked', isLocked);
+      btn.innerHTML = `<svg class="lucide-icon" width="16" height="16" aria-hidden="true"><use href="assets/icons/lucide.svg#${iconName}"/></svg>`;
+      btn.title = title;
     });
   }
 
   function _toggleLockZoom() {
-    const wasLocked = localStorage.getItem('sheetapp_zoom_locked') === 'true';
-    const isLocked = !wasLocked;
-    localStorage.setItem('sheetapp_zoom_locked', isLocked ? 'true' : 'false');
+    const isLocked = !(localStorage.getItem('sheetapp_zoom_locked') === 'true');
+    localStorage.setItem('sheetapp_zoom_locked', String(isLocked));
     _updateLockButtonsUI(isLocked);
-
     if (isLocked) {
-      const currentPct = Math.round((Store.get('currentZoom') || 1.0) * 100);
-      localStorage.setItem('sheetapp_locked_zoom_val', String(currentPct));
-      App?.showToast?.(`🔒 Đã khóa view ở tỷ lệ ${currentPct}%. Đổi bài sẽ giữ nguyên zoom.`, 'success');
+      const pct = Math.round((Store.get('currentZoom') || 1.0) * 100);
+      localStorage.setItem('sheetapp_locked_zoom_val', String(pct));
+      App?.showToast?.(`🔒 Đã khóa view ở tỷ lệ ${pct}%. Đổi bài sẽ giữ nguyên zoom.`, 'success');
     } else {
       App?.showToast?.('🔓 Đã mở khóa tỷ lệ view.', 'info');
     }
@@ -299,7 +265,34 @@ const ToolbarController = (() => {
   function _bindMisc() {
     // Ticket L0-16: #btn-fullscreen được ModeManager quản lý tập trung, không bind trùng lặp tại đây
     document.getElementById('btn-print')?.addEventListener('click', () => window.print());
-    document.getElementById('btn-session-panel')?.addEventListener('click', () => PerformanceNotes?.toggle?.());
+    const _toggleSession = () => PerformanceNotes?.toggle?.();
+    document.getElementById('btn-session-panel')?.addEventListener('click', _toggleSession);
+    document.getElementById('btn-menu-session-panel')?.addEventListener('click', _toggleSession);
+    document.getElementById('btn-open-session-from-popover')?.addEventListener('click', () => {
+      _toggleSession();
+      document.getElementById('song-info-popover')?.classList.add('hidden');
+    });
+
+    // Quick Numpad trigger từ menu
+    document.getElementById('btn-menu-quick-numpad')?.addEventListener('click', async () => {
+      if (!window.QuickNumpadModal && window.ScriptLoader?.loadModal) {
+        await window.ScriptLoader.loadModal('numpad');
+      }
+      window.QuickNumpadModal?.toggle?.();
+    });
+
+    // Floating SATB Mini Player
+    document.getElementById('btn-menu-satb-bar')?.addEventListener('click', () => {
+      document.getElementById('satb-mini-player')?.classList.toggle('hidden');
+    });
+    document.getElementById('btn-satb-mini-toggle')?.addEventListener('click', () => {
+      if (window.SheetAudioPlayer?.isPlaying?.()) window.SheetAudioPlayer.stop();
+      else window.SheetAudioPlayer?.play?.();
+    });
+    document.getElementById('btn-satb-mini-close')?.addEventListener('click', () => {
+      document.getElementById('satb-mini-player')?.classList.add('hidden');
+      window.SheetAudioPlayer?.stop?.();
+    });
 
     document.getElementById('btn-compact-mode')?.addEventListener('click', e => {
       const btn = e.currentTarget;
@@ -323,13 +316,7 @@ const ToolbarController = (() => {
     // Session panel buttons
     document.getElementById('btn-close-session')?.addEventListener('click', () => {
       const panel = document.getElementById('session-panel');
-      if (panel) {
-        if (window.ModalManager) {
-          window.ModalManager.close(panel);
-        } else {
-          panel.classList.add('hidden');
-        }
-      }
+      if (panel) (window.ModalManager ? window.ModalManager.close(panel) : panel.classList.add('hidden'));
     });
     document.getElementById('btn-save-session')?.addEventListener('click', async () => {
       const note = document.getElementById('session-note')?.value.trim() || '';
@@ -340,13 +327,10 @@ const ToolbarController = (() => {
 
     const _handleFollowLeaderClick = async (e) => {
       e?.preventDefault?.();
-      if (!window.FollowLeader && window.ScriptLoader?.loadLiveSync) {
-        await window.ScriptLoader.loadLiveSync();
-      }
+      if (!window.FollowLeader && window.ScriptLoader?.loadLiveSync) await window.ScriptLoader.loadLiveSync();
       window.FollowLeader?.openModal?.();
     };
-    document.getElementById('btn-follow-leader')?.addEventListener('click', _handleFollowLeaderClick);
-    document.getElementById('btn-menu-follow-leader')?.addEventListener('click', _handleFollowLeaderClick);
+    ['btn-follow-leader', 'btn-menu-follow-leader'].forEach(id => document.getElementById(id)?.addEventListener('click', _handleFollowLeaderClick));
   }
 
   function _updateTrackFill(slider) {
@@ -465,66 +449,46 @@ const ToolbarController = (() => {
       }
     });
 
-    document.getElementById('btn-menu-zoom-out')?.addEventListener('click', () => {
-      document.getElementById('btn-zoom-out')?.click();
-      const cur = document.getElementById('zoom-slider')?.value || '100';
-      const label = document.getElementById('menu-zoom-val');
-      if (label) label.textContent = cur + '%';
-    });
-    document.getElementById('btn-menu-zoom-in')?.addEventListener('click', () => {
-      document.getElementById('btn-zoom-in')?.click();
-      const cur = document.getElementById('zoom-slider')?.value || '100';
-      const label = document.getElementById('menu-zoom-val');
-      if (label) label.textContent = cur + '%';
-    });
+    const _syncZoomVal = () => {
+      const v = (document.getElementById('zoom-slider')?.value || '100') + '%';
+      const lbl = document.getElementById('menu-zoom-val');
+      if (lbl) lbl.textContent = v;
+    };
+    document.getElementById('btn-menu-zoom-out')?.addEventListener('click', () => { document.getElementById('btn-zoom-out')?.click(); _syncZoomVal(); });
+    document.getElementById('btn-menu-zoom-in')?.addEventListener('click', () => { document.getElementById('btn-zoom-in')?.click(); _syncZoomVal(); });
     document.getElementById('btn-menu-lock-zoom')?.addEventListener('click', () => {
       document.getElementById('btn-lock-zoom')?.click();
       const isLocked = localStorage.getItem('sheetapp_zoom_locked') === 'true';
       const btn = document.getElementById('btn-menu-lock-zoom');
       if (btn) btn.innerHTML = isLocked ? '<svg class="icon icon-xs"><use href="#icon-lock"/></svg>' : '<svg class="icon icon-xs"><use href="#icon-unlock"/></svg>';
     });
-    document.getElementById('btn-menu-auto-scroll')?.addEventListener('click', () => {
-      document.getElementById('btn-auto-scroll')?.click();
+
+    [
+      ['btn-menu-auto-scroll', 'btn-auto-scroll'],
+      ['btn-menu-metronome', 'btn-toolbar-metronome'],
+      ['btn-menu-auth', 'btn-toolbar-auth'],
+      ['btn-menu-add-chord-mode', 'btn-add-chord-mode-bar'],
+      ['btn-menu-transpose-reset', 'btn-transpose-reset'],
+    ].forEach(([src, dst]) => {
+      document.getElementById(src)?.addEventListener('click', () => document.getElementById(dst)?.click());
     });
+
     document.getElementById('menu-scroll-speed')?.addEventListener('change', (e) => {
       const sp = document.getElementById('scroll-speed');
       if (sp) { sp.value = e.target.value; sp.dispatchEvent(new Event('change')); }
     });
-    document.getElementById('btn-menu-metronome')?.addEventListener('click', () => {
-      document.getElementById('btn-toolbar-metronome')?.click();
-    });
-    document.getElementById('btn-menu-auth')?.addEventListener('click', () => {
-      document.getElementById('btn-toolbar-auth')?.click();
-    });
-    document.getElementById('btn-menu-chord-preset')?.addEventListener('click', () => {
-      document.getElementById('btn-chord-preset')?.click();
-      const txt = document.getElementById('chord-preset-label')?.textContent || 'Chuẩn';
-      const ml = document.getElementById('menu-chord-preset-label');
-      if (ml) ml.textContent = 'Cỡ hợp âm: ' + txt;
-    });
-    document.getElementById('btn-menu-chord-notation')?.addEventListener('click', () => {
-      document.getElementById('btn-chord-notation')?.click();
-      const txt = document.getElementById('chord-notation-label')?.textContent || 'C';
-      const ml = document.getElementById('menu-chord-notation-label');
-      if (ml) ml.textContent = 'Ký hiệu: ' + txt;
-    });
-    document.getElementById('btn-menu-instrument-role')?.addEventListener('click', () => {
-      document.getElementById('btn-instrument-role')?.click();
-      const label = document.getElementById('instrument-role-label')?.textContent || 'Guitar';
-      const ml = document.getElementById('menu-instrument-role-label');
-      if (ml) ml.textContent = 'Góc nhìn: ' + label;
-    });
-    document.getElementById('btn-menu-verse-mode')?.addEventListener('click', () => {
-      document.getElementById('btn-verse-mode')?.click();
-      const txt = document.getElementById('verse-mode-label')?.textContent || 'Tất cả khổ';
-      const ml = document.getElementById('menu-verse-mode-label');
-      if (ml) ml.textContent = 'Khổ hát: ' + txt;
-    });
-    document.getElementById('btn-menu-add-chord-mode')?.addEventListener('click', () => {
-      document.getElementById('btn-add-chord-mode-bar')?.click();
-    });
-    document.getElementById('btn-menu-transpose-reset')?.addEventListener('click', () => {
-      document.getElementById('btn-transpose-reset')?.click();
+
+    [
+      ['btn-menu-chord-preset', 'btn-chord-preset', 'menu-chord-preset-label', 'chord-preset-label', 'Cỡ hợp âm: ', 'Chuẩn'],
+      ['btn-menu-chord-notation', 'btn-chord-notation', 'menu-chord-notation-label', 'chord-notation-label', 'Ký hiệu: ', 'C'],
+      ['btn-menu-instrument-role', 'btn-instrument-role', 'menu-instrument-role-label', 'instrument-role-label', 'Góc nhìn: ', 'Guitar'],
+      ['btn-menu-verse-mode', 'btn-verse-mode', 'menu-verse-mode-label', 'verse-mode-label', 'Khổ hát: ', 'Tất cả khổ']
+    ].forEach(([btnId, targetId, lblId, srcLblId, prefix, defVal]) => {
+      document.getElementById(btnId)?.addEventListener('click', () => {
+        document.getElementById(targetId)?.click();
+        const ml = document.getElementById(lblId);
+        if (ml) ml.textContent = prefix + (document.getElementById(srcLblId)?.textContent || defVal);
+      });
     });
   }
 
@@ -562,7 +526,13 @@ const ToolbarController = (() => {
   function _bindToolbarTempo() {
     const tempoBtn = document.getElementById('btn-toolbar-tempo');
     if (!tempoBtn) return;
-    tempoBtn.addEventListener('click', async () => {
+    tempoBtn.addEventListener('click', async (e) => {
+      // 1-tap vào nốt ♩ để bật/tắt audio click metronome ngay lập tức
+      if (e.target.closest('.tempo-note-icon')) {
+        e.stopPropagation();
+        window.Metronome?.togglePlay?.();
+        return;
+      }
       const valEl = document.getElementById('toolbar-tempo-val');
       const curBpm = parseInt(valEl?.textContent, 10) || 100;
       if (window.TempoPick?.show) {
@@ -574,6 +544,38 @@ const ToolbarController = (() => {
       } else {
         document.getElementById('btn-toolbar-metronome')?.click();
       }
+    });
+
+    // Cập nhật phân đoạn vào popover khi mở nút ⓘ
+    document.getElementById('btn-song-info-popover')?.addEventListener('click', () => {
+      setTimeout(_renderPopoverSections, 40);
+    });
+  }
+
+  function _renderPopoverSections() {
+    const row = document.getElementById('si-pop-sections-row');
+    const container = document.getElementById('si-pop-sections');
+    if (!row || !container) return;
+    const sections = window.ArrangementEngine?.getSections?.() || [];
+    if (!sections.length) {
+      row.classList.add('hidden');
+      container.innerHTML = '';
+      return;
+    }
+    row.classList.remove('hidden');
+    container.innerHTML = '';
+    sections.forEach(sec => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'si-section-chip';
+      chip.textContent = sec.name || `m.${sec.start_measure}`;
+      chip.title = `Nhảy đến ${sec.name || 'đoạn'} (ô nhịp ${sec.start_measure})`;
+      chip.addEventListener('click', (e) => {
+        e.stopPropagation();
+        window.ArrangementEngine?.jumpToSection?.(sec.id);
+        document.getElementById('song-info-popover')?.classList.add('hidden');
+      });
+      container.appendChild(chip);
     });
   }
 

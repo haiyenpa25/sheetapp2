@@ -27,6 +27,8 @@
         <div class="si-popover-row"><span class="si-popover-label">Số ô nhịp:</span><span class="si-popover-value" id="si-pop-measures">--</span></div>
         <div class="si-popover-row"><span class="si-popover-label">Bộ hợp âm:</span><span class="si-popover-value" id="si-pop-chordset">--</span></div>
         <div class="si-popover-row"><span class="si-popover-label">Sử dụng:</span><span class="si-popover-value" id="si-pop-usage">--</span></div>
+        <div class="si-popover-row si-popover-sections-row hidden" id="si-pop-sections-row"><span class="si-popover-label">Đoạn bài:</span><div class="si-popover-sections" id="si-pop-sections"></div></div>
+        <button id="btn-open-session-from-popover" class="btn btn-ghost btn-sm w-full mt-2" title="Mở nhật ký phục vụ & ghi chú"><?= icon('clipboard-list', 'icon-xs') ?> <span>Nhật ký phục vụ</span></button>
       </div>
     </div>
   </div>
@@ -40,6 +42,7 @@
         <?= icon('minus', 'icon-xs') ?>
       </button>
       <span id="transpose-display" class="transpose-value" title="Bấm để về tông gốc">0</span>
+      <span id="transpose-sounding-badge" class="transpose-sounding-badge hidden" title="Tông phát ra"></span>
       <button id="btn-transpose-up" class="icon-btn-pill" title="Tăng 1 nửa cung (Phím ] )" disabled>
         <?= icon('plus', 'icon-xs') ?>
       </button>
@@ -79,8 +82,8 @@
     </div>
 
     <!-- Nhóm 4: Cụm Tempo / Gõ Nhịp (Ticket R1-2) -->
-    <button type="button" id="btn-toolbar-tempo" class="band-pill btn-toolbar-tempo" title="Tốc độ bài hát (Bấm để chỉnh BPM / Gõ nhịp)">
-      <span class="tempo-note-icon font-bold">♩</span>
+    <button type="button" id="btn-toolbar-tempo" class="band-pill btn-toolbar-tempo" title="Tốc độ bài hát (Bấm ♩ để gõ nhịp · Bấm số BPM để chỉnh tốc độ)">
+      <span class="tempo-note-icon font-bold" title="Bật/Tắt máy gõ nhịp (Metronome)">♩</span>
       <span id="toolbar-tempo-val" class="tempo-val">100</span>
     </button>
     <button id="btn-toolbar-metronome" class="icon-btn-pill hidden" disabled title="Mở máy gõ nhịp" aria-hidden="true" tabindex="-1"><span class="metronome-icon-pulse">♩</span></button>
@@ -246,6 +249,7 @@
             <span class="btn-text">Dừng</span>
           </button>
           <button id="btn-audio-settings" class="icon-btn-xs" disabled title="Tùy chỉnh bè phát"><?= icon('settings') ?></button>
+          <button id="btn-menu-satb-bar" class="icon-btn-xs" title="Mở thanh tập bè SATB nổi"><?= icon('music') ?></button>
         </div>
 
         <div id="audio-settings-panel" class="audio-settings-panel hidden">
@@ -350,6 +354,16 @@
 
         <!-- NHÓM 5: KHÁC (Other) -->
         <div class="menu-section-header" role="presentation">KHÁC</div>
+
+        <button id="btn-menu-session-panel" class="btn btn-ghost btn-sm btn-menu-item" title="Nhật ký phục vụ & Ghi chú tập đàn">
+          <?= icon('clipboard-list') ?>
+          <span>Nhật ký phục vụ</span>
+        </button>
+
+        <button id="btn-menu-quick-numpad" class="btn btn-ghost btn-sm btn-menu-item" title="Bàn phím số nhanh (#)">
+          <?= icon('hash') ?>
+          <span>Bàn phím số nhanh (#)</span>
+        </button>
 
         <button id="btn-lyric-view" class="btn btn-ghost btn-sm btn-menu-item" title="Xem lời & hợp âm dạng chữ">
           <?= icon('file-text') ?>

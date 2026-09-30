@@ -291,6 +291,14 @@ const SheetAudioPlayer = (() => {
 
       document.getElementById('btn-play-audio')?.classList.add('hidden');
       document.getElementById('btn-stop-audio')?.classList.remove('hidden');
+      const miniPlayer = document.getElementById('satb-mini-player');
+      if (miniPlayer) miniPlayer.classList.remove('hidden');
+      const miniToggle = document.getElementById('btn-satb-mini-toggle');
+      if (miniToggle) {
+        miniToggle.classList.add('active');
+        miniToggle.title = 'Dừng phát bè';
+        miniToggle.innerHTML = '<svg class="icon icon-xs"><use href="#icon-pause"/></svg>';
+      }
       window.App?.showToast?.(`▶ Đang phát — ${VOICE_LABELS[_currentVoice] ?? _currentVoice}`, 'success');
 
     } catch (err) {
@@ -327,6 +335,12 @@ const SheetAudioPlayer = (() => {
     }
     document.getElementById('btn-play-audio')?.classList.remove('hidden');
     document.getElementById('btn-stop-audio')?.classList.add('hidden');
+    const miniToggle = document.getElementById('btn-satb-mini-toggle');
+    if (miniToggle) {
+      miniToggle.classList.remove('active');
+      miniToggle.title = 'Phát bè';
+      miniToggle.innerHTML = '<svg class="icon icon-xs"><use href="#icon-play"/></svg>';
+    }
   }
 
   function setSpeed(rate) {
@@ -360,7 +374,7 @@ const SheetAudioPlayer = (() => {
     if (sel) sel.value = voice;
   }
 
-  return { init, setup, play, enableBtn, stop, setSpeed, setVolume, applyPlaybackMode };
+  return { init, setup, play, enableBtn, stop, setSpeed, setVolume, applyPlaybackMode, isPlaying: () => _isPlaying, setVoice: _setVoice };
 
 })();
 

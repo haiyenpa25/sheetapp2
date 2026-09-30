@@ -259,6 +259,25 @@
     <div class="half-page-divider-line"></div>
     <span class="half-page-divider-badge">Nửa Trang Kế Tiếp</span>
   </div>
+
+  <!-- SATB FLOATING PRACTICE PLAYER BAR (Tập Bè Nhanh Trên Sheet) -->
+  <div id="satb-mini-player" class="satb-mini-player hidden" role="region" aria-label="Bộ điều khiển tập bè SATB">
+    <div class="satb-mini-content">
+      <button id="btn-satb-mini-toggle" class="satb-mini-play-btn" title="Phát / Dừng phát bè">
+        <?= icon('play', 'icon-xs') ?>
+      </button>
+      <div class="satb-mini-voices" role="group" aria-label="Chọn bè tập">
+        <button class="voice-btn voice-s" data-voice="soprano" title="Soprano (Nữ cao)">S</button>
+        <button class="voice-btn voice-a" data-voice="alto" title="Alto (Nữ trầm)">A</button>
+        <button class="voice-btn voice-t" data-voice="tenor" title="Tenor (Nam cao)">T</button>
+        <button class="voice-btn voice-b" data-voice="bass" title="Bass (Nam trầm)">B</button>
+        <button class="voice-btn voice-all active" data-voice="satb" title="Hòa âm 4 bè"><?= icon('music', 'icon-xs') ?></button>
+      </div>
+      <button id="btn-satb-mini-close" class="satb-mini-close" title="Đóng thanh tập bè">
+        <?= icon('x', 'icon-xs') ?>
+      </button>
+    </div>
+  </div>
 </div>
 
 
