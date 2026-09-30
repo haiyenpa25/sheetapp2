@@ -12,6 +12,8 @@
  * Tự động đồng bộ ngữ cảnh bài hát (?song=), trạng thái đăng nhập, và trợ giúp theo ngữ cảnh.
  */
 
+require_once __DIR__ . '/icons.php';
+
 if (session_status() === PHP_SESSION_NONE) {
     @session_start();
 }
@@ -64,7 +66,7 @@ $helpAnchor = match($activePillar) {
   <div class="shell-nav-inner">
     <!-- 1. Logo & Nhãn Thương Hiệu -->
     <a href="<?= $appBase ?>/<?= $songQuery ?>" class="shell-brand" title="SheetApp2 — Nền tảng Ban Hát & Ca Đoàn">
-      <span class="shell-brand-icon">🎵</span>
+      <span class="shell-brand-icon"><?= icon('music') ?></span>
       <span class="shell-brand-name">SheetApp</span>
     </a>
 
@@ -77,7 +79,7 @@ $helpAnchor = match($activePillar) {
          role="tab"
          aria-selected="<?= $activePillar === 'library' ? 'true' : 'false' ?>"
          title="Thư viện 903 bài hát, đọc sheet nhạc, dịch tông & danh sách Setlist">
-        <span class="pillar-icon">📚</span>
+        <span class="pillar-icon"><?= icon('book-open') ?></span>
         <span class="pillar-label">Thư Viện</span>
       </a>
 
@@ -88,7 +90,7 @@ $helpAnchor = match($activePillar) {
          role="tab"
          aria-selected="<?= $activePillar === 'live' ? 'true' : 'false' ?>"
          title="Phòng biểu diễn ban nhạc, đồng bộ trực tiếp Ca Trưởng - Nhạc Công, máy chiếu nhà thờ">
-        <span class="pillar-icon">🎤</span>
+        <span class="pillar-icon"><?= icon('mic') ?></span>
         <span class="pillar-label">Biểu Diễn</span>
       </a>
 
@@ -99,7 +101,7 @@ $helpAnchor = match($activePillar) {
          role="tab"
          aria-selected="<?= $activePillar === 'learn' ? 'true' : 'false' ?>"
          title="Phòng tập thông minh, luyện tập nốt giai điệu, tách bè SATB & đệm hát bàn phím ảo">
-        <span class="pillar-icon">🎹</span>
+        <span class="pillar-icon"><?= icon('keyboard') ?></span>
         <span class="pillar-label">Tập Luyện</span>
       </a>
 
@@ -110,7 +112,7 @@ $helpAnchor = match($activePillar) {
          role="tab"
          aria-selected="<?= $activePillar === 'manager' ? 'true' : 'false' ?>"
          title="Quản trị kho nhạc, phân quyền thành viên, quản lý bộ hợp âm & chỉnh sửa Visual MusicXML">
-        <span class="pillar-icon">🛠️</span>
+        <span class="pillar-icon"><?= icon('settings') ?></span>
         <span class="pillar-label">Quản Lý</span>
       </a>
     </div>
@@ -124,7 +126,7 @@ $helpAnchor = match($activePillar) {
          title="Xem hướng dẫn sử dụng tính năng cho mục này" 
          target="_blank" 
          rel="noopener">
-        <span class="help-icon">❓</span>
+        <span class="help-icon"><?= icon('help-circle') ?></span>
         <span class="help-text">Trợ Giúp</span>
       </a>
 
@@ -132,7 +134,7 @@ $helpAnchor = match($activePillar) {
       <?php if ($currentUser): ?>
       <div id="shell-notif-widget" class="shell-notif-widget">
         <button id="shell-notif-btn" class="shell-notif-btn" title="Thông báo" aria-label="Thông báo" aria-haspopup="true" aria-expanded="false">
-          <span class="notif-icon">🔔</span>
+          <span class="notif-icon"><?= icon('bell') ?></span>
           <span id="shell-notif-badge" class="shell-notif-badge hidden">0</span>
         </button>
         <div id="shell-notif-dropdown" class="shell-notif-dropdown hidden" role="menu">
@@ -154,21 +156,21 @@ $helpAnchor = match($activePillar) {
           $uRole = $currentUser['role'] ?? 'viewer';
           $initial = mb_strtoupper(mb_substr($uName, 0, 1, 'UTF-8'), 'UTF-8');
           $roleLabel = match($uRole) {
-            'admin'  => '🛡️ Quản trị',
-            'leader' => '👑 Ca trưởng',
-            'banhat' => '🎸 Ban hát',
-            default  => '👁️ Thành viên'
+            'admin'  => 'Quản trị',
+            'leader' => 'Ca trưởng',
+            'banhat' => 'Ban hát',
+            default  => 'Thành viên'
           };
         ?>
           <div class="shell-user-pill" id="shell-user-menu-btn" title="Tài khoản @<?= htmlspecialchars($currentUser['username'] ?? '') ?>">
             <span class="shell-avatar"><?= htmlspecialchars($initial) ?></span>
             <span class="shell-user-name"><?= htmlspecialchars($uName) ?></span>
             <span class="shell-role-badge role-<?= htmlspecialchars($uRole) ?>"><?= htmlspecialchars($roleLabel) ?></span>
-            <button id="shell-btn-logout" class="shell-logout-btn" title="Đăng xuất khỏi hệ thống">⏻</button>
+            <button id="shell-btn-logout" class="shell-logout-btn" title="Đăng xuất khỏi hệ thống"><?= icon('log-out') ?></button>
           </div>
         <?php else: ?>
           <button id="shell-btn-login" class="shell-login-btn" title="Đăng nhập vào tài khoản">
-            <span class="login-icon">👤</span>
+            <span class="login-icon"><?= icon('user') ?></span>
             <span class="login-text">Đăng Nhập</span>
           </button>
         <?php endif; ?>

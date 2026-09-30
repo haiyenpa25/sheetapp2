@@ -168,15 +168,15 @@ const MobileController = (() => {
     const isBandActive = lyricContainer && !lyricContainer.classList.contains('hidden');
 
     if (isBandActive) {
-      icon.textContent = '🎼';
-      label.textContent = 'Nhạc';
+      icon.innerHTML = '<svg class="icon icon-xs" aria-hidden="true"><use href="#icon-file-text"/></svg>';
+      label.textContent = 'Lời & HÂ';
       btn.classList.add('active');
-      btn.title = 'Đang xem Band · Chạm để xem Bản Nhạc';
+      btn.title = 'Đang xem Lời & Hợp âm · Chạm để xem Bản Nhạc';
     } else {
-      icon.textContent = '▶';
-      label.textContent = 'Band';
+      icon.innerHTML = '<svg class="icon icon-xs" aria-hidden="true"><use href="#icon-music"/></svg>';
+      label.textContent = 'Bản Nhạc';
       btn.classList.remove('active');
-      btn.title = 'Đang xem Bản Nhạc · Chạm để xem Band (Lời & Hợp âm chữ lớn)';
+      btn.title = 'Đang xem Bản Nhạc · Chạm để xem Lời & Hợp âm';
     }
   }
 

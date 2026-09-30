@@ -66,8 +66,6 @@ const AppUI = (() => {
     document.getElementById('welcome-screen')?.classList.add('hidden');
     document.getElementById('sheet-area')?.classList.remove('hidden');
     document.getElementById('page-bar')?.classList.remove('hidden');
-    // Luôn hiện capo-wrap khi có bài đang mở
-    document.getElementById('capo-wrap')?.classList.remove('hidden');
     const wrapper = document.querySelector('.sheet-viewer-wrapper');
     if (wrapper) wrapper.scrollTop = 0;
   }
@@ -164,6 +162,7 @@ const AppUI = (() => {
       badge.textContent = soundingKey ? `Capo ${currentCapo} · nghe ra ${soundingKey}` : `Capo ${currentCapo}`;
       badge.title = fingeredKey ? `Thế bấm: ${fingeredKey} (Kẹp ngăn ${currentCapo} nghe ra ${soundingKey})` : `Capo ${currentCapo}`;
       badge.classList.remove('hidden');
+      badge.classList.add('capo-active');
       badge.style.display = 'inline-flex';
 
       if (capoHint) {
@@ -173,6 +172,7 @@ const AppUI = (() => {
         capoSel.value = String(currentCapo);
       }
     } else {
+      badge.classList.remove('capo-active');
       // Capo = 0: nếu có gợi ý capo tốt nhất (bestCapo)
       const suggested = (typeof bestCapo === 'number' && bestCapo > 0)
         ? bestCapo

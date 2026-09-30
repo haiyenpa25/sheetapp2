@@ -272,7 +272,7 @@ const StageLens = (() => {
       localStorage.setItem(HINT_KEY, '1');
     } catch (_) { return; }
     setTimeout(() => {
-      window.AppUI?.showToast?.('🎹 Đang xem như Đàn phím — mở Công cụ → Hiển thị để chọn nhạc cụ của bạn', 'info');
+      window.AppUI?.showToast?.('Đang xem như Đàn phím — mở Công cụ → Hiển thị để chọn nhạc cụ của bạn', 'info');
     }, HINT_DELAY_MS);
   }
 

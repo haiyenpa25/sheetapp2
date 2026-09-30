@@ -396,15 +396,15 @@
   </div>
 
   <div class="mobile-thumb-group mobile-view-group" role="group" aria-label="Chế độ xem">
-    <button id="btn-mobile-view-toggle" class="btn-thumb-view" title="Chuyển chế độ Band ↔ Bản Nhạc">
-      <span id="mobile-view-icon" class="thumb-icon"><?= icon('play') ?></span>
-      <span id="mobile-view-label" class="thumb-label">Band</span>
+    <button id="btn-mobile-view-toggle" class="btn-thumb-view" title="Chuyển chế độ Lời &amp; Hợp âm ↔ Bản Nhạc">
+      <span id="mobile-view-icon" class="thumb-icon"><?= icon('music') ?></span>
+      <span id="mobile-view-label" class="thumb-label">Bản Nhạc</span>
     </button>
   </div>
 
   <div class="mobile-thumb-group mobile-gig-group" role="group" aria-label="Toàn màn hình">
     <button id="btn-mobile-gig" class="btn-thumb-gig" title="Chế độ Toàn Màn Hình" aria-label="Toàn màn hình">
-      <span class="thumb-icon"><?= icon('zap') ?></span>
+      <span class="thumb-icon"><?= icon('maximize') ?></span>
     </button>
   </div>
 </nav>

@@ -121,6 +121,7 @@ body.dark-mode {
     display: inline-flex;
     align-items: center;
     background: var(--lp-canvas) !important;
+    flex-shrink: 0 !important;
   }
   .unified-toolbar .btn-view-mode {
     display: inline-flex;
@@ -149,12 +150,21 @@ body.dark-mode {
   .unified-toolbar .btn-toolbar-tempo { cursor: pointer; gap: 5px; font-weight: 600; }
   .unified-toolbar .btn-toolbar-tempo:hover { background: var(--lp-hover) !important; border-color: var(--lp-border-strong) !important; }
   .unified-toolbar .tempo-note-icon { font-size: 15px; color: var(--lp-accent); line-height: 1; }
-  .unified-toolbar .btn-chord-edit-pill { cursor: pointer; gap: 5px; font-weight: 600; }
+  .unified-toolbar .btn-chord-edit-pill { cursor: pointer; gap: 5px; font-weight: 600; flex-shrink: 0 !important; }
   .unified-toolbar .btn-chord-edit-pill.active { background: #f59e0b !important; border-color: #d97706 !important; color: #fff !important; }
   body.toolbar-controls-compact .unified-toolbar #btn-transpose-reset,
   body.toolbar-controls-compact .unified-toolbar #btn-add-chord-mode-bar,
   body.toolbar-controls-compact .unified-toolbar #btn-new-chord-set { display: inline-flex !important; }
   .unified-toolbar .toolbar-secondary-controls { display: none !important; }
+
+  /* ROADMAP5 2.2: Thu gọn cụm Capo và các nút phụ trên màn hình laptop <= 1440px tránh tràn toolbar */
+  @media (max-width: 1440px) {
+    .unified-toolbar #capo-wrap { display: none !important; }
+    .unified-toolbar #capo-badge:not(.capo-active) { display: none !important; }
+    .unified-toolbar .chord-set-count,
+    .unified-toolbar #btn-new-chord-set,
+    .unified-toolbar #btn-propose-hd { display: none !important; }
+  }
 
   /* Nút icon bên trong pill */
   .unified-toolbar .icon-btn-pill {
@@ -427,14 +437,25 @@ body.dark-mode {
 .song-item .song-fav-btn.active,
 .song-item .song-fav-btn.fav-active { opacity: 1; }
 
-/* ─── 4. Thông báo nổi: nhỏ, giữa đáy, không đè bản nhạc ──────────── */
+/* ─── 4. Thông báo nổi: nhỏ, góc trên phải trên máy tính, không đè khuông nhạc ──────────── */
 .toast-container {
-  left: 50% !important;
-  right: auto !important;
-  bottom: 18px !important;
-  transform: translateX(-50%);
-  align-items: center !important;
+  left: auto !important;
+  right: 24px !important;
+  top: 100px !important;
+  bottom: auto !important;
+  transform: none !important;
+  align-items: flex-end !important;
   pointer-events: none;
+}
+@media (max-width: 680px) {
+  .toast-container {
+    left: 50% !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important;
+    transform: translateX(-50%) !important;
+    align-items: center !important;
+  }
 }
 .toast-container .toast {
   max-width: min(420px, calc(100vw - 32px)) !important;

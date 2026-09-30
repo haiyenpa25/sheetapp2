@@ -149,7 +149,25 @@ body.stage-clean-mode .app-shell-navbar {
 }
 
 .pillar-icon {
+  display: inline-flex;
+  align-items: center;
   font-size: 0.95rem;
+}
+.shell-brand-icon .icon,
+.pillar-icon .icon,
+.help-icon .icon,
+.notif-icon .icon,
+.login-icon .icon,
+.shell-logout-btn .icon {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
+  vertical-align: -2px;
+}
+.shell-brand-icon .icon {
+  width: 18px;
+  height: 18px;
+  color: var(--shell-active-indicator, #7c3aed);
 }
 
 /* Actions Right Area */
