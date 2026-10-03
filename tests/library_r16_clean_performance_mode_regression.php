@@ -8,7 +8,7 @@ declare(strict_types=1);
  * - Chế độ Biểu Diễn 100% Sạch: ẩn thanh điều hướng, thanh công cụ, dải chip, dải phân đoạn, thanh dưới điện thoại.
  * - Lớp điều khiển mờ duy nhất (#gig-floating-hud): ‹ Bài │ − Tông + │ Khổ n/N │ Cuộn │ − Zoom + │ Thoát ✕
  * - Nút HUD không còn là ô xám trống (Lucide SVG + nhãn, nền kính cong).
- * - Thông báo "Nhấn F/Esc để thoát" chỉ hiện 1 lần per session và ở trên đỉnh, không đè HUD.
+ * - Thông báo "Nhấn F/Esc để thoát" chỉ hiện 1 lần per session; lỗi hiện phía trên HUD.
  * - Lock/Unlock zoom dùng Lucide SVG thay vì emoji.
  */
 
@@ -127,11 +127,11 @@ recordCheck(
     true
 );
 
-// 10. library-polish.css: Toast ở chế độ Biểu Diễn được dời lên trên đỉnh (top: 14px) không đè HUD
+// 10. ROADMAP6: Toast lỗi ở dưới màn hình nhưng nằm trên HUD, không đè tiêu đề bài.
 recordCheck(
-    "library-polish.css đặt toast ở đỉnh màn hình (top) trong sheet-only-mode để không đè HUD",
+    "library-polish.css đặt toast phía trên HUD trong sheet-only-mode",
     str_contains($libraryPolishCss, 'body.sheet-only-mode .toast-container') &&
-    (bool)preg_match('/body\.sheet-only-mode\s+\.toast-container\s*\{[^}]*top:\s*\d+px/s', $libraryPolishCss),
+    (bool)preg_match('/body\.sheet-only-mode\s+\.toast-container\s*\{[^}]*bottom:\s*126px/s', $libraryPolishCss),
     true
 );
 

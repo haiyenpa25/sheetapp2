@@ -17,7 +17,7 @@ module.exports = defineConfig({
   workers: 1,
   reporter: 'list',
   use: {
-    baseURL: 'http://localhost/sheetapp2/',
+    baseURL: process.env.SHEETAPP_E2E_BASE_URL || 'http://localhost/sheetapp2/',
     trace: 'on-first-retry',
   },
   projects: [

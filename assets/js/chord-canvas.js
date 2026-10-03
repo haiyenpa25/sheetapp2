@@ -195,7 +195,7 @@ const ChordCanvas = (() => {
       // Thu hẹp đúng phạm vi lỗi B2/B3 — KHÔNG đổi hành vi cho bộ cá nhân tuỳ ý khác
       // (không phá luồng "Tạo bộ mới rồi sửa ngay"): TLH luôn bất biến (Core Rule 3);
       // HD là bộ DÙNG CHUNG — ai không phải chủ sở hữu (chord_code='HD') phải hỏi trước.
-      const needsConfirm = (_currentSet === 'default') || (curSetUpper === 'HD' && !isOwnSet);
+      const needsConfirm = (_currentSet === 'default') || (curSetUpper === 'HD' && !isOwnSet && !window.Auth?.isAdmin?.());
       if (needsConfirm) {
         const targetSet = myChordCode || myUsername;
         if (!targetSet) {
@@ -407,18 +407,26 @@ const ChordCanvas = (() => {
     await _refreshSetDropdown(true);
     window.App?.showToast?.(`Đã tạo bộ "${name}" - bắt đầu nhập!`, 'success');
   }
-
-  function showNewSetModal() {
+  async function showNewSetModal() {
     if (!window.Auth?.isBanhat?.()) {
       window.App?.showToast?.('⚠️ Vui lòng đăng nhập tài khoản Nhạc công để tạo bản phối', 'info');
       window.Auth?.openModal?.();
       return;
     }
     const myChordCode = (window.Auth?.getChordCode?.() || '').toUpperCase();
-    if (myChordCode) { createSet(myChordCode); return; }
+    if (myChordCode) {
+      const selector = document.getElementById('chord-set-selector');
+      const alreadyExists = myChordCode === 'HD' || Array.from(selector?.options || []).some(option => option.value.toUpperCase() === myChordCode);
+      if (alreadyExists) {
+        await switchSet(myChordCode);
+        window.ModeManager?.setMode?.(window.ModeManager.MODES.EDIT_CHORDS);
+      } else {
+        await createSet(myChordCode);
+      }
+      return;
+    }
     ChordCanvasUI.showNewSetModal({ onCreate: (name) => createSet(name) });
   }
-
   async function deleteSet(name) {
     if (!name || name === 'default' || name === 'TLH' || name === 'HD') {
       window.App?.showToast?.('Bộ này được bảo vệ chuẩn, không thể xóa!', 'error'); return;

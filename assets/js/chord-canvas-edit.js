@@ -296,7 +296,7 @@ const ChordCanvasEdit = (() => {
     const myChordCode = (window.Auth?.getChordCode?.() || '').toUpperCase();
     const curSetUpper = (currentSet || '').toUpperCase();
 
-    if (myChordCode && curSetUpper !== myChordCode && curSetUpper !== 'HD') {
+    if (!window.Auth?.isAdmin?.() && myChordCode && curSetUpper !== myChordCode && curSetUpper !== 'HD') {
       window.App?.showToast?.(`❌ Bạn chỉ có quyền lưu vào bộ hợp âm cá nhân (${myChordCode})!`, 'error');
       return;
     }

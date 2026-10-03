@@ -10,11 +10,11 @@ const LyricExtractor = (() => {
   let _currentMode = localStorage.getItem(MODE_KEY) || 'stacked';
 
   /* ─── Transpose chord text ─── */
-  function _transposeChordText(chordStr, semitones) {
+  function _transposeChordText(chordStr, semitones, useFlats = null) {
     if (!chordStr || semitones === 0) return chordStr;
     // TransposeEngine.transposeChord có fallback nội bộ (không cần Tonal.js)
     if (window.TransposeEngine?.transposeChord) {
-      return window.TransposeEngine.transposeChord(chordStr, semitones) || chordStr;
+      return window.TransposeEngine.transposeChord(chordStr, semitones, useFlats) || chordStr;
     }
     // Tonal.js trực tiếp (only when TransposeEngine not available at all)
     if (!window.Tonal) return chordStr;
@@ -65,6 +65,17 @@ const LyricExtractor = (() => {
     const part = doc.querySelector('part');
     if (!part) return [];
 
+    // Hợp âm chữ dùng cùng cách viết thăng/giáng với tông hiển thị.
+    const xmlKey = doc.querySelector('key');
+    const fifthsText = xmlKey?.querySelector('fifths')?.textContent;
+    const sourceKey = fifthsText == null
+      ? window.Store?.get?.('currentSong')?.defaultKey
+      : Number(fifthsText);
+    const xmlMode = xmlKey?.querySelector('mode')?.textContent?.trim().toLowerCase();
+    const isMinor = xmlMode ? xmlMode === 'minor' : null;
+    const targetKey = window.KeyService?.displayKey?.(sourceKey, transposeOffset, isMinor) || '';
+    const useFlats = targetKey ? targetKey.includes('b') : null;
+
     const measures = part.querySelectorAll('measure');
     const verseMap   = {};
     const verseLabel = {};
@@ -77,7 +88,7 @@ const LyricExtractor = (() => {
         if (c.tagName === 'harmony') {
           let str = parseHarmonyToText(c);
           const custom = c.hasAttribute('color');
-          if (!custom && transposeOffset !== 0) str = _transposeChordText(str, transposeOffset);
+          if (!custom && transposeOffset !== 0) str = _transposeChordText(str, transposeOffset, useFlats);
           if (window.GuitarLens?.isSimplifyActive?.()) str = window.GuitarLens.simplifyChord(str);
           currentChord = str;
 

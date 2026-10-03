@@ -61,7 +61,7 @@ test.describe('R0-7 · Toolbar controls luôn bấm được trong tối đa 2 t
   for (const w of DESKTOP_WIDTHS) {
     test(`Laptop ${w}px (sidebar mở): Zoom, Tự cuộn, Metronome, Capo, Soạn hợp âm đều bấm được`, async ({ page }) => {
       const sid = loginAsBanhat();
-      await page.context().addCookies([{ name: 'PHPSESSID', value: sid, domain: 'localhost', path: '/' }]);
+      await page.context().addCookies([{ name: 'PHPSESSID', value: sid, url: new URL('/', test.info().project.use.baseURL).href }]);
 
       await page.setViewportSize({ width: w, height: 800 });
       await page.goto('./?song=thanh-ca-001', { waitUntil: 'domcontentloaded' });
@@ -78,7 +78,7 @@ test.describe('R0-7 · Toolbar controls luôn bấm được trong tối đa 2 t
 
   test('Điện thoại 390px: Soạn hợp âm bấm được (qua menu ⋮), thật sự vào chế độ sửa', async ({ page }) => {
     const sid = loginAsBanhat();
-    await page.context().addCookies([{ name: 'PHPSESSID', value: sid, domain: 'localhost', path: '/' }]);
+    await page.context().addCookies([{ name: 'PHPSESSID', value: sid, url: new URL('/', test.info().project.use.baseURL).href }]);
 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('./?song=thanh-ca-001&v=sheet', { waitUntil: 'domcontentloaded' });
@@ -92,13 +92,17 @@ test.describe('R0-7 · Toolbar controls luôn bấm được trong tối đa 2 t
     await expect(page.locator('#main-dropdown-menu')).toBeVisible({ timeout: 5000 });
     await page.locator('#btn-menu-add-chord-mode').click();
 
+    await expect(page.getByRole('dialog', { name: 'Bắt đầu sửa hợp âm' })).toBeVisible();
+    await page.locator('#cc-clone-edit-mine').click();
+    await expect.poll(() => page.evaluate(() => window.ChordCanvas?.isAddMode?.())).toBe(true);
+
     const mode = await page.evaluate(() => window.ModeManager?.getMode?.());
     expect(mode).toBe('edit_chords');
   });
 
   test('Laptop 1366px (sidebar mở): bấm "Gốc" trong menu thật sự đưa tông về 0', async ({ page }) => {
     const sid = loginAsBanhat();
-    await page.context().addCookies([{ name: 'PHPSESSID', value: sid, domain: 'localhost', path: '/' }]);
+    await page.context().addCookies([{ name: 'PHPSESSID', value: sid, url: new URL('/', test.info().project.use.baseURL).href }]);
 
     await page.setViewportSize({ width: 1366, height: 800 });
     await page.goto('./?song=thanh-ca-001', { waitUntil: 'domcontentloaded' });

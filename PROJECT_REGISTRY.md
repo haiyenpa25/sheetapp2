@@ -38,6 +38,7 @@ SheetApp/
 ├── PROJECT_REGISTRY.md       ← File này. Bản đồ dự án & lịch sử thay đổi.
 ├── CODE_MAP.md               ← Bản đồ tri thức codebase (tự sinh bởi Gitnexus)
 ├── INFO.md                   ← Tài liệu tổng quan, sprint plan, keyboard shortcuts
+├── ROADMAP7.md               ← Kế hoạch và trạng thái tối ưu Thư viện trên điện thoại/laptop
 ├── sync.sh                   ← Auto-sync script (cập nhật CODE_MAP.md & push GitHub)
 ├── SHEETAPP2_LIVE_BAND_DEEP_ANALYSIS_2026-09-10.md ← Báo cáo phân tích chuyên sâu Live Band Studio
 ├── SHEETAPP2_MANAGER_DEEP_ANALYSIS_2026-09-10.md   ← Báo cáo phân tích chuyên sâu Manager Portal
@@ -1382,4 +1383,18 @@ SheetApp/
 
 *File này là "bộ nhớ" của dự án. AI Agent cập nhật sau mỗi phiên để phiên sau không phải khám phá lại từ đầu.*
 *Cập nhật: 2026-09-28 (Hoàn tất 100% Roadmap 1-4, sẵn sàng bàn giao)*
+
+[2026-10-02] — Tích hợp Roadmap6/7 Thư viện vào cây làm việc `main` theo yêu cầu chủ dự án:
+  + Tạo: `ROADMAP6.md`, `ROADMAP7.md`, hai báo cáo trong `docs/`, ảnh kiểm tra `docs/roadmap7/` và E2E R6/R7.
+  ~ Sửa: toolbar điện thoại, HUD toàn màn hình, logo và tên bài trong nav trái, quyền hiển thị Soạn, vị trí nút hợp âm, cách viết Ab ở Lời khi G tăng một bán cung.
+  ~ Giữ các sửa riêng có trước trên `main` ở dải phân đoạn, bộ hợp âm và các bài E2E; sao lưu file trước tích hợp tại `C:\xampp\htdocs\sheetapp2-integration-backup-20261002`.
+  ~ Kiểm thử trên trang chính: 122/122 E2E Chromium/WebKit PASS; PHP tổng hợp 164 suite, 3205 checks PASS, 0 FAIL; xem `docs/ROADMAP7_IMPLEMENTATION_REPORT.md`. Chưa commit/push/deploy.
+
+[2026-10-02] — Thêm báo cáo phân tích `docs/MOBILE_CHORD_EDIT_UX_REVIEW_2026-10-02.md`: rà soát luồng soạn hợp âm điện thoại, nút chuyển HD/TLH, khoảng trống kiểm thử cảm ứng và ưu tiên cải tiến. Chưa sửa mã, dữ liệu hoặc trạng thái ticket.
+
+[2026-10-02] — Triển khai sửa nút HD/TLH điện thoại trong `assets/js/mobile-controller.js` và `assets/css/library-polish.css`; thêm kiểm thử cảm ứng `e2e/library-mobile-hd-tlh-switch.spec.js`. Chi tiết và giới hạn nghiệm thu ghi trong báo cáo trên. Chưa commit/push/deploy.
+
+[2026-10-02] — Sửa chế độ Rút gọn Thư viện: thêm `assets/js/compact-score.js` để gộp nốt trùng cùng thời điểm/cao độ/trường độ/khuông, giữ nốt riêng và dấu luyến/nối/lời; `assets/js/osmd-renderer.js` dùng module này và giữ khuông Fa khi lời sẽ chồng. Cập nhật nhãn trợ giúp, script order trong `index.php`, precache `sw.js`, kiểm thử `e2e/library-compact-score.spec.js` và kiểm tra cache L5-3. Không thay MusicXML hoặc DB gốc; chưa commit/push/deploy.
+[2026-10-02] — Bổ sung quan hệ nốt dùng chung cho Rút gọn: `CompactScore.getVoiceEvents()` trả bè logic theo khuông/thời điểm; MusicXML sau gộp ghi `data-sheetapp-voices` để một nốt vẽ một lần vẫn thuộc cả hai bè khi tách. Có ca kiểm thử nốt ghi một lần, dấu nghỉ rõ ràng và nạp/vẽ bằng OSMD thật.
+[2026-10-03] — Tối giản bản nhạc theo tuyến giai điệu: `assets/js/compact-score.js` chọn bè Sol chính và một cao độ cho mỗi chùm, chuyển lời và bỏ dấu nối/luyến không đủ cặp; `assets/js/osmd-renderer.js` giữ Fa ẩn và điều chỉnh bố cục lời thay vì bật lại Fa; `assets/css/sheet.css` cho cuộn ngang bản nhạc tối thiểu 370 px trên điện thoại rất hẹp. Cập nhật nhãn tùy chọn/trợ giúp, E2E MusicXML thật và bật/tắt trên trang Thư viện; kết quả ở `docs/THU_VIEN_FULL_AUDIT_2026-10-02.md`. Không sửa MusicXML hoặc DB gốc; chưa commit/push/deploy.
 

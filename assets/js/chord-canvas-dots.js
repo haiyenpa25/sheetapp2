@@ -23,7 +23,7 @@ const ChordCanvasDots = (() => {
     if (staveGroups.length) {
       staveGroups.forEach(g => {
         const r = g.getBoundingClientRect();
-        if (r.width > 40 && r.height > 0 && r.top > 0) {
+        if (r.width > 40 && r.height > 0) {
           staffLineRects.push(r.top - cRect.top);
         }
       });
@@ -35,7 +35,7 @@ const ChordCanvasDots = (() => {
       // HD nằm cao hơn khuông ~76px, đè lên dòng tên tác giả.
       Array.from(svg.querySelectorAll('line, path')).forEach(el => {
         const r = el.getBoundingClientRect();
-        if (r.width > STAFF_LINE_MIN_WIDTH && r.height < 3 && r.top > 0) {
+        if (r.width > STAFF_LINE_MIN_WIDTH && r.height < 3) {
           staffLineRects.push(r.top - cRect.top);
         }
       });
@@ -57,7 +57,7 @@ const ChordCanvasDots = (() => {
     const systems = [];
     let sysStart = deduped[0];
     let prev = deduped[0];
-    const SYS_GAP = 150;
+    const SYS_GAP = 40;
 
     for (let i = 1; i < deduped.length; i++) {
       const curr = deduped[i];
@@ -74,26 +74,14 @@ const ChordCanvasDots = (() => {
 
     const assigned = new Map();
     allBadges.forEach(badge => {
-      const badgeY = parseFloat(badge.style.top);
+      const badgeY = parseFloat(badge.dataset.noteTop ?? badge.style.top);
       if (isNaN(badgeY)) return;
 
       let bestSys = null;
-      let minAbove = Infinity;
-
+      let minDist = Infinity;
       for (const sys of systems) {
-        const dist = sys.topLine - badgeY;
-        if (dist >= -40 && dist < minAbove) {
-          minAbove = dist;
-          bestSys = sys;
-        }
-      }
-
-      if (!bestSys) {
-        let minDist = Infinity;
-        for (const sys of systems) {
-          const d = Math.abs(badgeY - sys.topLine);
-          if (d < minDist) { minDist = d; bestSys = sys; }
-        }
+        const dist = Math.abs(badgeY - sys.topLine);
+        if (dist < minDist) { minDist = dist; bestSys = sys; }
       }
 
       if (bestSys) {
@@ -262,6 +250,7 @@ const ChordCanvasDots = (() => {
     if (_cachedNoteMapping && _cachedNoteGeomKey === geomKey) {
       return _cachedNoteMapping.map(m => ({
         ...m,
+        rect: m.el.getBoundingClientRect(),
         chord: chordMap[`${m.measureIdx}_${m.noteIdx}`] || ''
       }));
     }
@@ -493,6 +482,7 @@ const ChordCanvasDots = (() => {
         }
 
         textBadge.style.cssText = baseStyle.join(';');
+        textBadge.dataset.noteTop = rect.top - cRect.top;
 
         if (editEnabled) {
           textBadge.addEventListener('mouseenter', () => {
@@ -567,6 +557,7 @@ const ChordCanvasDots = (() => {
         'pointer-events:auto', 'cursor:pointer', 'user-select:none', 'touch-action:manipulation',
         '-webkit-tap-highlight-color:transparent', 'transition:transform 0.15s ease, background 0.15s ease', 'position:absolute'
       ]);
+      btn.dataset.noteTop = rect.top - cRect.top;
       btn.addEventListener('mouseenter', () => { btn.style.transform = 'translateX(-50%) scale(1.2)'; btn.style.background = 'rgba(109,40,217,1)'; });
       btn.addEventListener('mouseleave', () => { btn.style.transform = 'translateX(-50%) scale(1)';   btn.style.background = 'rgba(109,40,217,0.82)'; });
       let _pointerHandled = false;

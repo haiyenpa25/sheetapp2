@@ -166,8 +166,8 @@ const ChordCanvasTranspose = (() => {
     if (s !== 0) {
       if (typeof window !== 'undefined' && window.KeyService?.displayKey) {
         displayedRoot = window.KeyService.displayKey(cleanOrig, s, mode === 'minor');
-      } else if (typeof KeyService !== 'undefined' && KeyService.displayKey) {
-        displayedRoot = KeyService.displayKey(cleanOrig, s, mode === 'minor');
+      } else if (globalThis.KeyService?.displayKey) {
+        displayedRoot = globalThis.KeyService.displayKey(cleanOrig, s, mode === 'minor');
       } else if (typeof window !== 'undefined' && window.TransposeEngine?.calcKey) {
         displayedRoot = window.TransposeEngine.calcKey(cleanOrig, s);
       } else {

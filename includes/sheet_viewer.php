@@ -122,6 +122,10 @@
         <span class="gig-hud-trans-label">Tông <span id="gig-hud-trans" class="gig-hud-trans-val" title="Tông đang dịch">0</span></span>
         <button id="btn-gig-trans-up" class="btn-gig-action btn-gig-step" title="Tăng 1 nửa cung (Phím ] )">+</button>
       </div>
+
+      <button id="btn-gig-view-toggle" class="btn-gig-action btn-gig-view" type="button" aria-label="Đổi dạng xem" title="Đổi Bản nhạc / Lời &amp; Hợp âm">Nhạc</button>
+      <button id="btn-gig-chordset" class="btn-gig-action btn-gig-chordset" type="button" aria-label="Đổi bộ hợp âm" title="Đổi bộ hợp âm">HD</button>
+      <button id="btn-gig-tools" class="btn-gig-action btn-gig-tools" type="button" aria-label="Mở Công cụ" title="Mở Công cụ"><?= icon('more-horizontal') ?></button>
       
       <!-- Nút Chuyển Khổ trong Biểu Diễn (Ticket L1-6) -->
       <button id="btn-gig-verse" class="btn-gig-action btn-gig-verse hidden" title="Chuyển khổ hát (Phím V)">Khổ 1/1</button>
@@ -141,6 +145,9 @@
       <button id="btn-gig-exit" class="btn-gig-action btn-gig-exit" title="Thoát Toàn Màn Hình (Esc)"><span>Thoát</span> <?= icon('x') ?></button>
     </div>
   </div>
+  <button id="gig-hud-reveal" class="gig-hud-reveal" type="button" aria-label="Hiện thanh điều khiển biểu diễn" title="Hiện thanh điều khiển">
+    <?= icon('chevron-up') ?> <span>Điều khiển</span>
+  </button>
 
   <!-- Floating Chord Edit Hint (ngoài page-bar) -->
   <div id="chord-edit-hint" class="chord-edit-hint hidden" role="status">

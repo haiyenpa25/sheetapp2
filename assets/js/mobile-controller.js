@@ -51,18 +51,13 @@ const MobileController = (() => {
     // 2. Chuyển đổi bộ hợp âm ngón cái (HD ↔ TLH)
     document.getElementById('btn-mobile-chordset')?.addEventListener('click', async (e) => {
       e.currentTarget.blur();
+      if (window.ChordCanvas?.isAddMode?.()) {
+        window.App?.showToast?.('Chạm Soạn để hoàn tất trước khi đổi bộ hợp âm', 'info');
+        return;
+      }
       const curSet = window.ChordCanvas?.getCurrentSet?.() || 'HD';
       const selector = document.getElementById('chord-set-selector');
-      
-      let nextSet = 'HD';
-      if (selector && selector.options && selector.options.length > 1) {
-        let curIdx = selector.selectedIndex;
-        if (curIdx < 0) curIdx = 0;
-        const nextIdx = (curIdx + 1) % selector.options.length;
-        nextSet = selector.options[nextIdx].value;
-      } else {
-        nextSet = (curSet === 'HD') ? 'default' : 'HD';
-      }
+      const nextSet = curSet === 'HD' ? 'default' : 'HD';
 
       if (window.ChordCanvas?.switchSet) {
         await window.ChordCanvas.switchSet(nextSet);
@@ -73,6 +68,10 @@ const MobileController = (() => {
       sync();
     });
 
+    document.getElementById('btn-gig-chordset')?.addEventListener('click', () => {
+      document.getElementById('btn-mobile-chordset')?.click();
+    });
+
     // 3. Chuyển chế độ Band ↔ Bản Nhạc
     document.getElementById('btn-mobile-view-toggle')?.addEventListener('click', (e) => {
       e.currentTarget.blur();
@@ -81,10 +80,30 @@ const MobileController = (() => {
       setTimeout(sync, 60);
     });
 
+    document.getElementById('btn-gig-view-toggle')?.addEventListener('click', () => {
+      document.getElementById('btn-mobile-view-toggle')?.click();
+    });
+    document.getElementById('btn-gig-tools')?.addEventListener('click', (event) => {
+      event.stopPropagation();
+      document.getElementById('btn-more-options')?.click();
+    });
+
     // 4. Biểu diễn toàn màn hình sân khấu
     document.getElementById('btn-mobile-gig')?.addEventListener('click', (e) => {
       e.currentTarget.blur();
       document.getElementById('btn-fullscreen')?.click();
+    });
+
+    document.getElementById('btn-mobile-edit')?.addEventListener('click', (e) => {
+      e.currentTarget.blur();
+      if (!window.Auth?.isBanhat?.()) return;
+      const lyricView = document.getElementById('lyric-view-container');
+      if (lyricView && !lyricView.classList.contains('hidden')) {
+        document.getElementById('btn-view-sheet')?.click();
+      }
+      const edit = document.getElementById('btn-add-chord-mode-bar');
+      if (edit && !edit.disabled) edit.click();
+      sync();
     });
 
     // Theo dõi thay đổi kích thước màn hình
@@ -96,6 +115,7 @@ const MobileController = (() => {
       EventBus.on('transpose:changed', () => sync());
       EventBus.on('state:currentTranspose', () => sync());
       EventBus.on('song:loaded', () => sync());
+      EventBus.on('app:mode_change', () => sync());
     }
 
     // Quan sát thay đổi ở DOM chính
@@ -104,12 +124,15 @@ const MobileController = (() => {
     if (songKeyEl) observer.observe(songKeyEl, { childList: true, characterData: true, subtree: true });
     const transDisp = document.getElementById('transpose-display');
     if (transDisp) observer.observe(transDisp, { childList: true, characterData: true, subtree: true });
+    const lyricView = document.getElementById('lyric-view-container');
+    if (lyricView) observer.observe(lyricView, { attributes: true, attributeFilter: ['class'] });
   }
 
   function sync() {
     _syncTransposeDisplay();
     _syncChordSetDisplay();
     _syncViewToggleDisplay();
+    _syncEditDisplay();
   }
 
   function _syncTransposeDisplay() {
@@ -141,6 +164,7 @@ const MobileController = (() => {
 
     disp.textContent = displayKey;
     disp.title = `Tông: ${displayKey} · Chạm để về gốc`;
+    disp.setAttribute('aria-label', `Tông hiện tại ${displayKey}. Chạm để về tông gốc`);
     disp.classList.toggle('has-transpose', semi !== 0);
   }
 
@@ -149,12 +173,23 @@ const MobileController = (() => {
     if (!label) return;
 
     const curSet = window.ChordCanvas?.getCurrentSet?.() || 'HD';
+    const fallback = curSet === 'HD' && !!window.ChordCanvas?.getChordStatus?.()?.isFallback;
     if (curSet === 'default') {
       label.textContent = 'TLH';
     } else if (curSet === 'HD') {
-      label.textContent = 'HD';
+      label.textContent = fallback ? 'HD→TLH' : 'HD';
     } else {
       label.textContent = curSet.length > 4 ? curSet.slice(0, 3) + '…' : curSet;
+    }
+    const button = document.getElementById('btn-mobile-chordset');
+    const setDescription = fallback ? 'HD trống, đang hiện hợp âm TLH' : `Bộ hợp âm: ${label.textContent}`;
+    button?.setAttribute('aria-label', `${setDescription}. Chạm để đổi ${curSet === 'HD' ? 'sang TLH' : 'sang HD'}`);
+    if (button) button.title = setDescription;
+    button?.classList.toggle('showing-tlh-fallback', fallback);
+    const gigChordset = document.getElementById('btn-gig-chordset');
+    if (gigChordset) {
+      gigChordset.textContent = label.textContent;
+      gigChordset.setAttribute('aria-label', `${setDescription}. Chạm để đổi ${curSet === 'HD' ? 'sang TLH' : 'sang HD'}`);
     }
   }
 
@@ -172,12 +207,28 @@ const MobileController = (() => {
       label.textContent = 'Lời & HÂ';
       btn.classList.add('active');
       btn.title = 'Đang xem Lời & Hợp âm · Chạm để xem Bản Nhạc';
+      btn.setAttribute('aria-label', 'Đang xem Lời và hợp âm. Chạm để xem Bản nhạc');
     } else {
       icon.innerHTML = '<svg class="icon icon-xs" aria-hidden="true"><use href="#icon-music"/></svg>';
       label.textContent = 'Bản Nhạc';
       btn.classList.remove('active');
       btn.title = 'Đang xem Bản Nhạc · Chạm để xem Lời & Hợp âm';
+      btn.setAttribute('aria-label', 'Đang xem Bản nhạc. Chạm để xem Lời và hợp âm');
     }
+    const gigView = document.getElementById('btn-gig-view-toggle');
+    if (gigView) {
+      gigView.textContent = isBandActive ? 'Lời' : 'Nhạc';
+      gigView.setAttribute('aria-label', btn.getAttribute('aria-label'));
+    }
+  }
+
+  function _syncEditDisplay() {
+    const btn = document.getElementById('btn-mobile-edit');
+    if (!btn) return;
+    const active = document.body.classList.contains('chord-edit-mode');
+    btn.classList.toggle('active', active);
+    btn.setAttribute('aria-pressed', String(active));
+    btn.setAttribute('aria-label', active ? 'Hoàn tất soạn hợp âm' : 'Soạn hợp âm');
   }
 
   function _debounce(fn, ms) {

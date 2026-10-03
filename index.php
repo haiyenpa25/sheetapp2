@@ -214,6 +214,7 @@ echo jsTag('core/OfflineSetlistManager.js', false);
 
 // ── 2. Renderers & Engines ──
 echo jsTag('osmd-svg-text.js');
+echo jsTag('compact-score.js');
 echo jsTag('osmd-renderer.js');
 echo jsTag('lyric-extractor.js');
 echo jsTag('transpose-engine.js');

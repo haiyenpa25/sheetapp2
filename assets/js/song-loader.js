@@ -428,7 +428,10 @@ const SongLoader = (() => {
     const cnt   = Object.keys(window.ChordCanvas?.getCustomChords?.() ?? {}).length;
     const setLbl = set === 'default' ? 'TLH (gốc)' : (set === 'HD' ? '⭐ HD' : set);
     const cntLbl = set !== 'default' ? (cnt > 0 ? ` (${cnt} hợp âm)` : ' (chưa có · đang hiện TLH)') : '';
-    AppUI.showToast(`🎵 ${song.title}${key ? ' · '+key : ''} · ${setLbl}${cntLbl}`, 'info');
+    // Điện thoại đã hiện bài/tông/bộ hợp âm ở toolbar sát ngón cái; toast này che khuông nhạc.
+    if (window.innerWidth > 680) {
+      AppUI.showToast(`🎵 ${song.title}${key ? ' · '+key : ''} · ${setLbl}${cntLbl}`, 'info');
+    }
   }
 
   async function _restoreFromURL() {

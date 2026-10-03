@@ -53,11 +53,18 @@ const ModeManager = (() => {
         }, { passive: true });
       });
     }
+    document.getElementById('gig-hud-reveal')?.addEventListener('click', _showHud);
 
     // Tự động khôi phục Wake Lock khi tab hiển thị lại trong chế độ Biểu Diễn
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible' && _currentMode === MODES.PERFORMANCE) {
         _requestWakeLock();
+      }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement && _currentMode === MODES.PERFORMANCE) {
+        resetToView();
       }
     });
 
@@ -81,7 +88,7 @@ const ModeManager = (() => {
 
     // 2. Sidebar overlay nếu đang mở trên màn hình <= 1440px (Ticket R1-7)
     const sidebar = document.getElementById('sidebar');
-    if (sidebar && !sidebar.classList.contains('mobile-hidden') && window.innerWidth <= 1440) {
+    if (_currentMode !== MODES.PERFORMANCE && sidebar && !sidebar.classList.contains('mobile-hidden') && window.innerWidth <= 1440) {
       document.getElementById('sidebar-overlay')?.click();
       e?.preventDefault?.();
       return true;
@@ -164,7 +171,10 @@ const ModeManager = (() => {
       _requestFullscreen();
       _requestWakeLock();
       window.KeyboardHandler?.enableMIDI?.();
-      window.LiveSync?.ensureLoaded?.();
+      window.LiveSync?.ensureLoaded?.().then(() => {
+        const songId = window.App?.getCurrentSongId?.();
+        if (songId) window.ArrangementEngine?.loadForSongIfEmpty?.(songId);
+      }).catch(() => {});
       const HINT_KEY = 'sheetapp_gig_hint_shown';
       if (!sessionStorage.getItem(HINT_KEY)) {
         sessionStorage.setItem(HINT_KEY, '1');
@@ -196,7 +206,7 @@ const ModeManager = (() => {
       const icon = btnGig.querySelector('.gig-icon');
       const text = btnGig.querySelector('.gig-text');
       if (text) text.textContent = isPerformance ? 'Thu Nhỏ' : 'Toàn Màn Hình';
-      if (icon) icon.textContent = isPerformance ? '✕' : '⚡';
+      if (icon) icon.innerHTML = `<svg class="icon icon-xs" aria-hidden="true"><use href="#icon-${isPerformance ? 'minimize' : 'maximize'}"></use></svg>`;
     }
 
     // 4. Đồng bộ giao diện Nút Điền Hợp Âm
@@ -237,6 +247,7 @@ const ModeManager = (() => {
     const hud = document.getElementById('gig-floating-hud');
     if (hud && _currentMode === MODES.PERFORMANCE) {
       hud.classList.add('faded');
+      document.getElementById('section-jump-bar-container')?.classList.add('hud-faded');
     }
   }
 
@@ -245,6 +256,7 @@ const ModeManager = (() => {
     if (hud) {
       hud.classList.remove('faded');
     }
+    document.getElementById('section-jump-bar-container')?.classList.remove('hud-faded');
     _resetHudTimer();
   }
 
@@ -263,6 +275,7 @@ const ModeManager = (() => {
     if (hud) {
       hud.classList.remove('faded');
     }
+    document.getElementById('section-jump-bar-container')?.classList.remove('hud-faded');
     _resetHudTimer();
   }
 
@@ -275,6 +288,7 @@ const ModeManager = (() => {
     if (hud) {
       hud.classList.remove('faded');
     }
+    document.getElementById('section-jump-bar-container')?.classList.remove('hud-faded');
   }
 
   /* Fullscreen & WakeLock Helpers */
@@ -297,10 +311,16 @@ const ModeManager = (() => {
 
   async function _requestFullscreen() {
     try {
-      if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+      if (!document.fullscreenElement) {
+        if (!document.documentElement.requestFullscreen) {
+          resetToView();
+          return;
+        }
         await document.documentElement.requestFullscreen();
       }
-    } catch (e) {}
+    } catch (e) {
+      if (_currentMode === MODES.PERFORMANCE) resetToView();
+    }
   }
 
   async function _exitFullscreen() {

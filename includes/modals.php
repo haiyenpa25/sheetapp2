@@ -535,9 +535,9 @@
       <div class="help-pane hidden" id="help-tab-compact">
         <p>Nhấn <strong><?= icon('sliders', 'icon-xs') ?> Gọn Nhẹ</strong> trên toolbar để bật chế độ đơn giản hóa bản nhạc. Nhấn <strong><?= icon('settings', 'icon-xs') ?></strong> bên cạnh để tùy chỉnh:</p>
         <ul>
-          <li><?= icon('check', 'icon-xs text-success') ?> <strong>Ẩn Khóa Fa</strong> — Chỉ hiển thị khuông cao âm (treble)</li>
-          <li><?= icon('check', 'icon-xs text-success') ?> <strong>Ẩn Bè Phụ</strong> — Chỉ giữ giai điệu chính</li>
-          <li><?= icon('check', 'icon-xs text-success') ?> <strong>Ẩn Nốt Chùm</strong> — Mỗi nhịp chỉ một nốt cao nhất</li>
+          <li><?= icon('check', 'icon-xs text-success') ?> <strong>Ẩn Khóa Fa</strong> — Chỉ hiển thị khuông khóa Sol</li>
+          <li><?= icon('check', 'icon-xs text-success') ?> <strong>Chỉ Giữ Bè Giai Điệu</strong> — Bỏ bè hòa âm khóa Sol; nốt hai bè dùng chung chỉ hiện một lần</li>
+          <li><?= icon('check', 'icon-xs text-success') ?> <strong>Bỏ Nốt Hòa Âm</strong> — Mỗi thời điểm giữ một cao độ giai điệu và lời đi kèm</li>
           <li><?= icon('check', 'icon-xs text-success') ?> <strong>Ẩn Tên Bài</strong> — Gọn cho màn hình nhỏ</li>
         </ul>
         <p>Chế độ Gọn Nhẹ lý tưởng cho iPad, điện thoại, hoặc khi muốn đọc lời nhanh.</p>

@@ -25,7 +25,13 @@ test.describe('R1-4 · Dải Phân Đoạn Có Điều Kiện & Chuẩn Hóa Nh�
   test('Mở bài thường -> dải ẩn; Biểu Diễn -> dải hiện + nhãn chuẩn tiếng Việt + icon SVG', async ({ page }) => {
     await page.setViewportSize({ width: 1366, height: 768 });
     await page.goto('./?song=thanh-ca-001', { waitUntil: 'domcontentloaded' });
+    // Đợi OSMD render (SVG xuất hiện)
     await expect(page.locator('#osmd-container svg').first()).toBeVisible({ timeout: 25000 });
+    // Đợi song:loaded event và ArrangementEngine populate sections (tối đa 8s)
+    await page.waitForFunction(
+      () => (window.ArrangementEngine?.getSections?.() || []).length > 0,
+      { timeout: 8000 }
+    ).catch(() => {}); // nếu không có sections sau 8s, tiếp tục (loadForSongIfEmpty sẽ xử lý)
 
     const jumpBar = page.locator('#section-jump-bar-container');
 
@@ -37,7 +43,8 @@ test.describe('R1-4 · Dải Phân Đoạn Có Điều Kiện & Chuẩn Hóa Nh�
     await btnGig.click();
 
     // 3. Dải phân đoạn HIỂN THỊ trong chế độ Biểu Diễn
-    await expect(jumpBar).toBeVisible({ timeout: 5000 });
+    // Sections được tải async (API call) khi vào Performance mode → cần timeout đủ dài
+    await expect(jumpBar).toBeVisible({ timeout: 15000 });
 
     // 4. Kiểm tra các chips có đủ 4 phân đoạn chuẩn tiếng Việt
     const chips = page.locator('#section-chips-list .section-chip');

@@ -88,8 +88,7 @@ test.describe('R1-5 · Bảng Công Cụ Thống Nhất (Popover Laptop & Bottom
     await expect(followLeaderBtn).toContainText('Theo người hướng dẫn');
 
     const addChordBtn = page.locator('#btn-menu-add-chord-mode');
-    await expect(addChordBtn).toBeVisible();
-    await expect(addChordBtn).toContainText('Soạn hợp âm');
+    await expect(addChordBtn).toBeHidden(); // Khách không có quyền Soạn theo ROADMAP6.
 
     const lyricBtn = page.locator('#btn-lyric-view');
     await expect(lyricBtn).toBeVisible();
@@ -130,9 +129,9 @@ test.describe('R1-5 · Bảng Công Cụ Thống Nhất (Popover Laptop & Bottom
     const rowCount = await rows.count();
     expect(rowCount).toBeGreaterThan(10);
 
-    const minHeights = await rows.evaluateAll(elements =>
-      elements.map(el => Math.round(el.getBoundingClientRect().height))
-    );
+    const minHeights = await rows.evaluateAll(elements => elements
+      .filter(el => getComputedStyle(el).display !== 'none')
+      .map(el => Math.round(el.getBoundingClientRect().height)));
     for (const h of minHeights) {
       expect(h).toBeGreaterThanOrEqual(44);
     }

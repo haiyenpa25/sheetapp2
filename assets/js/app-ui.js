@@ -8,11 +8,19 @@ const AppUI = (() => {
   function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
     if (!container) return;
+    if (document.body.classList.contains('sheet-only-mode') && (type === 'info' || type === 'success')) return;
+    const key = `${type}:${message}`;
+    if (Array.from(container.querySelectorAll('.toast')).some(item => item.dataset.toastKey === key)) return;
+    if (type !== 'error' && container.querySelector('.toast.error')) return;
+    container.querySelectorAll('.toast').forEach(item => item.remove());
 
     const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    toast.innerHTML = `<span>${icons[type] || ''}</span><span>${window.SafeHtml.escape(message)}</span>`;
+    toast.dataset.toastKey = key;
+    toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    toast.innerHTML = `<span aria-hidden="true">${icons[type] || ''}</span><span>${window.SafeHtml.escape(message)}</span><button type="button" class="toast-dismiss" aria-label="Đóng thông báo">×</button>`;
+    toast.querySelector('.toast-dismiss').addEventListener('click', () => toast.remove());
     container.appendChild(toast);
 
     setTimeout(() => {
@@ -71,7 +79,7 @@ const AppUI = (() => {
   }
 
   function enableControls(enabled) {
-    ['btn-transpose-up','btn-transpose-down','btn-transpose-reset',
+    ['btn-transpose-up','btn-transpose-down','btn-transpose-reset','btn-mobile-edit',
      'btn-zoom-in', 'btn-zoom-out',
      'zoom-slider', 'btn-session-panel','btn-print',
      'btn-prev-song','btn-next-song', 'btn-mixer',

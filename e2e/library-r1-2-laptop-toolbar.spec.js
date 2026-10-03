@@ -51,13 +51,14 @@ test.describe('Ticket R1-2: Laptop Toolbar 48px & 9 Core Groups Verification', (
     await expect(page.locator('#btn-view-sheet')).toBeVisible();
     await expect(page.locator('#btn-view-lyrics')).toBeVisible();
 
-    // Group 6: Chord Edit Pill
-    await expect(page.locator('#btn-add-chord-mode-bar')).toBeVisible();
+    // Group 6: Chord Edit Pill — attached to DOM; hidden for guests (security rule), visible for banhat+
+    await expect(page.locator('#btn-add-chord-mode-bar')).toBeAttached();
 
     // Group 7: Fullscreen / Biểu Diễn with explicit label
     const fullscreenBtn = page.locator('#btn-fullscreen');
     await expect(fullscreenBtn).toBeVisible();
-    await expect(fullscreenBtn).toContainText('Biểu Diễn');
+    // Text mặc định: 'Toàn Màn Hình' (khi chưa vào chế độ Biểu Diễn)
+    await expect(fullscreenBtn).toContainText('Toàn Màn Hình');
 
     // Group 8: Navigation arrows
     await expect(page.locator('#nav-arrows')).toBeVisible();

@@ -172,6 +172,10 @@
       </button>
     </div>
 
+    <button id="btn-mobile-edit" class="mobile-edit-btn hidden" type="button" title="Soạn hợp âm trên bản nhạc" aria-label="Soạn hợp âm" aria-pressed="false" disabled>
+      <?= icon('pencil') ?> <span>Soạn</span>
+    </button>
+
     <!-- Nhóm 9: Menu Công Cụ & Cài Đặt (Phím ?) -->
     <div class="control-group more-options-group" id="more-options-group">
       <button id="btn-more-options" class="icon-btn" title="Menu Công Cụ & Cài Đặt">
@@ -202,8 +206,8 @@
         </button>
         <div id="compact-settings-panel" class="compact-settings-panel hidden">
           <label class="check-row"><input type="checkbox" id="chk-compact-bass" checked> Ẩn Khóa Fa</label>
-          <label class="check-row"><input type="checkbox" id="chk-compact-voices" checked> Ẩn Bè Phụ</label>
-          <label class="check-row"><input type="checkbox" id="chk-compact-chordnotes" checked> Ẩn Nốt Chùm</label>
+          <label class="check-row"><input type="checkbox" id="chk-compact-voices" checked> Chỉ Giữ Bè Giai Điệu</label>
+          <label class="check-row"><input type="checkbox" id="chk-compact-chordnotes" checked> Bỏ Nốt Hòa Âm</label>
           <label class="check-row"><input type="checkbox" id="chk-compact-lyrics"> Ẩn Lời Ca (Nhạc cụ)</label>
           <label class="check-row"><input type="checkbox" id="chk-compact-measures"> Ẩn Số Ô Nhịp</label>
           <label class="check-row"><input type="checkbox" id="chk-compact-texts" checked> Tối giản Tác Giả</label>
@@ -333,7 +337,7 @@
         <!-- Nút dự phòng backward compat cho selector cũ -->
         <button id="btn-menu-chord-edit" class="hidden" aria-hidden="true" tabindex="-1" onclick="document.getElementById('btn-menu-add-chord-mode')?.click()"></button>
 
-        <button id="btn-menu-create-chordset" class="btn btn-ghost btn-sm btn-menu-item" title="Tạo bộ hợp âm mới" onclick="document.getElementById('btn-add-set')?.click() || window.ChordCanvas?.showCreateSetModal?.()">
+        <button id="btn-menu-create-chordset" class="btn btn-ghost btn-sm btn-menu-item" title="Tạo bộ hợp âm mới" onclick="window.ChordCanvas?.showNewSetModal?.()">
           <?= icon('plus') ?>
           <span>Bộ hợp âm mới</span>
         </button>
@@ -403,14 +407,14 @@
   </div>
 
   <div class="mobile-thumb-group mobile-chordset-group" role="group" aria-label="Bộ hợp âm">
-    <button id="btn-mobile-chordset" class="btn-thumb-chordset" title="Chọn bản phối hợp âm">
+    <button id="btn-mobile-chordset" class="btn-thumb-chordset" title="Chọn bản phối hợp âm" aria-label="Bộ hợp âm: HD. Chạm để đổi">
       <span class="thumb-icon"><?= icon('guitar') ?></span>
       <span id="mobile-chordset-label" class="thumb-label">HD</span>
     </button>
   </div>
 
   <div class="mobile-thumb-group mobile-view-group" role="group" aria-label="Chế độ xem">
-    <button id="btn-mobile-view-toggle" class="btn-thumb-view" title="Chuyển chế độ Lời &amp; Hợp âm ↔ Bản Nhạc">
+    <button id="btn-mobile-view-toggle" class="btn-thumb-view" title="Chuyển chế độ Lời &amp; Hợp âm ↔ Bản Nhạc" aria-label="Đổi dạng xem">
       <span id="mobile-view-icon" class="thumb-icon"><?= icon('music') ?></span>
       <span id="mobile-view-label" class="thumb-label">Bản Nhạc</span>
     </button>

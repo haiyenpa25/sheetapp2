@@ -3206,3 +3206,11 @@ body.dark-mode .half-page-divider-badge {
 }
 
 
+@media screen and (max-width: 360px) {
+  .sheet-viewer-wrapper.compact-melody-scroll { overflow-x: auto !important; }
+  .osmd-container.compact-melody {
+    min-width: 370px;
+    width: 370px;
+    max-width: none;
+  }
+}

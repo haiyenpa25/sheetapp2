@@ -208,7 +208,10 @@ const Auth = (() => {
     // Thêm hợp âm — CHỈ hiển thị khi đã đăng nhập có quyền banhat/admin
     document.getElementById('btn-add-chord-mode')?.classList.toggle('hidden', !canEditChords);
     document.getElementById('btn-add-chord-mode-bar')?.classList.toggle('hidden', !canEditChords);
+    document.getElementById('btn-mobile-edit')?.classList.toggle('hidden', !canEditChords);
     document.getElementById('btn-menu-chord-edit')?.classList.toggle('hidden', !canEditChords);
+    document.getElementById('btn-menu-add-chord-mode')?.classList.toggle('hidden', !canEditChords);
+    document.getElementById('btn-menu-create-chordset')?.classList.toggle('hidden', !canEditChords);
     
     // Nổi bật hợp âm — TẤT CẢ người dùng đều được dùng (chỉ xem, không sửa)
     document.getElementById('btn-chord-highlight')?.classList.remove('hidden');

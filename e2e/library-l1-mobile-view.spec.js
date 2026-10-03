@@ -205,7 +205,7 @@ test.describe('L1-8 · Tối ưu hiển thị điện thoại (Mobile View & Bot
     await expect(page.locator('#lyric-view-container')).toBeVisible();
     await expect(page.locator('#osmd-container')).toBeHidden();
     await expect(viewToggleBtn).toHaveClass(/active/);
-    await expect(page.locator('#mobile-view-label')).toHaveText('Nhạc');
+    await expect(page.locator('#mobile-view-label')).toHaveText('Lời & HÂ');
   });
 
 });

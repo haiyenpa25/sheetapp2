@@ -569,9 +569,19 @@ const ArrangementEngine = (() => {
     }
   }
 
+  // Đồng bộ dải phân đoạn nếu bài đã được tải trước lúc vào Biểu Diễn.
+  async function loadForSongIfEmpty(requestedSongId) {
+    const songId = requestedSongId || _currentSongId || window.Store?.get?.('currentSong')?.id
+      || new URLSearchParams(window.location.search).get('song');
+    if (!songId) return;
+    if (_currentSongId === songId && _sections.length > 0) return renderJumpBar();
+    await loadForSong(songId);
+  }
+
   return {
     init,
     loadForSong,
+    loadForSongIfEmpty,
     getSections,
     getCurrentSection,
     jumpToSection,

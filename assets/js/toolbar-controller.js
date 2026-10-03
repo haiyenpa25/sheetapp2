@@ -131,6 +131,7 @@ const ToolbarController = (() => {
     const overlay = document.getElementById('sidebar-overlay');
 
     function _updateToggleBtn(isOpen) {
+      document.body.classList.toggle('library-sidebar-open', Boolean(isOpen));
       const btn = document.getElementById('btn-open-sidebar');
       if (!btn) return;
       const title = isOpen ? 'Đóng danh sách bài hát [Phím S]' : 'Mở danh sách bài hát (903 bài) [Phím S]';
@@ -146,14 +147,15 @@ const ToolbarController = (() => {
       overlay?.classList.remove('hidden');
       _updateToggleBtn(true);
       if (overlay) {
-        overlay.onclick = _closeSidebar;
+        overlay.onclick = () => _closeSidebar({ restoreFocus: true });
       }
     }
 
-    function _closeSidebar() {
+    function _closeSidebar({ restoreFocus = false } = {}) {
       sidebar?.classList.add('mobile-hidden');
       overlay?.classList.add('hidden');
       _updateToggleBtn(false);
+      if (restoreFocus) document.getElementById('btn-open-sidebar')?.focus();
     }
 
     function _toggle() {
@@ -163,12 +165,13 @@ const ToolbarController = (() => {
         if (sidebar.classList.contains('mobile-hidden')) {
           _openSidebar();
         } else {
-          _closeSidebar();
+          _closeSidebar({ restoreFocus: true });
         }
       } else {
         // Desktop >1440px: collapse narrow
         sidebar.classList.toggle('collapsed');
         _updateToggleBtn(!sidebar.classList.contains('collapsed'));
+        if (sidebar.classList.contains('collapsed')) document.getElementById('btn-open-sidebar')?.focus();
       }
     }
 

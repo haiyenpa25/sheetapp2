@@ -26,7 +26,7 @@ test.describe('R2-5 · Điện thoại: Bảng hợp âm 38% màn hình, chip 48
 
   test('1. Bảng hợp âm mobile 38% màn hình, nút Xong/Lưu ≥ 44px không bị che, thanh dưới tạm ẩn', async ({ page }) => {
     const sid = loginAsHoaiDinh();
-    await page.context().addCookies([{ name: 'PHPSESSID', value: sid, domain: 'localhost', path: '/' }]);
+    await page.context().addCookies([{ name: 'PHPSESSID', value: sid, url: new URL('/', test.info().project.use.baseURL).href }]);
 
     await page.route('**/api/index.php?route=chord_sets*', async (route) => {
       const req = route.request();
@@ -119,7 +119,7 @@ test.describe('R2-5 · Điện thoại: Bảng hợp âm 38% màn hình, chip 48
 
   test('2. Nghiệm thu R2-5: Chạm 1 lần là đặt và tự tiến tới nốt sau; 24 hợp âm ≤ 30 chạm', async ({ page }) => {
     const sid = loginAsHoaiDinh();
-    await page.context().addCookies([{ name: 'PHPSESSID', value: sid, domain: 'localhost', path: '/' }]);
+    await page.context().addCookies([{ name: 'PHPSESSID', value: sid, url: new URL('/', test.info().project.use.baseURL).href }]);
 
     let savedPayloads = [];
     await page.route('**/api/index.php?route=chord_sets*', async (route) => {
@@ -197,7 +197,7 @@ test.describe('R2-5 · Điện thoại: Bảng hợp âm 38% màn hình, chip 48
 
   test('3. Vùng chạm theo nốt gần nhất (Voronoi) và visualViewport cuộn nốt vào vùng nhìn thấy', async ({ page }) => {
     const sid = loginAsHoaiDinh();
-    await page.context().addCookies([{ name: 'PHPSESSID', value: sid, domain: 'localhost', path: '/' }]);
+    await page.context().addCookies([{ name: 'PHPSESSID', value: sid, url: new URL('/', test.info().project.use.baseURL).href }]);
 
     await page.goto('./?song=thanh-ca-002&v=sheet', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('#osmd-container svg').first()).toBeVisible({ timeout: 25000 });

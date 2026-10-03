@@ -8,6 +8,7 @@ const OSMDRenderer = (() => {
 
   let osmd = null, containerId = null, currentXmlString = null, currentZoom = 1.0;
   let isLoaded = false, _onReadyCallbacks = [], _isCompactMode = false, _titleCompacted = false;
+  let _compactVisibility = null, _compactBassHidden = false;
   let _renderToken = 0;
   let _renderCount = 0, _lastContainerWidth = 0, _pendingRender = false;
 
@@ -68,6 +69,7 @@ const OSMDRenderer = (() => {
         _pendingRender = false;
         _renderCount++;
         await osmd.render();
+        await _ensureCompactLyricsReadable();
         _titleCompacted = false;
         _compactTitleSVG();
         _tagChordSymbols();
@@ -138,6 +140,11 @@ const OSMDRenderer = (() => {
         osmd.rules.ChordSymbolYPadding     = 0.0;
         osmd.rules.ChordSymbolYSpacing     = 0.0;
         osmd.rules.ChordOverlapAllowedIntoNextMeasure = true;
+        osmd.rules.LyricsHeight = isMobile ? 2.0 : 1.8;
+        osmd.rules.LyricsXPaddingFactorForLongLyrics = _isCompactMode ? 1.5 : 1;
+        osmd.rules.HorizontalBetweenLyricsDistance = _isCompactMode ? 0.6 : 0.2;
+        osmd.rules.VerticalBetweenLyricsDistance = _isCompactMode ? 1.0 : 0.5;
+        osmd.rules.LyricOverlapAllowedIntoNextMeasure = _isCompactMode ? 0 : 3.4;
         if (osmd.rules.SheetTitleHeight !== undefined)    osmd.rules.SheetTitleHeight   = 2.0;
         if (osmd.rules.SheetComposerHeight !== undefined) osmd.rules.SheetComposerHeight = 1.5;
         if (osmd.rules.SheetAuthorHeight !== undefined)   osmd.rules.SheetAuthorHeight   = 1.5;
@@ -145,54 +152,10 @@ const OSMDRenderer = (() => {
     }
   }
 
-  /** Cắt tỉa XML gốc ngay từ trong trứng nước (Xoá thẻ DOM) để dẹp sạch nốt bè/chùm */
+  /** Keep the source XML; derive one treble melody only for compact rendering. */
   function preprocessXML(xml) {
-      if (!window.DisplaySettings || !_isCompactMode) return xml;
-      const prefs = DisplaySettings.getCompactPrefs();
-      if (!prefs.hideVoices && !prefs.hideChordNotes) return xml;
-      try {
-          const doc = window.XmlDocCache?.getClonedDoc(xml) || new DOMParser().parseFromString(xml, "application/xml");
-          if (prefs.hideVoices) {
-              doc.querySelectorAll("note voice").forEach(v => { if (parseInt(v.textContent) > 1) v.parentNode.remove(); });
-              doc.querySelectorAll("notations slur, notations tied, note > tie").forEach(el => el.remove());
-          }
-          if (prefs.hideChordNotes) {
-              doc.querySelectorAll("measure").forEach(measure => {
-                  let currentPrimaryNote = null, maxPitchVal = -1, maxPitchNode = null;
-                  measure.querySelectorAll("note").forEach(note => {
-                      if (note.querySelector("rest")) return;
-                      const pitchNode = note.querySelector("pitch");
-                      if (!pitchNode) return;
-                      const step = pitchNode.querySelector("step")?.textContent;
-                      const alterNode = pitchNode.querySelector("alter");
-                      const alter = alterNode ? parseInt(alterNode.textContent) : 0;
-                      const octave = parseInt(pitchNode.querySelector("octave")?.textContent || "0");
-                      const stepVals = { 'C':0, 'D':2, 'E':4, 'F':5, 'G':7, 'A':9, 'B':11 };
-                      const pitchVal = octave * 12 + (stepVals[step] || 0) + alter;
-                      if (note.querySelector("chord")) {
-                          if (currentPrimaryNote) {
-                              if (pitchVal > maxPitchVal) { maxPitchVal = pitchVal; maxPitchNode = pitchNode.cloneNode(true); }
-                              note.parentNode.removeChild(note);
-                          }
-                      } else {
-                          if (currentPrimaryNote && maxPitchNode) {
-                              const pPitch = currentPrimaryNote.querySelector("pitch");
-                              if (pPitch && pPitch.innerHTML !== maxPitchNode.innerHTML) pPitch.innerHTML = maxPitchNode.innerHTML;
-                          }
-                          currentPrimaryNote = note; maxPitchVal = pitchVal; maxPitchNode = pitchNode.cloneNode(true);
-                      }
-                  });
-                  if (currentPrimaryNote && maxPitchNode) {
-                      const pPitch = currentPrimaryNote.querySelector("pitch");
-                      if (pPitch && pPitch.innerHTML !== maxPitchNode.innerHTML) pPitch.innerHTML = maxPitchNode.innerHTML;
-                  }
-              });
-          }
-          return window.XmlDocCache?.serializeDoc?.(doc) ?? new XMLSerializer().serializeToString(doc);
-      } catch (err) {
-          console.error("XML Preprocess error:", err);
-          return xml;
-      }
+    if (!window.DisplaySettings || !_isCompactMode || !window.CompactScore) return xml;
+    return window.CompactScore.preprocessXML(xml, DisplaySettings.getCompactPrefs());
   }
 
   /**
@@ -226,6 +189,7 @@ const OSMDRenderer = (() => {
       _pendingRender = false;
       _renderCount++;
       await osmd.render();
+      await _ensureCompactLyricsReadable();
       if (token !== _renderToken) return osmd; // Bị hủy bởi lần render mới hơn
       window.SongPreloader?.markSvgReady?.();
 
@@ -285,6 +249,7 @@ const OSMDRenderer = (() => {
       _pendingRender = false;
       _renderCount++;
       await osmd.render();
+      await _ensureCompactLyricsReadable();
       if (token !== _renderToken) return osmd;
 
       _forceLayoutRecalc();
@@ -320,6 +285,7 @@ const OSMDRenderer = (() => {
       _pendingRender = false;
       _renderCount++;
       await osmd.render();
+      await _ensureCompactLyricsReadable();
       if (token !== _renderToken) return osmd;
 
       _forceLayoutRecalc();
@@ -352,6 +318,7 @@ const OSMDRenderer = (() => {
       _forceLayoutRecalc();
       _renderCount++;
       await osmd.render();
+      await _ensureCompactLyricsReadable();
       _forceLayoutRecalc();
       const zoomCont = document.getElementById(containerId);
       if (zoomCont) _lastContainerWidth = zoomCont.clientWidth;
@@ -366,6 +333,7 @@ const OSMDRenderer = (() => {
     _pendingRender = false;
     _renderCount++;
     await osmd.render();
+    await _ensureCompactLyricsReadable();
     _forceLayoutRecalc();
     const c = document.getElementById(containerId);
     if (c) _lastContainerWidth = c.clientWidth;
@@ -546,25 +514,64 @@ const OSMDRenderer = (() => {
     });
   }
 
+  async function _ensureCompactLyricsReadable() {
+    if (!_isCompactMode || !_compactBassHidden || !_compactVisibility) return;
+    const hasOverlap = () => {
+      const lyrics = [..._getLyricTextNodes()].map(node => node.getBoundingClientRect())
+        .filter(rect => rect.width > 0 && rect.height > 0);
+      for (let i = 0; i < lyrics.length; i++) {
+        for (let j = i + 1; j < lyrics.length; j++) {
+          const a = lyrics[i], b = lyrics[j];
+          if (Math.min(a.right, b.right) - Math.max(a.left, b.left) > 3
+              && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 3) return true;
+        }
+      }
+      return false;
+    };
+    if (hasOverlap() && osmd.rules) {
+      osmd.rules.LyricsHeight = Math.min(osmd.rules.LyricsHeight, 1.4);
+      osmd.rules.VerticalBetweenLyricsDistance = 1.5;
+      osmd.rules.LyricsXPaddingFactorForLongLyrics = 2;
+      osmd.updateGraphic?.();
+      _renderCount++;
+      await osmd.render();
+    }
+    document.getElementById(containerId)?.toggleAttribute('data-compact-lyrics-overlap', hasOverlap());
+  }
+
   function _applyCompactMode() {
     if (!osmd || !osmd.Sheet) return;
+    const container = document.getElementById(containerId);
+    container?.classList.toggle('compact-melody', _isCompactMode);
+    container?.closest('.sheet-viewer-wrapper')?.classList.toggle('compact-melody-scroll', _isCompactMode);
     let compactPrefs = { hideBass: true, hideVoices: true, hideText: true };
     if (window.DisplaySettings) compactPrefs = DisplaySettings.getCompactPrefs();
     const isMobile = typeof window !== 'undefined' && window.innerWidth <= 680;
     if (!_isCompactMode) {
+      _compactVisibility = null;
+      _compactBassHidden = false;
+      document.getElementById(containerId)?.removeAttribute('data-compact-lyrics-overlap');
       const drawMeta = !isMobile;
       osmd.setOptions({ drawComposer: drawMeta, drawCredits: drawMeta, drawSubtitle: drawMeta, drawLyricist: drawMeta });
       return;
     }
+    _compactVisibility = osmd.Sheet.Instruments.map(ins => ({
+      visible: ins.Visible,
+      staves: ins.Staves?.map(staff => staff.Visible) || []
+    }));
+    _compactBassHidden = false;
+    document.getElementById(containerId)?.removeAttribute('data-compact-lyrics-overlap');
     osmd.Sheet.Instruments.forEach((ins, insIndex) => {
       if (!ins.Staves) return;
       if (compactPrefs.hideBass) {
         if (ins.Staves.length >= 2) for (let i = 1; i < ins.Staves.length; i++) ins.Staves[i].Visible = false;
         if (insIndex > 0) { ins.Visible = false; ins.Staves.forEach(st => st.Visible = false); }
       }
-      if (compactPrefs.hideVoices && insIndex === 0 && ins.Voices) {
-        ins.Voices.forEach(voice => { if (voice.VoiceId > 1) voice.Visible = false; });
-      }
+    });
+    _compactBassHidden = _compactVisibility.some((previous, index) => {
+      const instrument = osmd.Sheet.Instruments[index];
+      return previous.visible !== instrument.Visible
+        || previous.staves.some((visible, staffIndex) => visible !== instrument.Staves[staffIndex].Visible);
     });
 
     const drawCredits = !compactPrefs.hideText;

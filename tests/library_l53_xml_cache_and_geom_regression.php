@@ -36,6 +36,7 @@ $songInfoFile = __DIR__ . '/../assets/js/song-info-bar.js';
 $transEngineFile = __DIR__ . '/../assets/js/transpose-engine.js';
 $verseFile = __DIR__ . '/../assets/js/core/VerseManager.js';
 $osmdFile = __DIR__ . '/../assets/js/osmd-renderer.js';
+$compactScoreFile = __DIR__ . '/../assets/js/compact-score.js';
 $dotsFile = __DIR__ . '/../assets/js/chord-canvas-dots.js';
 $indexFile = __DIR__ . '/../index.php';
 $eslintFile = __DIR__ . '/../eslint.config.js';
@@ -139,9 +140,26 @@ assertCondition(
 );
 
 $osmdSrc = file_get_contents($osmdFile);
+$compactCacheScript = <<<'NODE'
+const fs = require('fs');
+const vm = require('vm');
+let clones = 0;
+global.window = { XmlDocCache: {
+  getClonedDoc: () => { clones++; return { querySelectorAll: () => [] }; },
+  serializeDoc: () => '<processed/>'
+} };
+vm.runInThisContext(fs.readFileSync(process.argv[2], 'utf8'));
+const result = window.CompactScore.preprocessXML('<score-partwise/>', { hideVoices: true, hideChordNotes: false });
+if (clones !== 1 || result !== '<processed/>') process.exit(1);
+console.log('COMPACT_CACHE_OK');
+NODE;
+$compactCacheTemp = tempnam(sys_get_temp_dir(), 'sheetapp_compact_cache_');
+file_put_contents($compactCacheTemp, $compactCacheScript);
+$compactCacheOutput = shell_exec('node ' . escapeshellarg($compactCacheTemp) . ' ' . escapeshellarg($compactScoreFile) . ' 2>&1');
+@unlink($compactCacheTemp);
 assertCondition(
-    str_contains($osmdSrc, 'window.XmlDocCache?.getClonedDoc(xml)'),
-    "osmd-renderer.js preprocessXML sử dụng XmlDocCache.getClonedDoc",
+    str_contains((string)$compactCacheOutput, 'COMPACT_CACHE_OK'),
+    "CompactScore.preprocessXML dùng XmlDocCache.getClonedDoc thật khi rút gọn",
     true
 );
 

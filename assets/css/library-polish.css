@@ -69,12 +69,8 @@ body.dark-mode {
   transform: none !important;
 }
 
-/* Logo trùng: thanh App Shell (≥1201px) đã có logo SheetApp */
-@media (min-width: 1201px) {
-  .sidebar-header .logo-icon,
-  .sidebar-header .logo-text,
-  .sidebar-header .library-count-badge { display: none; }
-}
+/* Logo của Thư viện nằm trong ngăn chọn bài; App Shell vẫn giữ logo khi ngăn đóng. */
+body.library-sidebar-open #app-shell-navbar .shell-brand { display: none; }
 
 /* ─── 1. Thanh công cụ (desktop & iPad) ───────────────────────────── */
 @media (min-width: 681px) {
@@ -155,6 +151,9 @@ body.dark-mode {
   body.toolbar-controls-compact .unified-toolbar #btn-transpose-reset,
   body.toolbar-controls-compact .unified-toolbar #btn-add-chord-mode-bar,
   body.toolbar-controls-compact .unified-toolbar #btn-new-chord-set { display: inline-flex !important; }
+  .unified-toolbar #btn-add-chord-mode-bar.hidden,
+  .unified-toolbar #btn-new-chord-set.hidden { display: none !important; }
+  .unified-toolbar .icon-xs { width: 16px; height: 16px; }
   .unified-toolbar .toolbar-secondary-controls { display: none !important; }
 
   /* ROADMAP5 2.2: Thu gọn cụm Capo và nhãn đếm trên màn hình laptop <= 1440px tránh tràn toolbar */
@@ -172,7 +171,7 @@ body.dark-mode {
     background: transparent !important; color: var(--lp-muted);
   }
   .unified-toolbar .icon-btn-pill:hover:not(:disabled) { background: var(--lp-hover) !important; color: var(--lp-ink); }
-  .unified-toolbar .icon-btn-pill svg { width: 15px; height: 15px; }
+  .unified-toolbar .icon-btn-pill svg { width: 16px; height: 16px; }
 
   /* Nút icon đứng riêng: ☰, ◀ ▶, ⋮ */
   .unified-toolbar .icon-btn,
@@ -284,6 +283,8 @@ body.dark-mode {
 .section-jump-bar-container.hidden {
   display: none !important;
 }
+body.chord-edit-mode #section-jump-bar-container { display: none !important; }
+body.chord-edit-mode .toast-container .toast:not(.error) { display: none !important; }
 .section-chips-list { gap: 4px; }
 .section-chip {
   padding: 3px 10px;
@@ -439,20 +440,20 @@ body.dark-mode {
 .toast-container {
   left: auto !important;
   right: 24px !important;
-  top: 100px !important;
-  bottom: auto !important;
+  top: auto !important;
+  bottom: 24px !important;
   transform: none !important;
   align-items: flex-end !important;
   pointer-events: none;
 }
 @media (max-width: 680px) {
   .toast-container {
-    left: 50% !important;
-    right: auto !important;
-    top: calc(54px + env(safe-area-inset-top, 0px)) !important;
-    bottom: auto !important;
-    transform: translateX(-50%) !important;
-    align-items: center !important;
+    left: 16px !important;
+    right: 16px !important;
+    top: auto !important;
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+    transform: none !important;
+    align-items: stretch !important;
     z-index: 9999 !important;
   }
 }
@@ -461,14 +462,16 @@ body.dark-mode {
   padding: 7px 14px !important;
   border-radius: 12px !important;
   font-size: 12.5px !important;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: block !important;
+  white-space: normal;
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
   box-shadow: var(--lp-shadow-pop) !important;
   pointer-events: auto;
   animation-name: fadeIn, fadeOut;
 }
+.toast-container .toast > span:nth-child(2) { flex: 1; min-width: 0; }
+.toast-dismiss { border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 20px; line-height: 1; min-width: 28px; min-height: 28px; }
 body.dark-mode .toast-container .toast { background: #22222b; color: var(--lp-ink); }
 
 /* ─── 5. Điện thoại (≤680px) ──────────────────────────────────────── */
@@ -484,7 +487,7 @@ body.dark-mode .toast-container .toast { background: #22222b; color: var(--lp-in
   .unified-toolbar .song-title { font-size: 13.5px !important; font-weight: 600 !important; }
   .unified-toolbar .icon-btn,
   .unified-toolbar #btn-more-options,
-  .unified-toolbar #btn-open-sidebar { width: 36px !important; height: 36px !important; min-width: 36px !important; min-height: 36px !important; }
+  .unified-toolbar #btn-open-sidebar { width: 44px !important; height: 44px !important; min-width: 44px !important; min-height: 44px !important; }
 
   /* Thanh ngón cái: nền kính, 4 nút cùng chiều cao 40px, rõ ràng */
   .mobile-thumb-bar {
@@ -497,12 +500,12 @@ body.dark-mode .toast-container .toast { background: #22222b; color: var(--lp-in
   .mobile-transpose-group { padding: 2px; }
   .btn-thumb-action,
   .btn-thumb-gig {
-    width: 38px; height: 38px; min-width: 38px; min-height: 38px;
+    width: 44px; height: 44px; min-width: 44px; min-height: 44px;
     font-size: 1.1rem;
   }
-  .btn-thumb-tone { height: 38px; min-width: 40px; font-family: inherit; font-size: 13px; }
+  .btn-thumb-tone { height: 44px; min-width: 44px; font-family: inherit; font-size: 13px; }
   .btn-thumb-chordset,
-  .btn-thumb-view { height: 38px; padding: 0 14px; font-size: 13px; font-weight: 600; }
+  .btn-thumb-view { height: 44px; min-width: 44px; padding: 0 8px; font-size: 13px; font-weight: 600; }
   body:not(.dark-mode) .btn-thumb-action,
   body:not(.dark-mode) .btn-thumb-tone,
   body:not(.dark-mode) .btn-thumb-chordset { color: var(--lp-ink); }
@@ -557,6 +560,7 @@ body.dark-mode .toast-container .toast { background: #22222b; color: var(--lp-in
   align-items: center; justify-content: flex-start; text-decoration: none;
   background: transparent; cursor: pointer; box-sizing: border-box;
 }
+#main-dropdown-menu .btn-menu-item.hidden { display: none !important; }
 #main-dropdown-menu .btn-menu-item:hover { background: var(--lp-hover, rgba(0, 0, 0, 0.05)); }
 #main-dropdown-menu .btn-menu-item .icon { width: 18px; height: 18px; margin-right: 10px; color: var(--lp-muted, #64748b); flex-shrink: 0; }
 #main-dropdown-menu .btn-menu-item:hover .icon { color: currentColor; }
@@ -630,8 +634,6 @@ body.sheet-only-mode .sidebar,
 body.sheet-only-mode .sidebar-overlay,
 body.sheet-only-mode #song-info-strip,
 body.sheet-only-mode .song-info-strip,
-body.sheet-only-mode #section-jump-bar-container,
-body.sheet-only-mode .section-jump-bar-container,
 body.sheet-only-mode .mobile-thumb-bar,
 body.sheet-only-mode .host-quick-cues-bar,
 body.sheet-only-mode .leader-notes-banner,
@@ -644,10 +646,31 @@ body.sheet-only-mode #btn-exit-sheet-only {
 
 /* Toast trong Biểu Diễn: chỉ hiện ở đỉnh màn hình (top: 14px), nhỏ gọn, không đè HUD */
 body.sheet-only-mode .toast-container {
-  top: 14px !important;
-  bottom: auto !important;
+  top: auto !important;
+  bottom: 126px !important;
+  left: auto !important;
+  right: 16px !important;
+  transform: none !important;
+}
+body.sheet-only-mode .section-jump-bar-container:not(.hidden) {
+  position: fixed !important;
+  bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important;
   left: 50% !important;
-  transform: translateX(-50%) !important;
+  top: auto !important;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100vw - 24px);
+  min-height: 0;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 12px;
+  background: rgba(18,18,28,.9) !important;
+  color: #f8fafc;
+  z-index: 9980 !important;
+}
+body.sheet-only-mode .section-jump-bar-container.hud-faded { display: none !important; }
+body.sheet-only-mode .section-jump-bar-container .section-chip { color: #f8fafc; }
+@media (max-width: 680px) {
+  body.sheet-only-mode .section-jump-bar-container:not(.hidden) { bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important; }
 }
 body.sheet-only-mode .toast-container .toast {
   font-size: 12px !important;
@@ -1836,4 +1859,148 @@ body.dark-mode .satb-mini-voices .voice-btn {
 }
 .satb-mini-close:hover {
   color: var(--danger, #ef4444);
+}
+
+/* ROADMAP7: danh sách bài gọn hơn, bài đang đọc có dấu chọn màu xanh. */
+.sidebar .song-item-title {
+  font-size: 12px !important;
+  line-height: 1.3;
+  font-weight: 500;
+}
+.sidebar .song-item.active {
+  background: rgba(37, 99, 235, .09);
+  border-color: rgba(37, 99, 235, .28);
+}
+.sidebar .song-item.active::before { background: #2563eb; opacity: 1; }
+.sidebar .song-item.active .song-item-num { color: #1d4ed8; }
+.sidebar .song-item.active .song-item-title { color: #1e40af; font-weight: 600; }
+body.dark-mode .sidebar .song-item.active {
+  background: rgba(96, 165, 250, .16);
+  border-color: rgba(147, 197, 253, .36);
+}
+body.dark-mode .sidebar .song-item.active .song-item-title,
+body.dark-mode .sidebar .song-item.active .song-item-num { color: #bfdbfe; }
+
+.mobile-edit-btn { display: none !important; }
+@media (max-width: 680px) {
+  .unified-toolbar #btn-mobile-edit:not(.hidden) {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-width: 44px;
+    height: 44px;
+    padding: 0 8px;
+    border: 1px solid rgba(109, 40, 217, .22);
+    border-radius: 9px;
+    background: rgba(109, 40, 217, .08);
+    color: #6d28d9;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .unified-toolbar #btn-mobile-edit svg { width: 16px; height: 16px; }
+  .unified-toolbar #btn-mobile-edit.active {
+    background: #6d28d9;
+    color: #fff;
+  }
+  .unified-toolbar #btn-mobile-edit:disabled { opacity: .5; cursor: default; }
+  body.dark-mode .unified-toolbar #btn-mobile-edit:not(.hidden) { color: #ddd6fe; }
+  body.dark-mode .unified-toolbar #btn-mobile-edit.active { color: #fff; }
+}
+@media (max-width: 350px) {
+  .unified-toolbar #btn-mobile-edit span { display: none; }
+  .unified-toolbar #btn-mobile-edit:not(.hidden) { padding: 0; width: 44px; }
+}
+
+/* ROADMAP7: điều khiển điện thoại ở màn hình rất hẹp. */
+@media (max-width: 350px) {
+  .mobile-thumb-bar {
+    padding-left: 8px;
+    padding-right: 8px;
+    gap: 4px;
+  }
+  .mobile-thumb-group { flex: 0 0 auto; }
+  .mobile-thumb-bar .btn-thumb-chordset,
+  .mobile-thumb-bar .btn-thumb-view {
+    width: 44px;
+    min-width: 44px;
+    padding: 0;
+  }
+  .mobile-thumb-bar .btn-thumb-chordset .thumb-icon,
+  .mobile-thumb-bar .btn-thumb-view .thumb-label { display: none; }
+  .mobile-thumb-bar .btn-thumb-chordset .thumb-label { display: inline; }
+  .mobile-thumb-bar .btn-thumb-chordset.showing-tlh-fallback .thumb-label { font-size: 9px; letter-spacing: -.4px; }
+}
+
+/* ROADMAP7: trong biểu diễn vẫn đổi dạng xem và dịch tông được bằng ngón tay. */
+.gig-hud-reveal { display: none; }
+@media (max-width: 680px) {
+  body.sheet-only-mode .gig-floating-hud {
+    width: calc(100vw - 16px) !important;
+    max-width: calc(100vw - 16px) !important;
+    box-sizing: border-box;
+    border-radius: 18px !important;
+    padding: 6px !important;
+    bottom: max(8px, env(safe-area-inset-bottom, 8px)) !important;
+    z-index: 9990 !important;
+  }
+  body.sheet-only-mode .section-jump-bar-container:not(.hidden) {
+    bottom: calc(140px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  body.sheet-only-mode .gig-hud-info { display: none !important; }
+  body.sheet-only-mode .gig-hud-actions {
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    gap: 4px !important;
+  }
+  body.sheet-only-mode .gig-hud-transpose-segment { order: 1; }
+  body.sheet-only-mode .btn-gig-view { order: 2; }
+  body.sheet-only-mode .btn-gig-exit { order: 3; }
+  body.sheet-only-mode .btn-gig-chordset { order: 4; }
+  body.sheet-only-mode .btn-gig-tools { order: 5; }
+  body.sheet-only-mode .btn-gig-verse { order: 6; }
+  body.sheet-only-mode .btn-gig-scroll { order: 7; }
+  body.sheet-only-mode .gig-hud-trans-label { min-width: 38px; text-align: center; }
+  body.sheet-only-mode .btn-gig-action,
+  body.sheet-only-mode .btn-gig-action.btn-gig-step,
+  body.sheet-only-mode .btn-gig-action.btn-gig-scroll {
+    min-width: 44px !important;
+    width: auto !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 0 8px !important;
+  }
+  body.sheet-only-mode .btn-gig-action.btn-gig-step {
+    width: 44px !important;
+    padding: 0 !important;
+  }
+  body.sheet-only-mode .btn-gig-action.btn-gig-view,
+  body.sheet-only-mode .btn-gig-action.btn-gig-chordset {
+    border: 1px solid rgba(255,255,255,.2) !important;
+    background: rgba(255,255,255,.1) !important;
+  }
+  body.sheet-only-mode .gig-floating-hud.faded + .gig-hud-reveal {
+    display: inline-flex;
+    position: fixed;
+    left: 50%;
+    bottom: max(8px, env(safe-area-inset-bottom, 8px));
+    transform: translateX(-50%);
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-width: 110px;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid rgba(255,255,255,.22);
+    border-radius: 99px;
+    background: rgba(18,18,28,.9);
+    color: #fff;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 9991;
+    cursor: pointer;
+  }
 }
