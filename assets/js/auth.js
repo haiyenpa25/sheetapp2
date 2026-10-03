@@ -67,7 +67,7 @@ const Auth = (() => {
         return false;
       }
     } catch (err) {
-      showError('Lỗi mạng');
+      showError(err?.status >= 400 && err.status < 500 ? err.message : 'Lỗi mạng');
       return false;
     }
   }

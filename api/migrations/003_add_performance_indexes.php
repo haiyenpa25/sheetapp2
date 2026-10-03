@@ -24,7 +24,13 @@ return function(PDO $pdo): void {
 
     // Indexes cho practice & learning
     $pdo->exec("CREATE INDEX IF NOT EXISTS idx_practice_sessions_user_song ON practice_sessions(user_id, song_id);");
-    $pdo->exec("CREATE INDEX IF NOT EXISTS idx_learning_arrangements_user_song ON learning_arrangements(user_id, song_id);");
+    $learningColumns = $pdo->query("PRAGMA table_info(learning_arrangements)")->fetchAll(PDO::FETCH_ASSOC);
+    $hasLearningUserId = in_array('user_id', array_column($learningColumns, 'name'), true);
+    if ($hasLearningUserId) {
+        $pdo->exec("CREATE INDEX IF NOT EXISTS idx_learning_arrangements_user_song ON learning_arrangements(user_id, song_id);");
+    } else {
+        $pdo->exec("CREATE INDEX IF NOT EXISTS idx_learning_arrangements_song_id ON learning_arrangements(song_id);");
+    }
 
     // Indexes cho song_versions
     $pdo->exec("CREATE INDEX IF NOT EXISTS idx_song_versions_song_id ON song_versions(song_id);");
