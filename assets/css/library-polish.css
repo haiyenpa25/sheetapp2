@@ -31,6 +31,51 @@
   --lp-shadow-pop: 0 8px 28px rgba(20, 24, 40, 0.14);
 }
 
+/* Tablet: keep the reader's three primary actions inside the toolbar. */
+.unified-toolbar #btn-tablet-view-toggle { display: none !important; }
+@media (min-width: 681px) and (max-width: 1200px) {
+  .unified-toolbar .view-switch-pill,
+  .unified-toolbar .nav-arrows,
+  .unified-toolbar #btn-toolbar-tempo,
+  .unified-toolbar #btn-add-chord-mode-bar,
+  body.toolbar-controls-compact .unified-toolbar #btn-add-chord-mode-bar {
+    display: none !important;
+  }
+  .unified-toolbar #btn-mobile-edit:not(.hidden),
+  .unified-toolbar #btn-tablet-view-toggle {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-width: 44px;
+    height: 44px;
+    padding: 0 6px;
+    border: 1px solid var(--lp-border);
+    border-radius: 9px;
+    background: var(--lp-surface);
+    color: var(--lp-ink);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .unified-toolbar #btn-tablet-view-toggle svg,
+  .unified-toolbar #btn-mobile-edit svg { width: 16px; height: 16px; }
+  .unified-toolbar #btn-fullscreen {
+    display: inline-flex !important;
+    flex-direction: column;
+    gap: 0;
+    min-width: 54px;
+    padding: 0 3px;
+  }
+  .unified-toolbar #btn-fullscreen .gig-text {
+    display: inline !important;
+    font-size: 9px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .unified-toolbar .chord-set-select { max-width: 65px; }
+}
+
 @media (pointer: coarse) {
   :root { --lp-h: 40px; --lp-h-inner: 32px; }
 }

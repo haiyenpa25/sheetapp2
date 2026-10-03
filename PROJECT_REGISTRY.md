@@ -1401,3 +1401,5 @@ SheetApp/
 [2026-10-03] — Rà soát server Thư viện: sửa migration 003 cho schema `learning_arrangements` cũ và thông báo lỗi đăng nhập 4xx trong `assets/js/auth.js`; thêm kiểm thử hành vi `tests/legacy_migration_indexes_regression.php`, `tests/library_login_error_regression.js`; báo cáo và giới hạn nghiệm thu tại `docs/LIBRARY_SERVER_AUDIT_2026-10-03.md`.
 
 [2026-10-03] — Sau xác nhận của chủ dự án, backup CSDL production ngoài web rồi áp dụng đủ 15 migration và sửa quyền sở hữu file DB cho tài khoản web; kiểm tra HTTP/bản nhạc/tìm kiếm đạt. Sửa `api/services/SongSearchHelper.php` để tìm “gie xu” nhận/tô sáng “Jê sus” trong lời, mở rộng `tests/library_r37_search_alias_matching_regression.php`; bằng chứng trong báo cáo rà soát server.
+
+[2026-10-03] — Rà soát iPad/tablet Thư viện: phát hiện thanh công cụ cắt mất Soạn và chuyển Bản nhạc/Lời ở 681–1200px; thêm nút tablet có nhãn rõ cho Toàn Màn Hình, Soạn (chỉ tài khoản có quyền) và đổi Lời/Nhạc. Kiểm thử trình duyệt `tests/library_tablet_toolbar_regression.js` xác nhận các nút nằm trong màn hình và luồng đổi chế độ/toàn màn hình.

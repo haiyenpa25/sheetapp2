@@ -80,6 +80,13 @@ const MobileController = (() => {
       setTimeout(sync, 60);
     });
 
+    document.getElementById('btn-tablet-view-toggle')?.addEventListener('click', (e) => {
+      e.currentTarget.blur();
+      const lyricView = document.getElementById('lyric-view-container');
+      document.getElementById(lyricView && !lyricView.classList.contains('hidden') ? 'btn-view-sheet' : 'btn-view-lyrics')?.click();
+      sync();
+    });
+
     document.getElementById('btn-gig-view-toggle')?.addEventListener('click', () => {
       document.getElementById('btn-mobile-view-toggle')?.click();
     });
@@ -219,6 +226,14 @@ const MobileController = (() => {
     if (gigView) {
       gigView.textContent = isBandActive ? 'Lời' : 'Nhạc';
       gigView.setAttribute('aria-label', btn.getAttribute('aria-label'));
+    }
+    const tabletView = document.getElementById('btn-tablet-view-toggle');
+    if (tabletView) {
+      tabletView.innerHTML = isBandActive
+        ? '<svg class="icon icon-xs" aria-hidden="true"><use href="#icon-music"/></svg><span>Nhạc</span>'
+        : '<svg class="icon icon-xs" aria-hidden="true"><use href="#icon-file-text"/></svg><span>Lời</span>';
+      tabletView.title = isBandActive ? 'Chuyển sang Bản nhạc' : 'Chuyển sang Lời & Hợp âm';
+      tabletView.setAttribute('aria-label', tabletView.title);
     }
   }
 

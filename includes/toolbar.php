@@ -175,6 +175,9 @@
     <button id="btn-mobile-edit" class="mobile-edit-btn hidden" type="button" title="Soạn hợp âm trên bản nhạc" aria-label="Soạn hợp âm" aria-pressed="false" disabled>
       <?= icon('pencil') ?> <span>Soạn</span>
     </button>
+    <button id="btn-tablet-view-toggle" class="tablet-view-btn" type="button" title="Chuyển sang Lời & Hợp âm" aria-label="Chuyển sang Lời và hợp âm">
+      <?= icon('file-text') ?> <span>Lời</span>
+    </button>
 
     <!-- Nhóm 9: Menu Công Cụ & Cài Đặt (Phím ?) -->
     <div class="control-group more-options-group" id="more-options-group">
