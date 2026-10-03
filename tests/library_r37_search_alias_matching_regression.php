@@ -101,6 +101,9 @@ foreach ($resGieXu as $s) {
     }
 }
 it("Kết quả tìm 'gie xu' có lyric_snippet highlight thẻ <mark> quanh tên Chúa", $hasMarkSnippet);
+it("Lời bài hát viết 'Jê sus' có highlight khi tìm 'gie xu'",
+    str_contains(SongSearchHelper::createLyricSnippet('Con tin Jê sus luôn ở cùng con.', 'gie xu', 'gie xu') ?? '', '<mark>Jê sus</mark>')
+);
 
 // ── 3. Kiểm tra tìm kiếm với 'Giê-xu' có dấu ──
 echo "\n-- 3. Tìm kiếm với 'Giê-xu' có dấu --\n";

@@ -23,7 +23,7 @@ class SongSearchHelper {
         $variants = [mb_strtolower($clean, 'UTF-8'), mb_strtolower($unacc, 'UTF-8'), mb_strtoupper($clean, 'UTF-8'), mb_strtoupper($unacc, 'UTF-8')];
         $re = '/(?:gi[eê][\s\-]+xu|gi[eê]xu|j[eê][\s\-]+sus|j[eê]sus)/ui';
         if (preg_match($re, $clean)) {
-            foreach (['jesus', 'je-sus', 'jêsus', 'jê-sus', 'giê-xu', 'gie-xu', 'gie xu'] as $repl) {
+            foreach (['jesus', 'je-sus', 'je sus', 'jêsus', 'jê-sus', 'jê sus', 'giê-xu', 'gie-xu', 'gie xu'] as $repl) {
                 $v = preg_replace($re, $repl, $clean);
                 $variants[] = mb_strtolower($v, 'UTF-8');
                 $variants[] = mb_strtolower(self::removeAccents($v), 'UTF-8');
@@ -433,7 +433,7 @@ class SongSearchHelper {
         $reJesus = '/(?:gi[eê][\s\-]+xu|gi[eê]xu|j[eê][\s\-]+sus|j[eê]sus)/ui';
         $hasJesus = preg_match($reJesus, $cleanQuery);
         if ($hasJesus) {
-            $escaped = preg_replace('/(J[êe]\-?sus|Gi[êe]\-?xu)/ui', '<mark>$1</mark>', $escaped);
+            $escaped = preg_replace('/(J[êe][\s\-]*sus|Gi[êe][\s\-]*xu)/ui', '<mark>$1</mark>', $escaped);
         }
 
         $wordsToHighlight = preg_split('/\s+/u', trim($cleanQuery), -1, PREG_SPLIT_NO_EMPTY);
