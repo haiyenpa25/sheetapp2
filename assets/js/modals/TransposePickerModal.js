@@ -59,6 +59,8 @@
     }
 
     function closePick(val) {
+      var resolvePick = _cb;
+      _cb = null;
       if (modal) {
         if (window.ModalManager) {
           window.ModalManager.close(modal);
@@ -66,7 +68,7 @@
           modal.classList.add('hidden');
         }
       }
-      if (_cb) { _cb(val); _cb = null; }
+      if (resolvePick) { resolvePick(val); }
     }
 
     if (window.EventBus) {

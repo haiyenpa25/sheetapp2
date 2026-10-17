@@ -428,6 +428,7 @@ const SetlistDetail = (() => {
       }
     } catch(err) {
       console.error('[SetlistDetail] addSongToSetlist error:', err);
+      window.App?.showToast?.(err.message || 'Không thể thêm bài vào chương trình. Vui lòng thử lại.', 'error');
     }
   }
 
