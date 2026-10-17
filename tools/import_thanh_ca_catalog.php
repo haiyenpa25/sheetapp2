@@ -412,8 +412,17 @@ foreach ($catalog['songs'] as $item) {
             copy($sourceMusicXml, $targetAbsPath);
         }
         $copiedXml++;
+    } elseif (!file_exists($targetAbsPath)) {
+        // Bài chưa có bản nhạc MusicXML -> Sinh file MusicXML từ lời & hợp âm
+        $gen = generateMusicXmlFromChordPro($cleanTitle, $defaultKey, $chordProText, $plainLyrics, $reverseKeyMap);
+        file_put_contents($targetAbsPath, $gen['xml']);
+        $seedChords = $gen['chords'];
+        $generatedXml++;
+    } else {
+        $copiedXml++;
+    }
 
-        // Đọc key và composer từ MusicXML nếu có
+    if (file_exists($targetAbsPath)) {
         $mXml = @simplexml_load_file($targetAbsPath);
         if ($mXml) {
             $keyNodes = $mXml->xpath('//key');
@@ -435,12 +444,6 @@ foreach ($catalog['songs'] as $item) {
                 $plainLyrics = SongSearchHelper::extractLyricsByVerse((string)file_get_contents($targetAbsPath));
             }
         }
-    } else {
-        // Bài chưa có bản nhạc MusicXML -> Sinh file MusicXML từ lời & hợp âm
-        $gen = generateMusicXmlFromChordPro($cleanTitle, $defaultKey, $chordProText, $plainLyrics, $reverseKeyMap);
-        file_put_contents($targetAbsPath, $gen['xml']);
-        $seedChords = $gen['chords'];
-        $generatedXml++;
     }
 
     $insertSongStmt->execute([

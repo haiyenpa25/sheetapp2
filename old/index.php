@@ -46,7 +46,6 @@ echo cssTag('base.css');
 echo cssTag('layout.css');
 echo cssTag('sheet.css');
 echo cssTag('components.css');
-echo cssTag('fab.css');
 
 ?>
   <!-- ── Thư viện âm thanh và OSMD (local vendor, fallback CDN) ── -->
@@ -224,7 +223,6 @@ echo jsTag('song-loader.js');
 echo jsTag('keyboard-handler.js');
 echo jsTag('toolbar-controller.js');
 echo jsTag('app.js');
-echo jsTag('fab.js');
 ?>
 
 
