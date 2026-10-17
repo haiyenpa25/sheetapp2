@@ -77,7 +77,7 @@ const AppUI = (() => {
      'zoom-slider', 'btn-session-panel','btn-print',
      'btn-prev-song','btn-next-song', 'btn-mixer',
      'btn-add-annotate-mode','btn-add-chord-mode','btn-add-chord-mode-bar',
-     'btn-chord-highlight',
+     'btn-chord-highlight','btn-chord-notation',
      'chord-set-selector', 'btn-play-audio',
      'btn-auto-scroll','scroll-speed','btn-dark-mode',
      'btn-perf-notes', 'btn-toolbar-metronome'].forEach(id => {

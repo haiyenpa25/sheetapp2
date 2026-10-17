@@ -1,7 +1,7 @@
 # CODE_MAP.md — Gitnexus Codebase Knowledge Graph & Map (SheetApp)
 
 > **GITNEXUS SECOND BRAIN CODE MAP**
-> Bản đồ tri thức toàn bộ hệ thống SheetApp. Cập nhật tự động: 2026-10-17 15:07:24
+> Bản đồ tri thức toàn bộ hệ thống SheetApp. Cập nhật tự động: 2026-10-17 15:28:30
 > AI Agent BẮT BUỘC tra cứu sơ đồ phụ thuộc dưới đây trước khi chỉnh sửa file.
 
 ---
@@ -120,6 +120,7 @@ graph TD
 - `assets\js\core\ModalManager.js`
 - `assets\js\core\ModeManager.js`
 - `assets\js\core\OfflineSetlistManager.js`
+- `assets\js\core\OfflineVault.js`
 - `assets\js\core\SafeHtml.js`
 - `assets\js\core\ScriptLoader.js`
 - `assets\js\core\ServiceWorkerManager.js`
@@ -219,5 +220,5 @@ graph TD
 
 ---
 
-## 5 · FILE REGISTRY INDEX (3055 files total)
-Total indexed files: 3055
+## 5 · FILE REGISTRY INDEX (3062 files total)
+Total indexed files: 3062

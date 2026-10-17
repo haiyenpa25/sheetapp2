@@ -430,6 +430,7 @@ echo learnJsTag('assets/js/chord-canvas-xml.js', false);
 
 <!-- /learn modules -->
 <?php
+echo learnJsTag('assets/js/vendor/pitchy-mpm.js', true);
 echo learnJsTag('assets/js/learn/learn-interfaces.js', true);
 echo learnJsTag('assets/js/learn/learn-store.js', true);
 echo learnJsTag('assets/js/learn/timeline/chord-timeline-normalizer.js', true);

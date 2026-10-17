@@ -71,6 +71,16 @@
         </div>
 
         <div class="audio-panel-row">
+          <span class="audio-panel-label">Âm Sắc:</span>
+          <!-- AUDIO TIMBRE (Piano / Church Organ / Choir Pad) -->
+          <select id="audio-timbre" class="select-toolbar" disabled title="Chọn âm sắc nhạc cụ phát bè">
+            <option value="piano" selected>🎹 Piano</option>
+            <option value="organ">⛪ Đàn Ống (Organ)</option>
+            <option value="choir">🎶 Hợp Xướng (Choir)</option>
+          </select>
+        </div>
+
+        <div class="audio-panel-row">
           <span class="audio-panel-label">Âm Lượng:</span>
           <!-- VOLUME SLIDER — Âm lượng phát -->
           <label class="volume-label" title="Âm lượng">

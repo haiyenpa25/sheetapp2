@@ -32,6 +32,7 @@ const App = (() => {
     if (window.PerformanceNotes) PerformanceNotes.init();
     if (window.SongInfoBar)      SongInfoBar.init();
     if (window.Metronome)        Metronome.init();
+    if (window.HarmonicNumeral)  HarmonicNumeral.init();
 
     ToolbarController.init();
     KeyboardHandler.init();

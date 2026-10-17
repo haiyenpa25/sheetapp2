@@ -176,6 +176,11 @@
         </svg>
         <span class="desktop-only">Nổi bật</span>
       </button>
+      <!-- Nút Hệ Hợp Âm — chuyển đổi Chuẩn (C) / Số La Mã (I-V) / Nashville (1-5) -->
+      <button id="btn-chord-notation" class="btn btn-xs btn-ghost pb-btn-icon-text"
+              title="Chế độ hợp âm: Chuẩn / La Mã (I-IV-V) / Nashville (1-4-5)" disabled>
+        <span>🔤</span> <span id="chord-notation-label">C</span>
+      </button>
       <!-- Xóa set — hiện khi set != default -->
       <button id="btn-delete-chord-set" class="btn btn-xs btn-danger" title="Xóa bộ hợp âm" style="display:none" onclick="ChordCanvas.confirmDeleteSet()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>

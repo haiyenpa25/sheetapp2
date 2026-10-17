@@ -318,7 +318,9 @@ const LibraryUI = (() => {
     _buildQuickJump(filtered);
 
     if (q) {
-      if (_searchMode === 'lyric') {
+      if (window.OfflineVault?.searchSongs) {
+        filtered = window.OfflineVault.searchSongs(filtered, q, _searchMode);
+      } else if (_searchMode === 'lyric') {
         filtered = filtered.filter(s => (s.title?.toLowerCase().includes(q)) || (s.lyricSnippet?.toLowerCase().includes(q)));
       } else {
         const isNumQuery = /^\d+$/.test(q), qNum = isNumQuery ? parseInt(q, 10) : NaN;

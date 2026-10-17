@@ -74,19 +74,27 @@ const ApiService = (() => {
   const songs = {
     list:   (forceReload = false) => {
       if (forceReload || !_songsListPromise) {
-        _songsListPromise = _request('api/index.php?route=songs').catch(async err => {
-          // Fallback offline: Nạp từ songs_cache.json đã precache trong Service Worker
-          try {
-            const baseHref = document.querySelector('base')?.getAttribute('href') || './';
-            const cacheResp = await fetch(`${baseHref}storage/data/songs_cache.json`);
-            if (cacheResp.ok) {
-              const data = await cacheResp.json();
-              if (Array.isArray(data) && data.length > 0) return data;
-            }
-          } catch (e) {}
-          _songsListPromise = null;
-          throw err;
-        });
+        _songsListPromise = _request('api/index.php?route=songs')
+          .then(res => {
+            const items = Array.isArray(res) ? res : (res?.data || []);
+            if (items.length > 0) window.OfflineVault?.saveCatalog?.(items);
+            return res;
+          })
+          .catch(async err => {
+            const idbCatalog = await window.OfflineVault?.getCatalog?.();
+            if (Array.isArray(idbCatalog) && idbCatalog.length > 0) return idbCatalog;
+            // Fallback offline: Nạp từ songs_cache.json đã precache trong Service Worker
+            try {
+              const baseHref = document.querySelector('base')?.getAttribute('href') || './';
+              const cacheResp = await fetch(`${baseHref}storage/data/songs_cache.json`);
+              if (cacheResp.ok) {
+                const data = await cacheResp.json();
+                if (Array.isArray(data) && data.length > 0) return data;
+              }
+            } catch (e) {}
+            _songsListPromise = null;
+            throw err;
+          });
       }
       return _songsListPromise;
     },

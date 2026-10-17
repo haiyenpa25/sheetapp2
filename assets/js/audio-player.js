@@ -140,8 +140,42 @@ const SheetAudioPlayer = (() => {
     }
   }
 
+    /* ══════════════════════════════════════
+   *  Timbre Synthesis (Piano / Church Organ / Choir Pad — Sprint S2)
+   * ══════════════════════════════════════ */
+  let _currentTimbre = 'piano'; // 'piano' | 'organ' | 'choir'
+  let _timbreSynth   = null;
+
+  function _ensureTimbreSynth() {
+    if (!window.Tone || _currentTimbre === 'piano') return null;
+    if (_timbreSynth && _timbreSynth._timbreType === _currentTimbre) return _timbreSynth;
+    try { _timbreSynth?.dispose?.(); } catch (_) {}
+    const isOrgan = _currentTimbre === 'organ';
+    _timbreSynth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: isOrgan ? 'fatsawtooth' : 'fattriangle', count: 3, spread: isOrgan ? 12 : 24 },
+      envelope: isOrgan
+        ? { attack: 0.04, decay: 0.1, sustain: 0.9, release: 0.25 }
+        : { attack: 0.18, decay: 0.2, sustain: 0.85, release: 0.5 }
+    }).toDestination();
+    _timbreSynth._timbreType = _currentTimbre;
+    return _timbreSynth;
+  }
+
+  function setTimbre(timbre) {
+    if (!['piano', 'organ', 'choir'].includes(timbre)) return _currentTimbre;
+    _currentTimbre = timbre;
+    const sel = document.getElementById('audio-timbre');
+    if (sel && sel.value !== timbre) sel.value = timbre;
+    if (_isPlaying) applyPlaybackMode();
+    return _currentTimbre;
+  }
+
+  function getTimbre() {
+    return _currentTimbre;
+  }
+
   /* ══════════════════════════════════════
-   *  applyPlaybackMode
+   *  applyPlaybackMode (Voice Filter + Timbre Synthesis)
    * ══════════════════════════════════════ */
   function applyPlaybackMode() {
     if (!_player || !_osmd) return;
@@ -149,11 +183,26 @@ const SheetAudioPlayer = (() => {
     if (!instrPlayer) return;
     _restoreSchedule(instrPlayer);
     const mode = _currentVoice;
-    if (mode === 'satb') return;
+    const useCustomTimbre = _currentTimbre !== 'piano' && !!window.Tone;
+    if (mode === 'satb' && !useCustomTimbre) return;
+
     _origSchedule = instrPlayer.schedule.bind(instrPlayer);
     instrPlayer.schedule = function satbSchedule(midiId, time, notes) {
-      const filtered = _pickByVoice(notes, mode);
-      if (filtered.length > 0) _origSchedule(midiId, time, filtered);
+      const filtered = mode === 'satb' ? notes : _pickByVoice(notes, mode);
+      if (!filtered || filtered.length === 0) return;
+      if (useCustomTimbre) {
+        const synth = _ensureTimbreSynth();
+        if (synth) {
+          filtered.forEach(n => {
+            const midi = _getMidi(n);
+            const dur  = Math.max(0.15, Math.min(2.5, Number(n.length || n.duration || 0.45)));
+            const freq = Tone.Frequency(midi, 'midi').toFrequency();
+            synth.triggerAttackRelease(freq, dur, time);
+          });
+          return;
+        }
+      }
+      _origSchedule(midiId, time, filtered);
     };
   }
 
@@ -181,20 +230,9 @@ const SheetAudioPlayer = (() => {
    *  Init
    * ══════════════════════════════════════ */
   function init() {
-    /* ────────────────────────────────────────────────────────
-     *  Nút PHÁT — tách làm 2 bước:
-     *    1. _syncUnlock() + _playSilentHtml5() — ĐỒNG BỘ, trong gesture
-     *    2. _playAsync() — bất đồng bộ sau đó
-     * ────────────────────────────────────────────────────────
-     *  LÝ DO: iOS Safari coi tất cả code sau "await" đầu tiên
-     *  là NGOÀI user gesture → không cho resume AudioContext.
-     *  Bằng cách gọi resume() TRƯỚC await, ta vẫn nằm trong gesture.
-     * ──────────────────────────────────────────────────────── */
     document.getElementById('btn-play-audio')?.addEventListener('click', () => {
-      // ① SYNC — phải là dòng code đầu tiên của handler, trước mọi await
       _syncUnlock();
       _playSilentHtml5();
-      // ② ASYNC — sau khi context đã được unlock
       _playAsync();
     });
 
@@ -202,6 +240,10 @@ const SheetAudioPlayer = (() => {
 
     document.getElementById('audio-speed')?.addEventListener('change', e =>
       setSpeed(parseFloat(e.target.value))
+    );
+
+    document.getElementById('audio-timbre')?.addEventListener('change', e =>
+      setTimbre(e.target.value)
     );
 
     document.getElementById('audio-volume')?.addEventListener('input', e => {
@@ -352,10 +394,12 @@ const SheetAudioPlayer = (() => {
   function enableBtn(enabled) {
     const btn = document.getElementById('btn-play-audio');
     const spd = document.getElementById('audio-speed');
+    const tmb = document.getElementById('audio-timbre');
     const vol = document.getElementById('audio-volume');
     const set = document.getElementById('btn-audio-settings');
     if (btn) btn.disabled = !enabled;
     if (spd) spd.disabled = !enabled;
+    if (tmb) tmb.disabled = !enabled;
     if (vol) vol.disabled = !enabled;
     if (set) set.disabled = !enabled;
     document.querySelectorAll('.voice-btn').forEach(b => { b.disabled = !enabled; });
@@ -374,7 +418,7 @@ const SheetAudioPlayer = (() => {
     if (sel) sel.value = voice;
   }
 
-  return { init, setup, play, enableBtn, stop, setSpeed, setVolume, applyPlaybackMode, isPlaying: () => _isPlaying, setVoice: _setVoice };
+  return { init, setup, play, enableBtn, stop, setSpeed, setVolume, setTimbre, getTimbre, applyPlaybackMode, isPlaying: () => _isPlaying, setVoice: _setVoice };
 
 })();
 

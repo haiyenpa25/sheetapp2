@@ -1398,3 +1398,5 @@ SheetApp/
 [2026-10-02] — Bổ sung quan hệ nốt dùng chung cho Rút gọn: `CompactScore.getVoiceEvents()` trả bè logic theo khuông/thời điểm; MusicXML sau gộp ghi `data-sheetapp-voices` để một nốt vẽ một lần vẫn thuộc cả hai bè khi tách. Có ca kiểm thử nốt ghi một lần, dấu nghỉ rõ ràng và nạp/vẽ bằng OSMD thật.
 [2026-10-03] — Tối giản bản nhạc theo tuyến giai điệu: `assets/js/compact-score.js` chọn bè Sol chính và một cao độ cho mỗi chùm, chuyển lời và bỏ dấu nối/luyến không đủ cặp; `assets/js/osmd-renderer.js` giữ Fa ẩn và điều chỉnh bố cục lời thay vì bật lại Fa; `assets/css/sheet.css` cho cuộn ngang bản nhạc tối thiểu 370 px trên điện thoại rất hẹp. Cập nhật nhãn tùy chọn/trợ giúp, E2E MusicXML thật và bật/tắt trên trang Thư viện; kết quả ở `docs/THU_VIEN_FULL_AUDIT_2026-10-02.md`. Không sửa MusicXML hoặc DB gốc; chưa commit/push/deploy.
 
+
+[2026-10-17] — Lập `ROADMAP6.md` (bản mới, tiền tố ticket TV) cho trang Thư viện sau rà soát mã, dữ liệu chỉ đọc và chạy Chromium khách ở 4 kích thước; gồm 16 lỗi có bằng chứng (B1–B16), lộ trình TV0–TV7, thang nghiệm thu và 8 quyết định chờ chủ dự án. Chỉ tạo tài liệu, không sửa mã/dữ liệu; chưa commit.

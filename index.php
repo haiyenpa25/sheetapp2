@@ -192,6 +192,8 @@ echo "<script>
   window.__FEATURES__ = " . json_encode(FeatureFlags::all(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) . ";
 </script>\n";
 
+echo jsTag('vendor/idb-keyval.min.js', false);
+echo jsTag('core/OfflineVault.js', false);
 echo jsTag('core/ScriptLoader.js', false);
 echo jsTag('core/FeatureFlags.js', false);
 echo jsTag('core/SafeHtml.js',     false);

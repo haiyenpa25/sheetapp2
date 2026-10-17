@@ -123,6 +123,43 @@ checkS(str_contains($oldLibJs, 'function togglePin') && str_contains($oldLibJs, 
 $oldKbJs = (string)@file_get_contents($root . '/old/assets/js/keyboard-handler.js');
 checkS(str_contains($oldKbJs, 'function _commitNumJump') && str_contains($oldKbJs, 'quick-num-hud'), 'old/assets/js/keyboard-handler.js hỗ trợ gõ số nhảy bài (_commitNumJump + quick-num-hud)');
 
+// ── 5. Behavioral & Static: Sprint S1–S3 Open-Source Integrations ──
+require_once $root . '/tools/audit_satb_harmony.php';
+
+$sampleParallel5thXml = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<score-partwise version="3.1">
+  <part id="P1">
+    <measure number="1">
+      <note><pitch><step>G</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><staff>1</staff></note>
+      <backup><duration>4</duration></backup>
+      <note><pitch><step>C</step><octave>4</octave></pitch><duration>4</duration><voice>2</voice><staff>1</staff></note>
+    </measure>
+    <measure number="2">
+      <note><pitch><step>A</step><octave>4</octave></pitch><duration>4</duration><voice>1</voice><staff>1</staff></note>
+      <backup><duration>4</duration></backup>
+      <note><pitch><step>D</step><octave>4</octave></pitch><duration>4</duration><voice>2</voice><staff>1</staff></note>
+    </measure>
+  </part>
+</score-partwise>
+XML;
+
+$auditRes = SatbHarmonyAuditor::auditXmlString($sampleParallel5thXml, 'test_parallel5.xml');
+$hasParallel5 = false;
+foreach ($auditRes['issues'] as $iss) {
+    if ($iss['type'] === 'PARALLEL_5TH') {
+        $hasParallel5 = true;
+        break;
+    }
+}
+checkB($hasParallel5, 'SatbHarmonyAuditor::auditXmlString phát hiện chính xác quãng 5 đúng song song (C4-G4 -> D4-A4)');
+
+checkS(is_file($root . '/assets/js/vendor/idb-keyval.min.js') && is_file($root . '/assets/js/core/OfflineVault.js'), 'Sprint S1: Đã tích hợp idb-keyval.min.js và core/OfflineVault.js (IndexedDB + tìm kiếm tiếng Việt không dấu)');
+checkS(str_contains($oldToolbar, 'id="audio-timbre"') && str_contains($oldViewer, 'id="btn-chord-notation"'), 'Sprint S2: Giao diện /old/ có bộ chọn Âm sắc (#audio-timbre: Piano/Organ/Choir) và nút Hợp âm La Mã/Nashville (#btn-chord-notation)');
+$audioPlayerJs = (string)@file_get_contents($root . '/assets/js/audio-player.js');
+checkS(str_contains($audioPlayerJs, 'function setTimbre') && str_contains($audioPlayerJs, 'organ') && str_contains($audioPlayerJs, 'choir'), 'Sprint S2: assets/js/audio-player.js hỗ trợ tổng hợp âm sắc Đàn Ống (Organ) và Hợp Xướng (Choir)');
+checkS(is_file($root . '/assets/js/vendor/pitchy-mpm.js') && is_file($root . '/tools/audit_satb_harmony.php'), 'Sprint S3: Đã tích hợp pitchy-mpm.js (McLeod Pitch Method) và tools/audit_satb_harmony.php');
+
 if ($failed > 0) {
     echo "\nFAILED: {$failed} checks failed.\n";
     exit(1);
