@@ -948,6 +948,17 @@ body.sheet-only-mode .toast-container .toast {
   .main-content {
     margin-left: 0 !important;
     width: 100% !important;
+    transition: margin-left .28s cubic-bezier(.32,.72,0,1), width .28s cubic-bezier(.32,.72,0,1);
+  }
+}
+
+@media (min-width: 1201px) and (max-width: 1440px) {
+  body.library-sidebar-open .main-content {
+    margin-left: min(320px, 85vw) !important;
+    width: calc(100% - min(320px, 85vw)) !important;
+  }
+  .sidebar-overlay {
+    display: none !important;
   }
 }
 

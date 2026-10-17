@@ -79,12 +79,12 @@ $thuongNienCount = (int)$testPdo->query("SELECT COUNT(*) FROM songs WHERE liturg
 check($thuongNienCount === 0, 'Phụ lục A: Xoá triệt để nhãn Thường Niên (0 bài mang Thường Niên)', true);
 
 // 2.2 Phủ kín 903 bài có Chủ đề
-$totalSongs = (int)$testPdo->query("SELECT COUNT(*) FROM songs")->fetchColumn();
-$withThemeCount = (int)$testPdo->query("SELECT COUNT(*) FROM songs WHERE theme IS NOT NULL AND theme != ''")->fetchColumn();
+$totalSongs = (int)$testPdo->query("SELECT COUNT(*) FROM songs WHERE COALESCE(category_id, 1) = 1")->fetchColumn();
+$withThemeCount = (int)$testPdo->query("SELECT COUNT(*) FROM songs WHERE COALESCE(category_id, 1) = 1 AND theme IS NOT NULL AND theme != ''")->fetchColumn();
 check($withThemeCount === 903, "Phụ lục B.2: 100% bài hát (903/903) được gán chủ đề chuẩn mục lục (thực tế: {$withThemeCount})", true);
 
 // 2.3 Điền 403 bài 501–903 vốn đang trống
-$empty501_903 = (int)$testPdo->query("SELECT COUNT(*) FROM songs WHERE httlvnId >= 501 AND httlvnId <= 903 AND (theme IS NULL OR theme = '')")->fetchColumn();
+$empty501_903 = (int)$testPdo->query("SELECT COUNT(*) FROM songs WHERE COALESCE(category_id, 1) = 1 AND httlvnId >= 501 AND httlvnId <= 903 AND (theme IS NULL OR theme = '')")->fetchColumn();
 check($empty501_903 === 0, 'Mục tiêu R3-4: 403 bài (501–903) trước đây trống nay đã được điền đủ 100%', true);
 
 // 2.4 Integrity check
@@ -133,7 +133,7 @@ $checkKeyHymns = [
 ];
 
 foreach ($checkKeyHymns as $hId => $expected) {
-    $song = $testPdo->query("SELECT httlvnId, title, liturgical_season, theme FROM songs WHERE httlvnId = {$hId}")->fetch();
+    $song = $testPdo->query("SELECT httlvnId, title, liturgical_season, theme FROM songs WHERE COALESCE(category_id, 1) = 1 AND httlvnId = {$hId}")->fetch();
     check($song !== false, "Bài {$hId} tồn tại trong CSDL");
     if (isset($expected['theme'])) {
         check($song['theme'] === $expected['theme'], "Bài {$hId} ('{$song['title']}'): Theme khớp mục lục B.2 '{$expected['theme']}'");

@@ -52,9 +52,10 @@ $afterCount = (int)$realDb->query("SELECT count(*) FROM setlists")->fetchColumn(
 
 it("Chế độ --dry-run bảo toàn tuyệt đối số lượng setlists thật (trước={$beforeCount}, sau={$afterCount})", $beforeCount === $afterCount);
 it('Output dry-run chứa tiêu đề bảng dry-run', str_contains((string)$dryRunOutput, 'BẢNG DANH SÁCH DRY-RUN'));
-it('Nhận diện được Setlist Phụng Vụ Test trong danh sách dry-run', str_contains((string)$dryRunOutput, 'Setlist Phụng Vụ Test'));
-it('Nhận diện được E2E Setlist Offline Test trong danh sách dry-run', str_contains((string)$dryRunOutput, 'E2E Setlist Offline Test'));
-it('Chứa hướng dẫn rõ ràng cho chủ dự án thực thi sau duyệt', str_contains((string)$dryRunOutput, 'php tools/clean_test_setlists.php --execute'));
+it('Output dry-run trên CSDL thật phản ánh đúng trạng thái sạch hoặc hướng dẫn thực thi',
+    str_contains((string)$dryRunOutput, 'Không phát hiện chương trình thử nghiệm nào trong CSDL') ||
+    str_contains((string)$dryRunOutput, 'php tools/clean_test_setlists.php --execute')
+);
 
 // ── 3. Chế độ --status ──
 echo "\n-- 3. Chế độ --status --\n";
@@ -152,17 +153,26 @@ $tempDryCmd = escapeshellcmd("{$phpBin} " . escapeshellarg($toolPath) . " --dry-
 $tempDryOutput = shell_exec($tempDryCmd);
 $tempCountBefore = (int)$tempPdo->query("SELECT count(*) FROM setlists")->fetchColumn();
 it('Dry-run không xóa dữ liệu trên test DB (vẫn còn 5 setlists)', $tempCountBefore === 5);
+it('Nhận diện được Setlist Phụng Vụ Test trong danh sách dry-run', str_contains((string)$tempDryOutput, 'Setlist Phụng Vụ Test'));
+it('Nhận diện được E2E Setlist Offline Test trong danh sách dry-run', str_contains((string)$tempDryOutput, 'E2E Setlist Offline Test'));
+it('Chứa hướng dẫn rõ ràng cho chủ dự án thực thi sau duyệt', str_contains((string)$tempDryOutput, 'php tools/clean_test_setlists.php --execute'));
 
 // Chạy test --backup trên temp DB
 $tempBackupCmd = escapeshellcmd("{$phpBin} " . escapeshellarg($toolPath) . " --backup --db=" . escapeshellarg($tempDbPath));
 $tempBackupOutput = shell_exec($tempBackupCmd);
 it('Tạo file sao lưu thành công', str_contains((string)$tempBackupOutput, 'Đã tạo file sao lưu dữ liệu test'));
+if (preg_match('/Đã tạo file sao lưu dữ liệu test:\s*(.+\.json)/u', (string)$tempBackupOutput, $bm)) {
+    @unlink(trim($bm[1]));
+}
 
 // Chạy test --execute trên temp DB
 $tempExecCmd = escapeshellcmd("{$phpBin} " . escapeshellarg($toolPath) . " --execute --db=" . escapeshellarg($tempDbPath));
 $tempExecOutput = shell_exec($tempExecCmd);
 it('Thực thi dọn dẹp thành công với --execute', str_contains((string)$tempExecOutput, 'DỌN DẸP HOÀN TẤT THÀNH CÔNG'));
 it('Đã xóa đúng 3 test setlists', str_contains((string)$tempExecOutput, 'Số setlists đã xóa:           3'));
+if (preg_match('/trước khi dọn:\s*(.+\.json)/u', (string)$tempExecOutput, $em)) {
+    @unlink(trim($em[1]));
+}
 
 // Kiểm tra trạng thái sau khi --execute trên temp DB:
 // 1. Chỉ còn 2 real setlists (100 và 101)

@@ -11,7 +11,7 @@
 
 const urlParams      = new URLSearchParams(self.location.search);
 const SW_VERSION     = urlParams.get('v') || 'v5';
-const SW_MANIFEST_HASH = 'e5a1927369';
+const SW_MANIFEST_HASH = '345e84f145';
 const CACHE_VENDOR   = `sheetapp-vendor-${SW_VERSION}`;
 const CACHE_APP      = `sheetapp-app-${SW_VERSION}`;
 const CACHE_MUSICXML = `sheetapp-musicxml-${SW_VERSION}`;
@@ -122,6 +122,7 @@ self.addEventListener('message', event => {
 // ── Fetch: routing strategy ───────────────────────────────────────
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
+  if (url.pathname.includes('/old/')) return;
 
   // 1. API: Network Only (không cache), NGOẠI TRỪ danh mục bài hát cho offline fallback
   if (url.pathname.includes('/api/')) {

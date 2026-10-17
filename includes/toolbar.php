@@ -350,7 +350,7 @@
           <div id="version-list-items"></div>
         </div>
 
-        <button id="btn-toolbar-editor" class="btn btn-ghost btn-sm btn-menu-item" title="Mở Editor nốt 4 bè SATB" onclick="(function(){ var sid = window.App?.getCurrentSongId?.(); window.location.href = sid ? ('/editor/?song=' + sid) : '/editor/'; })()">
+        <button id="btn-toolbar-editor" class="btn btn-ghost btn-sm btn-menu-item" title="Mở Editor nốt 4 bè SATB" onclick="(function(){ var b = window.__APP_BASE__ || ''; var sid = window.App?.getCurrentSongId?.(); window.location.href = sid ? (b + '/editor/?song=' + sid) : (b + '/editor/'); })()">
           <?= icon('music') ?>
           <span>Sửa bản nhạc (SATB)</span>
         </button>
@@ -388,6 +388,13 @@
         <a href="<?= $bHref ?>manager/#tab-users" data-target="/manager/#tab-users" target="_blank" class="btn btn-ghost btn-sm btn-menu-item" title="Quản lý thành viên ban nhạc & bộ hợp âm">
           <?= icon('users') ?>
           <span>Ban nhạc & Thành viên</span>
+        </a>
+
+        <a href="<?= $bHref ?>old/" id="btn-menu-old-ui" class="btn btn-ghost btn-sm btn-menu-item"
+           onclick="(function(e){ var sid = window.App?.getCurrentSongId?.() || new URLSearchParams(window.location.search).get('song'); if (sid) { e.preventDefault(); window.location.href = '<?= $bHref ?>old/?song=' + encodeURIComponent(sid); } })(event)"
+           title="Chuyển sang Giao diện Cũ (SheetApp v1 đơn giản)">
+          <?= icon('layout') ?>
+          <span>Giao diện Cũ (Đơn giản)</span>
         </a>
 
         <button id="btn-help" class="btn btn-ghost btn-sm btn-menu-item" title="Hướng dẫn sử dụng (?)">

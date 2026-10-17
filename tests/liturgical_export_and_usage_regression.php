@@ -9,6 +9,25 @@
 
 declare(strict_types=1);
 
+$root = dirname(__DIR__);
+$phpBin = PHP_BINARY ?: 'php';
+
+// Bảo đảm cô lập hoàn toàn CSDL thật (Ticket K2) ngay cả khi chạy độc lập ngoài run_all_tests.php
+$ownTempDb = null;
+$activeDbPath = getenv('SHEETAPP_DB_PATH') ?: '';
+if ($activeDbPath === '' || realpath($activeDbPath) === realpath($root . '/storage/data/app.sqlite')) {
+    $ownTempDb = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'sheetapp_liturgical_test_' . uniqid() . '.sqlite';
+    copy($root . '/storage/data/app.sqlite', $ownTempDb);
+    putenv("SHEETAPP_DB_PATH={$ownTempDb}");
+    $_ENV['SHEETAPP_DB_PATH'] = $ownTempDb;
+    $activeDbPath = $ownTempDb;
+    register_shutdown_function(static function () use ($ownTempDb): void {
+        @unlink($ownTempDb);
+        @unlink($ownTempDb . '-wal');
+        @unlink($ownTempDb . '-shm');
+    });
+}
+
 require_once __DIR__ . '/../api/core/DB.php';
 require_once __DIR__ . '/../api/services/SetlistService.php';
 require_once __DIR__ . '/../api/services/ChordProService.php';
@@ -23,18 +42,49 @@ function check(bool $condition, string $message): void {
     echo "  ✅ PASS: {$message}\n";
 }
 
-echo "=== KIỂM THỬ HỒI QUY EPIC 4.3: BẢN IN BOOKLET & BÁO CÁO LỊCH SỬ DÙNG BÀI ===\n\n";
+/**
+ * Thực thi script PHP endpoint trong tiến trình con dùng chung CSDL cô lập SHEETAPP_DB_PATH
+ * @param array<string, scalar> $queryParams
+ * @return array{code: int, body: string}
+ */
+function runIsolatedEndpoint(string $relScript, array $queryParams, string $sessId = ''): array {
+    global $root, $phpBin, $activeDbPath;
+    $scriptPath = $root . '/' . ltrim($relScript, '/');
+    $runnerCode = sprintf(
+        'putenv(%s); $_ENV["SHEETAPP_DB_PATH"] = %s; putenv("SHEETAPP_E2E=1"); $_GET = %s; $_SERVER["REQUEST_METHOD"] = "GET"; $_SERVER["REMOTE_ADDR"] = "127.0.0.1"; if (%s !== "") { $_COOKIE["PHPSESSID"] = %s; session_id(%s); } require %s; $c = http_response_code(); echo "\n__HTTP_CODE__=" . (is_int($c) ? $c : 200);',
+        var_export("SHEETAPP_DB_PATH={$activeDbPath}", true),
+        var_export($activeDbPath, true),
+        var_export($queryParams, true),
+        var_export($sessId, true),
+        var_export($sessId, true),
+        var_export($sessId, true),
+        var_export($scriptPath, true)
+    );
+    $tmpRunner = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'sheetapp_ep_' . uniqid() . '.php';
+    file_put_contents($tmpRunner, "<?php\n" . $runnerCode);
+    $raw = (string)shell_exec(escapeshellcmd($phpBin) . ' ' . escapeshellarg($tmpRunner));
+    @unlink($tmpRunner);
+    $code = 200;
+    if (preg_match('/\n__HTTP_CODE__=(\d+)\s*$/', $raw, $m)) {
+        $code = (int)$m[1];
+        $raw = (string)preg_replace('/\n__HTTP_CODE__=\d+\s*$/', '', $raw);
+    }
+    return ['code' => $code, 'body' => $raw];
+}
 
-$baseUrl = 'http://localhost/sheetapp2';
+echo "=== KIỂM THỬ HỒI QUY EPIC 4.3: BẢN IN BOOKLET & BÁO CÁO LỊCH SỬ DÙNG BÀI ===\n\n";
 
 // ── 1. Kiểm tra Bản In Lời + Hợp Âm (print/chord-sheet.php) ──
 echo "[1/5] Kiểm tra Bản In Lời + Hợp Âm (print/chord-sheet.php)...\n";
 
-$ch = curl_init("{$baseUrl}/print/chord-sheet.php?song=thanh-ca-001&set=HD&t=2&cols=2");
-curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 10]);
-$html = curl_exec($ch);
-$code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-curl_close($ch);
+$respChordSheet = runIsolatedEndpoint('print/chord-sheet.php', [
+    'song' => 'thanh-ca-001',
+    'set'  => 'HD',
+    't'    => '2',
+    'cols' => '2',
+]);
+$html = $respChordSheet['body'];
+$code = $respChordSheet['code'];
 
 check($code === 200, "Truy cập print/chord-sheet.php trả về HTTP 200 OK");
 check(str_contains($html, 'HỠI THÁNH VƯƠNG, KÍP NGỰ LAI'), "HTML chứa đúng tựa bài hát");
@@ -45,16 +95,17 @@ check(str_contains($html, 'window.print()'), "Tích hợp sẵn nút gọi in tr
 check(str_contains($html, '@media print'), "Có khối CSS in ấn chuyên dụng chuẩn A4");
 
 // Kiểm tra tùy chọn chỉ in lời (ẩn hợp âm)
-$chNoChord = curl_init("{$baseUrl}/print/chord-sheet.php?song=thanh-ca-001&chords=0");
-curl_setopt_array($chNoChord, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 10]);
-$htmlNoChord = curl_exec($chNoChord);
-curl_close($chNoChord);
+$respNoChord = runIsolatedEndpoint('print/chord-sheet.php', [
+    'song'   => 'thanh-ca-001',
+    'chords' => '0',
+]);
+$htmlNoChord = $respNoChord['body'];
 check(!str_contains($htmlNoChord, 'class="chord"'), "Tùy chọn chords=0 ẩn hoàn toàn dòng hợp âm, chỉ giữ lời bài hát");
 
 // ── 2. Kiểm tra Booklet Phụng Vụ (print/service-booklet.php) ──
 echo "\n[2/5] Kiểm tra Cuốn Booklet Phụng Vụ A4 (print/service-booklet.php)...\n";
 
-// Sử dụng setlist có bài thật (id=25 hoặc setlist đầu tiên)
+// Sử dụng setlist trong CSDL cô lập
 $testSetlistId = (int)DB::run("SELECT id FROM setlists ORDER BY id DESC LIMIT 1")->fetchColumn();
 if ($testSetlistId <= 0) {
     DB::run("INSERT INTO setlists (title, created_by, status) VALUES ('Setlist Phụng Vụ Test', 1, 'published')");
@@ -65,11 +116,12 @@ DB::run("INSERT OR IGNORE INTO song_usage_history (song_id, setlist_id, service_
 
 check($testSetlistId > 0, "Tìm thấy ít nhất 1 setlist trong cơ sở dữ liệu để test booklet");
 
-$chBooklet = curl_init("{$baseUrl}/print/service-booklet.php?setlist_id={$testSetlistId}&cols=1");
-curl_setopt_array($chBooklet, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 10]);
-$htmlBooklet = curl_exec($chBooklet);
-$codeBooklet = curl_getinfo($chBooklet, CURLINFO_HTTP_CODE);
-curl_close($chBooklet);
+$respBooklet = runIsolatedEndpoint('print/service-booklet.php', [
+    'setlist_id' => (string)$testSetlistId,
+    'cols'       => '1',
+]);
+$htmlBooklet = $respBooklet['body'];
+$codeBooklet = $respBooklet['code'];
 
 check($codeBooklet === 200, "Truy cập print/service-booklet.php trả về HTTP 200 OK");
 check(str_contains($htmlBooklet, 'booklet-page'), "Chứa các trang phân tách rõ ràng (booklet-page)");
@@ -79,15 +131,17 @@ check(str_contains($htmlBooklet, 'page-break-after: always') || str_contains($ht
 // ── 3. Kiểm tra Cảnh Báo Lặp Bài Hát (Quyết định D15) ──
 echo "\n[3/5] Kiểm tra API Cảnh Báo Lặp Bài (action=check_recent_usage)...\n";
 
-// 3.1: Kiểm tra bài đã được sử dụng gần đây (thanh-ca-001)
-$chCheck1 = curl_init("{$baseUrl}/api/index.php?route=setlists&action=check_recent_usage&song_id=thanh-ca-001&weeks=10");
-$phpBin = PHP_BINARY ?: 'php';
-$root = dirname(__DIR__);
 putenv('SHEETAPP_E2E=1');
 $sessId = trim((string)shell_exec(escapeshellcmd($phpBin) . ' ' . escapeshellarg($root . '/tools/create_test_session.php') . ' admin admin'));
-curl_setopt_array($chCheck1, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 10, CURLOPT_COOKIE => "PHPSESSID={$sessId}"]);
-$res1 = json_decode((string)curl_exec($chCheck1), true);
-curl_close($chCheck1);
+
+// 3.1: Kiểm tra bài đã được sử dụng gần đây (thanh-ca-001)
+$respCheck1 = runIsolatedEndpoint('api/index.php', [
+    'route'   => 'setlists',
+    'action'  => 'check_recent_usage',
+    'song_id' => 'thanh-ca-001',
+    'weeks'   => '10',
+], $sessId);
+$res1 = json_decode($respCheck1['body'], true);
 
 check(($res1['success'] ?? false) === true, "API check_recent_usage trả về success=true");
 $data1 = $res1['data'] ?? [];
@@ -97,10 +151,13 @@ check($data1['warning'] === true, "Cờ cảnh báo warning = true");
 check(!empty($data1['warning_message']), "Có thông điệp cảnh báo rõ ràng gồm số tuần, ngày và tên buổi nhóm");
 
 // 3.2: Kiểm tra bài chưa từng được dùng (thanh-ca-700)
-$chCheck2 = curl_init("{$baseUrl}/api/index.php?route=setlists&action=check_recent_usage&song_id=thanh-ca-700&weeks=4");
-curl_setopt_array($chCheck2, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 10, CURLOPT_COOKIE => "PHPSESSID={$sessId}"]);
-$res2 = json_decode((string)curl_exec($chCheck2), true);
-curl_close($chCheck2);
+$respCheck2 = runIsolatedEndpoint('api/index.php', [
+    'route'   => 'setlists',
+    'action'  => 'check_recent_usage',
+    'song_id' => 'thanh-ca-700',
+    'weeks'   => '4',
+], $sessId);
+$res2 = json_decode($respCheck2['body'], true);
 
 $data2 = $res2['data'] ?? [];
 check($data2['is_recent'] === false, "Bài chưa từng dùng trả về is_recent = false");
@@ -109,10 +166,11 @@ check($data2['warning'] === false, "Bài chưa từng dùng không phát sinh wa
 // ── 4. Kiểm tra Báo Cáo Lịch Sử Sử Dụng Bài (action=usage_report) ──
 echo "\n[4/5] Kiểm tra API Báo Cáo Sử Dụng Bài (action=usage_report)...\n";
 
-$chRep = curl_init("{$baseUrl}/api/index.php?route=setlists&action=usage_report");
-curl_setopt_array($chRep, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 10, CURLOPT_COOKIE => "PHPSESSID={$sessId}"]);
-$resRep = json_decode((string)curl_exec($chRep), true);
-curl_close($chRep);
+$respRep = runIsolatedEndpoint('api/index.php', [
+    'route'  => 'setlists',
+    'action' => 'usage_report',
+], $sessId);
+$resRep = json_decode($respRep['body'], true);
 
 check(($resRep['success'] ?? false) === true, "API usage_report trả về success=true");
 $repData = $resRep['data'] ?? [];

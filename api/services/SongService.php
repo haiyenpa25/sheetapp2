@@ -88,7 +88,7 @@ class SongService {
             if (is_array($data)) return $data;
         }
 
-        $sql = "SELECT s.id, s.title, s.httlvnId, s.xmlPath, s.defaultKey, s.category_id, s.liturgical_season, s.theme, s.composer, s.tags, s.tempo, c.name as category FROM songs s LEFT JOIN categories c ON s.category_id = c.id ORDER BY s.httlvnId ASC, s.title ASC";
+        $sql = "SELECT s.id, s.title, s.httlvnId, s.xmlPath, s.defaultKey, s.category_id, s.liturgical_season, s.theme, s.composer, s.tags, s.tempo, c.name as category FROM songs s LEFT JOIN categories c ON s.category_id = c.id ORDER BY COALESCE(c.display_order, s.category_id, 1) ASC, COALESCE(s.httlvnId, 999999) ASC, s.title ASC";
         $songs = DB::run($sql)->fetchAll();
 
         // Ghi cache an toàn
@@ -107,7 +107,7 @@ class SongService {
         if (!$song) {
             $num = (int)$id;
             if ($num > 0) {
-                $sql = "SELECT s.*, c.name as category FROM songs s LEFT JOIN categories c ON s.category_id = c.id WHERE s.httlvnId = ?";
+                $sql = "SELECT s.*, c.name as category FROM songs s LEFT JOIN categories c ON s.category_id = c.id WHERE s.httlvnId = ? ORDER BY COALESCE(s.category_id, 1) ASC LIMIT 1";
                 $song = DB::run($sql, [$num])->fetch();
             }
         }

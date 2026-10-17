@@ -174,7 +174,7 @@ if (isset($options['backup'])) {
 // ── 2. Lệnh Dry-Run Migration (--dry-run) ───────────────────────────
 if (isset($options['dry-run']) || (isset($options['seed']) && isset($options['dry-run']))) {
     $mapping = getOfficialLabelMapping();
-    $currentSongs = $pdo->query("SELECT id, httlvnId, title, liturgical_season, theme FROM songs ORDER BY httlvnId ASC")->fetchAll();
+    $currentSongs = $pdo->query("SELECT id, httlvnId, title, liturgical_season, theme FROM songs WHERE COALESCE(category_id, 1) = 1 ORDER BY httlvnId ASC")->fetchAll();
     
     $totalSongs = count($currentSongs);
     $populatedEmpty = 0;
@@ -334,7 +334,7 @@ if (isset($options['seed'])) {
     $pdo->beginTransaction();
 
     $totalUpdated = 0;
-    $stmt = $pdo->prepare("UPDATE songs SET liturgical_season = :season, theme = :theme WHERE httlvnId = :num");
+    $stmt = $pdo->prepare("UPDATE songs SET liturgical_season = :season, theme = :theme WHERE COALESCE(category_id, 1) = 1 AND httlvnId = :num");
 
     foreach ($mapping as $num => $info) {
         $stmt->execute([

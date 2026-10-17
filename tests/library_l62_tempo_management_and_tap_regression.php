@@ -52,15 +52,16 @@ $realCount = (int)$pdo->query("SELECT COUNT(*) FROM songs WHERE tempo IS NOT NUL
 it("Có ít nhất 100 bài có tempo thật chuẩn xác (thực tế: {$realCount} bài ≥ 100)", $realCount >= 100);
 
 // 1.4 Các bài còn lại mang giá trị NULL (không áp đặt tempo giả)
+$totalDbSongs = (int)$pdo->query("SELECT COUNT(*) FROM songs")->fetchColumn();
 $nullCount = (int)$pdo->query("SELECT COUNT(*) FROM songs WHERE tempo IS NULL")->fetchColumn();
-it("Các bài chưa xác định tempo mang giá trị NULL ({$nullCount} bài)", $nullCount > 0 && ($nullCount + $realCount === 903));
+it("Các bài chưa xác định tempo mang giá trị NULL ({$nullCount} bài)", $nullCount > 0 && ($nullCount + $realCount === $totalDbSongs));
 
 // ── 2. Kiểm tra SongService & SongSearchHelper trả về tempo ──
 echo "\n-- 2. SongService & Cache tích hợp tempo --\n";
 
 // 2.1 SongService::getAll() trả về trường tempo
 $allSongs = SongService::getAll();
-it("SongService::getAll() trả về danh sách 903 bài hát", count($allSongs) === 903);
+it("SongService::getAll() trả về danh sách >= 903 bài hát (" . count($allSongs) . " bài)", count($allSongs) >= 903);
 
 $song001 = null;
 foreach ($allSongs as $s) {

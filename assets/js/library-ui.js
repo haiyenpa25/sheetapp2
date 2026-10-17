@@ -266,20 +266,21 @@ const LibraryUI = (() => {
   function _sortSongs(list) {
     const mode = document.getElementById('sort-filter')?.value || 'num';
     const copy = [...list];
+    const numCmp = (a, b) => ((Number(a.category_id) || 1) - (Number(b.category_id) || 1)) || ((Number(a.httlvnId) || 999999) - (Number(b.httlvnId) || 999999)) || (a.title || '').localeCompare(b.title || '', 'vi', { sensitivity: 'base' });
     if (mode === 'title') {
       copy.sort((a, b) => (a.title || '').localeCompare(b.title || '', 'vi', { sensitivity: 'base' }));
     } else if (mode === 'key') {
       copy.sort((a, b) => {
         const keyA = a.defaultKey || a.keySignature || '';
         const keyB = b.defaultKey || b.keySignature || '';
-        if (!keyA && !keyB) return (a.httlvnId || 0) - (b.httlvnId || 0);
+        if (!keyA && !keyB) return numCmp(a, b);
         if (!keyA) return 1;
         if (!keyB) return -1;
         const cmp = keyA.localeCompare(keyB);
-        return cmp !== 0 ? cmp : (a.httlvnId || 0) - (b.httlvnId || 0);
+        return cmp !== 0 ? cmp : numCmp(a, b);
       });
     } else {
-      copy.sort((a, b) => (a.httlvnId || 0) - (b.httlvnId || 0));
+      copy.sort(numCmp);
     }
     return copy;
   }
@@ -314,10 +315,12 @@ const LibraryUI = (() => {
     if (badge) { badge.textContent = String(activeCount); badge.classList.toggle('hidden', activeCount === 0); }
     document.getElementById('btn-filter-toggle')?.classList.toggle('active', activeCount > 0);
 
-    // Ẩn thanh nhảy nhanh (Quick Jump STT) nếu đang lọc
+    const catSongs = cat ? songs.filter(s => s.category === cat) : songs;
+    _buildQuickJump(catSongs);
     const quickJumpEl = document.querySelector('.quick-jump');
     if (quickJumpEl) {
-      quickJumpEl.style.display = (mode === 'num' && !q && !cat && !season && !theme) ? '' : 'none';
+      const hasNumbered = catSongs.some(s => (Number(s.httlvnId) || 0) > 0);
+      quickJumpEl.style.display = (mode === 'num' && !q && !season && !theme && hasNumbered) ? '' : 'none';
     }
 
     // Nếu có từ khóa hoặc bộ lọc mùa lễ -> gọi API FTS5
@@ -335,6 +338,7 @@ const LibraryUI = (() => {
           } else if (!q) {
             list = _sortSongs(list);
           }
+          _updateCount(list.length);
           render(list, { isSearch: !!q, emptyMsg: q ? `Không tìm thấy "${q}"` : 'Không có bài hát phù hợp', emptyHint: 'Thử đổi dịp lễ hoặc từ khóa khác' });
           return;
         }
@@ -375,6 +379,7 @@ const LibraryUI = (() => {
     } else {
       filtered = _sortSongs(filtered);
     }
+    _updateCount(filtered.length);
     render(filtered, { isSearch: !!q, emptyMsg: q ? `Không tìm thấy "${q}"` : 'Không có bài hát', emptyHint: q ? 'Thử từ khóa khác' : '' });
   }
 
@@ -382,31 +387,29 @@ const LibraryUI = (() => {
   function _toggleSearchMode() {
     _searchMode = _searchMode === 'title' ? 'lyric' : 'title';
     const btn = document.getElementById('btn-search-lyrics');
-    if (btn) {
-      btn.classList.toggle('active', _searchMode === 'lyric');
-      btn.title = _searchMode === 'lyric' ? 'Đang tìm theo Lời (click để tìm theo Tên)' : 'Tìm theo Lời bài hát';
-    }
+    if (btn) { btn.classList.toggle('active', _searchMode === 'lyric'); btn.title = _searchMode === 'lyric' ? 'Đang tìm theo Lời (click để tìm theo Tên)' : 'Tìm theo Lời bài hát'; }
     _onSearch();
   }
 
   // ── Dynamic Taxonomy & Category Filters (Ticket L2-3) ─────────
   function _buildCategoryFilter() {
     if (!songs || !songs.length) return;
-    const cats = [...new Set(songs.map(s => s.category).filter(Boolean))].sort();
+    const catCounts = {}, catOrder = {};
+    songs.forEach(s => { if (s.category) { catCounts[s.category] = (catCounts[s.category] || 0) + 1; if (!catOrder[s.category]) catOrder[s.category] = Number(s.category_id) || 99; } });
+    const cats = Object.keys(catCounts).sort((a, b) => (catOrder[a] - catOrder[b]) || a.localeCompare(b, 'vi'));
     const seasons = [...new Set(songs.map(s => s.liturgical_season).filter(Boolean))].sort();
     const themes = [...new Set(songs.map(s => s.theme).filter(Boolean))].sort();
     const sync = (id, wrapId, list, label) => {
-      const el = document.getElementById(id), wrap = document.getElementById(wrapId);
-      if (wrap) wrap.style.display = list.length > (id === 'category-filter' ? 1 : 0) ? '' : 'none';
-      if (el) {
-        if (list.length <= (id === 'category-filter' ? 1 : 0)) el.value = '';
-        else if (id === 'category-filter' || el.options.length <= 1) {
-          const cur = el.value;
-          el.innerHTML = `<option value="">${label}</option>` + list.map(v => `<option value="${_esc(v)}"${v === cur ? ' selected' : ''}>${_esc(v)}</option>`).join('');
-        }
+      const el = document.getElementById(id), wrap = document.getElementById(wrapId), minLen = id === 'category-filter' ? 1 : 0;
+      if (wrap) wrap.style.display = list.length > minLen ? '' : 'none';
+      if (!el) return;
+      if (list.length <= minLen) el.value = '';
+      else if (id === 'category-filter' || el.options.length <= 1) {
+        const cur = el.value;
+        el.innerHTML = `<option value="">${label}</option>` + list.map(v => `<option value="${_esc(v)}"${v === cur ? ' selected' : ''}>${_esc(v)}${id === 'category-filter' ? ' (' + catCounts[v] + ')' : ''}</option>`).join('');
       }
     };
-    sync('category-filter', 'category-filter-wrap', cats, 'Tất cả danh mục');
+    sync('category-filter', 'category-filter-wrap', cats, `Tất cả danh mục (${songs.length})`);
     sync('season-filter', 'season-filter-wrap', seasons, 'Tất cả Dịp lễ');
     sync('theme-filter', 'theme-filter-wrap', themes, 'Tất cả Chủ Đề');
     const avail = (cats.length > 1 ? 1 : 0) + (seasons.length > 0 ? 1 : 0) + (themes.length > 0 ? 1 : 0);
@@ -423,7 +426,7 @@ const LibraryUI = (() => {
       const btn = document.createElement('button');
       btn.className = `quick-jump-btn ${cls}`.trim();
       btn.textContent = label;
-      const h = () => { container.querySelectorAll('.quick-jump-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); render(filterFn ? list.filter(filterFn) : songs); };
+      const h = () => { container.querySelectorAll('.quick-jump-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); render(filterFn ? list.filter(filterFn) : list); };
       btn.addEventListener('touchstart', h, { passive: true });
       btn.addEventListener('click', h);
       return btn;

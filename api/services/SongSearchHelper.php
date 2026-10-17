@@ -213,7 +213,7 @@ class SongSearchHelper {
             if ($season !== '') { $sql .= " AND s.liturgical_season = ?"; $params[] = $season; }
             if ($theme !== '') { $sql .= " AND s.theme = ?"; $params[] = $theme; }
             if ($categoryId !== null) { $sql .= " AND s.category_id = ?"; $params[] = $categoryId; }
-            $sql .= " ORDER BY s.httlvnId ASC, s.title ASC LIMIT ?";
+            $sql .= " ORDER BY COALESCE(s.category_id, 1) ASC, COALESCE(s.httlvnId, 999999) ASC, s.title ASC LIMIT ?";
             $params[] = $limit;
             return DB::run($sql, $params)->fetchAll() ?: [];
         }
@@ -231,6 +231,7 @@ class SongSearchHelper {
             if ($season !== '') { $numSql .= " AND s.liturgical_season = ?"; $numParams[] = $season; }
             if ($theme !== '') { $numSql .= " AND s.theme = ?"; $numParams[] = $theme; }
             if ($categoryId !== null) { $numSql .= " AND s.category_id = ?"; $numParams[] = $categoryId; }
+            $numSql .= " ORDER BY COALESCE(s.category_id, 1) ASC LIMIT 1";
             $numRow = DB::run($numSql, $numParams)->fetch(PDO::FETCH_ASSOC);
             if ($numRow) $exactSongByNum = $numRow;
         }
@@ -295,7 +296,7 @@ class SongSearchHelper {
             if ($theme !== '') { $sql .= " AND s.theme = :theme"; $params[':theme'] = $theme; }
             if ($categoryId !== null) { $sql .= " AND s.category_id = :catId"; $params[':catId'] = $categoryId; }
 
-            $sql .= " ORDER BY relevance_tier ASC, (CASE WHEN relevance_tier < 4 THEN s.httlvnId ELSE 0 END) ASC, fts_rank ASC, s.httlvnId ASC LIMIT " . (int)$limit;
+            $sql .= " ORDER BY relevance_tier ASC, (CASE WHEN relevance_tier < 4 THEN COALESCE(s.category_id, 1) ELSE 0 END) ASC, (CASE WHEN relevance_tier < 4 THEN COALESCE(s.httlvnId, 999999) ELSE 0 END) ASC, fts_rank ASC, COALESCE(s.category_id, 1) ASC, COALESCE(s.httlvnId, 999999) ASC LIMIT " . (int)$limit;
 
             $stmt = DB::pdo()->prepare($sql);
             $stmt->execute($params);
@@ -502,7 +503,7 @@ class SongSearchHelper {
         if ($season !== '') { $sql .= " AND s.liturgical_season = ?"; $params[] = $season; }
         if ($theme !== '') { $sql .= " AND s.theme = ?"; $params[] = $theme; }
         if ($categoryId !== null) { $sql .= " AND s.category_id = ?"; $params[] = $categoryId; }
-        $sql .= " ORDER BY relevance_tier ASC, s.httlvnId ASC LIMIT ?";
+        $sql .= " ORDER BY relevance_tier ASC, COALESCE(s.category_id, 1) ASC, COALESCE(s.httlvnId, 999999) ASC LIMIT ?";
         $params[] = $limit;
 
         $rows = DB::run($sql, $params)->fetchAll() ?: [];

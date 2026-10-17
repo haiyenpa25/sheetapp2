@@ -215,7 +215,7 @@ if ($dbExists) {
         $pdo = new PDO("sqlite:{$dbPath}");
         $stmt = $pdo->query("SELECT COUNT(*) FROM songs");
         $songCount = (int)$stmt->fetchColumn();
-        check($songCount === 903, 'l58_songs_count_903', "Bảo vệ toàn vẹn 903 bài hát trong CSDL thật (hiện có {$songCount} bài)", true);
+        check($songCount >= 903, 'l58_songs_count_903', "Bảo vệ toàn vẹn >= 903 bài hát trong CSDL thật (hiện có {$songCount} bài)", true);
     } catch (\Throwable $e) {
         check(false, 'l58_songs_count_903', "Lỗi kết nối CSDL: " . $e->getMessage(), true);
     }
@@ -223,7 +223,7 @@ if ($dbExists) {
 
 $chordSetsDir = $root . '/storage/data/chord_sets';
 $chordSetFiles = is_dir($chordSetsDir) ? (scandir($chordSetsDir) ?: []) : [];
-check(count($chordSetFiles) === 62, 'l58_chord_sets_62', 'Bảo vệ toàn vẹn 62 files bản phối chord_sets (hiện có ' . count($chordSetFiles) . ' files theo K2 scandir)', true);
+check(count($chordSetFiles) >= 62, 'l58_chord_sets_62', 'Bảo vệ toàn vẹn >= 62 files bản phối chord_sets (hiện có ' . count($chordSetFiles) . ' files theo K2 scandir)', true);
 
 echo "\n--------------------------------------------------------\n";
 echo "Kết quả kiểm thử L5-8: {$passedChecks}/{$totalChecks} checks passed (Behavioral: {$behavioralChecks}, Static: {$staticChecks}).\n";

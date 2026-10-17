@@ -50,18 +50,18 @@
       </button>
     </div>
 
+    <div id="category-filter-wrap" class="mt-half sidebar-filter-item">
+      <select id="category-filter" class="form-input select-toolbar sidebar-filter-select w-full" aria-label="Lọc theo danh mục bài hát" title="Chọn thể loại / tuyển tập bài hát">
+        <option value="">Tất cả danh mục</option>
+      </select>
+    </div>
+
     <!-- PANEL GOM BỘ LỌC (TỰ ẨN KHI KHÔNG CÓ DỮ LIỆU - TICKET L2-3) -->
     <div id="sidebar-filters-panel" class="sidebar-filters-panel hidden">
       <?php
       require_once __DIR__ . '/../api/services/SongSearchHelper.php';
       $sidebarTaxonomy = SongSearchHelper::getTaxonomy();
       ?>
-      <div id="category-filter-wrap" class="sidebar-filter-item">
-        <label for="category-filter" class="sidebar-filter-label">Danh mục:</label>
-        <select id="category-filter" class="form-input select-toolbar sidebar-filter-select" aria-label="Lọc theo danh mục bài hát">
-          <option value="">Tất cả danh mục</option>
-        </select>
-      </div>
 
       <div id="season-filter-wrap" class="sidebar-filter-item">
         <label for="season-filter" class="sidebar-filter-label">Dịp lễ:</label>

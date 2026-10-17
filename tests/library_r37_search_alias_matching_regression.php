@@ -206,10 +206,10 @@ it("HTTP API search q=gie+xu trả về bài hát có 'JÊSUS' trong tiêu đề
 echo "\n-- 9. Dữ liệu bài hát gốc không bị sửa đổi --\n";
 
 $pdo = DB::pdo();
-$countGieXuInDb = (int)$pdo->query("SELECT count(*) FROM songs WHERE title LIKE '%Giê-xu%' OR title LIKE '%giê-xu%'")->fetchColumn();
-it("Số bài có chứa 'Giê-xu' trong bảng songs vẫn giữ nguyên = 0 (bảo toàn nguyên văn Thánh Ca)", $countGieXuInDb === 0);
+$countGieXuInDb = (int)$pdo->query("SELECT count(*) FROM songs WHERE COALESCE(category_id, 1) = 1 AND (title LIKE '%Giê-xu%' OR title LIKE '%giê-xu%')")->fetchColumn();
+it("Số bài Thánh Ca HTTLVN có chứa 'Giê-xu' trong bảng songs vẫn giữ nguyên = 0 (bảo toàn nguyên văn Thánh Ca)", $countGieXuInDb === 0);
 
-$countJesusInDb = (int)$pdo->query("SELECT count(*) FROM songs WHERE title LIKE '%JÊSUS%' OR title LIKE '%Jêsus%' OR title LIKE '%Jê-sus%' OR title LIKE '%JÊ-SUS%'")->fetchColumn();
+$countJesusInDb = (int)$pdo->query("SELECT count(*) FROM songs WHERE COALESCE(category_id, 1) = 1 AND (title LIKE '%JÊSUS%' OR title LIKE '%Jêsus%' OR title LIKE '%Jê-sus%' OR title LIKE '%JÊ-SUS%')")->fetchColumn();
 it("Số bài chính thức chứa 'JÊSUS' / 'Jê-sus' trong bảng songs được bảo toàn nguyên vẹn (127 bài)", $countJesusInDb === 127);
 
 // ── 10. Kiểm tra tĩnh Frontend JavaScript ──

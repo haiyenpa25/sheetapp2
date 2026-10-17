@@ -13,7 +13,7 @@ const ApiService = (() => {
     if (typeof window !== 'undefined' && window.location) {
       const parts = window.location.pathname.split('/').filter(Boolean);
       const knownAppRoots = [
-        'learn', 'live-band', 'manager', 'editor', 'huong-dan', 'omr',
+        'learn', 'live-band', 'manager', 'editor', 'huong-dan', 'omr', 'old',
         'api', 'assets', 'storage', 'tools', 'tests', 'docs',
         'index.php', 'login.php', 'register.php', 'projector.php'
       ];

@@ -41,7 +41,7 @@ $songQuery = !empty($currentSongId) ? ('?song=' . urlencode($currentSongId)) : '
 // Tự động nhận diện Base URL của ứng dụng (hỗ trợ cả root domain và subfolder XAMPP)
 if (!isset($appBase)) {
     $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
-    $subDirs = ['live-band', 'learn', 'manager', 'huong-dan', 'editor', 'members', 'tools', 'api'];
+    $subDirs = ['live-band', 'learn', 'manager', 'huong-dan', 'editor', 'members', 'tools', 'api', 'old'];
     $currentSub = basename($scriptDir);
     if (in_array($currentSub, $subDirs, true)) {
         $appBase = rtrim(dirname($scriptDir), '/');
@@ -128,8 +128,18 @@ $helpAnchor = match($activePillar) {
       </a>
     </div>
 
-    <!-- 3. Khu Vực Tiện Ích: Trợ Giúp & Tài Khoản -->
+    <!-- 3. Khu Vực Tiện Ích: Chuyển Giao Diện Cũ, Trợ Giúp & Tài Khoản -->
     <div class="shell-actions">
+      <!-- Nút Chuyển Giao Diện Cũ (Old UI — SheetApp v1) -->
+      <a href="<?= $appBase ?>/old/<?= $songQuery ?>"
+         id="shell-switch-old-ui-btn"
+         class="shell-help-btn"
+         onclick="(function(e){ var sid = window.App?.getCurrentSongId?.() || new URLSearchParams(window.location.search).get('song'); if (sid) { e.preventDefault(); window.location.href = '<?= $appBase ?>/old/?song=' + encodeURIComponent(sid); } })(event)"
+         title="Chuyển sang Giao diện Cũ (SheetApp v1 đơn giản)">
+        <span class="help-icon"><?= icon('layout') ?></span>
+        <span class="help-text">Giao Diện Cũ</span>
+      </a>
+
       <!-- Nút Trợ Giúp Theo Ngữ Cảnh (Context Help) -->
       <a href="<?= $appBase ?>/huong-dan/<?= $helpAnchor ?>" 
          id="shell-context-help-btn" 
