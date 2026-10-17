@@ -87,13 +87,23 @@
       });
     });
 
+    function confirmPick() {
+      var bpmVal = bpmIn ? (parseInt(bpmIn.value, 10) || null) : null;
+      closePick({
+        transpose: _curSemi,
+        transpose_key: _curSemi,
+        bpm: bpmVal,
+        valueOf: function() { return _curSemi; }
+      });
+    }
+
     if (customIn) {
       customIn.addEventListener('input', function() {
         var v = parseInt(customIn.value, 10) || 0;
         _updatePreview(v);
       });
       customIn.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') { e.preventDefault(); closePick(_curSemi); }
+        if (e.key === 'Enter') { e.preventDefault(); confirmPick(); }
         if (e.key === 'Escape') { e.preventDefault(); closePick(null); }
       });
     }
@@ -114,15 +124,14 @@
       });
     });
 
-    if (btnOk) btnOk.addEventListener('click', function() {
-      var bpmVal = bpmIn ? (parseInt(bpmIn.value, 10) || null) : null;
-      closePick({
-        transpose: _curSemi,
-        transpose_key: _curSemi,
-        bpm: bpmVal,
-        valueOf: function() { return _curSemi; }
+    if (bpmIn) {
+      bpmIn.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); confirmPick(); }
+        if (e.key === 'Escape') { e.preventDefault(); closePick(null); }
       });
-    });
+    }
+
+    if (btnOk) btnOk.addEventListener('click', confirmPick);
     if (btnCancel) btnCancel.addEventListener('click', function() { closePick(null); });
     if (btnClose)  btnClose.addEventListener('click',  function() { closePick(null); });
     if (modal)     modal.addEventListener('click', function(e) { if (e.target === modal) closePick(null); });

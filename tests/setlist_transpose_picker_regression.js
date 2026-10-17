@@ -77,4 +77,12 @@ window.SetlistDetail.setContext({
   assert.equal(submitted.transpose_key, 2);
   assert.equal(submitted.bpm, 96);
   console.log('PASS: Thêm bài gửi đúng tông và BPM tới API');
+
+  // Test Enter key trên custom input
+  const enterCustom = window.TransposePick.show('Bài thử', 3, 'G', 115);
+  elements.get('transpose-pick-custom').listeners.keydown({ key: 'Enter', preventDefault() {} });
+  const enterRes = await enterCustom;
+  assert.equal(enterRes.transpose_key, 3);
+  assert.equal(enterRes.bpm, 115);
+  console.log('PASS: Nhấn Enter trên ô nhập số cung tự động xác nhận đủ tông và BPM');
 })().catch(error => { console.error(error); process.exitCode = 1; });
