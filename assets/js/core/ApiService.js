@@ -34,8 +34,21 @@ const ApiService = (() => {
     return base ? `${base}/${cleanUrl}` : `/${cleanUrl}`;
   }
 
+  function _csrfToken() {
+    if (typeof document === 'undefined' || !document.cookie) return '';
+    const m = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
+    return m ? decodeURIComponent(m[1]) : '';
+  }
+
   async function _request(url, options = {}) {
     const finalUrl = resolveUrl(url);
+    const method = (options.method || 'GET').toUpperCase();
+    if (method !== 'GET' && method !== 'HEAD') {
+      const token = _csrfToken();
+      if (token) {
+        options.headers = Object.assign({}, options.headers || {}, { 'X-CSRF-Token': token });
+      }
+    }
     const res = await fetch(finalUrl, options);
     if (!res.ok) {
       let data = null;

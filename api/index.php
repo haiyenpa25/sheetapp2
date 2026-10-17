@@ -11,7 +11,7 @@ if (!ob_start('ob_gzhandler')) { ob_start(); }
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Headers: Content-Type, X-CSRF-Token');
 // API không cache — luôn lấy data mới nhất
 header('Cache-Control: no-store, no-cache, must-revalidate');
 
@@ -23,6 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once __DIR__ . '/core/Response.php';
 require_once __DIR__ . '/core/RequestSecurity.php';
 require_once __DIR__ . '/core/FeatureFlags.php';
+
+RequestSecurity::ensureCsrfToken($_SERVER);
 
 $route = $_GET['route'] ?? '';
 $method = $_SERVER['REQUEST_METHOD'];

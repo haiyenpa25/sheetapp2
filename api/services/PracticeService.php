@@ -137,7 +137,9 @@ class PracticeService {
             $stmtUpdate->execute([time(), $durationSec, $maxBpm, $accuracyTotal, $notesTotal, $notesCorrect, $timingScore, $sessionId]);
 
             // Lấy thông tin assignment_id và user_id trước khi commit
-            $sessionInfo = $db->query("SELECT user_id, assignment_id FROM practice_sessions WHERE id = {$sessionId}")->fetch(PDO::FETCH_ASSOC);
+            $stmtInfo = $db->prepare("SELECT user_id, assignment_id FROM practice_sessions WHERE id = ?");
+            $stmtInfo->execute([$sessionId]);
+            $sessionInfo = $stmtInfo->fetch(PDO::FETCH_ASSOC);
 
             $db->commit();
 

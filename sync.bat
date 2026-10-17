@@ -17,21 +17,31 @@ if not exist "%PHP_EXE%" (
     set PHP_EXE=php
 )
 
-echo [1/4] Regenerate Service Worker Precache Manifest...
+echo [1/5] Checking JavaScript syntax...
+"%NODE_EXE%" tools/check_syntax.js
+if errorlevel 1 (
+    echo [Abort] JS syntax check failed.
+    exit /b 1
+)
+
+echo [2/5] Regenerate Service Worker Precache Manifest...
 "%PHP_EXE%" tools/generate_sw_manifest.php
 
-echo [2/4] Regenerate Gitnexus Second Brain Code Map...
+echo [3/5] Regenerate Gitnexus Second Brain Code Map...
 "%NODE_EXE%" tools/generate_code_map.js
 
-echo [3/4] Staging and committing changes...
-"%GIT_EXE%" config user.name "AI Agent"
-"%GIT_EXE%" config user.email "agent@sheet.hyb.io.vn"
-"%GIT_EXE%" add .
+echo [4/5] Staging and committing changes...
+"%GIT_EXE%" config merge.ours.driver true
+"%GIT_EXE%" add -A
 "%GIT_EXE%" commit -m "Auto-sync from Antigravity: %date% %time%"
 
-echo [4/4] Pushing to GitHub repository...
+echo [5/5] Rebasing and pushing to GitHub repository...
 set GIT_TERMINAL_PROMPT=0
 set GCM_INTERACTIVE=never
+"%GIT_EXE%" pull --rebase origin main
+"%NODE_EXE%" tools/generate_code_map.js
+"%GIT_EXE%" add CODE_MAP.md
+"%GIT_EXE%" diff --cached --quiet || "%GIT_EXE%" commit --amend --no-edit
 "%GIT_EXE%" push origin main
 if errorlevel 1 (
     echo [Warning] Git push can require manual authentication or network. Local commit created.

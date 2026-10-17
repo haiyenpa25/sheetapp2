@@ -38,3 +38,10 @@ const EventBus = (() => {
 })();
 
 window.EventBus = EventBus;
+
+if (!window.escapeHtml) {
+  const _ESC_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+  window.escapeHtml = (v) => String(v ?? '').replace(/[&<>"']/g, c => _ESC_MAP[c]);
+  window.safeHtml = (strings, ...vals) => strings.reduce((out, s, i) => out + window.escapeHtml(vals[i - 1]) + s);
+}
+

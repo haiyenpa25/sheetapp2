@@ -113,7 +113,8 @@ const Metronome = (() => {
 
   function _initAudio() {
     if (_audioContext) return;
-    _audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (typeof AudioCtx === 'function') _audioContext = new AudioCtx();
   }
 
   /* ── 3 BỘ PHÁT ÂM THANH SYNTHESIZER ── */

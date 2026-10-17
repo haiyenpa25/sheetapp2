@@ -27,10 +27,13 @@ const LibraryUI = (() => {
     'Hillsongs - Worship': 'Hillsong',
   };
 
+  const ROW_HEIGHT = 26;
   let songs = [], activeSongId = null, onSelectCb = null, onDeleteCb = null;
   let _searchDebounce = null, _searchMode = 'title', _pinnedIds = [];
+  let _vList = [], _vStart = -1, _vEnd = -1, _vRaf = 0;
 
   const listEl     = () => document.getElementById('song-list');
+  const scrollWrapEl = () => document.querySelector('.song-list-container');
   const searchEl   = () => document.getElementById('search-input');
   const categoryEl = () => document.getElementById('category-filter');
   const keyEl      = () => document.getElementById('key-filter');
@@ -41,6 +44,10 @@ const LibraryUI = (() => {
       clearTimeout(_searchDebounce);
       _searchDebounce = setTimeout(_onSearch, 150);
     });
+    scrollWrapEl()?.addEventListener('scroll', () => {
+      if (_vList.length <= 120 || _vRaf) return;
+      _vRaf = requestAnimationFrame(() => { _vRaf = 0; _renderVirtualSlice(false); });
+    }, { passive: true });
     loadSongs();
 
     document.getElementById('btn-prev-song')?.addEventListener('click', () => {
@@ -217,27 +224,60 @@ const LibraryUI = (() => {
   function render(list, opts = {}) {
     const el = listEl();
     if (!el) return;
+    _vList = Array.isArray(list) ? list : [];
+    _vStart = -1; _vEnd = -1;
 
-    if (!list || list.length === 0) {
-      el.innerHTML = `<div class="empty-state">
-        <p>${opts.emptyMsg || 'Không tìm thấy bài hát'}</p>
-        <small>${opts.emptyHint || 'Thử từ khóa hoặc bộ lọc khác'}</small>
-      </div>`;
+    if (_vList.length === 0) {
+      el.style.paddingTop = '0px';
+      el.style.paddingBottom = '0px';
+      el.innerHTML = `<div class="empty-state"><p>${opts.emptyMsg || 'Không tìm thấy bài hát'}</p><small>${opts.emptyHint || 'Thử từ khóa hoặc bộ lọc khác'}</small></div>`;
       return;
     }
 
-    const frag = document.createDocumentFragment();
+    const wrap = scrollWrapEl();
+    if (wrap && !activeSongId) wrap.scrollTop = 0;
+    _renderVirtualSlice(true);
+    if (activeSongId) _highlightActive(activeSongId);
+  }
+
+  function _renderVirtualSlice(force = false) {
+    const el = listEl();
+    if (!el || _vList.length === 0) return;
     const canAdmin = window.Auth?.isAdmin?.() ?? false;
     const canEdit  = window.Auth?.isBanhat?.() ?? false;
 
-    list.forEach(song => {
-      frag.appendChild(_createSongItem(song, canAdmin, canEdit));
-    });
+    if (_vList.length <= 120) {
+      if (!force && _vStart === 0 && _vEnd === _vList.length) return;
+      _vStart = 0; _vEnd = _vList.length;
+      el.style.paddingTop = '0px';
+      el.style.paddingBottom = '0px';
+      const frag = document.createDocumentFragment();
+      _vList.forEach(s => frag.appendChild(_createSongItem(s, canAdmin, canEdit)));
+      el.innerHTML = '';
+      el.appendChild(frag);
+      return;
+    }
 
+    const wrap = scrollWrapEl();
+    const scrollTop = wrap ? wrap.scrollTop : 0;
+    const viewH = (wrap && wrap.clientHeight > 0) ? wrap.clientHeight : 780;
+    const start = Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - 12);
+    const end   = Math.min(_vList.length, Math.ceil((scrollTop + viewH) / ROW_HEIGHT) + 12);
+    if (!force && start === _vStart && end === _vEnd) return;
+    _vStart = start; _vEnd = end;
+
+    el.style.paddingTop = (start * ROW_HEIGHT) + 'px';
+    el.style.paddingBottom = ((_vList.length - end) * ROW_HEIGHT) + 'px';
+    const frag = document.createDocumentFragment();
+    for (let i = start; i < end; i++) {
+      frag.appendChild(_createSongItem(_vList[i], canAdmin, canEdit));
+    }
     el.innerHTML = '';
     el.appendChild(frag);
-
-    if (activeSongId) _highlightActive(activeSongId);
+    if (activeSongId) {
+      const active = el.querySelector(`.song-item[data-id="${CSS.escape(String(activeSongId))}"]`);
+      if (active) active.classList.add('active');
+    }
   }
 
   /** Tạo DOM node một bài hát trên ĐÚNG 1 DÒNG (Số + Tên + Tông + Ghim/Sao) */
@@ -246,61 +286,24 @@ const LibraryUI = (() => {
     div.className  = 'song-item';
     div.dataset.id = song.id;
     const keySig   = song.defaultKey || song.keySignature || '';
-    div.title      = `${song.httlvnId ? String(song.httlvnId).padStart(3, '0') + ' - ' : ''}${song.title}${keySig ? ' [' + keySig + ']' : ''}`;
+    const numStr   = song.httlvnId ? String(song.httlvnId).padStart(3, '0') : '—';
+    div.title      = `${song.httlvnId ? numStr + ' - ' : ''}${song.title}${keySig ? ' [' + keySig + ']' : ''}`;
 
-    // 1. Số thứ tự (cột cố định)
-    const num = document.createElement('span');
-    num.className   = 'song-item-num';
-    num.textContent = song.httlvnId ? String(song.httlvnId).padStart(3, '0') : '—';
-    div.appendChild(num);
+    const addSpan = (cls, txt) => { const s = document.createElement('span'); s.className = cls; s.textContent = txt; div.appendChild(s); };
+    addSpan('song-item-num', numStr);
+    addSpan('song-item-title', song.title);
+    if (keySig) addSpan('song-key-badge', keySig);
 
-    // 2. Tên bài hát (1 dòng gọn)
-    const title = document.createElement('span');
-    title.className   = 'song-item-title';
-    title.textContent = song.title;
-    div.appendChild(title);
-
-    // 3. Tông nhạc phẳng nằm bên phải tên bài
-    if (keySig) {
-      const badge = document.createElement('span');
-      badge.className   = 'song-key-badge';
-      badge.textContent = keySig;
-      div.appendChild(badge);
-    }
-
-    // 4. Nút thao tác nhanh (📌 Ghim, ★ Lưu, + Setlist, 🗑 Xóa)
     const acts = document.createElement('div');
     acts.className = 'song-item-actions';
+    const addBtn = (cls, txt, ttl) => { const b = document.createElement('button'); b.className = cls; b.textContent = txt; b.title = ttl; acts.appendChild(b); };
 
     const pinned = isPinned(song.id);
-    const pinBtn = document.createElement('button');
-    pinBtn.className   = `song-pin-btn icon-btn-xs${pinned ? ' pin-active' : ''}`;
-    pinBtn.title       = pinned ? 'Bỏ ghim' : 'Ghim bài này lên thanh Ghim nhanh';
-    pinBtn.textContent = '📌';
-    acts.appendChild(pinBtn);
-
+    addBtn(`song-pin-btn icon-btn-xs${pinned ? ' pin-active' : ''}`, '📌', pinned ? 'Bỏ ghim' : 'Ghim bài này lên thanh Ghim nhanh');
     const isFav = window.HistoryManager?.isFavorite?.(song.id) ?? false;
-    const favBtn = document.createElement('button');
-    favBtn.className   = `song-fav-btn icon-btn-xs${isFav ? ' fav-active' : ''}`;
-    favBtn.title       = isFav ? 'Bỏ yêu thích' : 'Thêm yêu thích';
-    favBtn.textContent = isFav ? '★' : '☆';
-    acts.appendChild(favBtn);
-
-    if (canEdit) {
-      const addBtn = document.createElement('button');
-      addBtn.className   = 'song-add-setlist-btn icon-btn-xs';
-      addBtn.title       = 'Thêm vào Setlist';
-      addBtn.textContent = '+';
-      acts.appendChild(addBtn);
-    }
-
-    if (canAdmin) {
-      const delBtn = document.createElement('button');
-      delBtn.className   = 'song-delete-btn icon-btn-xs';
-      delBtn.title       = 'Xoá bài hát';
-      delBtn.textContent = '×';
-      acts.appendChild(delBtn);
-    }
+    addBtn(`song-fav-btn icon-btn-xs${isFav ? ' fav-active' : ''}`, isFav ? '★' : '☆', isFav ? 'Bỏ yêu thích' : 'Thêm yêu thích');
+    if (canEdit) addBtn('song-add-setlist-btn icon-btn-xs', '+', 'Thêm vào Setlist');
+    if (canAdmin) addBtn('song-delete-btn icon-btn-xs', '×', 'Xoá bài hát');
 
     div.appendChild(acts);
     return div;
@@ -308,36 +311,25 @@ const LibraryUI = (() => {
 
   // ── Search & Filter ──────────────────────────────────────────
   function _onSearch() {
-    const q   = (searchEl()?.value || '').trim().toLowerCase();
-    const cat = categoryEl()?.value || '';
-    const key = keyEl()?.value || '';
+    const q = (searchEl()?.value || '').trim().toLowerCase(), cat = categoryEl()?.value || '', key = keyEl()?.value || '';
     let filtered = songs;
-
     if (cat) filtered = filtered.filter(s => s.category === cat);
     if (key) filtered = filtered.filter(s => (s.defaultKey || s.keySignature || '') === key);
-
     _buildQuickJump(filtered);
 
     if (q) {
       if (_searchMode === 'lyric') {
-        filtered = filtered.filter(s =>
-          (s.title?.toLowerCase().includes(q)) || (s.lyricSnippet?.toLowerCase().includes(q))
-        );
+        filtered = filtered.filter(s => (s.title?.toLowerCase().includes(q)) || (s.lyricSnippet?.toLowerCase().includes(q)));
       } else {
-        const isNumQuery = /^\d+$/.test(q);
-        const qNum = isNumQuery ? parseInt(q, 10) : NaN;
+        const isNumQuery = /^\d+$/.test(q), qNum = isNumQuery ? parseInt(q, 10) : NaN;
         filtered = filtered.filter(s => {
           const titleMatch = s.title?.toLowerCase().includes(q);
-          if (!isNumQuery) return titleMatch;
-          return titleMatch || s.httlvnId === qNum || String(s.httlvnId || '').padStart(3, '0').includes(q);
+          return !isNumQuery ? titleMatch : (titleMatch || s.httlvnId === qNum || String(s.httlvnId || '').padStart(3, '0').includes(q));
         });
       }
     }
     _updateCount(filtered.length);
-    render(filtered, {
-      emptyMsg: q ? `Không tìm thấy "${q}"` : 'Không có bài hát phù hợp',
-      emptyHint: 'Thử từ khóa hoặc đổi danh mục / tông'
-    });
+    render(filtered, { emptyMsg: q ? `Không tìm thấy "${q}"` : 'Không có bài hát phù hợp', emptyHint: 'Thử từ khóa hoặc đổi danh mục / tông' });
   }
 
   function _toggleSearchMode() {
@@ -366,16 +358,10 @@ const LibraryUI = (() => {
     sel.innerHTML = `<option value="">Tất cả danh mục (${songs.length})</option>` +
       cats.map(c => `<option value="${_esc(c)}"${c === current ? ' selected' : ''}>${_esc(c)} (${catCounts[c]})</option>`).join('');
 
-    // Build flat category strip (#category-flat-list)
     const flatEl = document.getElementById('category-flat-list');
     if (flatEl) {
       flatEl.innerHTML = `<button type="button" class="cat-flat-btn${!current ? ' active' : ''}" data-cat="">Tất cả <span>${songs.length}</span></button>` +
-        cats.map(c => {
-          const shortLabel = CAT_SHORT_NAMES[c] || c;
-          const activeCls = c === current ? ' active' : '';
-          return `<button type="button" class="cat-flat-btn${activeCls}" data-cat="${_esc(c)}" title="${_esc(c)} (${catCounts[c]} bài)">${_esc(shortLabel)} <span>${catCounts[c]}</span></button>`;
-        }).join('');
-
+        cats.map(c => `<button type="button" class="cat-flat-btn${c === current ? ' active' : ''}" data-cat="${_esc(c)}" title="${_esc(c)} (${catCounts[c]} bài)">${_esc(CAT_SHORT_NAMES[c] || c)} <span>${catCounts[c]}</span></button>`).join('');
       flatEl.querySelectorAll('.cat-flat-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const val = btn.dataset.cat || '';
@@ -388,9 +374,7 @@ const LibraryUI = (() => {
   }
 
   function _syncFlatCategoryActive(val) {
-    const flatEl = document.getElementById('category-flat-list');
-    if (!flatEl) return;
-    flatEl.querySelectorAll('.cat-flat-btn').forEach(btn => {
+    document.getElementById('category-flat-list')?.querySelectorAll('.cat-flat-btn').forEach(btn => {
       btn.classList.toggle('active', (btn.dataset.cat || '') === val);
     });
   }
@@ -400,56 +384,33 @@ const LibraryUI = (() => {
     const sel = keyEl();
     if (!sel || songs.length === 0) return;
     const keyCounts = {};
-    songs.forEach(s => {
-      const k = s.defaultKey || s.keySignature || '';
-      if (k) keyCounts[k] = (keyCounts[k] || 0) + 1;
-    });
-    const keys = Object.keys(keyCounts).sort((a, b) => a.localeCompare(b));
-    const current = sel.value;
+    songs.forEach(s => { const k = s.defaultKey || s.keySignature || ''; if (k) keyCounts[k] = (keyCounts[k] || 0) + 1; });
+    const keys = Object.keys(keyCounts).sort((a, b) => a.localeCompare(b)), current = sel.value;
     sel.innerHTML = `<option value="">Tông: Tất cả</option>` +
       keys.map(k => `<option value="${_esc(k)}"${k === current ? ' selected' : ''}>${_esc(k)} (${keyCounts[k]})</option>`).join('');
   }
 
   // ── Quick Jump (1 dòng gọn: All | 1..100 | 101..200...) ──────
   function _buildQuickJump(list) {
-    const container = document.getElementById('quick-jump-btns');
-    const wrap      = document.getElementById('quick-jump');
+    const container = document.getElementById('quick-jump-btns'), wrap = document.getElementById('quick-jump');
     if (!container) return;
-    const ranges = [
-      ['001',1,100],['101',101,200],['201',201,300],
-      ['301',301,400],['401',401,500],['501',501,600],
-      ['601',601,700],['701',701,800],['801',801,999]
-    ];
+    const ranges = [['001',1,100],['101',101,200],['201',201,300],['301',301,400],['401',401,500],['501',501,600],['601',601,700],['701',701,800],['801',801,999]];
     const hasAnyNumbered = list.some(s => (s.httlvnId || 0) > 0);
     if (wrap) wrap.style.display = hasAnyNumbered ? '' : 'none';
     if (!hasAnyNumbered) { container.innerHTML = ''; return; }
 
     const frag = document.createDocumentFragment();
-    const allBtn = document.createElement('button');
-    allBtn.className   = 'quick-jump-btn quick-jump-all active';
-    allBtn.textContent = 'Tất cả';
-    allBtn.title       = 'Hiện tất cả bài trong danh mục đang chọn';
-    allBtn.addEventListener('click', () => {
-      container.querySelectorAll('.quick-jump-btn').forEach(b => b.classList.remove('active'));
-      allBtn.classList.add('active');
-      render(list);
-    });
-    frag.appendChild(allBtn);
-
+    const mkBtn = (cls, txt, ttl, fn) => {
+      const b = document.createElement('button'); b.className = cls; b.textContent = txt; b.title = ttl;
+      b.addEventListener('click', () => { container.querySelectorAll('.quick-jump-btn').forEach(x => x.classList.remove('active')); b.classList.add('active'); fn(); });
+      frag.appendChild(b);
+    };
+    mkBtn('quick-jump-btn quick-jump-all active', 'Tất cả', 'Hiện tất cả bài trong danh mục đang chọn', () => render(list));
     ranges.forEach(([label, min, max]) => {
-      if (!list.some(s => (s.httlvnId || 0) >= min && (s.httlvnId || 0) <= max)) return;
-      const btn = document.createElement('button');
-      btn.className   = 'quick-jump-btn';
-      btn.textContent = label;
-      btn.title       = `Từ bài ${min} đến ${max}`;
-      btn.addEventListener('click', () => {
-        container.querySelectorAll('.quick-jump-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        render(list.filter(s => (s.httlvnId || 0) >= min && (s.httlvnId || 0) <= max));
-      });
-      frag.appendChild(btn);
+      if (list.some(s => (s.httlvnId || 0) >= min && (s.httlvnId || 0) <= max)) {
+        mkBtn('quick-jump-btn', label, `Từ bài ${min} đến ${max}`, () => render(list.filter(s => (s.httlvnId || 0) >= min && (s.httlvnId || 0) <= max)));
+      }
     });
-
     container.innerHTML = '';
     container.appendChild(frag);
   }
@@ -534,6 +495,18 @@ const LibraryUI = (() => {
   function _highlightActive(id) {
     const el = listEl();
     if (!el) return;
+    if (_vList.length > 120) {
+      const idx = _vList.findIndex(s => String(s.id) === String(id));
+      const wrap = scrollWrapEl();
+      if (idx >= 0 && wrap) {
+        const itemTop = idx * ROW_HEIGHT;
+        const viewH = wrap.clientHeight || 700;
+        if (itemTop < wrap.scrollTop || itemTop + ROW_HEIGHT > wrap.scrollTop + viewH) {
+          wrap.scrollTop = Math.max(0, itemTop - Math.floor(viewH / 2));
+          _renderVirtualSlice(true);
+        }
+      }
+    }
     el.querySelectorAll('.song-item.active').forEach(i => i.classList.remove('active'));
     const active = el.querySelector(`.song-item[data-id="${CSS.escape(String(id))}"]`);
     if (active) { active.classList.add('active'); active.scrollIntoView({ behavior: 'instant', block: 'nearest' }); }

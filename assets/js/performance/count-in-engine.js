@@ -80,10 +80,11 @@ const CountInEngine = (() => {
     const ctx = _getAudioContext();
     const beatDuration = 60.0 / bpm;
     const totalBeats = beats * countInBars;
+    const nowTime = ctx ? ctx.currentTime : (performance.now() / 1000);
 
     // Tính thời gian bắt đầu AudioContext
-    let localStartTime = ctx.currentTime + 0.08;
-    if (startAtServer > 0 && window.TransportClock) {
+    let localStartTime = nowTime + 0.08;
+    if (startAtServer > 0 && window.TransportClock && ctx) {
       localStartTime = window.TransportClock.toAudioContextTime(startAtServer, ctx);
     }
 
@@ -94,10 +95,11 @@ const CountInEngine = (() => {
     for (let i = 0; i < totalBeats; i++) {
       const noteTime = localStartTime + (i * beatDuration);
       const isAccent = (i % beats === 0);
-      _playClick(noteTime, isAccent, false);
+      if (ctx) _playClick(noteTime, isAccent, false);
 
       // Schedule visual update
-      const delayMs = Math.max(0, (noteTime - ctx.currentTime) * 1000);
+      const baseNow = ctx ? ctx.currentTime : (performance.now() / 1000);
+      const delayMs = Math.max(0, (noteTime - baseNow) * 1000);
       const countNumber = (i % beats) + 1;
 
       const timer = setTimeout(() => {
