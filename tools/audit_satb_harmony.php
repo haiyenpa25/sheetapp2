@@ -157,16 +157,15 @@ if (realpath($_SERVER['SCRIPT_FILENAME'] ?? '') === __FILE__) {
     if (!empty($opts['file']) && is_file((string)$opts['file'])) {
         $files[] = (string)$opts['file'];
     } else {
-        $xmlDir = $root . '/ThanhCa-MusicXML';
-        if (is_dir($xmlDir)) {
-            $all = array_merge(
-                glob($xmlDir . '/*.xml') ?: [],
-                glob($xmlDir . '/*.musicxml') ?: [],
-                glob($xmlDir . '/*/*.xml') ?: [],
-                glob($xmlDir . '/*/*.musicxml') ?: []
-            );
-            $files = array_slice($all, 0, $limit);
-        }
+        $all = array_merge(
+            glob($root . '/storage/songs/*.xml') ?: [],
+            glob($root . '/storage/songs/*.musicxml') ?: [],
+            glob($root . '/ThanhCa-MusicXML/*.xml') ?: [],
+            glob($root . '/ThanhCa-MusicXML/*.musicxml') ?: [],
+            glob($root . '/ThanhCa-MusicXML/*/*.xml') ?: [],
+            glob($root . '/ThanhCa-MusicXML/*/*.musicxml') ?: []
+        );
+        $files = array_slice($all, 0, $limit);
     }
 
     $reports = [];
