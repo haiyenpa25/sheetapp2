@@ -24,7 +24,7 @@ $isJson = in_array('--json', $argv, true);
 // ── 1. Quét số dòng các file JS, PHP, CSS ──
 $excludedDirs = [
     'vendor', 'node_modules', 'storage', '.git', '.superpowers',
-    'brain', '.system_generated', 'assets/js/vendor', 'dashboard', 'old'
+    'brain', '.system_generated', 'assets/js/vendor', 'dashboard'
 ];
 
 function scanFiles(string $dir, array $extensions, array $excludedDirs): array {

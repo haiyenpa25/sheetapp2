@@ -83,15 +83,6 @@ const ApiService = (() => {
           .catch(async err => {
             const idbCatalog = await window.OfflineVault?.getCatalog?.();
             if (Array.isArray(idbCatalog) && idbCatalog.length > 0) return idbCatalog;
-            // Fallback offline: Nạp từ songs_cache.json đã precache trong Service Worker
-            try {
-              const baseHref = document.querySelector('base')?.getAttribute('href') || './';
-              const cacheResp = await fetch(`${baseHref}storage/data/songs_cache.json`);
-              if (cacheResp.ok) {
-                const data = await cacheResp.json();
-                if (Array.isArray(data) && data.length > 0) return data;
-              }
-            } catch (e) {}
             _songsListPromise = null;
             throw err;
           });
@@ -121,8 +112,10 @@ const ApiService = (() => {
       if (q) p.set('q', q);
       if (filters.season) p.set('season', filters.season);
       if (filters.theme)  p.set('theme', filters.theme);
+      if (filters.category) p.set('category', filters.category);
       if (filters.category_id) p.set('category_id', filters.category_id);
-      if (filters.limit) p.set('limit', filters.limit);
+      if (filters.mode)   p.set('mode', filters.mode);
+      if (filters.limit)  p.set('limit', filters.limit);
       return _request(`api/index.php?${p.toString()}`);
     },
     getTaxonomy: ()       => _request('api/index.php?route=songs&action=taxonomy'),

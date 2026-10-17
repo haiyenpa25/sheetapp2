@@ -77,16 +77,16 @@ const LibraryUI = (() => {
 
     const list = listEl();
     if (list) {
-      let _lastTouchId = '', _lastTouchTime = 0;
-      list.addEventListener('touchstart', (e) => {
-        const item = e.target.closest('.song-item');
-        if (!item?.dataset.id || e.target.closest('.song-delete-btn,.song-add-setlist-btn,.song-fav-btn,.song-pin-btn')) return;
-        _lastTouchId = item.dataset.id;
-        _lastTouchTime = Date.now();
-        selectSong(item.dataset.id);
+      let _ptX = 0, _ptY = 0, _ptMoved = false;
+      list.addEventListener('pointerdown', (e) => {
+        _ptX = e.clientX; _ptY = e.clientY; _ptMoved = false;
+      }, { passive: true });
+      list.addEventListener('pointermove', (e) => {
+        if (!_ptMoved && (Math.abs(e.clientX - _ptX) > 10 || Math.abs(e.clientY - _ptY) > 10)) _ptMoved = true;
       }, { passive: true });
 
       list.addEventListener('click', (e) => {
+        if (_ptMoved) { _ptMoved = false; return; }
         const btn = e.target.closest('.song-delete-btn');
         if (btn) { e.stopPropagation(); _handleDelete(btn); return; }
         const addSetBtn = e.target.closest('.song-add-setlist-btn');
@@ -96,7 +96,7 @@ const LibraryUI = (() => {
         const favBtn = e.target.closest('.song-fav-btn');
         if (favBtn) { e.stopPropagation(); _handleFav(favBtn); return; }
         const item = e.target.closest('.song-item');
-        if (!item?.dataset.id || (item.dataset.id === _lastTouchId && Date.now() - _lastTouchTime < 600)) return;
+        if (!item?.dataset.id) return;
         selectSong(item.dataset.id);
       });
     }
@@ -230,7 +230,7 @@ const LibraryUI = (() => {
     if (_vList.length === 0) {
       el.style.paddingTop = '0px';
       el.style.paddingBottom = '0px';
-      el.innerHTML = `<div class="empty-state"><p>${opts.emptyMsg || 'Không tìm thấy bài hát'}</p><small>${opts.emptyHint || 'Thử từ khóa hoặc bộ lọc khác'}</small></div>`;
+      el.innerHTML = `<div class="empty-state"><p>${_esc(opts.emptyMsg || 'Không tìm thấy bài hát')}</p><small>${_esc(opts.emptyHint || 'Thử từ khóa hoặc bộ lọc khác')}</small></div>`;
       return;
     }
 

@@ -50,6 +50,16 @@ class SongVersionHelper {
             ];
         }
 
+        // TV4-2: Chỉ chủ sở hữu hoặc Admin mới được ghi đè file dưới storage/users/<owner>
+        $usersRoot = realpath(__DIR__ . '/../../storage/users');
+        if ($usersRoot && strpos($targetPath, $usersRoot) === 0 && !Auth::isAdmin()) {
+            $currentUser = preg_replace('/[^a-zA-Z0-9_\-]/', '_', strtolower(Auth::username() ?: ''));
+            $expectedPrefix = rtrim($usersRoot, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $currentUser . DIRECTORY_SEPARATOR;
+            if ($currentUser === '' || strpos($targetPath, $expectedPrefix) !== 0) {
+                return ['success' => false, 'message' => 'Lỗi: Bạn không có quyền ghi đè phiên bản của người dùng khác.'];
+            }
+        }
+
         if (pathinfo($targetPath, PATHINFO_EXTENSION) !== 'xml') {
              return ['success' => false, 'message' => 'Lỗi: Chỉ cho phép ghi file .xml'];
         }
@@ -76,6 +86,14 @@ class SongVersionHelper {
         }
         if (strpos($targetPath, $storageRoot) !== 0) {
             return ['success' => false, 'message' => 'Lỗi: Quyền truy cập bị từ chối.'];
+        }
+        $usersRoot = realpath(__DIR__ . '/../../storage/users');
+        if ($usersRoot && strpos($targetPath, $usersRoot) === 0 && !Auth::isAdmin()) {
+            $currentUser = preg_replace('/[^a-zA-Z0-9_\-]/', '_', strtolower(Auth::username() ?: ''));
+            $expectedPrefix = rtrim($usersRoot, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $currentUser . DIRECTORY_SEPARATOR;
+            if ($currentUser === '' || strpos($targetPath, $expectedPrefix) !== 0) {
+                return ['success' => false, 'message' => 'Lỗi: Bạn không có quyền khôi phục phiên bản của người dùng khác.'];
+            }
         }
         $backupPath = $targetPath . '.bak';
         if (!file_exists($backupPath)) {

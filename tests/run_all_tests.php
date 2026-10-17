@@ -141,7 +141,6 @@ foreach ($phpFiles as $file) {
 
 if ($lintErrors === 0) {
     echo "PASS (" . count($phpFiles) . " files)\n";
-    $passedSuites++;
 } else {
     echo "FAIL ({$lintErrors} files có lỗi)\n";
     $failedSuites[] = "PHP Syntax Lint ({$lintErrors} errors)";
@@ -210,7 +209,6 @@ try {
 
     if ($integrity === 'ok' && empty($fkCheck) && $userCount === 3 && $songCount === 2) {
         echo "PASS (Integrity ok, FKs ok, Seed ok)\n";
-        $passedSuites++;
     } else {
         echo "FAIL (Dữ liệu fixture không khớp)\n";
         $failedSuites[] = "Test DB Fixture Validation";

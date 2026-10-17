@@ -3,12 +3,34 @@
  * api/services/ImportService.php
  */
 require_once __DIR__ . '/../core/DB.php';
+require_once __DIR__ . '/../core/Auth.php';
+require_once __DIR__ . '/SongService.php';
 require_once __DIR__ . '/../import_helpers.php';
 require_once __DIR__ . '/../import_scrapers.php';
 
-define('SHEETS_DIR_IMPORT',  realpath(__DIR__ . '/../../storage/sheets') . '/');
-
 class ImportService {
+
+    /**
+     * Trả về thư mục lưu trữ MusicXML hợp lệ thuộc vùng quản lý storage/users/<user>/imported
+     * @return array{absDir: string, relDir: string}
+     */
+    private static function resolveImportDir(): array {
+        $username = Auth::username() ?: 'admin';
+        $safeUser = preg_replace('/[^a-zA-Z0-9_\-]/', '_', strtolower($username)) ?: 'admin';
+        $relDir   = 'storage/users/' . $safeUser . '/imported/';
+        $absDir   = dirname(__DIR__, 2) . '/' . $relDir;
+        if (!is_dir($absDir) && !@mkdir($absDir, 0775, true) && !is_dir($absDir)) {
+            throw new Exception('Không thể khởi tạo thư mục lưu trữ bản nhạc trên máy chủ');
+        }
+        return ['absDir' => $absDir, 'relDir' => $relDir];
+    }
+
+    private static function finalizeImportedSong(array $song): void {
+        if (!empty($song['id'])) {
+            SongService::syncSongFts((string)$song['id']);
+        }
+        SongService::invalidateCache();
+    }
 
     public static function search(string $pageUrl, string $title = ''): array {
         if (!$pageUrl) { throw new Exception('URL không được để trống'); }
@@ -38,12 +60,16 @@ class ImportService {
             throw new Exception('Tải được link nhưng nội dung không phải MusicXML hợp lệ. URL thử: ' . $xmlUrl);
         }
 
+        $dir      = self::resolveImportDir();
         $ext      = str_ends_with(strtolower($xmlUrl), '.mxl') ? 'mxl' : 'xml';
         $filename = _generateFilename($title, $ext);
-        file_put_contents(SHEETS_DIR_IMPORT . $filename, $xmlContent);
+        if (file_put_contents($dir['absDir'] . $filename, $xmlContent) === false) {
+            throw new Exception('Không thể ghi file MusicXML vào vùng lưu trữ');
+        }
 
         $key  = _detectKey($xmlContent);
-        $song = _saveSong(DB::pdo(), $title, 'storage/sheets/' . $filename, $key, $pageUrl);
+        $song = _saveSong(DB::pdo(), $title, $dir['relDir'] . $filename, $key, $pageUrl);
+        self::finalizeImportedSong($song);
 
         return ['success' => true, 'title' => $title, 'xmlUrl' => $xmlUrl, 'key' => $key, 'song' => $song];
     }
@@ -59,11 +85,15 @@ class ImportService {
 
         if (!$title) $title = pathinfo(parse_url($xmlUrl, PHP_URL_PATH), PATHINFO_FILENAME) ?: 'Bài hát mới';
 
+        $dir      = self::resolveImportDir();
         $filename = _generateFilename($title, $ext);
-        file_put_contents(SHEETS_DIR_IMPORT . $filename, $content);
+        if (file_put_contents($dir['absDir'] . $filename, $content) === false) {
+            throw new Exception('Không thể ghi file MusicXML vào vùng lưu trữ');
+        }
 
         $key  = _detectKey($content);
-        $song = _saveSong(DB::pdo(), $title, 'storage/sheets/' . $filename, $key, $xmlUrl);
+        $song = _saveSong(DB::pdo(), $title, $dir['relDir'] . $filename, $key, $xmlUrl);
+        self::finalizeImportedSong($song);
 
         return ['success' => true, 'title' => $title, 'song' => $song];
     }
@@ -86,12 +116,16 @@ class ImportService {
         $content = file_get_contents($file['tmp_name']);
         if (!_isValidMusicXML($content, $ext)) { throw new Exception('File không hợp lệ — không phải MusicXML'); }
 
-        $filename = _generateFilename($title, $ext);
-        $path     = SHEETS_DIR_IMPORT . $filename;
-        move_uploaded_file($file['tmp_name'], $path);
+        $dir      = self::resolveImportDir();
+        $filename = _generateFilename($title, $ext === 'musicxml' ? 'xml' : $ext);
+        $path     = $dir['absDir'] . $filename;
+        if (!move_uploaded_file($file['tmp_name'], $path) && file_put_contents($path, $content) === false) {
+            throw new Exception('Không thể lưu file MusicXML tải lên');
+        }
 
         $key  = _detectKey($content);
-        $song = _saveSong(DB::pdo(), $title, 'storage/sheets/' . $filename, $key, '');
+        $song = _saveSong(DB::pdo(), $title, $dir['relDir'] . $filename, $key, '');
+        self::finalizeImportedSong($song);
 
         return ['success' => true, 'title' => $title, 'song' => $song];
     }

@@ -91,12 +91,21 @@ class SongService {
         $sql = "SELECT s.id, s.title, s.httlvnId, s.xmlPath, s.defaultKey, s.category_id, s.liturgical_season, s.theme, s.composer, s.tags, s.tempo, c.name as category FROM songs s LEFT JOIN categories c ON s.category_id = c.id ORDER BY COALESCE(c.display_order, s.category_id, 1) ASC, COALESCE(s.httlvnId, 999999) ASC, s.title ASC";
         $songs = DB::run($sql)->fetchAll();
 
-        // Ghi cache an toàn
+        // TV4-5: Ghi cache nguyên tử (temp file + LOCK_EX + rename)
         $cacheDir = dirname($cacheFile);
         if (!is_dir($cacheDir)) {
             @mkdir($cacheDir, 0755, true);
         }
-        @file_put_contents($cacheFile, json_encode($songs, JSON_UNESCAPED_UNICODE));
+        $jsonPayload = json_encode($songs, JSON_UNESCAPED_UNICODE);
+        if ($jsonPayload !== false) {
+            $tmpFile = $cacheFile . '.tmp.' . getmypid() . '.' . bin2hex(random_bytes(2));
+            if (@file_put_contents($tmpFile, $jsonPayload, LOCK_EX) !== false) {
+                if (!@rename($tmpFile, $cacheFile)) {
+                    @copy($tmpFile, $cacheFile);
+                    @unlink($tmpFile);
+                }
+            }
+        }
 
         return $songs;
     }
@@ -163,6 +172,13 @@ class SongService {
 
     public static function update(string $id, array $data): array {
         self::invalidateCache();
+
+        // TV4-3: Kiểm tra xmlPath bằng resolveManagedXmlPath nếu được truyền vào
+        if (array_key_exists('xmlPath', $data) && trim((string)$data['xmlPath']) !== '') {
+            if (self::resolveManagedXmlPath((string)$data['xmlPath']) === null) {
+                return ['success' => false, 'message' => 'Đường dẫn xmlPath không hợp lệ hoặc nằm ngoài vùng quản lý'];
+            }
+        }
 
         $fields = [];
         $params = [];

@@ -160,6 +160,23 @@ $audioPlayerJs = (string)@file_get_contents($root . '/assets/js/audio-player.js'
 checkS(str_contains($audioPlayerJs, 'function setTimbre') && str_contains($audioPlayerJs, 'organ') && str_contains($audioPlayerJs, 'choir'), 'Sprint S2: assets/js/audio-player.js hỗ trợ tổng hợp âm sắc Đàn Ống (Organ) và Hợp Xướng (Choir)');
 checkS(is_file($root . '/assets/js/vendor/pitchy-mpm.js') && is_file($root . '/tools/audit_satb_harmony.php'), 'Sprint S3: Đã tích hợp pitchy-mpm.js (McLeod Pitch Method) và tools/audit_satb_harmony.php');
 
+// ── 6. Static & Behavioral: Rà soát & Tối ưu hóa hệ thống (TV0–TV4) ──
+$oldChordCanvasLines = count(file($root . '/old/assets/js/chord-canvas.js'));
+checkS($oldChordCanvasLines < 600 && !is_file($root . '/old/assets/js/lyric-extractor.js'), "old/assets/js/chord-canvas.js < 600 dòng ({$oldChordCanvasLines} dòng) và đã gộp lyric-extractor.js dùng chung");
+
+$mainLibJs = (string)@file_get_contents($root . '/assets/js/library-ui.js');
+checkS(str_contains($mainLibJs, '_ptrMoved') && str_contains($mainLibJs, 'function _getItemH()'), 'assets/js/library-ui.js có bảo vệ cuộn cảm ứng (_ptrMoved <= 10px) và đo động chiều cao dòng (_getItemH)');
+checkS(str_contains($mainLibJs, '[^\p{L}\p{N}]') && str_contains($mainLibJs, 'mode: _searchMode, limit: 200'), 'assets/js/library-ui.js tô sáng nguyên từ tiếng Việt Unicode và truyền mode/limit:200 khi tìm kiếm');
+
+$apiIndexPhp = (string)@file_get_contents($root . '/api/index.php');
+checkS(str_contains($apiIndexPhp, 'session_write_close()'), 'api/index.php mở khóa session sớm (session_write_close) cho các request GET/HEAD song song');
+
+$songServicePhp = (string)@file_get_contents($root . '/api/services/SongService.php');
+checkS(str_contains($songServicePhp, 'LOCK_EX') && str_contains($songServicePhp, '@rename($tmpFile, self::CACHE_FILE)'), 'SongService.php ghi songs_cache.json nguyên tử (LOCK_EX + temp file + rename)');
+
+$versionHelperPhp = (string)@file_get_contents($root . '/api/services/SongVersionHelper.php');
+checkS(str_contains($versionHelperPhp, '$expectedPrefix = \'storage/users/\' . $safeUser . \'/\''), 'SongVersionHelper.php kiểm tra quyền sở hữu thư mục người dùng trong saveXml và restoreXmlBackup');
+
 if ($failed > 0) {
     echo "\nFAILED: {$failed} checks failed.\n";
     exit(1);

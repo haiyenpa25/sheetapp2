@@ -278,7 +278,7 @@ body.library-sidebar-open #app-shell-navbar .shell-brand { display: none; }
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   border-bottom: 1px solid var(--lp-border);
-  z-index: 9985 !important;
+  z-index: var(--z-hud, 100) !important;
 }
 .section-jump-bar-container.hidden {
   display: none !important;
@@ -454,7 +454,7 @@ body.chord-edit-mode .toast-container .toast:not(.error) { display: none !import
     bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
     transform: none !important;
     align-items: stretch !important;
-    z-index: 9999 !important;
+    z-index: var(--z-toast, 2000) !important;
   }
 }
 .toast-container .toast {
@@ -543,7 +543,7 @@ body.dark-mode .toast-container .toast { background: #22222b; color: var(--lp-in
   color: var(--lp-text, #0f172a); border-radius: 12px;
   border: 1px solid var(--lp-border, #e2e8f0);
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
-  padding: 8px 6px; z-index: 99999;
+  padding: 8px 6px; z-index: var(--z-dropdown, 200);
 }
 [data-theme="dark"] #main-dropdown-menu, body.dark-mode #main-dropdown-menu {
   background: #18181b; border-color: #27272a; color: #f4f4f5;
@@ -572,7 +572,7 @@ body.dark-mode .toast-container .toast { background: #22222b; color: var(--lp-in
 #main-dropdown-menu .tools-row-label .icon { width: 18px; height: 18px; color: var(--lp-muted, #64748b); flex-shrink: 0; }
 #main-dropdown-menu .tools-zoom-controls, #main-dropdown-menu .tools-scroll-controls { display: inline-flex; align-items: center; gap: 4px; }
 #main-dropdown-menu .sheet-drag-handle { display: none; }
-.main-dropdown-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(2px); z-index: 99998; }
+.main-dropdown-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(2px); z-index: var(--z-modal-bg, 900); }
 .main-dropdown-backdrop.hidden { display: none !important; }
 
 @media (max-width: 680px) {
@@ -582,7 +582,7 @@ body.dark-mode .toast-container .toast { background: #22222b; color: var(--lp-in
     border-radius: 16px 16px 0 0 !important; border: none !important;
     padding: 8px 14px calc(20px + env(safe-area-inset-bottom, 0px)) !important;
     box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.25) !important;
-    overflow-x: hidden !important; overflow-y: auto !important; z-index: 99999 !important;
+    overflow-x: hidden !important; overflow-y: auto !important; z-index: var(--z-modal, 1000) !important;
   }
   #main-dropdown-menu .sheet-drag-handle { display: block !important; width: 40px; height: 5px !important; min-height: 5px !important; flex-shrink: 0 !important; background: var(--lp-border, #cbd5e1); border-radius: 3px; margin: 6px auto 12px; }
   #main-dropdown-menu .btn-menu-item, #main-dropdown-menu .tools-row { min-height: 48px !important; padding: 10px 14px !important; font-size: 14px !important; }
@@ -1275,7 +1275,7 @@ body.dark-mode .cc-status-chip {
   border-top: 1px solid rgba(109, 40, 217, 0.3) !important;
   background: var(--lp-surface, #ffffff);
   box-shadow: 0 -8px 32px rgba(109, 40, 217, 0.22);
-  z-index: 99999 !important;
+  z-index: var(--z-popup, 800) !important;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -1550,7 +1550,7 @@ body.dark-mode .lv-edit-chordpro-btn:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 99999;
+  z-index: var(--z-modal, 1000);
   padding: 16px;
   animation: fadeIn 0.15s ease;
 }
@@ -1954,7 +1954,7 @@ body.dark-mode .sidebar .song-item.active .song-item-num { color: #bfdbfe; }
     border-radius: 18px !important;
     padding: 6px !important;
     bottom: max(8px, env(safe-area-inset-bottom, 8px)) !important;
-    z-index: 9990 !important;
+    z-index: var(--z-hud, 100) !important;
   }
   body.sheet-only-mode .section-jump-bar-container:not(.hidden) {
     bottom: calc(140px + env(safe-area-inset-bottom, 0px)) !important;

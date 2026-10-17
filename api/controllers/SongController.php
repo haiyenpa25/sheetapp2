@@ -45,16 +45,18 @@ class SongController {
                         return;
                     }
 
-                    if ($action === 'search' || isset($_GET['q']) || isset($_GET['season']) || isset($_GET['theme'])) {
+                    if ($action === 'search' || isset($_GET['q']) || isset($_GET['season']) || isset($_GET['theme']) || isset($_GET['category'])) {
                         $q = trim($_GET['q'] ?? ($_GET['lyric_search'] ?? ''));
                         $filters = [
                             'season'      => trim($_GET['season'] ?? ''),
                             'theme'       => trim($_GET['theme'] ?? ''),
+                            'category'    => trim($_GET['category'] ?? ''),
                             'category_id' => isset($_GET['category_id']) && $_GET['category_id'] !== '' ? (int)$_GET['category_id'] : null,
-                            'limit'       => isset($_GET['limit']) ? min(100, max(1, (int)$_GET['limit'])) : 50
+                            'mode'        => trim($_GET['mode'] ?? 'title'),
+                            'limit'       => isset($_GET['limit']) ? min(500, max(1, (int)$_GET['limit'])) : 200
                         ];
                         $results = SongService::search($q, $filters);
-                        Response::ok(['data' => $results]);
+                        Response::ok(['data' => $results, 'total' => count($results)]);
                         return;
                     }
 

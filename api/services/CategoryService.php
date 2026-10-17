@@ -3,6 +3,7 @@
  * api/services/CategoryService.php
  */
 require_once __DIR__ . '/../core/DB.php';
+require_once __DIR__ . '/SongService.php';
 
 class CategoryService {
     public static function getAll(): array {
@@ -12,17 +13,20 @@ class CategoryService {
     public static function create(string $name): array {
         $slug = self::slugify($name);
         DB::run("INSERT INTO categories (name, slug) VALUES (?, ?)", [$name, $slug]);
+        SongService::invalidateCache();
         return ['id' => (int)DB::lastId(), 'name' => $name, 'slug' => $slug];
     }
 
     public static function update(int|string $id, string $name): array {
         $slug = self::slugify($name);
         DB::run("UPDATE categories SET name = ?, slug = ? WHERE id = ?", [$name, $slug, (int)$id]);
+        SongService::invalidateCache();
         return ['id' => (int)$id, 'name' => $name, 'slug' => $slug];
     }
 
     public static function delete(int|string $id): array {
         DB::run("DELETE FROM categories WHERE id = ?", [(int)$id]);
+        SongService::invalidateCache();
         return ['deleted' => true, 'id' => (int)$id];
     }
 

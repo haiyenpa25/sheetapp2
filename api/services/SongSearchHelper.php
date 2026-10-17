@@ -197,8 +197,10 @@ class SongSearchHelper {
         $cleanQuery = trim($query);
         $season = trim($filters['season'] ?? '');
         $theme = trim($filters['theme'] ?? '');
+        $category = trim($filters['category'] ?? '');
         $categoryId = isset($filters['category_id']) && $filters['category_id'] !== '' ? (int)$filters['category_id'] : null;
-        $limit = isset($filters['limit']) ? min(100, max(1, (int)$filters['limit'])) : 50;
+        $mode = trim($filters['mode'] ?? 'title');
+        $limit = isset($filters['limit']) ? min(500, max(1, (int)$filters['limit'])) : 200;
 
         if ($cleanQuery === '') {
             $sql = "
@@ -212,6 +214,7 @@ class SongSearchHelper {
             $params = [];
             if ($season !== '') { $sql .= " AND s.liturgical_season = ?"; $params[] = $season; }
             if ($theme !== '') { $sql .= " AND s.theme = ?"; $params[] = $theme; }
+            if ($category !== '') { $sql .= " AND c.name = ?"; $params[] = $category; }
             if ($categoryId !== null) { $sql .= " AND s.category_id = ?"; $params[] = $categoryId; }
             $sql .= " ORDER BY COALESCE(s.category_id, 1) ASC, COALESCE(s.httlvnId, 999999) ASC, s.title ASC LIMIT ?";
             $params[] = $limit;
@@ -230,6 +233,7 @@ class SongSearchHelper {
             $numParams = [$songNum];
             if ($season !== '') { $numSql .= " AND s.liturgical_season = ?"; $numParams[] = $season; }
             if ($theme !== '') { $numSql .= " AND s.theme = ?"; $numParams[] = $theme; }
+            if ($category !== '') { $numSql .= " AND c.name = ?"; $numParams[] = $category; }
             if ($categoryId !== null) { $numSql .= " AND s.category_id = ?"; $numParams[] = $categoryId; }
             $numSql .= " ORDER BY COALESCE(s.category_id, 1) ASC LIMIT 1";
             $numRow = DB::run($numSql, $numParams)->fetch(PDO::FETCH_ASSOC);
@@ -294,9 +298,13 @@ class SongSearchHelper {
 
             if ($season !== '') { $sql .= " AND s.liturgical_season = :season"; $params[':season'] = $season; }
             if ($theme !== '') { $sql .= " AND s.theme = :theme"; $params[':theme'] = $theme; }
+            if ($category !== '') { $sql .= " AND c.name = :catName"; $params[':catName'] = $category; }
             if ($categoryId !== null) { $sql .= " AND s.category_id = :catId"; $params[':catId'] = $categoryId; }
 
-            $sql .= " ORDER BY relevance_tier ASC, (CASE WHEN relevance_tier < 4 THEN COALESCE(s.category_id, 1) ELSE 0 END) ASC, (CASE WHEN relevance_tier < 4 THEN COALESCE(s.httlvnId, 999999) ELSE 0 END) ASC, fts_rank ASC, COALESCE(s.category_id, 1) ASC, COALESCE(s.httlvnId, 999999) ASC LIMIT " . (int)$limit;
+            $orderBy = ($mode === 'lyric')
+                ? " ORDER BY (CASE WHEN match_type = 'lyric' THEN 0 ELSE 1 END) ASC, fts_rank ASC, COALESCE(s.category_id, 1) ASC, COALESCE(s.httlvnId, 999999) ASC"
+                : " ORDER BY relevance_tier ASC, (CASE WHEN relevance_tier < 4 THEN COALESCE(s.category_id, 1) ELSE 0 END) ASC, (CASE WHEN relevance_tier < 4 THEN COALESCE(s.httlvnId, 999999) ELSE 0 END) ASC, fts_rank ASC, COALESCE(s.category_id, 1) ASC, COALESCE(s.httlvnId, 999999) ASC";
+            $sql .= $orderBy . " LIMIT " . (int)$limit;
 
             $stmt = DB::pdo()->prepare($sql);
             $stmt->execute($params);

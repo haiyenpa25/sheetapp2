@@ -59,26 +59,26 @@ const LibraryUI = (() => {
 
     _buildCategoryFilter();
 
-    // ── Event Delegation (touch instant 0ms + click fallback) ──
+    // ── Event Delegation (TV0-1: Chỉ mở bài khi chạm thật, không mở nhầm khi vuốt cuộn) ──
     const list = listEl();
     if (list) {
-      let _lastTouchId = '', _lastTouchTime = 0;
-      list.addEventListener('touchstart', (e) => {
-        const item = e.target.closest('.song-item');
-        if (!item?.dataset.id || e.target.closest('.song-delete-btn,.song-add-setlist-btn,.song-fav-btn')) return;
-        _lastTouchId = item.dataset.id; _lastTouchTime = Date.now();
-        selectSong(item.dataset.id);
+      let _ptX = 0, _ptY = 0, _ptMoved = false;
+      list.addEventListener('pointerdown', (e) => {
+        _ptX = e.clientX; _ptY = e.clientY; _ptMoved = false;
       }, { passive: true });
-
+      list.addEventListener('pointermove', (e) => {
+        if (!_ptMoved && (Math.abs(e.clientX - _ptX) > 10 || Math.abs(e.clientY - _ptY) > 10)) _ptMoved = true;
+      }, { passive: true });
       list.addEventListener('click', (e) => {
+        if (_ptMoved) { _ptMoved = false; return; }
         const btn = e.target.closest('.song-delete-btn'); if (btn) { e.stopPropagation(); _handleDelete(btn); return; }
         const addSetBtn = e.target.closest('.song-add-setlist-btn'); if (addSetBtn) { e.stopPropagation(); _promptAddToSetlist(addSetBtn.closest('.song-item')?.dataset.id); return; }
         const favBtn = e.target.closest('.song-fav-btn'); if (favBtn) { e.stopPropagation(); _handleFav(favBtn); return; }
         const item = e.target.closest('.song-item'); if (!item?.dataset.id) return;
-        if (item.dataset.id === _lastTouchId && Date.now() - _lastTouchTime < 600) return;
         selectSong(item.dataset.id);
       });
     }
+    window.addEventListener('resize', () => { _measuredItemH = 0; if (_virtualSongs) _renderVirtualChunk(); }, { passive: true });
   }
 
   function _handleDelete(btn) {
@@ -118,8 +118,15 @@ const LibraryUI = (() => {
     if (urlSongId) selectSong(urlSongId, false);
   }
 
-  // ITEM_H: chiều cao mỗi song-item tương ứng CSS compact desktop (28px) vs mobile (38px)
-  const ITEM_H = window.innerWidth >= 1024 ? 28 : 38, V_BUFFER = 6;
+  // TV0-2: Đo chiều cao dòng thực tế từ DOM (tự động tính lại khi xoay máy / resize)
+  let _measuredItemH = 0;
+  const V_BUFFER = 6;
+  function _getItemH() {
+    if (_measuredItemH > 20) return _measuredItemH;
+    const sample = listEl()?.querySelector('.song-item');
+    if (sample && sample.offsetHeight > 20) { _measuredItemH = sample.offsetHeight; return _measuredItemH; }
+    return window.innerWidth >= 1024 ? 40 : 42;
+  }
 
   let _virtualSongs = null, _virtualRaf = null, _vScrollBound = false;
 
@@ -127,10 +134,11 @@ const LibraryUI = (() => {
     if (!_virtualSongs || !_virtualSongs.length) return;
     const el = listEl(), container = el?.closest('.song-list-container') || el;
     if (!el || !container) return;
+    const itemH = _getItemH();
     const st = container.scrollTop || el.scrollTop || 0, vh = container.clientHeight || 600, total = _virtualSongs.length;
-    const start = Math.max(0, Math.floor(st / ITEM_H) - V_BUFFER);
-    const end = Math.min(total, Math.ceil((st + vh) / ITEM_H) + V_BUFFER);
-    const topPad = start * ITEM_H, bottomPad = Math.max(0, (total - end) * ITEM_H);
+    const start = Math.max(0, Math.floor(st / itemH) - V_BUFFER);
+    const end = Math.min(total, Math.ceil((st + vh) / itemH) + V_BUFFER);
+    const topPad = start * itemH, bottomPad = Math.max(0, (total - end) * itemH);
     const frag = document.createDocumentFragment();
     if (topPad > 0) {
       const topDiv = document.createElement('div');
@@ -148,6 +156,10 @@ const LibraryUI = (() => {
     }
     el.innerHTML = '';
     el.appendChild(frag);
+    if (!_measuredItemH) {
+      const firstItem = el.querySelector('.song-item');
+      if (firstItem && firstItem.offsetHeight > 20) _measuredItemH = firstItem.offsetHeight;
+    }
     if (activeSongId) _highlightActive(activeSongId, false);
   }
 
@@ -161,7 +173,7 @@ const LibraryUI = (() => {
       const qVal = (searchEl()?.value || '').trim().toLowerCase();
       el.innerHTML = (qVal === 'setlist' || _removeAccents(qVal) === 'chuong trinh')
         ? `<div class="empty-state"><span class="empty-icon">📋</span><p>Tìm chương trình (Setlist)?</p><button class="btn btn-sm btn-primary" onclick="document.querySelector('[data-tab=setlist]')?.click()" style="margin-top:6px;">Mở tab Chương trình</button></div>`
-        : `<div class="empty-state"><span class="empty-icon">🎶</span><p>${opts.emptyMsg || 'Không tìm thấy bài hát'}</p><small>${opts.emptyHint || 'Thử từ khóa khác'}</small></div>`;
+        : `<div class="empty-state"><span class="empty-icon">🎶</span><p>${_esc(opts.emptyMsg || 'Không tìm thấy bài hát')}</p><small>${_esc(opts.emptyHint || 'Thử từ khóa khác')}</small></div>`;
       return;
     }
 
@@ -326,7 +338,7 @@ const LibraryUI = (() => {
     // Nếu có từ khóa hoặc bộ lọc mùa lễ -> gọi API FTS5
     if (q || season || theme) {
       try {
-        const res = await window.ApiService?.songs?.search?.(q, { season, theme });
+        const res = await window.ApiService?.songs?.search?.(q, { season, theme, category: cat, mode: _searchMode, limit: 200 });
         if (seq !== _searchSeq) return;
         if (res && (res.success || Array.isArray(res))) {
           let list = Array.isArray(res) ? res : (res.data || []);
@@ -346,35 +358,35 @@ const LibraryUI = (() => {
     }
     if (seq !== _searchSeq) return;
 
-    // Client-side fallback & memory filtering
-    const qLower = q.toLowerCase(), qUnacc = _removeAccents(qLower);
+    // Client-side fallback & memory filtering (hỗ trợ OfflineVault tìm không dấu đa từ khóa)
     let filtered = songs;
     if (cat) filtered = filtered.filter(s => s.category === cat);
     if (season) filtered = filtered.filter(s => (s.liturgical_season || '').toLowerCase() === season.toLowerCase());
     if (theme) filtered = filtered.filter(s => (s.theme || '').toLowerCase().includes(theme.toLowerCase()));
 
     if (q) {
-      const numM = q.match(/^(?:#|bài\s+|bai\s+|stt\s+)?(\d+)$/i);
-      const target = numM ? parseInt(numM[1], 10) : null;
-      const qVars = _getQueryVariants(q);
-      const titleMatches = [], lyricMatches = [];
-      filtered.forEach(s => {
-        const isNum = target !== null && Number(s.httlvnId) === target;
-        const tLower = (s.title || '').toLowerCase(), tUnacc = _removeAccents(tLower);
-        if (isNum) titleMatches.push({ ...s, match_type: 'title', relevance_tier: 0 });
-        else if (qVars.some(v => tLower === v || tUnacc === v)) titleMatches.push({ ...s, match_type: 'title', relevance_tier: 1 });
-        else if (qVars.some(v => tLower.startsWith(v) || tUnacc.startsWith(v))) titleMatches.push({ ...s, match_type: 'title', relevance_tier: 2 });
-        else if (qVars.some(v => tLower.includes(v) || tUnacc.includes(v))) titleMatches.push({ ...s, match_type: 'title', relevance_tier: 3 });
-        else if (s.lyrics_text) {
-          const lLower = s.lyrics_text.toLowerCase(), lUnacc = _removeAccents(lLower);
-          if (qVars.some(v => lLower.includes(v) || lUnacc.includes(v))) lyricMatches.push({ ...s, match_type: 'lyric', relevance_tier: 4 });
-        }
-      });
-      titleMatches.sort((a, b) => (a.relevance_tier || 0) - (b.relevance_tier || 0) || (Number(a.httlvnId) || 0) - (Number(b.httlvnId) || 0));
-      lyricMatches.sort((a, b) => (Number(a.httlvnId) || 0) - (Number(b.httlvnId) || 0));
-      filtered = [...titleMatches, ...lyricMatches];
-      if (target !== null) {
-        filtered.sort((a, b) => (Number(a.httlvnId) === target ? -1 : Number(b.httlvnId) === target ? 1 : (Number(a.httlvnId) || 0) - (Number(b.httlvnId) || 0)));
+      if (window.OfflineVault?.searchSongs) {
+        filtered = window.OfflineVault.searchSongs(filtered, q, _searchMode);
+      } else {
+        const numM = q.match(/^(?:#|bài\s+|bai\s+|stt\s+)?(\d+)$/i);
+        const target = numM ? parseInt(numM[1], 10) : null;
+        const qVars = _getQueryVariants(q);
+        const titleMatches = [], lyricMatches = [];
+        filtered.forEach(s => {
+          const isNum = target !== null && Number(s.httlvnId) === target;
+          const tLower = (s.title || '').toLowerCase(), tUnacc = _removeAccents(tLower);
+          if (isNum) titleMatches.push({ ...s, match_type: 'title', relevance_tier: 0 });
+          else if (qVars.some(v => tLower === v || tUnacc === v)) titleMatches.push({ ...s, match_type: 'title', relevance_tier: 1 });
+          else if (qVars.some(v => tLower.startsWith(v) || tUnacc.startsWith(v))) titleMatches.push({ ...s, match_type: 'title', relevance_tier: 2 });
+          else if (qVars.some(v => tLower.includes(v) || tUnacc.includes(v))) titleMatches.push({ ...s, match_type: 'title', relevance_tier: 3 });
+          else if (s.lyrics_text) {
+            const lLower = s.lyrics_text.toLowerCase(), lUnacc = _removeAccents(lLower);
+            if (qVars.some(v => lLower.includes(v) || lUnacc.includes(v))) lyricMatches.push({ ...s, match_type: 'lyric', relevance_tier: 4 });
+          }
+        });
+        titleMatches.sort((a, b) => (a.relevance_tier || 0) - (b.relevance_tier || 0) || (Number(a.httlvnId) || 0) - (Number(b.httlvnId) || 0));
+        lyricMatches.sort((a, b) => (Number(a.httlvnId) || 0) - (Number(b.httlvnId) || 0));
+        filtered = _searchMode === 'lyric' ? [...lyricMatches, ...titleMatches] : [...titleMatches, ...lyricMatches];
       }
     } else {
       filtered = _sortSongs(filtered);
@@ -382,7 +394,6 @@ const LibraryUI = (() => {
     _updateCount(filtered.length);
     render(filtered, { isSearch: !!q, emptyMsg: q ? `Không tìm thấy "${q}"` : 'Không có bài hát', emptyHint: q ? 'Thử từ khóa khác' : '' });
   }
-
 
   function _toggleSearchMode() {
     _searchMode = _searchMode === 'title' ? 'lyric' : 'title';
@@ -426,9 +437,7 @@ const LibraryUI = (() => {
       const btn = document.createElement('button');
       btn.className = `quick-jump-btn ${cls}`.trim();
       btn.textContent = label;
-      const h = () => { container.querySelectorAll('.quick-jump-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); render(filterFn ? list.filter(filterFn) : list); };
-      btn.addEventListener('touchstart', h, { passive: true });
-      btn.addEventListener('click', h);
+      btn.addEventListener('click', () => { container.querySelectorAll('.quick-jump-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); render(filterFn ? list.filter(filterFn) : list); });
       return btn;
     };
     frag.appendChild(makeBtn('Tất cả', 'quick-jump-all', null));
@@ -472,11 +481,7 @@ const LibraryUI = (() => {
     sec.style.display = '';
     sec.innerHTML = `<div class="recent-header"><span>Gần đây</span><button id="btn-clear-history" class="btn btn-ghost btn-xs">Xóa</button></div>` +
       `<div class="recent-list">${recent.slice(0,5).map(s => `<div class="recent-item" data-id="${_esc(s.id)}" style="touch-action:manipulation"><span class="recent-num">${s.httlvnId ? String(s.httlvnId).padStart(3,'0') : ''}</span><span class="recent-title">${_esc(s.title)}</span></div>`).join('')}</div>`;
-    let _rId = '', _rTime = 0;
-    sec.querySelectorAll('.recent-item').forEach(it => {
-      it.addEventListener('touchstart', () => { _rId = it.dataset.id; _rTime = Date.now(); selectSong(it.dataset.id); }, { passive: true });
-      it.addEventListener('click', () => { if (it.dataset.id === _rId && Date.now() - _rTime < 600) return; selectSong(it.dataset.id); });
-    });
+    sec.querySelectorAll('.recent-item').forEach(it => it.addEventListener('click', () => selectSong(it.dataset.id)));
     sec.querySelector('#btn-clear-history')?.addEventListener('click', e => { e.stopPropagation(); HistoryManager.clearHistory?.(); sec.style.display = 'none'; });
   }
 
@@ -487,10 +492,7 @@ const LibraryUI = (() => {
     sec.style.display = ''; sec.classList.remove('hidden');
     sec.innerHTML = `<div class="recent-header"><span>⭐ Yêu thích (${favs.length})</span></div>` +
       `<div class="recent-list">${favs.slice(0,5).map(s => `<div class="recent-item fav-item" data-id="${_esc(s.id)}" style="touch-action:manipulation"><span class="recent-num">${s.httlvnId ? String(s.httlvnId).padStart(3,'0') : ''}</span><span class="recent-title">${_esc(s.title)}</span></div>`).join('')}</div>`;
-    sec.querySelectorAll('.recent-item').forEach(it => {
-      it.addEventListener('click', () => selectSong(it.dataset.id));
-      it.addEventListener('touchstart', () => selectSong(it.dataset.id), { passive: true });
-    });
+    sec.querySelectorAll('.recent-item').forEach(it => it.addEventListener('click', () => selectSong(it.dataset.id)));
   }
 
   function _showFavorites() {
@@ -542,7 +544,7 @@ const LibraryUI = (() => {
       const idx = _virtualSongs.findIndex(s => String(s.id) === String(id));
       const container = el.closest('.song-list-container');
       if (idx !== -1 && container) {
-        container.scrollTop = Math.max(0, idx * ITEM_H - (container.clientHeight || 600) / 2);
+        container.scrollTop = Math.max(0, idx * _getItemH() - (container.clientHeight || 600) / 2);
         _renderVirtualChunk();
         active = el.querySelector(`.song-item[data-id="${CSS.escape(String(id))}"]`);
       }
@@ -575,15 +577,15 @@ const LibraryUI = (() => {
 
   function _highlightText(text, query) {
     if (!text) return '';
-    const safeText = _esc(text), cleanQ = (query || '').trim();
-    if (!cleanQ) return safeText;
+    const cleanQ = (query || '').trim();
+    if (!cleanQ) return _esc(text);
     const reJesus = /(?:gi[eê][\s\-]+xu|gi[eê]xu|j[eê][\s\-]+sus|j[eê]sus)/i;
-    let out = safeText;
-    if (reJesus.test(cleanQ)) out = out.replace(/(J[êe]\-?sus|Gi[êe]\-?xu)/gi, '<mark>$1</mark>');
+    let raw = String(text);
+    if (reJesus.test(cleanQ)) raw = raw.replace(/(J[êe]\-?sus|Gi[êe]\-?xu)/gi, '\x01$1\x02');
     const map = { a: '[aáàảãạăắằẳẵặâấầẩẫậ]', e: '[eéèẻẽẹêếềểễệ]', i: '[iíìỉĩị]', o: '[oóòỏõọôốồổỗộơớờởỡợ]', u: '[uúùủũụưứừửữự]', y: '[yýỳỷỹỵ]', d: '[dđ]' };
     const parts = cleanQ.split(/\s+/).filter(w => !reJesus.test(w) && !['gie','xu','giê'].includes(w.toLowerCase())).map(w => w.toLowerCase().split('').map(c => map[c] || c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join(''));
-    if (parts.length > 0) out = out.replace(new RegExp('(' + parts.join('|') + ')', 'gi'), '<mark>$1</mark>');
-    return out.replace(/<mark>(?:<mark>)+(.*?)(?:<\/mark>)+<\/mark>/gi, '<mark>$1</mark>');
+    if (parts.length > 0) raw = raw.replace(new RegExp('(^|[^\\p{L}\\p{N}])(' + parts.join('|') + ')(?=[^\\p{L}\\p{N}]|$)', 'giu'), '$1\x01$2\x02');
+    return _esc(raw).replace(/\x01+/g, '<mark>').replace(/\x02+/g, '</mark>');
   }
 
   const onSelect = cb => { onSelectCb = cb; }, onDelete = cb => { onDeleteCb = cb; }, getSongs = () => songs;

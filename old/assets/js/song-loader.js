@@ -38,14 +38,26 @@ const SongLoader = (() => {
       // FIX BUG-2: ChordCanvas.loadSong() phải hoàn thành TRƯỚC _injectChords() bên dưới.
       // Đặt cùng Promise.all → 3 request song song, _customChords sẵn sàng khi cần.
       AppUI.setLoadingText('Đang tải dữ liệu...');
-      const xmlFetchUrl = song.xmlPath.startsWith('storage/') ? `../${song.xmlPath}` : song.xmlPath;
-      const [res, settings] = await Promise.all([
-        fetch(xmlFetchUrl),
+      const xmlFetchUrl = window.ApiService?.resolveUrl ? window.ApiService.resolveUrl(song.xmlPath) : (song.xmlPath.startsWith('storage/') ? `../${song.xmlPath}` : song.xmlPath);
+      const fetchXmlText = async () => {
+        try {
+          // INTENTIONAL EXCEPTION: Static MusicXML asset fetch
+          const res = await fetch(xmlFetchUrl);
+          if (res.ok) {
+            const text = await res.text();
+            window.OfflineVault?.saveSongXml?.(song.id, text);
+            return text;
+          }
+        } catch (_) {}
+        const cachedXml = await window.OfflineVault?.getSongXml?.(song.id);
+        if (cachedXml) return cachedXml;
+        throw new Error('Không thể tải file XML (Mất mạng và chưa lưu ngoại tuyến)');
+      };
+      const [xml, settings] = await Promise.all([
+        fetchXmlText(),
         ApiService.sessions.load(song.id).catch(() => ({})),
         ChordCanvas.loadSong(song.id, profileOverride)  // đảm bảo chords ready trước render
       ]);
-      if (!res.ok) throw new Error(`Không thể tải file: ${res.status}`);
-      const xml = await res.text();
       Store.set('originalXml', xml);
 
       const transpose = transposeOverride ?? 0;

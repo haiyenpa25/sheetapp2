@@ -29,6 +29,11 @@ RequestSecurity::ensureCsrfToken($_SERVER);
 $route = $_GET['route'] ?? '';
 $method = $_SERVER['REQUEST_METHOD'];
 
+// TV2-8: Đóng session sớm cho các route chỉ đọc (GET/HEAD) để tránh khóa tuần tự các request song song
+if (($method === 'GET' || $method === 'HEAD') && $route !== 'auth' && session_status() === PHP_SESSION_ACTIVE) {
+    session_write_close();
+}
+
 if (RequestSecurity::requiresOriginCheck($method) && !RequestSecurity::isSameOrigin($_SERVER)) {
     Response::abort(403, 'Yêu cầu khác nguồn bị từ chối');
 }
