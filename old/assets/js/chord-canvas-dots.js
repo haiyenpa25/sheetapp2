@@ -344,42 +344,20 @@ const ChordCanvasDots = (() => {
         if (editEnabled) {
           baseStyle.push(
             `color: rgb(${cr},${cg},${cb})`,
-            'background: rgba(255,255,255,0.97)',
-            `border: 1.5px solid rgba(${cr},${cg},${cb},0.7)`,
-            'border-radius: 6px', 'padding: 2px 7px',
-            `box-shadow: 0 2px 8px rgba(${cr},${cg},${cb},0.22)`,
-            'cursor: pointer', 'pointer-events: auto',
-            'transition: transform 0.15s ease, box-shadow 0.15s ease'
+            'background: #ffffff',
+            `border: 1px solid rgba(${cr},${cg},${cb},0.85)`,
+            'border-radius: 0px', 'padding: 1px 5px',
+            'cursor: pointer', 'pointer-events: auto'
           );
-          textBadge.addEventListener('mouseenter', () => {
-            textBadge.style.transform = 'translateX(-50%) scale(1.1)';
-            textBadge.style.boxShadow = `0 4px 14px rgba(${cr},${cg},${cb},0.38)`;
-          });
-          textBadge.addEventListener('mouseleave', () => {
-            textBadge.style.transform = 'translateX(-50%) scale(1)';
-            textBadge.style.boxShadow = `0 2px 8px rgba(${cr},${cg},${cb},0.22)`;
-          });
           textBadge.addEventListener('pointerdown', e => { e.stopPropagation(); onShowPopup(textBadge, measureIdx, noteIdx, chord); });
         } else if (highlightMode) {
           baseStyle.push(
-            'color: #fff', 'background: rgba(109,40,217,0.9)',
-            'border: 1.5px solid rgba(109,40,217,0.7)',
-            'border-radius: 7px', 'padding: 3px 8px',
-            'box-shadow: 0 3px 10px rgba(109,40,217,0.4)',
+            'color: #fff', 'background: #3730a3',
+            'border: 1px solid #312e81',
+            'border-radius: 0px', 'padding: 2px 6px',
             'cursor: pointer', 'pointer-events: auto',
-            'transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease',
             'font-family: "Georgia", serif', 'letter-spacing: 0.01em'
           );
-          textBadge.addEventListener('mouseenter', () => {
-            textBadge.style.transform = 'translateX(-50%) scale(1.12)';
-            textBadge.style.background = 'rgba(109,40,217,1)';
-            textBadge.style.boxShadow = '0 6px 18px rgba(109,40,217,0.55)';
-          });
-          textBadge.addEventListener('mouseleave', () => {
-            textBadge.style.transform = 'translateX(-50%) scale(1)';
-            textBadge.style.background = 'rgba(109,40,217,0.9)';
-            textBadge.style.boxShadow = '0 3px 10px rgba(109,40,217,0.4)';
-          });
           textBadge.addEventListener('pointerdown', e => {
             e.stopPropagation();
             if (!window.Auth?.isBanhat?.()) {
@@ -392,20 +370,11 @@ const ChordCanvasDots = (() => {
         } else {
           baseStyle.push(
             `color: rgb(${cr},${cg},${cb})`,
-            `background: rgba(${cr},${cg},${cb},0.06)`,
-            `border: 1px solid rgba(${cr},${cg},${cb},0.22)`,
-            'border-radius: 5px', 'padding: 1px 6px', 'box-shadow: none',
-            'cursor: pointer', 'pointer-events: auto',
-            'transition: background 0.15s ease, transform 0.12s ease'
+            'background: rgba(255,255,255,0.88)',
+            'border: none',
+            'border-radius: 0px', 'padding: 0 2px', 'box-shadow: none',
+            'cursor: pointer', 'pointer-events: auto'
           );
-          textBadge.addEventListener('mouseenter', () => {
-            textBadge.style.background = `rgba(${cr},${cg},${cb},0.13)`;
-            textBadge.style.transform = 'translateX(-50%) scale(1.05)';
-          });
-          textBadge.addEventListener('mouseleave', () => {
-            textBadge.style.background = `rgba(${cr},${cg},${cb},0.06)`;
-            textBadge.style.transform = 'translateX(-50%) scale(1)';
-          });
           textBadge.addEventListener('pointerdown', e => {
             e.stopPropagation();
             if (!window.Auth?.isBanhat?.()) {

@@ -1,44 +1,47 @@
 <!-- SHEET VIEWER -->
 <div class="sheet-viewer-wrapper" id="sheet-viewer-wrapper">
+  <!-- QUICK PIN BAR (Thanh ghim nhanh bài hát buổi lễ) -->
+  <div id="quick-pin-bar" class="quick-pin-bar hidden" role="navigation" aria-label="Bài hát đã ghim nhanh"></div>
+  <!-- QUICK NUMBER JUMP HUD -->
+  <div id="quick-num-hud" class="quick-num-hud hidden" aria-live="polite"></div>
+
   <!-- WELCOME SCREEN -->
   <div id="welcome-screen" class="welcome-screen">
     <div class="welcome-content">
-      <div class="welcome-icon">🎼</div>
-      <h2>Chào mừng đến SheetApp</h2>
-      <p>Hiển thị thánh ca tương tác với khả năng dịch giọng và ghi chú hợp âm</p>
+      <h2>SHEETAPP — MỤC LỤC TRA CỨU NHANH</h2>
+      <p>Chọn bài hát ở cột bên trái hoặc gõ trực tiếp số bài trên bàn phím (VD: <code>001</code> + <code>Enter</code>)</p>
       <div class="welcome-features">
         <div class="feature-item">
-          <span class="feat-icon">🎵</span>
+          <span class="feat-icon">[0-9]</span>
           <div>
-            <strong>Hiển thị Sheet Nhạc</strong>
-            <small>Render MusicXML sắc nét qua OSMD</small>
+            <strong>Gõ Số Nhảy Bài Tức Thì</strong>
+            <small>Gõ số bài (1–903) + Enter ở bất kỳ đâu để mở ngay</small>
           </div>
         </div>
         <div class="feature-item">
-          <span class="feat-icon">🎹</span>
+          <span class="feat-icon">[/]</span>
           <div>
-            <strong>Dịch Giọng Tức Thì</strong>
-            <small>Tăng/giảm tông, hợp âm tự động theo</small>
+            <strong>Tìm Kiếm & Lọc Theo Tông</strong>
+            <small>Nhấn phím / để tìm nhanh hoặc lọc bài cùng Tông nhạc</small>
           </div>
         </div>
         <div class="feature-item">
-          <span class="feat-icon">✏️</span>
+          <span class="feat-icon">[📌]</span>
           <div>
-            <strong>Chỉnh Hợp Âm</strong>
-            <small>Click vào hợp âm để thay đổi</small>
+            <strong>Thanh Ghim Nhanh Buổi Lễ</strong>
+            <small>Bấm 📌 ở bài hát để ghim lên thanh ngang phía trên, chuyển bài 1 chạm</small>
           </div>
         </div>
         <div class="feature-item">
-          <span class="feat-icon">📋</span>
+          <span class="feat-icon">[←/→]</span>
           <div>
-            <strong>Nhật Ký Biểu Diễn</strong>
-            <small>Lưu lịch sử mỗi buổi tập</small>
+            <strong>Dịch Giọng & Hợp Âm</strong>
+            <small>Phím ← / → để hạ/tăng tông, phím ↑ / ↓ chuyển bài trước/sau</small>
           </div>
         </div>
       </div>
-      <button id="btn-import-welcome" class="btn btn-primary btn-lg mt-2">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        Import Bài Đầu Tiên
+      <button id="btn-import-welcome" class="btn btn-primary btn-sm mt-1">
+        + Import MusicXML / Bài Mới
       </button>
     </div>
   </div>
@@ -191,16 +194,14 @@
     </div>
 
     <!-- Spacer đẩy Nav sang phải -->
-    <!-- ⑤ Nhật Ký Biểu Diễn -->
+    <!-- ⑤ Nhật Ký Biểu Diễn & Ghim Nhanh -->
     <button id="btn-perf-notes" class="btn btn-xs btn-ghost pb-btn-icon-text"
             title="Nhật ký — tông, BPM, ghi chú biểu diễn" disabled>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-        <polyline points="14 2 14 8 20 8"/>
-        <line x1="16" y1="13" x2="8" y2="13"/>
-        <line x1="16" y1="17" x2="8" y2="17"/>
-      </svg>
       <span class="desktop-only">Nhật ký</span>
+    </button>
+    <button id="btn-pin-current-song" class="btn btn-xs btn-ghost pb-btn-icon-text"
+            title="Ghim bài này lên thanh Ghim nhanh phía trên (phím G)">
+      <span>📌 Ghim</span>
     </button>
 
     <div class="pb-spacer"></div>

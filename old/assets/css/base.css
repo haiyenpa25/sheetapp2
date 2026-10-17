@@ -1,47 +1,47 @@
 /* =============================================
-   SheetApp — base.css
-   CSS Variables, Reset, Scrollbar
+   SheetApp (Giao Diện Cũ) — base.css
+   Flat, Zero Border-Radius, Compact Typography
    ============================================= */
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; border-radius: 0 !important; }
 
 :root {
-  --bg-base:       #eef0f7;
+  --bg-base:       #f3f4f6;
   --bg-surface:    #ffffff;
-  --bg-overlay:    #f4f5fb;
-  --bg-raised:     #e8eaf6;
-  --bg-hover:      #dde0f5;
+  --bg-overlay:    #f8fafc;
+  --bg-raised:     #e5e7eb;
+  --bg-hover:      #e2e8f0;
   --bg-sheet:      #ffffff;
 
-  --accent:        #6d28d9;
-  --accent-light:  #7c3aed;
-  --accent-dim:    #8b5cf6;
-  --accent-glow:   rgba(109,40,217,.15);
-  --success:       #059669;
-  --warning:       #d97706;
-  --danger:        #dc2626;
-  --chord-color:   #e11d48;
+  --accent:        #3730a3;
+  --accent-light:  #4338ca;
+  --accent-dim:    #4f46e5;
+  --accent-glow:   rgba(55,48,163,.12);
+  --success:       #047857;
+  --warning:       #b45309;
+  --danger:        #b91c1c;
+  --chord-color:   #dc2626;
 
-  --text-primary:  #1e1b4b;
-  --text-secondary:#4c4a7a;
-  --text-muted:    #8b85b8;
-  --border:        rgba(109,40,217,.12);
-  --border-active: rgba(109,40,217,.45);
+  --text-primary:  #111827;
+  --text-secondary:#374151;
+  --text-muted:    #6b7280;
+  --border:        #d1d5db;
+  --border-active: #3730a3;
 
-  --sidebar-w:     290px;
-  --toolbar-h:     64px;
-  --radius:        12px;
-  --radius-sm:     8px;
-  --radius-xs:     5px;
-  --shadow:        0 4px 24px rgba(109,40,217,.12);
-  --shadow-sm:     0 1px 6px rgba(0,0,0,.08);
-  --transition:    .2s cubic-bezier(.4,0,.2,1);
+  --sidebar-w:     260px;
+  --toolbar-h:     36px;
+  --radius:        0px;
+  --radius-sm:     0px;
+  --radius-xs:     0px;
+  --shadow:        none;
+  --shadow-sm:     none;
+  --transition:    .1s linear;
 
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono: ui-monospace, 'Menlo', 'Consolas', monospace; /* Không cần tải font ngoài */
+  --font-mono: ui-monospace, 'Menlo', 'Consolas', monospace;
 }
 
-html { font-size: 14px; height: 100%; }
+html { font-size: 12.5px; height: 100%; }
 body {
   font-family: var(--font-body);
   background: var(--bg-base);
@@ -49,29 +49,27 @@ body {
   display: flex;
   height: 100%;
   overflow: hidden;
+  line-height: 1.35;
 }
 
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--bg-raised); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--bg-hover); }
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-/* iPad / mobile scroll optimization */
 .sheet-viewer-wrapper,
 .sidebar,
 .library-list,
 .setlist-list {
-  -webkit-overflow-scrolling: touch; /* iOS momentum scroll */
+  -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
 }
 
-/* Đầu tư GPU cho các phần tử hay animation */
 .toolbar, .sidebar, .sheet-viewer-wrapper {
-  transform: translateZ(0);     /* Force GPU layer */
+  transform: translateZ(0);
   backface-visibility: hidden;
 }
 
-/* content-visibility cho các panel ẩn (không render khi hidden) */
 .modal-overlay,
 #admin-console,
 #session-panel {
@@ -80,19 +78,19 @@ body {
 
 /* Utilities */
 .hidden   { display: none !important; }
-.mt-half  { margin-top: .4rem; }
-.mt-1     { margin-top: .75rem; }
-.mt-2     { margin-top: 1.5rem; }
-.text-sm  { font-size: .825rem; }
-.text-xs  { font-size: .7rem; }
+.mt-half  { margin-top: .25rem; }
+.mt-1     { margin-top: .5rem; }
+.mt-2     { margin-top: 1rem; }
+.text-sm  { font-size: .85rem; }
+.text-xs  { font-size: .75rem; }
 .text-muted   { color: var(--text-muted); }
 .text-center  { text-align: center; }
 .w-full   { width: 100%; }
 
-/* Tags */
-.tag { display: inline-block; padding: .15rem .5rem; border-radius: 99px; font-size: .7rem; font-weight: 500; background: var(--bg-raised); color: var(--text-secondary); border: 1px solid var(--border); }
-.tag-purple { background: rgba(167,139,250,.15); color: var(--accent); border-color: rgba(167,139,250,.3); }
-.tag-green  { background: rgba(52,211,153,.15); color: var(--success); border-color: rgba(52,211,153,.3); }
+/* Flat Tags */
+.tag { display: inline-block; padding: 1px 5px; font-size: .72rem; font-weight: 600; background: var(--bg-raised); color: var(--text-secondary); border: 1px solid var(--border); }
+.tag-purple { background: #eef2ff; color: var(--accent); border-color: #c7d2fe; }
+.tag-green  { background: #ecfdf5; color: var(--success); border-color: #a7f3d0; }
 
 /* KBD badge */
-.kbd { display: inline-block; font-size: .6rem; color: var(--text-muted); background: var(--bg-overlay); border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 3px; padding: .05em .35em; font-family: var(--font-mono); line-height: 1.6; }
+.kbd { display: inline-block; font-size: .68rem; color: var(--text-secondary); background: var(--bg-overlay); border: 1px solid var(--border); padding: 0 4px; font-family: var(--font-mono); line-height: 1.4; }
