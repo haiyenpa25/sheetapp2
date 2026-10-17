@@ -1,0 +1,2178 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE score-partwise PUBLIC "-//Recordare//DTD MusicXML 3.1 Partwise//EN" "http://www.musicxml.org/dtds/partwise.dtd">
+<score-partwise version="3.1">
+  <movement-title>TÔN TIN CHÚA JÊSUS</movement-title>
+  <identification>
+    <rights>©</rights>
+    <encoding>
+      <software>Finale v26.3 for Windows</software>
+      <encoding-date>2021-09-07</encoding-date>
+      <supports attribute="new-system" element="print" type="yes" value="yes"/>
+      <supports attribute="new-page" element="print" type="yes" value="yes"/>
+      <supports element="accidental" type="yes"/>
+      <supports element="beam" type="yes"/>
+      <supports element="stem" type="yes"/>
+    </encoding>
+  </identification>
+  <defaults>
+    <scaling>
+      <millimeters>7.2319</millimeters>
+      <tenths>40</tenths>
+    </scaling>
+    <page-layout>
+      <page-height>1643</page-height>
+      <page-width>1161</page-width>
+      <page-margins type="both">
+        <left-margin>70</left-margin>
+        <right-margin>70</right-margin>
+        <top-margin>70</top-margin>
+        <bottom-margin>70</bottom-margin>
+      </page-margins>
+    </page-layout>
+    <system-layout>
+      <system-margins>
+        <left-margin>0</left-margin>
+        <right-margin>0</right-margin>
+      </system-margins>
+      <system-distance>133</system-distance>
+      <top-system-distance>94</top-system-distance>
+    </system-layout>
+    <staff-layout>
+      <staff-distance>93</staff-distance>
+    </staff-layout>
+    <appearance>
+      <line-width type="stem">1.1784</line-width>
+      <line-width type="beam">5</line-width>
+      <line-width type="staff">1.1784</line-width>
+      <line-width type="light barline">1.1784</line-width>
+      <line-width type="heavy barline">5</line-width>
+      <line-width type="leger">1.1784</line-width>
+      <line-width type="ending">1.1784</line-width>
+      <line-width type="wedge">0.7487</line-width>
+      <line-width type="enclosure">1.1784</line-width>
+      <line-width type="tuplet bracket">0.7487</line-width>
+      <note-size type="grace">60</note-size>
+      <note-size type="cue">60</note-size>
+      <distance type="hyphen">120</distance>
+      <distance type="beam">7.5</distance>
+    </appearance>
+    <music-font font-family="Maestro,engraved" font-size="20.5"/>
+    <word-font font-family="Myriad Pro" font-size="10.25"/>
+    <lyric-font font-family="Myriad Pro" font-size="12" name="verse"/>
+    <lyric-font font-family="Myriad Pro" font-size="12" font-style="italic" name="section"/>
+  </defaults>
+  <credit page="1">
+    <credit-type>title</credit-type>
+    <credit-words default-x="581" default-y="1573" font-size="22" font-weight="bold" justify="center" valign="top">TÔN TIN CHÚA JÊSUS</credit-words>
+  </credit>
+  <credit page="1">
+    <credit-words default-x="70" default-y="1573" font-size="22" font-weight="bold" valign="top">501</credit-words>
+  </credit>
+  <part-list>
+    <part-group number="1" type="start">
+      <group-symbol default-x="-5">bracket</group-symbol>
+      <group-barline>no</group-barline>
+    </part-group>
+    <score-part id="P1">
+      <part-name print-object="no">MusicXML Part</part-name>
+      <score-instrument id="P1-I1">
+        <instrument-name>SmartMusic SoftSynth</instrument-name>
+        <instrument-sound>voice.soprano</instrument-sound>
+        <virtual-instrument/>
+      </score-instrument>
+      <midi-device>SmartMusic SoftSynth</midi-device>
+      <midi-instrument id="P1-I1">
+        <midi-channel>1</midi-channel>
+        <midi-bank>15489</midi-bank>
+        <midi-program>22</midi-program>
+        <volume>80</volume>
+        <pan>-70</pan>
+      </midi-instrument>
+    </score-part>
+    <score-part id="P2">
+      <part-name print-object="no">MusicXML Part</part-name>
+      <score-instrument id="P2-I2">
+        <instrument-name>SmartMusic SoftSynth</instrument-name>
+        <instrument-sound>voice.bass</instrument-sound>
+        <virtual-instrument/>
+      </score-instrument>
+      <midi-device>SmartMusic SoftSynth</midi-device>
+      <midi-instrument id="P2-I2">
+        <midi-channel>2</midi-channel>
+        <midi-bank>15489</midi-bank>
+        <midi-program>22</midi-program>
+        <volume>80</volume>
+        <pan>80</pan>
+      </midi-instrument>
+    </score-part>
+    <part-group number="1" type="stop"/>
+  </part-list>
+  <!--=========================================================-->
+  <part id="P1">
+    <?SmartMusic maxVoice=1?>
+    <measure number="1" width="161">
+      <print>
+        <system-layout>
+          <top-system-distance>121</top-system-distance>
+        </system-layout>
+        <measure-numbering>none</measure-numbering>
+      </print>
+      <attributes>
+        <divisions>2</divisions>
+        <key>
+          <fifths>1</fifths>
+          <mode>major</mode>
+        </key>
+        <time>
+          <beats>3</beats>
+          <beat-type>2</beat-type>
+        </time>
+        <clef>
+          <sign>G</sign>
+          <line>2</line>
+        </clef>
+      </attributes>
+      <sound tempo="104"/>
+      <note default-x="106">
+        <pitch>
+          <step>D</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem default-y="5">up</stem>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>1.Trong</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>2.Con</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>3.Khi</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>4.Bây</text>
+        </lyric>
+      </note>
+      <note default-x="106">
+        <chord/>
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem>up</stem>
+      </note>
+    </measure>
+    <!--=======================================================-->
+    <measure number="2" width="256">
+      <harmony default-y="20" font-family="VNI-Helve-Condense" font-size="13.7">
+        <root>
+          <root-step>D</root-step>
+        </root>
+        <kind halign="center" text="7">dominant</kind>
+      </harmony>
+      <note default-x="16">
+        <pitch>
+          <step>D</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="0">up</stem>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>đời</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>độc</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>lòng</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>giờ</text>
+        </lyric>
+      </note>
+      <note default-x="16">
+        <chord/>
+        <pitch>
+          <step>F</step>
+          <alter>1</alter>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>up</stem>
+      </note>
+      <note default-x="69">
+        <pitch>
+          <step>F</step>
+          <alter>1</alter>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="10">up</stem>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>nay</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>sanh</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>tôi</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>xin</text>
+        </lyric>
+      </note>
+      <note default-x="69">
+        <chord/>
+        <pitch>
+          <step>A</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>up</stem>
+      </note>
+      <harmony default-y="20" font-family="VNI-Helve-Condense" font-size="13.7">
+        <root>
+          <root-step>G</root-step>
+        </root>
+        <kind halign="center" text="">major</kind>
+      </harmony>
+      <note default-x="131">
+        <pitch>
+          <step>F</step>
+          <alter>1</alter>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem default-y="10">up</stem>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>không</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>thay</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>đau</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>cho</text>
+        </lyric>
+      </note>
+      <note default-x="131">
+        <chord/>
+        <pitch>
+          <step>A</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem>up</stem>
+      </note>
+      <note default-x="205">
+        <pitch>
+          <step>F</step>
+          <alter>1</alter>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem default-y="10">up</stem>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>tay</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>tôi</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>thương</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>tôi</text>
+        </lyric>
+      </note>
+      <note default-x="205">
+        <chord/>
+        <pitch>
+          <step>A</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem>up</stem>
+      </note>
+    </measure>
+    <!--=======================================================-->
+    <measure number="3" width="258">
+      <harmony default-y="20" font-family="VNI-Helve-Condense" font-size="13.7">
+        <root>
+          <root-step>G</root-step>
+        </root>
+        <kind halign="center" text="">major</kind>
+      </harmony>
+      <note default-x="18">
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>double</stem>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>nào</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>chịu</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>liền</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>được</text>
+        </lyric>
+      </note>
+      <note default-x="84">
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="15">up</stem>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>giúp</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>khốn</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>ngước</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>thấy</text>
+        </lyric>
+      </note>
+      <note default-x="84">
+        <chord/>
+        <pitch>
+          <step>B</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>up</stem>
+      </note>
+      <note default-x="150">
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem default-y="15">up</stem>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>đỡ,</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>khổ,</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>mắt,</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>Chúa,</text>
+        </lyric>
+      </note>
+      <note default-x="150">
+        <chord/>
+        <pitch>
+          <step>B</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem>up</stem>
+      </note>
+      <note default-x="215">
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem default-y="15">up</stem>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>Song</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>Linh</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>Linh</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>vui</text>
+        </lyric>
+      </note>
+      <note default-x="215">
+        <chord/>
+        <pitch>
+          <step>B</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem>up</stem>
+      </note>
+    </measure>
+    <!--=======================================================-->
+    <measure number="4" width="241">
+      <harmony default-y="20" font-family="VNI-Helve-Condense" font-size="13.7">
+        <root>
+          <root-step>D</root-step>
+        </root>
+        <kind halign="center" text="7">dominant</kind>
+      </harmony>
+      <note default-x="23">
+        <pitch>
+          <step>F</step>
+          <alter>1</alter>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="10">up</stem>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>nhờ</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>hồn</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>hồn</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>mừng</text>
+        </lyric>
+      </note>
+      <note default-x="23">
+        <chord/>
+        <pitch>
+          <step>A</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>up</stem>
+      </note>
+      <note default-x="84">
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="15">up</stem>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>Cha</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>tôi</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>tôi</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>thay,</text>
+        </lyric>
+      </note>
+      <note default-x="84">
+        <chord/>
+        <pitch>
+          <step>B</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>up</stem>
+      </note>
+      <harmony default-y="20" font-family="VNI-Helve-Condense" font-size="13.7">
+        <root>
+          <root-step>C</root-step>
+        </root>
+        <kind halign="center" text="">major</kind>
+      </harmony>
+      <note default-x="141">
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem default-y="13">up</stem>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>giải</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>sẽ</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>phải</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>thỏa</text>
+        </lyric>
+      </note>
+      <note default-x="141">
+        <chord/>
+        <pitch>
+          <step>C</step>
+          <octave>5</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem>up</stem>
+      </note>
+      <note default-x="198">
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem default-y="23.5">up</stem>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>cứu</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>sống</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>khát</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>chí</text>
+        </lyric>
+      </note>
+      <note default-x="198">
+        <chord/>
+        <pitch>
+          <step>E</step>
+          <octave>5</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem>up</stem>
+      </note>
+    </measure>
+    <!--=======================================================-->
+    <measure number="5" width="105">
+      <harmony default-y="20" font-family="VNI-Helve-Condense" font-size="13.7">
+        <root>
+          <root-step>G</root-step>
+        </root>
+        <kind halign="center" text="">major</kind>
+      </harmony>
+      <note default-x="18">
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>8</duration>
+        <voice>1</voice>
+        <type>whole</type>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>tôi;</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>luôn;</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>khao;</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>tôi;</text>
+        </lyric>
+      </note>
+      <note default-x="18">
+        <chord/>
+        <pitch>
+          <step>D</step>
+          <octave>5</octave>
+        </pitch>
+        <duration>8</duration>
+        <voice>1</voice>
+        <type>whole</type>
+      </note>
+      <note default-x="69">
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="15">up</stem>
+        <notations>
+          <slur bezier-x="13" bezier-y="-7" default-x="6" default-y="-43" number="1" placement="below" type="start"/>
+          <slur bezier-x="5" bezier-y="9" default-x="18" default-y="5" number="2" orientation="over" type="start"/>
+        </notations>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>Thảm</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>Trước</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>Hỡi</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>Hỡi</text>
+        </lyric>
+      </note>
+      <note default-x="69">
+        <chord/>
+        <pitch>
+          <step>B</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>up</stem>
+      </note>
+      <note default-x="100">
+        <pitch>
+          <step>B</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="18.5">up</stem>
+        <notations>
+          <slur bezier-x="-7" bezier-y="-12" default-x="7" default-y="-33" number="1" type="stop"/>
+          <slur bezier-x="-7" bezier-y="7" default-x="7" default-y="8" number="2" type="stop"/>
+        </notations>
+      </note>
+      <note default-x="100">
+        <chord/>
+        <pitch>
+          <step>D</step>
+          <octave>5</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>up</stem>
+      </note>
+    </measure>
+    <!--=======================================================-->
+    <measure number="6" width="270">
+      <harmony default-y="20" font-family="VNI-Helve-Condense" font-size="13.7">
+        <root>
+          <root-step>D</root-step>
+        </root>
+        <kind halign="center" text="7">dominant</kind>
+      </harmony>
+      <note default-x="19">
+        <pitch>
+          <step>B</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="18.5">up</stem>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>thiết</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>lúc</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>Chúa,</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>Chúa,</text>
+        </lyric>
+      </note>
+      <note default-x="19">
+        <chord/>
+        <pitch>
+          <step>D</step>
+          <octave>5</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>up</stem>
+      </note>
+      <note default-x="77">
+        <pitch>
+          <step>A</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="13">up</stem>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>tôi</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>tôi</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>căn</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>cho</text>
+        </lyric>
+      </note>
+      <note default-x="77">
+        <chord/>
+        <pitch>
+          <step>C</step>
+          <octave>5</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>up</stem>
+      </note>
+      <note default-x="142">
+        <pitch>
+          <step>A</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem default-y="13">up</stem>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>thay,</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>sinh</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>nguyên</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>tôi</text>
+        </lyric>
+      </note>
+      <note default-x="142">
+        <chord/>
+        <pitch>
+          <step>C</step>
+          <octave>5</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem>up</stem>
+      </note>
+      <note default-x="220">
+        <pitch>
+          <step>F</step>
+          <alter>1</alter>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="10">up</stem>
+        <notations>
+          <slur bezier-x="11" bezier-y="-6" default-x="6" default-y="-45" number="1" placement="below" type="start"/>
+          <slur bezier-x="5" bezier-y="7" default-x="18" default-y="3" number="2" orientation="over" type="start"/>
+        </notations>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>chẳng</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>Chúa</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>của</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>hiểu</text>
+        </lyric>
+      </note>
+      <note default-x="220">
+        <chord/>
+        <pitch>
+          <step>A</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>up</stem>
+      </note>
+      <note default-x="249">
+        <pitch>
+          <step>A</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="13">up</stem>
+        <notations>
+          <slur bezier-x="-5" bezier-y="-12" default-x="6" default-y="-35" number="1" type="stop"/>
+          <slur bezier-x="-5" bezier-y="7" default-x="7" default-y="3" number="2" type="stop"/>
+        </notations>
+      </note>
+      <note default-x="249">
+        <chord/>
+        <pitch>
+          <step>C</step>
+          <octave>5</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>up</stem>
+      </note>
+    </measure>
+    <!--=======================================================-->
+    <measure number="7" width="267">
+      <harmony default-y="20" font-family="VNI-Helve-Condense" font-size="13.7">
+        <root>
+          <root-step>G</root-step>
+        </root>
+        <kind halign="center" text="">major</kind>
+      </harmony>
+      <note default-x="19">
+        <pitch>
+          <step>A</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="13">up</stem>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>biết</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>đã</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>đức</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>tiếng</text>
+        </lyric>
+      </note>
+      <note default-x="19">
+        <chord/>
+        <pitch>
+          <step>C</step>
+          <octave>5</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>up</stem>
+      </note>
+      <note default-x="91">
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="15">up</stem>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>đi</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>thương</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>tin</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>Christ</text>
+        </lyric>
+      </note>
+      <note default-x="91">
+        <chord/>
+        <pitch>
+          <step>B</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>up</stem>
+      </note>
+      <note default-x="159">
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem default-y="15">up</stem>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>đâu,</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>tôi,</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>tôi,</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>luôn,</text>
+        </lyric>
+      </note>
+      <note default-x="159">
+        <chord/>
+        <pitch>
+          <step>B</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem>up</stem>
+      </note>
+      <note default-x="217">
+        <pitch>
+          <step>D</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="5">up</stem>
+        <notations>
+          <slur bezier-x="0" bezier-y="9" default-x="18" default-y="-5" number="1" orientation="over" type="start"/>
+          <slur bezier-x="12" bezier-y="-5" default-x="6" default-y="-55" number="2" placement="below" type="start"/>
+        </notations>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>Nếu</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>Bởi</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>Bổ</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>Hẳn</text>
+        </lyric>
+      </note>
+      <note default-x="217">
+        <chord/>
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>up</stem>
+      </note>
+      <note default-x="241">
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="15">up</stem>
+        <notations>
+          <slur bezier-x="-8" bezier-y="3" default-x="7" default-y="5" number="1" type="stop"/>
+          <slur bezier-x="-4" bezier-y="-12" default-x="7" default-y="-43" number="2" type="stop"/>
+        </notations>
+      </note>
+      <note default-x="241">
+        <chord/>
+        <pitch>
+          <step>B</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>up</stem>
+      </note>
+    </measure>
+    <!--=======================================================-->
+    <measure number="8" width="244">
+      <harmony default-y="20" font-family="VNI-Helve-Condense" font-size="13.7">
+        <root>
+          <root-step>C</root-step>
+        </root>
+        <kind halign="center" text="">major</kind>
+      </harmony>
+      <note default-x="22">
+        <pitch>
+          <step>E</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="15">up</stem>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>Christ</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>cớ</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>đức</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>nếm</text>
+        </lyric>
+      </note>
+      <note default-x="22">
+        <chord/>
+        <pitch>
+          <step>B</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>up</stem>
+      </note>
+      <note default-x="73">
+        <pitch>
+          <step>E</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="10">up</stem>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>đi</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>tôi,</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>tin,</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>ơn</text>
+        </lyric>
+      </note>
+      <note default-x="73">
+        <chord/>
+        <pitch>
+          <step>A</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>up</stem>
+      </note>
+      <note default-x="127">
+        <pitch>
+          <step>E</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem default-y="13">up</stem>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>quá</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>Chúa</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>cứu</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>Chúa</text>
+        </lyric>
+      </note>
+      <note default-x="127">
+        <chord/>
+        <pitch>
+          <step>C</step>
+          <octave>5</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem>up</stem>
+      </note>
+      <harmony default-y="20" font-family="VNI-Helve-Condense" font-size="13.7">
+        <root>
+          <root-step>D</root-step>
+        </root>
+        <kind halign="center" text="7">dominant</kind>
+      </harmony>
+      <note default-x="192">
+        <pitch>
+          <step>F</step>
+          <alter>1</alter>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="0">up</stem>
+        <notations>
+          <slur bezier-x="2" bezier-y="10" default-x="18" default-y="-7" number="1" orientation="over" type="start"/>
+        </notations>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>khỏi</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>khổ</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>rỗi</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>chẳng</text>
+        </lyric>
+      </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
+      <note default-x="192">
+        <pitch>
+          <step>D</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>2</voice>
+        <type>half</type>
+        <stem default-y="-73">down</stem>
+      </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
+      <note default-x="221">
+        <pitch>
+          <step>A</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="10">up</stem>
+        <notations>
+          <slur bezier-x="-9" bezier-y="3" default-x="7" default-y="3" number="1" type="stop"/>
+        </notations>
+      </note>
+    </measure>
+    <!--=======================================================-->
+    <measure number="9" width="106">
+      <harmony default-y="25" font-family="VNI-Helve-Condense" font-size="13.7">
+        <root>
+          <root-step>G</root-step>
+        </root>
+        <kind halign="center" text="">major</kind>
+      </harmony>
+      <note default-x="15">
+        <pitch>
+          <step>D</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>8</duration>
+        <voice>1</voice>
+        <type>whole</type>
+        <lyric default-y="-95" name="verse" number="1">
+          <syllabic>single</syllabic>
+          <text>tôi.</text>
+        </lyric>
+        <lyric default-y="-124" name="verse" number="2">
+          <syllabic>single</syllabic>
+          <text>thay!</text>
+        </lyric>
+        <lyric default-y="-152" name="verse" number="3">
+          <syllabic>single</syllabic>
+          <text>tôi.</text>
+        </lyric>
+        <lyric default-y="-181" name="verse" number="4">
+          <syllabic>single</syllabic>
+          <text>thôi.</text>
+        </lyric>
+      </note>
+      <note default-x="15">
+        <chord/>
+        <pitch>
+          <step>G</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>8</duration>
+        <voice>1</voice>
+        <type>whole</type>
+      </note>
+      <direction placement="below">
+        <direction-type>
+          <words default-x="88" default-y="-286" font-family="Times New Roman" font-weight="bold" justify="right">Fine</words>
+        </direction-type>
+        <sound fine="yes"/>
+      </direction>
+      <direction placement="above">
+        <direction-type>
+          <words default-x="100" default-y="5" font-family="Times New Roman" font-weight="bold" justify="right">D.C. al Fine</words>
+        </direction-type>
+        <sound dacapo="yes"/>
+      </direction>
+      <barline location="right">
+        <bar-style>light-light</bar-style>
+      </barline>
+    </measure>
+  </part>
+  <!--=========================================================-->
+  <part id="P2">
+    <?SmartMusic maxVoice=1?>
+    <measure number="1" width="161">
+      <print>
+        <staff-layout number="1">
+          <staff-distance>181</staff-distance>
+        </staff-layout>
+        <measure-numbering>none</measure-numbering>
+      </print>
+      <attributes>
+        <divisions>2</divisions>
+        <key>
+          <fifths>1</fifths>
+          <mode>major</mode>
+        </key>
+        <time>
+          <beats>3</beats>
+          <beat-type>2</beat-type>
+        </time>
+        <clef>
+          <sign>F</sign>
+          <line>4</line>
+        </clef>
+      </attributes>
+      <sound tempo="104"/>
+      <note default-x="106">
+        <pitch>
+          <step>G</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem default-y="-40">down</stem>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>single</syllabic>
+          <text font-size="10.25" font-style="italic">Trong</text>
+        </lyric>
+      </note>
+      <note default-x="106">
+        <chord/>
+        <pitch>
+          <step>B</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem>down</stem>
+      </note>
+    </measure>
+    <!--=======================================================-->
+    <measure number="2" width="256">
+      <direction placement="below">
+        <direction-type>
+          <words default-y="-67" font-style="italic" relative-x="-186" valign="top">Điệp khúc:</words>
+        </direction-type>
+      </direction>
+      <note default-x="16">
+        <pitch>
+          <step>D</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="-55">down</stem>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>single</syllabic>
+          <text font-size="10.25" font-style="italic">lòng</text>
+        </lyric>
+      </note>
+      <note default-x="16">
+        <chord/>
+        <pitch>
+          <step>A</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>down</stem>
+      </note>
+      <note default-x="69">
+        <pitch>
+          <step>D</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="-55">down</stem>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>single</syllabic>
+          <text font-size="10.25" font-style="italic">tôi</text>
+        </lyric>
+      </note>
+      <note default-x="69">
+        <chord/>
+        <pitch>
+          <step>C</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>down</stem>
+      </note>
+      <note default-x="131">
+        <pitch>
+          <step>D</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem default-y="-55">down</stem>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>single</syllabic>
+          <text font-size="10.25" font-style="italic">nay</text>
+        </lyric>
+      </note>
+      <note default-x="131">
+        <chord/>
+        <pitch>
+          <step>C</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem>down</stem>
+      </note>
+      <note default-x="205">
+        <pitch>
+          <step>D</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem default-y="-55">down</stem>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>single</syllabic>
+          <text font-size="10.25" font-style="italic">tin</text>
+        </lyric>
+      </note>
+      <note default-x="205">
+        <chord/>
+        <pitch>
+          <step>C</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem>down</stem>
+      </note>
+    </measure>
+    <!--=======================================================-->
+    <measure number="3" width="258">
+      <note default-x="18">
+        <pitch>
+          <step>G</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="-40">down</stem>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>single</syllabic>
+          <text font-size="10.25" font-style="italic">cậy</text>
+        </lyric>
+      </note>
+      <note default-x="18">
+        <chord/>
+        <pitch>
+          <step>B</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>down</stem>
+      </note>
+      <note default-x="84">
+        <pitch>
+          <step>G</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="-40">down</stem>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>single</syllabic>
+          <text font-size="10.25" font-style="italic">quả</text>
+        </lyric>
+      </note>
+      <note default-x="84">
+        <chord/>
+        <pitch>
+          <step>D</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>down</stem>
+      </note>
+      <note default-x="150">
+        <pitch>
+          <step>G</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem default-y="-40">down</stem>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>single</syllabic>
+          <text font-size="10.25" font-style="italic">quyết,</text>
+        </lyric>
+      </note>
+      <note default-x="150">
+        <chord/>
+        <pitch>
+          <step>D</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem>down</stem>
+      </note>
+      <note default-x="215">
+        <pitch>
+          <step>G</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem default-y="-40">down</stem>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>single</syllabic>
+          <text font-size="10.25" font-style="italic">Christ</text>
+        </lyric>
+      </note>
+      <note default-x="215">
+        <chord/>
+        <pitch>
+          <step>D</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem>down</stem>
+      </note>
+    </measure>
+    <!--=======================================================-->
+    <measure number="4" width="241">
+      <note default-x="23">
+        <pitch>
+          <step>D</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="-55">down</stem>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>single</syllabic>
+          <text font-size="10.25" font-style="italic">vì</text>
+        </lyric>
+      </note>
+      <note default-x="23">
+        <chord/>
+        <pitch>
+          <step>D</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>down</stem>
+      </note>
+      <note default-x="84">
+        <pitch>
+          <step>G</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="-40">down</stem>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>single</syllabic>
+          <text font-size="10.25" font-style="italic">tôi</text>
+        </lyric>
+      </note>
+      <note default-x="84">
+        <chord/>
+        <pitch>
+          <step>D</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>down</stem>
+      </note>
+      <note default-x="141">
+        <pitch>
+          <step>E</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem default-y="-50">down</stem>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>single</syllabic>
+          <text font-size="10.25" font-style="italic">đổ</text>
+        </lyric>
+      </note>
+      <note default-x="141">
+        <chord/>
+        <pitch>
+          <step>C</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem>down</stem>
+      </note>
+      <note default-x="198">
+        <pitch>
+          <step>C</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem default-y="-53">down</stem>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>single</syllabic>
+          <text font-size="10.25" font-style="italic">huyết</text>
+        </lyric>
+      </note>
+      <note default-x="198">
+        <chord/>
+        <pitch>
+          <step>C</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem>down</stem>
+      </note>
+    </measure>
+    <!--=======================================================-->
+    <measure number="5" width="105">
+      <note default-x="18">
+        <pitch>
+          <step>G</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>8</duration>
+        <voice>1</voice>
+        <type>whole</type>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>single</syllabic>
+          <text font-size="10.25" font-style="italic">ra;</text>
+        </lyric>
+      </note>
+      <note default-x="18">
+        <chord/>
+        <pitch>
+          <step>B</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>8</duration>
+        <voice>1</voice>
+        <type>whole</type>
+      </note>
+      <note default-x="69">
+        <pitch>
+          <step>G</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem default-y="-40">down</stem>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>single</syllabic>
+          <text font-size="10.25" font-style="italic">Miễn</text>
+        </lyric>
+      </note>
+      <note default-x="69">
+        <chord/>
+        <pitch>
+          <step>D</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem>down</stem>
+      </note>
+    </measure>
+    <!--=======================================================-->
+    <measure number="6" width="270">
+      <note default-x="19">
+        <pitch>
+          <step>D</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="-55">down</stem>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>single</syllabic>
+          <text font-size="10.25" font-style="italic">nhớ</text>
+        </lyric>
+      </note>
+      <note default-x="19">
+        <chord/>
+        <pitch>
+          <step>D</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>down</stem>
+      </note>
+      <note default-x="77">
+        <pitch>
+          <step>D</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="-55">down</stem>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>single</syllabic>
+          <text font-size="10.25" font-style="italic">luôn</text>
+        </lyric>
+      </note>
+      <note default-x="77">
+        <chord/>
+        <pitch>
+          <step>D</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>down</stem>
+      </note>
+      <note default-x="142">
+        <pitch>
+          <step>D</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem default-y="-55">down</stem>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>single</syllabic>
+          <text font-size="10.25" font-style="italic">luôn</text>
+        </lyric>
+      </note>
+      <note default-x="142">
+        <chord/>
+        <pitch>
+          <step>D</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem>down</stem>
+      </note>
+      <note default-x="220">
+        <pitch>
+          <step>D</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem default-y="-55">down</stem>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>single</syllabic>
+          <text font-size="10.25" font-style="italic">bửu</text>
+        </lyric>
+      </note>
+      <note default-x="220">
+        <chord/>
+        <pitch>
+          <step>D</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem>down</stem>
+      </note>
+    </measure>
+    <!--=======================================================-->
+    <measure number="7" width="267">
+      <note default-x="19">
+        <pitch>
+          <step>G</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="-40">down</stem>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>single</syllabic>
+          <text font-size="10.25" font-style="italic">huyết</text>
+        </lyric>
+      </note>
+      <note default-x="19">
+        <chord/>
+        <pitch>
+          <step>D</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>down</stem>
+      </note>
+      <note default-x="91">
+        <pitch>
+          <step>G</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="-40">down</stem>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>begin</syllabic>
+          <text font-size="10.25" font-style="italic">Jê</text>
+        </lyric>
+      </note>
+      <note default-x="91">
+        <chord/>
+        <pitch>
+          <step>D</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>down</stem>
+      </note>
+      <note default-x="159">
+        <pitch>
+          <step>G</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem default-y="-40">down</stem>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>end</syllabic>
+          <text font-size="10.25" font-style="italic">sus,</text>
+        </lyric>
+      </note>
+      <note default-x="159">
+        <chord/>
+        <pitch>
+          <step>D</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem>down</stem>
+      </note>
+      <note default-x="217">
+        <pitch>
+          <step>B</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="28.5">up</stem>
+        <notations>
+          <slur bezier-x="0" bezier-y="9" default-x="18" default-y="18" number="1" orientation="over" type="start"/>
+        </notations>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>single</syllabic>
+          <text font-size="10.25" font-style="italic">Lỗi</text>
+        </lyric>
+      </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
+      <note default-x="217">
+        <pitch>
+          <step>G</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>2</voice>
+        <type>half</type>
+        <stem default-y="-40">down</stem>
+      </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
+      <note default-x="241">
+        <pitch>
+          <step>D</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="38">up</stem>
+        <notations>
+          <slur bezier-x="-8" bezier-y="3" default-x="7" default-y="28" number="1" type="stop"/>
+        </notations>
+      </note>
+    </measure>
+    <!--=======================================================-->
+    <measure number="8" width="244">
+      <note default-x="22">
+        <pitch>
+          <step>C</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="-53">down</stem>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>single</syllabic>
+          <text font-size="10.25" font-style="italic">của</text>
+        </lyric>
+      </note>
+      <note default-x="22">
+        <chord/>
+        <pitch>
+          <step>C</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>down</stem>
+      </note>
+      <note default-x="73">
+        <pitch>
+          <step>C</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="-53">down</stem>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>single</syllabic>
+          <text font-size="10.25" font-style="italic">tôi</text>
+        </lyric>
+      </note>
+      <note default-x="73">
+        <chord/>
+        <pitch>
+          <step>C</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem>down</stem>
+      </note>
+      <note default-x="127">
+        <pitch>
+          <step>C</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem default-y="-53">down</stem>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>single</syllabic>
+          <text font-size="10.25" font-style="italic">ắt</text>
+        </lyric>
+      </note>
+      <note default-x="127">
+        <chord/>
+        <pitch>
+          <step>A</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>1</voice>
+        <type>half</type>
+        <stem>down</stem>
+      </note>
+      <note default-x="192">
+        <pitch>
+          <step>A</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="22">up</stem>
+        <notations>
+          <slur bezier-x="2" bezier-y="10" default-x="18" default-y="12" number="1" orientation="over" type="start"/>
+        </notations>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>single</syllabic>
+          <text font-size="10.25" font-style="italic">rửa</text>
+        </lyric>
+      </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
+      <note default-x="192">
+        <pitch>
+          <step>D</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>4</duration>
+        <voice>2</voice>
+        <type>half</type>
+        <stem default-y="-55">down</stem>
+      </note>
+      <backup>
+        <duration>2</duration>
+      </backup>
+      <note default-x="221">
+        <pitch>
+          <step>C</step>
+          <octave>4</octave>
+        </pitch>
+        <duration>2</duration>
+        <voice>1</voice>
+        <type>quarter</type>
+        <stem default-y="31.5">up</stem>
+        <notations>
+          <slur bezier-x="-9" bezier-y="4" default-x="7" default-y="21" number="1" type="stop"/>
+        </notations>
+      </note>
+    </measure>
+    <!--=======================================================-->
+    <measure number="9" width="106">
+      <note default-x="15">
+        <pitch>
+          <step>G</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>8</duration>
+        <voice>1</voice>
+        <type>whole</type>
+        <lyric default-y="-86" name="section" number="1">
+          <syllabic>single</syllabic>
+          <text font-size="10.25" font-style="italic">xong.</text>
+        </lyric>
+      </note>
+      <note default-x="15">
+        <chord/>
+        <pitch>
+          <step>B</step>
+          <octave>3</octave>
+        </pitch>
+        <duration>8</duration>
+        <voice>1</voice>
+        <type>whole</type>
+      </note>
+      <barline location="right">
+        <bar-style>light-light</bar-style>
+      </barline>
+    </measure>
+  </part>
+  <!--=========================================================-->
+</score-partwise>
