@@ -1,6 +1,9 @@
 #!/bin/bash
-# 1. Regenerate Service Worker Precache Manifest
-php tools/generate_sw_manifest.php
+PHP_BIN="/usr/local/lsws/lsphp83/bin/php"
+if [ ! -x "$PHP_BIN" ]; then
+    PHP_BIN="php"
+fi
+"$PHP_BIN" tools/generate_sw_manifest.php
 
 # 2. Regenerate Gitnexus Second Brain Code Map
 node tools/generate_code_map.js
