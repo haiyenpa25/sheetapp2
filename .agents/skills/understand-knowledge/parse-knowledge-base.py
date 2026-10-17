@@ -1,1 +1,0 @@
-/root/.understand-anything/repo/understand-anything-plugin/skills/understand-knowledge/parse-knowledge-base.py

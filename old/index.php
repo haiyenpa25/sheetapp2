@@ -175,12 +175,18 @@ echo cssTag('components.css');
   document.head.appendChild(s);"></script>
 
 <?php
-// Auto cache-bust: dùng thời gian sửa file
 function jsTag(string $file, bool $defer = true): string {
-    $path = __DIR__ . '/assets/js/' . $file;
-    $v    = file_exists($path) ? filemtime($path) : time();
-    $d    = $defer ? ' defer' : '';
-    return "<script src=\"assets/js/{$file}?v={$v}\"{$d}></script>\n";
+    $localPath = __DIR__ . '/assets/js/' . $file;
+    if (file_exists($localPath)) {
+        $src = "assets/js/{$file}";
+        $v   = filemtime($localPath);
+    } else {
+        $sharedPath = dirname(__DIR__) . '/assets/js/' . $file;
+        $src = "../assets/js/{$file}";
+        $v   = file_exists($sharedPath) ? filemtime($sharedPath) : time();
+    }
+    $d = $defer ? ' defer' : '';
+    return "<script src=\"{$src}?v={$v}\"{$d}></script>\n";
 }
 
 // ── 1. CORE Infrastructure (không defer — cần sớm nhất) ──

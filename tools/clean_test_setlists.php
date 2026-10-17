@@ -192,6 +192,15 @@ function executeCleanup(PDO $pdo, array $testSetlists): array {
         $stmtDel->execute();
         $deletedSetlists = $stmtDel->rowCount();
 
+        // Dọn dẹp các artifact test khác (tích hợp từ cleanup_test_artifacts.php)
+        foreach ([
+            "DELETE FROM domain_events WHERE payload_json LIKE '%E2E%' OR payload_json LIKE '%test%' OR type LIKE '%test%' OR subject_type='test_fixture'",
+            "DELETE FROM notifications WHERE title LIKE '%E2E%' OR title LIKE '%Test%' OR body LIKE '%E2E%' OR body LIKE '%test%'",
+            "UPDATE users SET email = NULL WHERE id = 1 AND email LIKE '%e2e-test%'",
+        ] as $extraSql) {
+            try { $pdo->exec($extraSql); } catch (Throwable $_) {}
+        }
+
         $pdo->commit();
 
         return [

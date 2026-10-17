@@ -426,6 +426,7 @@ const Store = (() => {
 
   function initDefaultListeners() {
     if (_defaultListenersRegistered) return;
+    if (typeof window !== 'undefined' && window.location?.pathname?.includes('/old/')) return;
     _defaultListenersRegistered = true;
 
     // Đăng ký 4 bên nghe

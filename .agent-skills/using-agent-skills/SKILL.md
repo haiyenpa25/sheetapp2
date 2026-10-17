@@ -22,6 +22,10 @@ Task arrives
     ├── Implementing code? ────────────→ incremental-implementation
     │   ├── UI work? ─────────────────→ frontend-ui-engineering
     │   ├── API work? ────────────────→ api-and-interface-design
+    │   ├── MusicXML / OSMD / Chords? → musicxml-osmd-engineering
+    │   ├── WebAudio / MIDI / SATB? ──→ webaudio-midi-satb
+    │   ├── SQLite / FTS5 / LiveSync? → sqlite-fts5-sync-architecture
+    │   ├── PWA / Stage / Dual-UI? ───→ pwa-offline-stage-performance
     │   ├── Need better context? ─────→ context-engineering
     │   └── Need doc-verified code? ───→ source-driven-development
     ├── Writing/running tests? ────────→ test-driven-development

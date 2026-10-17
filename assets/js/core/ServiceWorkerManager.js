@@ -9,6 +9,7 @@ const ServiceWorkerManager = (() => {
 
   function register() {
     if (!('serviceWorker' in navigator)) return;
+    if (typeof window !== 'undefined' && window.location?.pathname?.includes('/old/')) return;
 
     const doRegister = async () => {
       try {

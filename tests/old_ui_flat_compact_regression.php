@@ -76,7 +76,7 @@ checkB(!empty($sess['session_id']) && $finished === true, 'PracticeService::fini
 $practiceCode = (string)@file_get_contents($root . '/api/services/PracticeService.php');
 checkS(!str_contains($practiceCode, 'WHERE id = {$sessionId}'), 'PracticeService.php không còn nội suy chuỗi trực tiếp trong câu lệnh SQL');
 
-// ── 3. Static: Giới hạn < 600 dòng cho các file PHP/JS trong /old/ ─
+// ── 3. Static: Giới hạn < 600 dòng cho các file PHP/JS trong /old/ & Đồng nhất Core ─
 $oldFiles = [
     'old/index.php',
     'old/includes/sidebar.php',
@@ -85,8 +85,6 @@ $oldFiles = [
     'old/assets/js/library-ui.js',
     'old/assets/js/keyboard-handler.js',
     'old/assets/js/app.js',
-    'old/assets/js/core/ApiService.js',
-    'old/assets/js/core/EventBus.js',
     'old/assets/js/metronome.js',
 ];
 
@@ -96,6 +94,10 @@ foreach ($oldFiles as $relFile) {
     $lineCount = $exists ? count(file($fullPath)) : 9999;
     checkS($exists && $lineCount < 600, "{$relFile} tồn tại và < 600 dòng (hiện tại: {$lineCount} dòng)");
 }
+
+$oldIndexPhp = (string)@file_get_contents($root . '/old/index.php');
+checkS(str_contains($oldIndexPhp, '../assets/js/{$file}') && !is_dir($root . '/old/assets/js/core'), 'old/index.php đồng nhất dùng chung tầng Core & Engine từ ../assets/js/ (không trùng lặp old/assets/js/core)');
+checkS(!is_file($root . '/old/assets/js/url-state.js') && is_file($root . '/assets/js/url-state.js'), 'Đã gộp các module dùng chung (url-state, history-manager, session-tracker, transpose-engine) về assets/js/');
 
 // ── 4. Static: Kiểm tra cấu trúc HTML/CSS/JS của Giao diện cũ (/old/) ─
 $oldSidebar = (string)@file_get_contents($root . '/old/includes/sidebar.php');
