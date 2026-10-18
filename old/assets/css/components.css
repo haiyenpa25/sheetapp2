@@ -200,6 +200,9 @@ body.dark-mode .voice-selector {
 .toast.success { border-color: #6ee7b7; background: #ecfdf5; color: #065f46; }
 .toast.error   { border-color: #fca5a5; background: #fef2f2; color: #991b1b; }
 .toast.info    { border-color: #93c5fd; background: #eff6ff; color: #1e40af; }
+.toast > span:first-child { flex: 0 0 auto; align-self: flex-start; }
+.toast > span:nth-child(2) { flex: 1; min-width: 0; line-height: 1.4; }
+.toast-dismiss { flex: 0 0 auto; min-width: 44px; min-height: 44px; border: 0; background: transparent; color: inherit; cursor: pointer; pointer-events: auto; }
 @keyframes slideInRight { from{transform:translateX(20px);opacity:0} to{transform:translateX(0);opacity:1} }
 @keyframes fadeOut { from{opacity:1} to{opacity:0;transform:translateX(10px)} }
 

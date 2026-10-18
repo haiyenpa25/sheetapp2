@@ -108,18 +108,20 @@ const LyricExtractor = (() => {
           if (lyrics.length > 0) {
             lyrics.forEach(lyr => {
               const num = lyr.getAttribute('number') || '1';
-              const raw = lyr.querySelector('text')?.textContent || '';
+              const rawText = (lyr.querySelector('text')?.textContent || '').replace(/\s+/g, ' ').trim();
               const syl = lyr.querySelector('syllabic')?.textContent || 'single';
-              const isEnd = syl === 'single' || syl === 'end';
+              const hasHyphen = /[-\u2010\u2011]$/.test(rawText);
+              const isEnd = (syl === 'single' || syl === 'end') && !hasHyphen;
 
               if (!verseMap[num]) {
                 verseMap[num] = [];
-                const { text: cleaned, isChorus } = cleanFirstSyl(raw);
+                const { text: cleaned, isChorus } = cleanFirstSyl(rawText);
+                const cleanEnd = isEnd && !/[-\u2010\u2011]$/.test(cleaned);
                 verseLabel[num] = isChorus ? 'chorus' : ('verse:' + num);
                 known.add(num);
-                verseMap[num].push({ text: cleaned, chord: currentChord, isWordEnd: isEnd, measureIdx: mi, noteIdx: ni });
+                verseMap[num].push({ text: cleaned, chord: currentChord, isWordEnd: cleanEnd, measureIdx: mi, noteIdx: ni });
               } else {
-                verseMap[num].push({ text: raw, chord: currentChord, isWordEnd: isEnd, measureIdx: mi, noteIdx: ni });
+                verseMap[num].push({ text: rawText, chord: currentChord, isWordEnd: isEnd, measureIdx: mi, noteIdx: ni });
               }
             });
             currentChord = null;
@@ -154,18 +156,23 @@ const LyricExtractor = (() => {
       if (firstOfWord) {
         firstSyl = syl;
         if (syl.chord) chordBuf = syl.chord;
+      } else if (syl.chord && !chordBuf) {
+        chordBuf = syl.chord;
       }
       const t = (syl.text === '\u00a0' || !syl.text) ? '' : syl.text;
       buf += t;
       if (syl.isWordEnd) {
-        const wordText = buf.trim();
+        const wordText = buf.replace(/\s+/g, ' ').replace(/([-\u2010\u2011])\s+/g, '$1').trim();
         if (chordBuf || wordText) words.push({ chord: chordBuf, text: wordText, measureIdx: firstSyl?.measureIdx, noteIdx: firstSyl?.noteIdx });
         buf = ''; chordBuf = null; firstOfWord = true; firstSyl = null;
       } else {
         firstOfWord = false;
       }
     }
-    if (buf.trim() || chordBuf) words.push({ chord: chordBuf, text: buf.trim(), measureIdx: firstSyl?.measureIdx, noteIdx: firstSyl?.noteIdx });
+    if (buf.trim() || chordBuf) {
+      const wordText = buf.replace(/\s+/g, ' ').replace(/([-\u2010\u2011])\s+/g, '$1').trim();
+      words.push({ chord: chordBuf, text: wordText, measureIdx: firstSyl?.measureIdx, noteIdx: firstSyl?.noteIdx });
+    }
 
     let html = '';
     for (const w of words) {
@@ -208,10 +215,12 @@ const LyricExtractor = (() => {
     const isInline = _currentMode === 'inline';
     const title = document.getElementById('song-title')?.textContent?.trim() || '';
     const actualTranspose = window.Store?.get?.('currentTranspose') ?? window.App?.getCurrentTranspose?.() ?? transposeOffset ?? 0;
+    const curSong = window.Store?.get?.('currentSong');
+    const songCategory = curSong?.category || window.SongInfoBar?.getSongInfo?.()?.category || '';
     let key = document.getElementById('song-key')?.textContent?.trim() || '';
     if (key === '--') key = '';
     if (window.KeyService?.displayKey) {
-      const origKey = window.Store?.get?.('currentSong')?.defaultKey || window.SongInfoBar?.getSongKey?.() || '';
+      const origKey = curSong?.defaultKey || window.SongInfoBar?.getSongKey?.() || '';
       if (origKey) {
         key = window.KeyService.displayKey(origKey, actualTranspose) || key;
       }
@@ -225,6 +234,8 @@ const LyricExtractor = (() => {
         ? `<span class="lv-capo-badge" style="margin-left:6px;padding:2px 7px;border-radius:4px;background:var(--accent-amber,#f59e0b);color:#18181b;font-size:0.75rem;font-weight:700;">🎸 Capo ${personalCapo}</span>` : '';
       const trBadge = actualTranspose !== 0
         ? `<span class="lv-trans-badge">${actualTranspose > 0 ? '+' : ''}${actualTranspose}</span>` : '';
+      const safeCat = songCategory ? (window.SafeHtml ? window.SafeHtml.escape(songCategory) : songCategory) : '';
+      const catSpan = safeCat ? `<span class="lv-cat-badge" style="margin-left:8px;padding:2px 8px;border-radius:999px;background:rgba(109,40,217,0.1);color:var(--accent,#6d28d9);font-size:0.76rem;font-weight:600;">📚 ${safeCat}</span>` : '';
       const modeLabel   = isInline ? '↕ Dạng Hợp Âm' : '≡ Dạng Inline';
       const modeTitle   = isInline ? 'Chuyển sang kiểu hợp âm trên lời' : 'Chuyển sang kiểu hợp âm trong dòng';
       html += `
@@ -233,7 +244,7 @@ const LyricExtractor = (() => {
             <h2 class="lv-title">${title}</h2>
             <button class="lv-mode-btn" id="lv-mode-toggle" title="${modeTitle}">${modeLabel}</button>
           </div>
-          ${key ? `<p class="lv-key">🎼 Tông <strong>${key}</strong>${trBadge}${capoBadge}</p>` : ''}
+          ${(key || safeCat) ? `<p class="lv-key">${key ? `🎼 Tông <strong>${key}</strong>${trBadge}${capoBadge}` : ''}${catSpan}</p>` : ''}
         </header>`;
     }
 

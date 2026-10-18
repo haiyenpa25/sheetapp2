@@ -60,12 +60,12 @@ check(
     true
 );
 
-// 4. LibraryUI tích hợp Virtual List (ITEM_H và _renderVirtualChunk)
+// 4. Static guard only; real row geometry is covered by library-tv0-virtual.spec.js.
 check(
-    strpos($libraryJs, 'ITEM_H') !== false &&
+    strpos($libraryJs, 'function _getItemH()') !== false &&
     strpos($libraryJs, '_renderVirtualChunk') !== false,
     'Virtual List: LibraryUI có cơ chế tính toán ảo hoá và hàm phân mảnh _renderVirtualChunk',
-    true
+    false
 );
 
 // 5. Throttling cuộn đạt 60fps bằng requestAnimationFrame

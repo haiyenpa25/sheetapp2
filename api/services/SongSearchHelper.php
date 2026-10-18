@@ -201,15 +201,17 @@ class SongSearchHelper {
         $categoryId = isset($filters['category_id']) && $filters['category_id'] !== '' ? (int)$filters['category_id'] : null;
         $mode = trim($filters['mode'] ?? 'title');
         $limit = isset($filters['limit']) ? min(500, max(1, (int)$filters['limit'])) : 200;
+        $visWhere = class_exists('SongService') ? SongService::visibilitySqlClause('s') : '1=1';
 
         if ($cleanQuery === '') {
             $sql = "
                 SELECT s.id, s.title, s.httlvnId, s.xmlPath, s.defaultKey, s.category_id,
                        s.liturgical_season, s.theme, s.composer, s.tags, s.tempo,
+                       COALESCE(s.visibility, 'public') as visibility, COALESCE(s.is_public, 1) as is_public,
                        c.name as category
                 FROM songs s
                 LEFT JOIN categories c ON s.category_id = c.id
-                WHERE 1=1
+                WHERE {$visWhere}
             ";
             $params = [];
             if ($season !== '') { $sql .= " AND s.liturgical_season = ?"; $params[] = $season; }
@@ -227,8 +229,9 @@ class SongSearchHelper {
             $numSql = "
                 SELECT s.id, s.title, s.httlvnId, s.xmlPath, s.defaultKey, s.category_id,
                        s.liturgical_season, s.theme, s.composer, s.tags, s.tempo,
+                       COALESCE(s.visibility, 'public') as visibility, COALESCE(s.is_public, 1) as is_public,
                        c.name as category, 0 as relevance_tier, 0 as fts_rank, 'title' as match_type
-                FROM songs s LEFT JOIN categories c ON s.category_id = c.id WHERE s.httlvnId = ?
+                FROM songs s LEFT JOIN categories c ON s.category_id = c.id WHERE s.httlvnId = ? AND {$visWhere}
             ";
             $numParams = [$songNum];
             if ($season !== '') { $numSql .= " AND s.liturgical_season = ?"; $numParams[] = $season; }
@@ -278,6 +281,7 @@ class SongSearchHelper {
                 SELECT f.song_id as id,
                        s.title, s.httlvnId, s.xmlPath, s.defaultKey, s.category_id,
                        s.liturgical_season, s.theme, s.composer, s.tags, s.lyrics_text, s.tempo,
+                       COALESCE(s.visibility, 'public') as visibility, COALESCE(s.is_public, 1) as is_public,
                        c.name as category,
                        bm25(songs_fts) as fts_rank,
                        CASE
@@ -293,7 +297,7 @@ class SongSearchHelper {
                 FROM songs_fts f
                 JOIN songs s ON f.song_id = s.id
                 LEFT JOIN categories c ON s.category_id = c.id
-                WHERE songs_fts MATCH :matchExpr
+                WHERE songs_fts MATCH :matchExpr AND {$visWhere}
             ";
 
             if ($season !== '') { $sql .= " AND s.liturgical_season = :season"; $params[':season'] = $season; }
@@ -470,6 +474,7 @@ class SongSearchHelper {
         $categoryId = isset($filters['category_id']) && $filters['category_id'] !== '' ? (int)$filters['category_id'] : null;
         $limit = isset($filters['limit']) ? min(100, max(1, (int)$filters['limit'])) : 50;
         $variants = self::getQueryVariants($cleanQuery);
+        $visWhere = class_exists('SongService') ? SongService::visibilitySqlClause('s') : '1=1';
 
         $exactClauses = []; $prefixClauses = []; $containsClauses = [];
         $whereClauses = []; $params = [];
@@ -483,6 +488,7 @@ class SongSearchHelper {
         $sql = "
             SELECT s.id, s.title, s.httlvnId, s.xmlPath, s.defaultKey, s.category_id,
                    s.liturgical_season, s.theme, s.composer, s.tags, s.lyrics_text,
+                   COALESCE(s.visibility, 'public') as visibility, COALESCE(s.is_public, 1) as is_public,
                    c.name as category,
                    CASE
                        WHEN (" . implode(' OR ', $exactClauses) . ") THEN 1
@@ -496,7 +502,7 @@ class SongSearchHelper {
                    END as match_type
             FROM songs s
             LEFT JOIN categories c ON s.category_id = c.id
-            WHERE (" . implode(' OR ', $whereClauses) . ")
+            WHERE (" . implode(' OR ', $whereClauses) . ") AND {$visWhere}
         ";
 
         foreach ($variants as $v) { $params[] = $v; }

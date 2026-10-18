@@ -274,12 +274,13 @@
               <small class="text-muted text-xs">Mã xuất hiện trên dropdown hợp âm. Để trống tự lấy 4 chữ cái đầu.</small>
             </div>
             <div class="mgr-form-group">
-              <label class="mgr-label">Phân quyền</label>
+              <label class="mgr-label">Phân quyền (4 Nhóm Tài Khoản)</label>
               <select id="new-user-role" class="mgr-input">
-                <option value="banhat" selected>🎸 Ban Hát / Nhạc Công</option>
-                <option value="leader">👑 Ca Trưởng</option>
-                <option value="viewer">👁️ Viewer (Chỉ xem)</option>
-                <option value="admin">🛡️ Admin (Quản trị)</option>
+                <option value="viewer">👁️ Guest / Viewer (Chỉ xem bài Public)</option>
+                <option value="banhat" selected>🎤 Ban Hát (Tập hát SATB, xem bài nội bộ)</option>
+                <option value="bannhac">🎸 Ban Nhạc (Sửa hợp âm, bộ cá nhân)</option>
+                <option value="leader">👑 Ca Trưởng / Leader (Duyệt HD, Setlist)</option>
+                <option value="admin">🛡️ Admin (Quản trị &amp; Upload XML)</option>
               </select>
             </div>
           </div>
@@ -333,12 +334,13 @@
           </div>
           <div class="mgr-form-row">
             <div class="mgr-form-group">
-              <label class="mgr-label">Phân quyền</label>
+              <label class="mgr-label">Phân quyền (4 Nhóm Tài Khoản)</label>
               <select id="edit-user-role" class="mgr-input">
-                <option value="banhat">🎸 Ban Hát / Nhạc Công</option>
-                <option value="leader">👑 Ca Trưởng</option>
-                <option value="viewer">👁️ Viewer (Chỉ xem)</option>
-                <option value="admin">🛡️ Admin (Quản trị)</option>
+                <option value="viewer">👁️ Guest / Viewer (Chỉ xem bài Public)</option>
+                <option value="banhat">🎤 Ban Hát (Tập hát SATB, xem bài nội bộ)</option>
+                <option value="bannhac">🎸 Ban Nhạc (Sửa hợp âm, bộ cá nhân)</option>
+                <option value="leader">👑 Ca Trưởng / Leader (Duyệt HD, Setlist)</option>
+                <option value="admin">🛡️ Admin (Quản trị &amp; Upload XML)</option>
               </select>
             </div>
             <div class="mgr-form-group">

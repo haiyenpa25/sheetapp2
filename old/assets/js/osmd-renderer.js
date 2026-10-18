@@ -354,9 +354,14 @@ const OSMDRenderer = (() => {
     currentZoom = Math.max(0.1, Math.min(2.5, level));
     if (osmd && isLoaded) {
       osmd.zoom = currentZoom;
+      refreshRules();
       _forceLayoutRecalc();
       await osmd.render();
       _forceLayoutRecalc();
+      _titleCompacted = false;
+      _compactTitleSVG();
+      if (window.ChordCanvas) window.ChordCanvas.reposition();
+      if (window.ChordOverlay) window.ChordOverlay.onOSMDRendered();
       _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} });
     }
   }

@@ -280,10 +280,10 @@ const ApiService = (() => {
   };
 
   const importer = {
-    search: (url)    => _json('POST', 'api/index.php?route=import', { type: 'search', url }),
-    fetch:  (url)    => _json('POST', 'api/index.php?route=import', { type: 'fetch', url }),
-    upload: (fd)     => _request('api/index.php?route=import&type=upload', { method: 'POST', body: fd }),
-    save:   (data)   => _json('POST', 'api/index.php?route=import', { type: 'save', ...data })
+    search: (url, opts = {}) => { songs.invalidateCache(); return _json('POST', 'api/index.php?route=import', { type: 'search', url, ...opts }); },
+    fetch:  (url, opts = {}) => { songs.invalidateCache(); return _json('POST', 'api/index.php?route=import', { type: 'fetch', url, ...opts }); },
+    upload: (fd)             => { songs.invalidateCache(); return _request('api/index.php?route=import&type=upload', { method: 'POST', body: fd }); },
+    save:   (data)           => { songs.invalidateCache(); return _json('POST', 'api/index.php?route=import', { type: 'save', ...data }); }
   };
 
   const practice = {

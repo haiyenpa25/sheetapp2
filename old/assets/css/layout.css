@@ -156,12 +156,24 @@ select, input, label,
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary);
 }
 .song-item.active .song-item-title { color: var(--accent); font-weight: 700; }
+.song-cat-badge {
+  font-size: .7rem; font-weight: 600;
+  color: var(--text-secondary); background: #f8fafc; border: 1px solid var(--border);
+  padding: 0 4px; line-height: 1.35; flex-shrink: 0; white-space: nowrap;
+}
+.song-item.active .song-cat-badge {
+  color: var(--accent); background: #eef2ff; border-color: #c7d2fe;
+}
 .song-key-badge {
   font-family: var(--font-mono); font-size: .78rem; font-weight: 700;
   color: var(--accent); background: #eef2ff; border: 1px solid #c7d2fe;
   padding: 0 4px; line-height: 1.35; flex-shrink: 0; min-width: 22px; text-align: center;
 }
 .song-item-actions { display: flex; align-items: center; gap: 2px; opacity: 0.25; flex-shrink: 0; }
+@media (pointer: coarse) {
+  .song-item { height: 44px; min-height: 44px; }
+  .song-item-actions button { width: 44px; min-width: 44px; height: 44px; min-height: 44px; }
+}
 .song-item:hover .song-item-actions,
 .song-item.active .song-item-actions { opacity: 1; }
 .song-pin-btn, .song-fav-btn, .song-add-setlist-btn, .song-delete-btn {

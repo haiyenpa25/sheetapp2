@@ -42,9 +42,18 @@
               <input id="import-url-input" type="url" class="form-input" placeholder="https://thanhca.httlvn.org/thanh-ca-1/ten-bai-hat?op=sheet">
               <button id="btn-fetch-url" class="btn btn-primary">Tải Về</button>
             </div>
-            <div class="form-row mt-1">
-              <label class="form-label">Tên hiển thị</label>
-              <input id="import-url-title" type="text" class="form-input" placeholder="VD: Cúi Xin Vua Thánh Ngự Lại">
+            <div class="form-row mt-1" style="display:grid; grid-template-columns: 1fr 180px; gap:0.75rem;">
+              <div>
+                <label class="form-label">Tên hiển thị</label>
+                <input id="import-url-title" type="text" class="form-input" placeholder="VD: Cúi Xin Vua Thánh Ngự Lại">
+              </div>
+              <div>
+                <label class="form-label">Chế độ hiển thị</label>
+                <select id="import-url-visibility" class="form-input">
+                  <option value="public" selected>🌐 Public (Công khai)</option>
+                  <option value="private">🔒 Private (Riêng tư)</option>
+                </select>
+              </div>
             </div>
             <div id="url-examples" class="url-examples mt-1">
               <p class="text-xs text-muted">Ví dụ:</p>
@@ -53,7 +62,7 @@
           </div>
 
           <div id="tab-upload" class="tab-content hidden">
-            <p class="help-text">Tải file MusicXML (<code>.xml</code> hoặc <code>.mxl</code>) từ máy tính</p>
+            <p class="help-text">Tải file MusicXML (<code>.xml</code> hoặc <code>.mxl</code>) từ máy tính để tạo bài hát mới</p>
             <div id="drop-zone" class="drop-zone">
               <div class="drop-icon">📂</div>
               <p>Kéo thả file .xml vào đây</p>
@@ -65,10 +74,25 @@
               <button id="btn-clear-file" class="icon-btn-xs">✕</button>
             </div>
             <div class="form-row mt-1">
-              <label class="form-label">Tên hiển thị</label>
+              <label class="form-label">Tên bài hát hiển thị</label>
               <input id="import-upload-title" type="text" class="form-input" placeholder="Nhập tên bài hát">
             </div>
-            <button id="btn-do-upload" class="btn btn-primary w-full mt-1" disabled>📤 Upload & Thêm Vào Kho</button>
+            <div class="form-row mt-1" style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem;">
+              <div>
+                <label class="form-label">Danh mục (Thể loại)</label>
+                <select id="import-upload-category" class="form-input">
+                  <option value="1">Thánh ca</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">Chế độ hiển thị (Public / Private)</label>
+                <select id="import-upload-visibility" class="form-input">
+                  <option value="public" selected>🌐 Public (Công khai — Mọi người xem được)</option>
+                  <option value="private">🔒 Private (Riêng tư — Ẩn khỏi Khách)</option>
+                </select>
+              </div>
+            </div>
+            <button id="btn-do-upload" class="btn btn-primary w-full mt-1" disabled>📤 Upload XML &amp; Tạo Bài Hát</button>
           </div>
 
           <div id="tab-direct" class="tab-content hidden">
@@ -77,9 +101,18 @@
               <input id="import-direct-input" type="url" class="form-input" placeholder="https://example.com/sheet.xml">
               <button id="btn-fetch-direct" class="btn btn-primary">Tải Về</button>
             </div>
-            <div class="form-row mt-1">
-              <label class="form-label">Tên hiển thị</label>
-              <input id="import-direct-title" type="text" class="form-input" placeholder="Nhập tên bài hát">
+            <div class="form-row mt-1" style="display:grid; grid-template-columns: 1fr 180px; gap:0.75rem;">
+              <div>
+                <label class="form-label">Tên hiển thị</label>
+                <input id="import-direct-title" type="text" class="form-input" placeholder="Nhập tên bài hát">
+              </div>
+              <div>
+                <label class="form-label">Chế độ hiển thị</label>
+                <select id="import-direct-visibility" class="form-input">
+                  <option value="public" selected>🌐 Public (Công khai)</option>
+                  <option value="private">🔒 Private (Riêng tư)</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -150,17 +183,21 @@
              3. QUẢN LÝ BÀI HÁT
              ============================================= -->
         <div id="admin-tab-songs" class="admin-panel hidden">
-          <div style="display:flex; justify-content:space-between; margin-bottom:1rem; align-items:center; gap: 1rem;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:1rem; align-items:center; gap: 0.75rem; flex-wrap:wrap;">
              <h4 style="margin:0; white-space:nowrap;">Cơ Sở Bài Hát</h4>
-             <input type="text" id="admin-song-search" class="form-input" placeholder="Tìm tên bài hát..." style="max-width: 300px;">
+             <div style="display:flex; gap:0.5rem; align-items:center; flex:1; justify-content:flex-end;">
+               <input type="text" id="admin-song-search" class="form-input" placeholder="Tìm tên bài hát..." style="max-width: 260px;">
+               <button id="btn-admin-quick-upload-xml" class="btn btn-sm btn-primary" title="Upload file MusicXML tạo bài mới">+ Upload Bài XML</button>
+             </div>
           </div>
           <div style="background:var(--bg-surface); border:1px solid var(--border); border-radius:var(--radius-md); overflow:hidden;">
             <table class="admin-table" id="admin-songs-table">
                <thead>
                  <tr>
                    <th>Tựa Đề Của Bài Hát</th>
-                   <th style="width: 25%;">Danh Mục</th>
-                   <th style="width: 150px; text-align:center;">Hành Động</th>
+                   <th style="width: 22%;">Danh Mục</th>
+                   <th style="width: 150px;">Chế Độ</th>
+                   <th style="width: 110px; text-align:center;">Hành Động</th>
                  </tr>
                </thead>
                <tbody><!-- Rendered via JS --></tbody>
@@ -218,25 +255,27 @@
              5. QUẢN LÝ TÀI KHOẢN NGƯỜI DÙNG (USERS)
              ============================================= -->
         <div id="admin-tab-users" class="admin-panel hidden">
-          <h4 class="mt-0 mb-4">🔐 Quản Lý & Tạo Tài Khoản Thành Viên</h4>
+          <h4 class="mt-0 mb-4">🔐 Quản Lý &amp; Tạo Tài Khoản Thành Viên</h4>
           
           <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
             <h5 style="margin-top: 0; margin-bottom: 0.75rem;">➕ Tạo Tài Khoản Mới</h5>
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 0.75rem; align-items: end;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1.2fr auto; gap: 0.75rem; align-items: end;">
               <div>
                 <label class="form-label">Tên đăng nhập</label>
                 <input type="text" id="admin-new-user-name" class="form-input w-full" placeholder="VD: guitarnam">
               </div>
               <div>
                 <label class="form-label">Mật khẩu</label>
-                <input type="password" id="admin-new-user-pass" class="form-input w-full" placeholder="Mật khẩu">
+                <input type="password" id="admin-new-user-pass" class="form-input w-full" placeholder="Tối thiểu 4 ký tự">
               </div>
               <div>
-                <label class="form-label">Phân quyền</label>
+                <label class="form-label">Phân quyền (4 nhóm tài khoản)</label>
                 <select id="admin-new-user-role" class="form-input w-full">
-                  <option value="banhat">Ban Hát / Nhạc Công (Được tạo hợp âm)</option>
-                  <option value="viewer">Viewer (Chỉ xem sheet)</option>
-                  <option value="admin">Admin (Quản trị toàn quyền)</option>
+                  <option value="bannhac" selected>🎸 Ban Nhạc (Nhạc công / Hợp âm &amp; Setlist)</option>
+                  <option value="banhat">🎤 Ban Hát (Ca viên / Tập bè SATB)</option>
+                  <option value="viewer">👁️ Guest / Khách (Chỉ xem bài Public)</option>
+                  <option value="leader">👑 Trưởng Ban / Ca Trưởng</option>
+                  <option value="admin">🛡️ Admin (Quản trị &amp; Upload XML)</option>
                 </select>
               </div>
               <div>

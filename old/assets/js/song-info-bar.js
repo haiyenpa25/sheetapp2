@@ -36,6 +36,7 @@ const SongInfoBar = (() => {
     const info = {
       number:       song?.httlvnId ? String(song.httlvnId).padStart(3, '0') : '',
       title:        song?.title || '',
+      category:     song?.category || '',
       key:          '',
       mode:         '',
       timeBeats:    '',
@@ -106,6 +107,7 @@ const SongInfoBar = (() => {
     if (!inner) return;
 
     const chips = [];
+    if (info.category)     chips.push(`<span class="si-chip si-category" title="Danh mục: ${_esc(info.category)}">📚 ${_esc(info.category)}</span>`);
     if (info.key)          chips.push(`<span class="si-chip si-key">🎵 ${info.key} ${info.mode}</span>`);
     if (info.timeBeats)    chips.push(`<span class="si-chip si-time">♩ ${info.timeBeats}/${info.timeBeatType}</span>`);
     if (info.tempo)        chips.push(`<span class="si-chip si-tempo">= ${info.tempo} bpm</span>`);

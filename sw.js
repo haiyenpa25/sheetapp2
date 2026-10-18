@@ -11,7 +11,7 @@
 
 const urlParams      = new URLSearchParams(self.location.search);
 const SW_VERSION     = urlParams.get('v') || 'v5';
-const SW_MANIFEST_HASH = 'c8c72b9789';
+const SW_MANIFEST_HASH = '5b7e85888d';
 const CACHE_VENDOR   = `sheetapp-vendor-${SW_VERSION}`;
 const CACHE_APP      = `sheetapp-app-${SW_VERSION}`;
 const CACHE_MUSICXML = `sheetapp-musicxml-${SW_VERSION}`;
@@ -44,6 +44,7 @@ const PRECACHE_APP = [
   '/assets/js/core/FeatureFlags.js',
   '/assets/js/core/SafeHtml.js',
   '/assets/js/core/KeyService.js',
+  '/assets/js/core/ChordSetNames.js',
   '/assets/js/core/ApiService.js',
   '/assets/js/core/EventBus.js',
   '/assets/js/core/Store.js',
@@ -64,6 +65,7 @@ const PRECACHE_APP = [
   '/assets/js/chord-canvas.js',
   '/assets/js/song-info-bar.js',
   '/assets/js/song-loader.js',
+  '/assets/js/library-gestures.js',
   '/assets/js/library-ui.js',
   '/assets/js/app-ui.js',
   '/assets/js/toolbar-controller.js',

@@ -3,12 +3,21 @@
  * api/core/Auth.php — Session auth helpers
  *
  * Roles:
- *  viewer  — chỉ xem, không sửa (mặc định khi chưa đăng nhập)
- *  banhat  — ban hát: thêm/sửa hợp âm cá nhân
- *  admin   — toàn quyền
+ *  viewer  — khách (guest): chỉ xem bài public, không sửa (mặc định khi chưa đăng nhập)
+ *  banhat  — ban hát: xem bài public & nội bộ, luyện bè SATB, ghi chú tập luyện
+ *  bannhac — ban nhạc: nhạc công, thêm/sửa bộ hợp âm cá nhân, đề xuất HD, setlist
+ *  leader  — ca trưởng: quản lý chương trình, duyệt hợp âm
+ *  admin   — quản trị viên: toàn quyền quản trị tài khoản & upload bài hát XML (public/private)
  */
 class Auth {
+    public const VALID_ROLES = ['viewer', 'banhat', 'bannhac', 'leader', 'admin'];
     private static bool $dbChecked = false;
+
+    public static function normalizeRole(string $role): string {
+        $r = strtolower(trim($role));
+        if ($r === 'guest') return 'viewer';
+        return $r;
+    }
 
     public static function resetDbCache(): void {
         self::$dbChecked = false;
@@ -56,10 +65,33 @@ class Auth {
         return isset($_SESSION['role']) && in_array($_SESSION['role'], ['leader', 'admin'], true);
     }
 
-    /** Ban hát, Ca Trưởng hoặc Admin đều có quyền biểu diễn và sửa hợp âm */
+    /** Ban Nhạc, Ca Trưởng hoặc Admin */
+    public static function isBannhac(): bool {
+        self::checkDb();
+        return isset($_SESSION['role']) && in_array($_SESSION['role'], ['bannhac', 'leader', 'admin'], true);
+    }
+
+    /** Thành viên Ban Hát, Ban Nhạc, Ca Trưởng hoặc Admin */
     public static function isBanhat(): bool {
         self::checkDb();
-        return isset($_SESSION['role']) && in_array($_SESSION['role'], ['banhat', 'leader', 'admin'], true);
+        return isset($_SESSION['role']) && in_array($_SESSION['role'], ['banhat', 'bannhac', 'leader', 'admin'], true);
+    }
+
+    /** Kiểm tra quyền xem một bài hát dựa theo visibility / is_public */
+    public static function canViewSong(array $song): bool {
+        if (self::isAdmin()) {
+            return true;
+        }
+        $visibility = strtolower((string)($song['visibility'] ?? 'public'));
+        $isPublic = isset($song['is_public']) ? (int)$song['is_public'] : ($visibility === 'public' ? 1 : 0);
+
+        if ($visibility === 'admin_only') {
+            return false;
+        }
+        if ($isPublic === 0 || $visibility === 'private' || $visibility === 'internal') {
+            return self::isBanhat();
+        }
+        return true;
     }
 
     public static function isLoggedIn(): bool {
@@ -114,10 +146,17 @@ class Auth {
         }
     }
 
-    /** Yêu cầu ít nhất là Ban Hát */
+    /** Yêu cầu quyền Ban Nhạc, Ca Trưởng hoặc Admin */
+    public static function requireBannhac(): void {
+        if (!self::isBannhac()) {
+            Response::abort(403, 'Cần quyền Ban Nhạc để thực hiện');
+        }
+    }
+
+    /** Yêu cầu ít nhất là thành viên Ban Hát / Ban Nhạc */
     public static function requireBanhat(): void {
         if (!self::isBanhat()) {
-            Response::abort(403, 'Cần quyền Ban Hát để thực hiện');
+            Response::abort(403, 'Cần quyền Ban Hát hoặc Ban Nhạc để thực hiện');
         }
     }
 

@@ -68,47 +68,51 @@ class SongController {
                     }
 
                     // INTENTIONAL: Trả raw array vì LibraryUI.loadSongs() expect Array.isArray() trực tiếp.
-                    // Tối ưu ETag + 304 Not Modified Caching và stream trực tiếp từ cache file
-                    $cacheFile = __DIR__ . '/../../storage/data/songs_cache.json';
-                    if (!file_exists($cacheFile) || (time() - filemtime($cacheFile) >= 3600)) {
-                        SongService::getAll();
-                    }
+                    // Nếu là Guest (viewer): tối ưu ETag + 304 Not Modified Caching và stream trực tiếp từ cache file (chỉ chứa bài public)
+                    $isGuest = !Auth::isBanhat() && !Auth::isAdmin();
+                    if ($isGuest) {
+                        $cacheFile = __DIR__ . '/../../storage/data/songs_cache.json';
+                        if (!file_exists($cacheFile) || (time() - filemtime($cacheFile) >= 3600)) {
+                            SongService::writePublicCache();
+                        }
 
-                    if (file_exists($cacheFile)) {
-                        $mtime = filemtime($cacheFile);
-                        $size = filesize($cacheFile);
-                        $rawEtag = dechex($mtime) . '-' . dechex($size);
-                        $etag = '"' . $rawEtag . '"';
+                        if (file_exists($cacheFile)) {
+                            $mtime = filemtime($cacheFile);
+                            $size = filesize($cacheFile);
+                            $rawEtag = dechex($mtime) . '-' . dechex($size);
+                            $etag = '"' . $rawEtag . '"';
 
-                        header('ETag: ' . $etag);
-                        header('Cache-Control: no-cache, must-revalidate');
+                            header('ETag: ' . $etag);
+                            header('Cache-Control: no-cache, must-revalidate');
 
-                        $ifNoneMatch = $_SERVER['HTTP_IF_NONE_MATCH'] ?? '';
-                        if ($ifNoneMatch !== '') {
-                            $clientEtags = array_map(function($tag) {
-                                $tag = trim($tag);
-                                if (strpos($tag, 'W/') === 0) $tag = substr($tag, 2);
-                                return trim($tag, '"');
-                            }, explode(',', $ifNoneMatch));
+                            $ifNoneMatch = $_SERVER['HTTP_IF_NONE_MATCH'] ?? '';
+                            if ($ifNoneMatch !== '') {
+                                $clientEtags = array_map(function($tag) {
+                                    $tag = trim($tag);
+                                    if (strpos($tag, 'W/') === 0) $tag = substr($tag, 2);
+                                    return trim($tag, '"');
+                                }, explode(',', $ifNoneMatch));
 
-                            if (in_array('*', $clientEtags, true) || in_array($rawEtag, $clientEtags, true)) {
-                                if (ob_get_level() > 0) {
-                                    ob_end_clean();
+                                if (in_array('*', $clientEtags, true) || in_array($rawEtag, $clientEtags, true)) {
+                                    if (ob_get_level() > 0) {
+                                        ob_end_clean();
+                                    }
+                                    http_response_code(304);
+                                    exit;
                                 }
-                                http_response_code(304);
+                            }
+
+                            if ($method === 'HEAD') {
+                                if (ob_get_level() > 0) ob_end_clean();
                                 exit;
                             }
-                        }
 
-                        if ($method === 'HEAD') {
-                            if (ob_get_level() > 0) ob_end_clean();
+                            readfile($cacheFile);
                             exit;
                         }
-
-                        readfile($cacheFile);
-                        exit;
                     }
 
+                    header('Cache-Control: private, no-cache');
                     $data = SongService::getAll();
                     echo json_encode($data, JSON_UNESCAPED_UNICODE);
                     break;

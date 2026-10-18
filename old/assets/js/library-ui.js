@@ -27,7 +27,7 @@ const LibraryUI = (() => {
     'Hillsongs - Worship': 'Hillsong',
   };
 
-  const ROW_HEIGHT = 26;
+  let ROW_HEIGHT = 26;
   let songs = [], activeSongId = null, onSelectCb = null, onDeleteCb = null;
   let _searchDebounce = null, _searchMode = 'title', _pinnedIds = [];
   let _vList = [], _vStart = -1, _vEnd = -1, _vRaf = 0;
@@ -48,6 +48,7 @@ const LibraryUI = (() => {
       if (_vList.length <= 120 || _vRaf) return;
       _vRaf = requestAnimationFrame(() => { _vRaf = 0; _renderVirtualSlice(false); });
     }, { passive: true });
+    window.addEventListener('resize', () => { _renderVirtualSlice(true); if (activeSongId) _highlightActive(activeSongId); }, { passive: true });
     loadSongs();
 
     document.getElementById('btn-prev-song')?.addEventListener('click', () => {
@@ -77,16 +78,7 @@ const LibraryUI = (() => {
 
     const list = listEl();
     if (list) {
-      let _ptX = 0, _ptY = 0, _ptMoved = false;
-      list.addEventListener('pointerdown', (e) => {
-        _ptX = e.clientX; _ptY = e.clientY; _ptMoved = false;
-      }, { passive: true });
-      list.addEventListener('pointermove', (e) => {
-        if (!_ptMoved && (Math.abs(e.clientX - _ptX) > 10 || Math.abs(e.clientY - _ptY) > 10)) _ptMoved = true;
-      }, { passive: true });
-
-      list.addEventListener('click', (e) => {
-        if (_ptMoved) { _ptMoved = false; return; }
+      window.LibraryGestures.bind(list, (e) => {
         const btn = e.target.closest('.song-delete-btn');
         if (btn) { e.stopPropagation(); _handleDelete(btn); return; }
         const addSetBtn = e.target.closest('.song-add-setlist-btn');
@@ -160,7 +152,7 @@ const LibraryUI = (() => {
       `<button id="btn-clear-pins" class="pin-bar-clear" title="Xóa toàn bộ bài đã ghim">Xóa hết</button>`;
 
     bar.querySelectorAll('.pin-bar-item').forEach(el => {
-      el.addEventListener('click', (e) => {
+      window.LibraryGestures.bind(el, (e) => {
         const rm = e.target.closest('.pin-bar-remove');
         if (rm) {
           e.stopPropagation();
@@ -246,6 +238,13 @@ const LibraryUI = (() => {
     const canAdmin = window.Auth?.isAdmin?.() ?? false;
     const canEdit  = window.Auth?.isBanhat?.() ?? false;
 
+    const sample = el.querySelector('.song-item') || _createSongItem(_vList[0], canAdmin, canEdit);
+    const isProbe = !sample.isConnected;
+    if (isProbe) el.appendChild(sample);
+    const measuredHeight = sample.getBoundingClientRect().height;
+    if (isProbe) sample.remove();
+    if (measuredHeight > 0) ROW_HEIGHT = measuredHeight;
+
     if (_vList.length <= 120) {
       if (!force && _vStart === 0 && _vEnd === _vList.length) return;
       _vStart = 0; _vEnd = _vList.length;
@@ -280,18 +279,20 @@ const LibraryUI = (() => {
     }
   }
 
-  /** Tạo DOM node một bài hát trên ĐÚNG 1 DÒNG (Số + Tên + Tông + Ghim/Sao) */
+  /** Tạo DOM node một bài hát trên ĐÚNG 1 DÒNG (Số + Tên + Danh mục + Tông + Ghim/Sao) */
   function _createSongItem(song, canAdmin, canEdit) {
     const div = document.createElement('div');
     div.className  = 'song-item';
     div.dataset.id = song.id;
     const keySig   = song.defaultKey || song.keySignature || '';
     const numStr   = song.httlvnId ? String(song.httlvnId).padStart(3, '0') : '—';
-    div.title      = `${song.httlvnId ? numStr + ' - ' : ''}${song.title}${keySig ? ' [' + keySig + ']' : ''}`;
+    const catLabel = song.category ? (CAT_SHORT_NAMES[song.category] || song.category) : '';
+    div.title      = `${song.httlvnId ? numStr + ' - ' : ''}${song.title}${song.category ? ' — ' + song.category : ''}${keySig ? ' [' + keySig + ']' : ''}`;
 
-    const addSpan = (cls, txt) => { const s = document.createElement('span'); s.className = cls; s.textContent = txt; div.appendChild(s); };
+    const addSpan = (cls, txt, ttl) => { const s = document.createElement('span'); s.className = cls; s.textContent = txt; if (ttl) s.title = ttl; div.appendChild(s); };
     addSpan('song-item-num', numStr);
     addSpan('song-item-title', song.title);
+    if (catLabel) addSpan('song-cat-badge', catLabel, `Danh mục: ${song.category}`);
     if (keySig) addSpan('song-key-badge', keySig);
 
     const acts = document.createElement('div');
@@ -404,7 +405,7 @@ const LibraryUI = (() => {
     const frag = document.createDocumentFragment();
     const mkBtn = (cls, txt, ttl, fn) => {
       const b = document.createElement('button'); b.className = cls; b.textContent = txt; b.title = ttl;
-      b.addEventListener('click', () => { container.querySelectorAll('.quick-jump-btn').forEach(x => x.classList.remove('active')); b.classList.add('active'); fn(); });
+      window.LibraryGestures.bind(b, () => { container.querySelectorAll('.quick-jump-btn').forEach(x => x.classList.remove('active')); b.classList.add('active'); fn(); });
       frag.appendChild(b);
     };
     mkBtn('quick-jump-btn quick-jump-all active', 'Tất cả', 'Hiện tất cả bài trong danh mục đang chọn', () => render(list));
@@ -426,7 +427,7 @@ const LibraryUI = (() => {
     section.innerHTML = `<div class="recent-header"><span>Gần đây</span><button id="btn-clear-history" class="btn btn-ghost btn-xs">Xóa</button></div><div class="recent-list">${
       recent.slice(0, 4).map(s => `<div class="recent-item" data-id="${_esc(s.id)}"><span class="recent-num">${s.httlvnId ? String(s.httlvnId).padStart(3,'0') : '—'}</span><span class="recent-title">${_esc(s.title)}</span></div>`).join('')
     }</div>`;
-    section.querySelectorAll('.recent-item').forEach(item => item.addEventListener('click', () => selectSong(item.dataset.id)));
+    section.querySelectorAll('.recent-item').forEach(item => window.LibraryGestures.bind(item, () => selectSong(item.dataset.id)));
     section.querySelector('#btn-clear-history')?.addEventListener('click', e => {
       e.stopPropagation();
       HistoryManager.clearHistory?.();

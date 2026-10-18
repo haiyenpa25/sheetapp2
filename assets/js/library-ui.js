@@ -1,50 +1,37 @@
-// library-ui.js — Thư viện bài hát (v3: pointerdown instant, L2-1 search ranking)
+// library-ui.js — Thư viện bài hát (LibraryGestures loads before this module)
 const LibraryUI = (() => {
   'use strict';
 
   let songs = [], activeSongId = null, onSelectCb = null, onDeleteCb = null, _searchDebounce = null, _searchSeq = 0, _lastRenderedSongs = [];
-
-  const listEl     = () => document.getElementById('song-list');
-  const searchEl   = () => document.getElementById('search-input');
-  const categoryEl = () => document.getElementById('category-filter');
+  const CAT_SHORT_NAMES = { 'Thánh ca': 'Thánh Ca', 'Thánh Ca Tin Lành': 'TCTL', 'Tôn Vinh Chúa Hằng Hữu': 'TVCHH', 'Thánh Vịnh': 'Thánh Vịnh', 'Thánh Ca Truyền Giảng': 'TCTG', 'Biệt Thánh Ca': 'Biệt TC', 'Biệt TC': 'Biệt TC', 'Ca Khúc Chúc Tôn': 'CKCT', 'Thánh Ca Đội Kèn Thánh': 'TCĐKT', 'Thánh Ca Tôn Thờ': 'TCTT', 'Kinh Thánh': 'Kinh Thánh', 'Kinh Thánh Đối Đáp': 'Kinh Thánh', 'NS Trương Văn Xê': 'TV Xê', 'Hillsongs - Worship': 'Hillsong' };
+  const listEl = () => document.getElementById('song-list'), searchEl = () => document.getElementById('search-input'), categoryEl = () => document.getElementById('category-filter');
 
   function init() {
-    if (window.HistoryManager?.init) {
-      window.HistoryManager.init(() => { _buildRecentlyViewed(); _buildQuickFavorites(); });
-    }
-    // Search — debounce 200ms
-    searchEl()?.addEventListener('input', () => {
-      clearTimeout(_searchDebounce);
-      _searchDebounce = setTimeout(_onSearch, 200);
-    });
-    // Enter mở kết quả đầu tiên (Ticket L0-7, R3-2)
+    if (window.HistoryManager?.init) window.HistoryManager.init(() => { _buildRecentlyViewed(); _buildQuickFavorites(); });
+    searchEl()?.addEventListener('input', () => { clearTimeout(_searchDebounce); _searchDebounce = setTimeout(_onSearch, 200); });
     searchEl()?.addEventListener('keydown', async (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
         const qRaw = (searchEl()?.value || '').trim().toLowerCase();
-        if (qRaw === 'setlist' || _removeAccents(qRaw) === 'chuong trinh') {
-          document.querySelector('[data-tab="setlist"]')?.click(); searchEl()?.blur(); return;
-        }
-        clearTimeout(_searchDebounce);
-        await _onSearch();
+        if (qRaw === 'setlist' || _removeAccents(qRaw) === 'chuong trinh') { document.querySelector('[data-tab="setlist"]')?.click(); searchEl()?.blur(); return; }
+        clearTimeout(_searchDebounce); await _onSearch();
         const first = listEl()?.querySelector('.song-item');
         if (first?.dataset?.id) { selectSong(first.dataset.id); searchEl()?.blur(); }
       }
     });
 
     loadSongs();
-
     document.getElementById('btn-prev-song')?.addEventListener('click', () => { if (!(window.SetlistUI?.getCurrentSetlist?.() && (window.SetlistUI?.getCurrentIndex?.() ?? -1) >= 0)) App?.navigatePrev?.(); });
     document.getElementById('btn-next-song')?.addEventListener('click', () => { if (!(window.SetlistUI?.getCurrentSetlist?.() && (window.SetlistUI?.getCurrentIndex?.() ?? -1) >= 0)) App?.navigateNext?.(); });
     document.getElementById('btn-search-lyrics')?.addEventListener('click', _toggleSearchMode);
-    [categoryEl(), document.getElementById('sort-filter'), document.getElementById('season-filter'), document.getElementById('theme-filter')].forEach(el => el?.addEventListener('change', _onSearch));
+    [categoryEl(), document.getElementById('sort-filter'), document.getElementById('season-filter'), document.getElementById('theme-filter')].forEach(el => el?.addEventListener('change', () => { _syncFlatCategoryActive(categoryEl()?.value || ''); _onSearch(); }));
     const btnToggle = document.getElementById('btn-filter-toggle'), panel = document.getElementById('sidebar-filters-panel');
     btnToggle?.addEventListener('click', () => { const isH = panel?.classList.toggle('hidden'); btnToggle.setAttribute('aria-expanded', isH ? 'false' : 'true'); });
     document.getElementById('btn-clear-filters')?.addEventListener('click', () => {
       if (categoryEl()) categoryEl().value = '';
       const sEl = document.getElementById('season-filter'), tEl = document.getElementById('theme-filter');
       if (sEl) sEl.value = ''; if (tEl) tEl.value = '';
-      _onSearch();
+      _syncFlatCategoryActive(''); _onSearch();
     });
 
     // Sidebar tabs
@@ -62,15 +49,7 @@ const LibraryUI = (() => {
     // ── Event Delegation (TV0-1: Chỉ mở bài khi chạm thật, không mở nhầm khi vuốt cuộn) ──
     const list = listEl();
     if (list) {
-      let _ptX = 0, _ptY = 0, _ptMoved = false;
-      list.addEventListener('pointerdown', (e) => {
-        _ptX = e.clientX; _ptY = e.clientY; _ptMoved = false;
-      }, { passive: true });
-      list.addEventListener('pointermove', (e) => {
-        if (!_ptMoved && (Math.abs(e.clientX - _ptX) > 10 || Math.abs(e.clientY - _ptY) > 10)) _ptMoved = true;
-      }, { passive: true });
-      list.addEventListener('click', (e) => {
-        if (_ptMoved) { _ptMoved = false; return; }
+      window.LibraryGestures.bind(list, (e) => {
         const btn = e.target.closest('.song-delete-btn'); if (btn) { e.stopPropagation(); _handleDelete(btn); return; }
         const addSetBtn = e.target.closest('.song-add-setlist-btn'); if (addSetBtn) { e.stopPropagation(); _promptAddToSetlist(addSetBtn.closest('.song-item')?.dataset.id); return; }
         const favBtn = e.target.closest('.song-fav-btn'); if (favBtn) { e.stopPropagation(); _handleFav(favBtn); return; }
@@ -78,7 +57,7 @@ const LibraryUI = (() => {
         selectSong(item.dataset.id);
       });
     }
-    window.addEventListener('resize', () => { _measuredItemH = 0; if (_virtualSongs) _renderVirtualChunk(); }, { passive: true });
+    window.addEventListener('resize', () => { _measuredItemH = 0; if (_virtualSongs) { _renderVirtualChunk(); if (activeSongId) _highlightActive(activeSongId); } }, { passive: true });
   }
 
   function _handleDelete(btn) {
@@ -124,7 +103,10 @@ const LibraryUI = (() => {
   function _getItemH() {
     if (_measuredItemH > 20) return _measuredItemH;
     const sample = listEl()?.querySelector('.song-item');
-    if (sample && sample.offsetHeight > 20) { _measuredItemH = sample.offsetHeight; return _measuredItemH; }
+    if (sample && sample.offsetHeight > 20) {
+      _measuredItemH = sample.getBoundingClientRect().height + (parseFloat(window.getComputedStyle(listEl()).rowGap) || 0);
+      return _measuredItemH;
+    }
     return window.innerWidth >= 1024 ? 40 : 42;
   }
 
@@ -135,7 +117,9 @@ const LibraryUI = (() => {
     const el = listEl(), container = el?.closest('.song-list-container') || el;
     if (!el || !container) return;
     const itemH = _getItemH();
-    const st = container.scrollTop || el.scrollTop || 0, vh = container.clientHeight || 600, total = _virtualSongs.length;
+    const gap = parseFloat(window.getComputedStyle(el).rowGap) || 0;
+    const listTop = container === el ? 0 : el.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
+    const st = Math.max(0, container.scrollTop - listTop), vh = container.clientHeight || 600, total = _virtualSongs.length;
     const start = Math.max(0, Math.floor(st / itemH) - V_BUFFER);
     const end = Math.min(total, Math.ceil((st + vh) / itemH) + V_BUFFER);
     const topPad = start * itemH, bottomPad = Math.max(0, (total - end) * itemH);
@@ -143,7 +127,7 @@ const LibraryUI = (() => {
     if (topPad > 0) {
       const topDiv = document.createElement('div');
       topDiv.className = 'virtual-spacer';
-      topDiv.style.height = `${topPad}px`;
+      topDiv.style.height = `${Math.max(0, topPad - gap)}px`;
       frag.appendChild(topDiv);
     }
     const canAdmin = window.Auth?.isAdmin?.() ?? false, canEdit = window.Auth?.isBanhat?.() ?? false;
@@ -151,14 +135,14 @@ const LibraryUI = (() => {
     if (bottomPad > 0) {
       const botDiv = document.createElement('div');
       botDiv.className = 'virtual-spacer';
-      botDiv.style.height = `${bottomPad}px`;
+      botDiv.style.height = `${Math.max(0, bottomPad - gap)}px`;
       frag.appendChild(botDiv);
     }
     el.innerHTML = '';
     el.appendChild(frag);
     if (!_measuredItemH) {
       const firstItem = el.querySelector('.song-item');
-      if (firstItem && firstItem.offsetHeight > 20) _measuredItemH = firstItem.offsetHeight;
+      if (firstItem && firstItem.offsetHeight > 20) { _measuredItemH = firstItem.getBoundingClientRect().height + gap; _renderVirtualChunk(); return; }
     }
     if (activeSongId) _highlightActive(activeSongId, false);
   }
@@ -167,6 +151,8 @@ const LibraryUI = (() => {
     _lastRenderedSongs = Array.isArray(list) ? list : [];
     const el = listEl();
     if (!el) return;
+
+    el.classList.toggle('is-virtual', list?.length > 35 && !(opts.isSearch && list.some(s => s.match_type === 'lyric')));
 
     if (!list || list.length === 0) {
       _virtualSongs = null;
@@ -233,9 +219,8 @@ const LibraryUI = (() => {
   /** Tạo DOM node một song item */
   function _createSongItem(song, canAdmin, canEdit) {
     const div = document.createElement('div');
-    div.className = 'song-item';
-    div.dataset.id = song.id;
-    div.title = song.title;
+    div.className = 'song-item'; div.dataset.id = song.id;
+    div.title = `${song.title}${song.category ? ' — ' + song.category : ''}`;
 
     const num = document.createElement('div');
     num.className = 'song-item-num'; num.textContent = song.httlvnId ? String(song.httlvnId).padStart(3, '0') : '';
@@ -248,8 +233,14 @@ const LibraryUI = (() => {
     info.appendChild(title);
 
     const meta = document.createElement('div'); meta.className = 'song-item-meta';
+    if (song.visibility === 'private' || Number(song.is_public ?? 1) === 0) meta.appendChild(_createBadge('🔒 Nội bộ', '#f59e0b'));
     const songKey = song.defaultKey || song.keySignature;
     if (songKey) meta.appendChild(_createBadge(songKey));
+    if (song.category) {
+      const catBadge = document.createElement('span'); catBadge.className = 'song-cat-badge';
+      catBadge.textContent = CAT_SHORT_NAMES[song.category] || song.category; catBadge.title = `Danh mục: ${song.category}`;
+      meta.appendChild(catBadge);
+    }
     if (song.liturgical_season) meta.appendChild(_createBadge(song.liturgical_season, '#8b5cf6'));
     if (song.theme) meta.appendChild(_createBadge(song.theme, '#f59e0b'));
     info.appendChild(meta);
@@ -268,7 +259,6 @@ const LibraryUI = (() => {
     if (canEdit) acts.appendChild(_createActionBtn('song-add-setlist-btn icon-btn-xs', 'Thêm vào chương trình', '+'));
     if (canAdmin) acts.appendChild(_createActionBtn('song-delete-btn icon-btn-xs', 'Xóa bài hát', '🗑'));
     div.appendChild(acts);
-
     return div;
   }
 
@@ -279,32 +269,23 @@ const LibraryUI = (() => {
     const mode = document.getElementById('sort-filter')?.value || 'num';
     const copy = [...list];
     const numCmp = (a, b) => ((Number(a.category_id) || 1) - (Number(b.category_id) || 1)) || ((Number(a.httlvnId) || 999999) - (Number(b.httlvnId) || 999999)) || (a.title || '').localeCompare(b.title || '', 'vi', { sensitivity: 'base' });
-    if (mode === 'title') {
-      copy.sort((a, b) => (a.title || '').localeCompare(b.title || '', 'vi', { sensitivity: 'base' }));
-    } else if (mode === 'key') {
+    if (mode === 'title') copy.sort((a, b) => (a.title || '').localeCompare(b.title || '', 'vi', { sensitivity: 'base' }));
+    else if (mode === 'key') {
       copy.sort((a, b) => {
-        const keyA = a.defaultKey || a.keySignature || '';
-        const keyB = b.defaultKey || b.keySignature || '';
+        const keyA = a.defaultKey || a.keySignature || '', keyB = b.defaultKey || b.keySignature || '';
         if (!keyA && !keyB) return numCmp(a, b);
         if (!keyA) return 1;
         if (!keyB) return -1;
-        const cmp = keyA.localeCompare(keyB);
-        return cmp !== 0 ? cmp : numCmp(a, b);
+        return keyA.localeCompare(keyB) || numCmp(a, b);
       });
-    } else {
-      copy.sort(numCmp);
-    }
+    } else copy.sort(numCmp);
     return copy;
   }
 
-  function _removeAccents(str) {
-    if (!str) return '';
-    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
-  }
+  function _removeAccents(str) { return str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D') : ''; }
 
   function _getQueryVariants(query) {
-    const q = (query || '').trim(), unacc = _removeAccents(q);
-    const variants = [q.toLowerCase(), unacc.toLowerCase()];
+    const q = (query || '').trim(), unacc = _removeAccents(q), variants = [q.toLowerCase(), unacc.toLowerCase()];
     const re = /(?:gi[eê][\s\-]+xu|gi[eê]xu|j[eê][\s\-]+sus|j[eê]sus)/gi;
     if (re.test(q)) {
       ['jesus', 'je-sus', 'jêsus', 'jê-sus', 'giê-xu', 'gie-xu', 'gie xu'].forEach(repl => {
@@ -326,6 +307,7 @@ const LibraryUI = (() => {
     const badge  = document.getElementById('filter-active-badge');
     if (badge) { badge.textContent = String(activeCount); badge.classList.toggle('hidden', activeCount === 0); }
     document.getElementById('btn-filter-toggle')?.classList.toggle('active', activeCount > 0);
+    _syncFlatCategoryActive(cat);
 
     const catSongs = cat ? songs.filter(s => s.category === cat) : songs;
     _buildQuickJump(catSongs);
@@ -347,9 +329,7 @@ const LibraryUI = (() => {
           if (numM) {
             const target = parseInt(numM[1], 10);
             list.sort((a, b) => (Number(a.httlvnId) === target ? -1 : Number(b.httlvnId) === target ? 1 : (Number(a.httlvnId) || 0) - (Number(b.httlvnId) || 0)));
-          } else if (!q) {
-            list = _sortSongs(list);
-          }
+          } else if (!q) list = _sortSongs(list);
           _updateCount(list.length);
           render(list, { isSearch: !!q, emptyMsg: q ? `Không tìm thấy "${q}"` : 'Không có bài hát phù hợp', emptyHint: 'Thử đổi dịp lễ hoặc từ khóa khác' });
           return;
@@ -388,9 +368,7 @@ const LibraryUI = (() => {
         lyricMatches.sort((a, b) => (Number(a.httlvnId) || 0) - (Number(b.httlvnId) || 0));
         filtered = _searchMode === 'lyric' ? [...lyricMatches, ...titleMatches] : [...titleMatches, ...lyricMatches];
       }
-    } else {
-      filtered = _sortSongs(filtered);
-    }
+    } else filtered = _sortSongs(filtered);
     _updateCount(filtered.length);
     render(filtered, { isSearch: !!q, emptyMsg: q ? `Không tìm thấy "${q}"` : 'Không có bài hát', emptyHint: q ? 'Thử từ khóa khác' : '' });
   }
@@ -400,6 +378,14 @@ const LibraryUI = (() => {
     const btn = document.getElementById('btn-search-lyrics');
     if (btn) { btn.classList.toggle('active', _searchMode === 'lyric'); btn.title = _searchMode === 'lyric' ? 'Đang tìm theo Lời (click để tìm theo Tên)' : 'Tìm theo Lời bài hát'; }
     _onSearch();
+  }
+
+  function _syncFlatCategoryActive(val) {
+    document.getElementById('category-flat-list')?.querySelectorAll('.cat-flat-btn').forEach(btn => {
+      const isAct = (btn.dataset.cat || '') === val;
+      btn.classList.toggle('active', isAct);
+      btn.setAttribute('aria-selected', isAct ? 'true' : 'false');
+    });
   }
 
   // ── Dynamic Taxonomy & Category Filters (Ticket L2-3) ─────────
@@ -423,6 +409,16 @@ const LibraryUI = (() => {
     sync('category-filter', 'category-filter-wrap', cats, `Tất cả danh mục (${songs.length})`);
     sync('season-filter', 'season-filter-wrap', seasons, 'Tất cả Dịp lễ');
     sync('theme-filter', 'theme-filter-wrap', themes, 'Tất cả Chủ Đề');
+    const flatEl = document.getElementById('category-flat-list'), curCat = categoryEl()?.value || '';
+    if (flatEl && cats.length > 0) {
+      flatEl.innerHTML = `<button type="button" role="tab" aria-selected="${!curCat}" class="cat-flat-btn${!curCat ? ' active' : ''}" data-cat="">Tất cả <span>${songs.length}</span></button>` +
+        cats.map(c => `<button type="button" role="tab" aria-selected="${c === curCat}" class="cat-flat-btn${c === curCat ? ' active' : ''}" data-cat="${_esc(c)}" title="${_esc(c)} (${catCounts[c]} bài)">${_esc(CAT_SHORT_NAMES[c] || c)} <span>${catCounts[c]}</span></button>`).join('');
+      flatEl.querySelectorAll('.cat-flat-btn').forEach(btn => window.LibraryGestures.bind(btn, () => {
+        const val = btn.dataset.cat || '';
+        if (categoryEl()) categoryEl().value = val;
+        _syncFlatCategoryActive(val); _onSearch();
+      }));
+    }
     const avail = (cats.length > 1 ? 1 : 0) + (seasons.length > 0 ? 1 : 0) + (themes.length > 0 ? 1 : 0);
     document.getElementById('filter-empty-hint')?.classList.toggle('hidden', avail > 0);
   }
@@ -437,7 +433,7 @@ const LibraryUI = (() => {
       const btn = document.createElement('button');
       btn.className = `quick-jump-btn ${cls}`.trim();
       btn.textContent = label;
-      btn.addEventListener('click', () => { container.querySelectorAll('.quick-jump-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); render(filterFn ? list.filter(filterFn) : list); });
+      window.LibraryGestures.bind(btn, () => { container.querySelectorAll('.quick-jump-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); render(filterFn ? list.filter(filterFn) : list); });
       return btn;
     };
     frag.appendChild(makeBtn('Tất cả', 'quick-jump-all', null));
@@ -481,7 +477,7 @@ const LibraryUI = (() => {
     sec.style.display = '';
     sec.innerHTML = `<div class="recent-header"><span>Gần đây</span><button id="btn-clear-history" class="btn btn-ghost btn-xs">Xóa</button></div>` +
       `<div class="recent-list">${recent.slice(0,5).map(s => `<div class="recent-item" data-id="${_esc(s.id)}" style="touch-action:manipulation"><span class="recent-num">${s.httlvnId ? String(s.httlvnId).padStart(3,'0') : ''}</span><span class="recent-title">${_esc(s.title)}</span></div>`).join('')}</div>`;
-    sec.querySelectorAll('.recent-item').forEach(it => it.addEventListener('click', () => selectSong(it.dataset.id)));
+    sec.querySelectorAll('.recent-item').forEach(it => window.LibraryGestures.bind(it, () => selectSong(it.dataset.id)));
     sec.querySelector('#btn-clear-history')?.addEventListener('click', e => { e.stopPropagation(); HistoryManager.clearHistory?.(); sec.style.display = 'none'; });
   }
 
@@ -492,7 +488,7 @@ const LibraryUI = (() => {
     sec.style.display = ''; sec.classList.remove('hidden');
     sec.innerHTML = `<div class="recent-header"><span>⭐ Yêu thích (${favs.length})</span></div>` +
       `<div class="recent-list">${favs.slice(0,5).map(s => `<div class="recent-item fav-item" data-id="${_esc(s.id)}" style="touch-action:manipulation"><span class="recent-num">${s.httlvnId ? String(s.httlvnId).padStart(3,'0') : ''}</span><span class="recent-title">${_esc(s.title)}</span></div>`).join('')}</div>`;
-    sec.querySelectorAll('.recent-item').forEach(it => it.addEventListener('click', () => selectSong(it.dataset.id)));
+    sec.querySelectorAll('.recent-item').forEach(it => window.LibraryGestures.bind(it, () => selectSong(it.dataset.id)));
   }
 
   function _showFavorites() {
@@ -544,7 +540,8 @@ const LibraryUI = (() => {
       const idx = _virtualSongs.findIndex(s => String(s.id) === String(id));
       const container = el.closest('.song-list-container');
       if (idx !== -1 && container) {
-        container.scrollTop = Math.max(0, idx * _getItemH() - (container.clientHeight || 600) / 2);
+        const listTop = el.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
+        container.scrollTop = Math.max(0, listTop + idx * _getItemH() - (container.clientHeight || 600) / 2);
         _renderVirtualChunk();
         active = el.querySelector(`.song-item[data-id="${CSS.escape(String(id))}"]`);
       }

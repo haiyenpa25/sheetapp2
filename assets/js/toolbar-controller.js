@@ -134,7 +134,9 @@ const ToolbarController = (() => {
       document.body.classList.toggle('library-sidebar-open', Boolean(isOpen));
       const btn = document.getElementById('btn-open-sidebar');
       if (!btn) return;
-      const title = isOpen ? 'Đóng danh sách bài hát [Phím S]' : 'Mở danh sách bài hát (903 bài) [Phím S]';
+      const cnt = document.getElementById('library-count')?.textContent?.trim();
+      const cntStr = (cnt && cnt !== '...') ? ` (${cnt} bài)` : '';
+      const title = isOpen ? 'Đóng danh sách bài hát [Phím S]' : `Mở danh sách bài hát${cntStr} [Phím S]`;
       const label = isOpen ? 'Đóng danh sách bài hát' : 'Mở danh sách bài hát';
       btn.setAttribute('title', title);
       btn.setAttribute('aria-label', label);
@@ -371,7 +373,7 @@ const ToolbarController = (() => {
           let left = r.right - w;
           if (left < 8) left = 8;
           if (left + w > window.innerWidth - 8) left = window.innerWidth - w - 8;
-          menuOptions.style.cssText = `position:fixed; top:${r.bottom + 6}px; left:${left}px; width:${w}px; right:auto; z-index:99999;`;
+          menuOptions.style.cssText = `position:fixed; top:${r.bottom + 6}px; left:${left}px; width:${w}px; right:auto; z-index:var(--z-dropdown);`;
         }
       }
 

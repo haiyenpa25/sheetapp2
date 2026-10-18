@@ -41,7 +41,7 @@ test('nút bộ hợp âm điện thoại chỉ đổi HD và TLH, luôn hiện 
   const fallback = await page.evaluate(() => window.ChordCanvas?.getChordStatus?.()?.isFallback);
   if (fallback) {
     await expect(page.locator('#mobile-chordset-label')).toHaveText('HD→TLH');
-    await expect(button).toHaveAttribute('aria-label', /HD trống, đang hiện hợp âm TLH/);
+    await expect(button).toHaveAttribute('aria-label', /HD \(chưa có\).*đang hiện TLH/);
   }
   for (const width of [320, 350, 390]) {
     await page.setViewportSize({ width, height: 568 });

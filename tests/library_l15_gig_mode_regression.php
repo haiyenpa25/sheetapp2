@@ -103,8 +103,8 @@ $hasCenterTapElement = str_contains($sheetViewerPhp, 'id="edge-tap-center"');
 recordCheck("sheet_viewer.php có phần tử #edge-tap-center nằm giữa 2 mép màn hình", $hasCenterTapElement, false);
 
 // 10. layout.css định kiểu cho .edge-tap-center: bao phủ 64% giữa màn hình (left: 18%, right: 18%)
-$hasCenterTapCss = (bool)preg_match('/\.edge-tap-center\s*\{[^}]*left:\s*18%[^}]*right:\s*18%[^}]*z-index:\s*9975/s', $layoutCss);
-recordCheck("layout.css định nghĩa .edge-tap-center bao phủ vùng giữa (left: 18%, right: 18%, z-index: 9975)", $hasCenterTapCss, true);
+$hasCenterTapCss = (bool)preg_match('/\.edge-tap-center\s*\{[^}]*left:\s*18%[^}]*right:\s*18%[^}]*z-index:\s*var\(--z-chord-canvas\)/s', $layoutCss);
+recordCheck("layout.css định nghĩa .edge-tap-center bao phủ vùng giữa với token lớp chuẩn", $hasCenterTapCss, false);
 
 // 11. .edge-tap-center kích hoạt trong body.sheet-only-mode
 $hasCenterTapActive = str_contains($layoutCss, 'body.sheet-only-mode .edge-tap-center');

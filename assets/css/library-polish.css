@@ -71,6 +71,9 @@ body.dark-mode {
 
 /* Logo của Thư viện nằm trong ngăn chọn bài; App Shell vẫn giữ logo khi ngăn đóng. */
 body.library-sidebar-open #app-shell-navbar .shell-brand { display: none; }
+@media (max-width: 680px) {
+  body.library-sidebar-open #mobile-thumb-bar { display: none !important; }
+}
 
 /* ─── 1. Thanh công cụ (desktop & iPad) ───────────────────────────── */
 @media (min-width: 681px) {
@@ -86,6 +89,10 @@ body.library-sidebar-open #app-shell-navbar .shell-brand { display: none; }
   .unified-toolbar > .band-controls { gap: var(--lp-gap); }
   .unified-toolbar .toolbar-left,
   .unified-toolbar .toolbar-right { gap: var(--lp-gap); }
+  .unified-toolbar .toolbar-left { flex: 1 1 0; min-width: calc(2 * var(--lp-h) + var(--lp-gap)); }
+  .unified-toolbar .toolbar-center,
+  .unified-toolbar .toolbar-right { flex: 0 0 auto; }
+  .unified-toolbar .song-info-pill { min-width: 0; flex: 1 1 auto; }
 
   /* Mọi "pill": cùng một cỡ, viền mảnh, nền trắng */
   .unified-toolbar .band-pill {
@@ -148,11 +155,16 @@ body.library-sidebar-open #app-shell-navbar .shell-brand { display: none; }
   .unified-toolbar .tempo-note-icon { font-size: 15px; color: var(--lp-accent); line-height: 1; }
   .unified-toolbar .btn-chord-edit-pill { cursor: pointer; gap: 5px; font-weight: 600; flex-shrink: 0 !important; }
   .unified-toolbar .btn-chord-edit-pill.active { background: #f59e0b !important; border-color: #d97706 !important; color: #fff !important; }
-  body.toolbar-controls-compact .unified-toolbar #btn-transpose-reset,
-  body.toolbar-controls-compact .unified-toolbar #btn-add-chord-mode-bar,
-  body.toolbar-controls-compact .unified-toolbar #btn-new-chord-set { display: inline-flex !important; }
+  /* Compact controls use their existing equivalents in Công cụ. */
   .unified-toolbar #btn-add-chord-mode-bar.hidden,
   .unified-toolbar #btn-new-chord-set.hidden { display: none !important; }
+  @media (max-width: 1024px) {
+    .unified-toolbar { --lp-gap: 4px; }
+    .unified-toolbar #song-info { display: none; }
+    .unified-toolbar #chord-set-selector { max-width: 75px; }
+    .unified-toolbar .btn-view-mode span { display: inline; }
+    .unified-toolbar .btn-view-mode { width: auto; white-space: nowrap; }
+  }
   .unified-toolbar .icon-xs { width: 16px; height: 16px; }
   .unified-toolbar .toolbar-secondary-controls { display: none !important; }
 
@@ -378,12 +390,71 @@ body.chord-edit-mode .toast-container .toast:not(.error) { display: none !import
   color: var(--lp-ink);
 }
 .song-item.active .song-item-title { font-weight: 600 !important; }
-.song-item-meta { gap: 4px !important; margin-top: 2px; flex-wrap: wrap; }
+.song-item-meta { gap: 4px !important; margin-top: 2px; flex-wrap: wrap; align-items: center; }
 .song-item-meta .song-key-badge {
   font-size: 12px !important;
   line-height: 16px !important;
   padding: 1px 7px !important;
   height: auto !important;
+}
+.song-item-meta .song-cat-badge,
+.song-cat-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px !important;
+  line-height: 16px !important;
+  padding: 1px 6px !important;
+  border-radius: 6px;
+  background: var(--lp-hover, rgba(109, 40, 217, 0.08));
+  color: var(--lp-muted, #64748b);
+  border: 1px solid var(--lp-border, rgba(148, 163, 184, 0.28));
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.song-item.active .song-item-meta .song-cat-badge {
+  background: var(--lp-accent-soft, rgba(109, 40, 217, 0.14));
+  color: var(--lp-accent, #6d28d9);
+  border-color: transparent;
+}
+.song-cat-pill.hidden { display: none !important; }
+.category-flat-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+.cat-flat-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid var(--lp-border);
+  border-radius: 999px;
+  background: var(--lp-surface);
+  color: var(--lp-muted);
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.cat-flat-btn span {
+  font-size: 10.5px;
+  font-weight: 500;
+  opacity: 0.78;
+  font-variant-numeric: tabular-nums;
+}
+.cat-flat-btn:hover {
+  background: var(--lp-hover);
+  color: var(--lp-ink);
+}
+.cat-flat-btn.active {
+  background: var(--lp-accent-soft);
+  border-color: var(--lp-accent);
+  color: var(--lp-accent);
 }
 .song-item-meta .song-key-badge ~ .song-key-badge {
   background: transparent !important;
@@ -403,6 +474,11 @@ body.chord-edit-mode .toast-container .toast:not(.error) { display: none !import
   .song-item .song-fav-btn { width: 32px !important; height: 32px !important; min-width: 32px !important; min-height: 32px !important; }
 }
 .song-item-actions { height: auto !important; }
+
+/* Virtual rows must have a stable measured pitch; full titles remain in title. */
+.song-list.is-virtual .song-item-info { display: grid; grid-template-rows: 18px 18px; }
+.song-list.is-virtual .song-item-title { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.song-list.is-virtual .song-item-meta { flex-wrap: nowrap; overflow: hidden; }
 
 /* Đầu sidebar: tab, nút tài khoản, nút tìm theo lời */
 .sidebar-tab {
@@ -470,7 +546,8 @@ body.chord-edit-mode .toast-container .toast:not(.error) { display: none !import
   pointer-events: auto;
   animation-name: fadeIn, fadeOut;
 }
-.toast-container .toast > span:nth-child(2) { flex: 1; min-width: 0; }
+.toast-container .toast > span:first-child { flex: 0 0 auto; align-self: flex-start; }
+.toast-container .toast > span:nth-child(2) { flex: 1; min-width: 0; line-height: 1.4; }
 .toast-dismiss { border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 20px; line-height: 1; min-width: 28px; min-height: 28px; }
 body.dark-mode .toast-container .toast { background: #22222b; color: var(--lp-ink); }
 
@@ -665,7 +742,7 @@ body.sheet-only-mode .section-jump-bar-container:not(.hidden) {
   border-radius: 12px;
   background: rgba(18,18,28,.9) !important;
   color: #f8fafc;
-  z-index: 9980 !important;
+  z-index: var(--z-hud) !important;
 }
 body.sheet-only-mode .section-jump-bar-container.hud-faded { display: none !important; }
 body.sheet-only-mode .section-jump-bar-container .section-chip { color: #f8fafc; }
@@ -695,7 +772,7 @@ body.sheet-only-mode .toast-container .toast {
   padding: 4px 10px !important;
   gap: 8px !important;
   align-items: center !important;
-  z-index: 9980 !important;
+  z-index: var(--z-hud) !important;
 }
 
 .gig-hud-info {
@@ -907,7 +984,7 @@ body.sheet-only-mode .toast-container .toast {
   .sidebar {
     position: fixed !important;
     left: 0; top: 0; bottom: 0;
-    z-index: 600 !important;
+    z-index: var(--z-app-shell) !important;
     width: min(320px, 85vw) !important;
     transform: translateX(-110%);
     will-change: transform;
@@ -925,14 +1002,14 @@ body.sheet-only-mode .toast-container .toast {
     box-shadow: none !important;
   }
   .toolbar {
-    z-index: 310 !important;
+    z-index: var(--z-sticky) !important;
   }
   .sidebar-overlay {
     position: fixed !important; top: var(--toolbar-h, 48px) !important; left: 0; width: 100%; height: calc(100% - var(--toolbar-h, 48px)) !important;
     background: rgba(0,0,0,0.45);
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
-    z-index: 290 !important;
+    z-index: var(--z-dropdown) !important;
     transition: opacity .25s ease, visibility .25s ease;
   }
   .sidebar-overlay:not(.hidden) {
@@ -1215,7 +1292,7 @@ body.dark-mode .cc-shortcuts-hint {
   position: fixed;
   top: 56px;
   right: 16px;
-  z-index: 1000;
+  z-index: var(--z-popover);
 }
 
 .cc-status-chip .cc-status-indicator {
@@ -1690,7 +1767,7 @@ body.dark-mode .lv-cp-textarea:focus {
   user-select: none;
   white-space: nowrap;
   line-height: 1;
-  z-index: 9;
+  z-index: var(--z-sheet);
 }
 
 body.dark-mode .cc-tlh-ghost-chord {
@@ -1782,7 +1859,7 @@ body.dark-mode .si-section-chip:hover {
   bottom: 16px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 999;
+  z-index: var(--z-fab);
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border, #e2e8f0);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
@@ -2011,7 +2088,7 @@ body.dark-mode .sidebar .song-item.active .song-item-num { color: #bfdbfe; }
     font-family: inherit;
     font-size: 12px;
     font-weight: 600;
-    z-index: 9991;
+    z-index: var(--z-hud);
     cursor: pointer;
   }
 }

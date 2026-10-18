@@ -19,7 +19,8 @@ class ManagerRepertoireHelper {
     public static function getRepertoire(array $filters = []): array {
         $pdo = DB::get();
 
-        $where = ["1=1"];
+        $visWhere = class_exists('SongService') ? SongService::visibilitySqlClause('s') : '1=1';
+        $where = [$visWhere];
         $params = [];
 
         if (!empty($filters['category_id'])) {
@@ -49,6 +50,7 @@ class ManagerRepertoireHelper {
         $sql = "
             SELECT s.id, s.title, s.httlvnId, s.xmlPath, s.defaultKey, s.category_id,
                    s.liturgical_season, s.theme, s.tags, s.tempo,
+                   COALESCE(s.visibility, 'public') as visibility, COALESCE(s.is_public, 1) as is_public, s.created_by,
                    c.name as category_name, c.icon as category_icon, c.slug as category_slug
             FROM songs s
             LEFT JOIN categories c ON s.category_id = c.id

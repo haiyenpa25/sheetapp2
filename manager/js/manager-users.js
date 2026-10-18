@@ -27,7 +27,7 @@
   async function loadUsers() {
     const app = _getApp();
     const role = app.state?.currentUser?.role;
-    if (role !== 'admin' && role !== 'banhat') return;
+    if (!['admin', 'leader', 'bannhac', 'banhat'].includes(role)) return;
 
     const tbody = document.getElementById('mgr-users-tbody');
     if (tbody) {
@@ -51,6 +51,14 @@
     const isAdmin = app.state?.currentUser?.role === 'admin';
     const addBtn = document.getElementById('btn-add-user-modal');
     if (addBtn) addBtn.style.display = isAdmin ? '' : 'none';
+
+    const roleLabelMap = {
+      admin: '🛡️ Quản Trị',
+      leader: '👑 Ca Trưởng',
+      bannhac: '🎸 Ban Nhạc',
+      banhat: '🎤 Ban Hát',
+      viewer: '👁️ Guest / Viewer'
+    };
 
     let html = '';
     users.forEach(u => {
@@ -79,7 +87,7 @@
           </td>
           <td>
             <span class="mgr-user-role role-${u.role}">
-              ${u.role === 'admin' ? '🛡️ Quản Trị' : (u.role === 'leader' ? '👑 Ca Trưởng' : (u.role === 'banhat' ? '🎸 Ban Hát' : '👁️ Viewer'))}
+              ${roleLabelMap[u.role] || '👁️ Guest / Viewer'}
             </span>
             ${u.status === 'locked' ? '<span class="key-badge" style="margin-left:4px; font-size:0.68rem; background:rgba(239,68,68,0.15); color:#ef4444;">🔒 Khóa</span>' : ''}
           </td>
@@ -96,9 +104,10 @@
                 <button class="mgr-btn mgr-btn-ghost mgr-btn-xs" title="Chỉnh sửa thông tin" onclick="ManagerApp.openEditUserModal(${safeJsUser})">✏️ Sửa</button>
                 ${!isSelf ? `
                   <select class="mgr-input mgr-btn-xs" style="width:auto;" onchange="ManagerApp.updateUserRole(${u.id}, this.value)">
-                    <option value="banhat" ${u.role === 'banhat' ? 'selected' : ''}>🎸 Ban Hát</option>
+                    <option value="viewer" ${u.role === 'viewer' ? 'selected' : ''}>👁️ Guest</option>
+                    <option value="banhat" ${u.role === 'banhat' ? 'selected' : ''}>🎤 Ban Hát</option>
+                    <option value="bannhac" ${u.role === 'bannhac' ? 'selected' : ''}>🎸 Ban Nhạc</option>
                     <option value="leader" ${u.role === 'leader' ? 'selected' : ''}>👑 Ca Trưởng</option>
-                    <option value="viewer" ${u.role === 'viewer' ? 'selected' : ''}>👁️ Viewer</option>
                     <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>🛡️ Admin</option>
                   </select>
                   <button class="mgr-btn mgr-btn-ghost mgr-btn-xs" onclick="ManagerApp.resetUserPass(${u.id}, '${_escapeInlineJs(u.username)}')">🔑 Pass</button>

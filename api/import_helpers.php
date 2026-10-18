@@ -142,18 +142,20 @@ function _resolveUrl(string $url, string $baseUrl): string {
     return $base . $basePath . '/' . $url;
 }
 
-function _generateFilename(string $title, string $ext): string {
+function _generateFilename(string $title, string $ext, string $directory): string {
+    $directory = realpath($directory);
+    if ($directory === false || !is_dir($directory)) throw new RuntimeException('Thư mục lưu MusicXML không hợp lệ');
     $slug = _slugify($title);
     $slug = $slug ?: 'sheet-' . time();
     $filename = $slug . '.' . $ext;
     $i = 1;
-    while (file_exists(SHEETS_DIR . $filename)) {
+    while (file_exists($directory . DIRECTORY_SEPARATOR . $filename)) {
         $filename = $slug . '-' . $i++ . '.' . $ext;
     }
     return $filename;
 }
 
-function _saveSong($pdo, string $title, string $xmlPath, string $key, string $source): array {
+function _saveSong($pdo, string $title, string $xmlPath, string $key, string $source, array $options = []): array {
     $id = _slugify($title) ?: 'song-' . time();
     $baseId  = $id;
     $counter = 1;
@@ -164,17 +166,44 @@ function _saveSong($pdo, string $title, string $xmlPath, string $key, string $so
         $id = $baseId . '-' . $counter++;
     }
 
-    $httlvnId = null; // import thì mặc định ko có unless logic nâng cao
-    $stmt = $pdo->prepare("INSERT INTO songs (id, title, httlvnId, xmlPath, defaultKey) VALUES (?, ?, ?, ?, ?)");
-    $stmt->execute([$id, $title, $httlvnId, $xmlPath, $key]);
+    $httlvnId = !empty($options['httlvnId']) ? (int)$options['httlvnId'] : null;
+    $categoryId = !empty($options['category_id']) ? (int)$options['category_id'] : (!empty($options['categoryId']) ? (int)$options['categoryId'] : 1);
+    $composer = trim((string)($options['composer'] ?? ''));
+    $visInfo = class_exists('SongService')
+        ? SongService::normalizeVisibility($options, 'public')
+        : ['visibility' => 'public', 'is_public' => 1];
+    $createdBy = isset($options['created_by']) ? (int)$options['created_by'] : (class_exists('Auth') ? Auth::userId() : null);
+
+    $stmt = $pdo->prepare("
+        INSERT INTO songs (id, title, httlvnId, xmlPath, defaultKey, category_id, composer, visibility, is_public, created_by)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+    $stmt->execute([
+        $id,
+        $title,
+        $httlvnId,
+        $xmlPath,
+        $key ?: 'C',
+        $categoryId,
+        $composer,
+        $visInfo['visibility'],
+        $visInfo['is_public'],
+        $createdBy
+    ]);
 
     return [
-        'id'         => $id,
-        'title'      => $title,
-        'xmlPath'    => $xmlPath,
-        'defaultKey' => $key,
-        'source'     => $source,
-        'dateAdded'  => date('Y-m-d')
+        'id'          => $id,
+        'title'       => $title,
+        'httlvnId'    => $httlvnId,
+        'xmlPath'     => $xmlPath,
+        'defaultKey'  => $key ?: 'C',
+        'category_id' => $categoryId,
+        'composer'    => $composer,
+        'visibility'  => $visInfo['visibility'],
+        'is_public'   => $visInfo['is_public'],
+        'created_by'  => $createdBy,
+        'source'      => $source,
+        'dateAdded'   => date('Y-m-d')
     ];
 }
 

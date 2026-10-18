@@ -13,6 +13,12 @@ const ChordCanvasDots = (() => {
     const cRect = container.getBoundingClientRect();
     const scale = window.ChordCanvasUI?.getScale?.() || 1.0;
     const GAP_PX = Math.round(22 * scale);
+    const minLineW = Math.max(36, Math.round(STAFF_LINE_MIN_WIDTH * scale));
+    const maxLineH = Math.max(3, Math.ceil(3.5 * scale));
+    const dedupeGap = Math.max(2, Math.round(3 * scale));
+    const SYS_GAP = Math.max(18, Math.round(38 * scale));
+    const noteRange = Math.max(35, Math.round(65 * scale));
+    const horizPad = Math.max(3, Math.round(6 * scale));
 
     const svg = container.querySelector('svg');
     if (!svg) return;
@@ -23,42 +29,36 @@ const ChordCanvasDots = (() => {
     if (staveGroups.length) {
       staveGroups.forEach(g => {
         const r = g.getBoundingClientRect();
-        if (r.width > 40 && r.height > 0) {
+        if (r.width > 30 * scale && r.height > 0) {
           staffLineRects.push(r.top - cRect.top);
         }
       });
     }
 
     if (!staffLineRects.length) {
-      // OSMD 1.8.x vẽ dòng kẻ khuông bằng <path> (không có g.vf-stave / <line>),
-      // nên phải tính cả path nằm ngang dài; nếu không sẽ rơi vào fallback và hợp âm
-      // HD nằm cao hơn khuông ~76px, đè lên dòng tên tác giả.
       Array.from(svg.querySelectorAll('line, path')).forEach(el => {
         const r = el.getBoundingClientRect();
-        if (r.width > STAFF_LINE_MIN_WIDTH && r.height < 3) {
+        if (r.width > minLineW && r.height < maxLineH) {
           staffLineRects.push(r.top - cRect.top);
         }
       });
     }
 
     if (!staffLineRects.length) {
-      alignDOMChordsFallback(container);
+      alignDOMChordsFallback(container, scale);
       return;
     }
 
     staffLineRects.sort((a, b) => a - b);
     const deduped = [staffLineRects[0]];
     for (let i = 1; i < staffLineRects.length; i++) {
-      if (staffLineRects[i] - deduped[deduped.length - 1] > 3) {
+      if (staffLineRects[i] - deduped[deduped.length - 1] > dedupeGap) {
         deduped.push(staffLineRects[i]);
       }
     }
 
     const systems = [];
-    let sysStart = deduped[0];
-    let prev = deduped[0];
-    const SYS_GAP = 40;
-
+    let sysStart = deduped[0], prev = deduped[0];
     for (let i = 1; i < deduped.length; i++) {
       const curr = deduped[i];
       if (curr - prev > SYS_GAP) {
@@ -69,7 +69,7 @@ const ChordCanvasDots = (() => {
     }
     systems.push({ topLine: sysStart, bottomLine: prev });
 
-    const allBadges = Array.from(container.querySelectorAll('.cc-custom-chord-text, .cc-dot-btn'));
+    const allBadges = Array.from(container.querySelectorAll('.cc-custom-chord-text, .cc-dot-btn, .cc-edit-badge, .cc-tlh-ghost-chord'));
     if (!allBadges.length) return;
 
     const assigned = new Map();
@@ -77,11 +77,13 @@ const ChordCanvasDots = (() => {
       const badgeY = parseFloat(badge.dataset.noteTop ?? badge.style.top);
       if (isNaN(badgeY)) return;
 
-      let bestSys = null;
-      let minDist = Infinity;
+      let bestSys = null, minDist = Infinity, minTopDist = Infinity;
       for (const sys of systems) {
-        const dist = Math.abs(badgeY - sys.topLine);
-        if (dist < minDist) { minDist = dist; bestSys = sys; }
+        const dist = badgeY < sys.topLine ? (sys.topLine - badgeY) : (badgeY > sys.bottomLine ? (badgeY - sys.bottomLine) : 0);
+        const topDist = Math.abs(badgeY - sys.topLine);
+        if (dist < minDist || (dist === minDist && topDist < minTopDist)) {
+          minDist = dist; minTopDist = topDist; bestSys = sys;
+        }
       }
 
       if (bestSys) {
@@ -97,13 +99,13 @@ const ChordCanvasDots = (() => {
     }).filter(nr => nr.bottom > 0);
 
     for (const [sys, badges] of assigned.entries()) {
-      const badgeH = Math.max(...badges.map(b => b.offsetHeight || 0), 0);
+      const badgeH = Math.max(...badges.map(b => b.offsetHeight || 0), Math.round(16 * scale));
       let fixedY = Math.round(sys.topLine - badgeH - GAP_PX * CHORD_GAP_RATIO);
-      const sysNotes = noteRects.filter(nr => nr.top >= sys.topLine - 65 && nr.bottom <= sys.bottomLine + 65);
+      const sysNotes = noteRects.filter(nr => nr.top >= sys.topLine - noteRange && nr.bottom <= sys.bottomLine + noteRange);
       if (sysNotes.length) {
         const minNoteTop = Math.min(...sysNotes.map(nr => nr.top));
         if (minNoteTop < sys.topLine) {
-          const safeFixedY = Math.round(minNoteTop - badgeH - 8);
+          const safeFixedY = Math.round(minNoteTop - badgeH - Math.max(4, Math.round(6 * scale)));
           if (safeFixedY < fixedY) fixedY = safeFixedY;
         }
       }
@@ -111,21 +113,22 @@ const ChordCanvasDots = (() => {
       let prevRight = -Infinity;
       badges.forEach(badge => {
         let curLeft = parseFloat(badge.style.left) || 0;
-        let curW = badge.offsetWidth || (badge.textContent.trim().length * 14 + 12);
+        let curW = badge.offsetWidth || Math.round((badge.textContent.trim().length * 11 + 10) * scale);
         let badgeY = fixedY;
         const bLeft = curLeft - curW / 2, bRight = curLeft + curW / 2;
         const overlappingNotes = sysNotes.filter(nr => !(nr.right < bLeft || nr.left > bRight));
         if (overlappingNotes.length) {
           const localMinTop = Math.min(...overlappingNotes.map(nr => nr.top));
-          if (badgeY + badgeH > localMinTop - 6) badgeY = Math.round(localMinTop - badgeH - 6);
+          const clearance = Math.max(4, Math.round(6 * scale));
+          if (badgeY + badgeH > localMinTop - clearance) badgeY = Math.round(localMinTop - badgeH - clearance);
         }
         badge.style.top = badgeY + 'px';
         if (badge.classList.contains('cc-dot-btn')) {
-          prevRight = Math.max(prevRight, curLeft + 8);
+          prevRight = Math.max(prevRight, curLeft + Math.round(8 * scale));
         } else {
           const halfW = curW / 2;
-          if (curLeft < prevRight || (curLeft - halfW < prevRight + 6)) {
-            const newCenter = prevRight + 6 + halfW;
+          if (curLeft < prevRight || (curLeft - halfW < prevRight + horizPad)) {
+            const newCenter = prevRight + horizPad + halfW;
             badge.style.left = newCenter + 'px';
             prevRight = newCenter + halfW;
           } else {
@@ -136,12 +139,13 @@ const ChordCanvasDots = (() => {
     }
   }
 
-  function alignDOMChordsFallback(container) {
-    const badges = Array.from(container.querySelectorAll('.cc-custom-chord-text, .cc-dot-btn'));
+  function alignDOMChordsFallback(container, scale = 1.0) {
+    const badges = Array.from(container.querySelectorAll('.cc-custom-chord-text, .cc-dot-btn, .cc-edit-badge, .cc-tlh-ghost-chord'));
     if (!badges.length) return;
 
     const rows = [];
-    const ROW_THRESHOLD = 30;
+    const ROW_THRESHOLD = Math.max(16, Math.round(30 * scale));
+    const horizPad = Math.max(3, Math.round(6 * scale));
 
     badges.forEach(b => {
       const y = parseFloat(b.style.top) || 0;
@@ -164,13 +168,13 @@ const ChordCanvasDots = (() => {
       row.items.forEach(it => {
         it.el.style.top = `${minY}px`;
         const curLeft = parseFloat(it.el.style.left) || 0;
-        let curW = it.el.offsetWidth || (it.el.textContent.trim().length * 14 + 12);
+        let curW = it.el.offsetWidth || Math.round((it.el.textContent.trim().length * 11 + 10) * scale);
         if (it.el.classList.contains('cc-dot-btn')) {
-          prevRight = Math.max(prevRight, curLeft + 8);
+          prevRight = Math.max(prevRight, curLeft + Math.round(8 * scale));
         } else {
           const halfW = curW / 2;
-          if (curLeft < prevRight || (curLeft - halfW < prevRight + 6)) {
-            const newCenter = prevRight + 6 + halfW;
+          if (curLeft < prevRight || (curLeft - halfW < prevRight + horizPad)) {
+            const newCenter = prevRight + horizPad + halfW;
             it.el.style.left = newCenter + 'px';
             prevRight = newCenter + halfW;
           } else {
@@ -196,7 +200,8 @@ const ChordCanvasDots = (() => {
   function buildChordTextPositions(mapped, container) {
     const token = window.OSMDRenderer?.getRenderToken?.() || 0;
     const cWidth = container?.clientWidth || 0;
-    const cacheKey = `${token}_${mapped.length}_${cWidth}`;
+    const scale = window.ChordCanvasUI?.getScale?.() || 1.0;
+    const cacheKey = `${token}_${mapped.length}_${cWidth}_${Math.round(scale * 100)}`;
     if (_cachedChordTextPositions && _cachedChordTextKey === cacheKey) {
       return _cachedChordTextPositions;
     }
@@ -210,6 +215,7 @@ const ChordCanvasDots = (() => {
     const chordGroups = rawChords.filter(el => el.tagName.toLowerCase() === 'g' || !el.closest('g.osmd-chord-symbol, g.vf-chordsymbol'));
     if (!chordGroups.length) return result;
 
+    const maxDist = Math.max(45, Math.round(70 * scale));
     chordGroups.forEach(g => {
       const r = g.getBoundingClientRect();
       if (r.width === 0 || r.height === 0) return;
@@ -225,7 +231,7 @@ const ChordCanvasDots = (() => {
         if (dist < minDist) { minDist = dist; closest = m; }
       });
 
-      if (closest && minDist < 60) {
+      if (closest && minDist < maxDist) {
         result.set(`${closest.measureIdx}_${closest.noteIdx}`, {
           bx: r.left - cRect.left,
           by: r.top  - cRect.top,
@@ -245,9 +251,10 @@ const ChordCanvasDots = (() => {
     const token = window.OSMDRenderer?.getRenderToken?.() || 0;
     const container = document.getElementById('osmd-container');
     const cWidth = container?.clientWidth || 0;
-    const geomKey = `${token}_${noteEls.length}_${cWidth}`;
+    const scale = window.ChordCanvasUI?.getScale?.() || 1.0;
+    const geomKey = `${token}_${noteEls.length}_${cWidth}_${Math.round(scale * 100)}`;
 
-    if (_cachedNoteMapping && _cachedNoteGeomKey === geomKey) {
+    if (_cachedNoteMapping && _cachedNoteGeomKey === geomKey && _cachedNoteMapping.every(m => m.el?.isConnected)) {
       return _cachedNoteMapping.map(m => ({
         ...m,
         rect: m.el.getBoundingClientRect(),
@@ -334,7 +341,8 @@ const ChordCanvasDots = (() => {
         const y = sl?.PositionAndShape?.AbsolutePosition?.y;
         if (y != null) {
           const unit = osmd.graphic?.unitInPixels || 10;
-          return y * unit;
+          const zoom = osmd.zoom || window.OSMDRenderer?.getCurrentZoom?.() || 1.0;
+          return y * unit * zoom;
         }
       }
     } catch (_) {}
@@ -350,12 +358,14 @@ const ChordCanvasDots = (() => {
     const scale   = ChordCanvasUI.getScale();
     const dotSize = ChordCanvasUI.getDotSize(scale);
     const preset = window.DisplaySettings?.getChordPreset?.() || 'standard';
-    const presetMultiplier = (preset === 'stage' ? 1.6 : (preset === 'high_contrast' ? 1.3 : 1.0));
-    const fSize   = Math.max(16, Math.round(20 * scale * 1.35 * presetMultiplier));
+    const presetMultiplier = (preset === 'stage' ? 1.55 : (preset === 'high_contrast' ? 1.25 : 1.0));
+    const fSize   = Math.max(11, Math.min(34, Math.round(18 * scale * presetMultiplier)));
 
-    const staffTop = _getStaffTop(measureIdx);
+    const noteTop = rect.top - cRect.top;
+    const rawStaffTop = _getStaffTop(measureIdx);
+    const staffTop = (rawStaffTop != null && Math.abs(rawStaffTop - noteTop) < 120 * scale) ? rawStaffTop : null;
     const cx = (rect.left - cRect.left) + rect.width / 2;
-    const cy = staffTop != null ? (staffTop - 20 * scale) : ((rect.top - cRect.top) - (28 * scale));
+    const cy = staffTop != null ? (staffTop - 20 * scale) : (noteTop - (24 * scale));
 
     const editEnabled = opts.editEnabled ?? false;
     const highlightEnabled = opts.highlightEnabled ?? false;
@@ -371,26 +381,27 @@ const ChordCanvasDots = (() => {
         const badgeX = textPos ? (textPos.bx + textPos.bw / 2) : cx;
         let badgeY;
         if (staffTop != null) {
-          if (textPos && textPos.by < staffTop && textPos.by > staffTop - 45) {
-            badgeY = Math.max(staffTop - 36, Math.min(staffTop - 12, textPos.by - 4));
+          if (textPos && textPos.by < staffTop && textPos.by > staffTop - 45 * scale) {
+            badgeY = Math.max(staffTop - 36 * scale, Math.min(staffTop - 12 * scale, textPos.by - 4 * scale));
           } else {
-            badgeY = Math.max(staffTop - 36, Math.min(staffTop - 12, staffTop - 22 * scale));
+            badgeY = Math.max(staffTop - 36 * scale, Math.min(staffTop - 12 * scale, staffTop - 22 * scale));
           }
         } else {
-          badgeY = textPos ? (textPos.by - 6) : (cy - dotSize / 2);
+          badgeY = textPos ? (textPos.by - 6 * scale) : (cy - dotSize / 2);
         }
 
         const badge = document.createElement('div');
         badge.className = DOT_CLASS + ' cc-edit-badge';
         badge.textContent = '\u270e';
         badge.title = 'Sửa hợp âm: ' + chord;
+        badge.dataset.noteTop = noteTop;
         ChordCanvasUI.applyAbsolute(badge, badgeX, badgeY, [
           'display:' + (editEnabled ? 'flex' : 'none'),
           'align-items:center', 'justify-content:center',
           'width:' + dotSize + 'px', 'height:' + dotSize + 'px', 'border-radius:50%',
           'background:rgba(109,40,217,0.87)',
           'border:2.5px solid rgba(255,255,255,0.8)',
-          'color:#fff', 'font-size:' + fSize + 'px', 'line-height:1',
+          'color:#fff', 'font-size:' + Math.max(11, Math.round(dotSize * 0.6)) + 'px', 'line-height:1',
           'box-shadow:0 2px 7px rgba(109,40,217,0.55)',
           'pointer-events:auto', 'cursor:pointer', 'user-select:none', 'z-index:12',
           'touch-action:manipulation', '-webkit-tap-highlight-color:transparent',
@@ -423,12 +434,12 @@ const ChordCanvasDots = (() => {
         let spanX = textPos ? (textPos.bx + textPos.bw / 2) : cx;
         let spanY;
         if (staffTop != null) {
-          spanY = Math.max(staffTop - 36, Math.min(staffTop - 12, staffTop - 22 * scale));
+          spanY = Math.max(staffTop - 36 * scale, Math.min(staffTop - 12 * scale, staffTop - 22 * scale));
         } else {
-          spanY = textPos ? (textPos.by - 4) : (cy - 18 * scale);
+          spanY = textPos ? (textPos.by - 4 * scale) : (cy - 16 * scale);
         }
-        if (rect && rect.top - cRect.top < (staffTop || 9999)) {
-          spanY = Math.min(spanY, (rect.top - cRect.top) - fSize - 6);
+        if (rect && noteTop < (staffTop || 9999)) {
+          spanY = Math.min(spanY, noteTop - fSize - Math.max(4, Math.round(6 * scale)));
         }
 
         const textBadge = document.createElement('div');
@@ -530,7 +541,8 @@ const ChordCanvasDots = (() => {
           ghost.className = DOT_CLASS + ' cc-tlh-ghost-chord';
           ghost.textContent = tlhChord;
           ghost.title = `Gợi ý TLH: ${tlhChord} (Bấm + để đặt)`;
-          const ghostY = staffTop != null ? Math.max(staffTop - 36, Math.min(staffTop - 12, staffTop - 22 * scale)) : (cy - 18 * scale);
+          ghost.dataset.noteTop = noteTop;
+          const ghostY = staffTop != null ? Math.max(staffTop - 36 * scale, Math.min(staffTop - 12 * scale, staffTop - 22 * scale)) : (cy - 16 * scale);
           ChordCanvasUI.applyAbsolute(ghost, cx, ghostY, [
             'opacity:0.42', 'color:var(--text-muted,#9ca3af)', 'font-style:italic',
             'font-family:"Georgia",serif', `font-size:${fSize}px`,

@@ -2,14 +2,15 @@
 <header class="toolbar unified-toolbar" id="toolbar">
   <!-- 1. CỤM BÀI HÁT (Bên trái: Hamburger + Tên bài + Tông gốc) -->
   <div class="toolbar-left" id="toolbar-left-group">
-    <button id="btn-open-sidebar" class="icon-btn" title="Mở danh sách bài hát (903 bài) [Phím S]">
+    <button id="btn-open-sidebar" class="icon-btn" title="Mở danh sách bài hát [Phím S]">
       <?= icon('menu') ?>
     </button>
     <div class="song-info-pill" id="song-info" title="Bấm mở danh sách bài hát" onclick="App?.toggleSidebar?.()">
       <span id="song-title" class="song-title">Chọn bài hát...</span>
+      <span id="song-category" class="song-cat-pill hidden" title="Danh mục / Tuyển tập"></span>
       <span id="song-key" class="song-key-badge" title="Tông gốc">--</span>
     </div>
-    <button id="btn-song-info-popover" class="icon-btn-pill btn-song-info-popover" title="Xem chi tiết: Tông, BPM, Nhịp, Số ô nhịp, Thờ phượng" aria-label="Chi tiết bài hát">
+    <button id="btn-song-info-popover" class="icon-btn-pill btn-song-info-popover" title="Xem chi tiết: Danh mục, Tông, BPM, Nhịp, Số ô nhịp" aria-label="Chi tiết bài hát">
       <span class="song-info-popover-icon"><?= icon('info') ?></span>
     </button>
     <!-- Popover Chi Tiết Bài Hát (Ticket L1-3: Gộp thanh thông tin vào thanh công cụ) -->
@@ -20,6 +21,7 @@
       </div>
       <div class="si-popover-body" id="si-popover-content">
         <div class="si-popover-row"><span class="si-popover-label">Tên bài:</span><span class="si-popover-value" id="si-pop-title">--</span></div>
+        <div class="si-popover-row"><span class="si-popover-label">Danh mục:</span><span class="si-popover-value" id="si-pop-category">--</span></div>
         <div class="si-popover-row"><span class="si-popover-label">Tông gốc:</span><span class="si-popover-value" id="si-pop-key">--</span></div>
         <div class="si-popover-row"><span class="si-popover-label">Tông đang tập:</span><span class="si-popover-value" id="si-pop-practice-key">--</span></div>
         <div class="si-popover-row"><span class="si-popover-label">Nhịp / Phách:</span><span class="si-popover-value" id="si-pop-time">--</span></div>

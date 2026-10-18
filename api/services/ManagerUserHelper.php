@@ -41,7 +41,7 @@ class ManagerUserHelper {
             case 'create':
                 $username    = trim($data['username'] ?? '');
                 $password    = $data['password'] ?? '';
-                $role        = $data['role'] ?? 'banhat';
+                $role        = Auth::normalizeRole((string)($data['role'] ?? 'banhat'));
                 $displayName = trim($data['display_name'] ?? $username);
                 $instrument  = trim($data['instrument'] ?? 'Guitar');
                 $chordCode   = strtoupper(trim($data['chord_code'] ?? ''));
@@ -59,7 +59,7 @@ class ManagerUserHelper {
                 if (UserService::isWeakPassword($password, $username)) {
                     return ['success' => false, 'message' => 'Mật khẩu quá yếu hoặc dễ đoán, vui lòng chọn mật khẩu mạnh hơn'];
                 }
-                if (!in_array($role, ['viewer', 'banhat', 'leader', 'admin'], true)) {
+                if (!in_array($role, Auth::VALID_ROLES, true)) {
                     return ['success' => false, 'message' => 'Quyền người dùng không hợp lệ'];
                 }
                 if (empty($chordCode)) {
@@ -100,7 +100,7 @@ class ManagerUserHelper {
                 $displayName  = isset($data['display_name']) ? trim($data['display_name']) : $target['display_name'];
                 $instrument   = isset($data['instrument']) ? trim($data['instrument']) : $target['instrument'];
                 $chordCode    = isset($data['chord_code']) ? strtoupper(trim($data['chord_code'])) : ($target['chord_code'] ?? '');
-                $newRole      = isset($data['role']) ? trim($data['role']) : $target['role'];
+                $newRole      = isset($data['role']) ? Auth::normalizeRole((string)$data['role']) : $target['role'];
                 $newPass      = !empty($data['password']) ? $data['password'] : null;
                 $newVoicePart = isset($data['voice_part'])
                     ? (!empty($data['voice_part']) ? strtoupper(trim($data['voice_part'])) : null)
@@ -109,7 +109,7 @@ class ManagerUserHelper {
                     $newVoicePart = null;
                 }
 
-                if (!in_array($newRole, ['viewer', 'banhat', 'leader', 'admin'], true)) {
+                if (!in_array($newRole, Auth::VALID_ROLES, true)) {
                     return ['success' => false, 'message' => 'Quyền người dùng không hợp lệ'];
                 }
 
@@ -154,9 +154,9 @@ class ManagerUserHelper {
 
             case 'update_role':
                 $userId = (int)($data['user_id'] ?? 0);
-                $role = $data['role'] ?? 'banhat';
+                $role = Auth::normalizeRole((string)($data['role'] ?? 'banhat'));
                 if (!$userId) return ['success' => false, 'message' => 'Thiếu user_id'];
-                if (!in_array($role, ['viewer', 'banhat', 'leader', 'admin'], true)) {
+                if (!in_array($role, Auth::VALID_ROLES, true)) {
                     return ['success' => false, 'message' => 'Quyền người dùng không hợp lệ'];
                 }
 

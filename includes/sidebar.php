@@ -50,6 +50,9 @@
       </button>
     </div>
 
+    <!-- Dải danh mục 1 chạm hiển thị trực tiếp -->
+    <div id="category-flat-list" class="category-flat-list mt-half" role="tablist" aria-label="Danh mục bài hát"></div>
+
     <div id="category-filter-wrap" class="mt-half sidebar-filter-item">
       <select id="category-filter" class="form-input select-toolbar sidebar-filter-select w-full" aria-label="Lọc theo danh mục bài hát" title="Chọn thể loại / tuyển tập bài hát">
         <option value="">Tất cả danh mục</option>

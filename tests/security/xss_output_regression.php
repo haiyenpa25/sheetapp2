@@ -138,6 +138,12 @@ foreach ($xssPayloads as $payload) {
     check(!str_contains($inlineJs, "'") && !str_contains($inlineJs, "\n") && !str_contains($inlineJs, "\r"), "Corpus payload inline-js escaped safely: " . substr($payload, 0, 15));
 }
 
+$libraryOutput = [];
+$libraryExit = 1;
+exec('node ' . escapeshellarg(__DIR__ . '/library_empty_output.cjs') . ' 2>&1', $libraryOutput, $libraryExit);
+check($libraryExit === 0 && count($libraryOutput) === 2,
+    'Actual Classic/Modern renderers escape empty state payloads: ' . implode(' | ', $libraryOutput));
+
 if ($failures !== []) {
     fwrite(STDERR, sprintf("\n%d XSS output regression test(s) failed.\n", count($failures)));
     exit(1);

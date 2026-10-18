@@ -59,6 +59,9 @@ const Auth = (() => {
           const codeText = _chordCode ? `bộ [${_chordCode}]` : 'hợp âm';
           window.App?.showToast?.(`Xin chào @${_currentUser}! Đã kích hoạt quyền sửa ${codeText}`, 'success');
         }
+        // Làm mới danh sách bài hát theo quyền (hiển thị bài Private cho Admin/Ban Nhạc/Ban Hát)
+        window.ApiService?.songs?.invalidateCache?.();
+        window.LibraryUI?.loadSongs?.();
         // Tải lại nhạc nếu cần để bật quyền
         if (window.App && window.App.reloadCurrentXML) window.App.reloadCurrentXML();
         return true;
@@ -82,7 +85,10 @@ const Auth = (() => {
     _updateUI();
     closeModal();
     _hideForceChangePasswordModal();
-    window.App?.showToast?.('Đã đăng xuất. Bạn đang ở quyền Khách (Chỉ xem)', 'info');
+    window.App?.showToast?.('Đã đăng xuất. Bạn đang ở quyền Khách (Chỉ xem bài Public)', 'info');
+    // Làm mới danh sách bài hát để ẩn các bài Private khỏi Khách
+    window.ApiService?.songs?.invalidateCache?.();
+    window.LibraryUI?.loadSongs?.();
     // Tải lại nhạc để tắt quyền
     if (window.App && window.App.reloadCurrentXML) window.App.reloadCurrentXML();
   }
@@ -96,10 +102,11 @@ const Auth = (() => {
     const roleBadge = document.getElementById('auth-role-badge');
     if (roleBadge) {
       const badgeInfo = {
-        admin:  { text: 'Quản Trị', cls: 'role-badge-admin' },
-        leader: { text: 'Trưởng Ban', cls: 'role-badge-leader' },
-        banhat: { text: 'Ban Hát',   cls: 'role-badge-banhat' },
-        viewer: { text: '',          cls: '' }
+        admin:   { text: 'Quản Trị',   cls: 'role-badge-admin' },
+        leader:  { text: 'Trưởng Ban', cls: 'role-badge-leader' },
+        bannhac: { text: 'Ban Nhạc',   cls: 'role-badge-bannhac' },
+        banhat:  { text: 'Ban Hát',    cls: 'role-badge-banhat' },
+        viewer:  { text: '',           cls: '' }
       }[_role] ?? { text: '', cls: '' };
 
       if (_currentUser && badgeInfo.text) {
@@ -126,9 +133,11 @@ const Auth = (() => {
     }
     if (toolbarBadge) {
       if (_currentUser) {
-        const roleLabel = _role === 'admin' ? 'Admin' : (_role === 'leader' ? 'Leader' : (_role === 'banhat' ? (_chordCode || 'HÂ') : 'Khách'));
+        const roleLabel = _role === 'admin'
+          ? 'Admin'
+          : (_role === 'leader' ? 'Leader' : (_role === 'bannhac' ? (_chordCode || 'BN') : (_role === 'banhat' ? 'BH' : 'Khách')));
         toolbarBadge.textContent = roleLabel;
-        toolbarBadge.className = 'user-pill-role ' + (_role === 'admin' ? 'role-admin' : (_role === 'leader' ? 'role-leader' : 'role-banhat'));
+        toolbarBadge.className = 'user-pill-role ' + (_role === 'admin' ? 'role-admin' : (_role === 'leader' ? 'role-leader' : (_role === 'bannhac' ? 'role-bannhac' : 'role-banhat')));
         toolbarBadge.classList.remove('hidden');
       } else {
         toolbarBadge.className = 'user-pill-role hidden';
@@ -155,22 +164,27 @@ const Auth = (() => {
       const rolePill = document.getElementById('auth-role-display-pill');
       if (rolePill) {
         if (_role === 'admin') {
-          rolePill.textContent = 'Quản Trị Viên';
+          rolePill.textContent = 'Quản Trị Viên (Admin)';
           rolePill.style.background = 'rgba(239, 68, 68, 0.2)';
           rolePill.style.color = '#fca5a5';
           rolePill.style.border = '1px solid rgba(239, 68, 68, 0.4)';
         } else if (_role === 'leader') {
-          rolePill.textContent = 'Trưởng Ban Hát (Leader)';
+          rolePill.textContent = 'Trưởng Ban (Leader)';
           rolePill.style.background = 'rgba(16, 185, 129, 0.2)';
           rolePill.style.color = '#6ee7b7';
           rolePill.style.border = '1px solid rgba(16, 185, 129, 0.4)';
+        } else if (_role === 'bannhac') {
+          rolePill.textContent = 'Thành Viên Ban Nhạc';
+          rolePill.style.background = 'rgba(14, 165, 233, 0.2)';
+          rolePill.style.color = '#7dd3fc';
+          rolePill.style.border = '1px solid rgba(14, 165, 233, 0.4)';
         } else if (_role === 'banhat') {
-          rolePill.textContent = 'Nhạc Công Ban Hát';
+          rolePill.textContent = 'Thành Viên Ban Hát';
           rolePill.style.background = 'rgba(124, 58, 237, 0.2)';
           rolePill.style.color = '#c4b5fd';
           rolePill.style.border = '1px solid rgba(124, 58, 237, 0.4)';
         } else {
-          rolePill.textContent = 'Khách Xem';
+          rolePill.textContent = 'Khách Xem (Guest)';
           rolePill.style.background = 'rgba(100, 116, 139, 0.2)';
           rolePill.style.color = '#cbd5e1';
           rolePill.style.border = '1px solid rgba(100, 116, 139, 0.4)';
@@ -181,13 +195,15 @@ const Auth = (() => {
       const permSummary = document.getElementById('auth-perm-summary');
       if (permSummary) {
         if (_role === 'admin') {
-          permSummary.innerHTML = '✅ Xem sheet &amp; hợp âm<br>✅ Toàn quyền sửa bộ <strong>ADMIN</strong><br>✅ Ghi chú &amp; Quản trị hệ thống';
+          permSummary.innerHTML = '✅ Xem toàn bộ bài Public &amp; Private<br>✅ Upload bài hát XML (Public / Private)<br>✅ Quản trị tài khoản &amp; sửa bộ <strong>HD</strong>';
         } else if (_role === 'leader') {
-          permSummary.innerHTML = '✅ Xem sheet &amp; hợp âm<br>✅ Toàn quyền sửa hợp âm &amp; Setlist<br>✅ Đồng bộ Live Band &amp; Điều khiển sân khấu';
+          permSummary.innerHTML = '✅ Xem bài Public &amp; Nội bộ<br>✅ Toàn quyền sửa hợp âm &amp; Setlist<br>✅ Đồng bộ Live Band &amp; Điều khiển sân khấu';
+        } else if (_role === 'bannhac') {
+          permSummary.innerHTML = `✅ Xem bài Public &amp; Nội bộ Ban Nhạc<br>✅ Sửa bộ hợp âm <strong>${window.SafeHtml.escape(_chordCode || 'Cá nhân')}</strong> &amp; đề xuất HD<br>✅ Tạo &amp; chọn chương trình (Setlist)`;
         } else if (_role === 'banhat') {
-          permSummary.innerHTML = `✅ Xem sheet &amp; hợp âm<br>✅ Độc quyền sửa bộ <strong>${window.SafeHtml.escape(_chordCode || 'Cá nhân')}</strong><br>❌ Không sửa đè bộ người khác`;
+          permSummary.innerHTML = `✅ Xem bài Public &amp; Nội bộ Ban Hát<br>✅ Luyện bè SATB &amp; theo dõi chương trình<br>✅ Sửa bộ cá nhân <strong>${window.SafeHtml.escape(_chordCode || 'Cá nhân')}</strong>`;
         } else {
-          permSummary.innerHTML = '✅ Xem 903 sheet nhạc &amp; hợp âm<br>❌ Không có quyền sửa';
+          permSummary.innerHTML = '✅ Xem sheet nhạc Public, lời &amp; nghe MIDI<br>❌ Không xem bài Private / Không có quyền sửa';
         }
       }
     } else {
@@ -196,13 +212,14 @@ const Auth = (() => {
     }
 
     // Phân quyền:
-    //  viewer  — chỉ được xem
-    //  banhat  — thêm/sửa hợp âm cá nhân
+    //  viewer  — khách (chỉ xem bài public)
+    //  banhat  — ban hát (xem bài nội bộ, tập bè SATB, ghi chú cá nhân)
+    //  bannhac — ban nhạc (thêm/sửa hợp âm cá nhân, đề xuất HD, setlist)
     //  leader  — quản lý chương trình, thêm/sửa hợp âm, live sync
-    //  admin   — toàn quyền
+    //  admin   — toàn quyền quản trị tài khoản & upload bài hát XML (public/private)
     const canEdit       = isAdmin();       // admin only
     const isLead        = isLeader();      // leader + admin
-    const canEditChords = _canEditChords(); // banhat + leader + admin
+    const canEditChords = _canEditChords(); // bannhac + banhat + leader + admin
     const loggedIn      = isLoggedIn();
 
     // Thêm hợp âm — CHỈ hiển thị khi đã đăng nhập có quyền banhat/admin
@@ -461,13 +478,14 @@ const Auth = (() => {
     return _currentUser !== null;
   }
 
-  /** Ban Hát, Leader hoặc Admin đều có quyền chỉnh sửa hợp âm */
+  /** Ban Nhạc, Ban Hát, Leader hoặc Admin đều có quyền thành viên */
   function _canEditChords() {
-    return _role === 'banhat' || _role === 'leader' || _role === 'admin';
+    return _role === 'bannhac' || _role === 'banhat' || _role === 'leader' || _role === 'admin';
   }
 
   return {
     init, checkSession, login: doLogin, logout: doLogout, isAdmin, isLeader, isLoggedIn, openModal, closeModal, chooseGuestMode,
+    isBannhac: () => _role === 'bannhac' || _role === 'leader' || _role === 'admin',
     isBanhat: () => _canEditChords(),
     userId: () => _userId,
     getUserId: () => _userId,

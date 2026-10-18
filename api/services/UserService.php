@@ -59,13 +59,14 @@ class UserService {
     }
 
     public static function create(string $username, string $password, string $role): int {
+        $role = Auth::normalizeRole($role);
         if (strlen($password) < 4) {
             throw new Exception("Mật khẩu phải có ít nhất 4 ký tự");
         }
         if (self::isWeakPassword($password, $username)) {
             throw new Exception("Mật khẩu quá yếu hoặc dễ đoán, vui lòng chọn mật khẩu mạnh hơn");
         }
-        if (!in_array($role, ['viewer', 'banhat', 'leader', 'admin'], true)) {
+        if (!in_array($role, Auth::VALID_ROLES, true)) {
             throw new Exception("Quyền người dùng không hợp lệ");
         }
         $hash = password_hash($password, PASSWORD_DEFAULT);
@@ -74,13 +75,14 @@ class UserService {
     }
 
     public static function createWithProfile(string $username, string $password, string $role, string $displayName, string $instrument, ?string $chordCode = null, ?string $voicePart = null): int {
+        $role = Auth::normalizeRole($role);
         if (strlen($password) < 4) {
             throw new Exception("Mật khẩu phải có ít nhất 4 ký tự");
         }
         if (self::isWeakPassword($password, $username)) {
             throw new Exception("Mật khẩu quá yếu hoặc dễ đoán, vui lòng chọn mật khẩu mạnh hơn");
         }
-        if (!in_array($role, ['viewer', 'banhat', 'leader', 'admin'], true)) {
+        if (!in_array($role, Auth::VALID_ROLES, true)) {
             throw new Exception("Quyền người dùng không hợp lệ");
         }
         $hash = password_hash($password, PASSWORD_DEFAULT);
@@ -105,12 +107,13 @@ class UserService {
     }
 
     public static function updateMusician(int $id, string $displayName, string $instrument, string $chordCode, string $role, ?string $password = null, ?string $voicePart = null): void {
+        $role = Auth::normalizeRole($role);
         $existing = self::findById($id);
         if (!$existing) {
             throw new Exception("Không tìm thấy tài khoản người dùng");
         }
 
-        if (!in_array($role, ['viewer', 'banhat', 'leader', 'admin'], true)) {
+        if (!in_array($role, Auth::VALID_ROLES, true)) {
             throw new Exception("Quyền người dùng không hợp lệ");
         }
 
@@ -204,6 +207,10 @@ class UserService {
     }
 
     public static function updateRole(int $id, string $role): void {
+        $role = Auth::normalizeRole($role);
+        if (!in_array($role, Auth::VALID_ROLES, true)) {
+            throw new Exception("Phân quyền không hợp lệ");
+        }
         $existing = self::findById($id);
         if (!$existing) {
             throw new Exception("Không tìm thấy người dùng");

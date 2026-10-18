@@ -55,9 +55,17 @@ const AdminUI = (() => {
     document.getElementById('admin-song-search')?.addEventListener('keyup', (e) => {
         const val = e.target.value.toLowerCase();
         document.querySelectorAll('#admin-songs-table tbody tr').forEach(row => {
-            const txt = row.cells[0].textContent.toLowerCase();
+            const inputVal = row.querySelector('input')?.value?.toLowerCase() || '';
+            const txt = (row.cells[0]?.textContent || '').toLowerCase() + ' ' + inputVal;
             row.style.display = txt.includes(val) ? '' : 'none';
         });
+    });
+
+    // Nút chuyển nhanh sang tab Upload XML từ danh sách bài hát
+    document.getElementById('btn-admin-quick-upload-xml')?.addEventListener('click', () => {
+      const importTabBtn = document.querySelector('.admin-tab-btn[data-target="admin-tab-import"]');
+      importTabBtn?.click();
+      window.Importer?.switchTab?.('upload');
     });
 
     // Load users
@@ -82,8 +90,16 @@ const AdminUI = (() => {
   async function loadCategories() {
     try {
       const res = await window.ApiService.categories.list();
-      currentCategories = res.data || [];
+      currentCategories = Array.isArray(res) ? res : (res.data || []);
       
+      // Cập nhật dropdown danh mục trong tab Upload XML
+      const uploadCatSel = document.getElementById('import-upload-category');
+      if (uploadCatSel && currentCategories.length > 0) {
+        uploadCatSel.innerHTML = currentCategories.map(c =>
+          `<option value="${Number.parseInt(c.id, 10) || 1}">${window.SafeHtml.escape(c.name)}</option>`
+        ).join('');
+      }
+
       const tbody = document.querySelector('#admin-categories-table tbody');
       if (!tbody) return;
 
@@ -170,7 +186,7 @@ const AdminUI = (() => {
      CÁC HÀM CHO TAB BÀI HÁT
      ==================================== */
   function loadSongs() {
-    window.ApiService.songs.list()
+    window.ApiService.songs.list(true)
       .then(data => {
         const tbody = document.querySelector('#admin-songs-table tbody');
         if (!tbody) return;
@@ -183,6 +199,7 @@ const AdminUI = (() => {
              catOptions += `<option value="${Number.parseInt(cat.id, 10) || 0}" ${selected}>${window.SafeHtml.escape(cat.name)}</option>`;
           });
 
+          const isPrivate = (song.visibility && song.visibility !== 'public') || Number(song.is_public ?? 1) === 0;
           const tr = document.createElement('tr');
           const safeSongIdJs = window.SafeHtml.inlineJsString(song.id);
           tr.innerHTML = `
@@ -192,6 +209,12 @@ const AdminUI = (() => {
             <td>
                <select class="form-input" style="padding:0.2rem; font-size:0.8rem; border-color:transparent;" onchange="AdminUI.updateSongCategory('${safeSongIdJs}', this.value)">
                   ${catOptions}
+               </select>
+            </td>
+            <td>
+               <select class="form-input" style="padding:0.2rem 0.4rem; font-size:0.78rem;" onchange="AdminUI.updateSongVisibility('${safeSongIdJs}', this.value)">
+                  <option value="public" ${!isPrivate ? 'selected' : ''}>🌐 Public</option>
+                  <option value="private" ${isPrivate ? 'selected' : ''}>🔒 Private</option>
                </select>
             </td>
             <td style="text-align:center;">
@@ -208,18 +231,32 @@ const AdminUI = (() => {
      const title = inputEl.value.trim();
      if (!title) return;
      try {
-       await window.ApiService.songs.updateMetadata(id, { title });
+       await window.ApiService.songs.update(id, { title });
        showToast('Đã lưu tên bài', 'success');
+       window.LibraryUI?.loadSongs?.();
        window.dispatchEvent(new Event('libraryLibraryUpdated'));
      } catch (e) {}
   }
 
   async function updateSongCategory(id, catId) {
      try {
-       await window.ApiService.songs.updateMetadata(id, { categoryId: catId || null });
+       await window.ApiService.songs.update(id, { category_id: catId ? Number(catId) : 1 });
        showToast('Đã xếp danh mục', 'success');
+       window.LibraryUI?.loadSongs?.();
        window.dispatchEvent(new Event('libraryLibraryUpdated'));
      } catch (e) {}
+  }
+
+  async function updateSongVisibility(id, visibility) {
+     try {
+       const isPublic = visibility === 'public' ? 1 : 0;
+       await window.ApiService.songs.update(id, { visibility, is_public: isPublic });
+       showToast(isPublic ? '🌐 Đã chuyển sang Public (Công khai)' : '🔒 Đã chuyển sang Private (Riêng tư)', 'success');
+       window.LibraryUI?.loadSongs?.();
+       window.dispatchEvent(new Event('libraryLibraryUpdated'));
+     } catch (e) {
+       showToast('Không thể đổi chế độ hiển thị', 'error');
+     }
   }
 
   async function deleteSong(id) {
@@ -229,6 +266,7 @@ const AdminUI = (() => {
       if (res.success) {
         showToast('Đã xóa bài hát');
         loadSongs();
+        window.LibraryUI?.loadSongs?.();
         window.dispatchEvent(new Event('libraryLibraryUpdated'));
       }
     } catch (e) {
@@ -252,23 +290,25 @@ const AdminUI = (() => {
         return;
       }
       users.forEach(u => {
-        const amIOwner = (u.username === 'banhat');
+        const amISelf = (u.id === window.Auth?.getUserId?.());
         const safeUserId = Number.parseInt(u.id, 10) || 0;
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>#${safeUserId}</td>
           <td><strong>${window.SafeHtml.escape(u.username)}</strong></td>
           <td>
-            <select class="form-input" ${amIOwner ? 'disabled' : ''} style="padding:0.2rem; font-size:0.8rem;" onchange="AdminUI.updateUserRole(${safeUserId}, this.value)">
-              <option value="admin"  ${u.role === 'admin'  ? 'selected' : ''}>Admin (Quản Trị)</option>
-              <option value="banhat" ${u.role === 'banhat' ? 'selected' : ''}>Ban Hát (Thêm Hợp Âm)</option>
-              <option value="viewer" ${u.role === 'viewer' ? 'selected' : ''}>Viewer (Khách)</option>
+            <select class="form-input" ${amISelf ? 'disabled' : ''} style="padding:0.2rem; font-size:0.8rem;" onchange="AdminUI.updateUserRole(${safeUserId}, this.value)">
+              <option value="admin"   ${u.role === 'admin'   ? 'selected' : ''}>🛡️ Admin (Quản Trị)</option>
+              <option value="leader"  ${u.role === 'leader'  ? 'selected' : ''}>👑 Trưởng Ban / Ca Trưởng</option>
+              <option value="bannhac" ${u.role === 'bannhac' ? 'selected' : ''}>🎸 Ban Nhạc (Hợp Âm &amp; Setlist)</option>
+              <option value="banhat"  ${u.role === 'banhat'  ? 'selected' : ''}>🎤 Ban Hát (Ca Viên)</option>
+              <option value="viewer"  ${u.role === 'viewer'  ? 'selected' : ''}>👁️ Guest / Khách (Chỉ Xem)</option>
             </select>
           </td>
           <td>${u.created_at ? window.SafeHtml.escape(u.created_at.substring(0, 10)) : '—'}</td>
           <td style="text-align:right;">
             <button class="btn btn-sm btn-ghost" onclick="AdminUI.changeUserPass(${safeUserId})">🔑 Đổi Pass</button>
-            <button class="btn btn-sm btn-ghost" style="color:var(--danger);" onclick="AdminUI.deleteUser(${safeUserId})" ${amIOwner ? 'disabled' : ''}>🗑 Xóa</button>
+            <button class="btn btn-sm btn-ghost" style="color:var(--danger);" onclick="AdminUI.deleteUser(${safeUserId})" ${amISelf ? 'disabled' : ''}>🗑 Xóa</button>
           </td>
         `;
         tbody.appendChild(tr);
@@ -285,7 +325,7 @@ const AdminUI = (() => {
 
     let user = userInp?.value.trim();
     let pass = passInp?.value.trim();
-    let role = roleInp?.value || 'banhat';
+    let role = roleInp?.value || 'bannhac';
 
     if (!user || !pass) {
       user = prompt("Tên đăng nhập (Username) mong muốn:");
@@ -300,28 +340,37 @@ const AdminUI = (() => {
         showToast(`✅ Đã tạo tài khoản "${user}" (${role})`);
         if (userInp) userInp.value = '';
         if (passInp) passInp.value = '';
+        loadUsers();
       } else {
         showToast(res.error || 'Có lỗi xảy ra', 'error');
       }
     } catch (e) {
       console.error(e);
-      showToast('Lỗi kết nối khi tạo tài khoản', 'error');
+      showToast(e.message || 'Lỗi kết nối khi tạo tài khoản', 'error');
     }
   }
 
 
   async function updateUserRole(id, role) {
-    await window.ApiService.users.update(id, { role });
-    showToast('Đã đổi quyền');
+    try {
+      await window.ApiService.users.update(id, { id, role });
+      showToast('Đã đổi quyền tài khoản');
+      loadUsers();
+    } catch (e) {
+      showToast(e.message || 'Không thể đổi quyền', 'error');
+      loadUsers();
+    }
   }
 
   async function changeUserPass(id) {
-    const newpass = prompt('Nhập mật khẩu mới cho user này:');
+    const newpass = prompt('Nhập mật khẩu mới cho user này (tối thiểu 10 ký tự):');
     if(!newpass) return;
     try {
-       await window.ApiService.users.update(id, { password: newpass });
-       showToast('Đã ép đổi mật khẩu');
-    } catch(e){}
+       await window.ApiService.users.update(id, { id, password: newpass });
+       showToast('Đã cập nhật mật khẩu mới');
+    } catch(e){
+       showToast(e.message || 'Lỗi đổi mật khẩu', 'error');
+    }
   }
 
   async function deleteUser(id) {
@@ -330,7 +379,9 @@ const AdminUI = (() => {
        await window.ApiService.users.delete(id);
        showToast('Đã xóa tài khoản');
        loadUsers();
-    } catch(e){}
+    } catch(e){
+       showToast(e.message || 'Không thể xóa tài khoản', 'error');
+    }
   }
 
   function showToast(msg, type='success') {
@@ -341,7 +392,7 @@ const AdminUI = (() => {
 
   // Export ra window.AdminUI — một điểm duy nhất
   // Các hàm handler (editCategory, deleteSong, ...) được gọi từ inline onclick trong HTML
-  return { init, openModal, editCategory, saveCategory, deleteCategory, updateSongTitle, updateSongCategory, deleteSong, updateUserRole, changeUserPass, deleteUser };
+  return { init, openModal, loadSongs, loadUsers, editCategory, saveCategory, deleteCategory, updateSongTitle, updateSongCategory, updateSongVisibility, deleteSong, updateUserRole, changeUserPass, deleteUser };
 })();
 
 window.AdminUI = AdminUI;

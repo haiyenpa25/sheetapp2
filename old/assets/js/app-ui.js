@@ -8,11 +8,16 @@ const AppUI = (() => {
   function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
     if (!container) return;
+    if (document.body.classList.contains('sheet-only-mode') && type === 'info') return;
+    if (type !== 'error' && container.querySelector('.toast.error')) return;
+    container.querySelectorAll('.toast').forEach(item => item.remove());
 
     const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    toast.innerHTML = `<span>${icons[type] || ''}</span><span>${message}</span>`;
+    toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    toast.innerHTML = `<span aria-hidden="true">${icons[type] || ''}</span><span>${window.SafeHtml.escape(message)}</span><button class="toast-dismiss" type="button" aria-label="Đóng thông báo">×</button>`;
+    toast.querySelector('.toast-dismiss').addEventListener('click', () => toast.remove());
     container.appendChild(toast);
 
     setTimeout(() => {

@@ -12,7 +12,13 @@ const ChordCanvasDots = (() => {
     if (!container) return;
 
     const cRect = container.getBoundingClientRect();
-    const GAP_PX = 22;
+    const scale = window.ChordCanvasUI?.getScale?.() || 1.0;
+    const minLineW = Math.max(36, Math.round(100 * scale));
+    const maxLineH = Math.max(3, Math.ceil(3.5 * scale));
+    const dedupeGap = Math.max(2, Math.round(3 * scale));
+    const SYS_GAP = Math.max(18, Math.round(38 * scale));
+    const noteRange = Math.max(35, Math.round(65 * scale));
+    const horizPad = Math.max(3, Math.round(6 * scale));
 
     const svg = container.querySelector('svg');
     if (!svg) return;
@@ -23,7 +29,7 @@ const ChordCanvasDots = (() => {
     if (staveGroups.length) {
       staveGroups.forEach(g => {
         const r = g.getBoundingClientRect();
-        if (r.width > 40 && r.height > 0 && r.top > 0) {
+        if (r.width > 30 * scale && r.height > 0 && r.top > 0) {
           staffLineRects.push(r.top - cRect.top);
         }
       });
@@ -32,7 +38,7 @@ const ChordCanvasDots = (() => {
     if (!staffLineRects.length) {
       Array.from(svg.querySelectorAll('line, path')).forEach(el => {
         const r = el.getBoundingClientRect();
-        if (r.width > 100 && r.height < 3 && r.top > 0) {
+        if (r.width > minLineW && r.height < maxLineH && r.top > 0) {
           staffLineRects.push(r.top - cRect.top);
         }
       });
@@ -46,16 +52,13 @@ const ChordCanvasDots = (() => {
     staffLineRects.sort((a, b) => a - b);
     const deduped = [staffLineRects[0]];
     for (let i = 1; i < staffLineRects.length; i++) {
-      if (staffLineRects[i] - deduped[deduped.length - 1] > 3) {
+      if (staffLineRects[i] - deduped[deduped.length - 1] > dedupeGap) {
         deduped.push(staffLineRects[i]);
       }
     }
 
     const systems = [];
-    let sysStart = deduped[0];
-    let prev = deduped[0];
-    const SYS_GAP = 40;
-
+    let sysStart = deduped[0], prev = deduped[0];
     for (let i = 1; i < deduped.length; i++) {
       const curr = deduped[i];
       if (curr - prev > SYS_GAP) {
@@ -73,13 +76,15 @@ const ChordCanvasDots = (() => {
 
     const assigned = new Map();
     allBadges.forEach(badge => {
-      const badgeY = parseFloat(badge.style.top);
+      const badgeY = parseFloat(badge.dataset.noteTop ?? badge.style.top);
       if (isNaN(badgeY)) return;
-      let bestSys = null;
-      let minDist = Infinity;
+      let bestSys = null, minDist = Infinity, minTopDist = Infinity;
       for (const sys of systems) {
-        const dist = Math.abs(badgeY - sys.topLine);
-        if (dist < minDist) { minDist = dist; bestSys = sys; }
+        const dist = badgeY < sys.topLine ? (sys.topLine - badgeY) : (badgeY > sys.bottomLine ? (badgeY - sys.bottomLine) : 0);
+        const topDist = Math.abs(badgeY - sys.topLine);
+        if (dist < minDist || (dist === minDist && topDist < minTopDist)) {
+          minDist = dist; minTopDist = topDist; bestSys = sys;
+        }
       }
       if (bestSys) {
         if (!assigned.has(bestSys)) assigned.set(bestSys, []);
@@ -90,21 +95,38 @@ const ChordCanvasDots = (() => {
     const staveNotes = Array.from(svg.querySelectorAll('g.vf-stavenote'));
     const noteRects = staveNotes.map(sn => {
       const r = sn.getBoundingClientRect();
-      return { top: r.top - cRect.top, bottom: r.bottom - cRect.top };
+      return { top: r.top - cRect.top, bottom: r.bottom - cRect.top, left: r.left - cRect.left, right: r.right - cRect.left };
     }).filter(nr => nr.bottom > 0);
 
     for (const [sys, badges] of assigned.entries()) {
-      const badgeH = Math.max(...badges.map(b => b.offsetHeight || 20), 20);
-      let targetY = Math.round(sys.topLine - badgeH - 8);
-      const sysNotes = noteRects.filter(nr => nr.top >= sys.topLine - 65 && nr.bottom <= sys.bottomLine + 65);
+      const badgeH = Math.max(...badges.map(b => b.offsetHeight || 0), Math.round(16 * scale));
+      let targetY = Math.round(sys.topLine - badgeH - Math.round(8 * scale));
+      const sysNotes = noteRects.filter(nr => nr.top >= sys.topLine - noteRange && nr.bottom <= sys.bottomLine + noteRange);
       if (sysNotes.length) {
         const minNoteTop = Math.min(...sysNotes.map(nr => nr.top));
         if (minNoteTop < sys.topLine) {
-          targetY = Math.min(targetY, Math.round(minNoteTop - badgeH - 6));
+          targetY = Math.min(targetY, Math.round(minNoteTop - badgeH - Math.max(4, Math.round(6 * scale))));
         }
       }
+      badges.sort((a, b) => (parseFloat(a.style.left) || 0) - (parseFloat(b.style.left) || 0));
+      let prevRight = -Infinity;
       badges.forEach(el => {
         el.style.top = targetY + 'px';
+        if (el.classList.contains('cc-chord-text')) return;
+        const curLeft = parseFloat(el.style.left) || 0;
+        const curW = el.offsetWidth || Math.round((el.textContent.trim().length * 10 + 8) * scale);
+        if (el.classList.contains('cc-dot-btn')) {
+          prevRight = Math.max(prevRight, curLeft + Math.round(8 * scale));
+        } else {
+          const halfW = curW / 2;
+          if (curLeft < prevRight || (curLeft - halfW < prevRight + horizPad)) {
+            const newCenter = prevRight + horizPad + halfW;
+            el.style.left = newCenter + 'px';
+            prevRight = newCenter + halfW;
+          } else {
+            prevRight = curLeft + halfW;
+          }
+        }
       });
     }
   }
@@ -256,10 +278,11 @@ const ChordCanvasDots = (() => {
 
     const scale   = ChordCanvasUI.getScale();
     const dotSize = ChordCanvasUI.getDotSize(scale);
-    const fSize   = Math.min(22, Math.max(13, Math.round(14 * scale)));
+    const fSize   = Math.min(24, Math.max(11, Math.round(15 * scale)));
 
+    const noteTop = rect.top - cRect.top;
     const cx = (rect.left - cRect.left) + rect.width / 2;
-    const cy = (rect.top  - cRect.top)  - (25 * scale);
+    const cy = noteTop - (24 * scale);
 
     if (chord) {
       if (!editEnabled && currentSet === 'default') return;
@@ -267,19 +290,20 @@ const ChordCanvasDots = (() => {
 
       if (currentSet === 'default') {
         const badgeX = textPos ? textPos.bx + textPos.bw / 2 : cx;
-        const badgeY = textPos ? textPos.by - 6 : cy - dotSize / 2;
+        const badgeY = textPos ? textPos.by - 6 * scale : cy - dotSize / 2;
 
         const badge = document.createElement('div');
         badge.className = DOT_CLASS + ' cc-edit-badge';
         badge.textContent = '\u270e';
         badge.title = 'Sửa hợp âm: ' + chord;
+        badge.dataset.noteTop = noteTop;
         ChordCanvasUI.applyAbsolute(badge, badgeX, badgeY, [
           'display:' + (editEnabled ? 'flex' : 'none'),
           'align-items:center', 'justify-content:center',
           'width:' + dotSize + 'px', 'height:' + dotSize + 'px', 'border-radius:50%',
           'background:rgba(109,40,217,0.87)',
           'border:2.5px solid rgba(255,255,255,0.8)',
-          'color:#fff', 'font-size:' + fSize + 'px', 'line-height:1',
+          'color:#fff', 'font-size:' + Math.max(11, Math.round(dotSize * 0.6)) + 'px', 'line-height:1',
           'box-shadow:0 2px 7px rgba(109,40,217,0.55)',
           'pointer-events:auto', 'cursor:pointer', 'user-select:none', 'z-index:12',
           'touch-action:manipulation', '-webkit-tap-highlight-color:transparent',
@@ -309,22 +333,23 @@ const ChordCanvasDots = (() => {
 
       } else {
         let spanX = textPos ? textPos.bx + textPos.bw / 2 : cx;
-        let spanY = cy - (18 * scale);
+        let spanY = cy - (16 * scale);
         if (textPos) {
-          spanY = textPos.by - 4;
+          spanY = textPos.by - 4 * scale;
         } else {
           let closestDist = Infinity;
           for (let pos of chordTextPositions.values()) {
             let dist = Math.abs(pos.by - cy);
             if (dist < 120 * scale && dist < closestDist) {
               closestDist = dist;
-              spanY = pos.by - 4;
+              spanY = pos.by - 4 * scale;
             }
           }
         }
 
         const textBadge = document.createElement('div');
         textBadge.className = DOT_CLASS + ' cc-custom-chord-text';
+        textBadge.dataset.noteTop = noteTop;
         let displayChord = chord;
         const nStyle = window.HarmonicNumeral?.getNotationStyle?.() || 'standard';
         if (nStyle !== 'standard' && window.HarmonicNumeral?.convertChord) {
@@ -402,6 +427,7 @@ const ChordCanvasDots = (() => {
       const btn = document.createElement('div');
       btn.className = DOT_CLASS + ' ' + BTN_CLASS;
       btn.textContent = '+';
+      btn.dataset.noteTop = noteTop;
       ChordCanvasUI.applyAbsolute(btn, cx, cy, [
         'display:' + (editEnabled ? 'flex' : 'none'),
         'align-items:center', 'justify-content:center',

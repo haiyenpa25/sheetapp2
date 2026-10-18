@@ -504,6 +504,7 @@ const ChordCanvas = (() => {
     const canCreate   = window.Auth?.isBanhat?.() ?? false;
 
     const KNOWN_CODES = { 'HD': 'Hoài Dinh (HD)', 'NAM': 'Hoàng Nam (NAM)', 'LAN': 'Hà Lan (LAN)', 'BH': 'Ban Hát (BH)', 'ADMIN': 'Admin (ADMIN)' };
+    const esc = s => window.SafeHtml ? window.SafeHtml.escape(s) : s;
 
     selector.innerHTML = sets.map(s => {
       const sUpper = s.toUpperCase();
@@ -512,20 +513,16 @@ const ChordCanvas = (() => {
       else if (isLoggedIn && myChordCode && sUpper === myChordCode) label = `⭐ Bộ của tôi (${s}) [Được sửa]`;
       else if (KNOWN_CODES[sUpper]) label = `${KNOWN_CODES[sUpper]} 👁️ [Chỉ xem]`;
       else if (sUpper === 'HD') label = '⭐ HD (Hoài Dinh) 👁️ [Chỉ xem]';
-      else if (s.includes('__')) {
-        const parts = s.split('__');
-        label = `🎸 ${parts.slice(1).join('__').replace(/_/g, ' ')} (@${parts[0]}) [Chỉ xem]`;
-      } else label = `🎸 Bộ ${s} [Chỉ xem]`;
-      const safeVal = window.SafeHtml ? window.SafeHtml.escape(s) : s;
-      const safeLabel = window.SafeHtml ? window.SafeHtml.escape(label) : label;
-      return `<option value="${safeVal}" ${s === _currentSet ? 'selected' : ''}>${safeLabel}</option>`;
-    }).join('') 
-    + (canCreate ? `<option value="__create_new_set__" style="color: var(--accent,#6d28d9); font-weight: bold;">➕ Tạo Bộ Hợp Âm Mới (${window.SafeHtml ? window.SafeHtml.escape(myChordCode || 'Cá nhân') : (myChordCode || 'Cá nhân')})...</option>` : '')
+      else if (s.includes('__')) { const p = s.split('__'); label = `🎸 ${p.slice(1).join('__').replace(/_/g, ' ')} (@${p[0]}) [Chỉ xem]`; }
+      else label = `🎸 Bộ ${s} [Chỉ xem]`;
+      if (s === _currentSet && window.ChordSetNames?.describe) label = window.ChordSetNames.describe();
+      return `<option value="${esc(s)}" ${s === _currentSet ? 'selected' : ''}>${esc(label)}</option>`;
+    }).join('')
+    + (canCreate ? `<option value="__create_new_set__" style="color: var(--accent,#6d28d9); font-weight: bold;">➕ Tạo Bộ Hợp Âm Mới (${esc(myChordCode || 'Cá nhân')})...</option>` : '')
     + (canCreate ? `<option value="__open_members__" style="color: var(--emerald,#10b981); font-weight: bold;">👥 Quản Lý Nhạc Công & Hợp Âm...</option>` : '')
     + (canCreate ? `<option value="__open_manager__" style="color: var(--cyan,#06b6d4);">📂 Mở Quản Lý Kho Nhạc...</option>` : '');
 
     selector.value = _currentSet;
-
     if (!selector.dataset.boundCreateHandler) {
       selector.dataset.boundCreateHandler = 'true';
       selector.addEventListener('change', (e) => handleSelectChange(e.target.value));
@@ -533,10 +530,8 @@ const ChordCanvas = (() => {
 
     const isDeletable = _currentSet !== 'default' && _currentSet !== 'HD' && (isAdmin || (myChordCode && _currentSet.toUpperCase() === myChordCode));
     if (deleteBtn) deleteBtn.style.display = isDeletable ? 'inline-flex' : 'none';
-    const newBtn = document.getElementById('btn-new-chord-set');
-    if (newBtn) newBtn.classList.toggle('hidden', !isLoggedIn);
-    const proposeBtn = document.getElementById('btn-propose-hd');
-    if (proposeBtn) proposeBtn.classList.toggle('hidden', !(_currentSet !== 'default' && _currentSet !== 'HD' && canCreate));
+    document.getElementById('btn-new-chord-set')?.classList.toggle('hidden', !isLoggedIn);
+    document.getElementById('btn-propose-hd')?.classList.toggle('hidden', !(_currentSet !== 'default' && _currentSet !== 'HD' && canCreate));
   }
 
   function _updateCountBadge() {
@@ -545,19 +540,13 @@ const ChordCanvas = (() => {
     const chordCount = Object.keys(_customChords || {}).length;
     const tlhCount   = (_currentSet === 'default') ? Object.keys(window.ChordCanvasXML?.readXmlChords?.() || {}).length : 0;
     const isFallback = (_currentSet === 'HD' && chordCount === 0);
-    const countText  = isFallback ? '○ HD chưa có · đang hiện TLH' : (_currentSet !== 'default' ? (chordCount > 0 ? `● ${chordCount} hợp âm` : '○ Chưa có') : (tlhCount > 0 ? `● ${tlhCount} hợp âm` : ''));
-    countBadge.textContent = countText;
+    countBadge.textContent = isFallback ? '○ HD chưa có · đang hiện TLH' : (_currentSet !== 'default' ? (chordCount > 0 ? `● ${chordCount} hợp âm` : '○ Chưa có') : (tlhCount > 0 ? `● ${tlhCount} hợp âm` : ''));
     countBadge.style.color = isFallback ? 'var(--warning,#d97706)' : ((chordCount > 0 || (_currentSet === 'default' && tlhCount > 0)) ? 'var(--success,#16a34a)' : 'var(--text-muted,#9ca3af)');
   }
 
-  function _updateSetUI() {
-    _updateCountBadge();
-    _refreshSetDropdown();
-    window.SongInfoBar?.refreshChordChip?.();
-  }
+  function _updateSetUI() { _updateCountBadge(); _refreshSetDropdown(); window.SongInfoBar?.refreshChordChip?.(); }
   function resetSet() { _currentSet = 'HD'; _prevSet = 'HD'; _customChords = {}; }
 
-  /* ─── Exports ────────────────────────────────────────────────── */
   return {
     init, loadSong, clearSong, setAddMode, toggleAddMode, toggleHighlight, setHighlightMode,
     onOSMDRendered, reposition, handleSelectChange, switchSet, createSet, showNewSetModal,
@@ -581,18 +570,11 @@ const ChordCanvas = (() => {
     },
     getXmlChordCount: () => Object.keys(window.ChordCanvasXML?.readXmlChords?.() || {}).length,
     getChordStatus: () => {
-      const customCount = Object.keys(_customChords || {}).length;
-      const xmlCount = Object.keys(window.ChordCanvasXML?.readXmlChords?.() || {}).length;
-      return {
-        currentSet: _currentSet, customCount, xmlCount,
-        isFallback: (_currentSet === 'HD' && customCount === 0 && xmlCount > 0),
-        isSparse: (_currentSet === 'HD' && customCount > 0 && xmlCount > 0 && customCount < 0.3 * xmlCount)
-      };
+      const customCount = Object.keys(_customChords || {}).length, xmlCount = Object.keys(window.ChordCanvasXML?.readXmlChords?.() || {}).length;
+      return { currentSet: _currentSet, customCount, xmlCount, isFallback: (_currentSet === 'HD' && customCount === 0 && xmlCount > 0), isSparse: (_currentSet === 'HD' && customCount > 0 && xmlCount > 0 && customCount < 0.3 * xmlCount) };
     },
     isAddMode: () => _editEnabled, isEditMode: () => _editEnabled,
-    getNoteEls: () => _noteEls,
-    build: _build
+    getNoteEls: () => _noteEls, build: _build
   };
 })();
-
 window.ChordCanvas = ChordCanvas;

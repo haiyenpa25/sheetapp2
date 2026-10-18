@@ -67,12 +67,11 @@ const OSMDRenderer = (() => {
       if (window.ChordCanvas?.isPopupOpen?.()) return; // KHÔNG re-render nếu đang nhập popup hợp âm
       if (isLoaded || _pendingRender) {
         _pendingRender = false;
-        _renderCount++;
+        _renderToken++; _renderCount++;
         await osmd.render();
         await _ensureCompactLyricsReadable();
-        _titleCompacted = false;
-        _compactTitleSVG();
-        _tagChordSymbols();
+        window.ChordCanvasDots?.clearGeomCache?.();
+        _titleCompacted = false; _compactTitleSVG(); _tagChordSymbols();
         if (window.ChordCanvas) window.ChordCanvas.reposition();
         if (window.ChordOverlay) window.ChordOverlay.onOSMDRendered();
         if (!isLoaded) {
@@ -287,13 +286,12 @@ const OSMDRenderer = (() => {
       await osmd.render();
       await _ensureCompactLyricsReadable();
       if (token !== _renderToken) return osmd;
+      window.ChordCanvasDots?.clearGeomCache?.();
 
       _forceLayoutRecalc();
       const containerEl = document.getElementById(containerId);
       if (containerEl) _lastContainerWidth = containerEl.clientWidth;
-      _titleCompacted = false;
-      _compactTitleSVG();
-      _tagChordSymbols();
+      _titleCompacted = false; _compactTitleSVG(); _tagChordSymbols();
       if (window.ChordCanvas) window.ChordCanvas.reposition();
       if (window.ChordOverlay) window.ChordOverlay.onOSMDRendered();
       _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} });
@@ -310,19 +308,22 @@ const OSMDRenderer = (() => {
     currentZoom = Math.max(0.1, Math.min(2.5, level));
     if (osmd && (isLoaded || _pendingRender)) {
       osmd.zoom = currentZoom;
-      if (!_canRender()) {
-        _pendingRender = true;
-        return;
-      }
+      if (!_canRender()) { _pendingRender = true; return; }
       _pendingRender = false;
+      const token = ++_renderToken;
+      refreshRules();
       _forceLayoutRecalc();
       _renderCount++;
       await osmd.render();
       await _ensureCompactLyricsReadable();
+      if (token !== _renderToken) return;
+      window.ChordCanvasDots?.clearGeomCache?.();
       _forceLayoutRecalc();
       const zoomCont = document.getElementById(containerId);
       if (zoomCont) _lastContainerWidth = zoomCont.clientWidth;
-      _tagChordSymbols();
+      _titleCompacted = false; _compactTitleSVG(); _tagChordSymbols();
+      if (window.ChordCanvas) window.ChordCanvas.reposition();
+      if (window.ChordOverlay) window.ChordOverlay.onOSMDRendered();
       _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} });
     }
   }
@@ -331,15 +332,14 @@ const OSMDRenderer = (() => {
   async function renderPending() {
     if (!_pendingRender || !_canRender()) return false;
     _pendingRender = false;
-    _renderCount++;
+    _renderToken++; _renderCount++;
     await osmd.render();
     await _ensureCompactLyricsReadable();
+    window.ChordCanvasDots?.clearGeomCache?.();
     _forceLayoutRecalc();
     const c = document.getElementById(containerId);
     if (c) _lastContainerWidth = c.clientWidth;
-    _titleCompacted = false;
-    _compactTitleSVG();
-    _tagChordSymbols();
+    _titleCompacted = false; _compactTitleSVG(); _tagChordSymbols();
     if (window.ChordCanvas) window.ChordCanvas.reposition();
     if (window.ChordOverlay) window.ChordOverlay.onOSMDRendered();
     if (!isLoaded) {

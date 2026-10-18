@@ -92,22 +92,19 @@ const SongInfoBar = (() => {
 
   function _updatePopoverContent() {
     if (!_songData) return;
-    const titleEl = document.getElementById('si-pop-title');
-    const keyEl = document.getElementById('si-pop-key');
-    const prKeyEl = document.getElementById('si-pop-practice-key');
-    const timeEl = document.getElementById('si-pop-time');
-    const tempoEl = document.getElementById('si-pop-tempo');
-    const measuresEl = document.getElementById('si-pop-measures');
-    const chordsetEl = document.getElementById('si-pop-chordset');
+    const titleEl = document.getElementById('si-pop-title'), catEl = document.getElementById('si-pop-category');
+    const keyEl = document.getElementById('si-pop-key'), prKeyEl = document.getElementById('si-pop-practice-key');
+    const timeEl = document.getElementById('si-pop-time'), tempoEl = document.getElementById('si-pop-tempo');
+    const measuresEl = document.getElementById('si-pop-measures'), chordsetEl = document.getElementById('si-pop-chordset');
 
     if (titleEl) titleEl.textContent = _songData.title || '--';
+    if (catEl) catEl.textContent = _songData.category || '--';
     if (keyEl) keyEl.textContent = _songData.key ? `${_songData.key} ${_songData.mode}` : '--';
     const curTrans = window.Store?.get?.('currentTranspose') ?? 0;
     if (prKeyEl) prKeyEl.textContent = _calcPracticedKey(_songData.key, curTrans);
     if (timeEl) timeEl.textContent = _songData.timeBeats ? `${_songData.timeBeats}/${_songData.timeBeatType}` : '--';
     const inSetlist = document.querySelector('.toolbar-left')?.classList.contains('in-setlist');
-    const setlist = window.SetlistUI?.getCurrentSetlist?.();
-    const idx = window.SetlistUI?.getCurrentIndex?.();
+    const setlist = window.SetlistUI?.getCurrentSetlist?.(), idx = window.SetlistUI?.getCurrentIndex?.();
     const { effectiveBpm, hasRealTempo } = _computeEffectiveBpm(_loadNotes(), setlist, idx, inSetlist);
     if (tempoEl) tempoEl.textContent = (hasRealTempo && effectiveBpm) ? `♩ = ${effectiveBpm} bpm` : '♩ —';
     if (measuresEl) measuresEl.textContent = _songData.measureCount ? `${_songData.measureCount} ô nhịp` : '--';
@@ -123,24 +120,16 @@ const SongInfoBar = (() => {
     if (!xmlString) { clearSong(); return; }
     _songId   = song?.id || song?.httlvnId || null;
     _songData = _parseXml(xmlString, song);
-    if (!_songData.key && song?.defaultKey) {
-      _songData.key = song.defaultKey;
-    }
+    if (!_songData.key && song?.defaultKey) _songData.key = song.defaultKey;
     const realSongTempo = Number.parseInt(song?.tempo, 10);
-    if (realSongTempo && realSongTempo !== 104) {
-      _songData.tempo = realSongTempo;
-    }
+    if (realSongTempo && realSongTempo !== 104) _songData.tempo = realSongTempo;
     _render();
-    const strip = document.getElementById('song-info-strip');
-    if (strip) strip.classList.remove('si-hidden');
-    // Ticket L1-3: Thông tin bài hát đã tích hợp vào Toolbar pill và popover ⓘ
+    document.getElementById('song-info-strip')?.classList.remove('si-hidden');
   }
 
   function clearSong() {
-    _songData = null;
-    _songId   = null;
-    const strip = document.getElementById('song-info-strip');
-    if (strip) strip.classList.add('si-hidden');
+    _songData = null; _songId = null;
+    document.getElementById('song-info-strip')?.classList.add('si-hidden');
     const inner = document.getElementById('si-inner');
     if (inner) inner.innerHTML = '';
     const popUsage = document.getElementById('si-pop-usage');
@@ -150,20 +139,13 @@ const SongInfoBar = (() => {
   /* ─── Parse MusicXML ─────────────────────────────────────── */
   function _parseXml(xmlString, song) {
     const info = {
-      number:       song?.httlvnId ? String(song.httlvnId).padStart(3, '0') : '',
-      title:        song?.title || '',
-      key:          '',
-      mode:         '',
-      timeBeats:    '',
-      timeBeatType: '',
-      tempo:        '',
-      measureCount: 0,
+      number: song?.httlvnId ? String(song.httlvnId).padStart(3, '0') : '',
+      title: song?.title || '', category: song?.category || '',
+      key: '', mode: '', timeBeats: '', timeBeatType: '', tempo: '', measureCount: 0,
     };
 
     try {
       const doc = window.XmlDocCache?.getDoc(xmlString) || new DOMParser().parseFromString(xmlString, 'text/xml');
-
-      // Key signature
       const keyEl = doc.querySelector('key');
       if (keyEl) {
         const fifths = parseInt(keyEl.querySelector('fifths')?.textContent || '0', 10);
@@ -171,44 +153,29 @@ const SongInfoBar = (() => {
         info.key     = _fifthsToKeyName(fifths, mode);
         info.mode    = mode === 'minor' ? 'thứ' : 'trưởng';
       }
-
-      // Time signature
       const timeEl = doc.querySelector('time');
       if (timeEl) {
         info.timeBeats    = timeEl.querySelector('beats')?.textContent || '';
         info.timeBeatType = timeEl.querySelector('beat-type')?.textContent || '';
       }
-
-      // Tempo (Ticket L6-2: Bỏ qua tempo giả 104 từ XML)
       let parsedTempo = null;
       const perMin = doc.querySelector('per-minute');
-      if (perMin) {
-        parsedTempo = Math.round(parseFloat(perMin.textContent));
-      } else {
+      if (perMin) parsedTempo = Math.round(parseFloat(perMin.textContent));
+      else {
         const soundEl = doc.querySelector('sound[tempo]');
         if (soundEl) parsedTempo = Math.round(parseFloat(soundEl.getAttribute('tempo')));
       }
-      if (parsedTempo && parsedTempo !== 104) {
-        info.tempo = parsedTempo;
-      }
-
-      // Measure count (first part only)
+      if (parsedTempo && parsedTempo !== 104) info.tempo = parsedTempo;
       const part = doc.querySelector('part');
       if (part) info.measureCount = part.querySelectorAll('measure').length;
-
-      // Harmony / chord count (TLH gốc trong MusicXML)
       info.tlhChordCount = doc.querySelectorAll('harmony').length;
-    } catch (e) {
-      console.warn('[SongInfoBar] Parse error:', e);
-    }
-
+    } catch (e) { console.warn('[SongInfoBar] Parse error:', e); }
     return info;
   }
 
   /* Chuyển đổi fifths → tên key */
   function _fifthsToKeyName(fifths, mode) {
-    const sharps = ['C','G','D','A','E','B','F#','C#'];
-    const flats  = ['C','F','Bb','Eb','Ab','Db','Gb','Cb'];
+    const sharps = ['C','G','D','A','E','B','F#','C#'], flats = ['C','F','Bb','Eb','Ab','Db','Gb','Cb'];
     const key = fifths >= 0 ? sharps[Math.min(fifths, 7)] : flats[Math.min(-fifths, 7)];
     if (mode === 'minor') {
       const minorMap = { C:'Am', G:'Em', D:'Bm', A:'F#m', E:'C#m', B:'G#m', 'F#':'D#m', 'C#':'A#m', F:'Dm', Bb:'Gm', Eb:'Cm', Ab:'Fm', Db:'Bbm', Gb:'Ebm', Cb:'Abm' };
@@ -219,21 +186,12 @@ const SongInfoBar = (() => {
 
   /* Tính Tông tập từ Tông gốc và semitones */
   function _calcPracticedKey(origKey, semitones) {
-    if (!origKey) {
-      if (!semitones || semitones === 0) return 'Gốc';
-      return semitones > 0 ? `+${semitones}` : `${semitones}`;
-    }
+    if (!origKey) return (!semitones || semitones === 0) ? 'Gốc' : (semitones > 0 ? `+${semitones}` : `${semitones}`);
     const cleanOrig = String(origKey).trim();
     if (!semitones || semitones === 0) return cleanOrig;
-    if (window.KeyService?.displayKey) {
-      return window.KeyService.displayKey(cleanOrig, semitones) || cleanOrig;
-    }
-    if (window.TransposeEngine?.calcKey) {
-      return window.TransposeEngine.calcKey(cleanOrig, semitones) || cleanOrig;
-    }
-    if (window.TransposeEngine?.transposeChord) {
-      return window.TransposeEngine.transposeChord(cleanOrig, semitones) || cleanOrig;
-    }
+    if (window.KeyService?.displayKey) return window.KeyService.displayKey(cleanOrig, semitones) || cleanOrig;
+    if (window.TransposeEngine?.calcKey) return window.TransposeEngine.calcKey(cleanOrig, semitones) || cleanOrig;
+    if (window.TransposeEngine?.transposeChord) return window.TransposeEngine.transposeChord(cleanOrig, semitones) || cleanOrig;
     return cleanOrig;
   }
 
@@ -249,7 +207,9 @@ const SongInfoBar = (() => {
     const idx = window.SetlistUI?.getCurrentIndex?.();
 
     const chips = [];
-
+    if (_songData.category) {
+      chips.push(`<span class="si-chip si-category" title="Danh mục: ${_esc(_songData.category)}">📚 ${_esc(_songData.category)}</span>`);
+    }
     // 1. Setlist Badge (khi đang xem bài trong setlist)
     if (inSetlist && setlist && setlist.items && idx !== undefined && idx >= 0) {
       chips.push(`<span class="si-chip si-setlist-chip" title="Bài trong Setlist: ${_esc(setlist.title)}">📋 Setlist: Bài ${idx + 1}/${setlist.items.length}</span>`);

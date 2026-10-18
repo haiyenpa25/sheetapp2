@@ -8,15 +8,20 @@
 
 ## TRẠNG THÁI TRIỂN KHAI (người thực thi cập nhật sau mỗi ticket)
 
+> **Điều chỉnh phạm vi 2026-10-18 theo chủ dự án:** Classic (`/old/`) và Hiện đại (`/`)
+> đều là chế độ chính thức, cần đổi mới và rà tính năng. Không áp dụng đề xuất đóng băng/gỡ Classic.
+> Xem `docs/ROADMAP6_CLASSIC_MODERN_ANALYSIS.md` và nhật ký
+> `docs/ROADMAP6_LIBRARY_ACCEPTANCE_REPORT.md`. Bảng quyết định/chữ ký giữ nguyên.
+
 | Giai đoạn | Trạng thái | Ghi chú |
 |---|:-:|---|
-| TV0 — Sửa hỏng hóc | ⬜ | |
+| TV0 — Sửa hỏng hóc | 🟨 | Đang nghiệm thu TV0-1 ở cả Classic/Hiện đại; chưa hoàn tất giai đoạn |
 | TV1 — Tìm kiếm & danh sách | ⬜ | |
 | TV2 — Tải trang & ngoại tuyến | ⬜ | |
 | TV3 — Giao diện, chạm, trợ năng | ⬜ | |
 | TV4 — Bảo mật & API của Thư viện | ⬜ | Một số ticket chờ quyết định Q2 |
 | TV5 — Chất lượng dữ liệu | ⬜ | Mọi ticket ghi DB cần chủ dự án duyệt dry-run |
-| TV6 — Giao diện cũ `/old/` | ⬜ | Chờ quyết định Q1 |
+| TV6 — Classic `/old/` | ⬜ | Chủ dự án yêu cầu nâng cấp cả hai chế độ (2026-10-18); xem phân tích điều chỉnh |
 | TV7 — Nghiệm thu | ⬜ | |
 
 ---

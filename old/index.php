@@ -190,6 +190,7 @@ function jsTag(string $file, bool $defer = true): string {
 }
 
 // ── 1. CORE Infrastructure (không defer — cần sớm nhất) ──
+echo jsTag('core/SafeHtml.js', false);
 echo jsTag('vendor/idb-keyval.min.js', false);
 echo jsTag('core/OfflineVault.js', false);
 echo jsTag('core/EventBus.js', false);
@@ -208,6 +209,8 @@ echo jsTag('history-manager.js');
 echo jsTag('url-state.js');
 
 // ── 3. Feature Modules (defer) ──
+echo jsTag('core/ChordSetNames.js');
+echo jsTag('library-gestures.js');
 echo jsTag('library-ui.js');
 echo jsTag('setlist-ui.js');
 echo jsTag('importer.js');

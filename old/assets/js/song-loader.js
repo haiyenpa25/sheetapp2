@@ -283,11 +283,8 @@ const SongLoader = (() => {
 
   function _showLoadToast(song, transpose) {
     const key   = window.SongInfoBar?.getSongKey?.() || '';
-    const set   = window.ChordCanvas?.getCurrentSet?.() || 'HD';
-    const cnt   = Object.keys(window.ChordCanvas?.getCustomChords?.() ?? {}).length;
-    const setLbl = set === 'default' ? 'TLH (gốc)' : set;
-    const cntLbl = set !== 'default' ? ` (${cnt > 0 ? cnt + ' hợp âm' : 'chưa có'})` : '';
-    AppUI.showToast(`🎵 ${song.title}${key ? ' · '+key : ''} · ${setLbl}${cntLbl}`, 'info');
+    const setLbl = window.ChordSetNames.describe();
+    if (window.innerWidth > 680) AppUI.showToast(`🎵 ${song.title}${key ? ' · '+key : ''} · ${setLbl}`, 'info');
   }
 
   async function _restoreFromURL() {

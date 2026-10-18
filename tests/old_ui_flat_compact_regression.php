@@ -165,17 +165,51 @@ $oldChordCanvasLines = count(file($root . '/old/assets/js/chord-canvas.js'));
 checkS($oldChordCanvasLines < 600 && !is_file($root . '/old/assets/js/lyric-extractor.js'), "old/assets/js/chord-canvas.js < 600 dòng ({$oldChordCanvasLines} dòng) và đã gộp lyric-extractor.js dùng chung");
 
 $mainLibJs = (string)@file_get_contents($root . '/assets/js/library-ui.js');
-checkS(str_contains($mainLibJs, '_ptrMoved') && str_contains($mainLibJs, 'function _getItemH()'), 'assets/js/library-ui.js có bảo vệ cuộn cảm ứng (_ptrMoved <= 10px) và đo động chiều cao dòng (_getItemH)');
-checkS(str_contains($mainLibJs, '[^\p{L}\p{N}]') && str_contains($mainLibJs, 'mode: _searchMode, limit: 200'), 'assets/js/library-ui.js tô sáng nguyên từ tiếng Việt Unicode và truyền mode/limit:200 khi tìm kiếm');
+checkS(str_contains($mainLibJs, 'LibraryGestures.bind') && str_contains($mainLibJs, 'function _getItemH()'), 'LibraryUI dùng guard chạm chung và đo chiều cao DOM; hành vi kiểm trong E2E TV0');
+$normalizedLibJs = str_replace(chr(92) . chr(92), chr(92), $mainLibJs);
+checkS(str_contains($normalizedLibJs, '[^\p{L}\p{N}]') && str_contains($mainLibJs, 'mode: _searchMode, limit: 200'), 'assets/js/library-ui.js tô sáng nguyên từ tiếng Việt Unicode và truyền mode/limit:200 khi tìm kiếm');
 
 $apiIndexPhp = (string)@file_get_contents($root . '/api/index.php');
 checkS(str_contains($apiIndexPhp, 'session_write_close()'), 'api/index.php mở khóa session sớm (session_write_close) cho các request GET/HEAD song song');
 
 $songServicePhp = (string)@file_get_contents($root . '/api/services/SongService.php');
-checkS(str_contains($songServicePhp, 'LOCK_EX') && str_contains($songServicePhp, '@rename($tmpFile, self::CACHE_FILE)'), 'SongService.php ghi songs_cache.json nguyên tử (LOCK_EX + temp file + rename)');
+checkS(str_contains($songServicePhp, 'LOCK_EX') && str_contains($songServicePhp, '@rename($tmpFile, $cacheFile)'), 'SongService.php có đường ghi file tạm với LOCK_EX và rename (guard tĩnh, không chứng minh cạnh tranh)');
 
 $versionHelperPhp = (string)@file_get_contents($root . '/api/services/SongVersionHelper.php');
-checkS(str_contains($versionHelperPhp, '$expectedPrefix = \'storage/users/\' . $safeUser . \'/\''), 'SongVersionHelper.php kiểm tra quyền sở hữu thư mục người dùng trong saveXml và restoreXmlBackup');
+checkS(str_contains($versionHelperPhp, '$expectedPrefix = rtrim($usersRoot, DIRECTORY_SEPARATOR)')
+    && str_contains($versionHelperPhp, 'strpos($targetPath, $expectedPrefix) !== 0'), 'SongVersionHelper.php giữ guard tiền tố thư mục đã resolve; quyền thực tế cần test HTTP cách ly');
+
+// ── 7. Hiển thị Danh mục, Hợp âm (Zoom In/Out) & Lời bài hát (ROADMAP6 Polish) ──
+$mainSidebarPhp = (string)@file_get_contents($root . '/includes/sidebar.php');
+$mainToolbarPhp = (string)@file_get_contents($root . '/includes/toolbar.php');
+$mainInfoBarJs  = (string)@file_get_contents($root . '/assets/js/song-info-bar.js');
+checkS(
+    str_contains($mainSidebarPhp, 'id="category-flat-list"')
+    && str_contains($mainLibJs, 'song-cat-badge')
+    && str_contains($oldLibJs, 'song-cat-badge')
+    && str_contains($mainToolbarPhp, 'id="song-category"')
+    && str_contains($mainToolbarPhp, 'id="si-pop-category"')
+    && str_contains($mainInfoBarJs, 'si-category'),
+    'Hiển thị rõ Danh mục bài hát trên dải #category-flat-list, badge .song-cat-badge mỗi dòng bài hát và thanh thông tin bài hát'
+);
+
+$mainOsmdJs = (string)@file_get_contents($root . '/assets/js/osmd-renderer.js');
+$mainDotsJs = (string)@file_get_contents($root . '/assets/js/chord-canvas-dots.js');
+$oldDotsJs  = (string)@file_get_contents($root . '/old/assets/js/chord-canvas-dots.js');
+checkS(
+    str_contains($mainOsmdJs, 'clearGeomCache')
+    && str_contains($mainDotsJs, 'isConnected')
+    && str_contains($mainDotsJs, 'Math.round(38 * scale)')
+    && str_contains($oldDotsJs, 'Math.round(38 * scale)'),
+    'Hợp âm (HD/TLH) tự động xóa cache hình học, co giãn ngưỡng hệ thống khuông theo tỷ lệ Zoom In / Zoom Out (50%–200%)'
+);
+
+$lyricExtJs = (string)@file_get_contents($root . '/assets/js/lyric-extractor.js');
+checkS(
+    str_contains($lyricExtJs, 'hasHyphen')
+    && str_contains($lyricExtJs, 'lv-cat-badge'),
+    'LyricExtractor chuẩn hóa khoảng trắng/gạch nối âm tiết (TV3-5) và hiển thị danh mục bài hát trên khung Lời & Hợp âm'
+);
 
 if ($failed > 0) {
     echo "\nFAILED: {$failed} checks failed.\n";

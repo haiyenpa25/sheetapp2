@@ -64,7 +64,7 @@ echo cssTag('library-polish.css'); // lớp hoàn thiện giao diện — luôn 
 
 <!-- Skip Navigation Links cho điều hướng bàn phím A11y (Ticket L1-11) -->
 <nav class="skip-links" aria-label="Điều hướng nhanh">
-  <a href="#unified-toolbar" class="skip-link" tabindex="0">Nhảy tới thanh công cụ</a>
+  <a href="#toolbar" class="skip-link" tabindex="0">Nhảy tới thanh công cụ</a>
   <a href="#sheet-viewer-wrapper" class="skip-link" tabindex="0">Nhảy tới bản nhạc</a>
   <a href="#sidebar" class="skip-link" tabindex="0">Nhảy tới danh sách bài hát</a>
 </nav>
@@ -231,6 +231,8 @@ echo jsTag('modals/TransposePickerModal.js');
 echo jsTag('modals/TempoPickerSheet.js');
 echo jsTag('modals/ServicePlanAssignModal.js');
 echo jsTag('modals/PracticeTeamBoardModal.js');
+echo jsTag('core/ChordSetNames.js');
+echo jsTag('library-gestures.js');
 echo jsTag('library-ui.js');
 echo jsTag('modals/QuickNumpadModal.js');
 echo jsTag('service-plan-ui.js');

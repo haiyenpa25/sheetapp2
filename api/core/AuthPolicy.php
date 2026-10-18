@@ -22,12 +22,29 @@ class AuthPolicy {
         'view_songs' => [
             'viewer',
             'banhat',
+            'bannhac',
+            'leader',
+            'admin',
+        ],
+        'view_private_songs' => [
+            'banhat',
+            'bannhac',
             'leader',
             'admin',
         ],
         'edit_songs' => [
             'banhat',
+            'bannhac',
             'leader',
+            'admin',
+        ],
+        'edit_chords' => [
+            'bannhac',
+            'banhat',
+            'leader',
+            'admin',
+        ],
+        'upload_songs' => [
             'admin',
         ],
         'assign_practice' => [
@@ -51,8 +68,9 @@ class AuthPolicy {
      * Kiểm tra xem một vai trò có quyền hạn cụ thể hay không
      */
     public static function can(string $role, string $capability): bool {
+        $normalized = Auth::normalizeRole($role);
         $allowed = self::MATRIX[$capability] ?? [];
-        return in_array($role, $allowed, true);
+        return in_array($normalized, $allowed, true);
     }
 
     /**

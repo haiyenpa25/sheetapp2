@@ -1,5 +1,13 @@
 # PROJECT_REGISTRY.md — Sơ Đồ Dự Án SheetApp
 
+[2026-10-18] — ROADMAP6 đang triển khai trên `feature/roadmap5`, chưa hoàn tất:
+  + `assets/js/library-gestures.js`: nhận diện chạm thật dùng chung Classic/Hiện đại.
+  + `e2e/roadmap6.config.js`, `e2e/library-tv0-touch.spec.js`: test thành phần cách ly DB/storage.
+  + `docs/ROADMAP6_CLASSIC_MODERN_ANALYSIS.md`: phạm vi mới theo chủ dự án, nâng cả hai chế độ.
+  + `docs/ROADMAP6_LIBRARY_ACCEPTANCE_REPORT.md`: nhật ký bằng chứng và giới hạn nghiệm thu.
+  ~ Hai entry point và hai LibraryUI dùng module chạm chung; đăng ký module trong precache.
+  ~ Không push/deploy, không migration hoặc thay dữ liệu thật. Trạng thái test xem nhật ký.
+
 > **AI AGENT: Đọc file này để biết dự án có gì, ở đâu.**
 > Cập nhật file này sau mỗi phiên làm việc có tạo/sửa file quan trọng.
 

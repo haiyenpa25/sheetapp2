@@ -11,7 +11,10 @@ Options -Indexes
     RewriteRule ^api/(?:migrations|core|services|controllers|database)(?:/|$) - [F,L,NC]
     RewriteRule ^api/(?:init_db|omr_worker|import_helpers|import_scrapers)\.php$ - [F,L,NC]
 
-    # Storage mặc định là private. Chỉ MusicXML trong "Thanh ca" được frontend tải.
+    # Imported library assets are public; other user files remain private.
+    RewriteRule ^storage/users/[a-z0-9_-]+/imported/[a-z0-9_-]+\.(?:xml|mxl)$ - [L,NC]
+
+    # Storage mặc định là private ngoài các vùng MusicXML đã chỉ định.
     RewriteRule ^storage/(?!Thanh.ca/) - [F,L,NC]
 
     # Không công khai file cấu hình, repo, script thực thi, tài liệu, backup, log hoặc DB.

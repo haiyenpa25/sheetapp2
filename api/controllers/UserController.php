@@ -21,7 +21,7 @@ class UserController {
                     $body = json_decode(file_get_contents('php://input'), true) ?? [];
                     $username    = trim($body['username'] ?? '');
                     $password    = $body['password'] ?? '';
-                    $role        = $body['role'] ?? 'banhat';
+                    $role        = Auth::normalizeRole((string)($body['role'] ?? 'banhat'));
                     $displayName = trim($body['display_name'] ?? $username);
                     $instrument  = trim($body['instrument'] ?? 'Guitar');
                     $chordCode   = strtoupper(trim($body['chord_code'] ?? ''));
@@ -31,7 +31,7 @@ class UserController {
                         Response::error('Vui lòng nhập tên đăng nhập và mật khẩu.');
                         return;
                     }
-                    if (!in_array($role, ['viewer', 'banhat', 'leader', 'admin'], true)) {
+                    if (!in_array($role, Auth::VALID_ROLES, true)) {
                         Response::error('Quyền người dùng không hợp lệ.');
                         return;
                     }
@@ -57,7 +57,7 @@ class UserController {
                     Auth::requireAdmin();
                     $body = json_decode(file_get_contents('php://input'), true) ?? [];
                     $id          = (int)($body['id'] ?? 0);
-                    $role        = isset($body['role']) ? trim((string)$body['role']) : null;
+                    $role        = isset($body['role']) ? Auth::normalizeRole((string)$body['role']) : null;
                     $displayName = isset($body['display_name']) ? trim($body['display_name']) : null;
                     $instrument  = isset($body['instrument']) ? trim($body['instrument']) : null;
                     $chordCode   = isset($body['chord_code']) ? strtoupper(trim($body['chord_code'])) : null;
@@ -76,7 +76,7 @@ class UserController {
                     }
 
                     $resolvedRole = $role ?? $existing['role'];
-                    if (!in_array($resolvedRole, ['viewer', 'banhat', 'leader', 'admin'], true)) {
+                    if (!in_array($resolvedRole, Auth::VALID_ROLES, true)) {
                         Response::error('Quyền người dùng không hợp lệ.');
                         return;
                     }

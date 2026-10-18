@@ -29,15 +29,9 @@ function _guessHttlvnXmlUrl(string $pageUrl, string $html): ?string {
     ]);
 
     foreach ($candidates as $url) {
-        $headers = @get_headers($url, 1);
-        if ($headers) {
-            $status = $headers[0] ?? '';
-            $ct     = strtolower($headers['Content-Type'] ?? $headers['content-type'] ?? '');
-            if (strpos($status, '200') !== false &&
-                (strpos($ct, 'xml') !== false || strpos($ct, 'octet') !== false || strpos($ct, 'zip') !== false)) {
-                return $url;
-            }
-        }
+        $content = _fetchUrl($url, 10);
+        $extension = str_ends_with(strtolower($url), '.mxl') ? 'mxl' : 'xml';
+        if (is_string($content) && _isValidMusicXML($content, $extension)) return $url;
     }
     return null;
 }
@@ -69,20 +63,14 @@ function _extractXmlFromScript(string $html, string $pageUrl): ?string {
     if (preg_match('/atob\(["\']([A-Za-z0-9+\/=]{100,})["\']/', $html, $m)) {
         $decoded = base64_decode($m[1]);
         if ($decoded && _isValidMusicXML($decoded, 'xml')) {
-            $title    = _extractTitle($html) ?: 'import-' . time();
-            $filename = _generateFilename($title, 'xml');
-            file_put_contents(SHEETS_DIR . $filename, $decoded);
-            return 'storage/sheets/' . $filename;
+            return $decoded;
         }
     }
 
     if (preg_match('/["\'](<\?xml[^"\']{50,})["\']/', $html, $m)) {
         $xml = html_entity_decode($m[1]);
         if (_isValidMusicXML($xml, 'xml')) {
-            $title    = _extractTitle($html) ?: 'import-' . time();
-            $filename = _generateFilename($title, 'xml');
-            file_put_contents(SHEETS_DIR . $filename, $xml);
-            return 'storage/sheets/' . $filename;
+            return $xml;
         }
     }
 

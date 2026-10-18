@@ -224,7 +224,7 @@ const ChordCanvas = (() => {
       ? ChordCanvasXML.readXmlChords()
       : _applyTranspose(_customChords);
 
-    const mapped = ChordCanvasDots.mapNotes(notes, rawChordMap);
+    const mapped = window.ChordCanvasDots.mapNotes(notes, rawChordMap);
     const seenKeys = new Set();
     const seenBeat = [];
     const dedupedMapped = mapped.filter(m => {
@@ -238,8 +238,8 @@ const ChordCanvas = (() => {
       return true;
     });
 
-    const chordTextPositions = ChordCanvasDots.buildChordTextPositions(dedupedMapped, container);
-    dedupedMapped.forEach(m => ChordCanvasDots.placeDot(m, chordTextPositions, {
+    const chordTextPositions = window.ChordCanvasDots.buildChordTextPositions(dedupedMapped, container);
+    dedupedMapped.forEach(m => window.ChordCanvasDots.placeDot(m, chordTextPositions, {
       editEnabled: _editEnabled,
       currentSet: _currentSet,
       highlightMode: _highlightMode,
@@ -247,7 +247,7 @@ const ChordCanvas = (() => {
       onSetAddMode: setAddMode
     }));
 
-    ChordCanvasDots.alignDOMChords();
+    window.ChordCanvasDots.alignDOMChords();
   }
 
   function _showPopup(anchor, measureIdx, noteIdx, existing) {
@@ -269,7 +269,7 @@ const ChordCanvas = (() => {
 
   function openNextPopup(curMeasureIdx, curNoteIdx) {
     if (!_noteEls.length) return;
-    const mapped = ChordCanvasDots.mapNotes(_noteEls, {});
+    const mapped = window.ChordCanvasDots.mapNotes(_noteEls, {});
     const foundIdx = mapped.findIndex(m => m.measureIdx === curMeasureIdx && m.noteIdx === curNoteIdx);
     if (foundIdx !== -1 && foundIdx + 1 < mapped.length) {
       const next = mapped[foundIdx + 1];
@@ -450,7 +450,7 @@ const ChordCanvas = (() => {
     }
 
     selector.innerHTML = sets.map(s =>
-      `<option value="${s}" ${s === _currentSet ? 'selected' : ''}>${s === 'default' ? 'TLH (gốc)' : s}</option>`
+      `<option value="${window.SafeHtml.escape(s)}" ${s === _currentSet ? 'selected' : ''}>${window.SafeHtml.escape(s === _currentSet ? window.ChordSetNames.describe() : (s === 'default' ? 'TLH (gốc)' : s))}</option>`
     ).join('');
 
     const isAdmin    = window.Auth?.isAdmin?.() ?? false;

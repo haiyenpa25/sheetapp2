@@ -172,23 +172,19 @@ const MobileController = (() => {
     const label = document.getElementById('mobile-chordset-label');
     if (!label) return;
 
-    const curSet = window.ChordCanvas?.getCurrentSet?.() || 'HD';
-    const fallback = curSet === 'HD' && !!window.ChordCanvas?.getChordStatus?.()?.isFallback;
-    if (curSet === 'default') {
-      label.textContent = 'TLH';
-    } else if (curSet === 'HD') {
-      label.textContent = fallback ? 'HD→TLH' : 'HD';
-    } else {
-      label.textContent = curSet.length > 4 ? curSet.slice(0, 3) + '…' : curSet;
-    }
+    const status = window.ChordSetNames.readStatus();
+    const curSet = status.currentSet;
+    const fallback = curSet === window.ChordSetNames.HD && status.customCount === 0 && status.xmlCount > 0;
+    label.textContent = window.ChordSetNames.short(status);
     const button = document.getElementById('btn-mobile-chordset');
-    const setDescription = fallback ? 'HD trống, đang hiện hợp âm TLH' : `Bộ hợp âm: ${label.textContent}`;
+    const setDescription = window.ChordSetNames.describe(status);
     button?.setAttribute('aria-label', `${setDescription}. Chạm để đổi ${curSet === 'HD' ? 'sang TLH' : 'sang HD'}`);
     if (button) button.title = setDescription;
     button?.classList.toggle('showing-tlh-fallback', fallback);
     const gigChordset = document.getElementById('btn-gig-chordset');
     if (gigChordset) {
       gigChordset.textContent = label.textContent;
+      gigChordset.title = setDescription;
       gigChordset.setAttribute('aria-label', `${setDescription}. Chạm để đổi ${curSet === 'HD' ? 'sang TLH' : 'sang HD'}`);
     }
   }

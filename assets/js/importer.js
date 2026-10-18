@@ -112,6 +112,7 @@ const Importer = (() => {
       }
     }
     _resetUI();
+    _loadImportCategories();
   }
 
   function closeModal() {
@@ -150,14 +151,31 @@ const Importer = (() => {
 
   function onSuccess(cb) { onSuccessCb = cb; }
 
+  async function _loadImportCategories() {
+    try {
+      const cats = await window.ApiService.categories.list();
+      if (!Array.isArray(cats) || !cats.length) return;
+      ['import-upload-category', 'import-url-category', 'import-direct-category', 'omr-review-category'].forEach(selId => {
+        const sel = document.getElementById(selId);
+        if (sel) {
+          const cur = sel.value;
+          sel.innerHTML = cats.map(c => `<option value="${Number.parseInt(c.id, 10) || 1}">${_esc(c.icon || '')} ${_esc(c.name)}</option>`).join('');
+          if (cur) sel.value = cur;
+        }
+      });
+    } catch (_) {}
+  }
+
   // ---- IMPORT METHODS ----
 
   /**
    * 1. Import từ URL thánh ca (OSMD site) — dùng PHP proxy để scrape XML
    */
   async function _importFromThanhca() {
-    const url   = document.getElementById('import-url-input')?.value.trim();
-    const title = document.getElementById('import-url-title')?.value.trim() || '';
+    const url        = document.getElementById('import-url-input')?.value.trim();
+    const title      = document.getElementById('import-url-title')?.value.trim() || '';
+    const categoryId = parseInt(document.getElementById('import-url-category')?.value || '1', 10) || 1;
+    const visibility = document.getElementById('import-url-visibility')?.value || 'public';
 
     if (!url) { _showResult('Vui lòng nhập URL bài hát', 'error'); return; }
     if (!url.includes('thanhca.httlvn.org') && !url.includes('httlvn')) {
@@ -167,13 +185,19 @@ const Importer = (() => {
     _showProgress('Đang truy cập trang bài hát...');
 
     try {
-      const data = await window.ApiService.importer.search(url);
+      const data = await window.ApiService.importer.search(url, {
+        title,
+        category_id: categoryId,
+        visibility,
+        is_public: visibility === 'private' ? 0 : 1
+      });
 
       if (!data.success) throw new Error(data.message || 'Scrape thất bại');
 
       _showProgress('Đã tìm thấy nhạc, đang lưu...', 80);
       await _delay(300);
-      _showResult(`✅ Import thành công: <strong>${_esc(data.title)}</strong>`, 'success');
+      const visBadge = (data.song?.visibility === 'private') ? '🔒 Nội bộ (Private)' : '🌐 Công khai (Public)';
+      _showResult(`✅ Import thành công: <strong>${_esc(data.title)}</strong> <span class="tag">${visBadge}</span>`, 'success');
       _triggerSuccess(data.song);
 
     } catch (err) {
@@ -182,25 +206,35 @@ const Importer = (() => {
   }
 
   /**
-   * 2. Import từ file upload
+   * 2. Import từ file upload (.xml / .mxl) với chế độ Public / Private
    */
   async function _importFromUpload() {
     if (!selectedFile) return;
-    const title = document.getElementById('import-upload-title')?.value.trim()
-                  || selectedFile.name.replace(/\.(xml|mxl|musicxml)$/i, '');
+    const title      = document.getElementById('import-upload-title')?.value.trim()
+                       || selectedFile.name.replace(/\.(xml|mxl|musicxml)$/i, '');
+    const composer   = document.getElementById('import-upload-composer')?.value.trim() || '';
+    const httlvnId   = parseInt(document.getElementById('import-upload-number')?.value || '0', 10) || 0;
+    const categoryId = parseInt(document.getElementById('import-upload-category')?.value || '1', 10) || 1;
+    const visibility = document.getElementById('import-upload-visibility')?.value || 'public';
 
-    _showProgress('Đang upload file...');
+    _showProgress('Đang upload file XML...');
 
     try {
       const formData = new FormData();
       formData.append('file', selectedFile);
       formData.append('title', title);
+      formData.append('composer', composer);
+      formData.append('httlvnId', String(httlvnId));
+      formData.append('category_id', String(categoryId));
+      formData.append('visibility', visibility);
+      formData.append('is_public', visibility === 'private' ? '0' : '1');
 
       const data = await window.ApiService.importer.upload(formData);
 
       if (!data.success) throw new Error(data.message || 'Upload thất bại');
 
-      _showResult(`✅ Upload thành công: <strong>${_esc(data.title)}</strong>`, 'success');
+      const visBadge = (data.song?.visibility === 'private') ? '🔒 Nội bộ (Private)' : '🌐 Công khai (Public)';
+      _showResult(`✅ Upload thành công: <strong>${_esc(data.title)}</strong> — ${visBadge}`, 'success');
       _triggerSuccess(data.song);
 
     } catch (err) {
@@ -212,8 +246,10 @@ const Importer = (() => {
    * 3. Import từ URL trực tiếp đến file XML
    */
   async function _importFromDirectUrl() {
-    const url   = document.getElementById('import-direct-input')?.value.trim();
-    const title = document.getElementById('import-direct-title')?.value.trim() || '';
+    const url        = document.getElementById('import-direct-input')?.value.trim();
+    const title      = document.getElementById('import-direct-title')?.value.trim() || '';
+    const categoryId = parseInt(document.getElementById('import-direct-category')?.value || '1', 10) || 1;
+    const visibility = document.getElementById('import-direct-visibility')?.value || 'public';
 
     if (!url) { _showResult('Vui lòng nhập URL file XML', 'error'); return; }
     if (!/\.(xml|mxl|musicxml)(\?|$)/i.test(url) && !confirm('URL không kết thúc bằng .xml/.mxl. Vẫn thử?')) return;
@@ -221,11 +257,17 @@ const Importer = (() => {
     _showProgress('Đang tải file XML...');
 
     try {
-      const data = await window.ApiService.importer.fetch(url);
+      const data = await window.ApiService.importer.fetch(url, {
+        title,
+        category_id: categoryId,
+        visibility,
+        is_public: visibility === 'private' ? 0 : 1
+      });
 
       if (!data.success) throw new Error(data.message || 'Tải file thất bại');
 
-      _showResult(`✅ Import thành công: <strong>${_esc(data.title)}</strong>`, 'success');
+      const visBadge = (data.song?.visibility === 'private') ? '🔒 Nội bộ (Private)' : '🌐 Công khai (Public)';
+      _showResult(`✅ Import thành công: <strong>${_esc(data.title)}</strong> — ${visBadge}`, 'success');
       _triggerSuccess(data.song);
 
     } catch (err) {
@@ -366,6 +408,9 @@ const Importer = (() => {
   }
 
   function _triggerSuccess(song) {
+    window.ApiService?.songs?.invalidateCache?.();
+    if (window.AdminUI?.loadSongs) window.AdminUI.loadSongs();
+    if (window.LibraryUI?.loadSongs) window.LibraryUI.loadSongs();
     setTimeout(() => {
       closeModal();
       if (onSuccessCb) onSuccessCb(song);
@@ -394,7 +439,7 @@ const Importer = (() => {
     resultEl()?.classList.add('hidden');
     if (progressBar()) progressBar().style.width = '0%';
     if (clearInputs) {
-      ['import-url-input','import-url-title','import-direct-input','import-direct-title','import-upload-title']
+      ['import-url-input','import-url-title','import-direct-input','import-direct-title','import-upload-title','import-upload-composer','import-upload-number']
         .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
       selectedFile = null;
       document.getElementById('file-selected')?.classList.add('hidden');

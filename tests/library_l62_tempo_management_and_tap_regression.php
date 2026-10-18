@@ -123,7 +123,8 @@ it("Mọi tempo trong Top 100 đều nằm trong khoảng thực tế phụng v�
 echo "\n-- 4. Phân quyền SongController cho Ca Trưởng --\n";
 
 $controllerSource = file_get_contents(__DIR__ . '/../api/controllers/SongController.php');
-it("SongController PUT case dùng Auth::requireLeader() cho phép Ca Trưởng cập nhật tempo", strpos($controllerSource, "Auth::requireLeader();\n                    \$id   = \$_GET['id']") !== false);
+it("Static guard: SongController PUT giữ Auth::requireLeader(), không phụ thuộc CRLF/LF",
+    preg_match('/case\s+[\'"]PUT[\'"]:\s*Auth::requireLeader\(\);/', $controllerSource) === 1);
 
 // ── 5. Kiểm tra Tích hợp Frontend & Thuật toán TAP Tempo ──
 echo "\n-- 5. Tích hợp Frontend & Thuật toán TAP Tempo --\n";

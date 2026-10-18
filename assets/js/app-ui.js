@@ -46,6 +46,11 @@ const AppUI = (() => {
       keyEl.textContent = '';
       keyEl.style.display = 'none';
     }
+    const catEl = document.getElementById('song-category');
+    if (catEl) {
+      catEl.textContent = '';
+      catEl.classList.add('hidden');
+    }
   }
 
   function showLoading(text) {
@@ -274,6 +279,20 @@ const AppUI = (() => {
 
     if (gigKeyEl) {
       gigKeyEl.textContent = displayKey || '--';
+    }
+
+    const catEl = document.getElementById('song-category');
+    if (catEl) {
+      const cat = (song.category || '').trim();
+      const shortMap = { 'Thánh ca': 'Thánh Ca', 'Tôn Vinh Chúa Hằng Hữu': 'TVCHH', 'Biệt Thánh Ca': 'Biệt TC', 'Ca Khúc Chúc Tôn': 'CKCT', 'Kinh Thánh Đối Đáp': 'Kinh Thánh', 'NS Trương Văn Xê': 'TV Xê', 'Hillsongs - Worship': 'Hillsong' };
+      if (cat) {
+        catEl.textContent = shortMap[cat] || cat;
+        catEl.title = `Danh mục: ${cat}`;
+        catEl.classList.remove('hidden');
+      } else {
+        catEl.textContent = '';
+        catEl.classList.add('hidden');
+      }
     }
   }
 
