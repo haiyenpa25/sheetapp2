@@ -111,6 +111,15 @@ const LibraryList = (() => {
     bound.set(element, state);
     sync(state);
   }
-  return { bind };
+  function restoreCursor(element) {
+    const state = bound.get(element);
+    if (!state) return false;
+    sync(state);
+    const index = state.indices.get(state.cursor);
+    if (index == null) return false;
+    reveal(state, index);
+    return true;
+  }
+  return { bind, restoreCursor };
 })();
 window.LibraryList = LibraryList;

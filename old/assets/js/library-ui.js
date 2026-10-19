@@ -49,7 +49,7 @@ const LibraryUI = (() => {
       if (_vList.length <= 120 || _vRaf) return;
       _vRaf = requestAnimationFrame(() => { _vRaf = 0; _renderVirtualSlice(false); });
     }, { passive: true });
-    window.addEventListener('resize', () => { _renderVirtualSlice(true); if (activeSongId) _highlightActive(activeSongId, false); }, { passive: true });
+    window.addEventListener('resize', () => { _renderVirtualSlice(true); if (!window.LibraryList?.restoreCursor?.(listEl()) && activeSongId) _highlightActive(activeSongId); }, { passive: true });
     loadSongs();
 
     window.EventBus?.emit('navigation:library', { getItems: () => _vList, getCatalog: () => songs, getCategory: () => categoryEl()?.value || '', getActiveId: () => activeSongId, select: selectSong });
