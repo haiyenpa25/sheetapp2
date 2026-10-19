@@ -1,0 +1,35 @@
+
+Running 1 test using 1 worker
+
+node.exe : (node:21716) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:21716) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › e2e\library-tv2-demand-http.spec.js:5:1 › Modern reading avoids usage and performance API; explicit info and performance still load (2.3s)
+
+
+  1) [chromium] › e2e\library-tv2-demand-http.spec.js:5:1 › Modern reading avoids usage and performance API; explicit info and performance still load
+
+    Error: expect(received).toHaveLength(expected)
+
+    Expected length: 0
+    Received length: 3
+    Received array:  ["http://localhost/sheetapp2-roadmap6-oct19-061901/api/index.php?route=setlists&action=song_usage&song_id=thanh-ca-001", "http://localhost/sheetapp2-roadmap6-oct19-061901/api/index.php?route=arrangements&action=sections&songId=thanh-ca-001", "http://localhost/sheetapp2-roadmap6-oct19-061901/api/index.php?route=arrangements&action=arrangements&songId=thanh-ca-001"]
+
+      12 |   await expect(page.locator('#osmd-container svg').first()).toBeVisible();
+      13 |   await page.waitForLoadState('networkidle');
+    > 14 |   expect(calls).toHaveLength(0);
+         |                 ^
+      15 |   expect(await page.evaluate(() => window.LiveSync.isLoaded())).toBe(false);
+      16 |   await page.locator('#btn-song-info-popover').click();
+      17 |   await expect.poll(() => calls.filter(url => url.searchParams.get('action') === 'song_usage').length).toBe(1);
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv2-demand-http.spec.js:14:17
+
+    Error Context: test-results\roadmap6\library-tv2-demand-http-Mo-ff3c4--and-performance-still-load-chromium\error-context.md
+
+  1 failed
+    [chromium] › e2e\library-tv2-demand-http.spec.js:5:1 › Modern reading avoids usage and performance API; explicit info and performance still load

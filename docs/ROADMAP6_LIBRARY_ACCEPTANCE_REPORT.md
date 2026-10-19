@@ -1,8 +1,11 @@
 ﻿# ROADMAP6 — Nhật ký triển khai và nghiệm thu
 
 Ngày 2026-10-18, cập nhật 2026-10-19. Nhánh `feature/roadmap5`, baseline ban đầu `3b5fb69`, worktree tiếp nhận `623b745`.
-Một AI thực thi; không push, deploy hoặc chạy sync. Classic và Hiện đại đều là chế độ chính thức.
+Một AI thực thi; đã được chủ dự án yêu cầu push GitHub, không deploy hoặc chạy sync. Classic và Hiện đại đều là chế độ chính thức.
 Xem [phân tích phạm vi](ROADMAP6_CLASSIC_MODERN_ANALYSIS.md).
+
+Đợt tiếp tục TV2: xem [thay đổi, số đo và giới hạn](ROADMAP6_TV2_PROGRESS.md).
+Ngân sách 4G hiện **FAIL ở cả hai giao diện**, được báo riêng với kiểm thử hành vi.
 
 ## Kết quả TV0
 

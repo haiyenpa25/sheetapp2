@@ -1,0 +1,142 @@
+
+Running 2 tests using 1 worker
+
+node.exe : (node:31712) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:31712) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+[TV2 INITIAL LOAD] {"firstSvgMs":24302,"scripts":87,"requests":106,"transferBytes":3524545,"api":["http://localhost/sheetapp2-roadmap6-oct19-061901/api/index.php?route=auth&action=me","http://localhost/sheetapp2-roadmap6-oct19-061901/api/index.php?route=songs","http://localhost/sheetapp2-roadmap6-oct19-061901/api/index.php?route=setlists","http://localhost/sheetapp2-roadmap6-oct19-061901/api/index.php?route=sessions&songId=thanh-ca-001","http://localhost/sheetapp2-roadmap6-oct19-061901/api/index.php?route=chord_sets&action=load&songId=thanh-ca-001&name=HD"],"audioWarnings":["The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio","The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"],"failures":[]}
+  x  1 [chromium] › e2e\library-l5-performance-budget.spec.js:33:5 › L5-9 · Ngân Sách Hiệu Năng Trong CI (Performance Budget Quality Gate) › 1. [Budget B1 & B6] Modern cold 4G load stays within network budgets (26.4s)
+(node:32180) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[TV2 INITIAL LOAD] {"firstSvgMs":20154,"scripts":47,"requests":61,"transferBytes":2618848,"api":["http://localhost/sheetapp2-roadmap6-oct19-061901/api/index.php?route=auth&action=me","http://localhost/sheetapp2-roadmap6-oct19-061901/api/index.php?route=songs","http://localhost/sheetapp2-roadmap6-oct19-061901/api/index.php?route=sessions&songId=thanh-ca-001","http://localhost/sheetapp2-roadmap6-oct19-061901/api/index.php?route=chord_sets&action=load&songId=thanh-ca-001&name=HD"],"audioWarnings":["The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio","The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"],"failures":[]}
+  x  2 [chromium] › e2e\library-l5-performance-budget.spec.js:33:5 › L5-9 · Ngân Sách Hiệu Năng Trong CI (Performance Budget Quality Gate) › 1. [Budget B1 & B6] Classic cold 4G load stays within network budgets (23.2s)
+
+
+  1) [chromium] › e2e\library-l5-performance-budget.spec.js:33:5 › L5-9 · Ngân Sách Hiệu Năng Trong CI (Performance Budget Quality Gate) › 1. [Budget B1 & B6] Modern cold 4G load stays within network budgets
+
+    Error: expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 40
+    Received:    87
+
+      43 |       console.log('[TV2 INITIAL LOAD]', JSON.stringify(metrics));
+      44 |       expect.soft(metrics.failures, 'Every network transfer must be measurable').toEqual([]);
+    > 45 |       expect.soft(metrics.scripts).toBeLessThanOrEqual(BUDGETS.INITIAL_SCRIPTS);
+         |                                    ^
+      46 |       expect.soft(metrics.requests).toBeLessThanOrEqual(BUDGETS.INITIAL_REQUESTS);
+      47 |       expect.soft(metrics.transferBytes).toBeLessThanOrEqual(BUDGETS.INITIAL_BYTES);
+      48 |       expect.soft(metrics.firstSvgMs).toBeLessThanOrEqual(BUDGETS.INITIAL_RENDER_MS);
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-l5-performance-budget.spec.js:45:36
+
+    Error: expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 60
+    Received:    106
+
+      44 |       expect.soft(metrics.failures, 'Every network transfer must be measurable').toEqual([]);
+      45 |       expect.soft(metrics.scripts).toBeLessThanOrEqual(BUDGETS.INITIAL_SCRIPTS);
+    > 46 |       expect.soft(metrics.requests).toBeLessThanOrEqual(BUDGETS.INITIAL_REQUESTS);
+         |                                     ^
+      47 |       expect.soft(metrics.transferBytes).toBeLessThanOrEqual(BUDGETS.INITIAL_BYTES);
+      48 |       expect.soft(metrics.firstSvgMs).toBeLessThanOrEqual(BUDGETS.INITIAL_RENDER_MS);
+      49 |     });
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-l5-performance-budget.spec.js:46:37
+
+    Error: expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 1500000
+    Received:    3524545
+
+      45 |       expect.soft(metrics.scripts).toBeLessThanOrEqual(BUDGETS.INITIAL_SCRIPTS);
+      46 |       expect.soft(metrics.requests).toBeLessThanOrEqual(BUDGETS.INITIAL_REQUESTS);
+    > 47 |       expect.soft(metrics.transferBytes).toBeLessThanOrEqual(BUDGETS.INITIAL_BYTES);
+         |                                          ^
+      48 |       expect.soft(metrics.firstSvgMs).toBeLessThanOrEqual(BUDGETS.INITIAL_RENDER_MS);
+      49 |     });
+      50 |   }
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-l5-performance-budget.spec.js:47:42
+
+    Error: expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 2500
+    Received:    24302
+
+      46 |       expect.soft(metrics.requests).toBeLessThanOrEqual(BUDGETS.INITIAL_REQUESTS);
+      47 |       expect.soft(metrics.transferBytes).toBeLessThanOrEqual(BUDGETS.INITIAL_BYTES);
+    > 48 |       expect.soft(metrics.firstSvgMs).toBeLessThanOrEqual(BUDGETS.INITIAL_RENDER_MS);
+         |                                       ^
+      49 |     });
+      50 |   }
+      51 |
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-l5-performance-budget.spec.js:48:39
+
+    Error Context: test-results\roadmap6-performance\library-l5-performance-bud-b9436-tays-within-network-budgets-chromium\error-context.md
+
+  2) [chromium] › e2e\library-l5-performance-budget.spec.js:33:5 › L5-9 · Ngân Sách Hiệu Năng Trong CI (Performance Budget Quality Gate) › 1. [Budget B1 & B6] Classic cold 4G load stays within network budgets
+
+    Error: expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 40
+    Received:    47
+
+      43 |       console.log('[TV2 INITIAL LOAD]', JSON.stringify(metrics));
+      44 |       expect.soft(metrics.failures, 'Every network transfer must be measurable').toEqual([]);
+    > 45 |       expect.soft(metrics.scripts).toBeLessThanOrEqual(BUDGETS.INITIAL_SCRIPTS);
+         |                                    ^
+      46 |       expect.soft(metrics.requests).toBeLessThanOrEqual(BUDGETS.INITIAL_REQUESTS);
+      47 |       expect.soft(metrics.transferBytes).toBeLessThanOrEqual(BUDGETS.INITIAL_BYTES);
+      48 |       expect.soft(metrics.firstSvgMs).toBeLessThanOrEqual(BUDGETS.INITIAL_RENDER_MS);
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-l5-performance-budget.spec.js:45:36
+
+    Error: expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 60
+    Received:    61
+
+      44 |       expect.soft(metrics.failures, 'Every network transfer must be measurable').toEqual([]);
+      45 |       expect.soft(metrics.scripts).toBeLessThanOrEqual(BUDGETS.INITIAL_SCRIPTS);
+    > 46 |       expect.soft(metrics.requests).toBeLessThanOrEqual(BUDGETS.INITIAL_REQUESTS);
+         |                                     ^
+      47 |       expect.soft(metrics.transferBytes).toBeLessThanOrEqual(BUDGETS.INITIAL_BYTES);
+      48 |       expect.soft(metrics.firstSvgMs).toBeLessThanOrEqual(BUDGETS.INITIAL_RENDER_MS);
+      49 |     });
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-l5-performance-budget.spec.js:46:37
+
+    Error: expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 1500000
+    Received:    2618848
+
+      45 |       expect.soft(metrics.scripts).toBeLessThanOrEqual(BUDGETS.INITIAL_SCRIPTS);
+      46 |       expect.soft(metrics.requests).toBeLessThanOrEqual(BUDGETS.INITIAL_REQUESTS);
+    > 47 |       expect.soft(metrics.transferBytes).toBeLessThanOrEqual(BUDGETS.INITIAL_BYTES);
+         |                                          ^
+      48 |       expect.soft(metrics.firstSvgMs).toBeLessThanOrEqual(BUDGETS.INITIAL_RENDER_MS);
+      49 |     });
+      50 |   }
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-l5-performance-budget.spec.js:47:42
+
+    Error: expect(received).toBeLessThanOrEqual(expected)
+
+    Expected: <= 2500
+    Received:    20154
+
+      46 |       expect.soft(metrics.requests).toBeLessThanOrEqual(BUDGETS.INITIAL_REQUESTS);
+      47 |       expect.soft(metrics.transferBytes).toBeLessThanOrEqual(BUDGETS.INITIAL_BYTES);
+    > 48 |       expect.soft(metrics.firstSvgMs).toBeLessThanOrEqual(BUDGETS.INITIAL_RENDER_MS);
+         |                                       ^
+      49 |     });
+      50 |   }
+      51 |
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-l5-performance-budget.spec.js:48:39
+
+    Error Context: test-results\roadmap6-performance\library-l5-performance-bud-a728c-tays-within-network-budgets-chromium\error-context.md
+
+  2 failed
+    [chromium] › e2e\library-l5-performance-budget.spec.js:33:5 › L5-9 · Ngân Sách Hiệu Năng Trong CI (Performance Budget Quality Gate) › 1. [Budget B1 & B6] Modern cold 4G load stays within network budgets
+    [chromium] › e2e\library-l5-performance-budget.spec.js:33:5 › L5-9 · Ngân Sách Hiệu Năng Trong CI (Performance Budget Quality Gate) › 1. [Budget B1 & B6] Classic cold 4G load stays within network budgets

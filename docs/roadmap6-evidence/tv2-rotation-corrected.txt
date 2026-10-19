@@ -1,0 +1,18 @@
+
+Running 5 tests using 1 worker
+
+node.exe : (node:30920) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:30920) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › e2e\library-tv0-virtual.spec.js:7:3 › Modern: 1731 rows keep exact scroll geometry and selected row after rotation (1.3s)
+  ok 2 [chromium] › e2e\library-tv0-virtual.spec.js:7:3 › Classic: 1731 rows keep exact scroll geometry and selected row after rotation (325ms)
+  ok 3 [chromium] › e2e\library-tv1-focus-rerender.spec.js:3:1 › Virtual grid preserves action focus across a row replacement and never steals outside focus (250ms)
+  ok 4 [chromium] › e2e\library-tv1-keyboard.spec.js:8:3 › Modern keyboard navigates virtual rows and row actions without opening on arrows (4.1s)
+  ok 5 [chromium] › e2e\library-tv1-keyboard.spec.js:8:3 › Classic keyboard navigates virtual rows and row actions without opening on arrows (5.5s)
+
+  5 passed (13.4s)

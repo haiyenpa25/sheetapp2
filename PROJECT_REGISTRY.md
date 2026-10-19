@@ -1,5 +1,14 @@
 # PROJECT_REGISTRY.md — Sơ Đồ Dự Án SheetApp
 
+[2026-10-19] — ROADMAP6 TV2 tiếp tục và đẩy lên nhánh GitHub đã có:
+  ~ Modern/Classic chỉ tải danh sách bộ hợp âm khi dùng dropdown; dùng chung cache/in-flight của ApiService, giữ refresh sau thao tác ghi.
+  ~ Modern tải lịch sử dùng bài khi mở ⓘ, Performance khi mở tính năng; chặn phân đoạn đến muộn sau đổi bài, nhớ kết quả rỗng, cho thử lại usage sau lỗi mạng.
+  ~ Grid giữ focus khi thay dòng ảo; resize ưu tiên dòng đang duyệt rồi giữ bài đã chọn trong khung nhìn. Bổ sung kiểm thử resize rõ ràng ở hai chế độ.
+  + Bốn spec E2E mới; helper đo transfer thật và cấu hình 4G cách ly; fixture Node VM kiểm tra cache ApiService thật thay yêu cầu cache trùng trong UI.
+  ~ Chromium cuối: 90/90 PASS. Cổng 4G riêng: 2 FAIL đúng do vượt ngân sách; Modern 87 JS / 106 request / 3.524.545 byte / SVG 24.302 ms, Classic 47 / 61 / 2.618.848 / 20.154 ms; API đầu trang còn 5/4.
+  ~ PHP gate cuối chạy sau E2E trên bản sao: 173/173 suite, 3.342 check, 329 PHP lint PASS; ESLint phần sửa và git diff --check PASS. DB nguồn giữ SHA256 A91268B27DF548845C67B8F375C2D13B5899FFA4716BA99A00D59E4BC157CAC9, main sạch.
+  ~ TV2 chưa hoàn tất: còn runner khi quality gate ngoài regression thất bại, các nhóm lazy-load, AudioContext, precache và ngoại tuyến. Số đo/giới hạn và bằng chứng: docs/ROADMAP6_TV2_PROGRESS.md. Không sửa bảng quyết định/chữ ký.
+
 [2026-10-19] — ROADMAP6 TV4-4…6 và yêu cầu đưa lên GitHub:
   + `tests/security/library_tv44_csrf_regression.php`, `tests/library_tv46_api_regression.php`: request/token và hợp đồng songs/taxonomy, fixture memory.
   + `e2e/library-tv4-{csrf,categories,contract}.spec.js`: CSRF bật, lưu hợp âm thật, rollback danh mục, cache song song/ETag và HTTP songs; chỉ DB/storage cách ly.
@@ -1314,7 +1323,7 @@ SheetApp/
 [2026-09-28] — Hoàn tất Ticket L5-5 (ROADMAP4.md): On-Demand Script Loading & No Hidden Render (Tải theo nhu cầu & Không render khi khung ẩn)
   + Tạo: assets/js/core/ScriptLoader.js (In-flight deduplication, in-memory cache, on-demand presets: loadAudio, loadAdmin, loadSetlist, loadLiveSync, loadLenses, loadModal; auto triggers click & keyboard; prefetchIdle(); 252 dòng < 600 dòng)
   ~ Sửa: assets/js/osmd-renderer.js (Thêm _canRender() kiểm tra clientWidth > 0, visible, display != none; cơ chế _pendingRender hoãn render khi khung ẩn và renderPending() khi khung mở lại; triệt tiêu 100% cảnh báo SkyBottomLine và width not > 0; 580 dòng < 600 dòng)
-  ~ Sửa: index.php (Gỡ các script nặng Tone.js, OsmdAudioPlayer ở head; giới hạn ban đầu đúng 30 thẻ <script> trong DOM; hỗ trợ conditional blocks cho mở rộng)
+  ~ Đính chính ROADMAP6 (2026-10-19): entry hiện nạp lại Tone/OsmdAudioPlayer; con số 30 thẻ script lịch sử không mô tả lượng JS tải thực qua mạng. Chưa đạt ngân sách TV2.
   ~ Sửa: includes/toolbar.php (Tích hợp comment điều hướng cho ToolbarController; dọn script inline)
   ~ Sửa: assets/js/toolbar-controller.js (Tích hợp quản lý Dropdown Menu, Escape, Outside click từ toolbar.php; 407 dòng < 600 dòng)
   ~ Sửa: assets/js/song-loader.js (Bọc an toàn optional chaining và gọi prefetchIdle khi nạp bài xong; 577 dòng < 600 dòng)
@@ -1359,8 +1368,8 @@ SheetApp/
   🏆 ĐẠT 100% QUALITY GATE: 122/122 suites PASS (2331 passed, 0 failed, 72.3% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
 
 [2026-09-28] — Hoàn tất Ticket L5-9 (ROADMAP4.md): Performance Budget CI Gate (Ngân sách hiệu năng trong CI)
-  + Sửa: assets/js/app.js (Trì hoãn ServiceWorkerManager nạp sau window.load 1200ms để giữ ngân sách script ban đầu đúng 30 thẻ; 235 dòng < 600 dòng)
-  + Tạo: e2e/library-l5-performance-budget.spec.js (E2E Playwright: Đo 6 chỉ số ngân sách hiệu năng: Initial render 935ms <= 4500ms, Song switch 181ms <= 1800ms, OSMD render count === 1, Song switch network requests 4 <= 4, Instant transpose 82ms <= 300ms, Initial script count 30 <= 30; cơ chế fail if over budget)
+  + Ghi nhận lịch sử L5-9 đã lỗi thời: đếm 30 thẻ tại một thời điểm bỏ sót module tải động, không chứng minh ngân sách qua mạng.
+  ~ ROADMAP6 TV2-1 (2026-10-19): spec đếm request script thực, byte truyền gồm header/body đã mã hóa, có cả Modern/Classic; Chromium 4G 1,6 Mbps xuống, 750 kbps lên, RTT mô phỏng 150 ms. Giữ FAIL nếu vượt 40 JS / 60 request / 1,5 MB / SVG 2,5 giây; kết quả mới ở biên bản ROADMAP6.
   + Tạo: tests/library_l59_performance_budget_regression.php (11/11 checks PASS, 72.7% behavioral assertions, kiểm thử toàn diện budget metrics, thresholds, và cơ chế gate)
   🏆 ĐẠT 100% QUALITY GATE: 123/123 suites PASS (2342 passed, 0 failed, 72.3% behavioral), bảo toàn tuyệt đối K2 DB Checksum và 62 files chord_sets.
 
@@ -1425,7 +1434,7 @@ SheetApp/
   - **L2 (Tìm và mở bài trong 3 giây):** L2-1 đến L2-7 hoàn tất 100% (tìm theo số bài, xếp hạng tìm kiếm, danh sách ảo hóa 36px, bàn phím số nhanh).
   - **L3 (Chế độ chương trình lễ):** L3-1 đến L3-10 hoàn tất 100% (thanh chương trình, tải trước bài kế, theo ca trưởng Live Sync, thông điệp ca trưởng, bản đồ bài, gói Chúa nhật offline).
   - **L4 (Theo vai trò nhạc cụ - Stage Lens):** L4-1 đến L4-7 hoàn tất 100% (Guitar, Keyboard, Bass, Trống, Hát, số La Mã/Nashville).
-  - **L5 (Hiệu năng & Nền kỹ thuật):** L5-1 đến L5-9 hoàn tất 100% (render 1 lần, dịch giọng tức thì, cache DOMParser, gộp ≤4 requests, tải theo nhu cầu ≤30 scripts, Service Worker precache tự sinh bằng PHP, Store tập trung, dọn CSS giảm 72% !important, ngân sách CI).
+  - **L5 (Hiệu năng & Nền kỹ thuật):** trạng thái lịch sử đã được mở lại bởi ROADMAP6 TV2; phép đếm ≤30 script cũ không chứng minh tải theo nhu cầu hay ngân sách mạng hiện tại. Các phần render/cache/Store/CSS giữ nhật ký riêng phía trên.
   - **L6 (Chất lượng dữ liệu):** L6-1 (trích lời theo khổ & tách [ĐK]), L6-2 (xóa tempo 104 & công cụ TAP tempo), L6-3 (gắn nhãn 500 bài & kích hoạt bộ lọc), L6-4 (chiến lược HD: giữ TLH làm mặc định an toàn & phát triển HD qua xét duyệt), L6-5 (sửa lỗi chính tả 903 bài & bảo lưu từ cổ), L6-6 (bản đồ phân đoạn cho 100 bài hay dùng).
 
 *File này là "bộ nhớ" của dự án. AI Agent cập nhật sau mỗi phiên để phiên sau không phải khám phá lại từ đầu.*

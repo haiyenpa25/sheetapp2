@@ -1,0 +1,70 @@
+
+Running 2 tests using 1 worker
+
+node.exe : (node:15896) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:15896) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › e2e\library-tv1-keyboard.spec.js:8:3 › Modern keyboard navigates virtual rows and row actions without opening on arrows (5.6s)
+(node:24384) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  2 [chromium] › e2e\library-tv1-keyboard.spec.js:8:3 › Classic keyboard navigates virtual rows and row actions without opening on arrows (5.6s)
+
+
+  1) [chromium] › e2e\library-tv1-keyboard.spec.js:8:3 › Modern keyboard navigates virtual rows and row actions without opening on arrows
+
+    Error: expect(locator).toBeInViewport() failed
+
+    Locator: locator('[data-id="row-343"]')
+    Expected: in viewport
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeInViewport" locator('[data-id="row-343"]') with timeout 5000ms
+      - waiting for locator('[data-id="row-343"]')
+
+
+      42 |     // A resize must preserve the browsed position instead of jumping to selected row 3.
+      43 |     await page.evaluate(() => window.dispatchEvent(new Event('resize')));
+    > 44 |     await expect(page.locator('[data-id="row-343"]')).toBeInViewport();
+         |                                                       ^
+      45 |     await page.keyboard.press('Home');
+      46 |     await page.keyboard.press('Tab');
+      47 |     await expect(page.locator('[data-id="row-1"] .song-item-actions button').first()).toBeFocused();
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv1-keyboard.spec.js:44:55
+
+    Error Context: test-results\roadmap6\library-tv1-keyboard-Moder-bc7d4-s-without-opening-on-arrows-chromium\error-context.md
+
+  2) [chromium] › e2e\library-tv1-keyboard.spec.js:8:3 › Classic keyboard navigates virtual rows and row actions without opening on arrows
+
+    Error: expect(locator).toBeInViewport() failed
+
+    Locator: locator('[data-id="row-343"]')
+    Expected: in viewport
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeInViewport" locator('[data-id="row-343"]') with timeout 5000ms
+      - waiting for locator('[data-id="row-343"]')
+
+
+      42 |     // A resize must preserve the browsed position instead of jumping to selected row 3.
+      43 |     await page.evaluate(() => window.dispatchEvent(new Event('resize')));
+    > 44 |     await expect(page.locator('[data-id="row-343"]')).toBeInViewport();
+         |                                                       ^
+      45 |     await page.keyboard.press('Home');
+      46 |     await page.keyboard.press('Tab');
+      47 |     await expect(page.locator('[data-id="row-1"] .song-item-actions button').first()).toBeFocused();
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv1-keyboard.spec.js:44:55
+
+    Error Context: test-results\roadmap6\library-tv1-keyboard-Class-a42b0-s-without-opening-on-arrows-chromium\error-context.md
+
+  2 failed
+    [chromium] › e2e\library-tv1-keyboard.spec.js:8:3 › Modern keyboard navigates virtual rows and row actions without opening on arrows
+    [chromium] › e2e\library-tv1-keyboard.spec.js:8:3 › Classic keyboard navigates virtual rows and row actions without opening on arrows

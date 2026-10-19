@@ -23,3 +23,14 @@ npx playwright test -c e2e/roadmap6.config.js --project=chromium
 PHP gate chạy từ root bản sao để các test cũ cũng không đụng storage nguồn.
 Test HTTP thiếu biến môi trường sẽ SKIP, không được tính là đã nghiệm thu HTTP.
 Không chạy các script sync, seed/migration hoặc công cụ sửa nhãn trên dữ liệu thật.
+
+Đợt TV2 có cổng hiệu năng riêng, hiện **2 FAIL** vì vượt ngân sách; không gộp với
+cổng hành vi Chromium 90/90 PASS:
+
+```powershell
+npx playwright test -c e2e/roadmap6-performance.config.js
+```
+
+Xem [nhật ký TV2](../ROADMAP6_TV2_PROGRESS.md) cho điều kiện mạng, số đo và các
+lượt FAIL trung gian về focus/resize đã được sửa. Log PHP chạy từ worktree thiếu
+fixture không được tính là nghiệm thu; chỉ dùng cổng cuối từ bản sao Apache.

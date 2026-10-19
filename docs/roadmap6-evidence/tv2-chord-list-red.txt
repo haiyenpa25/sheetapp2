@@ -1,0 +1,66 @@
+
+Running 2 tests using 1 worker
+
+node.exe : (node:31824) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:31824) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › e2e\library-tv2-chord-list.spec.js:6:3 › Modern loads chord-set names only on interaction and shares pending requests (2.5s)
+(node:33692) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  2 [chromium] › e2e\library-tv2-chord-list.spec.js:6:3 › Classic loads chord-set names only on interaction and shares pending requests (2.1s)
+
+
+  1) [chromium] › e2e\library-tv2-chord-list.spec.js:6:3 › Modern loads chord-set names only on interaction and shares pending requests
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "thanh-ca-001",
+    + ]
+
+      14 |     await expect(page.locator('#osmd-container svg').first()).toBeVisible();
+      15 |     await page.waitForLoadState('networkidle');
+    > 16 |     expect(calls).toEqual([]);
+         |                   ^
+      17 |     await expect(page.locator('#chord-set-selector')).toHaveValue('HD');
+      18 |     await page.locator('#chord-set-selector').evaluate(el => {
+      19 |       el.dispatchEvent(new Event('focus'));
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv2-chord-list.spec.js:16:19
+
+    Error Context: test-results\roadmap6\library-tv2-chord-list-Mod-a40f8-and-shares-pending-requests-chromium\error-context.md
+
+  2) [chromium] › e2e\library-tv2-chord-list.spec.js:6:3 › Classic loads chord-set names only on interaction and shares pending requests
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 3
+
+    - Array []
+    + Array [
+    +   "thanh-ca-001",
+    + ]
+
+      14 |     await expect(page.locator('#osmd-container svg').first()).toBeVisible();
+      15 |     await page.waitForLoadState('networkidle');
+    > 16 |     expect(calls).toEqual([]);
+         |                   ^
+      17 |     await expect(page.locator('#chord-set-selector')).toHaveValue('HD');
+      18 |     await page.locator('#chord-set-selector').evaluate(el => {
+      19 |       el.dispatchEvent(new Event('focus'));
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv2-chord-list.spec.js:16:19
+
+    Error Context: test-results\roadmap6\library-tv2-chord-list-Cla-04127-and-shares-pending-requests-chromium\error-context.md
+
+  2 failed
+    [chromium] › e2e\library-tv2-chord-list.spec.js:6:3 › Modern loads chord-set names only on interaction and shares pending requests
+    [chromium] › e2e\library-tv2-chord-list.spec.js:6:3 › Classic loads chord-set names only on interaction and shares pending requests

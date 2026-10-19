@@ -9,6 +9,10 @@ deploy, chạy sync hoặc migration DB nguồn.
 
 ## Phần mã trong đợt
 
+- Đợt tiếp tục TV2: tải tên bộ hợp âm, usage và Performance theo nhu cầu; sửa
+  focus/resize danh sách ảo của cả hai UI. Chromium cuối **90/90 PASS**, PHP cuối
+  **173/173 suite / 3.342 check PASS**; ngân sách 4G **2 FAIL**, chưa hoàn tất TV2.
+  Xem [số đo và phạm vi](ROADMAP6_TV2_PROGRESS.md).
 - TV1-1…7 ở cả Hiện đại và Classic: phân trang/tổng thật, tìm lời/highlight, bàn phím
   grid giữ nút từng dòng, điều hướng theo danh sách và nhảy số đúng tập.
 - TV4-1…6: khách chỉ đọc chương trình published qua API/lịch sử/bản in, không nhận
@@ -24,7 +28,7 @@ File `storage/config/features.json` từng máy không nằm trong Git.
 
 ## Nghiệm thu và việc còn lại
 
-Trước commit/push: **84/84 Chromium ROADMAP6**, **173/173 suite PHP / 3.342 check PASS**;
+Đợt TV1/TV4 trước: **84/84 Chromium ROADMAP6**, **173/173 suite PHP / 3.342 check PASS**;
 329 PHP lint, ESLint phần JS sửa và `git diff --check` PASS. Hai cổng chạy tuần tự trên
 cùng bản sao. DB nguồn giữ nguyên SHA256; log cuối có trong `roadmap6-evidence/`.
 

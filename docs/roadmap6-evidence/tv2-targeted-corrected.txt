@@ -1,0 +1,21 @@
+
+Running 8 tests using 1 worker
+
+node.exe : (node:12320) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:12320) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › e2e\library-tv1-focus-rerender.spec.js:3:1 › Virtual grid preserves action focus across a row replacement and never steals outside focus (205ms)
+  ok 2 [chromium] › e2e\library-tv1-keyboard.spec.js:8:3 › Modern keyboard navigates virtual rows and row actions without opening on arrows (1.9s)
+  ok 3 [chromium] › e2e\library-tv1-keyboard.spec.js:8:3 › Classic keyboard navigates virtual rows and row actions without opening on arrows (6.2s)
+  ok 4 [chromium] › e2e\library-tv2-arrangements.spec.js:3:1 › arrangement requests coalesce, empty results stay loaded, late responses never replace the current song (656ms)
+  ok 5 [chromium] › e2e\library-tv2-chord-list.spec.js:6:3 › Modern loads chord-set names only on interaction and shares pending requests (6.3s)
+  ok 6 [chromium] › e2e\library-tv2-chord-list.spec.js:6:3 › Classic loads chord-set names only on interaction and shares pending requests (7.3s)
+  ok 7 [chromium] › e2e\library-tv2-demand-http.spec.js:6:1 › Modern reading avoids usage and performance API; explicit info and performance still load (5.6s)
+  ok 8 [chromium] › e2e\library-tv2-demand-http.spec.js:28:1 › Info popover can retry a failed usage request without changing songs (520ms)
+
+  8 passed (31.2s)

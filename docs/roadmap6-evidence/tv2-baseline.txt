@@ -1,0 +1,41 @@
+{
+  "mode": "modern",
+  "svgMs": 1680,
+  "js": 96,
+  "requests": 119,
+  "bytes": 3614903,
+  "api": [
+    "http://localhost/sheetapp2-roadmap6-oct19-061901/api/index.php?route=auth&action=me",
+    "http://localhost/sheetapp2-roadmap6-oct19-061901/api/index.php?route=songs",
+    "http://localhost/sheetapp2-roadmap6-oct19-061901/api/index.php?route=setlists",
+    "http://localhost/sheetapp2-roadmap6-oct19-061901/api/index.php?route=sessions&songId=thanh-ca-001",
+    "http://localhost/sheetapp2-roadmap6-oct19-061901/api/index.php?route=chord_sets&action=load&songId=thanh-ca-001&name=HD",
+    "http://localhost/sheetapp2-roadmap6-oct19-061901/api/index.php?route=chord_sets&action=list&songId=thanh-ca-001",
+    "http://localhost/sheetapp2-roadmap6-oct19-061901/api/index.php?route=setlists&action=song_usage&song_id=thanh-ca-001",
+    "http://localhost/sheetapp2-roadmap6-oct19-061901/api/index.php?route=arrangements&action=sections&songId=thanh-ca-001",
+    "http://localhost/sheetapp2-roadmap6-oct19-061901/api/index.php?route=arrangements&action=arrangements&songId=thanh-ca-001"
+  ],
+  "warnings": [
+    "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio",
+    "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio",
+    "Service Worker registration blocked by Playwright"
+  ]
+}
+{
+  "mode": "old/",
+  "svgMs": 1206,
+  "js": 47,
+  "requests": 62,
+  "bytes": 2618021,
+  "api": [
+    "http://localhost/sheetapp2-roadmap6-oct19-061901/api/index.php?route=auth&action=me",
+    "http://localhost/sheetapp2-roadmap6-oct19-061901/api/index.php?route=songs",
+    "http://localhost/sheetapp2-roadmap6-oct19-061901/api/index.php?route=chord_sets&action=list&songId=thanh-ca-001",
+    "http://localhost/sheetapp2-roadmap6-oct19-061901/api/index.php?route=sessions&songId=thanh-ca-001",
+    "http://localhost/sheetapp2-roadmap6-oct19-061901/api/index.php?route=chord_sets&action=load&songId=thanh-ca-001&name=HD"
+  ],
+  "warnings": [
+    "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio",
+    "The AudioContext was not allowed to start. It must be resumed (or created) after a user gesture on the page. https://developer.chrome.com/blog/autoplay/#web_audio"
+  ]
+}

@@ -1,0 +1,43 @@
+
+Running 1 test using 1 worker
+
+node.exe : (node:15928) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:15928) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › e2e\library-tv1-focus-rerender.spec.js:3:1 › Virtual grid preserves action focus across a row replacement and never steals outside focus (5.3s)
+
+
+  1) [chromium] › e2e\library-tv1-focus-rerender.spec.js:3:1 › Virtual grid preserves action focus across a row replacement and never steals outside focus
+
+    Error: expect(locator).toBeFocused() failed
+
+    Locator:  locator('.song-item button')
+    Expected: focused
+    Received: inactive
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeFocused" locator('.song-item button') with timeout 5000ms
+      - waiting for locator('.song-item button')
+        13 × locator resolved to <button tabindex="0">Favorite</button>
+           - unexpected value "inactive"
+
+
+      16 |     row.replaceWith(row.cloneNode(true));
+      17 |   });
+    > 18 |   await expect(page.locator('.song-item button')).toBeFocused();
+         |                                                   ^
+      19 |   await page.locator('#outside').focus();
+      20 |   await page.evaluate(() => {
+      21 |     const row = document.querySelector('.song-item');
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv1-focus-rerender.spec.js:18:51
+
+    Error Context: test-results\roadmap6\library-tv1-focus-rerender-e119b--never-steals-outside-focus-chromium\error-context.md
+
+  1 failed
+    [chromium] › e2e\library-tv1-focus-rerender.spec.js:3:1 › Virtual grid preserves action focus across a row replacement and never steals outside focus
