@@ -67,6 +67,10 @@ class SongService {
         return SongSearchHelper::search($query, $filters);
     }
 
+    public static function searchPage(string $query, array $filters = []): array {
+        return SongSearchHelper::searchPage($query, $filters);
+    }
+
     public static function vietnameseAccentRegex(string $str): string {
         return SongSearchHelper::vietnameseAccentRegex($str);
     }
@@ -142,7 +146,7 @@ class SongService {
             $tmpFile = $cacheFile . '.tmp.' . getmypid() . '.' . bin2hex(random_bytes(2));
             if (@file_put_contents($tmpFile, $jsonPayload, LOCK_EX) !== false) {
                 if (!@rename($tmpFile, $cacheFile)) {
-                    @copy($tmpFile, $cacheFile);
+                    error_log('SheetApp public song cache: atomic replacement failed; retaining previous cache');
                     @unlink($tmpFile);
                 }
             }
@@ -213,11 +217,13 @@ class SongService {
                 'is_public' => $visInfo['is_public']
             ];
         } catch (\PDOException $e) {
-            return ['success' => false, 'message' => 'Lỗi: ' . $e->getMessage()];
+            error_log('SheetApp song add failed: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Không thể thêm bài hát.'];
         }
     }
 
     public static function update(string $id, array $data): array {
+        if (!DB::run('SELECT 1 FROM songs WHERE id=?', [$id])->fetchColumn()) return ['success' => false, 'code' => 'not_found', 'message' => 'Không tìm thấy bài hát.'];
         self::invalidateCache();
 
         // Hỗ trợ alias categoryId -> category_id
@@ -233,7 +239,7 @@ class SongService {
         }
 
         // TV4-3: Kiểm tra xmlPath bằng resolveManagedXmlPath nếu được truyền vào
-        if (array_key_exists('xmlPath', $data) && trim((string)$data['xmlPath']) !== '') {
+        if (array_key_exists('xmlPath', $data)) {
             if (self::resolveManagedXmlPath((string)$data['xmlPath']) === null) {
                 return ['success' => false, 'message' => 'Đường dẫn xmlPath không hợp lệ hoặc nằm ngoài vùng quản lý'];
             }
@@ -261,7 +267,8 @@ class SongService {
             self::syncSongFts($id);
             return ['success' => true, 'message' => 'Cập nhật thành công'];
         } catch (\PDOException $e) {
-            return ['success' => false, 'message' => 'Lỗi: ' . $e->getMessage()];
+            error_log('SheetApp song update failed: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Không thể cập nhật bài hát.'];
         }
     }
 
@@ -287,7 +294,8 @@ class SongService {
 
             return ['success' => true, 'message' => 'Xóa bài hát thành công'];
         } catch (\PDOException $e) {
-            return ['success' => false, 'message' => 'Lỗi: ' . $e->getMessage()];
+            error_log('SheetApp song delete failed: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Không thể xóa bài hát.'];
         }
     }
 

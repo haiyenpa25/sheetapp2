@@ -83,9 +83,9 @@ check(
 
 // 2.2 Sắp xếp target STT lên đầu danh sách
 check(
-    strpos($libraryJs, "Number(a.httlvnId) === target") !== false,
+    str_contains($libraryJs, 'LibrarySearch.run') && str_contains(file_get_contents(__DIR__ . '/../api/services/SongSearchPage.php'), 'array_unshift($data, $exact)'),
     'frontend_numeric_target_sort_first',
-    'LibraryUI ép kiểu số và sắp xếp STT mục tiêu (target) lên trước các bài khác',
+    'LibraryUI giữ thứ tự server; SongSearchPage đặt số chính xác đầu trang đầu (static guard)',
     false
 );
 

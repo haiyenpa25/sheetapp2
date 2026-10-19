@@ -89,7 +89,7 @@ $b2Themes = [
     'Thanh niên',
     'Đơn ca – Song ca',
     'Hợp ca',
-    'Kinh tiết ca & Đoản ca',
+    'Kinh tiết ca / Đoản ca', // TV4-6 merges the duplicate; the former label remains an accepted filter alias.
     'Thi Thiên'
 ];
 

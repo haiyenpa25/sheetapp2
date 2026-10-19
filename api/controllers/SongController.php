@@ -20,7 +20,7 @@ class SongController {
                             return;
                         }
                         $versions = SongService::getVersions($songId);
-                        Response::ok($versions);
+                        Response::ok(['data' => $versions]);
                         return;
                     }
 
@@ -32,7 +32,7 @@ class SongController {
                         }
                         $song = SongService::getById($songId);
                         if ($song) {
-                            Response::ok($song);
+                            Response::ok(['data' => $song] + $song);
                             return;
                         }
                         Response::error('Không tìm thấy bài hát', 404);
@@ -41,7 +41,7 @@ class SongController {
 
                     if ($action === 'taxonomy') {
                         $taxonomy = SongService::getTaxonomy();
-                        Response::ok($taxonomy);
+                        Response::ok(['data' => $taxonomy] + $taxonomy);
                         return;
                     }
 
@@ -53,22 +53,23 @@ class SongController {
                             'category'    => trim($_GET['category'] ?? ''),
                             'category_id' => isset($_GET['category_id']) && $_GET['category_id'] !== '' ? (int)$_GET['category_id'] : null,
                             'mode'        => trim($_GET['mode'] ?? 'title'),
-                            'limit'       => isset($_GET['limit']) ? min(500, max(1, (int)$_GET['limit'])) : 200
+                            'key'         => trim($_GET['key'] ?? ''),
+                            'sort'        => trim($_GET['sort'] ?? 'num'),
+                            'limit'       => isset($_GET['limit']) ? min(200, max(1, (int)$_GET['limit'])) : 200,
+                            'offset'      => max(0, (int)($_GET['offset'] ?? 0))
                         ];
-                        $results = SongService::search($q, $filters);
-                        Response::ok(['data' => $results, 'total' => count($results)]);
+                        Response::ok(SongService::searchPage($q, $filters));
                         return;
                     }
 
                     $lyric = trim($_GET['lyric_search'] ?? '');
                     if ($lyric !== '') {
                         $data = SongService::searchByLyric($lyric);
-                        echo json_encode($data, JSON_UNESCAPED_UNICODE);
+                        Response::ok(['data' => $data]);
                         break;
                     }
 
-                    // INTENTIONAL: Trả raw array vì LibraryUI.loadSongs() expect Array.isArray() trực tiếp.
-                    // Nếu là Guest (viewer): tối ưu ETag + 304 Not Modified Caching và stream trực tiếp từ cache file (chỉ chứa bài public)
+                    // ApiService unwraps data for LibraryUI; hash and body use the same public cache snapshot.
                     $isGuest = !Auth::isBanhat() && !Auth::isAdmin();
                     if ($isGuest) {
                         $cacheFile = __DIR__ . '/../../storage/data/songs_cache.json';
@@ -77,9 +78,8 @@ class SongController {
                         }
 
                         if (file_exists($cacheFile)) {
-                            $mtime = filemtime($cacheFile);
-                            $size = filesize($cacheFile);
-                            $rawEtag = dechex($mtime) . '-' . dechex($size);
+                            $cachedJson = (string)file_get_contents($cacheFile);
+                            $rawEtag = hash('sha256', $cachedJson);
                             $etag = '"' . $rawEtag . '"';
 
                             header('ETag: ' . $etag);
@@ -107,14 +107,16 @@ class SongController {
                                 exit;
                             }
 
-                            readfile($cacheFile);
+                            echo '{"success":true,"data":';
+                            echo $cachedJson;
+                            echo '}';
                             exit;
                         }
                     }
 
                     header('Cache-Control: private, no-cache');
                     $data = SongService::getAll();
-                    echo json_encode($data, JSON_UNESCAPED_UNICODE);
+                    Response::ok(['data' => $data]);
                     break;
 
                 case 'POST':
@@ -136,7 +138,7 @@ class SongController {
                         if (!$result['success']) {
                             Response::error($result['message']);
                         } else {
-                            Response::ok($result['data'] ?? [], $result['message']);
+                            Response::ok(['data' => $result['data'] ?? []] + ($result['data'] ?? []), $result['message']);
                         }
                         return;
                     }
@@ -153,7 +155,7 @@ class SongController {
                         if (!$result['success']) {
                             Response::error($result['message']);
                         } else {
-                            Response::ok([], $result['message']);
+                            Response::ok(['data' => []], $result['message']);
                         }
                         return;
                     }
@@ -167,9 +169,9 @@ class SongController {
                         }
                         $result = SongService::saveXml($body['filepath'], $body['xml']);
                         if (!$result['success']) {
-                            Response::error($result['message']);
+                            Response::error($result['message'], ($result['code'] ?? '') === 'forbidden' ? 403 : 400);
                         } else {
-                            Response::ok(['message' => $result['message']]);
+                            Response::ok(['data' => [], 'message' => $result['message']]);
                         }
                         return;
                     }
@@ -182,9 +184,9 @@ class SongController {
                         }
                         $result = SongService::restoreXmlBackup($body['filepath']);
                         if (!$result['success']) {
-                            Response::error($result['message']);
+                            Response::error($result['message'], ($result['code'] ?? '') === 'forbidden' ? 403 : 400);
                         } else {
-                            Response::ok(['message' => $result['message']]);
+                            Response::ok(['data' => [], 'message' => $result['message']]);
                         }
                         return;
                     }
@@ -192,13 +194,15 @@ class SongController {
                     if ($action === 'rebuild_fts') {
                         Auth::requireAdmin();
                         $count = SongService::rebuildFtsIndex();
-                        Response::ok(['indexed' => $count], "Đã tái tạo thành công chỉ mục FTS5 cho {$count} bài hát.");
+                        Response::ok(['data' => ['indexed' => $count], 'indexed' => $count], "Đã tái tạo thành công chỉ mục FTS5 cho {$count} bài hát.");
                         return;
                     }
 
                     // Thêm bài hát mới — chỉ Admin
                     Auth::requireAdmin();
-                    echo json_encode(SongService::add($body), JSON_UNESCAPED_UNICODE);
+                    $result = SongService::add($body);
+                    if (!$result['success']) Response::error($result['message'], 400);
+                    else Response::ok(['data' => $result] + $result);
                     break;
 
                 case 'PUT':
@@ -206,14 +210,18 @@ class SongController {
                     $id   = $_GET['id'] ?? null;
                     $body = json_decode(file_get_contents('php://input'), true) ?? [];
                     if (!$id) { Response::error('Missing id'); return; }
-                    echo json_encode(SongService::update($id, $body), JSON_UNESCAPED_UNICODE);
+                    $result = SongService::update($id, $body);
+                    if (!$result['success']) Response::error($result['message'], ($result['code'] ?? '') === 'not_found' ? 404 : 400);
+                    else Response::ok(['data' => $result] + $result);
                     break;
 
                 case 'DELETE':
                     Auth::requireAdmin();
                     $id = $_GET['id'] ?? null;
                     if (!$id) { Response::error('Missing id'); return; }
-                    echo json_encode(SongService::delete($id), JSON_UNESCAPED_UNICODE);
+                    $result = SongService::delete($id);
+                    if (!$result['success']) Response::error($result['message'], 400);
+                    else Response::ok(['data' => $result] + $result);
                     break;
 
                 default:

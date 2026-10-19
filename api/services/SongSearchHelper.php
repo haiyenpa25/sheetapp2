@@ -8,6 +8,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../core/DB.php';
+require_once __DIR__ . '/SongSearchPage.php';
 
 class SongSearchHelper {
 
@@ -35,7 +36,7 @@ class SongSearchHelper {
     }
 
     public static function getTaxonomy(): array {
-        return [
+        $taxonomy = [
             'seasons' => [
                 ['key' => 'christmas',        'name' => 'Lễ Giáng Sinh',               'color' => '#f59e0b'], ['key' => 'new-year',         'name' => 'Năm Mới',                     'color' => '#3b82f6'],
                 ['key' => 'palm-sunday',      'name' => 'Chúa Nhật Lễ Lá',             'color' => '#84cc16'], ['key' => 'lent',             'name' => 'Lễ Thương Khó',               'color' => '#ec4899'],
@@ -55,13 +56,41 @@ class SongSearchHelper {
                 ['key' => 'thien-dang',           'name' => 'Thiên đàng'],                ['key' => 'truyen-giang',         'name' => 'Truyền giảng'],
                 ['key' => 'thieu-nhi',            'name' => 'Thiếu nhi'],                 ['key' => 'thanh-nien',           'name' => 'Thanh niên'],
                 ['key' => 'don-ca-song-ca',       'name' => 'Đơn ca – Song ca'],          ['key' => 'hop-ca',               'name' => 'Hợp ca'],
-                ['key' => 'kinh-tiet-ca-doan-ca', 'name' => 'Kinh tiết ca & Đoản ca'],   ['key' => 'thi-thien',            'name' => 'Thi Thiên'],
-                ['key' => 'khai-le',              'name' => 'Khai lễ'],                   ['key' => 'kinh-tiet-ca',         'name' => 'Kinh tiết ca / Đoản ca'],
+                ['key' => 'kinh-tiet-ca-doan-ca', 'name' => 'Kinh tiết ca / Đoản ca'],   ['key' => 'thi-thien',            'name' => 'Thi Thiên'],
+                ['key' => 'khai-le',              'name' => 'Khai lễ'],
                 ['key' => 'dang-hien',            'name' => 'Dâng hiến'],                 ['key' => 'tiec-thanh',           'name' => 'Tiệc Thánh'],
                 ['key' => 'tat-le',               'name' => 'Tất lễ'],                    ['key' => 'huyet-chua',           'name' => 'Huyết Chúa / Thập tự giá'],
                 ['key' => 'cau-nguyen',           'name' => 'Cầu Nguyện & Sám Hối'],      ['key' => 'ton-vinh',             'name' => 'Tôn Vinh & Cảm Tạ']
             ]
         ];
+        foreach ($taxonomy as &$items) foreach ($items as &$item) $item['label'] = $item['name'];
+        return $taxonomy;
+    }
+
+    private static function taxonomyValues(string $group, string $value): array {
+        if (in_array($value, ['kinh-tiet-ca', 'Kinh tiết ca / Đoản ca', 'Kinh tiết ca & Đoản ca'], true)) $value = 'kinh-tiet-ca-doan-ca';
+        foreach (self::getTaxonomy()[$group] as $item) {
+            if ($value === $item['key'] || $value === $item['label']) {
+                $values = [$item['key'], $item['label']];
+                if ($item['key'] === 'kinh-tiet-ca-doan-ca') $values = array_merge($values, ['kinh-tiet-ca', 'Kinh tiết ca & Đoản ca']);
+                return $values;
+            }
+        }
+        return [$value];
+    }
+
+    private static function appendTaxonomyFilters(string &$sql, array &$params, array $filters): void {
+        $named = !array_is_list($params);
+        foreach ([['season', 'seasons', 's.liturgical_season'], ['theme', 'themes', 's.theme']] as $index => [$key, $group, $column]) {
+            if (($filters[$index] ?? '') === '') continue;
+            $placeholders = [];
+            foreach (self::taxonomyValues($group, $filters[$index]) as $i => $value) {
+                $placeholder = $named ? ':tv_' . $key . '_' . $i : '?';
+                $placeholders[] = $placeholder;
+                if ($named) $params[$placeholder] = $value; else $params[] = $value;
+            }
+            $sql .= ' AND ' . $column . ' IN (' . implode(',', $placeholders) . ')';
+        }
     }
 
     public static function extractLyricsByVerse(string $xmlContent): string {
@@ -155,7 +184,8 @@ class SongSearchHelper {
             $lyrics = $song['lyrics_text'] ?? '';
 
             if (($lyrics === '' || $forceReextract) && !empty($song['xmlPath'])) {
-                $resolvedPath = realpath(__DIR__ . '/../../' . ltrim($song['xmlPath'], '/\\'));
+                require_once __DIR__ . '/SongService.php';
+                $resolvedPath = SongService::resolveManagedXmlPath((string)$song['xmlPath']);
                 if ($resolvedPath && file_exists($resolvedPath) && filesize($resolvedPath) < 2000000) {
                     $xmlContent = @file_get_contents($resolvedPath);
                     if ($xmlContent && str_contains($xmlContent, '<lyric')) {
@@ -178,7 +208,7 @@ class SongSearchHelper {
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([$songId, $title, $titleUnaccented, $lyrics, $lyricsUnaccented, $theme, $season, $composer]);
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) { error_log('SheetApp FTS sync failed: ' . $e->getMessage()); }
     }
 
     public static function rebuildFtsIndex(): int {
@@ -194,13 +224,17 @@ class SongSearchHelper {
     }
 
     public static function search(string $query, array $filters = []): array {
+        return self::searchPage($query, $filters)['data'];
+    }
+
+    public static function searchPage(string $query, array $filters = []): array {
         $cleanQuery = trim($query);
         $season = trim($filters['season'] ?? '');
         $theme = trim($filters['theme'] ?? '');
         $category = trim($filters['category'] ?? '');
         $categoryId = isset($filters['category_id']) && $filters['category_id'] !== '' ? (int)$filters['category_id'] : null;
         $mode = trim($filters['mode'] ?? 'title');
-        $limit = isset($filters['limit']) ? min(500, max(1, (int)$filters['limit'])) : 200;
+        $key = trim($filters['key'] ?? '');
         $visWhere = class_exists('SongService') ? SongService::visibilitySqlClause('s') : '1=1';
 
         if ($cleanQuery === '') {
@@ -214,17 +248,18 @@ class SongSearchHelper {
                 WHERE {$visWhere}
             ";
             $params = [];
-            if ($season !== '') { $sql .= " AND s.liturgical_season = ?"; $params[] = $season; }
-            if ($theme !== '') { $sql .= " AND s.theme = ?"; $params[] = $theme; }
+            self::appendTaxonomyFilters($sql, $params, [$season, $theme]);
             if ($category !== '') { $sql .= " AND c.name = ?"; $params[] = $category; }
             if ($categoryId !== null) { $sql .= " AND s.category_id = ?"; $params[] = $categoryId; }
-            $sql .= " ORDER BY COALESCE(s.category_id, 1) ASC, COALESCE(s.httlvnId, 999999) ASC, s.title ASC LIMIT ?";
-            $params[] = $limit;
-            return DB::run($sql, $params)->fetchAll() ?: [];
+            if ($key !== '') { $sql .= " AND s.defaultKey = ?"; $params[] = $key; }
+            $sort = $filters['sort'] ?? 'num';
+            $order = $sort === 'title' ? 's.title COLLATE NOCASE ASC' : ($sort === 'key' ? "COALESCE(s.defaultKey, '') ASC, s.title ASC" : 'COALESCE(s.category_id, 1) ASC, COALESCE(s.httlvnId, 999999) ASC, s.title ASC');
+            $sql .= " ORDER BY {$order}, s.id ASC";
+            return SongSearchPage::fetch($sql, $params, $filters);
         }
 
         $exactSongByNum = null;
-        if (preg_match('/^(?:#|bài\s+|bai\s+|stt\s+)?(\d+)$/ui', $cleanQuery, $m)) {
+        if ($mode !== 'lyric' && preg_match('/^(?:#|bài\s+|bai\s+|stt\s+)?(\d+)$/ui', $cleanQuery, $m)) {
             $songNum = (int)$m[1];
             $numSql = "
                 SELECT s.id, s.title, s.httlvnId, s.xmlPath, s.defaultKey, s.category_id,
@@ -234,10 +269,10 @@ class SongSearchHelper {
                 FROM songs s LEFT JOIN categories c ON s.category_id = c.id WHERE s.httlvnId = ? AND {$visWhere}
             ";
             $numParams = [$songNum];
-            if ($season !== '') { $numSql .= " AND s.liturgical_season = ?"; $numParams[] = $season; }
-            if ($theme !== '') { $numSql .= " AND s.theme = ?"; $numParams[] = $theme; }
+            self::appendTaxonomyFilters($numSql, $numParams, [$season, $theme]);
             if ($category !== '') { $numSql .= " AND c.name = ?"; $numParams[] = $category; }
             if ($categoryId !== null) { $numSql .= " AND s.category_id = ?"; $numParams[] = $categoryId; }
+            if ($key !== '') { $numSql .= " AND s.defaultKey = ?"; $numParams[] = $key; }
             $numSql .= " ORDER BY COALESCE(s.category_id, 1) ASC LIMIT 1";
             $numRow = DB::run($numSql, $numParams)->fetch(PDO::FETCH_ASSOC);
             if ($numRow) $exactSongByNum = $numRow;
@@ -259,14 +294,18 @@ class SongSearchHelper {
         }
 
         if (empty($safeTerms)) {
-            return $exactSongByNum ? [$exactSongByNum] : [];
+            return ['data' => $exactSongByNum && (int)($filters['offset'] ?? 0) <= 0 ? [$exactSongByNum] : [],
+                'total' => $exactSongByNum ? 1 : 0, 'limit' => min(200, max(1, (int)($filters['limit'] ?? 200))),
+                'offset' => max(0, (int)($filters['offset'] ?? 0))];
         }
 
         $ftsMatchExpr = implode(' AND ', $safeTerms);
+        if ($mode === 'lyric') $ftsMatchExpr = '{lyrics_text lyrics_unaccented}: (' . $ftsMatchExpr . ')';
 
         try {
             $exactClauses = []; $prefixClauses = []; $containsClauses = [];
             $params = [':matchExpr' => $ftsMatchExpr];
+            $params[':lyricPhrase'] = mb_strtolower(self::removeAccents($cleanQuery), 'UTF-8');
             foreach ($variants as $idx => $v) {
                 $pEx = ":ex_{$idx}"; $pPre = ":pre_{$idx}"; $pCont = ":cont_{$idx}";
                 $exactClauses[] = "lower(s.title) = {$pEx} OR lower(f.title_unaccented) = {$pEx}";
@@ -283,6 +322,7 @@ class SongSearchHelper {
                        s.liturgical_season, s.theme, s.composer, s.tags, s.lyrics_text, s.tempo,
                        COALESCE(s.visibility, 'public') as visibility, COALESCE(s.is_public, 1) as is_public,
                        c.name as category,
+                       CASE WHEN instr(lower(replace(f.lyrics_unaccented, '-', ' ')), :lyricPhrase) > 0 THEN instr(lower(replace(f.lyrics_unaccented, '-', ' ')), :lyricPhrase) ELSE 999999 END as lyric_phrase,
                        bm25(songs_fts) as fts_rank,
                        CASE
                            WHEN (" . implode(' OR ', $exactClauses) . ") THEN 1
@@ -300,39 +340,31 @@ class SongSearchHelper {
                 WHERE songs_fts MATCH :matchExpr AND {$visWhere}
             ";
 
-            if ($season !== '') { $sql .= " AND s.liturgical_season = :season"; $params[':season'] = $season; }
-            if ($theme !== '') { $sql .= " AND s.theme = :theme"; $params[':theme'] = $theme; }
+            self::appendTaxonomyFilters($sql, $params, [$season, $theme]);
             if ($category !== '') { $sql .= " AND c.name = :catName"; $params[':catName'] = $category; }
             if ($categoryId !== null) { $sql .= " AND s.category_id = :catId"; $params[':catId'] = $categoryId; }
+            if ($key !== '') { $sql .= " AND s.defaultKey = :key"; $params[':key'] = $key; }
+            if ($exactSongByNum !== null) { $sql .= " AND s.id != :exactId"; $params[':exactId'] = $exactSongByNum['id']; }
 
             $orderBy = ($mode === 'lyric')
-                ? " ORDER BY (CASE WHEN match_type = 'lyric' THEN 0 ELSE 1 END) ASC, fts_rank ASC, COALESCE(s.category_id, 1) ASC, COALESCE(s.httlvnId, 999999) ASC"
+                ? " ORDER BY lyric_phrase ASC, fts_rank ASC, COALESCE(s.category_id, 1) ASC, COALESCE(s.httlvnId, 999999) ASC"
                 : " ORDER BY relevance_tier ASC, (CASE WHEN relevance_tier < 4 THEN COALESCE(s.category_id, 1) ELSE 0 END) ASC, (CASE WHEN relevance_tier < 4 THEN COALESCE(s.httlvnId, 999999) ELSE 0 END) ASC, fts_rank ASC, COALESCE(s.category_id, 1) ASC, COALESCE(s.httlvnId, 999999) ASC";
-            $sql .= $orderBy . " LIMIT " . (int)$limit;
-
-            $stmt = DB::pdo()->prepare($sql);
-            $stmt->execute($params);
-            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $sql .= $orderBy . ', s.title ASC, s.id ASC';
+            $page = SongSearchPage::fetch($sql, $params, $filters, $exactSongByNum);
+            $rows = $page['data'];
 
             foreach ($rows as &$song) {
+                if ($mode === 'lyric') $song['match_type'] = 'lyric';
                 $lyrics = $song['lyrics_text'] ?? '';
                 $snippet = self::createLyricSnippet($lyrics, $cleanQuery, self::removeAccents($cleanQuery));
                 if ($snippet !== null) $song['lyric_snippet'] = $snippet;
                 unset($song['lyrics_text']);
             }
 
-            if ($exactSongByNum !== null) {
-                $rows = array_values(array_filter($rows, fn($r) => (string)$r['id'] !== (string)$exactSongByNum['id']));
-                array_unshift($rows, $exactSongByNum);
-            }
-            return $rows;
+            $page['data'] = $rows;
+            return $page;
         } catch (\Throwable $e) {
-            $rows = self::fallbackLikeSearch($cleanQuery, $filters);
-            if ($exactSongByNum !== null) {
-                $rows = array_values(array_filter($rows, fn($r) => $r['id'] !== $exactSongByNum['id']));
-                array_unshift($rows, $exactSongByNum);
-            }
-            return $rows;
+            return self::fallbackLikePage($cleanQuery, $filters, $exactSongByNum);
         }
     }
 
@@ -356,34 +388,13 @@ class SongSearchHelper {
 
     public static function createLyricSnippet(string $lyrics, string $cleanQuery, string $unaccentedQuery): ?string {
         if ($lyrics === '' || $cleanQuery === '') return null;
-        $variants = self::getQueryVariants($cleanQuery);
-
-        $pos = false;
-        $matchLen = 0;
-        foreach ($variants as $v) {
-            $p = mb_stripos($lyrics, $v);
-            if ($p !== false) { $pos = $p; $matchLen = mb_strlen($v); break; }
-            $unaccV = self::removeAccents($v);
-            $unaccLyr = self::removeAccents($lyrics);
-            $p = mb_stripos($unaccLyr, $unaccV);
-            if ($p !== false) { $pos = $p; $matchLen = mb_strlen($unaccV); break; }
-        }
-
-        if ($pos === false) {
-            $words = preg_split('/\s+/u', $cleanQuery, -1, PREG_SPLIT_NO_EMPTY);
-            foreach ($words as $w) {
-                if (mb_strlen($w) >= 2) {
-                    $p = mb_stripos($lyrics, $w);
-                    if ($p !== false) { $pos = $p; $matchLen = mb_strlen($w); break; }
-                    $unaccW = self::removeAccents($w);
-                    $unaccLyrics = self::removeAccents($lyrics);
-                    $pos = mb_stripos($unaccLyrics, $unaccW);
-                    if ($pos !== false) { $matchLen = mb_strlen($unaccW); break; }
-                }
-            }
-        }
-
-        if ($pos === false) return null;
+        $phrase = self::highlightPattern($cleanQuery, true);
+        $pattern = self::highlightPattern($cleanQuery);
+        if ($pattern === null) return null;
+        if (!preg_match($phrase, $lyrics, $match, PREG_OFFSET_CAPTURE)
+            && !preg_match($pattern, $lyrics, $match, PREG_OFFSET_CAPTURE)) return null;
+        $pos = mb_strlen(substr($lyrics, 0, $match[0][1]));
+        $matchLen = mb_strlen($match[0][0]);
 
         $lyricsLen = mb_strlen($lyrics);
         $preSub = mb_substr($lyrics, 0, $pos);
@@ -441,38 +452,47 @@ class SongSearchHelper {
         $suffix = ($sentenceEndPos < $lyricsLen && !preg_match('/[.!?]$/u', $slice)) ? ' ...' : '';
 
         $rawSnippet = $prefix . $slice . $suffix;
-        $escaped = htmlspecialchars($rawSnippet, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        return self::highlightRawText($rawSnippet, $cleanQuery);
+    }
 
-        $reJesus = '/(?:gi[eê][\s\-]+xu|gi[eê]xu|j[eê][\s\-]+sus|j[eê]sus)/ui';
-        $hasJesus = preg_match($reJesus, $cleanQuery);
-        if ($hasJesus) {
-            $escaped = preg_replace('/(J[êe]\-?sus|Gi[êe]\-?xu)/ui', '<mark>$1</mark>', $escaped);
-        }
+    private static function highlightPattern(string $query, bool $phraseOnly = false): ?string {
+        $alias = '/(?:gi[eê][\s\-]+xu|gi[eê]xu|j[eê][\s\-]+sus|j[eê]sus)/ui';
+        $query = preg_replace($alias, ' JESUSALIAS ', $query);
+        $words = preg_split('/\s+/u', trim($query), -1, PREG_SPLIT_NO_EMPTY);
+        $parts = array_map(static fn($word) => $word === 'JESUSALIAS'
+            ? '(?:j[êe][\s-]?sus|gi[êe][\s-]?xu)'
+            : self::vietnameseAccentRegex(self::removeAccents($word)), $words);
+        if (!$parts) return null;
+        $alternatives = array_values(array_unique(array_merge([implode('[\s-]+', $parts)], $phraseOnly ? [] : $parts)));
+        return '/(?<![\p{L}\p{N}\p{M}_])(?:' . implode('|', $alternatives) . ')(?![\p{L}\p{N}\p{M}_])/iu';
+    }
 
-        $wordsToHighlight = preg_split('/\s+/u', trim($cleanQuery), -1, PREG_SPLIT_NO_EMPTY);
-        if (count($wordsToHighlight) > 1 && !$hasJesus) {
-            $phrasePatternParts = array_map(fn($w) => self::vietnameseAccentRegex(htmlspecialchars($w, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')), $wordsToHighlight);
-            $fullPattern = '/(' . implode('\s+', $phrasePatternParts) . ')/iu';
-            $highlighted = preg_replace($fullPattern, '<mark>$1</mark>', $escaped);
-            if ($highlighted && $highlighted !== $escaped) return $highlighted;
+    /** Match raw text once, then escape each span; never search inside HTML entities. */
+    private static function highlightRawText(string $text, string $query): string {
+        $escape = static fn($value) => htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $pattern = self::highlightPattern($query);
+        if ($pattern === null) return $escape($text);
+        if (!preg_match_all($pattern, $text, $matches, PREG_OFFSET_CAPTURE)) return $escape($text);
+        $html = ''; $cursor = 0;
+        foreach ($matches[0] as [$match, $offset]) {
+            $html .= $escape(substr($text, $cursor, $offset - $cursor)) . '<mark>' . $escape($match) . '</mark>';
+            $cursor = $offset + strlen($match);
         }
-
-        foreach ($wordsToHighlight as $w) {
-            if ($hasJesus && (preg_match($reJesus, $w) || in_array(mb_strtolower($w), ['gie','xu','giê'], true))) continue;
-            $safeW = htmlspecialchars($w, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-            $pat = '/' . self::vietnameseAccentRegex($safeW) . '/iu';
-            $escaped = preg_replace($pat, '<mark>$0</mark>', $escaped);
-        }
-        $escaped = preg_replace('/<mark>(?:<mark>)+(.*?)(?:<\/mark>)+<\/mark>/iu', '<mark>$1</mark>', $escaped);
-        return $escaped ?: $rawSnippet;
+        return $html . $escape(substr($text, $cursor));
     }
 
     public static function fallbackLikeSearch(string $query, array $filters = []): array {
+        return self::fallbackLikePage($query, $filters)['data'];
+    }
+
+    private static function fallbackLikePage(string $query, array $filters, ?array $exactSongByNum = null): array {
         $cleanQuery = trim($query);
         $season = trim($filters['season'] ?? '');
         $theme = trim($filters['theme'] ?? '');
         $categoryId = isset($filters['category_id']) && $filters['category_id'] !== '' ? (int)$filters['category_id'] : null;
-        $limit = isset($filters['limit']) ? min(100, max(1, (int)$filters['limit'])) : 50;
+        $category = trim($filters['category'] ?? '');
+        $key = trim($filters['key'] ?? '');
+        $mode = $filters['mode'] ?? 'title';
         $variants = self::getQueryVariants($cleanQuery);
         $visWhere = class_exists('SongService') ? SongService::visibilitySqlClause('s') : '1=1';
 
@@ -482,12 +502,12 @@ class SongSearchHelper {
             $exactClauses[] = "lower(s.title) = ?";
             $prefixClauses[] = "lower(s.title) LIKE ?";
             $containsClauses[] = "lower(s.title) LIKE ?";
-            $whereClauses[] = "(s.title LIKE ? OR s.lyrics_text LIKE ? OR s.theme LIKE ? OR s.composer LIKE ?)";
+            $whereClauses[] = $mode === 'lyric' ? '(s.lyrics_text LIKE ?)' : "(s.title LIKE ? OR s.lyrics_text LIKE ? OR s.theme LIKE ? OR s.composer LIKE ?)";
         }
 
         $sql = "
             SELECT s.id, s.title, s.httlvnId, s.xmlPath, s.defaultKey, s.category_id,
-                   s.liturgical_season, s.theme, s.composer, s.tags, s.lyrics_text,
+                   s.liturgical_season, s.theme, s.composer, s.tags, s.lyrics_text, s.tempo,
                    COALESCE(s.visibility, 'public') as visibility, COALESCE(s.is_public, 1) as is_public,
                    c.name as category,
                    CASE
@@ -511,23 +531,27 @@ class SongSearchHelper {
         foreach ($variants as $v) { $params[] = '%' . $v . '%'; }
         foreach ($variants as $v) {
             $kw = '%' . $v . '%';
-            $params[] = $kw; $params[] = $kw; $params[] = $kw; $params[] = $kw;
+            $params[] = $kw;
+            if ($mode !== 'lyric') { $params[] = $kw; $params[] = $kw; $params[] = $kw; }
         }
 
-        if ($season !== '') { $sql .= " AND s.liturgical_season = ?"; $params[] = $season; }
-        if ($theme !== '') { $sql .= " AND s.theme = ?"; $params[] = $theme; }
+        self::appendTaxonomyFilters($sql, $params, [$season, $theme]);
         if ($categoryId !== null) { $sql .= " AND s.category_id = ?"; $params[] = $categoryId; }
-        $sql .= " ORDER BY relevance_tier ASC, COALESCE(s.category_id, 1) ASC, COALESCE(s.httlvnId, 999999) ASC LIMIT ?";
-        $params[] = $limit;
-
-        $rows = DB::run($sql, $params)->fetchAll() ?: [];
+        if ($category !== '') { $sql .= " AND c.name = ?"; $params[] = $category; }
+        if ($key !== '') { $sql .= " AND s.defaultKey = ?"; $params[] = $key; }
+        if ($exactSongByNum !== null) { $sql .= " AND s.id != ?"; $params[] = $exactSongByNum['id']; }
+        $sql .= " ORDER BY relevance_tier ASC, COALESCE(s.category_id, 1) ASC, COALESCE(s.httlvnId, 999999) ASC, s.title ASC, s.id ASC";
+        $page = SongSearchPage::fetch($sql, $params, $filters, $exactSongByNum);
+        $rows = $page['data'];
         foreach ($rows as &$song) {
+            if ($mode === 'lyric') $song['match_type'] = 'lyric';
             $lyrics = $song['lyrics_text'] ?? '';
             $snippet = self::createLyricSnippet($lyrics, $cleanQuery, self::removeAccents($cleanQuery));
             if ($snippet !== null) $song['lyric_snippet'] = $snippet;
             unset($song['lyrics_text']);
         }
-        return $rows;
+        $page['data'] = $rows;
+        return $page;
     }
 
     public static function searchByLyric(string $q): array {

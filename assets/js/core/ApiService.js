@@ -78,7 +78,7 @@ const ApiService = (() => {
           .then(res => {
             const items = Array.isArray(res) ? res : (res?.data || []);
             if (items.length > 0) window.OfflineVault?.saveCatalog?.(items);
-            return res;
+            return items;
           })
           .catch(async err => {
             const idbCatalog = await window.OfflineVault?.getCatalog?.();
@@ -116,6 +116,9 @@ const ApiService = (() => {
       if (filters.category_id) p.set('category_id', filters.category_id);
       if (filters.mode)   p.set('mode', filters.mode);
       if (filters.limit)  p.set('limit', filters.limit);
+      if (filters.offset != null) p.set('offset', filters.offset);
+      if (filters.key) p.set('key', filters.key);
+      if (filters.sort) p.set('sort', filters.sort);
       return _request(`api/index.php?${p.toString()}`);
     },
     getTaxonomy: ()       => _request('api/index.php?route=songs&action=taxonomy'),

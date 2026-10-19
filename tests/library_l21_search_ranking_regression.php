@@ -134,9 +134,9 @@ check(
 
 // 9. Frontend LibraryUI: Giữ nguyên thứ tự xếp hạng (Relevance Ranking) của API
 check(
-    strpos($libraryJs, 'if (!q)') !== false && strpos($libraryJs, '_sortSongs(list)') !== false,
-    'Frontend: LibraryUI bảo tồn thứ tự xếp hạng của API tìm kiếm, không tự ý sort đè',
-    true
+    str_contains($libraryJs, 'LibrarySearch.run') && str_contains(file_get_contents($root . '/assets/js/core/LibrarySearch.js'), 'rows.concat(response.data'),
+    'Frontend: phân trang chung ghép kết quả API đúng thứ tự (static guard; hành vi kiểm ở E2E TV1)',
+    false
 );
 
 // 10. CSS Layout: Có kiểu dáng cho tiêu đề nhóm tìm kiếm
