@@ -1,29 +1,21 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
+const { collectLibraryLoad, throttle4G } = require('./helpers/library-load-metrics');
 
-/**
- * e2e/library-l5-performance-budget.spec.js
- *
- * Kiểm thử Nghiệm thu Ticket L5-9 (ROADMAP 4 Mục 8):
- * Ngân sách hiệu năng trong CI (Performance Budget CI Quality Gate)
- *
- * Các chỉ số ngân sách bắt buộc (Strict Performance Budget Limits):
- * - BUDGET_INITIAL_RENDER_MS: ≤ 4500 ms (Thời gian hiện bản nhạc lần đầu)
- * - BUDGET_SONG_SWITCH_MS:    ≤ 1800 ms (Thời gian chuyển bài tiếp theo)
- * - BUDGET_RENDER_COUNT:      === 1 (Số lần gọi render OSMD khi đổi bài)
- * - BUDGET_NETWORK_REQUESTS:  ≤ 4 (Số request mạng khi đổi bài)
- * - BUDGET_TRANSPOSE_MS:      ≤ 300 ms (Thời gian dịch tông tức thời)
- * - BUDGET_INITIAL_SCRIPTS:   ≤ 100 (chỉ chặn nạp trùng/phình bất thường; ngân sách ≤ 30 cũ
- *                             đã bị bỏ vì đạt được bằng cách gỡ module chức năng)
+/** ROADMAP6 TV2-1: strict network budgets, measured through first visible SVG
+ * and network idle. Cold browser cache; Chromium 4G = 1.6 Mbps down / 750 kbps
+ * up / 150 ms latency. No CPU throttling; localhost server may already be warm.
+ * The initial-load budget remains RED until TV2-2 through TV2-4 reaches these limits.
  */
-
 const BUDGETS = {
-  INITIAL_RENDER_MS: 4500,
+  INITIAL_RENDER_MS: 2500,
   SONG_SWITCH_MS: 1800,
   RENDER_COUNT: 1,
   NETWORK_REQUESTS: 4,
   TRANSPOSE_MS: 300,
-  INITIAL_SCRIPTS: 100,
+  INITIAL_SCRIPTS: 40,
+  INITIAL_REQUESTS: 60,
+  INITIAL_BYTES: 1500000,
 };
 
 test.describe('L5-9 · Ngân Sách Hiệu Năng Trong CI (Performance Budget Quality Gate)', () => {
@@ -37,31 +29,25 @@ test.describe('L5-9 · Ngân Sách Hiệu Năng Trong CI (Performance Budget Qua
     });
   });
 
-  test('1. [Budget B1 & B6] Thời gian hiện bản nhạc lần đầu ≤ 4500ms và số script không phình bất thường', async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 800 });
-
-    const startTime = Date.now();
-    await page.goto('./?song=thanh-ca-001', { waitUntil: 'domcontentloaded' });
-
-    // Đo số script tag ban đầu
-    const scriptCount = await page.locator('script').count();
-    console.log(`[PERF BUDGET] Initial Scripts Count: ${scriptCount} (Ngân sách ≤ ${BUDGETS.INITIAL_SCRIPTS})`);
-    expect(
-      scriptCount,
-      `Số lượng script nạp ban đầu (${scriptCount}) vượt quá ngân sách ${BUDGETS.INITIAL_SCRIPTS}`
-    ).toBeLessThanOrEqual(BUDGETS.INITIAL_SCRIPTS);
-
-    // Chờ bản nhạc SVG đầu tiên hiển thị
-    const svg = page.locator('#osmd-container svg').first();
-    await expect(svg).toBeVisible({ timeout: BUDGETS.INITIAL_RENDER_MS });
-    const initialRenderDuration = Date.now() - startTime;
-
-    console.log(`[PERF BUDGET] Initial Song Render Time: ${initialRenderDuration}ms (Ngân sách ≤ ${BUDGETS.INITIAL_RENDER_MS}ms)`);
-    expect(
-      initialRenderDuration,
-      `Thời gian render bản nhạc đầu tiên (${initialRenderDuration}ms) vượt quá ngân sách ${BUDGETS.INITIAL_RENDER_MS}ms`
-    ).toBeLessThanOrEqual(BUDGETS.INITIAL_RENDER_MS);
-  });
+  for (const classic of [false, true]) {
+    test(`1. [Budget B1 & B6] ${classic ? 'Classic' : 'Modern'} cold 4G load stays within network budgets`, async ({ page, browserName }) => {
+      test.skip(browserName !== 'chromium', '4G CDP measurements require Chromium');
+      test.setTimeout(90000);
+      await page.setViewportSize({ width: 390, height: 844 });
+      await throttle4G(page);
+      const finish = collectLibraryLoad(page);
+      const started = Date.now();
+      await page.goto(`${classic ? 'old/' : './'}?song=thanh-ca-001&v=sheet`, { waitUntil: 'domcontentloaded', timeout: 60000 });
+      await expect(page.locator('#osmd-container svg').first()).toBeVisible({ timeout: 60000 });
+      const metrics = await finish(Date.now() - started);
+      console.log('[TV2 INITIAL LOAD]', JSON.stringify(metrics));
+      expect.soft(metrics.failures, 'Every network transfer must be measurable').toEqual([]);
+      expect.soft(metrics.scripts).toBeLessThanOrEqual(BUDGETS.INITIAL_SCRIPTS);
+      expect.soft(metrics.requests).toBeLessThanOrEqual(BUDGETS.INITIAL_REQUESTS);
+      expect.soft(metrics.transferBytes).toBeLessThanOrEqual(BUDGETS.INITIAL_BYTES);
+      expect.soft(metrics.firstSvgMs).toBeLessThanOrEqual(BUDGETS.INITIAL_RENDER_MS);
+    });
+  }
 
   test('2. [Budget B2, B3, B4] Chuyển bài tiếp theo: thời gian ≤ 1800ms, renderCount === 1, network requests ≤ 4', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
