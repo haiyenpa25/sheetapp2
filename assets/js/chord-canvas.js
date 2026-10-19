@@ -391,7 +391,6 @@ const ChordCanvas = (() => {
     try {
       const r = await window.ApiService.chordSets.save(songId, name, []);
       if (!r.success) { window.App?.showToast?.('Tạo thất bại', 'error'); return; }
-      _chordSetsCache.delete(songId);
     } catch(e) { return; }
 
     await switchSet(name);
@@ -439,7 +438,6 @@ const ChordCanvas = (() => {
     if (!songId) return;
     try {
       await window.ApiService.chordSets.delete(songId, name);
-      _chordSetsCache.delete(songId);
     } catch(e) {}
     if (_currentSet === name) await switchSet('HD');
     _refreshSetDropdown(true);
@@ -454,9 +452,7 @@ const ChordCanvas = (() => {
   }
 
   /* ─── Set dropdown UI ───────────────────────────────────────── */
-  const _chordSetsCache = new Map();
-
-  async function _refreshSetDropdown(forceRefresh = false) {
+  async function _refreshSetDropdown(forceRefresh = false, fetchNames = false) {
     const selector  = document.getElementById('chord-set-selector');
     const deleteBtn = document.getElementById('btn-delete-chord-set');
     const countBadge = document.getElementById('chord-set-count');
@@ -471,24 +467,23 @@ const ChordCanvas = (() => {
     selector.disabled = false;
     if (!selector._hasLazyListener) {
       selector._hasLazyListener = true;
-      selector.addEventListener('focus', () => _refreshSetDropdown(true));
-      selector.addEventListener('mousedown', () => _refreshSetDropdown(true));
+      selector.addEventListener('focus', () => _refreshSetDropdown(false, true));
+      selector.addEventListener('pointerdown', () => _refreshSetDropdown(false, true));
+      selector.addEventListener('mousedown', () => _refreshSetDropdown(false, true));
     }
 
     let sets = ['HD', 'default'];
-    try {
-      let cached = !forceRefresh ? _chordSetsCache.get(songId) : null;
-      if (cached) {
-        sets = cached;
-      } else {
+    if (fetchNames || forceRefresh) {
+      if (forceRefresh) window.ApiService.chordSets.clearCache(songId);
+      try {
         const r = await window.ApiService.chordSets.list(songId);
-        if (r && r.success && Array.isArray(r.sets)) {
-          const otherSets = r.sets.filter(s => s !== 'HD' && s !== 'default');
-          sets = ['HD', 'default', ...otherSets];
-          _chordSetsCache.set(songId, sets);
+        if (songId !== window.App?.getCurrentSongId?.()) return;
+        if (r?.success && Array.isArray(r.sets)) {
+          sets = ['HD', 'default', ...r.sets.filter(s => s !== 'HD' && s !== 'default')];
         }
-      }
-    } catch(e) {}
+      } catch(e) {}
+    }
+    if (songId !== window.App?.getCurrentSongId?.()) return;
 
     // R2-8 (B10): Luôn đảm bảo _currentSet có mặt trong options
     if (_currentSet && _currentSet !== 'default' && !sets.includes(_currentSet)) {
@@ -556,7 +551,7 @@ const ChordCanvas = (() => {
     toggleSuggestions: (show) => { _showTlhHints = (show !== undefined ? !!show : !_showTlhHints); _build(); return _showTlhHints; },
     isSuggestionMode: () => _showTlhHints,
     setShowTlhSuggestions: (val) => { _showTlhHints = !!val; _build(); },
-    clearSetsCache: (songId) => _chordSetsCache.delete(songId),
+    clearSetsCache: (songId) => window.ApiService.chordSets.clearCache(songId),
     undo: () => window.ChordCanvasEdit?.undo?.(),
     redo: () => window.ChordCanvasEdit?.redo?.(),
     getCurrentSet: () => _currentSet,

@@ -400,7 +400,7 @@ const ChordCanvas = (() => {
 
     await switchSet(name);
     setAddMode(true);
-    await _refreshSetDropdown();
+    await _refreshSetDropdown(true);
     window.App?.showToast?.(`Đã tạo bộ "${name}" - bắt đầu nhập!`, 'success');
   }
 
@@ -417,10 +417,10 @@ const ChordCanvas = (() => {
     if (!songId) return;
     try { await window.ApiService.chordSets.delete(songId, name); } catch(e) {}
     if (_currentSet === name) await switchSet('HD');
-    _refreshSetDropdown();
+    _refreshSetDropdown(true);
   }
 
-  async function _refreshSetDropdown() {
+  async function _refreshSetDropdown(forceRefresh = false, fetchNames = false) {
     const selector   = document.getElementById('chord-set-selector');
     const deleteBtn  = document.getElementById('btn-delete-chord-set');
     const countBadge = document.getElementById('chord-set-count');
@@ -434,14 +434,25 @@ const ChordCanvas = (() => {
     }
 
     selector.disabled = false;
-    let sets = ['default'];
-    try {
-      const r = await window.ApiService.chordSets.list(songId);
-      if (r.success) {
-        const hdInList = r.sets.some(s => s === 'HD');
-        sets = ['default', ...(hdInList ? r.sets : ['HD', ...r.sets])];
+    if (!selector._hasLazyListener) {
+      selector._hasLazyListener = true;
+      for (const event of ['focus', 'pointerdown', 'mousedown']) {
+        selector.addEventListener(event, () => _refreshSetDropdown(false, true));
       }
-    } catch(e) {}
+    }
+    let sets = ['default', 'HD'];
+    if (fetchNames || forceRefresh) {
+      if (forceRefresh) window.ApiService.chordSets.clearCache(songId);
+      try {
+        const r = await window.ApiService.chordSets.list(songId);
+        if (songId !== window.App?.getCurrentSongId?.()) return;
+        if (r?.success && Array.isArray(r.sets)) {
+          sets = ['default', 'HD', ...r.sets.filter(s => s !== 'HD' && s !== 'default')];
+        }
+      } catch(e) {}
+    }
+    if (songId !== window.App?.getCurrentSongId?.()) return;
+    if (_currentSet && !sets.includes(_currentSet)) sets.push(_currentSet);
 
     const chordCount = Object.keys(_customChords).length;
     if (countBadge) {
