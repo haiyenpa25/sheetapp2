@@ -109,12 +109,12 @@ check(file_exists($ccFile), "chord-canvas.js exists");
 $ccContent = file_get_contents($ccFile);
 
 check(
-    strpos($ccContent, '_chordSetsCache') !== false,
-    "chord-canvas.js implements _chordSetsCache to avoid duplicate chordSets.list requests"
+    strpos($ccContent, 'if (fetchNames || forceRefresh)') !== false,
+    "chord-canvas.js requests set names only on demand or after mutation"
 );
 check(
-    strpos($ccContent, '_chordSetsCache.delete(songId)') !== false,
-    "chord-canvas.js invalidates cache on mutating actions (create, delete, clone)"
+    strpos($ccContent, 'window.ApiService.chordSets.clearCache(songId)') !== false,
+    "chord-canvas.js delegates invalidation to the shared ApiService cache"
 );
 
 $slFile = $root . '/assets/js/song-loader.js';

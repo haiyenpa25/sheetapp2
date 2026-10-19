@@ -77,9 +77,10 @@ $songLoaderContent = file_get_contents($songLoaderFile);
 assertCondition(
     strpos($liveSyncContent, 'performance/musical-position.js') !== false &&
     strpos($liveSyncContent, 'performance/arrangement-engine.js') !== false &&
-    strpos($songLoaderContent, 'window.LiveSync?.ensureLoaded') !== false,
-    "live-sync.js nạp lazy các module phân đoạn và song-loader.js kích hoạt on-demand khi mở bài",
-    true
+    strpos(file_get_contents(__DIR__ . '/../assets/js/core/ModeManager.js'), 'window.LiveSync?.ensureLoaded') !== false &&
+    strpos($songLoaderContent, 'window.LiveSync?.ensureLoaded') === false,
+    "LiveSync giữ module phân đoạn; ModeManager kích hoạt theo nhu cầu, SongLoader không tự tải khi đọc",
+    false
 );
 
 // =========================================================================

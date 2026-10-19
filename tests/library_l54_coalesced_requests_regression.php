@@ -90,9 +90,11 @@ reportCheck("SongLoader.load truyền settings vào PerformanceNotes.loadSong",
     true
 );
 
-// ChordCanvas cache danh sách bộ hợp âm theo phiên
-reportCheck("ChordCanvas duy trì _chordSetsCache theo phiên",
-    strpos($chordCanvasContent, '_chordSetsCache') !== false && strpos($chordCanvasContent, '_chordSetsCache.set(songId, sets)') !== false,
+// TV2: exercise the actual ApiService cache instead of requiring a duplicate UI cache.
+$cacheOutput = shell_exec('node ' . escapeshellarg(__DIR__ . '/fixtures/tv2_chord_cache.cjs') . ' 2>&1');
+$cacheResult = json_decode(trim($cacheOutput ?? ''), true);
+reportCheck("ApiService thật gộp request/cache và vô hiệu hóa sau clear/save/clone/delete",
+    is_array($cacheResult) && count($cacheResult) === 5 && !in_array(false, $cacheResult, true),
     true
 );
 
