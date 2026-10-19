@@ -1,0 +1,20 @@
+
+Running 7 tests using 1 worker
+
+node.exe : (node:11556) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:11556) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › e2e\library-tv2-audio-http.spec.js:5:3 › Modern reading creates no AudioContext and audio vendors wait for playback (1.5s)
+  ok 2 [chromium] › e2e\library-tv2-audio-http.spec.js:27:3 › Modern first playback loads real vendors and supports stop and timbre changes (3.5s)
+  ok 3 [chromium] › e2e\library-tv2-audio-http.spec.js:5:3 › Classic reading creates no AudioContext and audio vendors wait for playback (1.5s)
+  ok 4 [chromium] › e2e\library-tv2-audio-http.spec.js:27:3 › Classic first playback loads real vendors and supports stop and timbre changes (2.0s)
+  ok 5 [chromium] › e2e\library-tv2-audio-races.spec.js:30:1 › Stop while vendors load prevents any score/player startup; resume is synchronous in the click (287ms)
+  ok 6 [chromium] › e2e\library-tv2-audio-races.spec.js:39:1 › Double play shares one pending load and a new song cancels the old score (154ms)
+  ok 7 [chromium] › e2e\library-tv2-audio-races.spec.js:55:1 › Stop during an asynchronous native play also stops a late vendor start (172ms)
+
+  7 passed (9.9s)

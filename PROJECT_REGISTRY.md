@@ -1,5 +1,13 @@
 # PROJECT_REGISTRY.md — Sơ Đồ Dự Án SheetApp
 
+[2026-10-19] — ROADMAP6 TV2-4 và tối ưu truyền tải theo yêu cầu chủ dự án:
+  ~ Hai entry tải Tone/SATB khi phát; AudioPlayer resume context trước await, dùng chung context với Tone/player, hủy tải/phát muộn khi dừng hoặc đổi bài. ScriptLoader sửa base Classic và thử lại script lỗi.
+  + tools/generate_asset_gzip.php, bốn sidecar gzip và assets/.htaccess: nén trước OSMD + ba CSS lớn, giữ MIME/Vary/ETag/Range và q=0; nguồn ghim LF để build nhất quán Windows/Linux. Không đổi cấu hình/restart Apache toàn máy.
+  + tests/library_tv2_gzip_regression.php: 56 check (52 hành vi / 4 tồn tại file). Ba spec Chromium mới: startup/phát thật hai UI, hủy phát đang chờ, base path/retry loader.
+  ~ Đo cùng 4G: Modern 3.524.545 → 1.993.443 byte, SVG 24.302 → 11.225 ms; Classic 2.618.848 → 1.299.141 byte, SVG 20.154 → 7.759 ms. Cảnh báo AudioContext đầu trang về 0. Ngân sách tổng vẫn 2 FAIL; chưa hoàn tất TV2.
+  ~ Cổng cuối tuần tự trên bản sao: 99/99 Chromium ROADMAP6, 174/174 suite PHP / 3.399 check, 331 PHP lint PASS; ESLint phần sửa và git diff --check PASS. DB nguồn giữ nguyên SHA256 A91268B27DF548845C67B8F375C2D13B5899FFA4716BA99A00D59E4BC157CAC9; main sạch.
+  ~ Chi tiết/bằng chứng và lệnh build --check: docs/ROADMAP6_TV2_AUDIO_COMPRESSION.md. Tiếp tục xuất bản feature/roadmap6-library-20261019; không merge main/deploy, không sửa bảng quyết định/chữ ký.
+
 [2026-10-19] — ROADMAP6 TV2 tiếp tục và đẩy lên nhánh GitHub đã có:
   ~ Modern/Classic chỉ tải danh sách bộ hợp âm khi dùng dropdown; dùng chung cache/in-flight của ApiService, giữ refresh sau thao tác ghi.
   ~ Modern tải lịch sử dùng bài khi mở ⓘ, Performance khi mở tính năng; chặn phân đoạn đến muộn sau đổi bài, nhớ kết quả rỗng, cho thử lại usage sau lỗi mạng.

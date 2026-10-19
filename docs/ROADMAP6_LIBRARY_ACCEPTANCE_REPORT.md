@@ -7,6 +7,8 @@ Xem [phân tích phạm vi](ROADMAP6_CLASSIC_MODERN_ANALYSIS.md).
 Đợt tiếp tục TV2: xem [thay đổi, số đo và giới hạn](ROADMAP6_TV2_PROGRESS.md).
 Ngân sách 4G hiện **FAIL ở cả hai giao diện**, được báo riêng với kiểm thử hành vi.
 
+Đợt mới nhất: [âm thanh theo nhu cầu và nén tài nguyên](ROADMAP6_TV2_AUDIO_COMPRESSION.md).
+
 ## Kết quả TV0
 
 | Ticket | Thay đổi / xác minh | Log trong `test-results/roadmap6-evidence/` |

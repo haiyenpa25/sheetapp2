@@ -1,0 +1,57 @@
+[PASS:S] sidecar exists: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:B] gunzip is byte-identical: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:B] sidecar cuts transport by more than half: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:S] sidecar exists: assets/css/sheet.css
+[PASS:B] gunzip is byte-identical: assets/css/sheet.css
+[PASS:B] sidecar cuts transport by more than half: assets/css/sheet.css
+[PASS:S] sidecar exists: assets/css/layout.css
+[PASS:B] gunzip is byte-identical: assets/css/layout.css
+[PASS:B] sidecar cuts transport by more than half: assets/css/layout.css
+[PASS:S] sidecar exists: assets/css/library-polish.css
+[PASS:B] gunzip is byte-identical: assets/css/library-polish.css
+[PASS:B] sidecar cuts transport by more than half: assets/css/library-polish.css
+[PASS:B] HTTP serves gzip: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:B] HTTP gzip decodes exactly: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:B] HTTP preserves MIME: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:B] HTTP declares encoding variance: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:B] identity stays uncompressed: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:B] gzip q=0 is respected: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:B] identity also declares variance: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:B] representations have distinct ETags: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:B] gzip conditional request returns 304: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:B] gzip ETag does not suppress identity: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:B] range stays a valid identity range: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:B] HTTP serves gzip: assets/css/sheet.css
+[PASS:B] HTTP gzip decodes exactly: assets/css/sheet.css
+[PASS:B] HTTP preserves MIME: assets/css/sheet.css
+[PASS:B] HTTP declares encoding variance: assets/css/sheet.css
+[PASS:B] identity stays uncompressed: assets/css/sheet.css
+[PASS:B] gzip q=0 is respected: assets/css/sheet.css
+[PASS:B] identity also declares variance: assets/css/sheet.css
+[PASS:B] representations have distinct ETags: assets/css/sheet.css
+[PASS:B] gzip conditional request returns 304: assets/css/sheet.css
+[PASS:B] gzip ETag does not suppress identity: assets/css/sheet.css
+[PASS:B] range stays a valid identity range: assets/css/sheet.css
+[PASS:B] HTTP serves gzip: assets/css/layout.css
+[PASS:B] HTTP gzip decodes exactly: assets/css/layout.css
+[PASS:B] HTTP preserves MIME: assets/css/layout.css
+[PASS:B] HTTP declares encoding variance: assets/css/layout.css
+[PASS:B] identity stays uncompressed: assets/css/layout.css
+[PASS:B] gzip q=0 is respected: assets/css/layout.css
+[PASS:B] identity also declares variance: assets/css/layout.css
+[PASS:B] representations have distinct ETags: assets/css/layout.css
+[PASS:B] gzip conditional request returns 304: assets/css/layout.css
+[PASS:B] gzip ETag does not suppress identity: assets/css/layout.css
+[PASS:B] range stays a valid identity range: assets/css/layout.css
+[PASS:B] HTTP serves gzip: assets/css/library-polish.css
+[PASS:B] HTTP gzip decodes exactly: assets/css/library-polish.css
+[PASS:B] HTTP preserves MIME: assets/css/library-polish.css
+[PASS:B] HTTP declares encoding variance: assets/css/library-polish.css
+[PASS:B] identity stays uncompressed: assets/css/library-polish.css
+[PASS:B] gzip q=0 is respected: assets/css/library-polish.css
+[PASS:B] identity also declares variance: assets/css/library-polish.css
+[PASS:B] representations have distinct ETags: assets/css/library-polish.css
+[PASS:B] gzip conditional request returns 304: assets/css/library-polish.css
+[PASS:B] gzip ETag does not suppress identity: assets/css/library-polish.css
+[PASS:B] range stays a valid identity range: assets/css/library-polish.css
+SUITE_COMPLETE total=56

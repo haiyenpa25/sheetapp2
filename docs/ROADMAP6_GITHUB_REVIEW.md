@@ -9,6 +9,10 @@ deploy, chạy sync hoặc migration DB nguồn.
 
 ## Phần mã trong đợt
 
+- Mới nhất: âm thanh theo nhu cầu trên hai UI, hủy phát đang chờ, loader retry và
+  gzip bốn asset lớn. Modern ~1,99 MB / Classic ~1,30 MB; startup AudioContext 0.
+  **99/99 Chromium**, **174/174 PHP / 3.399 check PASS**; ngân sách tổng 4G còn
+  **2 FAIL**. Xem [kết quả, lệnh build và giới hạn](ROADMAP6_TV2_AUDIO_COMPRESSION.md).
 - Đợt tiếp tục TV2: tải tên bộ hợp âm, usage và Performance theo nhu cầu; sửa
   focus/resize danh sách ảo của cả hai UI. Chromium cuối **90/90 PASS**, PHP cuối
   **173/173 suite / 3.342 check PASS**; ngân sách 4G **2 FAIL**, chưa hoàn tất TV2.

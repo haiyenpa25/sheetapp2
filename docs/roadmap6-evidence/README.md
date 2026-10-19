@@ -25,7 +25,7 @@ Test HTTP thiếu biến môi trường sẽ SKIP, không được tính là đ�
 Không chạy các script sync, seed/migration hoặc công cụ sửa nhãn trên dữ liệu thật.
 
 Đợt TV2 có cổng hiệu năng riêng, hiện **2 FAIL** vì vượt ngân sách; không gộp với
-cổng hành vi Chromium 90/90 PASS:
+cổng hành vi Chromium mới nhất 99/99 PASS:
 
 ```powershell
 npx playwright test -c e2e/roadmap6-performance.config.js
@@ -34,3 +34,7 @@ npx playwright test -c e2e/roadmap6-performance.config.js
 Xem [nhật ký TV2](../ROADMAP6_TV2_PROGRESS.md) cho điều kiện mạng, số đo và các
 lượt FAIL trung gian về focus/resize đã được sửa. Log PHP chạy từ worktree thiếu
 fixture không được tính là nghiệm thu; chỉ dùng cổng cuối từ bản sao Apache.
+
+Đợt âm thanh/nén tĩnh: [biên bản mới nhất](../ROADMAP6_TV2_AUDIO_COMPRESSION.md),
+log có tiền tố `tv24-`. PHP cuối 174/174 suite / 3.399 check PASS. Bộ đếm 56 check
+gzip gồm 52 hành vi và 4 tồn tại file; generator `--check` bảo vệ sidecar khớp nguồn.

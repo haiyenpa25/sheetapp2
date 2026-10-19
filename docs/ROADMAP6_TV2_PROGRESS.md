@@ -1,5 +1,8 @@
 # ROADMAP6 — TV2, đợt tiếp tục 2026-10-19
 
+**Cập nhật sau đợt này:** [âm thanh và nén tĩnh](ROADMAP6_TV2_AUDIO_COMPRESSION.md).
+AudioContext startup đã được sửa; số đo trong bảng bên dưới là mốc trước đợt mới.
+
 Phạm vi: tiếp tục trên `feature/roadmap5`, xuất bản vào
 `feature/roadmap6-library-20261019`. Một AI thực thi trong worktree cách ly.
 Cả Modern và Classic được duy trì. Không chạy sync, merge main hay deploy.

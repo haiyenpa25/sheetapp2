@@ -1,0 +1,37 @@
+
+Running 3 tests using 1 worker
+
+node.exe : (node:26292) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:26292) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › e2e\library-tv2-audio-races.spec.js:30:1 › Stop while vendors load prevents any score/player startup; resume is synchronous in the click (221ms)
+  ok 2 [chromium] › e2e\library-tv2-audio-races.spec.js:39:1 › Double play shares one pending load and a new song cancels the old score (134ms)
+  x  3 [chromium] › e2e\library-tv2-audio-races.spec.js:55:1 › Stop during an asynchronous native play also stops a late vendor start (190ms)
+
+
+  1) [chromium] › e2e\library-tv2-audio-races.spec.js:55:1 › Stop during an asynchronous native play also stops a late vendor start
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 0
+
+      62 |   await page.locator('#btn-stop-audio').click();
+      63 |   await page.evaluate(async () => { releasePlay(); await pending; });
+    > 64 |   expect(await page.evaluate(() => audioTrace.stops)).toBe(1);
+         |                                                       ^
+      65 |   expect(await page.evaluate(() => SheetAudioPlayer.isPlaying())).toBe(false);
+      66 | });
+      67 |
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv2-audio-races.spec.js:64:55
+
+    Error Context: test-results\roadmap6\library-tv2-audio-races-St-68873-o-stops-a-late-vendor-start-chromium\error-context.md
+
+  1 failed
+    [chromium] › e2e\library-tv2-audio-races.spec.js:55:1 › Stop during an asynchronous native play also stops a late vendor start
+  2 passed (1.5s)

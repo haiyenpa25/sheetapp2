@@ -1,0 +1,15 @@
+
+Running 2 tests using 1 worker
+
+node.exe : (node:28488) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:28488) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › e2e\library-tv2-audio-http.spec.js:27:3 › Modern first playback loads real vendors and supports stop and timbre changes (3.5s)
+  ok 2 [chromium] › e2e\library-tv2-audio-http.spec.js:27:3 › Classic first playback loads real vendors and supports stop and timbre changes (2.1s)
+
+  2 passed (6.4s)
