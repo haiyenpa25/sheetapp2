@@ -10,7 +10,11 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/../api/core/Session.php';
+Session::start();
+require_once __DIR__ . '/../api/core/Auth.php';
 require_once __DIR__ . '/../api/services/SetlistService.php';
+require_once __DIR__ . '/../api/services/SetlistPublicReadService.php';
 require_once __DIR__ . '/../api/services/ChordProService.php';
 require_once __DIR__ . '/../api/services/SongService.php';
 require_once __DIR__ . '/../api/services/TransposeHelper.php';
@@ -28,8 +32,9 @@ if ($setlistId <= 0) {
     exit;
 }
 
-$setlist = SetlistService::getById($setlistId);
+$setlist = Auth::isLoggedIn() ? SetlistService::getById($setlistId) : SetlistPublicReadService::getById($setlistId);
 if (!$setlist) {
+    http_response_code(404);
     echo '<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"><title>Không tìm thấy</title>';
     echo '<style>body{font-family:sans-serif;padding:40px;text-align:center;color:#ef4444;}</style></head>';
     echo '<body><h2>Chương trình không tồn tại hoặc đã bị xóa</h2></body></html>';

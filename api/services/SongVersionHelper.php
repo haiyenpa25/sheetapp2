@@ -56,7 +56,7 @@ class SongVersionHelper {
             $currentUser = preg_replace('/[^a-zA-Z0-9_\-]/', '_', strtolower(Auth::username() ?: ''));
             $expectedPrefix = rtrim($usersRoot, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $currentUser . DIRECTORY_SEPARATOR;
             if ($currentUser === '' || strpos($targetPath, $expectedPrefix) !== 0) {
-                return ['success' => false, 'message' => 'Lỗi: Bạn không có quyền ghi đè phiên bản của người dùng khác.'];
+                return ['success' => false, 'code' => 'forbidden', 'message' => 'Lỗi: Bạn không có quyền ghi đè phiên bản của người dùng khác.'];
             }
         }
 
@@ -92,7 +92,7 @@ class SongVersionHelper {
             $currentUser = preg_replace('/[^a-zA-Z0-9_\-]/', '_', strtolower(Auth::username() ?: ''));
             $expectedPrefix = rtrim($usersRoot, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $currentUser . DIRECTORY_SEPARATOR;
             if ($currentUser === '' || strpos($targetPath, $expectedPrefix) !== 0) {
-                return ['success' => false, 'message' => 'Lỗi: Bạn không có quyền khôi phục phiên bản của người dùng khác.'];
+                return ['success' => false, 'code' => 'forbidden', 'message' => 'Lỗi: Bạn không có quyền khôi phục phiên bản của người dùng khác.'];
             }
         }
         $backupPath = $targetPath . '.bak';

@@ -23,6 +23,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../core/Response.php';
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../services/SetlistService.php';
+require_once __DIR__ . '/../services/SetlistPublicReadService.php';
 
 class SetlistController {
     public function handleRequest(string $method): void {
@@ -39,7 +40,9 @@ class SetlistController {
                         Response::error('Thiếu song_id', 400);
                         return;
                     }
-                    Response::ok(['data' => SetlistService::getSongUsageHistory($songId)]);
+                    Response::ok(['data' => $userId === null
+                        ? SetlistPublicReadService::getSongUsageHistory($songId)
+                        : SetlistService::getSongUsageHistory($songId)]);
                     return;
                 }
 
@@ -70,6 +73,7 @@ class SetlistController {
                 }
 
                 if ($action === 'offline_package' || $action === 'manifest') {
+                    Auth::requireLogin();
                     if ($id <= 0) {
                         Response::error('Thiếu ID chương trình', 400);
                         return;
@@ -84,14 +88,14 @@ class SetlistController {
                 }
 
                 if ($id > 0) {
-                    $setlist = SetlistService::getById($id);
+                    $setlist = $userId === null ? SetlistPublicReadService::getById($id) : SetlistService::getById($id);
                     if (!$setlist) {
                         Response::notFound('Chương trình không tồn tại');
                         return;
                     }
                     Response::ok(['data' => $setlist]);
                 } else {
-                    Response::ok(['data' => SetlistService::getAll($userId)]);
+                    Response::ok(['data' => $userId === null ? SetlistPublicReadService::getAll() : SetlistService::getAll($userId)]);
                 }
                 return;
             }
