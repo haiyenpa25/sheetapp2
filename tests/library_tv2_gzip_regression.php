@@ -1,10 +1,11 @@
 <?php
 declare(strict_types=1);
 $checks = 0;
-function gzipCheck(bool $ok, string $label): void {
+function gzipCheck(bool $ok, string $label, bool $behavioral = true): void {
     global $checks;
     ++$checks;
-    echo ($ok ? '[PASS:B] ' : '[FAIL:B] ') . $label . "\n";
+    $kind = $behavioral ? 'B' : 'S';
+    echo ($ok ? "[PASS:{$kind}] " : "[FAIL:{$kind}] ") . $label . "\n";
     if (!$ok) exit(1);
 }
 function gzipHeader(array $headers, string $name): string {
@@ -21,7 +22,7 @@ function gzipRead(string $url, string $accept, string $extra = ''): array {
 $root = dirname(__DIR__);
 $files = ['assets/js/vendor/opensheetmusicdisplay.min.js', 'assets/css/sheet.css', 'assets/css/layout.css', 'assets/css/library-polish.css'];
 foreach ($files as $file) {
-    gzipCheck(is_file($root . '/' . $file . '.gz'), "sidecar exists: {$file}");
+    gzipCheck(is_file($root . '/' . $file . '.gz'), "sidecar exists: {$file}", false);
     $source = file_get_contents($root . '/' . $file);
     $compressed = file_get_contents($root . '/' . $file . '.gz');
     gzipCheck(gzdecode($compressed) === $source, "gunzip is byte-identical: {$file}");
