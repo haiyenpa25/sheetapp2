@@ -10,7 +10,7 @@ final class RequestSecurity {
         $origin = trim((string)($server['HTTP_ORIGIN'] ?? ''));
         if ($origin === '') {
             $origin = trim((string)($server['HTTP_REFERER'] ?? ''));
-            if ($origin === '') return true;
+            if ($origin === '') return false;
         }
 
         $originParts = parse_url($origin);
@@ -29,6 +29,11 @@ final class RequestSecurity {
         return in_array(strtoupper($method), ['POST', 'PUT', 'PATCH', 'DELETE'], true);
     }
 
+    public static function isAllowedRequest(array $server, string $method, bool $csrfEnforce): bool {
+        if (!self::requiresOriginCheck($method)) return true;
+        return self::isSameOrigin($server) && (!$csrfEnforce || self::isValidCsrf($server));
+    }
+
     public static function ensureCsrfToken(array $server = []): string {
         if (session_status() !== PHP_SESSION_ACTIVE) {
             return '';
@@ -36,7 +41,7 @@ final class RequestSecurity {
         if (empty($_SESSION['csrf_token']) || !is_string($_SESSION['csrf_token'])) {
             $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         }
-        if (!headers_sent() && empty($_COOKIE['XSRF-TOKEN'])) {
+        if (!headers_sent() && ($_COOKIE['XSRF-TOKEN'] ?? '') !== $_SESSION['csrf_token']) {
             $isHttps = !empty($server['HTTPS']) && $server['HTTPS'] !== 'off';
             @setcookie('XSRF-TOKEN', $_SESSION['csrf_token'], [
                 'path' => '/',

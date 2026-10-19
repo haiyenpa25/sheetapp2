@@ -34,8 +34,9 @@ if (($method === 'GET' || $method === 'HEAD') && $route !== 'auth' && session_st
     session_write_close();
 }
 
-if (RequestSecurity::requiresOriginCheck($method) && !RequestSecurity::isSameOrigin($_SERVER)) {
-    Response::abort(403, 'Yêu cầu khác nguồn bị từ chối');
+if (!RequestSecurity::isAllowedRequest($_SERVER, $method, FeatureFlags::isEnabled('csrf_enforce'))) {
+    Response::error('Yêu cầu thiếu hoặc sai nguồn/CSRF token.', 403);
+    exit;
 }
 
 try {

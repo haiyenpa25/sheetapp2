@@ -25,7 +25,17 @@ class CategoryService {
     }
 
     public static function delete(int|string $id): array {
-        DB::run("DELETE FROM categories WHERE id = ?", [(int)$id]);
+        if ((int)$id === 1) throw new InvalidArgumentException('Không thể xóa danh mục mặc định.');
+        $pdo = DB::get();
+        $pdo->beginTransaction();
+        try {
+            DB::run('UPDATE songs SET category_id=1 WHERE category_id=?', [(int)$id]);
+            DB::run('DELETE FROM categories WHERE id=?', [(int)$id]);
+            $pdo->commit();
+        } catch (Throwable $error) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            throw $error;
+        }
         SongService::invalidateCache();
         return ['deleted' => true, 'id' => (int)$id];
     }

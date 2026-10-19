@@ -10,6 +10,7 @@ require_once __DIR__ . '/../core/DB.php';
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/SongService.php';
 require_once __DIR__ . '/ChordSetService.php';
+require_once __DIR__ . '/CategoryService.php';
 
 class ManagerRepertoireHelper {
 
@@ -150,6 +151,7 @@ class ManagerRepertoireHelper {
                 $slug = preg_replace('/[^a-z0-9\-]/', '', strtolower(str_replace(' ', '-', $name))) ?: 'cat-' . time();
                 $ins = $pdo->prepare("INSERT INTO categories (name, slug, icon, description, display_order) VALUES (?, ?, ?, ?, ?)");
                 $ins->execute([$name, $slug, $icon, $desc, $order]);
+                SongService::invalidateCache();
                 return ['success' => true, 'message' => "Đã thêm danh mục '{$name}'!"];
 
             case 'update':
@@ -162,6 +164,7 @@ class ManagerRepertoireHelper {
 
                 $upd = $pdo->prepare("UPDATE categories SET name = ?, icon = ?, description = ?, display_order = ? WHERE id = ?");
                 $upd->execute([$name, $icon, $desc, $order, $id]);
+                SongService::invalidateCache();
                 return ['success' => true, 'message' => "Đã cập nhật danh mục '{$name}'!"];
 
             case 'delete':
@@ -169,8 +172,7 @@ class ManagerRepertoireHelper {
                 if (!$id || $id === 1) return ['success' => false, 'message' => 'Không thể xóa danh mục mặc định'];
 
                 // Chuyển các bài hát thuộc danh mục này về danh mục 1 (Thánh ca)
-                $pdo->prepare("UPDATE songs SET category_id = 1 WHERE category_id = ?")->execute([$id]);
-                $pdo->prepare("DELETE FROM categories WHERE id = ?")->execute([$id]);
+                CategoryService::delete($id);
                 return ['success' => true, 'message' => 'Đã xóa danh mục thành công'];
 
             default:

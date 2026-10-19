@@ -6,6 +6,7 @@ declare(strict_types=1);
  */
 class FeatureFlags {
     public const DEFAULTS = [
+        'csrf_enforce'         => false,
         'PRACTICE_ASSIGNMENTS' => false,
         'REVIEW_WORKFLOW'      => false,
         'EXPORT_CHORDPRO'      => false,

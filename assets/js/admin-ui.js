@@ -168,7 +168,7 @@ const AdminUI = (() => {
   }
 
   async function deleteCategory(id) {
-    if(!confirm("Bạn có chắc chắn muốn xóa danh mục này? (Các bài hát bên trong sẽ trở thành Không Xác Định)")) return;
+    if(!confirm("Bạn có chắc chắn muốn xóa danh mục này? Các bài hát bên trong sẽ chuyển về Thánh Ca.")) return;
     try {
       const res = await window.ApiService.categories.delete(id);
       if (res.success) {

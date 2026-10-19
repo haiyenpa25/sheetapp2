@@ -16,7 +16,7 @@ $server = ['HTTP_HOST' => 'localhost:8080', 'HTTPS' => 'off'];
 checkOrigin(RequestSecurity::isSameOrigin($server + ['HTTP_ORIGIN' => 'http://localhost:8080']), 'Same-origin request is accepted');
 checkOrigin(!RequestSecurity::isSameOrigin($server + ['HTTP_ORIGIN' => 'https://evil.example']), 'Foreign Origin is rejected');
 checkOrigin(!RequestSecurity::isSameOrigin($server + ['HTTP_SEC_FETCH_SITE' => 'cross-site']), 'Cross-site Fetch Metadata is rejected');
-checkOrigin(RequestSecurity::isSameOrigin($server), 'Non-browser request without origin metadata remains usable');
+checkOrigin(!RequestSecurity::isSameOrigin($server), 'Writes without origin metadata fail closed');
 
 $apiIndex = file_get_contents($root . '/api/index.php') ?: '';
 $htaccess = file_get_contents($root . '/.htaccess') ?: '';

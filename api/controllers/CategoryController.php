@@ -52,6 +52,8 @@ class CategoryController {
                 default:
                     Response::methodNotAllowed();
             }
+        } catch (InvalidArgumentException $e) {
+            Response::error($e->getMessage(), 400);
         } catch (Throwable $e) {
             Response::serverError($e, 'Category');
         }
