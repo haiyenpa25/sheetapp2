@@ -1,0 +1,15 @@
+
+Running 2 tests using 1 worker
+
+node.exe : (node:25084) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:25084) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › e2e\library-tv4-categories.spec.js:6:1 › Category rename refreshes cached songs; deletion transfers songs atomically through both APIs (1.2s)
+  ok 2 [chromium] › e2e\library-tv4-categories.spec.js:43:1 › Concurrent cache readers always receive complete JSON documents (4.0s)
+
+  2 passed (5.8s)

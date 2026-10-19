@@ -1,0 +1,74 @@
+
+Running 2 tests using 1 worker
+
+node.exe : (node:25384) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:25384) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › e2e\library-tv1-keyboard.spec.js:8:3 › Modern keyboard navigates virtual rows and row actions without opening on arrows (5.3s)
+(node:24724) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  2 [chromium] › e2e\library-tv1-keyboard.spec.js:8:3 › Classic keyboard navigates virtual rows and row actions without opening on arrows (5.2s)
+
+
+  1) [chromium] › e2e\library-tv1-keyboard.spec.js:8:3 › Modern keyboard navigates virtual rows and row actions without opening on arrows
+
+    Error: expect(locator).toHaveAttribute(expected) failed
+
+    Locator:  locator('#song-list')
+    Expected: "grid"
+    Received: ""
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveAttribute" locator('#song-list') with timeout 5000ms
+      - waiting for locator('#song-list')
+        13 × locator resolved to <div id="song-list" class="song-list is-virtual">…</div>
+           - unexpected value "null"
+
+
+      25 |     await page.evaluate(() => { LibraryUI.onSelect(song => window.selected.push(song.id)); LibraryUI.init(); });
+      26 |     const grid = page.locator('#song-list');
+    > 27 |     await expect(grid).toHaveAttribute('role', 'grid');
+         |                        ^
+      28 |     await expect(grid).toHaveAttribute('aria-rowcount', '343');
+      29 |     await page.focus('#search-input');
+      30 |     await page.keyboard.press('Tab');
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv1-keyboard.spec.js:27:24
+
+    Error Context: test-results\roadmap6\library-tv1-keyboard-Moder-bc7d4-s-without-opening-on-arrows-chromium\error-context.md
+
+  2) [chromium] › e2e\library-tv1-keyboard.spec.js:8:3 › Classic keyboard navigates virtual rows and row actions without opening on arrows
+
+    Error: expect(locator).toHaveAttribute(expected) failed
+
+    Locator:  locator('#song-list')
+    Expected: "grid"
+    Received: ""
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveAttribute" locator('#song-list') with timeout 5000ms
+      - waiting for locator('#song-list')
+        14 × locator resolved to <div id="song-list" class="song-list">…</div>
+           - unexpected value "null"
+
+
+      25 |     await page.evaluate(() => { LibraryUI.onSelect(song => window.selected.push(song.id)); LibraryUI.init(); });
+      26 |     const grid = page.locator('#song-list');
+    > 27 |     await expect(grid).toHaveAttribute('role', 'grid');
+         |                        ^
+      28 |     await expect(grid).toHaveAttribute('aria-rowcount', '343');
+      29 |     await page.focus('#search-input');
+      30 |     await page.keyboard.press('Tab');
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv1-keyboard.spec.js:27:24
+
+    Error Context: test-results\roadmap6\library-tv1-keyboard-Class-a42b0-s-without-opening-on-arrows-chromium\error-context.md
+
+  2 failed
+    [chromium] › e2e\library-tv1-keyboard.spec.js:8:3 › Modern keyboard navigates virtual rows and row actions without opening on arrows
+    [chromium] › e2e\library-tv1-keyboard.spec.js:8:3 › Classic keyboard navigates virtual rows and row actions without opening on arrows

@@ -1,0 +1,62 @@
+
+Running 1 test using 1 worker
+
+node.exe : (node:22812) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:22812) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › e2e\library-tv4-categories.spec.js:6:1 › Category rename refreshes cached songs; deletion transfers songs atomically through both APIs (945ms)
+
+
+  1) [chromium] › e2e\library-tv4-categories.spec.js:6:1 › Category rename refreshes cached songs; deletion transfers songs atomically through both APIs
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 117
+
+      23 |     const removed = await client.delete(`${base}/api/index.php?route=categories&id=${fixture.source}`);
+      24 |     expect.soft(removed.status(), await removed.text()).toBe(200);
+    > 25 |     expect.soft((await songs()).find(song => song.id === token + 'source').category_id).toBe(1);
+         |                                                                                         ^
+      26 |     php(`require 'api/core/DB.php'; DB::get()->exec("CREATE TRIGGER tv45_fail BEFORE DELETE ON categories WHEN OLD.id=${fixture.rollback} BEGIN SELECT RAISE(ABORT,'TV45 rollback'); END");`);
+      27 |     const rolledBack = await client.post(`${base}/api/index.php?route=manager&action=manage_category`, { data: { sub_action: 'delete', id: fixture.rollback } });
+      28 |     expect(rolledBack.status()).toBeGreaterThanOrEqual(400);
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv4-categories.spec.js:25:89
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 118
+    Received: 1
+
+      27 |     const rolledBack = await client.post(`${base}/api/index.php?route=manager&action=manage_category`, { data: { sub_action: 'delete', id: fixture.rollback } });
+      28 |     expect(rolledBack.status()).toBeGreaterThanOrEqual(400);
+    > 29 |     expect.soft(Number(php("require 'api/core/DB.php'; echo DB::run('SELECT category_id FROM songs WHERE id=?',[getenv('TV45_TOKEN').'rollback'])->fetchColumn();"))).toBe(fixture.rollback);
+         |                                                                                                                                                                       ^
+      30 |     php("require 'api/core/DB.php'; DB::get()->exec('DROP TRIGGER tv45_fail');");
+      31 |     const moved = await client.post(`${base}/api/index.php?route=manager&action=manage_category`, { data: { sub_action: 'delete', id: fixture.rollback } });
+      32 |     expect(moved.status(), await moved.text()).toBe(200);
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv4-categories.spec.js:29:167
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 118
+
+      31 |     const moved = await client.post(`${base}/api/index.php?route=manager&action=manage_category`, { data: { sub_action: 'delete', id: fixture.rollback } });
+      32 |     expect(moved.status(), await moved.text()).toBe(200);
+    > 33 |     expect((await songs()).find(song => song.id === token + 'rollback').category_id).toBe(1);
+         |                                                                                      ^
+      34 |   } finally {
+      35 |     await client.dispose();
+      36 |     php("if(!is_file('.roadmap6-isolated'))exit(1); require 'api/services/SongService.php'; DB::get()->exec('DROP TRIGGER IF EXISTS tv45_fail'); foreach(['source','rollback'] as $kind) DB::run('DELETE FROM songs WHERE id=?',[getenv('TV45_TOKEN').$kind]); DB::run('DELETE FROM categories WHERE slug IN (?,?)',[getenv('TV45_TOKEN').'source',getenv('TV45_TOKEN').'rollback']); SongService::invalidateCache();");
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv4-categories.spec.js:33:86
+
+    Error Context: test-results\roadmap6\library-tv4-categories-Cat-fba79-tomically-through-both-APIs-chromium\error-context.md
+
+  1 failed
+    [chromium] › e2e\library-tv4-categories.spec.js:6:1 › Category rename refreshes cached songs; deletion transfers songs atomically through both APIs

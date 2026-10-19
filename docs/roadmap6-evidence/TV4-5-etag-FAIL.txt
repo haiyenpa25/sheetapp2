@@ -1,0 +1,36 @@
+
+Running 1 test using 1 worker
+
+node.exe : (node:5888) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:5888) War... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › e2e\library-tv4-categories.spec.js:6:1 › Category rename refreshes cached songs; deletion transfers songs atomically through both APIs (1.0s)
+
+
+  1) [chromium] › e2e\library-tv4-categories.spec.js:6:1 › Category rename refreshes cached songs; deletion transfers songs atomically through both APIs
+
+    Error: Same-size category rename must invalidate the old ETag
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 304
+
+      24 |     await client.put(`${base}/api/index.php?route=categories&id=${fixture.source}`, { data: { name: token + '-REnamed' } });
+      25 |     const revalidated = await request.get(`${base}/api/index.php?route=songs`, { headers: { 'If-None-Match': cached.headers().etag } });
+    > 26 |     expect.soft(revalidated.status(), 'Same-size category rename must invalidate the old ETag').toBe(200);
+         |                                                                                                 ^
+      27 |     const removed = await client.delete(`${base}/api/index.php?route=categories&id=${fixture.source}`);
+      28 |     expect.soft(removed.status(), await removed.text()).toBe(200);
+      29 |     expect.soft((await songs()).find(song => song.id === token + 'source').category_id).toBe(1);
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv4-categories.spec.js:26:97
+
+    Error Context: test-results\roadmap6\library-tv4-categories-Cat-fba79-tomically-through-both-APIs-chromium\error-context.md
+
+  1 failed
+    [chromium] › e2e\library-tv4-categories.spec.js:6:1 › Category rename refreshes cached songs; deletion transfers songs atomically through both APIs

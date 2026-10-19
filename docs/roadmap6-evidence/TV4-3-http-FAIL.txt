@@ -1,0 +1,110 @@
+
+Running 1 test using 1 worker
+
+node.exe : (node:29908) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:29908) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › e2e\library-tv4-xml-path.spec.js:7:1 › Song update rejects unmanaged XML and FTS never extracts lyrics from an unmanaged file (736ms)
+
+
+  1) [chromium] › e2e\library-tv4-xml-path.spec.js:7:1 › Song update rejects unmanaged XML and FTS never extracts lyrics from an unmanaged file
+
+    Error: {"success":false,"message":"Đường dẫn xmlPath không hợp lệ hoặc nằm ngoài vùng quản lý"}
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 200
+
+      24 |     for (const xmlPath of ['../../api/core/Config.php', relative, '']) {
+      25 |       const response = await client.put(`${base}/api/index.php?route=songs&id=${token}`, { data: { xmlPath, title: 'Must not change' } });
+    > 26 |       expect.soft(response.status(), await response.text()).toBe(400);
+         |                                                             ^
+      27 |       expect.soft((await response.json()).success).toBe(false);
+      28 |       expect.soft(snapshot()).toBe(original);
+      29 |     }
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv4-xml-path.spec.js:26:61
+
+    Error: {"success":false,"message":"Đường dẫn xmlPath không hợp lệ hoặc nằm ngoài vùng quản lý"}
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 200
+
+      24 |     for (const xmlPath of ['../../api/core/Config.php', relative, '']) {
+      25 |       const response = await client.put(`${base}/api/index.php?route=songs&id=${token}`, { data: { xmlPath, title: 'Must not change' } });
+    > 26 |       expect.soft(response.status(), await response.text()).toBe(400);
+         |                                                             ^
+      27 |       expect.soft((await response.json()).success).toBe(false);
+      28 |       expect.soft(snapshot()).toBe(original);
+      29 |     }
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv4-xml-path.spec.js:26:61
+
+    Error: {"success":true,"message":"Cập nhật thành công"}
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 200
+
+      24 |     for (const xmlPath of ['../../api/core/Config.php', relative, '']) {
+      25 |       const response = await client.put(`${base}/api/index.php?route=songs&id=${token}`, { data: { xmlPath, title: 'Must not change' } });
+    > 26 |       expect.soft(response.status(), await response.text()).toBe(400);
+         |                                                             ^
+      27 |       expect.soft((await response.json()).success).toBe(false);
+      28 |       expect.soft(snapshot()).toBe(original);
+      29 |     }
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv4-xml-path.spec.js:26:61
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: false
+    Received: true
+
+      25 |       const response = await client.put(`${base}/api/index.php?route=songs&id=${token}`, { data: { xmlPath, title: 'Must not change' } });
+      26 |       expect.soft(response.status(), await response.text()).toBe(400);
+    > 27 |       expect.soft((await response.json()).success).toBe(false);
+         |                                                    ^
+      28 |       expect.soft(snapshot()).toBe(original);
+      29 |     }
+      30 |     const lyrics = php("require 'api/services/SongService.php'; DB::run(\"UPDATE songs SET xmlPath=?,lyrics_text='' WHERE id=?\",[getenv('TV43_PATH'),getenv('TV43_ID')]); SongSearchHelper::syncSongFts(getenv('TV43_ID'),true); echo json_encode([DB::run('SELECT lyrics_text FROM songs WHERE id=?',[getenv('TV43_ID')])->fetchColumn(),DB::run('SELECT lyrics_text FROM songs_fts WHERE song_id=?',[getenv('TV43_ID')])->fetchColumn()]);");
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv4-xml-path.spec.js:27:52
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "[{\"title\":\"TV43 fixture\",\"xmlPath\":\"storage\\/Thanh ca\\/missing.xml\",\"lyrics_text\":\"Originalsafeprobe\"},[{\"song_id\":\"tv43-1792369670065\",\"title\":\"TV43 fixture\",\"title_unaccented\":\"TV43 fixture\",\"lyrics_text\":\"Originalsafeprobe\",\"lyrics_unaccented\":\"Originalsafeprobe\",\"theme\":\"\",\"liturgical_season\":\"\",\"composer\":\"\"}]]"
+    Received: "[{\"title\":\"Must not change\",\"xmlPath\":\"\",\"lyrics_text\":\"Originalsafeprobe\"},[{\"song_id\":\"tv43-1792369670065\",\"title\":\"Must not change\",\"title_unaccented\":\"Must not change\",\"lyrics_text\":\"Originalsafeprobe\",\"lyrics_unaccented\":\"Originalsafeprobe\",\"theme\":\"\",\"liturgical_season\":\"\",\"composer\":\"\"}]]"
+
+      26 |       expect.soft(response.status(), await response.text()).toBe(400);
+      27 |       expect.soft((await response.json()).success).toBe(false);
+    > 28 |       expect.soft(snapshot()).toBe(original);
+         |                               ^
+      29 |     }
+      30 |     const lyrics = php("require 'api/services/SongService.php'; DB::run(\"UPDATE songs SET xmlPath=?,lyrics_text='' WHERE id=?\",[getenv('TV43_PATH'),getenv('TV43_ID')]); SongSearchHelper::syncSongFts(getenv('TV43_ID'),true); echo json_encode([DB::run('SELECT lyrics_text FROM songs WHERE id=?',[getenv('TV43_ID')])->fetchColumn(),DB::run('SELECT lyrics_text FROM songs_fts WHERE song_id=?',[getenv('TV43_ID')])->fetchColumn()]);");
+      31 |     expect(lyrics).not.toContain('Forbiddenoutsideprobe');
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv4-xml-path.spec.js:28:31
+
+    Error: expect(received).not.toContain(expected) // indexOf
+
+    Expected substring: not "Forbiddenoutsideprobe"
+    Received string:        "[\"1. Forbiddenoutsideprobe\",\"1. Forbiddenoutsideprobe\"]"
+
+      29 |     }
+      30 |     const lyrics = php("require 'api/services/SongService.php'; DB::run(\"UPDATE songs SET xmlPath=?,lyrics_text='' WHERE id=?\",[getenv('TV43_PATH'),getenv('TV43_ID')]); SongSearchHelper::syncSongFts(getenv('TV43_ID'),true); echo json_encode([DB::run('SELECT lyrics_text FROM songs WHERE id=?',[getenv('TV43_ID')])->fetchColumn(),DB::run('SELECT lyrics_text FROM songs_fts WHERE song_id=?',[getenv('TV43_ID')])->fetchColumn()]);");
+    > 31 |     expect(lyrics).not.toContain('Forbiddenoutsideprobe');
+         |                        ^
+      32 |     expect(JSON.parse(lyrics)).toEqual(['', '']);
+      33 |   } finally {
+      34 |     await client.dispose();
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv4-xml-path.spec.js:31:24
+
+    Error Context: test-results\roadmap6\library-tv4-xml-path-Song--b470a-rics-from-an-unmanaged-file-chromium\error-context.md
+
+  1 failed
+    [chromium] › e2e\library-tv4-xml-path.spec.js:7:1 › Song update rejects unmanaged XML and FTS never extracts lyrics from an unmanaged file

@@ -15,11 +15,11 @@
 
 | Giai đoạn | Trạng thái | Ghi chú |
 |---|:-:|---|
-| TV0 — Sửa hỏng hóc | 🟨 | Đang nghiệm thu TV0-1 ở cả Classic/Hiện đại; chưa hoàn tất giai đoạn |
-| TV1 — Tìm kiếm & danh sách | ⬜ | |
+| TV0 — Sửa hỏng hóc | 🟨 | Đã triển khai TV0-1…8; 37 test Chromium PASS trên hai chế độ. Còn thiết bị thật/WebKit và cổng hồi quy rộng; xem nhật ký |
+| TV1 — Tìm kiếm & danh sách | 🟨 | Đã triển khai TV1-1…7 trên hai chế độ; Chromium theo phạm vi PASS, còn nghiệm thu Safari/thiết bị thật. TV1-4 dùng grid giữ nút từng dòng theo trả lời chủ dự án 2026-10-19; xem nhật ký |
 | TV2 — Tải trang & ngoại tuyến | ⬜ | |
 | TV3 — Giao diện, chạm, trợ năng | ⬜ | |
-| TV4 — Bảo mật & API của Thư viện | ⬜ | Một số ticket chờ quyết định Q2 |
+| TV4 — Bảo mật & API của Thư viện | 🟨 | Đã triển khai TV4-1…6: quyền chương trình/XML, CSRF có cờ, cache/transaction danh mục và hợp đồng API. Cờ csrf_enforce mặc định tắt; còn nghiệm thu rộng/thiết bị thật; xem nhật ký |
 | TV5 — Chất lượng dữ liệu | ⬜ | Mọi ticket ghi DB cần chủ dự án duyệt dry-run |
 | TV6 — Classic `/old/` | ⬜ | Chủ dự án yêu cầu nâng cấp cả hai chế độ (2026-10-18); xem phân tích điều chỉnh |
 | TV7 — Nghiệm thu | ⬜ | |

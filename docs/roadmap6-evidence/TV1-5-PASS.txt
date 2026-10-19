@@ -1,0 +1,17 @@
+
+Running 4 tests using 1 worker
+
+node.exe : (node:17664) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:17664) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › e2e\library-tv1-classic-program.spec.js:26:1 › Classic browsing a program does not capture library navigation (261ms)
+  ok 2 [chromium] › e2e\library-tv1-classic-program.spec.js:32:1 › Classic playing program loads exactly once and applies stored tempo after loading (497ms)
+  ok 3 [chromium] › e2e\library-tv1-navigation.spec.js:6:3 › Modern prev/next follows the displayed order and gives playing setlists priority (236ms)
+  ok 4 [chromium] › e2e\library-tv1-navigation.spec.js:6:3 › Classic prev/next follows the displayed order and gives playing setlists priority (272ms)
+
+  4 passed (2.0s)

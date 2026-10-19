@@ -1,0 +1,14 @@
+[FAIL:B] Guest list contains only published programs
+[FAIL:B] Guest detail omits assignments entirely
+[FAIL:B] Guest detail omits personnel identity
+[FAIL:B] Guest detail omits internal description, item notes and assignment notes
+[PASS:B] Public playback retains profile, transpose, BPM and meter
+[FAIL:B] Guest cannot fetch draft by ID
+[FAIL:B] Guest cannot fetch completed by ID
+[PASS:B] Missing and nonpublic programs both return 404
+[FAIL:B] Guest offline_package requires login
+[FAIL:B] Guest manifest requires login
+[FAIL:B] Guest history and totals cannot disclose draft or completed programs
+[PASS:B] Logged-in member retains draft detail and assignments
+[PASS:B] Logged-in list retains existing visibility
+SUITE_COMPLETE total=13

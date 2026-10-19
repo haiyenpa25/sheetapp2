@@ -1,11 +1,50 @@
 # PROJECT_REGISTRY.md — Sơ Đồ Dự Án SheetApp
 
+[2026-10-19] — ROADMAP6 TV4-4…6 và yêu cầu đưa lên GitHub:
+  + `tests/security/library_tv44_csrf_regression.php`, `tests/library_tv46_api_regression.php`: request/token và hợp đồng songs/taxonomy, fixture memory.
+  + `e2e/library-tv4-{csrf,categories,contract}.spec.js`: CSRF bật, lưu hợp âm thật, rollback danh mục, cache song song/ETag và HTTP songs; chỉ DB/storage cách ly.
+  ~ RequestSecurity/FeatureFlags/api entry: csrf_enforce mặc định false, chặn request ghi thiếu Origin/Referer; bật cờ cần token session.
+  ~ CategoryService/ManagerRepertoireHelper dùng transaction chuyển bài trước khi xóa; cache chỉ thay nguyên tử, ETag hash snapshot.
+  ~ SongController/SongService/SongSearchHelper: success/data, 404, không lộ PDO; key/label/alias taxonomy và tempo ở LIKE.
+  ~ Chủ dự án đã yêu cầu commit/push. Giữ local feature/roadmap5, xuất bản nhánh mới feature/roadmap6-library-20261019 do origin/feature/roadmap5 phân kỳ; không force-push/main/deploy.
+  ~ Chromium cuối trước push: 84/84 PASS; đã bổ sung test adapter response và kiểm URL trước khi chờ render TC 903. Log chọn lọc được đưa vào docs/roadmap6-evidence/ để duyệt trên GitHub.
+  ~ Cổng cuối tuần tự: 173/173 suite PHP / 3.342 check PASS, 329 PHP lint; ESLint phần sửa PASS. Xem docs/ROADMAP6_GITHUB_REVIEW.md cho phạm vi nhánh, cách bật csrf_enforce và các giai đoạn chưa hoàn tất.
+
+[2026-10-19] — ROADMAP6 tiếp tục TV4-1…3 trên `feature/roadmap5`:
+  + `api/services/SetlistPublicReadService.php`: dữ liệu chương trình công khai qua whitelist, chỉ trạng thái published; lịch sử dùng bài có cùng phạm vi.
+  + `tests/fixtures/tv41_setlists.php`, `tests/library_tv41_public_setlists_regression.php`: fixture migration thật và 13 kiểm tra hành vi trên SQLite memory.
+  + `e2e/library-tv4-{public-programs,xml-owner,xml-path}.spec.js`: HTTP/UI hai chế độ, bản in, offline, quyền file, đường FTS; bắt buộc bản sao có marker.
+  ~ SetlistController và bản in dùng projection khách; offline/manifest đòi đăng nhập. SongController trả 403 khi XML không thuộc người dùng, 400 khi xmlPath sai/rỗng; FTS đọc qua bộ resolve vùng quản lý.
+  ~ Bằng chứng FAIL/PASS ở `docs/ROADMAP6_LIBRARY_ACCEPTANCE_REPORT.md`; TV4-4…6 còn lại, không đánh dấu toàn bộ TV4 hoàn tất.
+  ~ Sau TV4-1…3: 171/171 suite PHP, 3.325 check; 78/78 Chromium ROADMAP6 PASS. DB nguồn giữ nguyên SHA256; không commit/push/deploy.
+
+[2026-10-19] — ROADMAP6 tiếp tục TV1-4…6 trên worktree `sheetapp2-roadmap6-work`, nhánh `feature/roadmap5`:
+  + `assets/js/library-list.js`: grid bàn phím dùng chung, dòng ảo và nút trong dòng; chủ dự án đã chọn grid.
+  + `assets/js/song-navigation.js`: điều phối danh sách/chương trình và số chính thức theo tập.
+  + `e2e/library-tv1-{keyboard,navigation,numbers}*.spec.js`, `library-tv1-classic-program.spec.js`: bàn phím, axe sidebar, thứ tự hiện tại, chống chạy hai lần, bộ/tông/BPM, nhảy đúng tập.
+  ~ Hai LibraryUI/App/KeyboardHandler và SetlistPlayer/Classic SetlistUI dùng điều phối chung; Classic áp dụng BPM sau khi tải xong.
+  ~ Tập chưa có số chính thức ẩn nút nhập; số trùng hiện tiền tố tập; không suy số từ tên/id.
+  ~ Chromium ROADMAP6 cuối đợt 71/71 PASS, PHP 170/170 suite / 3.312 check PASS; ESLint phần sửa, cú pháp 310 JS và 44 check cấu trúc Classic PASS. Bổ sung kiểm hủy lượt phát giữa lúc tải. Không thay cho Safari/thiết bị thật hoặc toàn bộ E2E cũ.
+  ~ Chưa commit/push/deploy, không sửa DB nguồn; chi tiết bằng chứng và giới hạn ở `docs/ROADMAP6_LIBRARY_ACCEPTANCE_REPORT.md`.
+
 [2026-10-18] — ROADMAP6 đang triển khai trên `feature/roadmap5`, chưa hoàn tất:
   + `assets/js/library-gestures.js`: nhận diện chạm thật dùng chung Classic/Hiện đại.
-  + `e2e/roadmap6.config.js`, `e2e/library-tv0-touch.spec.js`: test thành phần cách ly DB/storage.
+  + `assets/js/core/ChordSetNames.js`: tên/trạng thái bộ hợp âm dùng chung hai chế độ.
+  + `assets/js/core/LibrarySearch.js`: phân trang chung, hủy phản hồi cũ, tải lại trang lỗi, tô sáng an toàn và tổng thư viện từ dữ liệu.
+  + `api/services/SongSearchPage.php`: trang SQL tối đa 200, offset/total, giữ số bài chính xác ở đầu trang đầu.
+  + `tests/library_tv1{1,2,3}_*_regression.php`, `e2e/library-tv1-*.spec.js`: fixture 343 bài trong memory, tìm lời, highlight, HTTP hai chế độ, retry/race.
+  + `e2e/roadmap6.config.js`, `e2e/library-tv0-*.spec.js`: kiểm thử TV0; HTTP chỉ trên bản sao cách ly.
+  + `tests/import_tv08_regression.php`, `tests/security/library_empty_output.cjs`: nhập an toàn và renderer empty-state thực.
   + `docs/ROADMAP6_CLASSIC_MODERN_ANALYSIS.md`: phạm vi mới theo chủ dự án, nâng cả hai chế độ.
   + `docs/ROADMAP6_LIBRARY_ACCEPTANCE_REPORT.md`: nhật ký bằng chứng và giới hạn nghiệm thu.
-  ~ Hai entry point và hai LibraryUI dùng module chạm chung; đăng ký module trong precache.
+  + `docs/ROADMAP6_IMPORT_REVIEW.md`: phạm vi nhập được chủ dự án cho phép và kết quả HTTP.
+  ~ Hai LibraryUI: chạm, đo hàng danh sách ảo/resize; toolbar, toast, z-index và drawer.
+  ~ ImportService/helpers/scrapers/.htaccess: đường nhập quản lý, tránh ghi đè, FTS/cache, bộ tải URL an toàn.
+  ~ Hai entry point và precache đăng ký module dùng chung; 37 test Chromium TV0 PASS.
+  ~ TV1-1…3, TV1-7: lọc trước phân trang, tìm trong lời, ưu tiên cụm lời liên tục, lấy tổng số từ catalog; không còn 903 gõ cứng trong includes hai chế độ.
+  ~ Cập nhật static guard theo nơi điều phối phân trang mới và thuật toán khoảng cách theo zoom ở baseline 623b745; bổ sung đo hộp DOM thực của hợp âm.
+  ~ Nghiệm thu phần đã sửa trên bản sao cập nhật schema: 170/170 suite PHP, 3.312 check và 54/54 test Chromium ROADMAP6 PASS; ESLint PASS. Chưa thay cho E2E cũ/Safari/thiết bị thật.
+  ~ Phát hiện checkout/commit bên ngoài phiên lúc 15:37; tiếp tục tại worktree `sheetapp2-roadmap6-work` trên `feature/roadmap5`.
   ~ Không push/deploy, không migration hoặc thay dữ liệu thật. Trạng thái test xem nhật ký.
 
 > **AI AGENT: Đọc file này để biết dự án có gì, ở đâu.**

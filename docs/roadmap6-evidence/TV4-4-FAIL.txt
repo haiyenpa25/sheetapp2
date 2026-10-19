@@ -1,0 +1,9 @@
+[FAIL:B] Writes without both Origin and Referer are denied even with enforcement off
+[PASS:B] Same-origin legacy write works with enforcement off
+[FAIL:B] Enforcement rejects a missing CSRF token
+[FAIL:B] Enforcement rejects an incorrect token
+[PASS:B] Same-origin session token permits a write
+[PASS:B] A valid token does not override foreign Origin
+[PASS:B] Same-origin Referer works when Origin is absent
+[PASS:B] Reads remain available without a token
+SUITE_COMPLETE total=8

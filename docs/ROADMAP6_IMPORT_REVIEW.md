@@ -1,6 +1,7 @@
 # TV0-8 — Phần nhập MusicXML cần xử lý thống nhất
 
-Ngày 2026-10-18. Chỉ đọc mã; chưa thử kết nối tới dịch vụ bên ngoài.
+Ngày 2026-10-18. Chủ dự án đã cho phép sửa theo phương án dưới đây trong hội thoại.
+Đã triển khai và kiểm thử trên bản sao cách ly; chưa thử dịch vụ bên ngoài thật.
 
 Baseline `3b5fb69` đã đưa ImportService về `storage/users/<user>/imported/`,
 nhưng `_generateFilename()` và `_extractXmlFromScript()` vẫn tham chiếu `SHEETS_DIR`
@@ -23,5 +24,15 @@ Vì vậy nhánh này không đi qua kiểm tra URL public, giới hạn redirec
 5. Test HTTP trên bản sao Apache: upload hai file cùng tên không ghi đè;
    có thể tải lại XML, tìm theo lời ngay và xuất hiện trong danh sách.
 
-Theo ROADMAP3 Phần 0 mục 10, phát hiện nhánh bảo mật mới phải hỏi trước khi sửa.
-Tạm giữ TV0-8 chờ xác nhận cho phạm vi trên; không tính là đã hoàn tất.
+Theo ROADMAP3 Phần 0 mục 10, đã hỏi khi phát hiện nhánh bảo mật mới.
+Chủ dự án trả lời: “Cho phép sửa theo phương án”. Không cần xin lại quyền này.
+
+Kết quả: bỏ `get_headers()`, dò qua `_fetchUrl`; extractor chỉ trả XML.
+`ImportService` kiểm tra realpath, dành tên bằng `fopen('x')`, dọn file mới nếu ghi/DB lỗi,
+đồng bộ FTS và cache cho upload/fetch/search. `.htaccess` chỉ cho đọc XML/MXL đúng mẫu
+trong thư mục imported, vẫn chặn DB và file riêng khác.
+
+7 check unit PASS. HTTP Apache cách ly xác nhận hai upload cùng tên có đường dẫn khác,
+giữ nguyên nội dung file đầu, tìm theo lời và danh sách cập nhật ngay, XML HTTP 200,
+DB và XML riêng HTTP 403. Log FAIL→PASS ở `test-results/roadmap6-evidence/TV0-8-*`.
+Không chạy các thao tác này trên DB/storage nguồn. Chưa nghiệm thu file nén MXL.

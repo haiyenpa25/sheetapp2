@@ -1,0 +1,36 @@
+
+Running 2 tests using 1 worker
+
+node.exe : (node:1840) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:1840) War... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › e2e\library-tv4-contract.spec.js:6:38 › ApiService songs.list returns an array for legacy responses (159ms)
+  x  2 [chromium] › e2e\library-tv4-contract.spec.js:6:38 › ApiService songs.list returns an array for canonical responses (143ms)
+
+
+  1) [chromium] › e2e\library-tv4-contract.spec.js:6:38 › ApiService songs.list returns an array for canonical responses
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    Expected: [{"id": "adapter-probe", "title": "Adapter probe"}]
+    Received: {"data": [{"id": "adapter-probe", "title": "Adapter probe"}], "success": true}
+
+      11 |   }, wrapped);
+      12 |   await page.addScriptTag({ path: path.resolve(__dirname, '../assets/js/core/ApiService.js') });
+    > 13 |   expect(await page.evaluate(() => ApiService.songs.list())).toEqual([{ id: 'adapter-probe', title: 'Adapter probe' }]);
+         |                                                              ^
+      14 | });
+      15 | test('All songs read branches return success/data and write errors use proper HTTP codes without SQL details', async ({ request }) => {
+      16 |   expect(fs.existsSync(path.join(isolated, '.roadmap6-isolated'))).toBe(true);
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv4-contract.spec.js:13:62
+
+    Error Context: test-results\roadmap6\library-tv4-contract-ApiSe-96753-ray-for-canonical-responses-chromium\error-context.md
+
+  1 failed
+    [chromium] › e2e\library-tv4-contract.spec.js:6:38 › ApiService songs.list returns an array for canonical responses
+  1 passed (1.7s)

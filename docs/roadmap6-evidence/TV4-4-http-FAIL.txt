@@ -1,0 +1,37 @@
+
+Running 1 test using 1 worker
+
+node.exe : (node:13008) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:13008) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+  x  1 [chromium] › e2e\library-tv4-csrf.spec.js:6:1 › CSRF flag rejects missing tokens and browser ApiService still saves chords (1.6s)
+
+
+  1) [chromium] › e2e\library-tv4-csrf.spec.js:6:1 › CSRF flag rejects missing tokens and browser ApiService still saves chords
+
+    Error: {"success":false,"error":"Lỗi: Thiếu tham số filepath hoặc xml."}
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 400
+
+      22 |     for (const headers of [{}, { Origin: new URL(base).origin }, { Origin: new URL(base).origin, 'X-CSRF-Token': 'incorrect' }]) {
+      23 |       const response = await context.request.post(endpoint, { headers, data: {} });
+    > 24 |       expect(response.status(), await response.text()).toBe(403);
+         |                                                        ^
+      25 |     }
+      26 |     const result = await page.evaluate(async ({ song, name }) => ApiService.chordSets.save(song, name, { '0_0': 'C' }), { song, name });
+      27 |     expect(result.success).toBe(true);
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv4-csrf.spec.js:24:56
+
+    Error Context: test-results\roadmap6\library-tv4-csrf-CSRF-flag-edafa-iService-still-saves-chords-chromium\error-context.md
+
+  1 failed
+    [chromium] › e2e\library-tv4-csrf.spec.js:6:1 › CSRF flag rejects missing tokens and browser ApiService still saves chords

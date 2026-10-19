@@ -1,0 +1,74 @@
+
+Running 2 tests using 1 worker
+
+node.exe : (node:20996) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:20996) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › e2e\library-tv1-numbers.spec.js:5:3 › Modern number lookup stays in its catalog and never guesses unofficial numbers (5.2s)
+(node:26144) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  2 [chromium] › e2e\library-tv1-numbers.spec.js:5:3 › Classic number lookup stays in its catalog and never guesses unofficial numbers (5.2s)
+
+
+  1) [chromium] › e2e\library-tv1-numbers.spec.js:5:3 › Modern number lookup stays in its catalog and never guesses unofficial numbers
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator:  locator('[data-id="tc-1"] .song-item-num')
+    Expected: "TC 001"
+    Received: "001"
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveText" locator('[data-id="tc-1"] .song-item-num') with timeout 5000ms
+      - waiting for locator('[data-id="tc-1"] .song-item-num')
+        14 × locator resolved to <div class="song-item-num">001</div>
+           - unexpected value "001"
+
+
+      20 |     await page.evaluate(() => { SongNavigation.init(); LibraryUI.onSelect(song => window.selected.push(song.id)); LibraryUI.init(); });
+      21 |     await expect.poll(() => page.evaluate(() => LibraryUI.getSongs().length)).toBe(4);
+    > 22 |     await expect(page.locator('[data-id="tc-1"] .song-item-num')).toHaveText('TC 001');
+         |                                                                   ^
+      23 |     await expect(page.locator('[data-id="tv-1"] .song-item-num')).toHaveText('TV 001');
+      24 |     await page.selectOption('#category-filter', 'Tôn Vinh');
+      25 |     await page.evaluate(() => { QuickNumpadModal.open(); QuickNumpadModal.appendDigit(1); });
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv1-numbers.spec.js:22:67
+
+    Error Context: test-results\roadmap6\library-tv1-numbers-Modern-fccba--guesses-unofficial-numbers-chromium\error-context.md
+
+  2) [chromium] › e2e\library-tv1-numbers.spec.js:5:3 › Classic number lookup stays in its catalog and never guesses unofficial numbers
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator:  locator('[data-id="tc-1"] .song-item-num')
+    Expected: "TC 001"
+    Received: "001"
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveText" locator('[data-id="tc-1"] .song-item-num') with timeout 5000ms
+      - waiting for locator('[data-id="tc-1"] .song-item-num')
+        14 × locator resolved to <span class="song-item-num">001</span>
+           - unexpected value "001"
+
+
+      20 |     await page.evaluate(() => { SongNavigation.init(); LibraryUI.onSelect(song => window.selected.push(song.id)); LibraryUI.init(); });
+      21 |     await expect.poll(() => page.evaluate(() => LibraryUI.getSongs().length)).toBe(4);
+    > 22 |     await expect(page.locator('[data-id="tc-1"] .song-item-num')).toHaveText('TC 001');
+         |                                                                   ^
+      23 |     await expect(page.locator('[data-id="tv-1"] .song-item-num')).toHaveText('TV 001');
+      24 |     await page.selectOption('#category-filter', 'Tôn Vinh');
+      25 |     await page.evaluate(() => { QuickNumpadModal.open(); QuickNumpadModal.appendDigit(1); });
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv1-numbers.spec.js:22:67
+
+    Error Context: test-results\roadmap6\library-tv1-numbers-Classi-5ac4a--guesses-unofficial-numbers-chromium\error-context.md
+
+  2 failed
+    [chromium] › e2e\library-tv1-numbers.spec.js:5:3 › Modern number lookup stays in its catalog and never guesses unofficial numbers
+    [chromium] › e2e\library-tv1-numbers.spec.js:5:3 › Classic number lookup stays in its catalog and never guesses unofficial numbers

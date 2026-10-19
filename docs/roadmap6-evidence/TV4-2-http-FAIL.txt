@@ -1,0 +1,36 @@
+
+Running 1 test using 1 worker
+
+node.exe : (node:10940) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:10940) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › e2e\library-tv4-xml-owner.spec.js:7:1 › XML save and restore allow the owner/admin and reject another user without modifying files (187ms)
+
+
+  1) [chromium] › e2e\library-tv4-xml-owner.spec.js:7:1 › XML save and restore allow the owner/admin and reject another user without modifying files
+
+    Error: {"success":false,"error":"Lỗi: Bạn không có quyền ghi đè phiên bản của người dùng khác."}
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 400
+
+      28 |     for (const action of ['save_xml', 'restore_xml']) {
+      29 |       const denied = await post(clients.banhat, action, 'admin');
+    > 30 |       expect(denied.status(), await denied.text()).toBe(403);
+         |                                                    ^
+      31 |       expect(fs.readFileSync(path.join(isolated, relative('admin')), 'utf8')).toBe(before);
+      32 |       expect(fs.readFileSync(path.join(isolated, relative('admin') + '.bak'), 'utf8')).toBe(backup);
+      33 |     }
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv4-xml-owner.spec.js:30:52
+
+    Error Context: test-results\roadmap6\library-tv4-xml-owner-XML--d7209-ser-without-modifying-files-chromium\error-context.md
+
+  1 failed
+    [chromium] › e2e\library-tv4-xml-owner.spec.js:7:1 › XML save and restore allow the owner/admin and reject another user without modifying files
