@@ -40,6 +40,12 @@ const LibraryList = (() => {
     const current = state.cursor && document.getElementById(rowId(state.cursor));
     if (current && element.contains(current)) element.setAttribute('aria-activedescendant', current.id);
     else element.removeAttribute('aria-activedescendant');
+    // A queued virtual-scroll render can replace the button just reached by Tab.
+    const action = state.focusedAction;
+    if (action && !action.node.isConnected && document.activeElement === document.body) {
+      element.querySelector(`.song-item[data-id="${CSS.escape(action.id)}"]`)
+        ?.querySelectorAll('button')[action.index]?.focus({ preventScroll: true });
+    }
   }
 
   function reveal(state, index) {
@@ -87,6 +93,15 @@ const LibraryList = (() => {
     if (!options.element || bound.has(options.element)) return;
     const state = { options, items: null, indices: new Map(), cursor: null };
     const { element } = options;
+    document.addEventListener('focusin', event => {
+      const button = event.target.closest('button');
+      const row = button?.closest('.song-item');
+      state.focusedAction = row && element.contains(row)
+        ? { node: button, id: row.dataset.id, index: [...row.querySelectorAll('button')].indexOf(button) } : null;
+    });
+    document.addEventListener('pointerdown', event => {
+      if (!element.contains(event.target)) state.focusedAction = null;
+    }, { passive: true });
     element.addEventListener('keydown', event => onKey(event, state));
     element.addEventListener('click', event => {
       const row = event.target.closest('.song-item');

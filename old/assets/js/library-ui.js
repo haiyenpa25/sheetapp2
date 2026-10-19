@@ -49,7 +49,7 @@ const LibraryUI = (() => {
       if (_vList.length <= 120 || _vRaf) return;
       _vRaf = requestAnimationFrame(() => { _vRaf = 0; _renderVirtualSlice(false); });
     }, { passive: true });
-    window.addEventListener('resize', () => { _renderVirtualSlice(true); if (activeSongId) _highlightActive(activeSongId); }, { passive: true });
+    window.addEventListener('resize', () => { _renderVirtualSlice(true); if (activeSongId) _highlightActive(activeSongId, false); }, { passive: true });
     loadSongs();
 
     window.EventBus?.emit('navigation:library', { getItems: () => _vList, getCatalog: () => songs, getCategory: () => categoryEl()?.value || '', getActiveId: () => activeSongId, select: selectSong });
@@ -495,10 +495,10 @@ const LibraryUI = (() => {
     return window.SongNavigation?.jumpNumber(num) ?? false;
   }
 
-  function _highlightActive(id) {
+  function _highlightActive(id, autoScroll = true) {
     const el = listEl();
     if (!el) return;
-    if (_vList.length > 120) {
+    if (autoScroll && _vList.length > 120) {
       const idx = _vList.findIndex(s => String(s.id) === String(id));
       const wrap = scrollWrapEl();
       if (idx >= 0 && wrap) {
@@ -512,7 +512,7 @@ const LibraryUI = (() => {
     }
     el.querySelectorAll('.song-item.active').forEach(i => i.classList.remove('active'));
     const active = el.querySelector(`.song-item[data-id="${CSS.escape(String(id))}"]`);
-    if (active) { active.classList.add('active'); active.scrollIntoView({ behavior: 'instant', block: 'nearest' }); }
+    if (active) { active.classList.add('active'); if (autoScroll) active.scrollIntoView({ behavior: 'instant', block: 'nearest' }); }
   }
 
   function addSong(song) {

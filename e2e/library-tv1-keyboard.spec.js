@@ -39,6 +39,8 @@ for (const classic of [false, true]) {
     await page.keyboard.press('End');
     const lastId = await grid.getAttribute('aria-activedescendant');
     await expect(page.locator(`[id="${lastId}"]`)).toHaveAttribute('data-id', 'row-343');
+    // A resize must preserve the browsed position instead of jumping to selected row 3.
+    await page.evaluate(() => window.dispatchEvent(new Event('resize')));
     await expect(page.locator('[data-id="row-343"]')).toBeInViewport();
     await page.keyboard.press('Home');
     await page.keyboard.press('Tab');

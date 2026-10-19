@@ -57,7 +57,7 @@ const LibraryUI = (() => {
         selectSong(item.dataset.id);
       });
     }
-    window.addEventListener('resize', () => { _measuredItemH = 0; if (_virtualSongs) { _renderVirtualChunk(); if (activeSongId) _highlightActive(activeSongId); } }, { passive: true });
+    window.addEventListener('resize', () => { _measuredItemH = 0; if (_virtualSongs) { _renderVirtualChunk(); if (activeSongId) _highlightActive(activeSongId, false); } }, { passive: true });
   }
 
   function _handleDelete(btn) {
