@@ -1,2 +1,7 @@
 CODE_MAP.md merge=ours
 storage/data/sw-manifest.json merge=ours
+# Keep precompressed source bytes reproducible on Windows and Linux.
+assets/js/vendor/opensheetmusicdisplay.min.js text eol=lf
+assets/css/sheet.css text eol=lf
+assets/css/layout.css text eol=lf
+assets/css/library-polish.css text eol=lf
