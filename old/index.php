@@ -68,17 +68,7 @@ echo cssTag('components.css');
       });
     }
   </script>
-  <!-- Tone.js — defer: không cần thiết cho render ban đầu -->
-  <script src="../assets/js/vendor/Tone.js" defer onerror="
-    var s=document.createElement('script');
-    s.src='https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js';
-    document.head.appendChild(s);"></script>
-  <!-- OSMD Audio Player — defer -->
-  <script src="../assets/js/vendor/OsmdAudioPlayer.min.js" defer onerror="
-    var s=document.createElement('script');
-    s.src='https://cdn.jsdelivr.net/npm/osmd-audio-player/umd/OsmdAudioPlayer.min.js';
-    document.head.appendChild(s);"></script>
-  <!-- Tonal.js — defer -->
+  <!-- SATB/Tone tải khi bấm phát; Tonal dùng cho dịch hợp âm. -->
   <script src="../assets/js/vendor/tonal.min.js" defer onerror="
     var s=document.createElement('script');
     s.src='https://cdn.jsdelivr.net/npm/tonal/browser/tonal.min.js';
@@ -190,6 +180,7 @@ function jsTag(string $file, bool $defer = true): string {
 }
 
 // ── 1. CORE Infrastructure (không defer — cần sớm nhất) ──
+echo jsTag('core/ScriptLoader.js', false);
 echo jsTag('core/SafeHtml.js', false);
 echo jsTag('vendor/idb-keyval.min.js', false);
 echo jsTag('core/OfflineVault.js', false);

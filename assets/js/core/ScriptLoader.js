@@ -21,7 +21,9 @@ const ScriptLoader = (() => {
     if (_loaded.has(src)) return Promise.resolve(true);
     if (_inFlight.has(src)) return _inFlight.get(src);
 
-    const baseHref = document.querySelector('base')?.getAttribute('href') || './';
+    const baseHref = typeof window.__APP_BASE__ === 'string'
+      ? window.__APP_BASE__.replace(/\/+$/, '') + '/'
+      : document.querySelector('base')?.getAttribute('href') || './';
     const cleanSrc = src.startsWith('/') ? src.slice(1) : src;
     const fullUrl = cleanSrc.startsWith('http') ? cleanSrc : `${baseHref}${cleanSrc}`;
 
@@ -44,6 +46,7 @@ const ScriptLoader = (() => {
       };
       script.onerror = (err) => {
         _inFlight.delete(src);
+        script.remove(); // A failed element must not turn the next attempt into a false success.
         console.warn(`[ScriptLoader] Không thể tải: ${src}`, err);
         reject(err);
       };
@@ -71,6 +74,9 @@ const ScriptLoader = (() => {
   }
 
   /* ── Presets nạp theo nhóm tính năng ── */
+  function loadAudioLibraries() {
+    return loadSequence(['assets/js/vendor/Tone.js', 'assets/js/vendor/OsmdAudioPlayer.min.js']);
+  }
   async function loadAudio() {
     return loadSequence([
       'assets/js/vendor/Tone.js',
@@ -260,6 +266,7 @@ const ScriptLoader = (() => {
     loadSequence,
     isLoaded,
     loadAudio,
+    loadAudioLibraries,
     loadAdmin,
     loadSetlist,
     loadLiveSync,

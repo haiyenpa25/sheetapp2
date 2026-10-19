@@ -158,15 +158,7 @@ echo cssTag('library-polish.css'); // lớp hoàn thiện giao diện — luôn 
   var s=document.createElement('script');
   s.src='https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.6/build/opensheetmusicdisplay.min.js';
   document.head.appendChild(s);"></script>
-<!-- Tone.js / OSMD Audio Player / Tonal.js — defer: không cần cho render ban đầu -->
-<script src="<?= $baseHref ?>assets/js/vendor/Tone.js" defer onerror="
-  var s=document.createElement('script');
-  s.src='https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js';
-  document.head.appendChild(s);"></script>
-<script src="<?= $baseHref ?>assets/js/vendor/OsmdAudioPlayer.min.js" defer onerror="
-  var s=document.createElement('script');
-  s.src='https://cdn.jsdelivr.net/npm/osmd-audio-player/umd/OsmdAudioPlayer.min.js';
-  document.head.appendChild(s);"></script>
+<!-- SATB/Tone tải khi bấm phát; Tonal dùng cho dịch hợp âm. -->
 <script src="<?= $baseHref ?>assets/js/vendor/tonal.min.js" defer onerror="
   var s=document.createElement('script');
   s.src='https://cdn.jsdelivr.net/npm/tonal/browser/tonal.min.js';

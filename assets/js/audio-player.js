@@ -34,7 +34,25 @@ const SheetAudioPlayer = (() => {
   let _currentVoice  = 'satb';
   let _origSchedule  = null;
   let _volumeDb      = 18;      // +18 dB mặc định
-  let _audioUnlocked = false;
+  let _audioContext = null;
+  let _librariesPromise = null;
+  let _pendingPlay = null;
+  let _playGeneration = 0;
+
+  async function _ensureAudioLibraries() {
+    if (!_librariesPromise) {
+      _librariesPromise = window.ScriptLoader.loadAudioLibraries().catch(error => {
+        _librariesPromise = null;
+        throw error;
+      });
+    }
+    await _librariesPromise;
+    const context = Tone.getContext();
+    if (context.rawContext !== _audioContext) {
+      context.dispose();
+      Tone.setContext(_audioContext);
+    }
+  }
 
   const TREBLE_THRESHOLD = 64;
 
@@ -56,15 +74,17 @@ const SheetAudioPlayer = (() => {
   function _syncUnlock() {
     try {
       // Lấy AudioContext thô của Tone.js
-      const ctx = window.Tone?.context?.rawContext
-               || window.Tone?.context?._context
-               || window.Tone?.context;
+      if (!_audioContext || _audioContext.state === 'closed') {
+        const Native = window.AudioContext || window.webkitAudioContext;
+        _audioContext = window.Tone?.getContext?.().rawContext || (Native ? new Native() : null);
+      }
+      const ctx = _audioContext;
 
       if (!ctx) return;
 
       // ① Gọi resume() ĐỒNG BỘ (không await) — iOS bắt buộc phải làm vậy
       if (ctx.state !== 'running') {
-        ctx.resume(); // fire and forget
+        ctx.resume().catch(() => {}); // synchronous call, before loading libraries
       }
 
       // ② Play 1 sample im lặng — thực sự "kích hoạt" AudioContext trên iOS
@@ -75,7 +95,6 @@ const SheetAudioPlayer = (() => {
       src.start(0);
       src.stop(0.001);
 
-      _audioUnlocked = true;
     } catch (e) {
       console.warn('[Audio] _syncUnlock error:', e);
     }
@@ -222,19 +241,15 @@ const SheetAudioPlayer = (() => {
   }
 
   function _applyVolume() {
-    if (!window.Tone?.Destination) return;
-    Tone.Destination.volume.value = _volumeDb;
+    if (!window.Tone) return;
+    Tone.getDestination().volume.value = _volumeDb;
   }
 
   /* ══════════════════════════════════════
    *  Init
    * ══════════════════════════════════════ */
   function init() {
-    document.getElementById('btn-play-audio')?.addEventListener('click', () => {
-      _syncUnlock();
-      _playSilentHtml5();
-      _playAsync();
-    });
+    document.getElementById('btn-play-audio')?.addEventListener('click', play);
 
     document.getElementById('btn-stop-audio')?.addEventListener('click', stop);
 
@@ -260,42 +275,31 @@ const SheetAudioPlayer = (() => {
       }
     });
 
-    /* Pre-warm: unlock AudioContext ngay khi user chạm vào màn hình lần đầu */
-    const _earlyUnlock = () => {
-      if (_audioUnlocked) return;
-      _syncUnlock();
-      document.removeEventListener('touchstart', _earlyUnlock);
-      document.removeEventListener('mousedown', _earlyUnlock);
-    };
-    document.addEventListener('touchstart', _earlyUnlock, { passive: true });
-    document.addEventListener('mousedown',  _earlyUnlock, { passive: true });
   }
 
   function setup(osmd) {
+    stop(); // Also invalidate a pending library/score load for the previous song.
     _osmd = osmd;
-    if (_player && _isPlaying) stop();
     _player = null;
-    if (typeof OsmdAudioPlayer === 'undefined') {
-      console.warn('[Audio] OsmdAudioPlayer chưa load.');
-    }
   }
 
   /* ══════════════════════════════════════
    *  _playAsync — phần bất đồng bộ của play()
    *  (đã tách ra khỏi click handler để iOS unlock hoạt động)
    * ══════════════════════════════════════ */
-  async function _playAsync() {
-    if (!_osmd) return;
+  async function _playAsync(generation, score) {
     try {
+      await _ensureAudioLibraries();
+      if (generation !== _playGeneration || score !== _osmd) return;
       // Gọi Tone.start() — lúc này context đã được resume() ở trên rồi
       if (window.Tone) {
         await Tone.start();
         // Chờ context thực sự "running" (tối đa 2s)
-        if (Tone.context?.state !== 'running') {
+        if (Tone.getContext().state !== 'running') {
           await new Promise((resolve, reject) => {
             const deadline = Date.now() + 2000;
             const poll = () => {
-              if (Tone.context?.state === 'running') return resolve();
+              if (Tone.getContext().state === 'running') return resolve();
               if (Date.now() > deadline) return reject(new Error('AudioContext không chuyển sang running'));
               setTimeout(poll, 50);
             };
@@ -307,11 +311,13 @@ const SheetAudioPlayer = (() => {
       _applyVolume();
 
       if (!_player) {
-        _player = new OsmdAudioPlayer();
+        _player = new OsmdAudioPlayer(_audioContext);
       }
 
       window.App?.showToast?.('🎵 Đang nạp âm thanh…', 'info');
-      await _player.loadScore(_osmd);
+      const player = _player;
+      await player.loadScore(score);
+      if (generation !== _playGeneration || score !== _osmd) return;
       applyPlaybackMode();
 
       // Tái áp dụng volume sau loadScore (iOS reset gain về 0)
@@ -328,7 +334,8 @@ const SheetAudioPlayer = (() => {
         else if (cRect.top    < vRect.top)          wrapper.scrollBy({ top: -cRect.height * 2, behavior: 'smooth' });
       });
 
-      _player.play();
+      await player.play();
+      if (generation !== _playGeneration || score !== _osmd) { await player.stop(); return; }
       _isPlaying = true;
 
       document.getElementById('btn-play-audio')?.classList.add('hidden');
@@ -344,6 +351,7 @@ const SheetAudioPlayer = (() => {
       window.App?.showToast?.(`▶ Đang phát — ${VOICE_LABELS[_currentVoice] ?? _currentVoice}`, 'success');
 
     } catch (err) {
+      if (generation !== _playGeneration) return;
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
                     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       let msg;
@@ -360,16 +368,27 @@ const SheetAudioPlayer = (() => {
 
   /* ── play() public (chuyển sang _playAsync cho iOS) ── */
   function play() {
+    if (!_osmd || _isPlaying) return Promise.resolve();
     _syncUnlock();
     _playSilentHtml5();
-    return _playAsync();
+    if (_pendingPlay) return _pendingPlay;
+    const pending = _playAsync(++_playGeneration, _osmd).finally(() => {
+      if (_pendingPlay === pending) _pendingPlay = null;
+    });
+    _pendingPlay = pending;
+    return pending;
   }
 
   function stop() {
+    const wasPending = !!_pendingPlay;
+    ++_playGeneration;
+    _pendingPlay = null;
     if (_player) {
       if (_player.instrumentPlayer) _restoreSchedule(_player.instrumentPlayer);
       if (_isPlaying) _player.stop();
     }
+    // A cancelled async play keeps its own instance for late cleanup.
+    if (wasPending) _player = null;
     _isPlaying = false;
     if (_osmd?.cursor) {
       _osmd.cursor.hide();
