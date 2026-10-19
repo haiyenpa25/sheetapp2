@@ -29,7 +29,7 @@ const LibraryUI = (() => {
 
   let ROW_HEIGHT = 26;
   let songs = [], activeSongId = null, onSelectCb = null, onDeleteCb = null;
-  let _searchDebounce = null, _searchMode = 'title', _pinnedIds = [];
+  let _searchDebounce = null, _searchMode = 'title', _pinnedIds = [], _searchSeq = 0;
   let _vList = [], _vStart = -1, _vEnd = -1, _vRaf = 0;
 
   const listEl     = () => document.getElementById('song-list');
@@ -39,6 +39,7 @@ const LibraryUI = (() => {
   const keyEl      = () => document.getElementById('key-filter');
 
   function init() {
+    window.LibraryList?.bind({ element: listEl(), getItems: () => _vList, getActive: () => activeSongId, select: selectSong, renderWindow: () => _renderVirtualSlice(true) });
     _loadPins();
     searchEl()?.addEventListener('input', () => {
       clearTimeout(_searchDebounce);
@@ -51,12 +52,7 @@ const LibraryUI = (() => {
     window.addEventListener('resize', () => { _renderVirtualSlice(true); if (activeSongId) _highlightActive(activeSongId); }, { passive: true });
     loadSongs();
 
-    document.getElementById('btn-prev-song')?.addEventListener('click', () => {
-      if (!window.SetlistUI?.getCurrentSetlist?.()) App?.navigatePrev?.();
-    });
-    document.getElementById('btn-next-song')?.addEventListener('click', () => {
-      if (!window.SetlistUI?.getCurrentSetlist?.()) App?.navigateNext?.();
-    });
+    window.EventBus?.emit('navigation:library', { getItems: () => _vList, getCatalog: () => songs, getCategory: () => categoryEl()?.value || '', getActiveId: () => activeSongId, select: selectSong });
     document.getElementById('btn-search-lyrics')?.addEventListener('click', _toggleSearchMode);
     categoryEl()?.addEventListener('change', () => {
       _syncFlatCategoryActive(categoryEl()?.value || '');
@@ -214,6 +210,7 @@ const LibraryUI = (() => {
   }
 
   function render(list, opts = {}) {
+    if (!opts.searchPage) window.LibrarySearch?.cancel();
     const el = listEl();
     if (!el) return;
     _vList = Array.isArray(list) ? list : [];
@@ -285,13 +282,14 @@ const LibraryUI = (() => {
     div.className  = 'song-item';
     div.dataset.id = song.id;
     const keySig   = song.defaultKey || song.keySignature || '';
-    const numStr   = song.httlvnId ? String(song.httlvnId).padStart(3, '0') : '—';
+    const numStr   = window.SongNavigation ? (window.SongNavigation.numberLabel(song) || '—') : (song.httlvnId ? String(song.httlvnId).padStart(3, '0') : '—');
     const catLabel = song.category ? (CAT_SHORT_NAMES[song.category] || song.category) : '';
     div.title      = `${song.httlvnId ? numStr + ' - ' : ''}${song.title}${song.category ? ' — ' + song.category : ''}${keySig ? ' [' + keySig + ']' : ''}`;
 
-    const addSpan = (cls, txt, ttl) => { const s = document.createElement('span'); s.className = cls; s.textContent = txt; if (ttl) s.title = ttl; div.appendChild(s); };
-    addSpan('song-item-num', numStr);
-    addSpan('song-item-title', song.title);
+    const addSpan = (cls, txt, ttl) => { const s = document.createElement('span'); s.className = cls; s.textContent = txt; if (ttl) s.title = ttl; div.appendChild(s); return s; };
+    addSpan('song-item-num' + (numStr.includes(' ') ? ' has-catalog-prefix' : ''), numStr);
+    const title = addSpan('song-item-title', song.title);
+    if (window.LibrarySearch) title.innerHTML = window.LibrarySearch.highlight(song.title, searchEl()?.value || '');
     if (catLabel) addSpan('song-cat-badge', catLabel, `Danh mục: ${song.category}`);
     if (keySig) addSpan('song-key-badge', keySig);
 
@@ -311,18 +309,26 @@ const LibraryUI = (() => {
   }
 
   // ── Search & Filter ──────────────────────────────────────────
-  function _onSearch() {
+  async function _onSearch() {
+    const seq = ++_searchSeq;
+    window.LibrarySearch?.cancel();
     const q = (searchEl()?.value || '').trim().toLowerCase(), cat = categoryEl()?.value || '', key = keyEl()?.value || '';
     let filtered = songs;
     if (cat) filtered = filtered.filter(s => s.category === cat);
     if (key) filtered = filtered.filter(s => (s.defaultKey || s.keySignature || '') === key);
     _buildQuickJump(filtered);
 
+    if (q && window.LibrarySearch) {
+      const categoryId = cat ? songs.find(s => s.category === cat)?.category_id : null;
+      const handled = await window.LibrarySearch.run(q, { category: cat, category_id: categoryId, key, mode: _searchMode }, render, _updateCount);
+      if (seq !== _searchSeq || handled) return;
+    }
+
     if (q) {
       if (window.OfflineVault?.searchSongs) {
         filtered = window.OfflineVault.searchSongs(filtered, q, _searchMode);
       } else if (_searchMode === 'lyric') {
-        filtered = filtered.filter(s => (s.title?.toLowerCase().includes(q)) || (s.lyricSnippet?.toLowerCase().includes(q)));
+        filtered = filtered.filter(s => (s.lyrics_text || s.lyricSnippet || '').toLowerCase().includes(q));
       } else {
         const isNumQuery = /^\d+$/.test(q), qNum = isNumQuery ? parseInt(q, 10) : NaN;
         filtered = filtered.filter(s => {
@@ -468,6 +474,7 @@ const LibraryUI = (() => {
 
   function selectSong(songId, updateUrl = true) {
     if (!songId) return;
+    window.SongNavigation?.leaveSetlist();
     activeSongId = String(songId);
     _highlightActive(activeSongId);
     _syncPinToolbarBtn();
@@ -485,14 +492,7 @@ const LibraryUI = (() => {
   }
 
   function jumpByNumber(num) {
-    const n = parseInt(num, 10);
-    if (isNaN(n) || n <= 0) return false;
-    const cat = categoryEl()?.value || '';
-    let match = cat ? songs.find(s => s.category === cat && Number(s.httlvnId) === n) : null;
-    if (!match) match = songs.find(s => Number(s.httlvnId) === n);
-    if (match) { selectSong(match.id); return true; }
-    window.App?.showToast?.(`Không tìm thấy bài số ${n}`, 'error');
-    return false;
+    return window.SongNavigation?.jumpNumber(num) ?? false;
   }
 
   function _highlightActive(id) {
@@ -534,7 +534,7 @@ const LibraryUI = (() => {
     if (onDeleteCb) onDeleteCb(id);
   }
 
-  function _updateCount(n) { const badge = document.getElementById('library-count'); if (badge) badge.textContent = n; }
+  function _updateCount(n) { window.SongNavigation?.syncNumberControls(); window.LibrarySearch?.catalog(songs); const badge = document.getElementById('library-count'); if (badge) badge.textContent = n; }
   function _esc(str) { return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function onSelect(cb) { onSelectCb = cb; }
   function onDelete(cb) { onDeleteCb = cb; }

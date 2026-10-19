@@ -19,29 +19,20 @@
   let _autoOpenTimer = null;
 
   function _findSongByNumber(num) {
-    if (!num || isNaN(num)) return null;
-    const songs = (window.LibraryUI && typeof window.LibraryUI.getSongs === 'function') 
-      ? window.LibraryUI.getSongs() 
-      : [];
-
-    return songs.find(s => {
-      const sNum = s.httlvnId ? parseInt(s.httlvnId, 10) : parseInt((s.id || '').replace(/^thanh-ca-/, ''), 10);
-      if (sNum === num) return true;
-      const padded = String(num).padStart(3, '0');
-      if (s.id === 'thanh-ca-' + padded || s.id === 'thanh-ca-' + num) return true;
-      if (s.title && (s.title.startsWith(num + '.') || s.title.startsWith(num + ' ') || s.title.startsWith(padded + '.') || s.title.startsWith(padded + ' '))) return true;
-      return false;
-    }) || null;
+    return window.SongNavigation?.findNumber(num) || null;
   }
 
   function _updateState() {
     clearTimeout(_autoOpenTimer);
 
     if (!_digitsDisplay || !_matchDisplay || !_btnOpen) return;
+    const context = window.SongNavigation?.numberContext();
+    const label = _modal.querySelector('.numpad-screen-label');
+    if (label) label.textContent = `Số bài · ${context?.category || 'Thư viện'}`;
 
     if (!_currentDigits) {
       _digitsDisplay.textContent = '---';
-      _matchDisplay.textContent = 'Nhập số bài 1 - 903...';
+      _matchDisplay.textContent = `Nhập số bài trong ${context?.category || 'danh mục đang chọn'}…`;
       _matchDisplay.className = 'numpad-song-match';
       _btnOpen.disabled = true;
       _matchedSong = null;
@@ -56,7 +47,7 @@
       _matchedSong = song;
       const keyText = song.key || song.defaultKey || '';
       const keyBadge = keyText ? ` (${keyText})` : '';
-      _matchDisplay.textContent = `✓ Bài ${num}: ${song.title}${keyBadge}`;
+      _matchDisplay.textContent = `✓ ${window.SongNavigation.numberLabel(song, true)}: ${song.title}${keyBadge}`;
       _matchDisplay.className = 'numpad-song-match matched';
       _btnOpen.disabled = false;
 
@@ -104,9 +95,8 @@
 
   function openCurrentSong() {
     clearTimeout(_autoOpenTimer);
-    if (!_matchedSong) return;
-
-    const targetSong = _matchedSong;
+    const targetSong = _findSongByNumber(parseInt(_currentDigits, 10));
+    if (!targetSong) { _updateState(); return; }
     close();
 
     if (window.LibraryUI && typeof window.LibraryUI.selectSong === 'function') {
@@ -117,6 +107,10 @@
   function open() {
     if (!_modal) init();
     if (!_modal) return;
+    if (!window.SongNavigation?.numberContext().available) {
+      window.App?.showToast?.('Danh mục này chưa có số chính thức. Hãy tìm theo tên bài.', 'info');
+      return;
+    }
 
     clear();
 

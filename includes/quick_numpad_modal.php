@@ -19,7 +19,7 @@
           <span class="numpad-prefix">#</span><span id="numpad-display-digits">---</span>
         </div>
         <div id="numpad-song-match" class="numpad-song-match" title="Nhấp để mở bài hát này">
-          Nhập số bài 1 - 903...
+          Nhập số bài...
         </div>
       </div>
 

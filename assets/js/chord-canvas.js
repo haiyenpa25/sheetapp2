@@ -4,7 +4,6 @@
  */
 const ChordCanvas = (() => {
   'use strict';
-
   /* ─── State ───────────────────────────────────────────────────────────────── */
   let _editEnabled = false, _highlightMode = false, _currentSet = 'HD', _prevSet = 'HD';
   let _customChords = {}, _noteEls = [], _ro = null, _songUseFlats = null;

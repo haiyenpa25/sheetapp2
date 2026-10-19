@@ -33,7 +33,7 @@ const OfflineVault = (() => {
       const s = songs[i];
       if (s && !s._normTitle) {
         s._normTitle = normalizeVi(s.title || '');
-        s._normLyric = normalizeVi(s.lyricSnippet || '');
+        s._normLyric = normalizeVi(s.lyrics_text || s.lyricSnippet || '');
       }
     }
     return songs;
@@ -54,6 +54,10 @@ const OfflineVault = (() => {
     const qNum = isNumQuery ? parseInt(q, 10) : NaN;
 
     return songs.filter(s => {
+        if (mode === 'lyric') {
+          const lyric = s._normLyric ?? normalizeVi(s.lyrics_text || s.lyricSnippet || '');
+          return tokens.length > 0 && tokens.every(token => lyric.includes(token));
+        }
       if (isNumQuery) {
         if (s.httlvnId === qNum || String(s.httlvnId || '').padStart(3, '0').includes(q)) {
           return true;
@@ -67,14 +71,6 @@ const OfflineVault = (() => {
         return true;
       }
 
-      if (mode === 'lyric') {
-        const rawLyric = (s.lyricSnippet || '').toLowerCase();
-        if (rawLyric.includes(q)) return true;
-        const normLyric = s._normLyric ?? normalizeVi(s.lyricSnippet || '');
-        if (tokens.length > 0 && tokens.every(t => normLyric.includes(t))) {
-          return true;
-        }
-      }
       return false;
     });
   }

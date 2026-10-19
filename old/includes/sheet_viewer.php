@@ -15,7 +15,7 @@
           <span class="feat-icon">[0-9]</span>
           <div>
             <strong>Gõ Số Nhảy Bài Tức Thì</strong>
-            <small>Gõ số bài (1–903) + Enter ở bất kỳ đâu để mở ngay</small>
+            <small>Gõ số bài + Enter ở bất kỳ đâu để mở ngay</small>
           </div>
         </div>
         <div class="feature-item">

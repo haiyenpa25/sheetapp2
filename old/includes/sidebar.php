@@ -27,15 +27,16 @@
   <div class="sidebar-search">
     <div id="category-flat-list" class="category-flat-list" aria-label="Danh mục Thánh Ca"></div>
     <div class="filter-row-compact">
-      <select id="category-filter" class="form-input select-toolbar" title="Lọc theo danh mục">
+      <select id="category-filter" class="form-input select-toolbar" title="Lọc theo danh mục" aria-label="Lọc theo danh mục bài hát">
         <option value="">Tất cả danh mục</option>
       </select>
-      <select id="key-filter" class="form-input select-toolbar key-filter-select" title="Lọc theo Tông nhạc">
+      <select id="key-filter" class="form-input select-toolbar key-filter-select" title="Lọc theo Tông nhạc" aria-label="Lọc theo tông nhạc">
         <option value="">Tông: Tất cả</option>
       </select>
     </div>
     <div class="search-box">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <label for="search-input" class="library-search-label">Tìm bài hát trong thư viện</label>
       <input id="search-input" type="text" placeholder="Số bài, tên bài (/ để tìm)..." autocomplete="off">
       <button id="btn-search-lyrics" class="btn-lyric-mode" title="Tìm theo Lời bài hát">Lời</button>
     </div>

@@ -211,6 +211,9 @@ echo jsTag('url-state.js');
 // ── 3. Feature Modules (defer) ──
 echo jsTag('core/ChordSetNames.js');
 echo jsTag('library-gestures.js');
+echo jsTag('library-list.js');
+echo jsTag('song-navigation.js');
+echo jsTag('core/LibrarySearch.js');
 echo jsTag('library-ui.js');
 echo jsTag('setlist-ui.js');
 echo jsTag('importer.js');

@@ -90,13 +90,11 @@ const KeyboardHandler = (() => {
       }
       case 'ArrowDown':
         e.preventDefault();
-        if (window.SetlistUI?.getCurrentSetlist?.()) { SetlistUI.next(); }
-        else { App?.navigateNext?.(); }
+        App?.navigateNext?.();
         break;
       case 'ArrowUp':
         e.preventDefault();
-        if (window.SetlistUI?.getCurrentSetlist?.()) { SetlistUI.prev(); }
-        else { App?.navigatePrev?.(); }
+        App?.navigatePrev?.();
         break;
       case ' ': {
         e.preventDefault();

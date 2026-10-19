@@ -30,6 +30,7 @@
   <div class="sidebar-search">
     <div class="search-box sidebar-search-box">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <label for="search-input" class="library-search-label">Tìm bài hát trong thư viện</label>
       <input id="search-input" type="text" placeholder="Tìm bài hát..." autocomplete="off">
       <div class="sidebar-search-actions">
         <button id="btn-quick-numpad" class="btn-quick-numpad" title="Bàn phím số nhanh (#)" aria-label="Mở bàn phím số nhanh">#</button>

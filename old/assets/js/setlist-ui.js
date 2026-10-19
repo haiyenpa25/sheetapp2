@@ -12,6 +12,7 @@ const SetlistUI = (() => {
   let _setlists = [];
   let _currentSetlist = null; // object setlist hiện tại
   let _currentIndex = -1;
+  let _playToken = 0;
   let _addingToSetlistId = null;
 
   async function fetchSetlists() {
@@ -199,6 +200,7 @@ const SetlistUI = (() => {
   }
 
   async function playCurrentItem() {
+    const token = ++_playToken;
     if (!_currentSetlist || !_currentSetlist.items || _currentSetlist.items.length === 0) {
        window.App?.showToast?.('Setlist trống', 'error');
        return;
@@ -215,6 +217,7 @@ const SetlistUI = (() => {
     const songId = item.song_id;
     
     await ensureSongsLoaded();
+    if (token !== _playToken || _currentSetlist?.items[_currentIndex] !== item) return;
     const songObj = _allSongsCache.find(s => String(s.id) === String(songId)) || window.LibraryUI?.getSongObj?.(songId);
     
     if (!songObj) {
@@ -229,7 +232,8 @@ const SetlistUI = (() => {
     }
 
     // Đưa cả profile lẫn transpose_key qua bên App
-    window.App?.loadSongWithProfile?.(songObj, item.chord_profile, item.transpose_key);
+    await window.App?.loadSongWithProfile?.(songObj, item.chord_profile, item.transpose_key);
+    if (token !== _playToken || _currentSetlist?.items[_currentIndex] !== item) return;
     document.querySelector('.toolbar-left')?.classList.add('in-setlist');
 
     // Apply BPM đã lưu cho bài này (nếu có)
@@ -311,6 +315,15 @@ const SetlistUI = (() => {
       _currentIndex--;
       renderSetlistItems().then(() => playCurrentItem()); // await via .then() vì prev() không async
     }
+  }
+
+  function endPlayback() {
+    ++_playToken;
+    _currentIndex = -1;
+    document.querySelector('.toolbar-left')?.classList.remove('in-setlist');
+    document.querySelectorAll('#setlist-items .song-item.active').forEach(row => row.classList.remove('active'));
+    _syncMetronomeSaveBtnVisibility();
+    window.EventBus?.emit('setlist:ended');
   }
 
   let _allSongsCache = [];
@@ -451,12 +464,10 @@ const SetlistUI = (() => {
       document.getElementById('add-to-setlist-modal')?.classList.add('hidden');
     });
 
-    document.getElementById('btn-next-song')?.addEventListener('click', (e) => {
-      if (_currentSetlist) { e.preventDefault(); e.stopPropagation(); next(); }
-    }, true);
-    document.getElementById('btn-prev-song')?.addEventListener('click', (e) => {
-      if (_currentSetlist) { e.preventDefault(); e.stopPropagation(); prev(); }
-    }, true);
+    window.EventBus?.emit('navigation:program', {
+      isActive: () => !!_currentSetlist && _currentIndex >= 0,
+      next, prev, end: endPlayback
+    });
 
     // ── Nút "💾 Lưu BPM" trong Metronome Panel ──
     // Chỉ hiện khi đang play một bài trong setlist

@@ -7,6 +7,7 @@ const LibraryUI = (() => {
   const listEl = () => document.getElementById('song-list'), searchEl = () => document.getElementById('search-input'), categoryEl = () => document.getElementById('category-filter');
 
   function init() {
+    window.LibraryList?.bind({ element: listEl(), getItems: () => _lastRenderedSongs, getActive: () => activeSongId, select: selectSong, renderWindow: _renderVirtualChunk });
     if (window.HistoryManager?.init) window.HistoryManager.init(() => { _buildRecentlyViewed(); _buildQuickFavorites(); });
     searchEl()?.addEventListener('input', () => { clearTimeout(_searchDebounce); _searchDebounce = setTimeout(_onSearch, 200); });
     searchEl()?.addEventListener('keydown', async (e) => {
@@ -21,8 +22,7 @@ const LibraryUI = (() => {
     });
 
     loadSongs();
-    document.getElementById('btn-prev-song')?.addEventListener('click', () => { if (!(window.SetlistUI?.getCurrentSetlist?.() && (window.SetlistUI?.getCurrentIndex?.() ?? -1) >= 0)) App?.navigatePrev?.(); });
-    document.getElementById('btn-next-song')?.addEventListener('click', () => { if (!(window.SetlistUI?.getCurrentSetlist?.() && (window.SetlistUI?.getCurrentIndex?.() ?? -1) >= 0)) App?.navigateNext?.(); });
+    window.EventBus?.emit('navigation:library', { getItems: () => _lastRenderedSongs, getCatalog: () => songs, getCategory: () => categoryEl()?.value || '', getActiveId: () => activeSongId, select: selectSong });
     document.getElementById('btn-search-lyrics')?.addEventListener('click', _toggleSearchMode);
     [categoryEl(), document.getElementById('sort-filter'), document.getElementById('season-filter'), document.getElementById('theme-filter')].forEach(el => el?.addEventListener('change', () => { _syncFlatCategoryActive(categoryEl()?.value || ''); _onSearch(); }));
     const btnToggle = document.getElementById('btn-filter-toggle'), panel = document.getElementById('sidebar-filters-panel');
@@ -148,6 +148,7 @@ const LibraryUI = (() => {
   }
 
   function render(list, opts = {}) {
+    if (!opts.searchPage) window.LibrarySearch?.cancel();
     _lastRenderedSongs = Array.isArray(list) ? list : [];
     const el = listEl();
     if (!el) return;
@@ -224,6 +225,7 @@ const LibraryUI = (() => {
 
     const num = document.createElement('div');
     num.className = 'song-item-num'; num.textContent = song.httlvnId ? String(song.httlvnId).padStart(3, '0') : '';
+    if (window.SongNavigation) { num.textContent = window.SongNavigation.numberLabel(song); num.classList.toggle('has-catalog-prefix', num.textContent.includes(' ')); }
     div.appendChild(num);
 
     const info = document.createElement('div'); info.className = 'song-item-info';
@@ -297,6 +299,7 @@ const LibraryUI = (() => {
   }
 
   async function _onSearch() {
+    window.LibrarySearch?.cancel();
     const seq    = ++_searchSeq;
     const q      = (searchEl()?.value || '').trim();
     const cat    = categoryEl()?.value || '';
@@ -318,22 +321,12 @@ const LibraryUI = (() => {
     }
 
     // Nếu có từ khóa hoặc bộ lọc mùa lễ -> gọi API FTS5
-    if (q || season || theme) {
+    if ((q || season || theme) && window.LibrarySearch) {
       try {
-        const res = await window.ApiService?.songs?.search?.(q, { season, theme, category: cat, mode: _searchMode, limit: 200 });
+        const categoryId = catSongs.find(s => s.category === cat)?.category_id;
+        const handled = await window.LibrarySearch.run(q, { season, theme, category: cat, category_id: cat ? categoryId : null, mode: _searchMode, sort: mode }, render, _updateCount);
         if (seq !== _searchSeq) return;
-        if (res && (res.success || Array.isArray(res))) {
-          let list = Array.isArray(res) ? res : (res.data || []);
-          if (cat) list = list.filter(s => s.category === cat);
-          const numM = q.match(/^(?:#|bài\s+|bai\s+|stt\s+)?(\d+)$/i);
-          if (numM) {
-            const target = parseInt(numM[1], 10);
-            list.sort((a, b) => (Number(a.httlvnId) === target ? -1 : Number(b.httlvnId) === target ? 1 : (Number(a.httlvnId) || 0) - (Number(b.httlvnId) || 0)));
-          } else if (!q) list = _sortSongs(list);
-          _updateCount(list.length);
-          render(list, { isSearch: !!q, emptyMsg: q ? `Không tìm thấy "${q}"` : 'Không có bài hát phù hợp', emptyHint: 'Thử đổi dịp lễ hoặc từ khóa khác' });
-          return;
-        }
+        if (handled) return;
       } catch (err) { /* fallback local */ }
     }
     if (seq !== _searchSeq) return;
@@ -353,6 +346,11 @@ const LibraryUI = (() => {
         const qVars = _getQueryVariants(q);
         const titleMatches = [], lyricMatches = [];
         filtered.forEach(s => {
+          if (_searchMode === 'lyric') {
+            const lyric = _removeAccents((s.lyrics_text || s.lyricSnippet || '').toLowerCase());
+            if (qVars.some(v => lyric.includes(_removeAccents(v)))) lyricMatches.push({ ...s, match_type: 'lyric', relevance_tier: 4 });
+            return;
+          }
           const isNum = target !== null && Number(s.httlvnId) === target;
           const tLower = (s.title || '').toLowerCase(), tUnacc = _removeAccents(tLower);
           if (isNum) titleMatches.push({ ...s, match_type: 'title', relevance_tier: 0 });
@@ -366,7 +364,7 @@ const LibraryUI = (() => {
         });
         titleMatches.sort((a, b) => (a.relevance_tier || 0) - (b.relevance_tier || 0) || (Number(a.httlvnId) || 0) - (Number(b.httlvnId) || 0));
         lyricMatches.sort((a, b) => (Number(a.httlvnId) || 0) - (Number(b.httlvnId) || 0));
-        filtered = _searchMode === 'lyric' ? [...lyricMatches, ...titleMatches] : [...titleMatches, ...lyricMatches];
+        filtered = _searchMode === 'lyric' ? lyricMatches : [...titleMatches, ...lyricMatches];
       }
     } else filtered = _sortSongs(filtered);
     _updateCount(filtered.length);
@@ -518,7 +516,7 @@ const LibraryUI = (() => {
 
   function selectSong(songId, updateUrl = true) {
     if (!songId) return;
-    if (window.SetlistPlayer?.endSetlist && window.SetlistUI?.getCurrentSetlist?.() && (window.SetlistUI?.getCurrentIndex?.() ?? -1) >= 0) window.SetlistPlayer.endSetlist(false);
+    window.SongNavigation?.leaveSetlist();
     activeSongId = String(songId);
     _highlightActive(activeSongId);
     if (updateUrl) {
@@ -567,12 +565,13 @@ const LibraryUI = (() => {
   }
 
   // ── Helpers ───────────────────────────────────────────────────
-  function _updateCount(n) { const b = document.getElementById('library-count'); if (b) b.textContent = n; }
+  function _updateCount(n) { window.SongNavigation?.syncNumberControls(); window.LibrarySearch?.catalog(songs); const b = document.getElementById('library-count'); if (b) b.textContent = n; }
   function _esc(str) {
     return window.SafeHtml?.escape ? window.SafeHtml.escape(str) : String(str ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
   }
 
   function _highlightText(text, query) {
+    if (window.LibrarySearch) return window.LibrarySearch.highlight(text, query);
     if (!text) return '';
     const cleanQ = (query || '').trim();
     if (!cleanQ) return _esc(text);
@@ -588,8 +587,9 @@ const LibraryUI = (() => {
   const onSelect = cb => { onSelectCb = cb; }, onDelete = cb => { onDeleteCb = cb; }, getSongs = () => songs;
   const getActiveSong = () => songs.find(s => String(s.id) === String(activeSongId)) || null;
   const getSongObj = id => songs.find(s => String(s.id) === String(id)) || _lastRenderedSongs.find(s => String(s.id) === String(id)) || null;
+  const jumpByNumber = number => window.SongNavigation?.jumpNumber(number) ?? false;
 
-  return { init, loadSongs, render, selectSong, addSong, deleteSong, onSelect, onDelete, getSongs, getActiveSong, getSongObj };
+  return { init, loadSongs, render, selectSong, jumpByNumber, addSong, deleteSong, onSelect, onDelete, getSongs, getActiveSong, getSongObj };
 })();
 
 window.LibraryUI = LibraryUI;

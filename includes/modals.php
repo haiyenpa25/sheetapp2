@@ -163,7 +163,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width: 15px; height: 15px; margin-left: 2px;"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </button>
           <p style="margin: 0; font-size: 0.72rem; color: var(--text-muted); line-height: 1.4;">
-            <?= icon('check', 'icon-xs text-success') ?> Xem 903 bài &amp; hợp âm đầy đủ &nbsp;•&nbsp; <?= icon('check', 'icon-xs text-success') ?> Nghe audio 4 bè &nbsp;•&nbsp; <?= icon('check', 'icon-xs text-success') ?> Tự tập đàn
+            <?= icon('check', 'icon-xs text-success') ?> Xem <span data-library-total>toàn bộ</span> bài &amp; hợp âm đầy đủ &nbsp;•&nbsp; <?= icon('check', 'icon-xs text-success') ?> Nghe audio 4 bè &nbsp;•&nbsp; <?= icon('check', 'icon-xs text-success') ?> Tự tập đàn
           </p>
         </div>
 

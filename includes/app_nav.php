@@ -89,7 +89,7 @@ $helpAnchor = match($activePillar) {
          id="pillar-library" 
          role="tab"
          aria-selected="<?= $activePillar === 'library' ? 'true' : 'false' ?>"
-         title="Thư viện 903 bài hát, đọc sheet nhạc, dịch tông & danh sách Setlist">
+         data-library-count-title title="Thư viện bài hát, đọc sheet nhạc, dịch tông & danh sách Setlist">
         <span class="pillar-icon"><?= icon('book-open') ?></span>
         <span class="pillar-label">Thư Viện</span>
       </a>

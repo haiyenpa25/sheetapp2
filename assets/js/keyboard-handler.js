@@ -82,8 +82,7 @@ const KeyboardHandler = (() => {
       case 'ArrowDown':
         e.preventDefault();
         if (e.shiftKey) {
-          if (window.SetlistUI?.getCurrentSetlist?.()) { SetlistUI.next(); }
-          else { App?.navigateNext?.(); }
+          App?.navigateNext?.();
         } else {
           _turnPageOrScroll(+1);
         }
@@ -91,8 +90,7 @@ const KeyboardHandler = (() => {
       case 'ArrowUp':
         e.preventDefault();
         if (e.shiftKey) {
-          if (window.SetlistUI?.getCurrentSetlist?.()) { SetlistUI.prev(); }
-          else { App?.navigatePrev?.(); }
+          App?.navigatePrev?.();
         } else {
           _turnPageOrScroll(-1);
         }

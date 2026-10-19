@@ -304,24 +304,10 @@ const SetlistPlayer = (() => {
       }
     });
 
-    // Cặp nút chuyển bài trên Toolbar: chỉ can thiệp khi đang thực sự phát setlist
-    document.getElementById('btn-next-song')?.addEventListener('click', (e) => {
-      const ctx = getContext();
-      if (ctx.getCurrentSetlist?.() && (ctx.getCurrentIndex?.() ?? -1) >= 0) {
-        e.preventDefault();
-        e.stopPropagation();
-        next();
-      }
-    }, true);
-
-    document.getElementById('btn-prev-song')?.addEventListener('click', (e) => {
-      const ctx = getContext();
-      if (ctx.getCurrentSetlist?.() && (ctx.getCurrentIndex?.() ?? -1) >= 0) {
-        e.preventDefault();
-        e.stopPropagation();
-        prev();
-      }
-    }, true);
+    window.EventBus?.emit('navigation:program', {
+      isActive: () => !!getContext().getCurrentSetlist?.() && (getContext().getCurrentIndex?.() ?? -1) >= 0,
+      next, prev, end: endSetlist
+    });
 
     // Nút đóng/kết thúc chương trình trên thanh đáy (Ticket L3-10)
     document.getElementById('btn-sp-end')?.addEventListener('click', (e) => {

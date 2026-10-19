@@ -9,6 +9,7 @@ const App = (() => {
 
   /* ── INIT ── */
   function init() {
+    window.SongNavigation?.init();
     OSMDRenderer.init('osmd-container');
     OSMDRenderer.onReady(() => {
       ChordCanvas?.onOSMDRendered?.();
@@ -89,19 +90,11 @@ const App = (() => {
 
   /* ── NAVIGATION ── */
   function navigateNext() {
-    const songs = LibraryUI.getSongs();
-    const song  = Store.get('currentSong');
-    const idx   = song ? songs.findIndex(s => s.id === song.id) : -1;
-    const next  = songs[idx + 1];
-    if (next) LibraryUI.selectSong(next.id);
+    window.SongNavigation?.request(1);
   }
 
   function navigatePrev() {
-    const songs = LibraryUI.getSongs();
-    const song  = Store.get('currentSong');
-    const idx   = song ? songs.findIndex(s => s.id === song.id) : songs.length;
-    const prev  = songs[idx - 1];
-    if (prev) LibraryUI.selectSong(prev.id);
+    window.SongNavigation?.request(-1);
   }
 
   /* ── TRANSPOSE ── */
