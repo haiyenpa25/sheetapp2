@@ -1,0 +1,25 @@
+# Transport-only gzip sidecars. No server restart or mod_deflate required.
+# Source: https://httpd.apache.org/docs/2.4/mod/mod_deflate.html#precompressed
+# Regenerate/check with: php tools/generate_asset_gzip.php [--check]
+<IfModule mod_headers.c>
+    <IfModule mod_rewrite.c>
+        RewriteEngine On
+        RewriteCond "%{HTTP:Accept-Encoding}" "(^|,)\s*gzip\s*(;|,|$)" [NC]
+        RewriteCond "%{HTTP:Accept-Encoding}" "!(^|,)\s*gzip\s*;\s*q=0(\.0*)?\s*(,|$)" [NC]
+        RewriteCond "%{HTTP:Range}" "^$"
+        RewriteCond "%{REQUEST_FILENAME}.gz" -s
+        RewriteRule "^(js/vendor/opensheetmusicdisplay\.min\.js|css/(sheet|layout|library-polish)\.css)$" "$1.gz" [L,QSA]
+        RewriteRule "\.(js|css)\.gz$" "-" [E=no-gzip:1]
+    </IfModule>
+    <FilesMatch "\.(js|css)(\.gz)?$">
+        Header merge Vary Accept-Encoding
+    </FilesMatch>
+    <FilesMatch "\.js\.gz$">
+        ForceType text/javascript
+        Header set Content-Encoding gzip
+    </FilesMatch>
+    <FilesMatch "\.css\.gz$">
+        ForceType text/css
+        Header set Content-Encoding gzip
+    </FilesMatch>
+</IfModule>
