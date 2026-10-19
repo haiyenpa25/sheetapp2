@@ -167,7 +167,8 @@ checkS($oldChordCanvasLines < 600 && !is_file($root . '/old/assets/js/lyric-extr
 $mainLibJs = (string)@file_get_contents($root . '/assets/js/library-ui.js');
 checkS(str_contains($mainLibJs, 'LibraryGestures.bind') && str_contains($mainLibJs, 'function _getItemH()'), 'LibraryUI dùng guard chạm chung và đo chiều cao DOM; hành vi kiểm trong E2E TV0');
 $normalizedLibJs = str_replace(chr(92) . chr(92), chr(92), $mainLibJs);
-checkS(str_contains($normalizedLibJs, '[^\p{L}\p{N}]') && str_contains($mainLibJs, 'mode: _searchMode, limit: 200'), 'assets/js/library-ui.js tô sáng nguyên từ tiếng Việt Unicode và truyền mode/limit:200 khi tìm kiếm');
+$sharedSearch = (string)file_get_contents($root . '/assets/js/core/LibrarySearch.js');
+checkS(str_contains($normalizedLibJs, '[^\p{L}\p{N}]') && str_contains($mainLibJs, 'mode: _searchMode') && str_contains($sharedSearch, 'limit: 200, offset'), 'LibraryUI dùng phân trang chung tối đa 200; hành vi Unicode/phân trang kiểm bằng E2E TV1');
 
 $apiIndexPhp = (string)@file_get_contents($root . '/api/index.php');
 checkS(str_contains($apiIndexPhp, 'session_write_close()'), 'api/index.php mở khóa session sớm (session_write_close) cho các request GET/HEAD song song');

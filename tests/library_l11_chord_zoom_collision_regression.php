@@ -37,21 +37,24 @@ checkStatic(
     'chord-canvas-dots.js áp dụng GAP_PX co giãn động theo zoom scale'
 );
 
-// 2. Kiểm tra cỡ chữ hợp âm overlay có hệ số >= 1.35
-$hasScaledFontSize = preg_match('/fSize\s*=\s*Math\.max\(\s*16\s*,\s*Math\.round\(\s*20\s*\*\s*scale\s*\*\s*1\.35/', $dotsJs);
-checkBehavior(
-    'chord_dots_fontsize_ratio_1_35',
-    (bool)$hasScaledFontSize,
-    'chord-canvas-dots.js định nghĩa cỡ chữ hợp âm với hệ số phóng đại 1.35x theo zoom scale'
+// 2. Preset-based sizing replaced the fixed multiplier in baseline 623b745.
+// Real font sizes and collision boxes are checked in library-tv0-chord-geometry.spec.js.
+$hasScaledFontSize = str_contains($dotsJs, '18 * scale * presetMultiplier')
+    && str_contains($dotsJs, 'Math.max(11, Math.min(34');
+checkStatic(
+    'chord_dots_fontsize_tracks_preset_and_zoom',
+    $hasScaledFontSize,
+    'Static: cỡ chữ theo preset/zoom có giới hạn; hình học thực kiểm trong E2E'
 );
 
 // 3. Kiểm tra thuật toán chống va chạm ngang (overlap check & reposition)
 $hasCollisionPrevention = strpos($dotsJs, 'curLeft < prevRight') !== false
-    && strpos($dotsJs, 'prevRight + 6') !== false;
-checkBehavior(
+    && strpos($dotsJs, 'prevRight + horizPad') !== false
+    && str_contains($dotsJs, 'horizPad = Math.max(3, Math.round(6 * scale))');
+checkStatic(
     'chord_dots_horizontal_collision_prevention',
     $hasCollisionPrevention,
-    'chord-canvas-dots.js có thuật toán kiểm tra overlap và dàn ngang các nhãn hợp âm kề nhau'
+    'Static: chống overlap dùng khoảng cách theo zoom; hộp DOM thực kiểm trong E2E'
 );
 
 // 4. Kiểm tra OSMDRenderer TextHeight >= 2.85

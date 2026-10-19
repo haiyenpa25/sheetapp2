@@ -91,19 +91,20 @@ it('chord-canvas-dots.js alignDOMChords quét g.vf-stavenote để tạo mảng 
     str_contains($chordDotsJs, "svg.querySelectorAll('g.vf-stavenote')")
 );
 
-it('chord-canvas-dots.js tính safeFixedY nâng hàng hợp âm khi nốt vươn cao hơn dòng kẻ trên (minNoteTop < sys.topLine)',
+it('Static: safeFixedY nâng hàng hợp âm theo zoom; hộp DOM thực kiểm ở E2E chord-geometry',
     str_contains($chordDotsJs, 'minNoteTop < sys.topLine') &&
-    str_contains($chordDotsJs, 'safeFixedY = Math.round(minNoteTop - badgeH - 8)')
+    str_contains($chordDotsJs, 'safeFixedY = Math.round(minNoteTop - badgeH - Math.max(4, Math.round(6 * scale)))')
 );
 
-it('chord-canvas-dots.js kiểm tra va chạm cục bộ từng badge với nốt bên dưới và nâng vị trí badgeY',
+it('Static: kiểm tra va chạm cục bộ dùng clearance theo zoom; hành vi ở E2E chord-geometry',
     str_contains($chordDotsJs, '!(nr.right < bLeft || nr.left > bRight)') &&
-    str_contains($chordDotsJs, 'badgeY + badgeH > localMinTop - 6')
+    str_contains($chordDotsJs, 'badgeY + badgeH > localMinTop - clearance')
+    && str_contains($chordDotsJs, 'clearance = Math.max(4, Math.round(6 * scale))')
 );
 
-it('chord-canvas-dots.js placeDot kiểm tra rect.top và giữ khoảng cách spanY an toàn',
-    str_contains($chordDotsJs, 'rect.top - cRect.top < (staffTop || 9999)') &&
-    str_contains($chordDotsJs, 'spanY = Math.min(spanY, (rect.top - cRect.top) - fSize - 6)')
+it('Static: placeDot dùng noteTop và khoảng cách theo zoom; hành vi ở E2E chord-geometry',
+    str_contains($chordDotsJs, 'noteTop < (staffTop || 9999)') &&
+    str_contains($chordDotsJs, 'spanY = Math.min(spanY, noteTop - fSize - Math.max(4, Math.round(6 * scale)))')
 );
 
 // ── 5. Kiểm tra hành vi / Mô phỏng hình học (Behavioral Simulation) ──

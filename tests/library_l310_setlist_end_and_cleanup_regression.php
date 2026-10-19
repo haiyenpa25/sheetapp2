@@ -61,25 +61,26 @@ assertCondition(
 );
 
 // -- 2. Kiểm tra Giải phóng các nút ◀ ▶ không để bị chiếm --
+$navigationSrc = file_get_contents(__DIR__ . '/../assets/js/song-navigation.js') ?: '';
 assertCondition(
-    str_contains($playerSrc, "ctx.getCurrentSetlist?.() && (ctx.getCurrentIndex?.() ?? -1) >= 0"),
-    "setlist-player.js chỉ can thiệp phím ◀ ▶ trên Toolbar khi đang thực sự phát setlist (index >= 0)",
-    true
+    str_contains($playerSrc, "'navigation:program'") && str_contains($playerSrc, '(getContext().getCurrentIndex?.() ?? -1) >= 0'),
+    "Static: bộ phát đăng ký trạng thái đang phát cho SongNavigation; hành vi kiểm ở E2E TV1-5",
+    false
 );
 
 assertCondition(file_exists($libraryUiFile), "File library-ui.js tồn tại");
 $libSrc = file_get_contents($libraryUiFile) ?: '';
 
 assertCondition(
-    str_contains($libSrc, "window.SetlistUI?.getCurrentSetlist?.() && (window.SetlistUI?.getCurrentIndex?.() ?? -1) >= 0"),
-    "library-ui.js giải phóng các nút #btn-prev-song và #btn-next-song khi setlist đã kết thúc hoặc không phát",
-    true
+    str_contains($libSrc, "'navigation:library'") && str_contains($navigationSrc, 'program?.isActive()'),
+    "Static: LibraryUI đăng ký thứ tự đang hiện; SongNavigation sở hữu nút điều hướng",
+    false
 );
 
 assertCondition(
-    str_contains($libSrc, "window.SetlistPlayer?.endSetlist") && str_contains($libSrc, "selectSong("),
-    "library-ui.js tự động dọn dẹp setlist khi người dùng chọn bài hát bất kỳ từ Kho Nhạc",
-    true
+    str_contains($libSrc, 'window.SongNavigation?.leaveSetlist()') && str_contains($navigationSrc, 'program.end(false)'),
+    "Static: chọn bài từ thư viện thoát chương trình qua controller; hành vi kiểm ở E2E TV1-5",
+    false
 );
 
 // -- 3. Kiểm tra Nút Kết thúc chương trình trên Giao diện --
