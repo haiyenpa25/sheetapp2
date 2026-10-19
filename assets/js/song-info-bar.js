@@ -13,6 +13,7 @@ const SongInfoBar = (() => {
 
   let _songData  = null;
   let _songId    = null;
+  const _usageRequests = new Map();
 
   function init() {
     document.getElementById('btn-song-info-toggle')?.addEventListener('click', _toggle);
@@ -41,6 +42,7 @@ const SongInfoBar = (() => {
           if (popover.parentNode !== document.body) document.body.appendChild(popover);
           popover.classList.remove('hidden');
           _updatePopoverContent();
+          _loadSongUsageChip(_songId);
           _positionPopover();
         } else {
           popover.classList.add('hidden');
@@ -118,6 +120,9 @@ const SongInfoBar = (() => {
 
   function loadSong(xmlString, song) {
     if (!xmlString) { clearSong(); return; }
+    _usageRequests.clear();
+    const popUsage = document.getElementById('si-pop-usage');
+    if (popUsage) popUsage.textContent = '--';
     _songId   = song?.id || song?.httlvnId || null;
     _songData = _parseXml(xmlString, song);
     if (!_songData.key && song?.defaultKey) _songData.key = song.defaultKey;
@@ -129,6 +134,7 @@ const SongInfoBar = (() => {
 
   function clearSong() {
     _songData = null; _songId = null;
+    _usageRequests.clear();
     document.getElementById('song-info-strip')?.classList.add('si-hidden');
     const inner = document.getElementById('si-inner');
     if (inner) inner.innerHTML = '';
@@ -293,7 +299,7 @@ const SongInfoBar = (() => {
     }
 
     inner.innerHTML = chips.join('');
-    _loadSongUsageChip(_songId);
+    if (document.getElementById('song-info-popover')?.classList.contains('hidden') === false) _loadSongUsageChip(_songId);
     _updatePopoverContent();
 
     // Wire sự kiện click vào Chip Tông để đổi nhanh
@@ -485,8 +491,10 @@ const SongInfoBar = (() => {
   async function _loadSongUsageChip(songId) {
     if (!songId || !window.ApiService?.setlists?.songUsage) return;
     try {
-      const res = await window.ApiService.setlists.songUsage(songId);
+      if (!_usageRequests.has(songId)) _usageRequests.set(songId, window.ApiService.setlists.songUsage(songId));
+      const res = await _usageRequests.get(songId);
       if (songId !== _songId) return;
+      if (!res?.success) { _usageRequests.delete(songId); return; }
       if (res.success && res.data && res.data.total_used > 0) {
         const inner = document.getElementById('si-inner');
         const count = res.data.total_used;
@@ -508,7 +516,7 @@ const SongInfoBar = (() => {
         });
         inner.appendChild(chip);
       }
-    } catch(e) {}
+    } catch(e) { _usageRequests.delete(songId); }
   }
 
   /* Đọc notes từ PerformanceNotes cache */

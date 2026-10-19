@@ -140,11 +140,7 @@ const SongLoader = (() => {
       // Các task phụ — không cần await
       if (window.SongInfoBar) SongInfoBar.loadSong(xml, song);
       if (window.PerformanceNotes) PerformanceNotes.loadSong(song.id, settings); // Ticket L5-4: dùng chung sessions
-      if (window.LiveSync?.ensureLoaded) {
-        window.LiveSync.ensureLoaded();
-      } else if (window.ScriptLoader?.loadLiveSync) {
-        window.ScriptLoader.loadLiveSync().then(() => window.LiveSync?.ensureLoaded?.());
-      }
+      // TV2-3: ModeManager and Live controls load performance modules on demand.
 
       _enableAudioControls();
       AppUI.showOSMD();

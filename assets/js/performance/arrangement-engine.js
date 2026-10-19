@@ -9,42 +9,43 @@
  */
 const ArrangementEngine = (() => {
   'use strict';
-
   let _currentSongId      = null;
+  const _pendingLoads = new Map();
+  let _loadedSongId = null;
+  let _loadGeneration = 0;
   let _sections           = [];
   let _arrangements       = [];
   let _activeArrangement  = null;
   let _activeStepIndex    = 0;
   let _currentSectionId   = null;
   let _lastHighlightedSec = null;
-
   function init() {
     _createJumpBarDOM();
     _bindEvents();
-
     const curSong = window.Store?.get?.('currentSong');
     if (curSong?.id) {
       loadForSong(curSong.id);
     }
-
     console.log('[ArrangementEngine] Initialized');
   }
-
   function _bindEvents() {
     if (typeof EventBus === 'undefined') return;
-
     EventBus.on('song:loaded', ({ song, settings }) => {
+      ++_loadGeneration;
+      _pendingLoads.clear();
+      _loadedSongId = null;
       const songId = song?.id;
       if (songId) {
         if (settings?.sections && Array.isArray(settings.sections)) {
           _currentSongId = songId;
+          _loadedSongId = songId;
           _sections = settings.sections;
           _arrangements = [];
           renderJumpBar();
           EventBus.emit('arrangements:loaded', { songId, sections: _sections, arrangements: _arrangements });
         } else {
           const isLive = window.LiveSession?.isActive?.() || window.Store?.get?.('currentRoom');
-          if (isLive || window.__enableArrangementsAutoLoad) {
+          if (isLive || _isPerformanceMode() || window.__enableArrangementsAutoLoad) {
             loadForSong(songId);
           } else {
             _currentSongId = songId;
@@ -57,18 +58,15 @@ const ArrangementEngine = (() => {
         clear();
       }
     });
-
     // Lắng nghe thay đổi ô nhịp để cập nhật active chip trên Section Bar
     EventBus.on('performance:measure_changed', ({ measure }) => {
       updateActiveSectionByMeasure(measure);
     });
-
     // Lắng nghe thay đổi chế độ và chương trình để cập nhật hiển thị Jump Bar (Ticket R1-4)
     EventBus.on('app:mode_change', () => renderJumpBar());
     EventBus.on('setlist:played', () => renderJumpBar());
     EventBus.on('setlist:ended', () => renderJumpBar());
   }
-
   /**
    * Tạo DOM container cho Section Jump Bar nếu chưa có
    */
@@ -89,7 +87,6 @@ const ArrangementEngine = (() => {
           </button>
         </div>
       `;
-
       // Chèn lên trước sheet container hoặc vào đầu wrapper
       const sheetContainer = document.getElementById('sheet-container') || document.getElementById('osmd-container');
       if (sheetContainer && sheetContainer.parentNode) {
@@ -98,7 +95,6 @@ const ArrangementEngine = (() => {
         wrapper.appendChild(bar);
       }
     }
-
     // Gắn sự kiện nút Sửa phân đoạn
     const btnEdit = document.getElementById('btn-section-edit');
     if (btnEdit && !btnEdit.dataset.bound) {
@@ -111,29 +107,36 @@ const ArrangementEngine = (() => {
       });
     }
   }
-
   /**
    * Tải danh sách sections và arrangements của bài hát từ API
    */
-  async function loadForSong(songId) {
+  function loadForSong(songId) {
+    if (_currentSongId === songId && _pendingLoads.has(songId)) return _pendingLoads.get(songId);
+    const pending = _loadForSong(songId, ++_loadGeneration).finally(() => {
+      if (_pendingLoads.get(songId) === pending) _pendingLoads.delete(songId);
+    });
+    _pendingLoads.set(songId, pending);
+    return pending;
+  }
+  async function _loadForSong(songId, generation) {
     _currentSongId = songId;
+    _loadedSongId = null;
     _sections = [];
     _arrangements = [];
     _activeArrangement = null;
     _activeStepIndex = 0;
     _currentSectionId = null;
     _lastHighlightedSec = null;
-
     try {
       if (window.ApiService?.arrangements) {
         const [secRes, arrRes] = await Promise.all([
           window.ApiService.arrangements.getSections(songId).catch(() => ({ data: [] })),
           window.ApiService.arrangements.list(songId).catch(() => ({ data: [] }))
         ]);
-
+        if (generation !== _loadGeneration) return;
+        _loadedSongId = songId;
         _sections = Array.isArray(secRes?.data) ? secRes.data : [];
         _arrangements = Array.isArray(arrRes?.data) ? arrRes.data : [];
-
         if (_arrangements.length > 0) {
           _activeArrangement = _arrangements.find(a => a.is_default) || _arrangements[0];
         }
@@ -141,11 +144,9 @@ const ArrangementEngine = (() => {
     } catch (e) {
       console.warn('[ArrangementEngine] Failed to load sections:', e);
     }
-
     renderJumpBar();
     EventBus.emit('arrangements:loaded', { songId, sections: _sections, arrangements: _arrangements });
   }
-
   function _isProgramOrSetlistActive() {
     return Boolean(document.querySelector('.toolbar-left')?.classList.contains('in-setlist') ||
       document.body.classList.contains('in-setlist') ||
@@ -165,7 +166,6 @@ const ArrangementEngine = (() => {
       window.__forceShowSectionJumpBar || document.body.dataset.showSections === 'true' ||
       (typeof window !== 'undefined' && (window.location.search.includes('v=sheet') || window.location.search.includes('sections=1'))));
   }
-
   /**
    * Render danh sách Section Chips trên Jump Bar (Ticket R1-4)
    */
@@ -173,7 +173,6 @@ const ArrangementEngine = (() => {
     const container = document.getElementById('section-jump-bar-container');
     const chipsList = document.getElementById('section-chips-list');
     if (!container || !chipsList) return;
-
     if (!_sections || _sections.length === 0) {
       const canEdit = window.Auth?.isAdmin?.() || window.Auth?.isBanhat?.();
       if (canEdit && _currentSongId && (_isProgramOrSetlistActive() || _isPerformanceMode() || window.__forceShowSectionJumpBar)) {
@@ -185,15 +184,12 @@ const ArrangementEngine = (() => {
       }
       return;
     }
-
     if (!_shouldShowJumpBar()) {
       container.classList.add('hidden');
       return;
     }
-
     container.classList.remove('hidden');
     chipsList.innerHTML = '';
-
     _sections.forEach((sec) => {
       const chip = document.createElement('button');
       chip.type = 'button';
@@ -202,11 +198,9 @@ const ArrangementEngine = (() => {
       chip.dataset.startMeasure = sec.start_measure;
       chip.dataset.endMeasure = sec.end_measure;
       chip.dataset.type = sec.type;
-
       const icon = _getSectionIcon(sec.type);
       const color = sec.color || _getSectionDefaultColor(sec.type);
       const vnName = _normalizeSectionLabel(sec.type, sec.name);
-
       chip.style.setProperty('--chip-accent', color);
       chip.innerHTML = `
         <span class="chip-icon">${icon}</span>
@@ -392,6 +386,8 @@ const ArrangementEngine = (() => {
   }
 
   function clear() {
+    ++_loadGeneration;
+    _loadedSongId = null;
     _currentSongId = null;
     _sections = [];
     _arrangements = [];
@@ -574,7 +570,7 @@ const ArrangementEngine = (() => {
     const songId = requestedSongId || _currentSongId || window.Store?.get?.('currentSong')?.id
       || new URLSearchParams(window.location.search).get('song');
     if (!songId) return;
-    if (_currentSongId === songId && _sections.length > 0) return renderJumpBar();
+    if (_currentSongId === songId && _loadedSongId === songId) return renderJumpBar();
     await loadForSong(songId);
   }
 
