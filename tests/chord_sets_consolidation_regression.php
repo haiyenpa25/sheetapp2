@@ -131,7 +131,7 @@ check(file_exists($toolPath), 'File tools/migrate_json_chord_sets_to_db.php tồ
 
 $output = [];
 $exitCode = 0;
-exec("C:\\xampp\\php\\php.exe " . escapeshellarg($toolPath) . " --reconcile 2>&1", $output, $exitCode);
+exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg($toolPath) . " --reconcile 2>&1", $output, $exitCode);
 check($exitCode === 0, 'tools/migrate_json_chord_sets_to_db.php --reconcile thực thi thành công');
 $outText = implode("\n", $output);
 check(str_contains($outText, '903'), 'Công cụ đối soát phát hiện đủ 903 bài thánh ca');

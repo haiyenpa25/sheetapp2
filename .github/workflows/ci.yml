@@ -19,7 +19,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: pdo, pdo_sqlite, sqlite3, mbstring, json, openssl, ctype, fileinfo, zip
+          extensions: pdo, pdo_sqlite, sqlite3, mbstring, json, openssl, ctype, fileinfo, zip, curl, dom
           coverage: none
 
       - name: Check PHP & Extensions
@@ -30,5 +30,29 @@ jobs:
       - name: Install sanitized library for a fresh checkout
         run: openssl rand -hex 24 | php tools/install_library.php --password-stdin
 
+      - name: Start isolated Apache for HTTP and gzip regression tests
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y apache2 libapache2-mod-php8.2
+          ci_user="$(id -un)"
+          ci_group="$(id -gn)"
+          sudo sed -i "s/^export APACHE_RUN_USER=.*/export APACHE_RUN_USER=$ci_user/" /etc/apache2/envvars
+          sudo sed -i "s/^export APACHE_RUN_GROUP=.*/export APACHE_RUN_GROUP=$ci_group/" /etc/apache2/envvars
+          sudo ln -s "$GITHUB_WORKSPACE" /var/www/html/sheetapp2
+          sudo tee /etc/apache2/conf-available/sheetapp-ci.conf > /dev/null <<EOF
+          ServerName localhost
+          <Directory "$GITHUB_WORKSPACE">
+              Options FollowSymLinks
+              AllowOverride All
+              Require all granted
+          </Directory>
+          EOF
+          sudo a2enmod rewrite headers expires deflate php8.2
+          sudo a2enconf sheetapp-ci
+          sudo service apache2 restart
+          curl --fail --silent http://localhost/sheetapp2/api/index.php?route=categories > /dev/null
+
       - name: Run Unified Test Runner
+        env:
+          SHEETAPP_TEST_URL: http://localhost/sheetapp2
         run: php tests/run_all_tests.php
