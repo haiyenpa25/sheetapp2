@@ -6,15 +6,15 @@ const instruments = [
   { id: 'drums', name: 'Trống' }
 ];
 const notes = [
-  { id: 'g1', instrumentId: 'guitar', measureIdx: 0, staffIdx: 0, noteIdx: 0, text: 'Rải nhẹ' },
+  { id: 'g1', instrumentId: 'guitar', measureIdx: 0, staffIdx: 0, noteIdx: 0, text: 'Rải nhẹ', color: 'blue' },
   { id: 'd1', instrumentId: 'drums', measureIdx: 0, staffIdx: 0, noteIdx: 0, text: 'Fill' },
   { id: 'd2', instrumentId: 'drums', measureIdx: 0, staffIdx: 1, noteIdx: 0, text: 'Điệu 6/8' }
 ];
-async function setup(page, admin = false) {
+async function setup(page, admin = false, initialNotes = notes) {
   await page.route('https://annotations.test/**', route => route.fulfill({ contentType: 'text/html', body: '<!doctype html>' }));
   await page.goto('https://annotations.test/');
   await page.evaluate(() => localStorage.removeItem('sheetapp_annotation_layers'));
-  await page.setContent('<main id="sheet-viewer-wrapper"><div id="sheet-area"><div id="osmd-container" style="position:relative"><svg width="500" height="140"><g id="n1"><rect x="60" y="40" width="10" height="10"/></g></svg><svg width="500" height="140"><g id="n2"><rect x="90" y="40" width="10" height="10"/></g></svg></div></div></main><button id="btn-add-annotate-mode"></button><button id="btn-add-chord-mode"></button>');
+  await page.setContent('<header id="toolbar"><div id="toolbar-controls"></div></header><main id="sheet-viewer-wrapper"><div id="sheet-area"><div id="osmd-container" style="position:relative"><svg width="500" height="300"><g id="n1"><rect x="60" y="180" width="10" height="10"/></g></svg><svg width="500" height="300"><g id="n2"><rect x="90" y="180" width="10" height="10"/></g></svg></div></div></main><button id="btn-add-annotate-mode"></button><button id="btn-add-chord-mode"></button>');
   await page.addStyleTag({ path: path.join(root, 'assets/css/instrument-annotations.css') });
   await page.evaluate(({ admin, instruments, notes }) => {
     window.currentSong = 'song-a'; window.isAdmin = admin; window.saved = []; window.failSave = false;
@@ -36,17 +36,17 @@ async function setup(page, admin = false) {
       { staffEntries: [{ graphicalVoiceEntries: [{ notes: [{ getSVGGElement: () => document.getElementById('n1') }] }] }] },
       { staffEntries: [{ graphicalVoiceEntries: [{ notes: [{ getSVGGElement: () => document.getElementById('n2') }] }] }] }
     ]] } }) };
-  }, { admin, instruments, notes });
+  }, { admin, instruments, notes: initialNotes });
   for (const file of ['annotation-geometry.js', 'annotation-panel.js', 'annotation-canvas.js']) {
     await page.addScriptTag({ path: path.join(root, 'assets/js', file) });
   }
   await page.evaluate(async () => { AnnotationCanvas.init(); await AnnotationCanvas.loadSong('song-a'); });
-  await page.getByRole('button', { name: 'Ghi chú nhạc cụ', exact: true }).click();
+  await page.getByRole('button', { name: 'Nhạc cụ', exact: true }).click();
 }
 
 test('readers filter multiple instrument layers and both staves without edit controls', async ({ page }) => {
   await setup(page);
-  await expect(page.locator('.ano-dot')).toHaveCount(2);
+  await expect(page.locator('.ano-dot')).toHaveCount(3);
   await expect(page.locator('[data-annotation-id="d2"]')).toContainText('Điệu 6/8');
   await page.getByRole('button', { name: 'Ẩn tất cả', exact: true }).click();
   await expect(page.locator('.ano-dot')).toHaveCount(0);
@@ -54,41 +54,43 @@ test('readers filter multiple instrument layers and both staves without edit con
   await expect(page.locator('.ano-dot')).toHaveCount(1);
   await expect(page.locator('.ano-dot')).toContainText('Guitar');
   await page.getByRole('checkbox', { name: /^Trống/ }).check();
-  await expect(page.locator('.ano-dot')).toHaveCount(2);
-  await expect(page.getByRole('button', { name: 'Soạn ghi chú', exact: true })).toHaveCount(0);
+  await expect(page.locator('.ano-dot')).toHaveCount(3);
+  await expect(page.getByRole('button', { name: 'Ghi chú', exact: true })).toHaveCount(0);
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('sheetapp_annotation_layers')))).toEqual(['guitar', 'drums']);
   await page.evaluate(() => AnnotationCanvas.setAddMode(true));
   await expect(page.locator('.ano-dot-btn')).toHaveCount(0);
   await page.evaluate(() => AnnotationCanvas.onOSMDRendered());
-  await expect(page.locator('.ano-dot')).toHaveCount(2);
+  await expect(page.locator('.ano-dot')).toHaveCount(3);
 });
 
 test('admin adds an independent layer, edits and deletes without losing other instruments', async ({ page }) => {
-  await setup(page, true);
-  await page.getByRole('button', { name: 'Soạn ghi chú', exact: true }).click();
+  await setup(page, true, notes.filter(note => note.id !== 'd1'));
   await page.getByLabel('Nhạc cụ đang soạn').selectOption('drums');
+  await page.getByRole('button', { name: 'Ghi chú', exact: true }).click();
   await page.locator('.ano-dot-btn').first().click();
   await page.getByLabel('Nội dung ghi chú').fill('Fill mới');
   await page.getByRole('button', { name: 'Lưu ghi chú', exact: true }).click();
   await expect(page.getByRole('dialog')).not.toBeVisible();
   const saved = await page.evaluate(() => window.saved[0]);
   expect(saved.revision).toBe('r1');
-  expect(saved.list).toHaveLength(4);
+  expect(saved.list).toHaveLength(3);
   expect(saved.list.find(note => note.id === 'g1').text).toBe('Rải nhẹ');
-  expect(saved.list[3].instrumentId).toBe('drums');
+  expect(saved.list[2].instrumentId).toBe('drums');
+  if (!await page.locator('#annotation-panel-body').isVisible()) await page.getByRole('button', { name: 'Nhạc cụ', exact: true }).click();
   await page.locator('[data-annotation-id="g1"] [data-action="edit"]').click();
   await page.getByLabel('Nội dung ghi chú').fill('Quạt nhẹ');
   await page.getByRole('button', { name: 'Lưu ghi chú', exact: true }).click();
   await expect(page.locator('[data-annotation-id="g1"]')).toContainText('Quạt nhẹ');
+  if (!await page.locator('#annotation-panel-body').isVisible()) await page.getByRole('button', { name: 'Nhạc cụ', exact: true }).click();
   await page.locator('[data-annotation-id="g1"] [data-action="edit"]').click();
   await page.getByRole('button', { name: 'Xóa ghi chú', exact: true }).click();
   await expect(page.locator('[data-annotation-id="g1"]')).toHaveCount(0);
-  expect(await page.evaluate(() => saved.at(-1).list.filter(n => n.instrumentId === 'drums').length)).toBe(3);
+  expect(await page.evaluate(() => saved.at(-1).list.filter(n => n.instrumentId === 'drums').length)).toBe(2);
 });
 
 test('failed save keeps the draft and allows retry', async ({ page }) => {
   await setup(page, true);
-  await page.getByRole('button', { name: 'Soạn ghi chú', exact: true }).click();
+  await page.getByRole('button', { name: 'Ghi chú', exact: true }).click();
   await page.locator('.ano-dot-btn').first().click();
   await page.getByLabel('Nội dung ghi chú').fill('<img src=x onerror=alert(1)>');
   await page.evaluate(() => { failSave = true; });
@@ -119,7 +121,7 @@ test('a delayed old song response cannot replace the current song', async ({ pag
 
 test('scroll gestures do not open an editor and keyboard activation still works', async ({ page }) => {
   await setup(page, true);
-  await page.getByRole('button', { name: 'Soạn ghi chú', exact: true }).click();
+  await page.getByRole('button', { name: 'Ghi chú', exact: true }).click();
   const point = page.locator('.ano-dot-btn').first();
   await point.dispatchEvent('pointerdown', { clientX: 60, clientY: 40 });
   await point.dispatchEvent('pointermove', { clientX: 61, clientY: 80 });
@@ -138,7 +140,7 @@ test('failed load can be retried and does not enable an empty editor', async ({ 
     await AnnotationCanvas.loadSong('song-a', true);
   });
   await expect(page.locator('#instrument-annotations [role=alert]')).toContainText('Không có mạng');
-  await expect(page.getByRole('button', { name: 'Soạn ghi chú', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Ghi chú', exact: true })).toHaveCount(0);
   await page.evaluate(() => { ApiService.annotations.load = async () => ({ annotations: [], instruments: [], revision: 'retry' }); });
   await page.getByRole('button', { name: 'Thử tải lại', exact: true }).click();
   await expect(page.locator('#instrument-annotations')).toContainText('Bài này chưa có ghi chú.');
@@ -202,17 +204,17 @@ test('annotation labels avoid notation and lyrics rather than covering them', as
 
 test('losing admin access closes the editor and removes authoring controls', async ({ page }) => {
   await setup(page, true);
-  await page.getByRole('button', { name: 'Soạn ghi chú', exact: true }).click();
+  await page.getByRole('button', { name: 'Ghi chú', exact: true }).click();
   await page.locator('.ano-dot-btn').first().click();
   await page.evaluate(() => { isAdmin = false; EventBus.emit('auth:changed'); });
   await expect(page.getByRole('dialog')).not.toBeVisible();
   await expect(page.locator('.ano-dot-btn')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Soạn ghi chú', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Ghi chú', exact: true })).toHaveCount(0);
 });
 
 test('conflict reload preserves the draft and saves it alongside newer notes', async ({ page }) => {
   await setup(page, true);
-  await page.getByRole('button', { name: 'Soạn ghi chú', exact: true }).click();
+  await page.getByRole('button', { name: 'Ghi chú', exact: true }).click();
   await page.locator('.ano-dot-btn').first().click();
   await page.getByLabel('Nội dung ghi chú').fill('Bản nháp đang soạn');
   await page.evaluate(() => {
@@ -261,7 +263,7 @@ test('API client sends revisions and refreshes cached registries after adding an
 
 test('a compact sheet badge opens and focuses its full note', async ({ page }) => {
   await setup(page);
-  await page.getByRole('button', { name: 'Ghi chú nhạc cụ', exact: true }).click();
+  await page.getByRole('button', { name: 'Nhạc cụ', exact: true }).click();
   await page.locator('.ano-dot').last().click();
   await expect(page.locator('#annotation-panel-body')).toBeVisible();
   await expect(page.locator('[data-annotation-id="d2"]')).toBeFocused();
@@ -272,33 +274,87 @@ test('a compact sheet badge opens and focuses its full note', async ({ page }) =
 
 test('switching to chord editing ends instrument annotation editing', async ({ page }) => {
   await setup(page, true);
-  await page.getByRole('button', { name: 'Soạn ghi chú', exact: true }).click();
+  await page.getByRole('button', { name: 'Ghi chú', exact: true }).click();
   await expect(page.locator('.ano-dot-btn')).toHaveCount(2);
   await page.evaluate(() => document.getElementById('btn-add-chord-mode').classList.add('active'));
   await expect(page.locator('.ano-dot-btn')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Soạn ghi chú', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Nhạc cụ', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Ghi chú', exact: true })).toBeVisible();
 });
 
-test('the new editor retains existing color and icon authoring', async ({ page }) => {
+test('instrument editor preserves legacy color metadata and icon authoring', async ({ page }) => {
   await setup(page, true);
+  if (!await page.locator('#annotation-panel-body').isVisible()) await page.getByRole('button', { name: 'Nhạc cụ', exact: true }).click();
   await page.locator('[data-annotation-id="g1"] [data-action="edit"]').click();
-  await page.getByLabel('Màu ghi chú', { exact: true }).selectOption('blue');
   await page.getByLabel('Biểu tượng ghi chú', { exact: true }).selectOption('🎹');
   await page.getByRole('button', { name: 'Lưu ghi chú', exact: true }).click();
   await expect(page.getByRole('dialog')).not.toBeVisible();
   expect(await page.evaluate(() => saved.at(-1).list.find(note => note.id === 'g1'))).toMatchObject({ color: 'blue', icon: '🎹' });
+  if (!await page.locator('#annotation-panel-body').isVisible()) await page.getByRole('button', { name: 'Nhạc cụ', exact: true }).click();
   await page.locator('[data-annotation-id="g1"] [data-action="edit"]').click();
-  await expect(page.getByLabel('Màu ghi chú', { exact: true })).toHaveValue('blue');
+  await expect(page.getByLabel('Màu ghi chú', { exact: true })).toHaveCount(0);
   await expect(page.getByLabel('Biểu tượng ghi chú', { exact: true })).toHaveValue('🎹');
 });
 
 test('adding a note works when the browser has no randomUUID API', async ({ page }) => {
   await setup(page, true);
   await page.evaluate(() => Object.defineProperty(crypto, 'randomUUID', { value: undefined, configurable: true }));
-  await page.getByRole('button', { name: 'Soạn ghi chú', exact: true }).click();
+  await page.getByRole('button', { name: 'Ghi chú', exact: true }).click();
   await page.locator('.ano-dot-btn').first().click();
   await page.getByLabel('Nội dung ghi chú').fill('Ghi chú trên máy trong mạng nội bộ');
   await page.getByRole('button', { name: 'Lưu ghi chú', exact: true }).click();
   await expect(page.getByRole('dialog')).not.toBeVisible();
   expect(await page.evaluate(() => saved.at(-1).list.at(-1).id)).toMatch(/^note-[a-zA-Z0-9_-]+$/);
+});
+
+
+test('toolbar selects an instrument, offers its presets and uses one color per instrument', async ({ page }) => {
+  await setup(page, true, notes.filter(note => note.instrumentId === 'guitar'));
+  await expect(page.locator('#toolbar #instrument-annotations')).toBeVisible();
+  await page.getByLabel('Nhạc cụ đang soạn').selectOption('drums');
+  await page.getByRole('button', { name: 'Ghi chú', exact: true }).click();
+  const point = page.locator('.ano-dot-btn').first();
+  await expect(point).toHaveCSS('background-color', 'rgb(255, 224, 102)');
+  await point.click();
+  await page.getByRole('button', { name: 'Fill', exact: true }).click();
+  await expect(page.getByLabel('Nội dung ghi chú')).toHaveValue('Fill');
+  await page.getByLabel('Nhạc cụ', { exact: true }).selectOption('guitar');
+  await expect(page.getByRole('button', { name: 'Rải', exact: true })).toBeVisible();
+  await expect(page.getByLabel('Nội dung ghi chú')).toHaveValue('Fill');
+  await page.getByRole('button', { name: 'Rải', exact: true }).click();
+  await expect(page.getByLabel('Nội dung ghi chú')).toHaveValue('Fill · Rải');
+  await page.getByRole('button', { name: 'Lưu ghi chú', exact: true }).click();
+  await expect(page.locator('.ano-dot[data-instrument-id=guitar]')).toHaveCount(2);
+  const colors = await page.locator('.ano-dot[data-instrument-id=guitar]').evaluateAll(nodes => nodes.map(n => n.style.getPropertyValue('--instrument-color')));
+  expect(new Set(colors).size).toBe(1);
+  expect(colors[0]).toMatch(/^#[0-9a-f]{6}$/);
+});
+
+
+test('an existing instrument note replaces the yellow plus and opens for direct editing', async ({ page }) => {
+  await setup(page, true);
+  await page.getByLabel('Nhạc cụ đang soạn').selectOption('drums');
+  await page.getByRole('button', { name: 'Ghi chú', exact: true }).click();
+  await expect(page.locator('.ano-dot-btn')).toHaveCount(0);
+  await page.locator('.ano-dot[data-note-id=d1]').click();
+  await expect(page.getByLabel('Nhạc cụ', { exact: true })).toHaveValue('drums');
+  await expect(page.getByLabel('Nội dung ghi chú')).toHaveValue('Fill');
+  await page.getByLabel('Nội dung ghi chú').fill('Fill 1 ô');
+  await page.getByRole('button', { name: 'Lưu ghi chú', exact: true }).click();
+  await expect(page.locator('.ano-dot[data-note-id=d1]')).toContainText('Fill 1 ô');
+  expect(await page.evaluate(() => saved.at(-1).list.filter(note => note.id === 'd1').length)).toBe(1);
+});
+
+
+test('a pending instrument color survives sheet redraws and save errors', async ({ page }) => {
+  await setup(page, true);
+  await page.getByLabel('Nhạc cụ đang soạn').selectOption('guitar');
+  await page.getByLabel('Màu nhạc cụ', { exact: true }).fill('#123456');
+  await page.evaluate(() => AnnotationCanvas.reposition());
+  await page.waitForTimeout(200);
+  await expect(page.getByLabel('Màu nhạc cụ', { exact: true })).toHaveValue('#123456');
+  await page.evaluate(() => { ApiService.annotations.saveInstrument = async () => { throw new Error('Không lưu được màu'); }; });
+  await page.getByRole('button', { name: 'Lưu màu nhạc cụ', exact: true }).click();
+  await expect(page.locator('#annotation-panel-body [role=alert]').first()).toContainText('Không lưu được màu');
+  await expect(page.getByLabel('Màu nhạc cụ', { exact: true })).toHaveValue('#123456');
 });

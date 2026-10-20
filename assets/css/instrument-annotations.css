@@ -27,3 +27,24 @@
 .ano-editor [role=alert] { color: var(--text-primary, #942424); white-space: pre-wrap; }
 @media (max-width: 480px) { .instrument-annotations { margin: .3rem 0; } .ano-control { min-height: 42px; } }
 @media print { .instrument-annotations, .ano-dot-btn, .ano-editor { display: none !important; } .ano-dot { box-shadow: none; } }
+
+/* Toolbar entry remains visible; native popover escapes toolbar clipping. */
+#toolbar .instrument-annotations { margin: 0; padding: 0; border: 0; background: transparent; flex: 0 0 auto; }
+#toolbar .instrument-annotations > button { font-weight: 700; min-width: 84px; }
+.ano-menu { position: fixed; inset: auto; margin: 0; box-sizing: border-box; width: min(420px, calc(100vw - 16px)); padding: .75rem; overflow: auto; border: 1px solid var(--border, #aaa); border-radius: 8px; color: var(--text-primary, #222); background: var(--bg-surface, #fff); z-index: 2000; box-shadow: 0 6px 24px #0003; }
+.ano-menu::backdrop { background: transparent; }
+.ano-menu > label { margin: .4rem 0; display: flex; gap: .5rem; align-items: center; }
+.ano-instrument-chip { border-bottom: 3px solid var(--instrument-color); padding: .25rem; }
+.ano-instrument-chip input { accent-color: var(--instrument-color); }
+.ano-detail-list li { border-left: 4px solid var(--instrument-color); }
+.ano-dot { border-color: var(--instrument-color, #64748b); border-left-width: 4px; background: #fff; color: #202124; }
+.ano-dot-btn { background: #ffe066; border-color: #856404; color: #493600; }
+.ano-editor { border-top: 5px solid var(--instrument-color, #64748b); }
+.ano-presets { display: flex; flex-wrap: wrap; gap: .4rem; }
+.ano-presets button { border-color: var(--instrument-color, #64748b); }
+
+#toolbar > .instrument-annotations { margin-left: auto; }
+#toolbar:has(> .instrument-annotations) .toolbar-left { min-width: 0; flex-shrink: 1; }
+@media (max-width: 680px) { #toolbar:has(> .instrument-annotations) .song-info-pill { max-width: calc(100vw - 180px); } }
+
+#toolbar .instrument-annotations > button.active { border-bottom: 4px solid var(--instrument-color); background: #fff3ba; color: #302400; }

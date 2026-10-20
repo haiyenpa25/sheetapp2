@@ -24,9 +24,9 @@ const AnnotationCanvas = (() => {
       }
     } catch (_) {}
     window.AnnotationPanel.init({ activate: ensureLoaded, reload, filter, filterAll,
-      edit: setAddMode, instrument: id => { instrumentId = id; updatePanel(); },
+      edit: setAddMode, instrument: id => { instrumentId = id; if (editing && selected !== null && !selected.includes(id)) { selected.push(id); remember(); } else updatePanel(); },
       openEditor, relocate: note => { relocating = note; setAddMode(true); },
-      save, createInstrument });
+      save, createInstrument, color: saveInstrumentColor });
     bindInteractions(); observeSheet(); updatePanel();
   }
   function bindInteractions() {
@@ -105,7 +105,7 @@ const AnnotationCanvas = (() => {
     ++generation; songId = null; pending = null; notes = []; revision = '';
     loaded = false; loading = false; editing = false; relocating = null; error = '';
     fingerprint = ''; fingerprintXml = null; unplaced = [];
-    window.AnnotationPanel?.closeEditor(); clearDots(); updatePanel();
+    window.AnnotationPanel?.closeEditor(); clearDots(); window.AnnotationGeometry?.reserveSpace(0); updatePanel();
   }
   function setAddMode(on) {
     if (on && !admin()) return;
@@ -114,6 +114,7 @@ const AnnotationCanvas = (() => {
     document.getElementById('btn-add-annotate-mode')?.classList.toggle('active', editing);
     if (editing) {
       window.ChordCanvas?.setAddMode?.(false);
+      if (selected !== null && !selected.includes(instrumentId)) { selected.push(instrumentId); remember(); }
       ensureLoaded();
     }
     build();
@@ -140,19 +141,24 @@ const AnnotationCanvas = (() => {
     clearDots();
     const container = document.getElementById('osmd-container');
     if (!container || !songId || !loaded || songId !== current()) { updatePanel(); return; }
-    if (!notes.length && !editing) { unplaced = []; updatePanel(); return; }
+    if (!notes.length && !editing) { window.AnnotationGeometry.reserveSpace(0); unplaced = []; updatePanel(); return; }
     const anchors = window.AnnotationGeometry.anchors().filter(anchor => container.contains(anchor.el));
     const score = currentFingerprint(), mapped = new Set(), occupied = [];
     const bounds = container.getBoundingClientRect();
     const obstacles = window.AnnotationGeometry.obstacles(container, bounds);
-    anchors.forEach(anchor => {
-      const found = notes.filter(note => (!score || !note.scoreFingerprint || note.scoreFingerprint === score)
-        && window.AnnotationGeometry.matches(note, anchor));
-      found.forEach(note => mapped.add(note.id));
-      const visible = found.filter(note => selected === null || selected.includes(note.instrumentId));
-      if (visible.length) place(container, bounds, anchor, visible, { occupied, obstacles });
-      if (editing && admin()) place(container, bounds, anchor, null, { occupied, obstacles });
+    const valid = notes.filter(note => !score || !note.scoreFingerprint || note.scoreFingerprint === score);
+    valid.forEach(note => { if (anchors.some(anchor => window.AnnotationGeometry.matches(note, anchor))) mapped.add(note.id); });
+    const visible = valid.filter(note => selected === null || selected.includes(note.instrumentId));
+    const plan = window.AnnotationGeometry.plan(anchors, visible, instruments, editing && admin(), instrumentId);
+    if (window.AnnotationGeometry.reserveSpace(plan.rows)) { reposition(); return; }
+    const tops = new Map();
+    plan.items.forEach(({ anchor }) => {
+      const key = anchor.line || anchor.el.ownerSVGElement;
+      if (!tops.has(key)) tops.set(key, window.AnnotationGeometry.chordTop(anchor, bounds));
     });
+    plan.items.forEach(item => place(container, bounds, item.anchor, item.found, {
+      occupied, obstacles, row: item.row, top: tops.get(item.anchor.line || item.anchor.el.ownerSVGElement)
+    }));
     unplaced = notes.filter(note => !mapped.has(note.id)).map(note => note.id);
     updatePanel();
   }
@@ -169,21 +175,22 @@ const AnnotationCanvas = (() => {
     if (found) {
       const name = instruments.find(item => item.id === found[0].instrumentId)?.name || found[0].instrumentId;
       button.textContent = found.length > 1 ? `${found.length} ghi chú · Ô ${anchor.measureIdx + 1}` : `${found[0].icon || ''} ${name} · ${found[0].text}`.trim();
-      button.dataset.color = found.length === 1 ? found[0].color || 'yellow' : 'yellow';
+      button.dataset.instrumentId = found[0].instrumentId;
+      button.dataset.noteId = found[0].id; window.AnnotationPanel.decorate(button, found[0].instrumentId);
       button.title = found.map(note => `${instruments.find(item => item.id === note.instrumentId)?.name || note.instrumentId}: ${note.text}`).join('\n');
       button.setAttribute('aria-label', `${button.title} · Ô ${anchor.measureIdx + 1}, khuông ${anchor.staffIdx + 1}. Mở bảng ghi chú`);
-      clickAfterTap(button, () => window.AnnotationPanel.show(found[0].id));
+      clickAfterTap(button, () => editing && admin() ? openEditor(found[0], button) : window.AnnotationPanel.show(found[0].id));
     } else {
       button.textContent = '+'; button.setAttribute('aria-label', `Thêm ghi chú ô ${anchor.measureIdx + 1}, khuông ${anchor.staffIdx + 1}, vị trí ${anchor.noteIdx + 1}`);
-      clickAfterTap(button, () => openEditor({ ...(relocating || {}), ...anchor, el: undefined,
-        instrumentId: relocating?.instrumentId || instrumentId, scoreFingerprint: currentFingerprint() || undefined }));
+      clickAfterTap(button, () => openEditor({ ...(relocating || {}), ...anchor, el: undefined, line: undefined,
+        instrumentId: relocating?.instrumentId || instrumentId, scoreFingerprint: currentFingerprint() || undefined }, button));
     }
     container.append(button);
-    window.AnnotationGeometry.position(button, { bounds, rect, ...layout });
+    window.AnnotationGeometry.position(button, { bounds, rect, anchor, ...layout });
   }
-  function openEditor(note) {
+  function openEditor(note, target) {
     if (!admin() || !loaded || saving) return;
-    window.AnnotationPanel.editor(note);
+    window.AnnotationPanel.hide(); window.AnnotationPanel.editor(note, target);
   }
   async function save(note, remove) {
     if (!admin() || !loaded || saving || songId !== current()) throw new Error('Chưa thể lưu. Hãy tải lại ghi chú.');
@@ -192,7 +199,7 @@ const AnnotationCanvas = (() => {
     try {
       const next = notes.filter(item => item.id !== note.id);
       if (!remove) {
-        const { el, ...record } = note;
+        const { el, line, ...record } = note;
         // Record IDs are not credentials; keep authoring usable on HTTP LAN hosts too.
         const suffix = window.crypto?.randomUUID?.() || `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 14)}`;
         next.push({ ...record, id: note.id || `note-${suffix}` });
@@ -202,6 +209,17 @@ const AnnotationCanvas = (() => {
       accept(data); relocating = null; build();
       window.App?.showToast?.('Đã lưu ghi chú', 'success');
     } finally { saving = false; updatePanel(); }
+  }
+  async function saveInstrumentColor(id, color) {
+    if (!admin() || saving) throw new Error('Chưa thể sửa màu.');
+    const instrument = instruments.find(item => item.id === id), token = generation;
+    saving = true;
+    try {
+      const data = await window.ApiService.annotations.saveInstrument({ instrumentId: id, name: instrument.name, color, registryRevision });
+      if (token !== generation) return;
+      instruments = data.instruments; registryRevision = data.registryRevision; build();
+    } catch (e) { error = e.message; throw e; }
+    finally { saving = false; updatePanel(); }
   }
   async function createInstrument(name) {
     if (!admin() || saving) throw new Error('Chưa thể sửa danh mục.');
