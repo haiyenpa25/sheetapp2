@@ -1,11 +1,16 @@
 const { test, expect } = require('@playwright/test');
+const fs = require('fs');
+const path = require('path');
 const base = process.env.SHEETAPP_TV_TEST_URL;
-test.skip(!base, 'Requires an explicit isolated Apache URL');
+const isolated = process.env.SHEETAPP_TV_ISOLATED_ROOT;
+test.skip(!base || !isolated, 'Requires an explicit isolated Apache URL and root');
 test.use({ serviceWorkers: 'allow' });
 test('PWA refreshes annotation code together and keeps offline music packages', async ({ page }) => {
   test.setTimeout(45000);
   expect(new URL(base).hostname).toBe('localhost');
-  expect(new URL(base).pathname).toMatch(/^\/sheetapp2-roadmap6-oct19-061901\/?$/);
+  expect(fs.existsSync(path.join(isolated, '.roadmap6-isolated'))).toBe(true);
+  expect(fs.realpathSync(isolated)).not.toBe(fs.realpathSync(path.resolve(__dirname, '..')));
+  expect(new URL(base).pathname.replace(/\/$/, '')).toBe('/' + path.basename(isolated));
   await page.goto(`${base}/robots.txt`);
   await page.evaluate(async baseUrl => {
     const old = await caches.open('sheetapp-app-v5');

@@ -76,3 +76,12 @@ Ca thử sử dụng bản cài riêng có marker `.roadmap6-isolated`; không c
 - Sửa các giả định của test phát hiện khi clone sạch: ID admin không cố định, thư mục rỗng không lưu trong Git, `.`/`..` không phải file LiveSync bị rò rỉ. Không thêm file giả để làm đủ số lượng; các guard JSON đối chiếu checksum nội dung và được kiểm tra với file bị thay đổi/bị thiếu.
 
 Bằng chứng thô: [bản cuối](instrument-annotations-evidence/library-bundle-final.txt), [các lỗi tái hiện trước sửa](instrument-annotations-evidence/library-bundle-red.txt). Bản cài HTTP được dựng từ đúng nội dung Git index, cài bằng `install_library.php`, dùng DB/storage riêng. Sau kiểm thử được chuyển khỏi webroot vào `C:/xampp/sheetapp2-backups/source-archive-20261020-110530/sheetapp2-bundle-20261020`; trong htdocs chỉ giữ source chính `sheetapp2`.
+
+
+### Kiểm tra lại sau khi đồng bộ main
+
+Lần push đầu bị từ chối vì remote có thêm commit `5f8cbb1` sửa hiển thị/cache/Cloudflare. Đã rebase, giữ nguyên phần sửa đó và cả hai mục nhật ký trong registry. Dựng lại hai bản cài độc lập từ Git index: `sheetapp2-bundle-merged-20261020` cho trình duyệt, `sheetapp2-bundle-php-20261020` cho PHP/HTTP.
+
+Bản ghép đạt **176/176 suite, 3.473 check, 337 PHP lint**. Bộ trình duyệt có **74 ca duy nhất**: lượt tổng đạt 72, hai ca PWA dừng vì điều kiện ghim tên fixture cũ; đổi guard sang kiểm tra marker/root thực và URL khớp basename, rồi chạy lại **2/2 PWA đạt** trên Chromium/WebKit. Tổng 74 ca đã có lượt chạy đạt, gồm phần thành phần, HTTP, danh mục, liên thông giao diện và offline. Không thay mã service worker của commit remote. JS syntax toàn source **332 file PASS**.
+
+[Bằng chứng bản ghép](instrument-annotations-evidence/library-bundle-merged-final.txt) giữ nguyên cả lỗi guard và lượt chạy lại. Hai bản cài sau cùng cũng được chuyển ra thư mục backup ngoài webroot; DB thật giữ nguyên checksum. Các kết quả trước mục này là lịch sử của bản trước khi ghép remote.

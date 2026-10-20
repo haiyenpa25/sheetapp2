@@ -17,6 +17,7 @@
 - `tools/export_library_seed.py` xuất snapshot read-only, scrub dữ liệu, secure-delete/VACUUM, kiểm tra byte thô và xuất manifest; `tools/install_library.php` cài mới và tạo admin riêng; `tools/update_library.php --apply` sao lưu rồi bổ sung dữ liệu còn thiếu trong transaction, giữ tài khoản, chương trình và hợp âm hiện có.
 - Thêm `tests/library_bundle_regression.php`, `tests/library_seed_export_test.py`, `e2e/library-tv-bundle.spec.js` và helper checksum JSON. Cập nhật test cũ để kiểm tra nội dung file thay vì đếm thư mục rỗng; RBAC dùng fixture riêng, dò LiveSync bỏ đúng `.`/`..`. CI cài seed trước khi chạy bộ PHP.
 - Nghiệm thu bản cuối trên bản cài từ Git index: PHP 176/176 suite / 3.473 check, 337 PHP lint; trình duyệt Chromium/WebKit 20/20; Python export 2/2; 1.731 XML parse không lỗi; JS spec syntax/ESLint và diff-check PASS. Bằng chứng tại `docs/instrument-annotations-evidence/library-bundle-{final,red}.txt`.
+- Đồng bộ thêm commit remote `5f8cbb1` trước khi push, giữ cả phần sửa hiển thị/cache. Bản ghép: PHP 176/176 / 3.473 check; 74 ca trình duyệt đã đạt qua lượt tổng và lượt chạy lại PWA sau sửa guard tên fixture; JS syntax 332 file PASS. Bằng chứng: `docs/instrument-annotations-evidence/library-bundle-merged-final.txt`.
 - Hướng dẫn cài mới/server cũ và phạm vi dữ liệu: `docs/LIBRARY_DATA_RELEASE.md`; README bỏ hướng dẫn chmod 777/tự sync. Không chạy migration hoặc thay DB thật; không xác nhận triển khai production.
 
 
