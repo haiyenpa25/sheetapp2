@@ -27,6 +27,9 @@ const AnnotationCanvas = (() => {
       edit: setAddMode, instrument: id => { instrumentId = id; updatePanel(); },
       openEditor, relocate: note => { relocating = note; setAddMode(true); },
       save, createInstrument });
+    bindInteractions(); observeSheet(); updatePanel();
+  }
+  function bindInteractions() {
     document.getElementById('btn-add-annotate-mode')?.addEventListener('click', toggleAddMode);
     document.getElementById('btn-cancel-add-annotate')?.addEventListener('click', () => setAddMode(false));
     document.addEventListener('keydown', event => {
@@ -44,6 +47,8 @@ const AnnotationCanvas = (() => {
       const button = document.getElementById(id);
       if (button) modeObserver.observe(button, { attributes: true, attributeFilter: ['class'] });
     });
+  }
+  function observeSheet() {
     const container = document.getElementById('osmd-container');
     if (container) {
       observer = new ResizeObserver(reposition); observer.observe(container);
@@ -55,7 +60,6 @@ const AnnotationCanvas = (() => {
       });
       chordObserver.observe(container, { childList: true, subtree: true });
     }
-    updatePanel();
   }
   function updatePanel() {
     window.AnnotationPanel?.render({ songId, notes, instruments, selected, loading, loaded,
