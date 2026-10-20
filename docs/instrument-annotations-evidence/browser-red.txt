@@ -1,0 +1,659 @@
+SOURCE: test-results/instrument-annotations/browser-red.txt
+
+
+Running 4 tests using 1 worker
+
+node.exe : (node:11584) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:11584) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › e2e\library-tv-instrument-annotations.spec.js:44:1 › readers filter multiple instrument layers and both staves without edit controls (482ms)
+(node:32832) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  2 [chromium] › e2e\library-tv-instrument-annotations.spec.js:63:1 › admin adds an independent layer, edits and deletes without losing other instruments (209ms)
+(node:14204) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  3 [chromium] › e2e\library-tv-instrument-annotations.spec.js:86:1 › failed save keeps the draft and allows retry (228ms)
+(node:25332) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  4 [chromium] › e2e\library-tv-instrument-annotations.spec.js:102:1 › a delayed old song response cannot replace the current song (208ms)
+
+
+  1) [chromium] › e2e\library-tv-instrument-annotations.spec.js:44:1 › readers filter multiple instrument layers and both staves without edit controls
+
+    Error: ENOENT: no such file or directory, open 'C:\xampp\htdocs\sheetapp2-roadmap6-work\assets\css\instrument-annotations.css'
+
+      15 |   await page.evaluate(() => localStorage.removeItem('sheetapp_annotation_layers'));
+      16 |   await page.setContent('<main id="sheet-viewer-wrapper"><div id="sheet-area"><div id="osmd-container" style="position:relative"><svg width="500" height="140"><g id="n1"><rect x="60" y="40" width="10" height="10"/></g></svg><svg width="500" height="140"><g id="n2"><rect x="90" y="40" width="10" height="10"/></g></svg></div></div></main><button id="btn-add-annotate-mode"></button>');
+    > 17 |   await page.addStyleTag({ path: path.join(root, 'assets/css/instrument-annotations.css') });
+         |   ^
+      18 |   await page.evaluate(({ admin, instruments, notes }) => {
+      19 |     window.currentSong = 'song-a'; window.isAdmin = admin; window.saved = []; window.failSave = false;
+      20 |     window.Auth = { isAdmin: () => window.isAdmin };
+        at setup (C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv-instrument-annotations.spec.js:17:3)
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv-instrument-annotations.spec.js:45:3
+
+    Error Context: test-results\roadmap6\library-tv-instrument-anno-e70d8-taves-without-edit-controls-chromium\error-context.md
+
+  2) [chromium] › e2e\library-tv-instrument-annotations.spec.js:63:1 › admin adds an independent layer, edits and deletes without losing other instruments
+
+    Error: ENOENT: no such file or directory, open 'C:\xampp\htdocs\sheetapp2-roadmap6-work\assets\css\instrument-annotations.css'
+
+      15 |   await page.evaluate(() => localStorage.removeItem('sheetapp_annotation_layers'));
+      16 |   await page.setContent('<main id="sheet-viewer-wrapper"><div id="sheet-area"><div id="osmd-container" style="position:relative"><svg width="500" height="140"><g id="n1"><rect x="60" y="40" width="10" height="10"/></g></svg><svg width="500" height="140"><g id="n2"><rect x="90" y="40" width="10" height="10"/></g></svg></div></div></main><button id="btn-add-annotate-mode"></button>');
+    > 17 |   await page.addStyleTag({ path: path.join(root, 'assets/css/instrument-annotations.css') });
+         |   ^
+      18 |   await page.evaluate(({ admin, instruments, notes }) => {
+      19 |     window.currentSong = 'song-a'; window.isAdmin = admin; window.saved = []; window.failSave = false;
+      20 |     window.Auth = { isAdmin: () => window.isAdmin };
+        at setup (C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv-instrument-annotations.spec.js:17:3)
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv-instrument-annotations.spec.js:64:3
+
+    Error Context: test-results\roadmap6\library-tv-instrument-anno-64482-ut-losing-other-instruments-chromium\error-context.md
+
+  3) [chromium] › e2e\library-tv-instrument-annotations.spec.js:86:1 › failed save keeps the draft and allows retry
+
+    Error: ENOENT: no such file or directory, open 'C:\xampp\htdocs\sheetapp2-roadmap6-work\assets\css\instrument-annotations.css'
+
+      15 |   await page.evaluate(() => localStorage.removeItem('sheetapp_annotation_layers'));
+      16 |   await page.setContent('<main id="sheet-viewer-wrapper"><div id="sheet-area"><div id="osmd-container" style="position:relative"><svg width="500" height="140"><g id="n1"><rect x="60" y="40" width="10" height="10"/></g></svg><svg width="500" height="140"><g id="n2"><rect x="90" y="40" width="10" height="10"/></g></svg></div></div></main><button id="btn-add-annotate-mode"></button>');
+    > 17 |   await page.addStyleTag({ path: path.join(root, 'assets/css/instrument-annotations.css') });
+         |   ^
+      18 |   await page.evaluate(({ admin, instruments, notes }) => {
+      19 |     window.currentSong = 'song-a'; window.isAdmin = admin; window.saved = []; window.failSave = false;
+      20 |     window.Auth = { isAdmin: () => window.isAdmin };
+        at setup (C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv-instrument-annotations.spec.js:17:3)
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv-instrument-annotations.spec.js:87:3
+
+    Error Context: test-results\roadmap6\library-tv-instrument-anno-49502--the-draft-and-allows-retry-chromium\error-context.md
+
+  4) [chromium] › e2e\library-tv-instrument-annotations.spec.js:102:1 › a delayed old song response cannot replace the current song
+
+    Error: ENOENT: no such file or directory, open 'C:\xampp\htdocs\sheetapp2-roadmap6-work\assets\css\instrument-annotations.css'
+
+      15 |   await page.evaluate(() => localStorage.removeItem('sheetapp_annotation_layers'));
+      16 |   await page.setContent('<main id="sheet-viewer-wrapper"><div id="sheet-area"><div id="osmd-container" style="position:relative"><svg width="500" height="140"><g id="n1"><rect x="60" y="40" width="10" height="10"/></g></svg><svg width="500" height="140"><g id="n2"><rect x="90" y="40" width="10" height="10"/></g></svg></div></div></main><button id="btn-add-annotate-mode"></button>');
+    > 17 |   await page.addStyleTag({ path: path.join(root, 'assets/css/instrument-annotations.css') });
+         |   ^
+      18 |   await page.evaluate(({ admin, instruments, notes }) => {
+      19 |     window.currentSong = 'song-a'; window.isAdmin = admin; window.saved = []; window.failSave = false;
+      20 |     window.Auth = { isAdmin: () => window.isAdmin };
+        at setup (C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv-instrument-annotations.spec.js:17:3)
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv-instrument-annotations.spec.js:103:3
+
+    Error Context: test-results\roadmap6\library-tv-instrument-anno-cf54b-ot-replace-the-current-song-chromium\error-context.md
+
+  4 failed
+    [chromium] › e2e\library-tv-instrument-annotations.spec.js:44:1 › readers filter multiple instrument layers and both staves without edit controls
+    [chromium] › e2e\library-tv-instrument-annotations.spec.js:63:1 › admin adds an independent layer, edits and deletes without losing other instruments
+    [chromium] › e2e\library-tv-instrument-annotations.spec.js:86:1 › failed save keeps the draft and allows retry
+    [chromium] › e2e\library-tv-instrument-annotations.spec.js:102:1 › a delayed old song response cannot replace the current song
+
+
+SOURCE: test-results/instrument-annotations/layout-red.txt
+
+
+Running 1 test using 1 worker
+
+node.exe : (node:17892) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:17892) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › e2e\library-tv-instrument-annotations.spec.js:183:1 › annotation labels avoid notation and lyrics rather than covering them (4.7s)
+
+
+  1) [chromium] › e2e\library-tv-instrument-annotations.spec.js:183:1 › annotation labels avoid notation and lyrics rather than covering them
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      195 |     return Array.from(document.querySelectorAll('.ano-dot')).every(dot =>
+      196 |       Array.from(document.querySelectorAll('#osmd-container svg rect')).every(node => !overlap(dot.getBoundingClientRect(), node.getBoundingClientRect())));
+    > 197 |   })).toBe(true);
+          |       ^
+      198 | });
+      199 |
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv-instrument-annotations.spec.js:197:7
+
+    Error Context: test-results\roadmap6\library-tv-instrument-anno-d7b2e-s-rather-than-covering-them-chromium\error-context.md
+
+  1 failed
+    [chromium] › e2e\library-tv-instrument-annotations.spec.js:183:1 › annotation labels avoid notation and lyrics rather than covering them
+
+
+SOURCE: test-results/instrument-annotations/classic-layout-red.txt
+
+
+Running 1 test using 1 worker
+
+node.exe : (node:29544) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:29544) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › e2e\library-tv-instrument-http.spec.js:105:3 › Classic dense notes stay readable at four screen widths (4.1s)
+
+
+  1) [chromium] › e2e\library-tv-instrument-http.spec.js:105:3 › Classic dense notes stay readable at four screen widths
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 50
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "note": "Trống: Fill vào điệp khúc",
+    +     "obstacle": "G",
+    +     "other": Object {
+    +       "bottom": 278,
+    +       "height": 15,
+    +       "left": 433.625,
+    +       "right": 449.59375,
+    +       "top": 263,
+    +       "width": 15.96875,
+    +       "x": 433.625,
+    +       "y": 263,
+    +     },
+    +     "rect": Object {
+    +       "bottom": 273.296875,
+    +       "height": 22.296875,
+    +       "left": 435.765625,
+    +       "right": 580.390625,
+    +       "top": 251,
+    +       "width": 144.625,
+    +       "x": 435.765625,
+    +       "y": 251,
+    +     },
+    +   },
+    +   Object {
+    +     "note": "Trống: Fill vào điệp khúc",
+    +     "obstacle": "F",
+    +     "other": Object {
+    +       "bottom": 278,
+    +       "height": 15,
+    +       "left": 703.2890625,
+    +       "right": 717.2109375,
+    +       "top": 263,
+    +       "width": 13.921875,
+    +       "x": 703.2890625,
+    +       "y": 263,
+    +     },
+    +     "rect": Object {
+    +       "bottom": 263.8125,
+    +       "height": 22.296875,
+    +       "left": 612.015625,
+    +       "right": 756.640625,
+    +       "top": 241.515625,
+    +       "width": 144.625,
+    +       "x": 612.015625,
+    +       "y": 241.515625,
+    +     },
+    +   },
+    + ]
+
+      136 |       await page.locator('#instrument-annotations').scrollIntoViewIfNeeded();
+      137 |       await page.screenshot({ path: `test-results/instrument-annotations/${classic ? 'classic' : 'modern'}-${width}.png` });
+    > 138 |       expect(collisions).toEqual([]);
+          |                          ^
+      139 |     }
+      140 |   });
+      141 | }
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv-instrument-http.spec.js:138:26
+
+    Error Context: test-results\roadmap6\library-tv-instrument-http-46bfb-dable-at-four-screen-widths-chromium\error-context.md
+
+    Error Context: test-results\roadmap6\library-tv-instrument-http-46bfb-dable-at-four-screen-widths-chromium\error-context.md
+
+  1 failed
+    [chromium] › e2e\library-tv-instrument-http.spec.js:105:3 › Classic dense notes stay readable at four screen widths
+
+
+SOURCE: test-results/instrument-annotations/auth-red.txt
+
+
+Running 1 test using 1 worker
+
+node.exe : (node:31228) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:31228) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › e2e\library-tv-instrument-annotations.spec.js:202:1 › losing admin access closes the editor and removes authoring controls (5.7s)
+
+
+  1) [chromium] › e2e\library-tv-instrument-annotations.spec.js:202:1 › losing admin access closes the editor and removes authoring controls
+
+    Error: expect(locator).not.toBeVisible() failed
+
+    Locator:  getByRole('dialog')
+    Expected: not visible
+    Received: visible
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "not toBeVisible" getByRole('dialog') with timeout 5000ms
+      - waiting for getByRole('dialog')
+        13 × locator resolved to <dialog open="" class="ano-editor" aria-labelledby="ano-editor-title">…</dialog>
+           - unexpected value "visible"
+
+
+      205 |   await page.locator('.ano-dot-btn').first().click();
+      206 |   await page.evaluate(() => { isAdmin = false; EventBus.emit('auth:changed'); });
+    > 207 |   await expect(page.getByRole('dialog')).not.toBeVisible();
+          |                                              ^
+      208 |   await expect(page.locator('.ano-dot-btn')).toHaveCount(0);
+      209 |   await expect(page.getByRole('button', { name: 'Soạn ghi chú', exact: true })).toHaveCount(0);
+      210 | });
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv-instrument-annotations.spec.js:207:46
+
+    Error Context: test-results\roadmap6\library-tv-instrument-anno-48821--removes-authoring-controls-chromium\error-context.md
+
+  1 failed
+    [chromium] › e2e\library-tv-instrument-annotations.spec.js:202:1 › losing admin access closes the editor and removes authoring controls
+
+
+SOURCE: test-results/instrument-annotations/client-red.txt
+
+
+Running 1 test using 1 worker
+
+node.exe : (node:17432) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:17432) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › e2e\library-tv-instrument-annotations.spec.js:236:1 › API client sends revisions and refreshes cached registries after adding an instrument (351ms)
+
+
+  1) [chromium] › e2e\library-tv-instrument-annotations.spec.js:236:1 › API client sends revisions and refreshes cached registries after adding an instrument
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 3
+    Received: 2
+
+      256 |     await ApiService.annotations.load('transport');
+      257 |   });
+    > 258 |   expect(reads).toBe(3);
+          |                 ^
+      259 |   expect(payload).toMatchObject({ action: 'instrument_save', name: 'Violin', registryRevision: 'i1' });
+      260 | });
+      261 |
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv-instrument-annotations.spec.js:258:17
+
+    Error Context: test-results\roadmap6\library-tv-instrument-anno-577a7--after-adding-an-instrument-chromium\error-context.md
+
+  1 failed
+    [chromium] › e2e\library-tv-instrument-annotations.spec.js:236:1 › API client sends revisions and refreshes cached registries after adding an instrument
+
+
+SOURCE: test-results/instrument-annotations/http-types-red.txt
+
+
+Running 1 test using 1 worker
+
+node.exe : (node:24624) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:24624) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › e2e\library-tv-instrument-http.spec.js:42:1 › HTTP keeps admin writes, guest/member read access and revision conflicts (1.4s)
+
+
+  1) [chromium] › e2e\library-tv-instrument-http.spec.js:42:1 › HTTP keeps admin writes, guest/member read access and revision conflicts
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 422
+    Received: 500
+
+      57 |   const added = await admin.post(endpoint(), { data: create }); expect(added.status()).toBe(200);
+      58 |   expect((await added.json()).instruments.some(item => item.name === create.name)).toBe(true);
+    > 59 |   expect((await admin.get(`${endpoint()}&action=load&songId[]=bad`)).status()).toBe(422);
+         |                                                                                ^
+      60 |   expect((await admin.post(endpoint(), { data: { action: 'save', songId: [], annotations: [], revision: '' } })).status()).toBe(422);
+      61 |   const fresh = await document();
+      62 |   const writes = await Promise.all(['race-a', 'race-b'].map(id => admin.post(endpoint(), { data: {
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv-instrument-http.spec.js:59:80
+
+    Error Context: test-results\roadmap6\library-tv-instrument-http-9c661-cess-and-revision-conflicts-chromium\error-context.md
+
+    Error Context: test-results\roadmap6\library-tv-instrument-http-9c661-cess-and-revision-conflicts-chromium\error-context.md
+
+  1 failed
+    [chromium] › e2e\library-tv-instrument-http.spec.js:42:1 › HTTP keeps admin writes, guest/member read access and revision conflicts
+
+
+SOURCE: test-results/instrument-annotations/detail-red.txt
+
+
+Running 1 test using 1 worker
+
+node.exe : (node:19916) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:19916) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › e2e\library-tv-instrument-annotations.spec.js:262:1 › a compact sheet badge opens and focuses its full note (6.1s)
+
+
+  1) [chromium] › e2e\library-tv-instrument-annotations.spec.js:262:1 › a compact sheet badge opens and focuses its full note
+
+    Error: expect(locator).toBeFocused() failed
+
+    Locator:  locator('[data-annotation-id="d2"]')
+    Expected: focused
+    Received: inactive
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeFocused" locator('[data-annotation-id="d2"]') with timeout 5000ms
+      - waiting for locator('[data-annotation-id="d2"]')
+        13 × locator resolved to <li data-annotation-id="d2">…</li>
+           - unexpected value "inactive"
+
+
+      265 |   await page.locator('.ano-dot').last().click();
+      266 |   await expect(page.locator('#annotation-panel-body')).toBeVisible();
+    > 267 |   await expect(page.locator('[data-annotation-id="d2"]')).toBeFocused();
+          |                                                           ^
+      268 | });
+      269 |
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv-instrument-annotations.spec.js:267:59
+
+    Error Context: test-results\roadmap6\library-tv-instrument-anno-f88e4-s-and-focuses-its-full-note-chromium\error-context.md
+
+  1 failed
+    [chromium] › e2e\library-tv-instrument-annotations.spec.js:262:1 › a compact sheet badge opens and focuses its full note
+
+
+SOURCE: test-results/instrument-annotations/modes-red.txt
+
+
+Running 1 test using 1 worker
+
+node.exe : (node:31480) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:31480) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › e2e\library-tv-instrument-annotations.spec.js:270:1 › switching to chord editing ends instrument annotation editing (5.6s)
+
+
+  1) [chromium] › e2e\library-tv-instrument-annotations.spec.js:270:1 › switching to chord editing ends instrument annotation editing
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  locator('.ano-dot-btn')
+    Expected: 0
+    Received: 2
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" locator('.ano-dot-btn') with timeout 5000ms
+      - waiting for locator('.ano-dot-btn')
+        14 × locator resolved to 2 elements
+           - unexpected value "2"
+
+
+      273 |   await expect(page.locator('.ano-dot-btn')).toHaveCount(2);
+      274 |   await page.evaluate(() => document.getElementById('btn-add-chord-mode').classList.add('active'));
+    > 275 |   await expect(page.locator('.ano-dot-btn')).toHaveCount(0);
+          |                                              ^
+      276 |   await expect(page.getByRole('button', { name: 'Soạn ghi chú', exact: true })).toBeVisible();
+      277 | });
+      278 |
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv-instrument-annotations.spec.js:275:46
+
+    Error Context: test-results\roadmap6\library-tv-instrument-anno-d1278-strument-annotation-editing-chromium\error-context.md
+
+  1 failed
+    [chromium] › e2e\library-tv-instrument-annotations.spec.js:270:1 › switching to chord editing ends instrument annotation editing
+
+
+SOURCE: test-results/instrument-annotations/sw-red.txt
+
+
+Running 1 test using 1 worker
+
+node.exe : (node:30400) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:30400) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › e2e\library-tv-instrument-sw.spec.js:5:1 › PWA refreshes annotation code together and keeps offline music packages (16.3s)
+
+
+  1) [chromium] › e2e\library-tv-instrument-sw.spec.js:5:1 › PWA refreshes annotation code together and keeps offline music packages
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('button', { name: 'Ghi chú nhạc cụ', exact: true })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('button', { name: 'Ghi chú nhạc cụ', exact: true }) with timeout 5000ms
+      - waiting for getByRole('button', { name: 'Ghi chú nhạc cụ', exact: true })
+
+
+      18 |   await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
+      19 |   await page.reload();
+    > 20 |   await expect(page.getByRole('button', { name: 'Ghi chú nhạc cụ', exact: true })).toBeVisible();
+         |                                                                                    ^
+      21 |   const result = await page.evaluate(async () => {
+      22 |     const keys = await caches.keys();
+      23 |     const app = keys.find(key => key.startsWith('sheetapp-app-v5-'));
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv-instrument-sw.spec.js:20:84
+
+    Error Context: test-results\roadmap6\library-tv-instrument-sw-P-fec6a-eeps-offline-music-packages-chromium\error-context.md
+
+  1 failed
+    [chromium] › e2e\library-tv-instrument-sw.spec.js:5:1 › PWA refreshes annotation code together and keeps offline music packages
+
+
+SOURCE: test-results/instrument-annotations/color-red.txt
+
+
+Running 1 test using 1 worker
+
+node.exe : (node:35224) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:35224) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › e2e\library-tv-instrument-annotations.spec.js:279:1 › the new editor retains existing color and icon authoring (30.2s)
+
+
+  1) [chromium] › e2e\library-tv-instrument-annotations.spec.js:279:1 › the new editor retains existing color and icon authoring
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.selectOption: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for getByLabel('Màu ghi chú', { exact: true })
+
+
+      280 |   await setup(page, true);
+      281 |   await page.locator('[data-annotation-id="g1"] [data-action="edit"]').click();
+    > 282 |   await page.getByLabel('Màu ghi chú', { exact: true }).selectOption('blue');
+          |                                                         ^
+      283 |   await page.getByLabel('Biểu tượng ghi chú', { exact: true }).selectOption('🎹');
+      284 |   await page.getByRole('button', { name: 'Lưu ghi chú', exact: true }).click();
+      285 |   await expect(page.getByRole('dialog')).not.toBeVisible();
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv-instrument-annotations.spec.js:282:57
+
+    Error Context: test-results\instrument-annotations\color-output\library-tv-instrument-anno-07946-ng-color-and-icon-authoring-chromium\error-context.md
+
+  1 failed
+    [chromium] › e2e\library-tv-instrument-annotations.spec.js:279:1 › the new editor retains existing color and icon authoring
+
+
+SOURCE: test-results/instrument-annotations/id-red.txt
+
+
+Running 1 test using 1 worker
+
+node.exe : (node:34488) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:34488) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › e2e\library-tv-instrument-annotations.spec.js:292:1 › adding a note works when the browser has no randomUUID API (5.6s)
+
+
+  1) [chromium] › e2e\library-tv-instrument-annotations.spec.js:292:1 › adding a note works when the browser has no randomUUID API
+
+    Error: expect(locator).not.toBeVisible() failed
+
+    Locator:  getByRole('dialog')
+    Expected: not visible
+    Received: visible
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "not toBeVisible" getByRole('dialog') with timeout 5000ms
+      - waiting for getByRole('dialog')
+        14 × locator resolved to <dialog open="" class="ano-editor" aria-labelledby="ano-editor-title">…</dialog>
+           - unexpected value "visible"
+
+
+      297 |   await page.getByLabel('Nội dung ghi chú').fill('Ghi chú trên máy trong mạng nội bộ');
+      298 |   await page.getByRole('button', { name: 'Lưu ghi chú', exact: true }).click();
+    > 299 |   await expect(page.getByRole('dialog')).not.toBeVisible();
+          |                                              ^
+      300 |   expect(await page.evaluate(() => saved.at(-1).list.at(-1).id)).toMatch(/^note-[a-zA-Z0-9_-]+$/);
+      301 | });
+      302 |
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv-instrument-annotations.spec.js:299:46
+
+    Error Context: test-results\instrument-annotations\id-output\library-tv-instrument-anno-28879-owser-has-no-randomUUID-API-chromium\error-context.md
+
+  1 failed
+    [chromium] › e2e\library-tv-instrument-annotations.spec.js:292:1 › adding a note works when the browser has no randomUUID API
+
+
+SOURCE: test-results/instrument-annotations/id-final.txt
+
+
+Running 32 tests using 1 worker
+
+node.exe : (node:16456) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:16456) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 [chromium] › e2e\library-tv-instrument-annotations.spec.js:47:1 › readers filter multiple instrument layers and both staves without edit controls (628ms)
+  ok  2 [chromium] › e2e\library-tv-instrument-annotations.spec.js:66:1 › admin adds an independent layer, edits and deletes without losing other instruments (848ms)
+  ok  3 [chromium] › e2e\library-tv-instrument-annotations.spec.js:89:1 › failed save keeps the draft and allows retry (754ms)
+  ok  4 [chromium] › e2e\library-tv-instrument-annotations.spec.js:105:1 › a delayed old song response cannot replace the current song (401ms)
+  ok  5 [chromium] › e2e\library-tv-instrument-annotations.spec.js:120:1 › scroll gestures do not open an editor and keyboard activation still works (541ms)
+  ok  6 [chromium] › e2e\library-tv-instrument-annotations.spec.js:134:1 › failed load can be retried and does not enable an empty editor (449ms)
+  ok  7 [chromium] › e2e\library-tv-instrument-annotations.spec.js:147:1 › a changed score hides stale anchors and lets admin place the same note again (554ms)
+  ok  8 [chromium] › e2e\library-tv-instrument-annotations.spec.js:168:1 › semantic time survives note index changes and equivalent fractions (425ms)
+  ok  9 [chromium] › e2e\library-tv-instrument-annotations.spec.js:186:1 › annotation labels avoid notation and lyrics rather than covering them (673ms)
+  ok 10 [chromium] › e2e\library-tv-instrument-annotations.spec.js:203:1 › losing admin access closes the editor and removes authoring controls (594ms)
+  ok 11 [chromium] › e2e\library-tv-instrument-annotations.spec.js:213:1 › conflict reload preserves the draft and saves it alongside newer notes (696ms)
+  ok 12 [chromium] › e2e\library-tv-instrument-annotations.spec.js:236:1 › API client sends revisions and refreshes cached registries after adding an instrument (445ms)
+  x  13 [chromium] › e2e\library-tv-instrument-annotations.spec.js:262:1 › a compact sheet badge opens and focuses its full note (5.4s)
+(node:20288) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 14 [chromium] › e2e\library-tv-instrument-annotations.spec.js:270:1 › switching to chord editing ends instrument annotation editing (379ms)
+  ok 15 [chromium] › e2e\library-tv-instrument-annotations.spec.js:279:1 › the new editor retains existing color and icon authoring (573ms)
+  ok 16 [chromium] › e2e\library-tv-instrument-annotations.spec.js:292:1 › adding a note works when the browser has no randomUUID API (647ms)
+(node:34636) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 17 [webkit] › e2e\library-tv-instrument-annotations.spec.js:47:1 › readers filter multiple instrument layers and both staves without edit controls (1.6s)
+  ok 18 [webkit] › e2e\library-tv-instrument-annotations.spec.js:66:1 › admin adds an independent layer, edits and deletes without losing other instruments (2.2s)
+  ok 19 [webkit] › e2e\library-tv-instrument-annotations.spec.js:89:1 › failed save keeps the draft and allows retry (1.7s)
+  ok 20 [webkit] › e2e\library-tv-instrument-annotations.spec.js:105:1 › a delayed old song response cannot replace the current song (697ms)
+  ok 21 [webkit] › e2e\library-tv-instrument-annotations.spec.js:120:1 › scroll gestures do not open an editor and keyboard activation still works (1.0s)
+  ok 22 [webkit] › e2e\library-tv-instrument-annotations.spec.js:134:1 › failed load can be retried and does not enable an empty editor (974ms)
+  ok 23 [webkit] › e2e\library-tv-instrument-annotations.spec.js:147:1 › a changed score hides stale anchors and lets admin place the same note again (1.3s)
+  ok 24 [webkit] › e2e\library-tv-instrument-annotations.spec.js:168:1 › semantic time survives note index changes and equivalent fractions (899ms)
+  ok 25 [webkit] › e2e\library-tv-instrument-annotations.spec.js:186:1 › annotation labels avoid notation and lyrics rather than covering them (1.1s)
+  ok 26 [webkit] › e2e\library-tv-instrument-annotations.spec.js:203:1 › losing admin access closes the editor and removes authoring controls (1.3s)
+  ok 27 [webkit] › e2e\library-tv-instrument-annotations.spec.js:213:1 › conflict reload preserves the draft and saves it alongside newer notes (2.1s)
+  ok 28 [webkit] › e2e\library-tv-instrument-annotations.spec.js:236:1 › API client sends revisions and refreshes cached registries after adding an instrument (895ms)
+  ok 29 [webkit] › e2e\library-tv-instrument-annotations.spec.js:262:1 › a compact sheet badge opens and focuses its full note (1.1s)
+  ok 30 [webkit] › e2e\library-tv-instrument-annotations.spec.js:270:1 › switching to chord editing ends instrument annotation editing (1.0s)
+  ok 31 [webkit] › e2e\library-tv-instrument-annotations.spec.js:279:1 › the new editor retains existing color and icon authoring (1.7s)
+  ok 32 [webkit] › e2e\library-tv-instrument-annotations.spec.js:292:1 › adding a note works when the browser has no randomUUID API (1.4s)
+
+
+  1) [chromium] › e2e\library-tv-instrument-annotations.spec.js:262:1 › a compact sheet badge opens and focuses its full note
+
+    Error: expect(locator).toBeFocused() failed
+
+    Locator:  locator('[data-annotation-id="d2"]')
+    Expected: focused
+    Received: inactive
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeFocused" locator('[data-annotation-id="d2"]') with timeout 5000ms
+      - waiting for locator('[data-annotation-id="d2"]')
+        14 × locator resolved to <li data-annotation-id="d2">…</li>
+           - unexpected value "inactive"
+
+
+      265 |   await page.locator('.ano-dot').last().click();
+      266 |   await expect(page.locator('#annotation-panel-body')).toBeVisible();
+    > 267 |   await expect(page.locator('[data-annotation-id="d2"]')).toBeFocused();
+          |                                                           ^
+      268 | });
+      269 |
+      270 | test('switching to chord editing ends instrument annotation editing', async ({ page }) => {
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv-instrument-annotations.spec.js:267:59
+
+    Error Context: test-results\instrument-annotations\id-final-output\library-tv-instrument-anno-f88e4-s-and-focuses-its-full-note-chromium\error-context.md
+
+  1 failed
+    [chromium] › e2e\library-tv-instrument-annotations.spec.js:262:1 › a compact sheet badge opens and focuses its full note
+  31 passed (39.8s)

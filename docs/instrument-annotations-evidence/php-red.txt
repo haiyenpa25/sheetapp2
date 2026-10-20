@@ -1,0 +1,44 @@
+[FAIL:B] versioned document API exists
+
+Fatal error: Uncaught RuntimeException: versioned document API exists in C:\xampp\htdocs\sheetapp2-roadmap6-work\tests\instrument_annotations_regression.php:10
+Stack trace:
+#0 C:\xampp\htdocs\sheetapp2-roadmap6-work\tests\instrument_annotations_regression.php(19): annotationCheck(false, 'versioned docum...')
+#1 {main}
+  thrown in C:\xampp\htdocs\sheetapp2-roadmap6-work\tests\instrument_annotations_regression.php on line 10
+C:/xampp/php/php.exe : PHP Fatal error:  Uncaught RuntimeException: versioned document API exists in
+C:\xampp\htdocs\sheetapp2-roadmap6-work\tests\instrument_annotations_regression.php:10
+At line:2 char:85
++ ... | Out-Null; C:/xampp/php/php.exe tests/instrument_annotations_regress ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (PHP Fatal error...gression.php:10:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+Stack trace:
+#0 C:\xampp\htdocs\sheetapp2-roadmap6-work\tests\instrument_annotations_regression.php(19): annotationCheck(false,
+'versioned docum...')
+#1 {main}
+  thrown in C:\xampp\htdocs\sheetapp2-roadmap6-work\tests\instrument_annotations_regression.php on line 10
+
+SOURCE: read-only-red.txt
+[PASS:S] versioned document API exists
+[PASS:B] empty document has revision
+[FAIL:B] reading an unknown song creates no storage files
+
+Fatal error: Uncaught RuntimeException: reading an unknown song creates no storage files in C:\xampp\htdocs\sheetapp2-roadmap6-work\tests\instrument_annotations_regression.php:11
+Stack trace:
+#0 C:\xampp\htdocs\sheetapp2-roadmap6-work\tests\instrument_annotations_regression.php(23): annotationCheck(false, 'reading an unkn...')
+#1 {main}
+  thrown in C:\xampp\htdocs\sheetapp2-roadmap6-work\tests\instrument_annotations_regression.php on line 11
+C:/xampp/php/php.exe : PHP Fatal error:  Uncaught RuntimeException: reading an unknown song creates no storage files
+in C:\xampp\htdocs\sheetapp2-roadmap6-work\tests\instrument_annotations_regression.php:11
+At line:2 char:1
++ C:/xampp/php/php.exe tests/instrument_annotations_regression.php *> t ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (PHP Fatal error...gression.php:11:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+Stack trace:
+#0 C:\xampp\htdocs\sheetapp2-roadmap6-work\tests\instrument_annotations_regression.php(23): annotationCheck(false,
+'reading an unkn...')
+#1 {main}
+  thrown in C:\xampp\htdocs\sheetapp2-roadmap6-work\tests\instrument_annotations_regression.php on line 11

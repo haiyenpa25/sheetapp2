@@ -1,0 +1,15 @@
+COMMAND: npm run check:syntax
+
+> sheetapp@2.0.0-dev check:syntax
+> node tools/check_syntax.js
+
+Kiểm tra cú pháp JavaScript (node --check) trên 330 file...
+PASS (330 files JS cú pháp hợp lệ)
+
+COMMAND: npx eslint assets/js/annotation-canvas.js assets/js/annotation-panel.js assets/js/annotation-geometry.js assets/js/core/ApiService.js assets/js/auth.js old/assets/js/auth.js sw.js --global clients
+
+ESLintExitCode=0
+SOURCE_DB_SHA256=A91268B27DF548845C67B8F375C2D13B5899FFA4716BA99A00D59E4BC157CAC9
+SOURCE_GIT_STATUS:
+(no changes)
+const SW_MANIFEST_HASH = 'b0c89a5325';
