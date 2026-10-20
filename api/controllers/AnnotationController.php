@@ -28,10 +28,10 @@ class AnnotationController {
 
             $action = $body['action'] ?? '';
             if ($action === 'instrument_save') {
-                if (!is_string($body['instrumentId'] ?? '') || !is_string($body['name'] ?? null) || !is_string($body['registryRevision'] ?? null)) {
+                if (!is_string($body['instrumentId'] ?? '') || !is_string($body['name'] ?? null) || !is_string($body['registryRevision'] ?? null) || (isset($body['color']) && !is_string($body['color']))) {
                     Response::error('Dữ liệu nhạc cụ không hợp lệ', 422); return;
                 }
-                Response::ok(AnnotationService::saveInstrument($body['instrumentId'] ?? '', $body['name'], $body['registryRevision']));
+                Response::ok(AnnotationService::saveInstrument($body['instrumentId'] ?? '', $body['name'], $body['registryRevision'], null, $body['color'] ?? null));
                 return;
             }
             $songId = $this->songId($body['songId'] ?? '');

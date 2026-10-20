@@ -6,9 +6,9 @@ class AnnotationService {
     public const BASE_DIR = __DIR__ . '/../../storage/data/annotations';
     public const LEGACY_DIR = __DIR__ . '/../../data/annotations';
     private const DEFAULT_INSTRUMENTS = [
-        ['id' => 'general', 'name' => 'Chung'], ['id' => 'guitar', 'name' => 'Guitar'],
-        ['id' => 'keyboard', 'name' => 'Keyboard'], ['id' => 'bass', 'name' => 'Bass'],
-        ['id' => 'drums', 'name' => 'Trống'], ['id' => 'vocals', 'name' => 'Hát'],
+        ['id' => 'general', 'name' => 'Chung', 'color' => '#64748b'], ['id' => 'guitar', 'name' => 'Guitar', 'color' => '#15803d'],
+        ['id' => 'keyboard', 'name' => 'Keyboard', 'color' => '#1d4ed8'], ['id' => 'bass', 'name' => 'Bass', 'color' => '#7e22ce'],
+        ['id' => 'drums', 'name' => 'Trống', 'color' => '#c2410c'], ['id' => 'vocals', 'name' => 'Hát', 'color' => '#be185d'],
     ];
 
     public static function load(string $songId): array {
@@ -45,29 +45,43 @@ class AnnotationService {
     public static function instruments(?string $directory = null): array {
         $store = new AnnotationDocumentStore($directory ?? self::BASE_DIR);
         $data = $store->read('.instruments', self::DEFAULT_INSTRUMENTS);
-        return ['instruments' => $data, 'registryRevision' => AnnotationDocumentStore::revision($data)];
+        return ['instruments' => self::withColors($data), 'registryRevision' => AnnotationDocumentStore::revision($data)];
     }
 
-    public static function saveInstrument(string $id, string $name, string $revision, ?string $directory = null): array {
+    public static function saveInstrument(string $id, string $name, string $revision, ?string $directory = null, ?string $color = null): array {
+        if ($color !== null && !preg_match('/^#[0-9a-fA-F]{6}$/D', $color)) throw new HttpException(422, 'Màu nhạc cụ không hợp lệ.');
         $name = trim($name);
         if ($name === '' || mb_strlen($name) > 40 || preg_match('/[\x00-\x1F]/u', $name)) {
             throw new HttpException(422, 'Tên nhạc cụ cần từ 1 đến 40 ký tự.');
         }
         $store = new AnnotationDocumentStore($directory ?? self::BASE_DIR);
-        $data = $store->write('.instruments', $revision, function (array $current) use ($id, $name): array {
+        $data = $store->write('.instruments', $revision, function (array $current) use ($id, $name, $color): array {
+            $current = self::withColors($current);
             if (count($current) >= 40 && $id === '') throw new HttpException(422, 'Tối đa 40 nhạc cụ.');
             foreach ($current as $instrument) {
                 if ($instrument['id'] !== $id && mb_strtolower($instrument['name']) === mb_strtolower($name)) {
                     throw new HttpException(422, 'Tên nhạc cụ đã tồn tại.');
                 }
             }
-            if ($id === '') { $current[] = ['id' => 'inst-' . bin2hex(random_bytes(6)), 'name' => $name]; return $current; }
+            if ($id === '') { $current[] = ['id' => 'inst-' . bin2hex(random_bytes(6)), 'name' => $name, 'color' => $color ?? self::colorAt(count($current))]; return $current; }
             foreach ($current as &$instrument) {
-                if ($instrument['id'] === $id) { $instrument['name'] = $name; return $current; }
+                if ($instrument['id'] === $id) { $instrument['name'] = $name; if ($color !== null) $instrument['color'] = strtolower($color); return $current; }
             }
             throw new HttpException(422, 'Nhạc cụ không tồn tại.');
         }, self::DEFAULT_INSTRUMENTS);
-        return ['instruments' => $data, 'registryRevision' => AnnotationDocumentStore::revision($data)];
+        return ['instruments' => self::withColors($data), 'registryRevision' => AnnotationDocumentStore::revision($data)];
+    }
+
+    private static function colorAt(int $index): string {
+        $palette = ['#64748b', '#15803d', '#1d4ed8', '#7e22ce', '#c2410c', '#be185d', '#0e7490', '#854d0e'];
+        return $palette[$index % count($palette)];
+    }
+
+    private static function withColors(array $instruments): array {
+        foreach ($instruments as $index => &$instrument) {
+            $instrument['color'] ??= self::colorAt($index);
+        }
+        return $instruments;
     }
 
     private static function validateSongId(string $id): void {

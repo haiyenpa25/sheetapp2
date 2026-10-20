@@ -48,6 +48,12 @@ try {
     annotationReject(fn() => AnnotationService::document('../escape', $dir), 422, 'ambiguous path rejected');
     $registry = AnnotationService::instruments($dir);
     annotationCheck(count($registry['instruments']) === 6, 'six built in instrument layers');
+    annotationCheck(count(array_unique(array_column($registry['instruments'], 'color'))) === 6, 'built in instruments have distinct colors');
+    $registry = AnnotationService::saveInstrument('drums', 'Trống', $registry['registryRevision'], $dir, '#c2410c');
+    annotationCheck(AnnotationService::instruments($dir)['instruments'][4]['color'] === '#c2410c', 'instrument color persists across reload');
+    $colorRevision = $registry['registryRevision'];
+    annotationReject(fn() => AnnotationService::saveInstrument('drums', 'Trống', $colorRevision, $dir, 'url(evil)'), 422, 'invalid color rejected');
+    annotationReject(fn() => AnnotationService::saveInstrument('drums', 'Trống', 'stale', $dir, '#123456'), 409, 'color update checks registry revision');
     $registry = AnnotationService::saveInstrument('', 'Violin', $registry['registryRevision'], $dir);
     $violin = end($registry['instruments']);
     annotationCheck($violin['name'] === 'Violin' && $violin['id'] !== '', 'admin can add custom instrument');
