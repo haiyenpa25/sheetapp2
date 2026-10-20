@@ -248,7 +248,7 @@
     <!-- NÚT CHUYỂN SANG GIAO DIỆN MỚI (SheetApp 2.0) -->
     <div class="control-group">
       <a id="btn-switch-new-ui" href="<?= $baseHref ?? '../' ?>" class="btn btn-primary btn-sm"
-         onclick="(function(e){ var sid = window.App?.getCurrentSongId?.() || new URLSearchParams(window.location.search).get('song'); var base = window.__APP_BASE__ || ''; var target = (base ? base + '/' : '/') + (sid ? ('?song=' + encodeURIComponent(sid)) : ''); e.preventDefault(); window.location.href = target; })(event)"
+         onclick="if (window.URLState) { event.preventDefault(); window.location.href = URLState.interfaceUrl(false); }"
          title="Chuyển sang Giao diện Mới (SheetApp 2.0 đầy đủ)"
          style="text-decoration:none;display:inline-flex;align-items:center;gap:.35rem;font-weight:600;white-space:nowrap;">
         <span>✨ Giao Diện Mới</span>

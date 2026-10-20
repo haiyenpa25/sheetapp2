@@ -393,7 +393,7 @@
         </a>
 
         <a href="<?= $bHref ?>old/" id="btn-menu-old-ui" class="btn btn-ghost btn-sm btn-menu-item"
-           onclick="(function(e){ var sid = window.App?.getCurrentSongId?.() || new URLSearchParams(window.location.search).get('song'); if (sid) { e.preventDefault(); window.location.href = '<?= $bHref ?>old/?song=' + encodeURIComponent(sid); } })(event)"
+           onclick="if (window.URLState) { event.preventDefault(); window.location.href = URLState.interfaceUrl(true); }"
            title="Chuyển sang Giao diện Cũ (SheetApp v1 đơn giản)">
           <?= icon('layout') ?>
           <span>Giao diện Cũ (Đơn giản)</span>

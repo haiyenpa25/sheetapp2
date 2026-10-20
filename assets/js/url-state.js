@@ -73,7 +73,21 @@ const URLState = (() => {
     return get();
   }
 
-  return { get, update, resetForNewSong, restore };
+  function interfaceUrl(classic) {
+    const base = (window.__APP_BASE__ || '').replace(/\/$/, '');
+    const url = new URL(`${base}/${classic ? 'old/' : ''}`, location.origin);
+    const params = new URLSearchParams(location.search);
+    ['song', 't', 'v', 'lv', 'set', 'compact'].forEach(key => {
+      if (params.has(key)) url.searchParams.set(key, params.get(key));
+    });
+    const activeSong = window.App?.getCurrentSongId?.();
+    if (activeSong) url.searchParams.set('song', activeSong);
+    // The two interfaces can have different device defaults; make the current view explicit.
+    if (!url.searchParams.has('v')) url.searchParams.set('v', 'sheet');
+    return url.href;
+  }
+
+  return { get, update, resetForNewSong, restore, interfaceUrl };
 })();
 
 window.URLState = URLState;
