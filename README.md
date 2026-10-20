@@ -133,34 +133,38 @@ sheetapp2/
 ### 1. Yêu Cầu Môi Trường Server:
 - **PHP:** PHP 8.1 trở lên (hỗ trợ `pdo_sqlite`, `json`, `mbstring`).
 - **Web Server:** Nginx, Apache hoặc LiteSpeed Web Server.
-- **Database:** SQLite (tự động khởi tạo file DB trong `storage/`).
+- **Database:** SQLite với FTS5. Bản phát hành có CSDL thư viện đã làm sạch dữ liệu cá nhân tại `storage/seed/library.sqlite`.
 
-### 2. Triển Khai (Deployment):
+### 2. Cài mới từ GitHub main:
 ```bash
-# 1. Clone repository về server
-git clone git@github.com:haiyenpa25/sheetapp2.git public_html
-
-# 2. Cấp quyền ghi cho thư mục storage
-chmod -R 777 public_html/storage
-
-# 3. Cấp quyền thực thi cho sync.sh
-chmod +x public_html/sync.sh
+git clone https://github.com/haiyenpa25/sheetapp2.git public_html
+cd public_html
+php tools/install_library.php
 ```
+
+Lệnh cài tạo `storage/data/app.sqlite` từ CSDL phát hành, tạo admin và hiển thị mật khẩu ngẫu nhiên **một lần**. Lưu mật khẩu ngay. Có thể truyền mật khẩu qua stdin bằng `--password-stdin`; không đặt mật khẩu trong dòng lệnh hoặc commit vào Git. Lệnh từ chối ghi đè DB đã tồn tại.
+
+Cấp quyền đọc source cho web server và quyền ghi `storage/` cho tài khoản chạy PHP (thường dùng thư mục `0750`/`0770`, file `0640`/`0660` tùy owner/group). Không dùng `chmod -R 777`. Apache cần bật rewrite và cho phép `.htaccess`; Nginx cần cấu hình chặn truy cập storage riêng tư tương đương.
+
+Mở `/` hoặc `/old/`. Hai giao diện dùng cùng CSDL, danh mục, hợp âm và ghi chú. Chi tiết dữ liệu, sao lưu và kiểm thử: [Hướng dẫn phát hành thư viện](docs/LIBRARY_DATA_RELEASE.md).
+
+### 3. Server đã có dữ liệu:
+
+Sao lưu toàn bộ `storage/` trước khi cập nhật source. Sau khi cập nhật main, chạy:
+
+```bash
+php tools/update_library.php --apply
+```
+
+Lệnh tạo bản sao SQLite nhất quán trước khi nhập, bổ sung các danh mục/bài/hợp âm/phiên bản/đoạn nhạc còn thiếu và cập nhật phân loại bài theo thư viện. Tài khoản, mật khẩu, chương trình và hợp âm hiện có được giữ lại; tiêu đề bài đã sửa được giữ lại. Không chép CSDL seed đè lên DB đang dùng. Nếu Git báo file local trùng file mới, lưu chúng ra bản sao riêng rồi đối chiếu nội dung trước khi cập nhật; không dùng lệnh ép xóa storage.
+
+DB vận hành `storage/data/app.sqlite` luôn bị ignore. Chỉ bản seed đã làm sạch được theo dõi trong Git, nên các lần pull sau không thay CSDL đang chạy.
 
 ---
 
-## ⚙️ 🤖 Quy Trình Đồng Bộ GitHub (Auto-Sync)
+## Cập nhật GitHub
 
-Dự án áp dụng quy tắc **Gitnexus Second Brain & Auto GitHub Sync**: Mỗi khi có thay đổi code, chỉ cần chạy script tự động:
-
-```bash
-./sync.sh
-```
-
-Script sẽ tự động:
-1. Chạy `node tools/generate_code_map.js` để tái tạo bản đồ tri thức [CODE_MAP.md](CODE_MAP.md).
-2. Tạo Git commit kèm mốc thời gian thực.
-3. Push trực tiếp lên branch `main` của GitHub repository `haiyenpa25/sheetapp2`.
+Kiểm tra thay đổi, chạy kiểm thử và commit/push có chủ đích. Không chạy `sync.sh`/`sync.bat` để tự push. Khi phát hành dữ liệu mới, dùng quy trình xuất seed và kiểm tra quyền riêng tư trong [hướng dẫn dữ liệu](docs/LIBRARY_DATA_RELEASE.md).
 
 ---
 

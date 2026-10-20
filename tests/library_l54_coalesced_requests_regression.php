@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/fixtures/library_storage_guard.php';
 /**
  * tests/library_l54_coalesced_requests_regression.php
  *
