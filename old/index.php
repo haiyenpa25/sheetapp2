@@ -46,6 +46,7 @@ echo cssTag('base.css');
 echo cssTag('layout.css');
 echo cssTag('sheet.css');
 echo cssTag('components.css');
+echo '  <link rel="stylesheet" href="../assets/css/instrument-annotations.css?v=' . filemtime(__DIR__ . '/../assets/css/instrument-annotations.css') . '">' . "\n";
 
 ?>
   <!-- ── Thư viện âm thanh và OSMD (local vendor, fallback CDN) ── -->
@@ -214,6 +215,8 @@ echo jsTag('chord-canvas-xml.js');
 echo jsTag('chord-canvas-ui.js');
 echo jsTag('chord-canvas-dots.js');
 echo jsTag('chord-canvas.js');
+echo jsTag('annotation-geometry.js');
+echo jsTag('annotation-panel.js');
 echo jsTag('annotation-canvas.js');
 echo jsTag('performance-notes.js');
 echo jsTag('instruments.js');

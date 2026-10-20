@@ -206,16 +206,23 @@ const ApiService = (() => {
       if (_annotationsCache.has(songId)) return Promise.resolve(_annotationsCache.get(songId));
       if (_annotationsInFlight.has(songId)) return _annotationsInFlight.get(songId);
       const p = _request(`api/index.php?route=annotations&action=load&songId=${encodeURIComponent(songId)}`)
-        .then(d => { _annotationsCache.set(songId, d); _annotationsInFlight.delete(songId); return d; })
-        .catch(e => { _annotationsInFlight.delete(songId); throw e; });
+        .then(d => {
+          if (_annotationsInFlight.get(songId) === p) { _annotationsCache.set(songId, d); _annotationsInFlight.delete(songId); }
+          return d;
+        })
+        .catch(e => { if (_annotationsInFlight.get(songId) === p) _annotationsInFlight.delete(songId); throw e; });
       _annotationsInFlight.set(songId, p);
       return p;
     },
-    save: (songId, list) => {
-      _annotationsCache.delete(songId);
-      return _json('POST', 'api/index.php?route=annotations', { action:'save', songId, annotations: list });
+    save: (songId, list, revision) => {
+      _annotationsCache.delete(songId); _annotationsInFlight.delete(songId);
+      return _json('POST', 'api/index.php?route=annotations', { action:'save', songId, annotations: list, revision });
     },
-    clearCache: (songId) => { if (songId) _annotationsCache.delete(songId); else _annotationsCache.clear(); }
+    saveInstrument: (data) => _json('POST', 'api/index.php?route=annotations', { action: 'instrument_save', ...data }),
+    clearCache: (songId) => {
+      if (songId) { _annotationsCache.delete(songId); _annotationsInFlight.delete(songId); }
+      else { _annotationsCache.clear(); _annotationsInFlight.clear(); }
+    }
   };
 
   const _usageCache = new Map();

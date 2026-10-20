@@ -48,6 +48,7 @@ echo cssTag('base.css');
 echo cssTag('layout.css');
 echo cssTag('sheet.css');
 echo cssTag('components.css');
+echo cssTag('instrument-annotations.css');
 echo cssTag('fab.css');
 echo cssTag('app-shell.css');
 echo cssTag('library-polish.css'); // lớp hoàn thiện giao diện — luôn nạp sau cùng
@@ -252,6 +253,8 @@ echo jsTag('chord-canvas-transpose.js');
 echo jsTag('chord-canvas-dots.js');
 echo jsTag('chord-canvas-edit.js');
 echo jsTag('chord-canvas.js');
+echo jsTag('annotation-geometry.js');
+echo jsTag('annotation-panel.js');
 echo jsTag('annotation-canvas.js');
 echo jsTag('performance-notes.js');
 echo jsTag('instruments.js');

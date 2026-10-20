@@ -50,7 +50,8 @@ const AnnotationCanvas = (() => {
     loaded = true; error = '';
   }
   async function ensureLoaded() {
-    if (!songId || loaded) return;
+    if (!songId) return;
+    if (loaded) { build(); return; }
     if (pending) return pending;
     const token = generation, id = songId;
     loading = true; error = ''; updatePanel();
