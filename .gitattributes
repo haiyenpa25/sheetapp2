@@ -5,3 +5,8 @@ assets/js/vendor/opensheetmusicdisplay.min.js text eol=lf
 assets/css/sheet.css text eol=lf
 assets/css/layout.css text eol=lf
 assets/css/library-polish.css text eol=lf
+
+# Public sanitized library snapshot; the live app.sqlite remains ignored.
+storage/seed/*.sqlite binary
+# Spaces inside MusicXML direction text are score content, not source formatting.
+"storage/Thanh ca/**" whitespace=-blank-at-eol

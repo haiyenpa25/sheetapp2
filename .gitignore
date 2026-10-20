@@ -1,7 +1,7 @@
-# ── CSDL & Data cá nhân (không push) ──
-storage/data/
+# ── Runtime CSDL & dữ liệu cá nhân ──
+storage/data/*
 storage/logs/
-storage/users/
+storage/users/*
 storage/backups/
 storage/tenants/
 *.sqlite*
@@ -11,7 +11,6 @@ dashboard/
 .ua/
 storage/omr_workspace/
 archive/
-storage/config/features.json
 
 # ── Bộ hợp âm HD (data riêng từng server) ──
 data/chord_sets/
@@ -19,11 +18,7 @@ data/chord_sets/
 # ── OMR workspace (file upload tạm) ──
 storage/omr_workspace/
 
-# ── Annotation files ──
-storage/data/annotations/
-
-# ── File nhạc XML / PDF đã upload ──
-storage/Thanh ca/
+# ── Bản nhạc thư viện được theo dõi trong Git ──
 
 # ── Docker (mỗi server config riêng) ──
 docker-compose.yml
@@ -49,4 +44,22 @@ storage/*.png
 Thumbs.db
 .vscode/
 .claude/
+
+
+# Library release assets; runtime databases and personal state stay local.
+!storage/data/.htaccess
+!storage/data/annotations/
+!storage/data/chord_sets/
+!storage/users/admin/
+storage/users/admin/*
+!storage/users/admin/thanh-ca-001/
+!storage/users/admin/thanh-ca-001/v1_ban-chuyen-soan-4-be-satb-demo.xml
+*.lock
+*.sqlite-wal
+*.sqlite-shm
+
+!storage/seed/*.sqlite
+
+__pycache__/
+*.pyc
 
