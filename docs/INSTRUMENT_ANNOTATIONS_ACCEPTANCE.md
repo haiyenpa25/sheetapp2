@@ -64,3 +64,19 @@ npx playwright test -c e2e/roadmap6.config.js library-tv-instrument-annotations 
 - Chưa đo lại ngân sách 4G trong đợt này; không đánh dấu TV2/ROADMAP6 hoàn tất.
 - DB nguồn giữ SHA256 `A91268B27DF548845C67B8F375C2D13B5899FFA4716BA99A00D59E4BC157CAC9`; checkout nguồn ở main không có thay đổi. Cổng PHP dùng bản cài riêng `sheetapp2-instrument-php-20261020`, khác bản HTTP E2E `sheetapp2-roadmap6-oct19-061901`, mỗi nơi có DB/storage riêng.
 - Không chạy sync, không merge main/deploy, không sửa bảng quyết định/chữ ký. Xuất bản tiếp trên nhánh `feature/roadmap6-library-20261019` theo ủy quyền GitHub trước đó.
+
+## Bản điều chỉnh toolbar và màu nhạc cụ — 2026-10-20
+
+Theo yêu cầu chốt lại trong hội thoại: toolbar → nhạc cụ → Ghi chú → dấu + vàng tại nốt → mẫu/chữ tự do → lưu phía trên dòng hợp âm. Mỗi nhạc cụ có một màu chung do admin đổi; người xem tick một/nhiều/tất cả. Cả Modern và Classic dùng chung module và API. Màu của thiết bị vật lý không thuộc phạm vi này.
+
+- Vị trí đã có ghi chú của nhạc cụ đang soạn dùng chính nhãn để sửa, không hiện thêm dấu + của lớp đó. Dữ liệu trùng điểm từ bản cũ vẫn giữ nguyên.
+- OSMD chừa khoảng trống theo số dòng và mức zoom. Các nhạc cụ có hàng riêng; nhãn tránh lời, nốt, hợp âm và không chuyển nhầm lên khuông khác. Bản rất dày có thể cao hơn vì thêm khoảng trống. Nội dung dài trên nhãn được cắt gọn, có toàn văn qua thao tác mở chi tiết.
+- Màu dùng chung theo registry, mã hex được kiểm tra phía máy chủ, vẫn có bảo vệ revision/role. Registry cũ thiếu màu được bổ sung trong phản hồi mà không tự ghi file khi GET. Không migration SQLite.
+- Bản PHP mới: **175/175 suite, 3.427 check (2.724 hành vi, 703 static), 333 PHP lint**, không skip/fail; chạy trên bản cài cô lập.
+- Tính năng Chromium: **25/25** gồm thành phần, HTTP thật hai UI ở 1366/820/390/360, lưu/tải màu, đúng khuông/phía trên hợp âm và nâng cache PWA.
+- Thành phần Chromium + WebKit: **38/38** (19 mỗi engine). WebKit headless không có hộp chọn màu hệ điều hành; ca màu phát sự kiện input của picker. Đây không phải kiểm tra Safari/iPad phần cứng.
+- JS syntax **330 file**, ESLint ba module sửa PASS. SW manifest hash `f9356e5f3d`.
+
+Bằng chứng đợt này: [PHP](instrument-annotations-evidence/toolbar-php-final.txt), [trình duyệt](instrument-annotations-evidence/toolbar-browser-final.txt), [lỗi tái hiện trước sửa](instrument-annotations-evidence/toolbar-browser-red.txt).
+
+Cập nhật bàn giao local: chuyển checkout `C:/xampp/htdocs/sheetapp2` từ main sang nhánh đã kiểm tra `feature/roadmap5` để URL `http://localhost/sheetapp2/` có chức năng. Đây là đổi nhánh local; không merge main hay triển khai production. Bản gốc main vẫn giữ commit `623b745`. Backup DB/annotations tại `C:/xampp/sheetapp2-backups/instrument-toolbar-20261020-105222`; backup integrity `ok`, DB SHA256 `A91268B27DF548845C67B8F375C2D13B5899FFA4716BA99A00D59E4BC157CAC9`. Các dòng bàn giao trước mục này mô tả trạng thái phiên bản cũ.

@@ -1,5 +1,13 @@
 # PROJECT_REGISTRY.md — Sơ Đồ Dự Án SheetApp
 
+## 2026-10-20 — Toolbar ghi chú nhạc cụ, màu dùng chung
+
+- Luồng mới cả Modern/Classic: Nhạc cụ trên toolbar → chọn nhạc cụ → Ghi chú → + vàng phía trên hợp âm → mẫu/chữ tự do → lưu; bấm nhãn sửa trực tiếp.
+- Registry lưu màu theo nhạc cụ, admin đổi màu; renderer chừa khoảng trống theo lớp/zoom, bộ lọc nhiều nhạc cụ giữ nguyên.
+- Kiểm chứng: PHP 175 suite/3.427 check; Chromium 25 ca tính năng; thành phần Chromium/WebKit 38 ca; JS syntax 330 file, ESLint module sửa PASS. Xem `docs/INSTRUMENT_ANNOTATIONS_ACCEPTANCE.md`.
+- Bàn giao local trên feature/roadmap5 tại thư mục người dùng đang mở; main không merge, DB không migration. Chỉ push nhánh GitHub đã được ủy quyền, không chạy sync.
+
+
 [2026-10-20] — Ghi chú theo nhạc cụ, theo yêu cầu và phân tích đã được chủ dự án duyệt:
   ~ Modern/Classic dùng chung AnnotationCanvas: soạn theo nhạc cụ, nhiều ghi chú tại cùng điểm, tick nhiều lớp/hiện hết/ẩn hết và nhớ lựa chọn; giữ chức năng màu/biểu tượng cũ. Danh mục mặc định và nhạc cụ admin bổ sung độc lập StageLens.
   + assets/js/annotation-geometry.js, assets/js/annotation-panel.js, assets/css/instrument-annotations.css: ánh xạ mọi trang/khuông OSMD; tránh ký âm/lời/hợp âm, nhãn thu gọn mở đúng toàn văn, dialog bàn phím, chặn cuộn mở nhầm và kết quả bài cũ.
