@@ -29,7 +29,7 @@ graph TD
 - **Nhiệm vụ:** Tiếp nhận request, phân tích parameter `route` và `action`, gọi Controller phù hợp và trả JSON chuẩn qua `Response::ok()`.
 
 ### 2.2 Controllers (`api/controllers/`)
-- **AnnotationController.php**: Handler cho route `annotation`
+- **AnnotationController.php**: Route `annotations`: đọc document/danh mục; admin lưu ghi chú và nhạc cụ với revision.
 - **ArrangementController.php**: Handler cho route `arrangement`
 - **AuthController.php**: Handler cho route `auth`
 - **CategoryController.php**: Handler cho route `category`
@@ -51,7 +51,8 @@ graph TD
 - **UserController.php**: Handler cho route `user`
 
 ### 2.3 Services (`api/services/`)
-- **AnnotationService.php**: Xử lý logic & truy vấn SQLite cho `Annotation`
+- **AnnotationService.php**: Ghi chú theo bài/bản phối mặc định, nhiều nhạc cụ tại cùng điểm; chuyển tiếp JSON cũ sang lớp Chung khi đọc, kiểm tra nội dung và revision.
+- **AnnotationDocumentStore.php**: Kho JSON dùng khóa ổn định và thay file nguyên tử; không dùng SQLite. Tham số directory chỉ do PHP nội bộ cấp để test cô lập.
 - **ArrangementService.php**: Xử lý logic & truy vấn SQLite cho `Arrangement`
 - **CategoryService.php**: Xử lý logic & truy vấn SQLite cho `Category`
 - **ChordProService.php**: Xử lý logic & truy vấn SQLite cho `ChordPro`
@@ -96,6 +97,8 @@ graph TD
 ### 3.2 Feature Modules
 - `assets\js\admin-ui.js`
 - `assets\js\annotation-canvas.js`
+- `assets\js\annotation-geometry.js` — ánh xạ tất cả khuông/trang OSMD, thời điểm âm nhạc, dấu cấu trúc XML, tránh chồng ký âm/hợp âm.
+- `assets\js\annotation-panel.js` — bộ lọc nhiều nhạc cụ, danh sách toàn văn và dialog soạn; không gọi mạng trực tiếp.
 - `assets\js\app-ui.js`
 - `assets\js\app.js`
 - `assets\js\audio-player.js`

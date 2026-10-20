@@ -31,3 +31,33 @@ File JSON lưu nguyên tử dưới khóa riêng; kiểm tra revision và ghi tr
 3. Ghép hai UI và QA: sheet thật, nhiều trang/khuông, resize/zoom, 360/390/820/1366; PHP gate và Chromium regression. Không ghi DB/storage nguồn.
 
 Không chạy sync, không merge main, không thay bảng quyết định/chữ ký roadmap.
+
+## Hướng dẫn sử dụng
+
+### Người đọc
+
+1. Mở bài ở chế độ **Bản Nhạc** trong Modern hoặc Classic, chọn **Ghi chú nhạc cụ** ngay phía trên sheet.
+2. Tick các nhạc cụ muốn xem, hoặc **Chọn tất cả** / **Ẩn tất cả**. Bộ lọc được nhớ trong `sheetapp_annotation_layers` trên thiết bị, độc lập StageLens.
+3. Nhãn trên sheet hiện nhạc cụ và chỉ dẫn; nhãn quá dài được cắt gọn. Nhiều ghi chú cùng điểm được gom theo số lượng.
+4. Chỗ chật dùng dấu **✎**. Chạm nhãn/dấu để mở và đưa ghi chú đầy đủ vào tầm nhìn; danh sách ghi rõ ô nhịp và khuông.
+5. **Tải lại ghi chú** lấy phiên bản mới từ máy chủ. Khi lỗi tải có **Thử tải lại**; không coi lỗi mạng là bài chưa có ghi chú.
+
+### Admin
+
+1. Trong bảng ghi chú, chọn **Soạn ghi chú**, chọn **Nhạc cụ đang soạn**, rồi chạm dấu **+** trên sheet.
+2. Nhập nội dung (tối đa 500 ký tự), chọn màu/biểu tượng nếu muốn và **Lưu ghi chú**. Có thể thêm nhiều chỉ dẫn, cùng hoặc khác nhạc cụ, tại cùng một điểm.
+3. **Sửa** trên thẻ ghi chú mở dialog có lựa chọn nhạc cụ, nội dung và **Xóa ghi chú**. Kết thúc bằng **Kết thúc soạn**.
+4. Nhập **Nhạc cụ mới** → **Thêm nhạc cụ** để bổ sung danh mục dùng chung. Không tạo thêm chế độ StageLens hay thay quyền thành viên.
+5. Nếu máy chủ báo phiên khác đã thay đổi: giữ dialog mở, chọn **Tải lại dữ liệu**, kiểm tra thông tin mới rồi lưu lại bản nháp. Lỗi mạng cũng giữ nguyên nội dung nhập.
+6. Nếu bản nhạc đã thay đổi, dùng **Đặt lại vị trí** trên thẻ có cảnh báo, chọn điểm mới, kiểm tra nội dung rồi lưu. Không tự chuyển ghi chú sang một nốt khác.
+
+## Vận hành và tương thích
+
+- Ghi chú vẫn ở `storage/data/annotations/<songId>.json`; danh mục ở `.instruments.json`. Backup cả thư mục này trước khi đưa phiên bản lên máy chủ. Không cần migration SQLite.
+- Client cũ thiếu revision sẽ bị từ chối lưu (422), giúp tránh xóa lớp nhạc cụ của client mới. Tải lại trang để nhận frontend mới.
+- `AnnotationService::load()` giữ cách đọc danh sách cũ cho PHP. Ghi qua API document có revision; không gọi cơ chế ghi toàn danh sách không kiểm tra phiên bản.
+- Dữ liệu cũ chưa có dấu cấu trúc được gắn theo chỉ số ô nhịp/nốt cũ; hệ thống không thể tự biết một lần thay XML diễn ra trước khi thêm tính năng này.
+- Không nạp API ghi chú ở lần đọc đầu nếu người dùng chưa mở bảng/chưa lưu bộ lọc bật. Khi đã chọn lớp, tải bất đồng bộ theo bài; có token chặn kết quả đến muộn.
+- CSS/geometry/panel/canvas được đưa vào precache. Cache giao diện dùng cả phiên bản và manifest hash, giúp thay đồng bộ module; cache MusicXML và gói `sheetapp-offline-*` được giữ lại.
+- Khi thay tài nguyên nằm trong manifest, chạy `php tools/generate_sw_manifest.php` ở bản build/cài đặt cách ly và đưa `sw.js` mới vào bản phát hành. Không chạy sync tự push.
+- Chưa cung cấp tải ghi chú ngoại tuyến, bản phối riêng từng chương trình, ghi chú theo đoạn, hoặc xuất PDF chuyên biệt.

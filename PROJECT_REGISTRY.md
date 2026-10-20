@@ -1,5 +1,14 @@
 # PROJECT_REGISTRY.md — Sơ Đồ Dự Án SheetApp
 
+[2026-10-20] — Ghi chú theo nhạc cụ, theo yêu cầu và phân tích đã được chủ dự án duyệt:
+  ~ Modern/Classic dùng chung AnnotationCanvas: soạn theo nhạc cụ, nhiều ghi chú tại cùng điểm, tick nhiều lớp/hiện hết/ẩn hết và nhớ lựa chọn; giữ chức năng màu/biểu tượng cũ. Danh mục mặc định và nhạc cụ admin bổ sung độc lập StageLens.
+  + assets/js/annotation-geometry.js, assets/js/annotation-panel.js, assets/css/instrument-annotations.css: ánh xạ mọi trang/khuông OSMD; tránh ký âm/lời/hợp âm, nhãn thu gọn mở đúng toàn văn, dialog bàn phím, chặn cuộn mở nhầm và kết quả bài cũ.
+  + api/services/AnnotationDocumentStore.php; mở rộng AnnotationService/Controller + ApiService: JSON schemaVersion=2, legacy thuộc Chung, khóa/ghi nguyên tử + revision chống ghi đè, danh mục admin bổ sung. Không migration SQLite, không đổi quyền role.
+  + tests/instrument_annotations_regression.php và ba e2e/library-tv-instrument-*.spec.js: kho dữ liệu cô lập, nhiều lớp, CRUD, retry/conflict, mốc nhạc, role/mode, bốn cỡ màn hình hai UI và nâng cấp cache PWA.
+  ~ sw.js + tools/generate_sw_manifest.php: precache bốn tài nguyên annotation; cache giao diện gắn manifest hash để đồng bộ code khi nâng cấp, giữ MusicXML/gói offline.
+  ~ Nghiệm thu bản cuối: 22/22 ca tính năng Chromium, 16/16 ca thành phần trên mỗi engine Chromium/WebKit; 175/175 suite PHP / 3.423 check, 333 PHP lint, 330 JS syntax và ESLint phần sửa PASS. DB nguồn giữ checksum, main sạch; test PHP và HTTP dùng hai bản cài có DB/storage độc lập.
+  ~ Hướng dẫn/phạm vi: docs/INSTRUMENT_ANNOTATIONS.md. Kết quả kiểm thử và bằng chứng thô: docs/INSTRUMENT_ANNOTATIONS_ACCEPTANCE.md và docs/instrument-annotations-evidence/. Không đánh dấu roadmap hoàn tất, không merge main/deploy.
+
 [2026-10-19] — ROADMAP6 TV2-4 và tối ưu truyền tải theo yêu cầu chủ dự án:
   ~ Hai entry tải Tone/SATB khi phát; AudioPlayer resume context trước await, dùng chung context với Tone/player, hủy tải/phát muộn khi dừng hoặc đổi bài. ScriptLoader sửa base Classic và thử lại script lỗi.
   + tools/generate_asset_gzip.php, bốn sidecar gzip và assets/.htaccess: nén trước OSMD + ba CSS lớn, giữ MIME/Vary/ETag/Range và q=0; nguồn ghim LF để build nhất quán Windows/Linux. Không đổi cấu hình/restart Apache toàn máy.
