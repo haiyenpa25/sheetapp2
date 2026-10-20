@@ -1,0 +1,24 @@
+.instrument-annotations { margin: .5rem 0; padding: .5rem; color: var(--text-primary, #222); background: var(--bg-surface, #fff); border: 1px solid var(--border, #ccc); border-radius: 8px; font-size: .85rem; }
+.instrument-annotations[hidden], #annotation-panel-body[hidden] { display: none !important; }
+.instrument-annotations fieldset { display: flex; flex-wrap: wrap; gap: .4rem 1rem; border: 1px solid var(--border, #ccc); margin: .6rem 0; }
+.instrument-annotations label { display: inline-flex; align-items: center; gap: .4rem; min-height: 36px; }
+.instrument-annotations input[type=checkbox] { width: 18px; height: 18px; }
+.instrument-annotations input, .instrument-annotations select, .ano-editor select, .ano-editor textarea { color: inherit; background: var(--bg-surface, #fff); border: 1px solid var(--border, #aaa); border-radius: 4px; padding: .4rem; max-width: 100%; }
+.ano-controls { display: flex; align-items: center; flex-wrap: wrap; gap: .4rem; margin: .4rem 0; }
+.ano-control { min-height: 36px; padding: .35rem .65rem; border: 1px solid var(--border, #aaa); border-radius: 5px; color: inherit; background: var(--bg-surface, #fff); cursor: pointer; touch-action: pan-y; }
+.ano-control:focus-visible, .ano-dot:focus-visible, .ano-dot-btn:focus-visible { outline: 3px solid #7c3aed; outline-offset: 2px; }
+.ano-control:disabled { opacity: .55; cursor: wait; }
+.ano-detail-list { list-style: none; margin: .5rem 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: .5rem; }
+.ano-detail-list li { padding: .6rem; border: 1px solid var(--border, #ccc); border-radius: 5px; overflow-wrap: anywhere; }
+.ano-detail-list p { margin: .4rem 0; white-space: pre-wrap; }
+.ano-warning { color: var(--text-primary, #8c3500); font-weight: 600; }
+.ano-dot, .ano-dot-btn { position: absolute; z-index: 85; pointer-events: auto; touch-action: pan-y; cursor: pointer; border: 1px solid #866212; border-radius: 4px; background: #fff3ba; color: #302400; font: 600 11px/1.3 sans-serif; padding: 3px 5px; max-width: 165px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-sizing: border-box; }
+.ano-dot-btn { z-index: 86; min-width: 28px; min-height: 28px; background: #e2f7ec; border-color: #137b4e; color: #075a36; }
+.ano-editor { box-sizing: border-box; width: min(420px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow: auto; color: var(--text-primary, #222); background: var(--bg-surface, #fff); border: 1px solid var(--border, #aaa); border-radius: 10px; padding: 1rem; }
+.ano-editor::backdrop { background: rgb(0 0 0 / 40%); }
+.ano-editor h2 { margin: 0 0 .75rem; font-size: 1.1rem; }
+.ano-editor label { display: grid; gap: .35rem; margin: .65rem 0; }
+.ano-editor textarea { width: 100%; box-sizing: border-box; resize: vertical; }
+.ano-editor [role=alert] { color: var(--text-primary, #942424); white-space: pre-wrap; }
+@media (max-width: 480px) { .instrument-annotations { margin: .3rem 0; } .ano-control { min-height: 42px; } }
+@media print { .instrument-annotations, .ano-dot-btn, .ano-editor { display: none !important; } .ano-dot { box-shadow: none; } }

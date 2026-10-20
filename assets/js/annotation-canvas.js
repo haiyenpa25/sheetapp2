@@ -1,378 +1,195 @@
-/**
- * annotation-canvas.js — Tương tác trực tiếp để gắn Ghi Chú (Sticky Notes)
- */
+﻿/** Instrument-specific annotations, shared by Modern and Classic. */
 const AnnotationCanvas = (() => {
   'use strict';
+  const STORAGE_KEY = 'sheetapp_annotation_layers';
+  let initialized = false, songId = null, generation = 0, pending = null;
+  let notes = [], instruments = [], revision = '', registryRevision = '';
+  let loaded = false, loading = false, saving = false, error = '', editing = false;
+  let instrumentId = 'general', relocating = null, selected = null, hasPreference = false;
+  let renderTimer, observer, unplaced = [], fingerprint = '', fingerprintXml = null;
+  const admin = () => !!window.Auth?.isAdmin?.();
+  const current = () => window.App?.getCurrentSongId?.() || window.Store?.get?.('currentSong')?.id;
 
-  /* ─── State ─────────────────────────────────────────────────── */
-  let _editEnabled = false;
-  let _popup       = null;
-  let _notes       = {}; // { "measureIdx_noteIdx": { text, color } }
-  let _noteEls     = [];
-  let _ro          = null;
-  let _isInitialized = false;
-
-  const DOT_CLASS = 'ano-dot';
-  const BTN_CLASS = 'ano-dot-btn';
-
-  /* ─── Init ──────────────────────────────────────────────────── */
   function init() {
+    if (initialized) return;
+    initialized = true;
+    try {
+      const value = localStorage.getItem(STORAGE_KEY);
+      if (value !== null) {
+        const parsed = JSON.parse(value);
+        if (parsed === null || (Array.isArray(parsed) && parsed.every(id => typeof id === 'string'))) {
+          selected = parsed; hasPreference = true;
+        }
+      }
+    } catch (_) {}
+    window.AnnotationPanel.init({ activate: ensureLoaded, reload, filter, filterAll,
+      edit: setAddMode, instrument: id => { instrumentId = id; updatePanel(); },
+      openEditor, relocate: note => { relocating = note; setAddMode(true); },
+      save, createInstrument });
     document.getElementById('btn-add-annotate-mode')?.addEventListener('click', toggleAddMode);
     document.getElementById('btn-cancel-add-annotate')?.addEventListener('click', () => setAddMode(false));
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') {
-        if (window.ModalManager?.hasOpenModals?.()) return;
-        if (_editEnabled) { _closePopup(); setAddMode(false); }
-      }
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !document.querySelector('.ano-editor[open]')) setAddMode(false);
     });
-    
-    if (_isInitialized) return;
-    _isInitialized = true;
-
+    window.EventBus?.on?.('auth:changed', () => { if (!admin()) setAddMode(false); updatePanel(); });
     const container = document.getElementById('osmd-container');
     if (container) {
-      let rTid = null;
-      _ro = new ResizeObserver(() => {
-        if (!_editEnabled && Object.keys(_notes).length === 0) return;
-        clearTimeout(rTid);
-        rTid = setTimeout(() => { _build(); }, 150);
-      });
-      _ro.observe(container);
+      observer = new ResizeObserver(reposition); observer.observe(container);
     }
+    updatePanel();
   }
-
-  function onOSMDRendered() { setTimeout(_build, 200); }
-  function reposition() { setTimeout(_build, 100); }
-  let _loadedSongId = null;
-
-  async function _ensureLoaded(songId) {
-    if (!songId || _loadedSongId === songId) return;
-    try {
-      const res = await window.ApiService?.annotations?.load?.(songId);
-      const list = res?.annotations ?? (Array.isArray(res) ? res : []);
-      list.forEach(a => {
-        _notes[`${a.measureIdx}_${a.noteIdx}`] = a;
-      });
-      _loadedSongId = songId;
-    } catch(e) {
-      console.warn('Load annotation error:', e);
-    }
+  function updatePanel() {
+    window.AnnotationPanel?.render({ songId, notes, instruments, selected, loading, loaded,
+      saving, error, editing: editing && admin(), admin: admin(), instrumentId, unplaced, relocating: !!relocating });
   }
-
-  async function loadSong(songId, force = false) {
-    _clear();
-    setAddMode(false);
-    _notes = {};
-    _loadedSongId = null;
-    if (!songId) return;
-
-    if (force || _editEnabled || window.__annotationsAutoLoad) {
-      await _ensureLoaded(songId);
-      _build();
-    }
+  function accept(data) {
+    if (!Array.isArray(data?.annotations) || typeof data.revision !== 'string') throw new Error('Không đọc được dữ liệu ghi chú. Hãy tải lại.');
+    notes = data.annotations; revision = data.revision;
+    instruments = data.instruments || instruments; registryRevision = data.registryRevision || registryRevision;
+    if (!instruments.some(item => item.id === instrumentId)) instrumentId = instruments[0]?.id || 'general';
+    loaded = true; error = '';
   }
-
-  function clearSong() { _clear(); setAddMode(false); _loadedSongId = null; }
-
-  /* ─── Mode ──────────────────────────────────────────────────── */
-  function setAddMode(on) {
-    _editEnabled = !!on;
-    document.getElementById('btn-add-annotate-mode')?.classList.toggle('active', on);
-    document.getElementById('add-annotate-hint')?.classList.toggle('hidden', !on);
-    document.querySelectorAll('.' + BTN_CLASS).forEach(d => { d.style.display = on ? 'flex' : 'none'; });
-    
-    // Nếu ChordMode đang bật thì tắt
-    if (on && window.ChordCanvas && document.getElementById('btn-add-chord-mode')?.classList.contains('active')) {
-      window.ChordCanvas.setAddMode(false);
-    }
-
-    if (on) {
-      const curId = window.Store?.get?.('currentSong')?.id;
-      _ensureLoaded(curId).then(() => _build());
-    } else {
-      _closePopup();
-      _build();
-    }
-  }
-
-  function toggleAddMode() { setAddMode(!_editEnabled); }
-
-  /* ─── Build dots ─────────────────────────────────────────────── */
-  function _clear() {
-    document.querySelectorAll('.' + DOT_CLASS).forEach(d => d.remove());
-    _closePopup();
-    _noteEls = [];
-  }
-
-  function _build() {
-    _clear();
-    const container = document.getElementById('osmd-container');
-    if (!container) return;
-    const svg = container.querySelector('svg');
-    if (!svg) return;
-
-    let notes = Array.from(svg.querySelectorAll('g.vf-stavenote'));
-    if (!notes.length) {
-      notes = Array.from(svg.querySelectorAll('g')).filter(g => g.querySelector('ellipse') && !g.querySelector('g > g > ellipse'));
-    }
-    if (!notes.length) return;
-
-    _noteEls = notes;
-    const mapped = _mapNotes(notes);
-    mapped.forEach(m => _placeDot(m));
-  }
-
-  function _mapNotes(noteEls) {
-    const osmd = window.OSMDRenderer?.getInstance?.();
-    const ml   = osmd?.graphic?.measureList;
-    if (ml) {
+  async function ensureLoaded() {
+    if (!songId || loaded) return;
+    if (pending) return pending;
+    const token = generation, id = songId;
+    loading = true; error = ''; updatePanel();
+    const task = (async () => {
       try {
-        const result = [], byEl = new Map();
-        for (let mi = 0; mi < ml.length; mi++) {
-          const staves = ml[mi];
-          if (!staves?.length) continue;
-          const staff = staves[0];
-          if (!staff?.staffEntries) continue;
-          const src  = staff.ParentSourceMeasure ?? staves[0].parentSourceMeasure;
-          const mIdx = src?.measureListIndex ?? mi;
-          let nIdx = 0;
-          for (const se of staff.staffEntries) {
-            if (!se) continue;
-            for (const ve of (se.graphicalVoiceEntries || [])) {
-              for (const gn of (ve.notes || [])) {
-                const svgG = gn.getSVGGElement?.();
-                if (svgG) byEl.set(svgG, { mIdx, nIdx });
-              }
-            }
-            nIdx++;
-          }
-        }
-        if (byEl.size > 0) {
-          for (const el of noteEls) {
-            const m = byEl.get(el) || byEl.get(el.parentElement);
-            result.push({
-              el, rect: el.getBoundingClientRect(),
-              measureIdx: m?.mIdx ?? -1, noteIdx: m?.nIdx ?? result.length,
-              anno: m ? (_notes[`${m.mIdx}_${m.nIdx}`] || null) : null
-            });
-          }
-          if (result.some(r => r.measureIdx >= 0)) return result;
-        }
-      } catch(e) {}
-    }
-    return [];
-  }
-
-  function _placeDot({ el, rect, measureIdx, noteIdx, anno }) {
-    if (!rect || rect.width === 0 || rect.height === 0) return;
-    const container = document.getElementById('osmd-container');
-    const cRect = container.getBoundingClientRect();
-    
-    // Đặt ghi chú phía DƯỚI nốt nhạc thay vì phía trên
-    const cx = (rect.left - cRect.left) + rect.width / 2;
-    const cy = (rect.top - cRect.top) + rect.height + 15;
-
-    const scale = window.App?.getCurrentZoom?.() ?? 1.0;
-
-      if (anno && anno.text) {
-      const div = document.createElement('div');
-      div.className = DOT_CLASS;
-      div.textContent = (anno.icon ? anno.icon + ' ' : '') + anno.text;
-      div.dataset.color = anno.color || 'yellow';
-
-      div.style.cssText = [
-        'position:absolute', `left:${cx}px`, `top:${cy}px`,
-        'transform:translateX(-50%)', 'z-index:90',
-        'border-radius:6px',
-        `font-size:${Math.max(10, 11 * scale)}px`, 'padding:3px 8px',
-        'white-space:nowrap', 'user-select:none', 'pointer-events:auto', 'cursor:pointer',
-        'box-shadow: 0 4px 10px rgba(0,0,0,0.15)', 'transition: transform 0.15s ease, box-shadow 0.15s ease'
-      ].join(';');
-
-      div.addEventListener('mouseenter', () => { div.style.transform = 'translateX(-50%) scale(1.05)'; div.style.boxShadow = '0 6px 14px rgba(0,0,0,0.2)'; });
-      div.addEventListener('mouseleave', () => { div.style.transform = 'translateX(-50%) scale(1)'; div.style.boxShadow = '0 4px 10px rgba(0,0,0,0.15)'; });
-
-
-      div.addEventListener('click', e => { e.stopPropagation(); _showPopup(div, measureIdx, noteIdx, anno); });
-      container.appendChild(div);
-    } else if (_editEnabled) {
-      const dotSize = Math.max(12, Math.round(16 * scale));
-      const btn = document.createElement('div');
-      btn.className = DOT_CLASS + ' ' + BTN_CLASS;
-      btn.textContent = '✎';
-      
-      btn.style.cssText = [
-        'position:absolute', `left:${cx}px`, `top:${cy}px`,
-        'transform:translateX(-50%)', 'z-index:80',
-        'display:flex', 'align-items:center', 'justify-content:center',
-        `width:${dotSize}px`, `height:${dotSize}px`, 'border-radius:50%', 'background:rgba(5,150,105,0.85)',
-        'color:#fff', `font-size:${10 * scale}px`, 'line-height:1', 'box-shadow:0 2px 7px rgba(5,150,105,0.5)',
-        'pointer-events:auto', 'cursor:pointer', 'user-select:none', 'transition: transform 0.15s ease, background 0.15s ease'
-      ].join(';');
-
-      btn.addEventListener('mouseenter', () => { btn.style.transform = 'translateX(-50%) scale(1.15)'; btn.style.background = 'rgba(5,150,105,1)'; });
-      btn.addEventListener('mouseleave', () => { btn.style.transform = 'translateX(-50%) scale(1)'; btn.style.background = 'rgba(5,150,105,0.85)'; });
-
-      
-      btn.addEventListener('click', e => { e.stopPropagation(); _showPopup(btn, measureIdx, noteIdx, null); });
-      container.appendChild(btn);
-    }
-  }
-
-  /* ─── Popup (Sprint C1: colors + icons) ────────────────────── */
-  const _COLORS = [
-    { id:'yellow', hex:'#fbbf24', title:'Nhắc nhở' },
-    { id:'blue',   hex:'#60a5fa', title:'Kỹ thuật' },
-    { id:'red',    hex:'#f87171', title:'Quan trọng' },
-    { id:'green',  hex:'#34d399', title:'Hiệu quả' },
-    { id:'purple', hex:'#a78bfa', title:'Nâng cao' },
-  ];
-  const _ICONS = [
-    { icon:'🎹', label:'Đàn' }, { icon:'🎵', label:'Hát' },
-    { icon:'⚡', label:'Nhanh' }, { icon:'🐢', label:'Chậm' },
-    { icon:'⚠️', label:'Lưu ý' }, { icon:'🔄', label:'Lặp' },
-  ];
-
-  function _showPopup(anchor, measureIdx, noteIdx, anno) {
-    _closePopup();
-    let selColor = anno?.color || 'yellow';
-    let selIcon  = anno?.icon  || '';
-    const ar  = anchor.getBoundingClientRect();
-    const pop = document.createElement('div');
-    pop.className = 'cc-popup';
-    pop.style.cssText = [
-      'position:fixed', `left:${ar.left + ar.width / 2}px`, `top:${ar.bottom + 8}px`,
-      'transform:translateX(-50%) translateY(10px)', 'z-index:99999',
-      'background:var(--bg-surface, #fff)', 'border:1px solid rgba(5,150,105,0.3)', 'border-radius:var(--radius, 12px)',
-      'padding:.8rem', 'box-shadow:var(--shadow, 0 8px 28px rgba(5,150,105,0.2))',
-      'min-width:240px', 'pointer-events:auto', 'opacity:0', 'transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease'
-    ].join(';');
-    
-    // Kích hoạt animation slide-up
-    setTimeout(() => {
-        pop.style.transform = 'translateX(-50%) translateY(0)';
-        pop.style.opacity = '1';
-    }, 10);
-
-    const colorBtns = _COLORS.map(c =>
-      `<button class="ano-color-btn ${selColor===c.id?'active':''}" data-color="${c.id}"
-               style="background:${c.hex}" title="${c.title}"></button>`
-    ).join('');
-    const iconBtns = _ICONS.map(ic =>
-      `<button class="ano-icon-btn ${selIcon===ic.icon?'active':''}" data-icon="${ic.icon}" title="${ic.label}">${ic.icon}</button>`
-    ).join('');
-
-    pop.innerHTML = `
-      <div style="font-size:.65rem;font-weight:700;color:#059669;text-transform:uppercase;margin-bottom:.35rem;">
-        ${anno ? 'Sửa' : 'Thêm'} Ghi chú
-      </div>
-      <div class="ano-color-row">${colorBtns}</div>
-      <div class="ano-icon-row">${iconBtns}
-        <button class="ano-icon-btn ${selIcon===''?'active':''}" data-icon="" title="Không icon">∅</button>
-      </div>
-      <input id="ac-pop-inp" type="text" maxlength="40"
-             placeholder="Ghi chú text..." value="${anno ? _escH(anno.text) : ''}"
-             style="width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:5px;
-                    padding:.3rem .55rem;font-size:.85rem;outline:none;margin-bottom:.4rem;">
-      <div style="display:flex;gap:.35rem;justify-content:flex-end;">
-        <button id="ac-pop-save" class="btn btn-primary btn-xs" style="background:#059669;border-color:#059669;">✓ Lưu</button>
-        ${anno ? '<button id="ac-pop-del" class="btn btn-danger btn-xs">🗑</button>' : ''}
-        <button id="ac-pop-cancel" class="btn btn-ghost btn-xs">✕</button>
-      </div>`;
-
-    document.body.appendChild(pop);
-    _popup = pop;
-
-    pop.querySelectorAll('.ano-color-btn').forEach(b => {
-      b.addEventListener('click', e => {
-        e.stopPropagation(); selColor = b.dataset.color;
-        pop.querySelectorAll('.ano-color-btn').forEach(x => x.classList.remove('active'));
-        b.classList.add('active');
-      });
-    });
-    pop.querySelectorAll('.ano-icon-btn').forEach(b => {
-      b.addEventListener('click', e => {
-        e.stopPropagation(); selIcon = b.dataset.icon;
-        pop.querySelectorAll('.ano-icon-btn').forEach(x => x.classList.remove('active'));
-        b.classList.add('active');
-      });
-    });
-
-    const inp = pop.querySelector('#ac-pop-inp');
-    setTimeout(() => { inp?.focus(); inp?.select(); }, 20);
-
-    const doSave = async () => {
-      const val = inp.value.trim();
-      _closePopup();
-      if (val) await _saveAnnotation(measureIdx, noteIdx, val, selColor, selIcon);
-      else if (anno) await _deleteAnnotation(measureIdx, noteIdx);
-    };
-
-    pop.querySelector('#ac-pop-save')?.addEventListener('click', doSave);
-    pop.querySelector('#ac-pop-del')?.addEventListener('click', () => { _closePopup(); _deleteAnnotation(measureIdx, noteIdx); });
-    pop.querySelector('#ac-pop-cancel')?.addEventListener('click', _closePopup);
-    inp?.addEventListener('keydown', e => {
-      if (e.key === 'Enter')  { e.stopPropagation(); doSave(); }
-      if (e.key === 'Escape') { e.stopPropagation(); _closePopup(); }
-    });
-
-    setTimeout(() => {
-      const outside = ev => {
-        if (!pop.contains(ev.target) && ev.target !== anchor) {
-          _closePopup();
-          document.removeEventListener('click', outside, true);
-        }
-      };
-      document.addEventListener('click', outside, true);
-    }, 80);
-  }
-
-  function _escH(str) { return String(str||'').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-  function _closePopup() { 
-      if (_popup) {
-          // Bỏ focus trước khi xoá DOM để tránh trình duyệt (đặc biệt là Safari/Chrome di động) tự nhảy trang lên top
-          const docActive = document.activeElement;
-          if (docActive && _popup.contains(docActive)) {
-              docActive.blur();
-          }
-          _popup.remove(); 
-          _popup = null; 
+        const data = await window.ApiService.annotations.load(id);
+        if (token !== generation || id !== current()) return;
+        accept(data);
+      } catch (e) { if (token === generation) error = e.message || 'Không tải được ghi chú.'; }
+      finally {
+        if (token === generation) { loading = false; pending = null; build(); }
       }
+    })();
+    pending = task;
+    return task;
   }
-
-  /* ─── Save / Delete ────────────────────────────────────── */
-  async function _saveAnnotation(measureIdx, noteIdx, text, color = 'yellow', icon = '') {
-    const songId = window.App?.getCurrentSongId?.();
-    if (!songId) return;
-    _notes[`${measureIdx}_${noteIdx}`] = { measureIdx, noteIdx, text, color, icon };
-    await _syncServer();
+  async function reload() {
+    if (saving || !songId) return;
+    ++generation; pending = null; loaded = false;
+    window.ApiService.annotations.clearCache(songId);
+    return ensureLoaded();
   }
-
-  async function _deleteAnnotation(measureIdx, noteIdx) {
-    const songId = window.App?.getCurrentSongId?.();
-    if (!songId) return;
-
-    delete _notes[`${measureIdx}_${noteIdx}`];
-    await _syncServer();
+  async function loadSong(id, force = false) {
+    clearSong(); songId = id || null; updatePanel();
+    if (force || window.AnnotationPanel?.isOpen() || (hasPreference && (selected === null || selected.length))) await ensureLoaded();
   }
-
-  async function _syncServer() {
-    const songId = window.App?.getCurrentSongId?.();
-    if (!songId) return;
-    
-    const arr = Object.values(_notes);
-    try {
-      await window.ApiService?.annotations?.save?.(songId, arr);
-      window.App?.showToast?.(`Đã lưu ghi chú`, 'success');
-    } catch(e) {
-      console.warn('Save annotation error:', e);
-      window.App?.showToast?.('Lỗi lưu ghi chú', 'error');
+  function clearSong() {
+    ++generation; songId = null; pending = null; notes = []; revision = '';
+    loaded = false; loading = false; editing = false; relocating = null; error = '';
+    fingerprint = ''; fingerprintXml = null; unplaced = [];
+    window.AnnotationPanel?.closeEditor(); clearDots(); updatePanel();
+  }
+  function setAddMode(on) {
+    if (on && !admin()) return;
+    editing = !!on; if (!on) relocating = null;
+    document.getElementById('btn-add-annotate-mode')?.classList.toggle('active', editing);
+    if (editing) {
+      window.ChordCanvas?.setAddMode?.(false);
+      ensureLoaded();
     }
-    _build();
+    build();
   }
-
-  return { init, onOSMDRendered, reposition, loadSong, clearSong, setAddMode, toggleAddMode };
+  function toggleAddMode() { setAddMode(!editing); }
+  function remember() {
+    hasPreference = true;
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(selected)); } catch (_) {}
+    build();
+  }
+  function filter(id, checked) {
+    const set = new Set(selected === null ? instruments.map(item => item.id) : selected);
+    if (checked) set.add(id); else set.delete(id);
+    selected = Array.from(set); remember();
+  }
+  function filterAll(all) { selected = all ? null : []; remember(); }
+  function clearDots() { document.querySelectorAll('.ano-dot,.ano-dot-btn').forEach(node => node.remove()); }
+  function currentFingerprint() {
+    const xml = window.Store?.get?.('originalXml');
+    if (xml !== fingerprintXml) { fingerprintXml = xml; fingerprint = window.AnnotationGeometry.fingerprint(xml); }
+    return fingerprint;
+  }
+  function build() {
+    clearDots();
+    const container = document.getElementById('osmd-container');
+    if (!container || !songId || !loaded || songId !== current()) { updatePanel(); return; }
+    const anchors = window.AnnotationGeometry.anchors().filter(anchor => container.contains(anchor.el));
+    const score = currentFingerprint(), mapped = new Set(), occupied = [];
+    const bounds = container.getBoundingClientRect();
+    anchors.forEach(anchor => {
+      const found = notes.filter(note => (!score || !note.scoreFingerprint || note.scoreFingerprint === score)
+        && window.AnnotationGeometry.matches(note, anchor));
+      found.forEach(note => mapped.add(note.id));
+      const visible = found.filter(note => selected === null || selected.includes(note.instrumentId));
+      if (visible.length) place(container, bounds, anchor, visible, occupied);
+      if (editing && admin()) place(container, bounds, anchor, null, occupied);
+    });
+    unplaced = notes.filter(note => !mapped.has(note.id)).map(note => note.id);
+    updatePanel();
+  }
+  function clickAfterTap(node, callback) {
+    let start = null, moved = false;
+    node.addEventListener('pointerdown', event => { start = { x: event.clientX, y: event.clientY }; moved = false; });
+    node.addEventListener('pointermove', event => {
+      if (start && Math.hypot(event.clientX - start.x, event.clientY - start.y) > 8) moved = true;
+    });
+    node.addEventListener('pointercancel', () => { moved = true; });
+    node.addEventListener('click', event => { event.stopPropagation(); if (!moved || event.detail === 0) callback(); });
+  }
+  function place(container, bounds, anchor, found, occupied) {
+    const rect = anchor.el.getBoundingClientRect();
+    const button = document.createElement('button'); button.type = 'button';
+    button.className = found ? 'ano-dot' : 'ano-dot-btn';
+    button.dataset.measureIdx = anchor.measureIdx; button.dataset.staffIdx = anchor.staffIdx; button.dataset.noteIdx = anchor.noteIdx;
+    if (found) {
+      const name = instruments.find(item => item.id === found[0].instrumentId)?.name || found[0].instrumentId;
+      button.textContent = found.length > 1 ? `${found.length} ghi chú · Ô ${anchor.measureIdx + 1}` : `${name} · ${found[0].text}`;
+      button.title = found.map(note => `${instruments.find(item => item.id === note.instrumentId)?.name || note.instrumentId}: ${note.text}`).join('\n');
+      clickAfterTap(button, () => window.AnnotationPanel.show());
+    } else {
+      button.textContent = '+'; button.setAttribute('aria-label', `Thêm ghi chú ô ${anchor.measureIdx + 1}, khuông ${anchor.staffIdx + 1}, vị trí ${anchor.noteIdx + 1}`);
+      clickAfterTap(button, () => openEditor({ ...(relocating || {}), ...anchor, el: undefined,
+        instrumentId: relocating?.instrumentId || instrumentId, scoreFingerprint: currentFingerprint() || undefined }));
+    }
+    container.append(button);
+    const width = button.offsetWidth, height = button.offsetHeight;
+    const left = Math.max(0, Math.min(bounds.width - width, rect.left - bounds.left));
+    let top = Math.max(0, rect.top - bounds.top - height - 5);
+    while (occupied.some(box => left < box.right && left + width > box.left && top < box.bottom && top + height > box.top)) top += height + 3;
+    button.style.left = `${left}px`; button.style.top = `${top}px`;
+    occupied.push({ left, right: left + width, top, bottom: top + height });
+  }
+  function openEditor(note) {
+    if (!admin() || !loaded || saving) return;
+    window.AnnotationPanel.editor(note);
+  }
+  async function save(note, remove) {
+    if (!admin() || !loaded || saving || songId !== current()) throw new Error('Chưa thể lưu. Hãy tải lại ghi chú.');
+    saving = true;
+    const token = generation, id = songId;
+    const next = notes.filter(item => item.id !== note.id);
+    if (!remove) {
+      const { el, ...record } = note;
+      next.push({ ...record, id: note.id || `note-${crypto.randomUUID()}` });
+    }
+    try {
+      const data = await window.ApiService.annotations.save(id, next, revision);
+      if (token !== generation || id !== current()) return;
+      accept(data); relocating = null; build();
+      window.App?.showToast?.('Đã lưu ghi chú', 'success');
+    } finally { saving = false; updatePanel(); }
+  }
+  async function createInstrument(name) {
+    if (!admin() || saving) throw new Error('Chưa thể sửa danh mục.');
+    const token = generation;
+    const data = await window.ApiService.annotations.saveInstrument({ name, registryRevision });
+    if (token !== generation) return;
+    instruments = data.instruments; registryRevision = data.registryRevision; build();
+  }
+  function reposition() { clearTimeout(renderTimer); renderTimer = setTimeout(build, 150); }
+  function onOSMDRendered() { reposition(); }
+  return { init, loadSong, clearSong, setAddMode, toggleAddMode, onOSMDRendered, reposition };
 })();
-
 window.AnnotationCanvas = AnnotationCanvas;
