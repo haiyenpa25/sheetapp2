@@ -30,7 +30,22 @@ try {
     annotationCheck(file_get_contents($dir . '/song-a.json') === $before, 'load does not rewrite legacy');
     $notes = $doc['annotations'];
     $notes[] = ['id' => 'drum-one', 'instrumentId' => 'drums', 'measureIdx' => 0, 'noteIdx' => 1, 'staffIdx' => 0, 'beat' => '1/4', 'text' => 'Fill', 'scoreFingerprint' => 'a0123456'];
+    $notes[1]['customColor'] = '#E11D48';
     $saved = AnnotationService::saveDocument('song-a', $notes, $doc['revision'], $dir);
+    annotationCheck(($saved['annotations'][1]['customColor'] ?? '') === '#e11d48', 'per-note hex color survives save and normalizes case');
+    foreach (['red', 'url(evil)', ['#123456'], 123] as $invalidColor) {
+        $badColor = $notes; $badColor[1]['customColor'] = $invalidColor;
+        annotationReject(fn() => AnnotationService::saveDocument('song-a', $badColor, $saved['revision'], $dir), 422, 'invalid custom note color rejected');
+    }
+    $colorDoc = AnnotationService::document('song-colors', $dir);
+    $plain = $notes; unset($plain[1]['customColor']);
+    $colorDoc = AnnotationService::saveDocument('song-colors', $plain, $colorDoc['revision'], $dir);
+    annotationCheck(!isset($colorDoc['annotations'][1]['customColor']), 'a default note inherits instrument color without frozen override');
+    $plain[1]['customColor'] = '#112233';
+    $colorDoc = AnnotationService::saveDocument('song-colors', $plain, $colorDoc['revision'], $dir);
+    unset($plain[1]['customColor']);
+    $colorDoc = AnnotationService::saveDocument('song-colors', $plain, $colorDoc['revision'], $dir);
+    annotationCheck(!isset($colorDoc['annotations'][1]['customColor']), 'reset removes the note color override');
     annotationCheck(count($saved['annotations']) === 2, 'two instruments share an anchor');
     annotationCheck($saved['revision'] !== $doc['revision'], 'save advances revision');
     annotationCheck(AnnotationService::document('song-a', $dir)['annotations'] === $saved['annotations'], 'round trip keeps stable IDs and anchors');

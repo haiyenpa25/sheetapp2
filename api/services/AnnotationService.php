@@ -107,6 +107,11 @@ class AnnotationService {
             $clean[$field] = $note[$field];
         }
         $clean['color'] = in_array($note['color'] ?? '', ['yellow', 'blue', 'red', 'green', 'purple'], true) ? $note['color'] : 'yellow';
+        $customColor = $note['customColor'] ?? null;
+        if ($customColor !== null && $customColor !== '') {
+            if (!is_string($customColor) || !preg_match('/^#[0-9a-fA-F]{6}$/D', $customColor)) throw new HttpException(422, 'Màu ghi chú không hợp lệ.');
+            $clean['customColor'] = strtolower($customColor);
+        }
         $clean['icon'] = is_string($note['icon'] ?? null) ? mb_substr($note['icon'], 0, 8) : '';
         return $clean;
     }
