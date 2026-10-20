@@ -17,7 +17,7 @@ test('PWA refreshes annotation code together and keeps offline music packages', 
   await page.evaluate(() => navigator.serviceWorker.ready);
   await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
   await page.reload();
-  await expect(page.getByRole('button', { name: 'Ghi chú nhạc cụ', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Nhạc cụ', exact: true })).toBeVisible();
   const result = await page.evaluate(async () => {
     const keys = await caches.keys();
     const app = keys.find(key => key.startsWith('sheetapp-app-v5-'));

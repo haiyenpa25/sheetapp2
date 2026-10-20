@@ -75,11 +75,14 @@ for (const classic of [false, true]) {
     await page.goto(`${base}/${classic ? 'old/' : ''}?song=${songId}&v=sheet`);
     await expect(page.locator('#osmd-container svg').first()).toBeVisible();
     await expect.poll(() => page.evaluate(() => Auth.isAdmin())).toBe(true);
-    await page.getByRole('button', { name: 'Ghi chú nhạc cụ', exact: true }).click();
+    await page.getByRole('button', { name: 'Nhạc cụ', exact: true }).click();
     await page.getByRole('button', { name: 'Chọn tất cả', exact: true }).click();
-    await page.getByRole('button', { name: 'Soạn ghi chú', exact: true }).click();
-    await expect(page.locator('.ano-dot-btn')).toHaveCount(await page.evaluate(() => AnnotationGeometry.anchors().length));
     await page.getByLabel('Nhạc cụ đang soạn').selectOption('drums');
+    await page.getByLabel('Màu nhạc cụ', { exact: true }).fill('#0e7490');
+    await page.getByRole('button', { name: 'Lưu màu nhạc cụ', exact: true }).click();
+    await expect(page.getByLabel('Màu nhạc cụ', { exact: true })).toHaveValue('#0e7490');
+    await page.getByRole('button', { name: 'Ghi chú', exact: true }).click();
+    await expect(page.locator('.ano-dot-btn')).toHaveCount(await page.evaluate(() => AnnotationGeometry.anchors().length));
     await page.locator('.ano-dot-btn').first().click();
     await page.getByLabel('Nội dung ghi chú').fill('Fill trước điệp khúc');
     await page.getByRole('button', { name: 'Lưu ghi chú', exact: true }).click();
@@ -88,15 +91,17 @@ for (const classic of [false, true]) {
     const doc = await document();
     expect(doc.annotations[0]).toMatchObject({ instrumentId: 'drums', text: 'Fill trước điệp khúc', measureIdx: 0, staffIdx: 0 });
     expect(doc.annotations[0].scoreFingerprint).toMatch(/^[a-f0-9]{8}$/);
+    expect(doc.instruments.find(item => item.id === 'drums').color).toBe('#0e7490');
     expect(doc.annotations[0].beat).toMatch(/^\d+\/\d+$/);
     await page.reload();
     await expect(page.locator('#osmd-container svg').first()).toBeVisible();
     await expect(page.locator('.ano-dot')).toHaveCount(1);
-    await page.getByRole('button', { name: 'Ghi chú nhạc cụ', exact: true }).click();
+    await page.getByRole('button', { name: 'Nhạc cụ', exact: true }).click();
     await expect(page.locator('[data-annotation-id]')).toContainText('Fill trước điệp khúc');
     for (const width of [1366, 820, 390, 360]) {
       await page.setViewportSize({ width, height: 844 });
       await expect(page.locator('.ano-dot')).toHaveCount(1);
+      await expect(page.locator('#toolbar #instrument-annotations > button')).toBeInViewport();
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
     }
     expect(errors).toEqual([]);
@@ -123,6 +128,13 @@ for (const classic of [false, true]) {
         const collisions = await page.evaluate(() => {
         const overlap = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
         const dots = Array.from(document.querySelectorAll('.ano-dot'));
+        const anchors = AnnotationGeometry.anchors(), bounds = document.getElementById('osmd-container').getBoundingClientRect();
+        for (const dot of dots) {
+          const anchor = anchors.find(a => a.measureIdx === +dot.dataset.measureIdx && a.staffIdx === +dot.dataset.staffIdx && a.noteIdx === +dot.dataset.noteIdx);
+          if (dot.getBoundingClientRect().bottom > bounds.top + AnnotationGeometry.chordTop(anchor, bounds) + 1) return [{ misplaced: dot.title }];
+          const previous = anchors.filter(a => a.measureIdx === anchor.measureIdx && a.staffIdx < anchor.staffIdx);
+          if (previous.some(a => dot.getBoundingClientRect().top < a.el.getBoundingClientRect().bottom)) return [{ wrongStaff: dot.title }];
+        }
         const text = Array.from(document.querySelectorAll('#osmd-container svg text,.cc-custom-chord-text')).filter(node => {
           const style = getComputedStyle(node);
           return style.opacity !== '0' && style.visibility !== 'hidden' && style.display !== 'none' && style.fill !== 'rgba(0, 0, 0, 0)';
