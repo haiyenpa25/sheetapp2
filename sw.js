@@ -11,9 +11,9 @@
 
 const urlParams      = new URLSearchParams(self.location.search);
 const SW_VERSION     = urlParams.get('v') || 'v5';
-const SW_MANIFEST_HASH = '5b7e85888d';
+const SW_MANIFEST_HASH = '72d0684991';
 const CACHE_VENDOR   = `sheetapp-vendor-${SW_VERSION}`;
-const CACHE_APP      = `sheetapp-app-${SW_VERSION}`;
+const CACHE_APP      = `sheetapp-app-${SW_VERSION}-${SW_MANIFEST_HASH}`;
 const CACHE_MUSICXML = `sheetapp-musicxml-${SW_VERSION}`;
 const MAX_MUSICXML_CACHE_ITEMS = 60; // Giới hạn cache tránh phình dung lượng vô hạn
 
@@ -38,6 +38,7 @@ const PRECACHE_APP = [
   '/assets/css/layout.css',
   '/assets/css/sheet.css',
   '/assets/css/components.css',
+  '/assets/css/instrument-annotations.css',
   '/assets/css/fab.css',
   '/assets/css/app-shell.css',
   '/assets/js/core/ScriptLoader.js',
@@ -63,6 +64,9 @@ const PRECACHE_APP = [
   '/assets/js/chord-canvas-ui.js',
   '/assets/js/chord-canvas-dots.js',
   '/assets/js/chord-canvas.js',
+  '/assets/js/annotation-geometry.js',
+  '/assets/js/annotation-panel.js',
+  '/assets/js/annotation-canvas.js',
   '/assets/js/song-info-bar.js',
   '/assets/js/song-loader.js',
   '/assets/js/library-gestures.js',
