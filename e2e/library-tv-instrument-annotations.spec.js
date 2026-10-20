@@ -11,7 +11,8 @@ const notes = [
   { id: 'd2', instrumentId: 'drums', measureIdx: 0, staffIdx: 1, noteIdx: 0, text: 'Điệu 6/8' }
 ];
 async function setup(page, admin = false) {
-  await page.goto('http://localhost/sheetapp2-roadmap6-oct19-061901/robots.txt');
+  await page.route('https://annotations.test/**', route => route.fulfill({ contentType: 'text/html', body: '<!doctype html>' }));
+  await page.goto('https://annotations.test/');
   await page.evaluate(() => localStorage.removeItem('sheetapp_annotation_layers'));
   await page.setContent('<main id="sheet-viewer-wrapper"><div id="sheet-area"><div id="osmd-container" style="position:relative"><svg width="500" height="140"><g id="n1"><rect x="60" y="40" width="10" height="10"/></g></svg><svg width="500" height="140"><g id="n2"><rect x="90" y="40" width="10" height="10"/></g></svg></div></div></main><button id="btn-add-annotate-mode"></button>');
   await page.addStyleTag({ path: path.join(root, 'assets/css/instrument-annotations.css') });
@@ -230,4 +231,30 @@ test('conflict reload preserves the draft and saves it alongside newer notes', a
   const result = await page.evaluate(() => saved.at(-1));
   expect(result.revision).toBe('r-new');
   expect(result.list.map(n => n.text)).toEqual(['Phiên mới', 'Bản nháp đang soạn']);
+});
+
+test('API client sends revisions and refreshes cached registries after adding an instrument', async ({ page }) => {
+  await setup(page);
+  let reads = 0, payload;
+  await page.route('**/api/index.php?route=annotations*', async route => {
+    if (route.request().method() === 'GET') {
+      reads++;
+      await route.fulfill({ json: { annotations: [], instruments: [{ id: 'new', name: `Version ${reads}` }], revision: 'r1' } });
+    } else {
+      payload = route.request().postDataJSON();
+      await route.fulfill({ json: { instruments: [{ id: 'new', name: 'New' }], registryRevision: 'i2', annotations: [], revision: 'r2' } });
+    }
+  });
+  await page.addScriptTag({ path: path.join(root, 'assets/js/core/ApiService.js') });
+  await page.evaluate(async () => { await ApiService.annotations.load('transport'); await ApiService.annotations.load('transport'); });
+  expect(reads).toBe(1);
+  await page.evaluate(() => ApiService.annotations.save('transport', [], 'expected-revision'));
+  expect(payload.revision).toBe('expected-revision');
+  await page.evaluate(async () => {
+    await ApiService.annotations.load('transport');
+    await ApiService.annotations.saveInstrument({ name: 'Violin', registryRevision: 'i1' });
+    await ApiService.annotations.load('transport');
+  });
+  expect(reads).toBe(3);
+  expect(payload).toMatchObject({ action: 'instrument_save', name: 'Violin', registryRevision: 'i1' });
 });

@@ -11,7 +11,7 @@ class AnnotationController {
         if ($method === 'GET') {
             $action = $_GET['action'] ?? '';
             if ($action === 'instruments') { Response::ok(AnnotationService::instruments()); return; }
-            $songId = trim($_GET['songId'] ?? '');
+            $songId = $this->songId($_GET['songId'] ?? '');
 
             if (!$songId) { Response::error('Thiếu songId'); return; }
 
@@ -24,7 +24,7 @@ class AnnotationController {
         } elseif ($method === 'POST') {
             Auth::requireAdmin();
             $body = json_decode(file_get_contents('php://input'), true);
-            if (!$body) { Response::error('Body không hợp lệ'); return; }
+            if (!is_array($body)) { Response::error('Body không hợp lệ', 422); return; }
 
             $action = $body['action'] ?? '';
             if ($action === 'instrument_save') {
@@ -34,7 +34,7 @@ class AnnotationController {
                 Response::ok(AnnotationService::saveInstrument($body['instrumentId'] ?? '', $body['name'], $body['registryRevision']));
                 return;
             }
-            $songId = trim($body['songId'] ?? '');
+            $songId = $this->songId($body['songId'] ?? '');
 
             if (!$songId) { Response::error('Thiếu songId'); return; }
 
@@ -50,5 +50,10 @@ class AnnotationController {
         } else {
             Response::methodNotAllowed();
         }
+    }
+
+    private function songId(mixed $value): string {
+        if (!is_string($value)) throw new HttpException(422, 'Mã bài không hợp lệ.');
+        return trim($value);
     }
 }

@@ -3,10 +3,11 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/api/core/HttpException.php';
 require_once dirname(__DIR__) . '/api/services/AnnotationService.php';
 $total = 0;
-function annotationCheck(bool $ok, string $label): void {
+function annotationCheck(bool $ok, string $label, bool $behavioral = true): void {
     global $total;
     ++$total;
-    echo ($ok ? '[PASS:B] ' : '[FAIL:B] ') . $label . "\n";
+    $kind = $behavioral ? 'B' : 'S';
+    echo ($ok ? "[PASS:{$kind}] " : "[FAIL:{$kind}] ") . $label . "\n";
     if (!$ok) throw new RuntimeException($label);
 }
 function annotationReject(callable $call, int $status, string $label): void {
@@ -16,7 +17,7 @@ function annotationReject(callable $call, int $status, string $label): void {
 $dir = sys_get_temp_dir() . '/sheetapp-annotations-' . bin2hex(random_bytes(6));
 mkdir($dir);
 try {
-    annotationCheck(method_exists(AnnotationService::class, 'document'), 'versioned document API exists');
+    annotationCheck(method_exists(AnnotationService::class, 'document'), 'versioned document API exists', false);
     $empty = AnnotationService::document('song-a', $dir);
     annotationCheck($empty['annotations'] === [] && is_string($empty['revision']), 'empty document has revision');
     $legacy = [['measureIdx' => 0, 'noteIdx' => 1, 'text' => 'Nhẹ', 'color' => 'blue', 'icon' => '🎹']];

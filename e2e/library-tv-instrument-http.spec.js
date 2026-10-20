@@ -56,6 +56,14 @@ test('HTTP keeps admin writes, guest/member read access and revision conflicts',
   expect((await member.post(endpoint(), { data: create })).status()).toBe(403);
   const added = await admin.post(endpoint(), { data: create }); expect(added.status()).toBe(200);
   expect((await added.json()).instruments.some(item => item.name === create.name)).toBe(true);
+  expect((await admin.get(`${endpoint()}&action=load&songId[]=bad`)).status()).toBe(422);
+  expect((await admin.post(endpoint(), { data: { action: 'save', songId: [], annotations: [], revision: '' } })).status()).toBe(422);
+  const fresh = await document();
+  const writes = await Promise.all(['race-a', 'race-b'].map(id => admin.post(endpoint(), { data: {
+    action: 'save', songId, revision: fresh.revision, annotations: [{ ...note, id }]
+  } })));
+  expect(writes.map(response => response.status()).sort()).toEqual([200, 409]);
+  expect((await document()).annotations).toHaveLength(1);
 });
 
 for (const classic of [false, true]) {

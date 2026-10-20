@@ -218,7 +218,9 @@ const ApiService = (() => {
       _annotationsCache.delete(songId); _annotationsInFlight.delete(songId);
       return _json('POST', 'api/index.php?route=annotations', { action:'save', songId, annotations: list, revision });
     },
-    saveInstrument: (data) => _json('POST', 'api/index.php?route=annotations', { action: 'instrument_save', ...data }),
+    saveInstrument: (data) => _json('POST', 'api/index.php?route=annotations', { action: 'instrument_save', ...data }).then(result => {
+      _annotationsCache.clear(); _annotationsInFlight.clear(); return result;
+    }),
     clearCache: (songId) => {
       if (songId) { _annotationsCache.delete(songId); _annotationsInFlight.delete(songId); }
       else { _annotationsCache.clear(); _annotationsInFlight.clear(); }
