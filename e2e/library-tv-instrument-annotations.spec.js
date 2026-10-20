@@ -258,3 +258,11 @@ test('API client sends revisions and refreshes cached registries after adding an
   expect(reads).toBe(3);
   expect(payload).toMatchObject({ action: 'instrument_save', name: 'Violin', registryRevision: 'i1' });
 });
+
+test('a compact sheet badge opens and focuses its full note', async ({ page }) => {
+  await setup(page);
+  await page.getByRole('button', { name: 'Ghi chú nhạc cụ', exact: true }).click();
+  await page.locator('.ano-dot').last().click();
+  await expect(page.locator('#annotation-panel-body')).toBeVisible();
+  await expect(page.locator('[data-annotation-id="d2"]')).toBeFocused();
+});

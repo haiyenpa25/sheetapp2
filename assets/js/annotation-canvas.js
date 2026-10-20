@@ -160,7 +160,7 @@ const AnnotationCanvas = (() => {
       button.textContent = found.length > 1 ? `${found.length} ghi chú · Ô ${anchor.measureIdx + 1}` : `${name} · ${found[0].text}`;
       button.title = found.map(note => `${instruments.find(item => item.id === note.instrumentId)?.name || note.instrumentId}: ${note.text}`).join('\n');
       button.setAttribute('aria-label', `${button.title} · Ô ${anchor.measureIdx + 1}, khuông ${anchor.staffIdx + 1}. Mở bảng ghi chú`);
-      clickAfterTap(button, () => window.AnnotationPanel.show());
+      clickAfterTap(button, () => window.AnnotationPanel.show(found[0].id));
     } else {
       button.textContent = '+'; button.setAttribute('aria-label', `Thêm ghi chú ô ${anchor.measureIdx + 1}, khuông ${anchor.staffIdx + 1}, vị trí ${anchor.noteIdx + 1}`);
       clickAfterTap(button, () => openEditor({ ...(relocating || {}), ...anchor, el: undefined,

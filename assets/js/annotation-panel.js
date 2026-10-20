@@ -25,16 +25,20 @@ window.AnnotationPanel = (() => {
     body = element('div'); body.id = 'annotation-panel-body'; body.hidden = true; root.append(body);
     document.getElementById('sheet-area')?.before(root);
   }
-  function show() {
+  function show(noteId) {
     open = true; body.hidden = false;
     root.firstElementChild.setAttribute('aria-expanded', 'true'); actions.activate();
+    if (noteId) window.requestAnimationFrame(() => {
+      const item = Array.from(body.querySelectorAll('[data-annotation-id]')).find(node => node.dataset.annotationId === noteId);
+      if (item) { item.tabIndex = -1; item.scrollIntoView({ block: 'center' }); item.focus({ preventScroll: true }); }
+    });
   }
   function render(next) {
     if (!root) return;
     state = next; root.hidden = !state.songId;
     const focusKey = body.contains(document.activeElement) ? document.activeElement.dataset.focusKey : '';
     body.replaceChildren();
-    const status = element('p', state.error || (state.loading ? 'Đang tải ghi chú…' : 'Chọn lớp ghi chú muốn xem.'));
+    const status = element('p', state.error || (state.loading ? 'Đang tải ghi chú…' : 'Chọn lớp ghi chú muốn xem. Khi thiếu chỗ, nhãn trên sheet thu gọn thành ✎; chạm để đọc đầy đủ.'));
     status.setAttribute('role', state.error ? 'alert' : 'status'); body.append(status);
     button(state.error ? 'Thử tải lại' : 'Tải lại ghi chú', () => actions.reload(), body);
     if (!state.loaded) return;
@@ -94,7 +98,7 @@ window.AnnotationPanel = (() => {
   function closeEditor() {
     if (!dialog) return;
     dialog.close(); dialog.remove(); dialog = null;
-    if (opener?.isConnected) opener.focus({ preventScroll: true });
+    (opener?.isConnected ? opener : root?.firstElementChild)?.focus({ preventScroll: true });
   }
   function editor(note) {
     closeEditor(); opener = document.activeElement;
