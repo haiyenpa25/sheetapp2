@@ -40,6 +40,13 @@ const AnnotationCanvas = (() => {
     const container = document.getElementById('osmd-container');
     if (container) {
       observer = new ResizeObserver(reposition); observer.observe(container);
+      // Classic can finish its chord overlay after OSMD's ready callback.
+      const chordObserver = new window.MutationObserver(records => {
+        if (records.some(record => record.target.closest?.('.cc-note-dot,.cc-dot') ||
+          Array.from(record.addedNodes).concat(Array.from(record.removedNodes)).some(node =>
+            node.nodeType === 1 && (node.matches?.('.cc-note-dot,.cc-dot') || node.querySelector?.('.cc-note-dot,.cc-dot'))))) reposition();
+      });
+      chordObserver.observe(container, { childList: true, subtree: true });
     }
     updatePanel();
   }
@@ -122,6 +129,7 @@ const AnnotationCanvas = (() => {
     clearDots();
     const container = document.getElementById('osmd-container');
     if (!container || !songId || !loaded || songId !== current()) { updatePanel(); return; }
+    if (!notes.length && !editing) { unplaced = []; updatePanel(); return; }
     const anchors = window.AnnotationGeometry.anchors().filter(anchor => container.contains(anchor.el));
     const score = currentFingerprint(), mapped = new Set(), occupied = [];
     const bounds = container.getBoundingClientRect();

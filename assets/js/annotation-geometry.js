@@ -42,7 +42,7 @@ window.AnnotationGeometry = (() => {
     return (hash >>> 0).toString(16).padStart(8, '0');
   }
   function obstacles(container, bounds) {
-    return Array.from(container.querySelectorAll('svg text,svg path,svg line,svg rect,svg ellipse,.cc-note-dot'))
+    return Array.from(container.querySelectorAll('svg text,svg path,svg line,svg rect,svg ellipse,.cc-note-dot,.cc-dot'))
       .filter(node => {
         const style = window.getComputedStyle(node);
         if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false;

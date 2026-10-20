@@ -6,7 +6,7 @@ const base = process.env.SHEETAPP_TV_TEST_URL;
 const isolated = process.env.SHEETAPP_TV_ISOLATED_ROOT;
 test.skip(!base || !isolated, 'Requires an explicit isolated Apache clone');
 test.describe.configure({ mode: 'serial' });
-let admin, member, session, backup;
+let admin, peer, member, session, backup;
 const songId = 'thanh-ca-001';
 const endpoint = () => `${base}/api/index.php?route=annotations`;
 test.beforeAll(async () => {
@@ -19,6 +19,7 @@ test.beforeAll(async () => {
     { cwd: isolated, env: { ...process.env, SHEETAPP_E2E: '1' }, encoding: 'utf8' }).trim();
   session = sid('admin');
   admin = await api.newContext({ extraHTTPHeaders: { Cookie: `PHPSESSID=${session}`, Origin: new URL(base).origin } });
+  peer = await api.newContext({ extraHTTPHeaders: { Cookie: `PHPSESSID=${sid('admin')}`, Origin: new URL(base).origin } });
   member = await api.newContext({ extraHTTPHeaders: { Cookie: `PHPSESSID=${sid('banhat')}`, Origin: new URL(base).origin } });
   backup = new Map([`${songId}.json`, `${songId}.json.lock`, '.instruments.json', '.instruments.json.lock'].map(name => {
     const file = path.join(isolated, 'storage/data/annotations', name);
@@ -26,7 +27,7 @@ test.beforeAll(async () => {
   }));
 });
 test.afterAll(async () => {
-  await admin?.dispose(); await member?.dispose();
+  await admin?.dispose(); await peer?.dispose(); await member?.dispose();
   for (const [file, bytes] of backup || []) {
     if (bytes !== null) fs.writeFileSync(file, bytes);
     else if (fs.existsSync(file)) fs.unlinkSync(file);
@@ -59,7 +60,7 @@ test('HTTP keeps admin writes, guest/member read access and revision conflicts',
   expect((await admin.get(`${endpoint()}&action=load&songId[]=bad`)).status()).toBe(422);
   expect((await admin.post(endpoint(), { data: { action: 'save', songId: [], annotations: [], revision: '' } })).status()).toBe(422);
   const fresh = await document();
-  const writes = await Promise.all(['race-a', 'race-b'].map(id => admin.post(endpoint(), { data: {
+  const writes = await Promise.all(['race-a', 'race-b'].map((id, index) => (index ? peer : admin).post(endpoint(), { data: {
     action: 'save', songId, revision: fresh.revision, annotations: [{ ...note, id }]
   } })));
   expect(writes.map(response => response.status()).sort()).toEqual([200, 409]);
@@ -77,6 +78,7 @@ for (const classic of [false, true]) {
     await page.getByRole('button', { name: 'Ghi chú nhạc cụ', exact: true }).click();
     await page.getByRole('button', { name: 'Chọn tất cả', exact: true }).click();
     await page.getByRole('button', { name: 'Soạn ghi chú', exact: true }).click();
+    await expect(page.locator('.ano-dot-btn')).toHaveCount(await page.evaluate(() => AnnotationGeometry.anchors().length));
     await page.getByLabel('Nhạc cụ đang soạn').selectOption('drums');
     await page.locator('.ano-dot-btn').first().click();
     await page.getByLabel('Nội dung ghi chú').fill('Fill trước điệp khúc');
@@ -98,5 +100,43 @@ for (const classic of [false, true]) {
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
     }
     expect(errors).toEqual([]);
+  });
+
+  test(`${classic ? 'Classic' : 'Modern'} dense notes stay readable at four screen widths`, async ({ page }) => {
+    await page.goto(`${base}/${classic ? 'old/' : ''}?song=${songId}&v=sheet`);
+    await expect(page.locator('#osmd-container svg').first()).toBeVisible();
+    await page.evaluate(async () => {
+      const anchors = AnnotationGeometry.anchors();
+      const doc = await ApiService.annotations.load('thanh-ca-001');
+      ApiService.annotations.load = async () => ({ ...doc, annotations: anchors.slice(0, 6).map((anchor, index) => ({
+        id: `preview-${index}`, instrumentId: index % 2 ? 'guitar' : 'drums', measureIdx: anchor.measureIdx,
+        staffIdx: anchor.staffIdx, noteIdx: anchor.noteIdx, beat: anchor.beat,
+        text: index % 2 ? 'Rải nhẹ, điệp khúc quạt' : 'Fill vào điệp khúc'
+      })) });
+      await AnnotationCanvas.loadSong('thanh-ca-001', true);
+    });
+    for (const width of [1366, 820, 390, 360]) {
+      await page.setViewportSize({ width, height: 844 });
+      await page.waitForTimeout(600);
+      await expect(page.locator('.ano-dot')).toHaveCount(6);
+      await expect(async () => {
+        const collisions = await page.evaluate(() => {
+        const overlap = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+        const dots = Array.from(document.querySelectorAll('.ano-dot'));
+        const text = Array.from(document.querySelectorAll('#osmd-container svg text,.cc-custom-chord-text')).filter(node => {
+          const style = getComputedStyle(node);
+          return style.opacity !== '0' && style.visibility !== 'hidden' && style.display !== 'none' && style.fill !== 'rgba(0, 0, 0, 0)';
+        });
+        return dots.flatMap((node, index) => {
+          const rect = node.getBoundingClientRect();
+          const hit = text.find(other => overlap(rect, other.getBoundingClientRect()));
+          const dot = dots.slice(index + 1).find(other => overlap(rect, other.getBoundingClientRect()));
+          return hit || dot ? [{ note: node.title, obstacle: (hit || dot).textContent, rect: rect.toJSON(), other: (hit || dot).getBoundingClientRect().toJSON() }] : [];
+        });
+        });
+        expect(collisions).toEqual([]);
+      }).toPass({ timeout: 5000 });
+      await page.screenshot({ path: `test-results/instrument-annotations/${classic ? 'classic' : 'modern'}-${width}.png` });
+    }
   });
 }
