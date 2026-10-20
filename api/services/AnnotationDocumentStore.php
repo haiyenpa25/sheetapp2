@@ -7,7 +7,9 @@ final class AnnotationDocumentStore {
     public function __construct(private string $directory) {}
 
     public function read(string $key, array $fallback = []): array {
-        return $this->locked($key, LOCK_SH, fn(string $path) => $this->decode($path, $fallback));
+        // Writers replace complete files atomically. A read sees an old or new snapshot
+        // without creating lock files for arbitrary anonymous song IDs.
+        return $this->decode($this->directory . '/' . $key . '.json', $fallback);
     }
 
     public function write(string $key, string $revision, callable $update, array $fallback = []): array {

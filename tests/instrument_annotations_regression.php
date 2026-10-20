@@ -20,6 +20,7 @@ try {
     annotationCheck(method_exists(AnnotationService::class, 'document'), 'versioned document API exists', false);
     $empty = AnnotationService::document('song-a', $dir);
     annotationCheck($empty['annotations'] === [] && is_string($empty['revision']), 'empty document has revision');
+    annotationCheck(count(scandir($dir)) === 2, 'reading an unknown song creates no storage files');
     $legacy = [['measureIdx' => 0, 'noteIdx' => 1, 'text' => 'Nhẹ', 'color' => 'blue', 'icon' => '🎹']];
     file_put_contents($dir . '/song-a.json', json_encode($legacy));
     $before = file_get_contents($dir . '/song-a.json');
