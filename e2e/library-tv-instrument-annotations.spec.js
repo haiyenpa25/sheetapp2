@@ -292,7 +292,7 @@ test('instrument editor preserves legacy color metadata and icon authoring', asy
   expect(await page.evaluate(() => saved.at(-1).list.find(note => note.id === 'g1'))).toMatchObject({ color: 'blue', icon: '🎹' });
   if (!await page.locator('#annotation-panel-body').isVisible()) await page.getByRole('button', { name: 'Nhạc cụ', exact: true }).click();
   await page.locator('[data-annotation-id="g1"] [data-action="edit"]').click();
-  await expect(page.getByLabel('Màu ghi chú', { exact: true })).toHaveCount(0);
+  await expect(page.getByLabel('Màu ghi chú', { exact: true })).toHaveValue('#15803d');
   await expect(page.getByLabel('Biểu tượng ghi chú', { exact: true })).toHaveValue('🎹');
 });
 
@@ -362,4 +362,43 @@ test('a pending instrument color survives sheet redraws and save errors', async 
   await page.getByRole('button', { name: 'Lưu màu nhạc cụ', exact: true }).click();
   await expect(page.locator('#annotation-panel-body p[role=alert]')).toHaveCount(0);
   await expect(page.getByLabel('Màu nhạc cụ', { exact: true })).toHaveValue('#123456');
+});
+
+
+test('editor saves a custom note color and leaves other notes unchanged', async ({ page }) => {
+  await setup(page, true);
+  await page.locator('[data-annotation-id="g1"] [data-action="edit"]').click();
+  await expect(page.getByLabel('Màu ghi chú', { exact: true })).toHaveValue('#15803d');
+  await page.getByRole('button', { name: 'Màu đỏ', exact: true }).click();
+  await expect(page.getByLabel('Màu ghi chú', { exact: true })).toHaveValue('#e11d48');
+  await page.getByRole('button', { name: 'Lưu ghi chú', exact: true }).click();
+  await expect(page.locator('.ano-dot[data-note-id=g1]')).toHaveCSS('border-left-color', 'rgb(225, 29, 72)');
+  const result = await page.evaluate(() => saved.at(-1).list);
+  expect(result.find(note => note.id === 'g1').customColor).toBe('#e11d48');
+  expect(result.find(note => note.id === 'd1').customColor).toBeUndefined();
+  expect(result.find(note => note.id === 'g1').color).toBe('blue');
+});
+
+test('custom note color survives a failed save and can return to instrument color', async ({ page }) => {
+  await setup(page, true);
+  await page.locator('[data-annotation-id="g1"] [data-action="edit"]').click();
+  await page.getByLabel('Màu ghi chú', { exact: true }).evaluate(input => { input.value = '#123456'; input.dispatchEvent(new Event('input', { bubbles: true })); });
+  await page.getByLabel('Nhạc cụ', { exact: true }).selectOption('drums');
+  await expect(page.getByLabel('Màu ghi chú', { exact: true })).toHaveValue('#123456');
+  await page.evaluate(() => { failSave = true; });
+  await page.getByRole('button', { name: 'Lưu ghi chú', exact: true }).click();
+  await expect(page.getByRole('dialog').getByRole('alert')).toContainText('Mất mạng');
+  await expect(page.getByLabel('Màu ghi chú', { exact: true })).toHaveValue('#123456');
+  await page.getByRole('button', { name: 'Theo màu nhạc cụ', exact: true }).click();
+  await expect(page.getByLabel('Màu ghi chú', { exact: true })).toHaveValue('#c2410c');
+  await page.evaluate(() => { failSave = false; });
+  await page.getByRole('button', { name: 'Lưu ghi chú', exact: true }).click();
+  expect(await page.evaluate(() => saved.at(-1).list.find(note => note.id === 'g1').customColor)).toBeUndefined();
+  await expect(page.locator('.ano-dot[data-note-id=g1]')).toHaveCSS('border-left-color', 'rgb(194, 65, 12)');
+});
+
+test('starting note authoring remembers visible layers for reload and interface switching', async ({ page }) => {
+  await setup(page, true);
+  await page.getByRole('button', { name: 'Ghi chú', exact: true }).click();
+  expect(await page.evaluate(() => localStorage.getItem('sheetapp_annotation_layers'))).toBe('null');
 });

@@ -114,7 +114,8 @@ const AnnotationCanvas = (() => {
     document.getElementById('btn-add-annotate-mode')?.classList.toggle('active', editing);
     if (editing) {
       window.ChordCanvas?.setAddMode?.(false);
-      if (selected !== null && !selected.includes(instrumentId)) { selected.push(instrumentId); remember(); }
+      if (selected !== null && !selected.includes(instrumentId)) selected.push(instrumentId);
+      remember();
       ensureLoaded();
     }
     build();
@@ -176,7 +177,7 @@ const AnnotationCanvas = (() => {
       const name = instruments.find(item => item.id === found[0].instrumentId)?.name || found[0].instrumentId;
       button.textContent = found.length > 1 ? `${found.length} ghi chú · Ô ${anchor.measureIdx + 1}` : `${found[0].icon || ''} ${name} · ${found[0].text}`.trim();
       button.dataset.instrumentId = found[0].instrumentId;
-      button.dataset.noteId = found[0].id; window.AnnotationPanel.decorate(button, found[0].instrumentId);
+      button.dataset.noteId = found[0].id; window.AnnotationPanel.decorate(button, found[0].instrumentId, found[0].customColor);
       button.title = found.map(note => `${instruments.find(item => item.id === note.instrumentId)?.name || note.instrumentId}: ${note.text}`).join('\n');
       button.setAttribute('aria-label', `${button.title} · Ô ${anchor.measureIdx + 1}, khuông ${anchor.staffIdx + 1}. Mở bảng ghi chú`);
       clickAfterTap(button, () => editing && admin() ? openEditor(found[0], button) : window.AnnotationPanel.show(found[0].id));

@@ -63,3 +63,15 @@
   #toolbar.unified-toolbar:has(> .instrument-annotations) > #toolbar-controls { order: 4; flex: 1 0 100%; width: 100%; }
   #toolbar .instrument-annotations > button { min-width: 68px; padding-inline: .5rem; }
 }
+
+/* Per-note colors override the instrument default without changing other notes. */
+.ano-dot { border-color: var(--annotation-color, var(--instrument-color, #64748b)); background: color-mix(in srgb, var(--annotation-color, #64748b) 12%, white); }
+.ano-detail-list li { border-left-color: var(--annotation-color, var(--instrument-color, #64748b)); }
+.ano-editor { border-top-color: var(--annotation-color, var(--instrument-color, #64748b)); }
+.ano-note-colors { border: 1px solid var(--border, #aaa); border-radius: 5px; margin: .75rem 0; padding: .5rem; }
+.ano-note-colors input[type=color] { width: 52px; height: 36px; padding: .15rem; cursor: pointer; }
+.ano-note-colors label { display: flex; align-items: center; gap: .5rem; margin: .3rem 0; }
+.ano-color-options { display: flex; flex-wrap: wrap; gap: .35rem; margin: .5rem 0; }
+.ano-color-swatch::before { content: ''; display: inline-block; width: .8rem; height: .8rem; margin-right: .3rem; vertical-align: middle; background: var(--swatch-color); border: 1px solid #0005; border-radius: 50%; }
+.ano-color-swatch[aria-pressed=true] { outline: 2px solid var(--swatch-color); outline-offset: 1px; }
+.ano-note-colors p { margin: .4rem 0; font-size: .85rem; }

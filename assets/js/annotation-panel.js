@@ -15,7 +15,10 @@ window.AnnotationPanel = (() => {
     const color = state?.instruments.find(item => item.id === id)?.color;
     return /^#[0-9a-f]{6}$/i.test(color || '') ? color : COLORS[id] || '#0e7490';
   }
-  function decorate(node, id) { node.style.setProperty('--instrument-color', colorFor(id)); }
+  function decorate(node, id, customColor) {
+    node.style.setProperty('--instrument-color', colorFor(id));
+    node.style.setProperty('--annotation-color', /^#[0-9a-f]{6}$/i.test(customColor || '') ? customColor : colorFor(id));
+  }
   function placeMenu() {
     const rect = root.getBoundingClientRect();
     body.style.left = `${Math.max(8, Math.min(rect.left, window.innerWidth - Math.min(420, window.innerWidth - 16) - 8))}px`;
@@ -102,6 +105,28 @@ window.AnnotationPanel = (() => {
     options.forEach(item => { const option = element('option', item.name); option.value = item.id; select.append(option); });
     select.value = value; label.append(select); return { label, select };
   }
+  function noteColors(note, instrument, parent) {
+    let customColor = note.customColor || '';
+    const field = element('fieldset', undefined, 'ano-note-colors'); field.append(element('legend', 'Màu ghi chú'));
+    const label = element('label', 'Màu tùy chọn'), input = element('input'); input.type = 'color';
+    input.setAttribute('aria-label', 'Màu ghi chú'); label.append(input); field.append(label);
+    const options = element('div', undefined, 'ano-color-options'); field.append(options);
+    const status = element('p'); status.setAttribute('role', 'status'); field.append(status);
+    const refresh = () => {
+      input.value = customColor || colorFor(instrument.value); decorate(parent, instrument.value, customColor);
+      status.textContent = customColor ? 'Màu riêng cho ghi chú này' : 'Đang dùng màu nhạc cụ';
+      options.querySelectorAll('[data-swatch]').forEach(node => node.setAttribute('aria-pressed', String(node.dataset.swatch === customColor)));
+    };
+    const palette = [['#e11d48', 'đỏ'], ['#c2410c', 'cam'], ['#ca8a04', 'vàng'], ['#15803d', 'xanh lá'], ['#1d4ed8', 'xanh dương'], ['#7e22ce', 'tím']];
+    palette.forEach(([color, name]) => {
+      const swatch = button(`Màu ${name}`, () => { customColor = color; refresh(); }, options);
+      swatch.dataset.swatch = color; swatch.classList.add('ano-color-swatch'); swatch.style.setProperty('--swatch-color', color);
+    });
+    button('Theo màu nhạc cụ', () => { customColor = ''; refresh(); }, field);
+    input.addEventListener('input', () => { customColor = input.value.toLowerCase(); refresh(); });
+    instrument.addEventListener('change', refresh); parent.append(field); refresh();
+    return { value: () => customColor, refresh };
+  }
   function renderAdmin(controls) {
     const edit = button(state.editing ? 'Kết thúc ghi' : 'Ghi chú', () => { actions.edit(!state.editing); if (state.editing) setOpen(false); }, controls);
     edit.setAttribute('aria-pressed', String(state.editing));
@@ -132,7 +157,7 @@ window.AnnotationPanel = (() => {
   function renderNote(note, list) {
     const item = element('li'); item.dataset.annotationId = note.id;
     item.dataset.focusKey = `note:${note.id}`; item.tabIndex = -1;
-    decorate(item, note.instrumentId);
+    decorate(item, note.instrumentId, note.customColor);
     const name = state.instruments.find(instrument => instrument.id === note.instrumentId)?.name || note.instrumentId;
     item.append(element('strong', `${name} · Ô ${note.measureIdx + 1} · Khuông ${(note.staffIdx || 0) + 1}`), element('p', `${note.icon || ''} ${note.text}`.trim()));
     if (state.unplaced.includes(note.id)) item.append(element('p', 'Cần kiểm tra vị trí: bản nhạc đã thay đổi hoặc chưa tìm thấy điểm gắn.', 'ano-warning'));
@@ -157,12 +182,13 @@ window.AnnotationPanel = (() => {
     if (note.icon && !icons.includes(note.icon)) icons.push(note.icon);
     const icon = choices('Biểu tượng ghi chú', note.icon || '', icons.map(id => ({ id, name: id || 'Không biểu tượng' })));
     pop.append(icon.label);
+    const colors = noteColors(note, select, pop);
     const textLabel = element('label', 'Nội dung ghi chú'), text = element('textarea'); text.maxLength = 500; text.rows = 4;
     text.value = note.text || ''; textLabel.append(text); pop.append(textLabel);
     const presets = element('div', undefined, 'ano-presets'); presets.setAttribute('role', 'group'); presets.setAttribute('aria-label', 'Mẫu ghi chú');
     textLabel.before(presets);
     const renderPresets = () => {
-      decorate(pop, select.value); presets.replaceChildren();
+      decorate(pop, select.value, colors.value()); presets.replaceChildren();
       (PRESETS[select.value] || PRESETS.general).forEach(value => button(value, () => {
         text.value = text.value.trim() ? `${text.value.trim()} · ${value}`.slice(0, 500) : value; text.focus();
       }, presets));
@@ -172,17 +198,17 @@ window.AnnotationPanel = (() => {
     const controls = element('div', undefined, 'ano-controls'); pop.append(controls);
     const submit = async remove => {
       if (!remove && !text.value.trim()) { error.textContent = 'Hãy nhập nội dung ghi chú.'; text.focus(); return; }
-      pop.querySelectorAll('button,select,textarea').forEach(node => { node.disabled = true; });
+      pop.querySelectorAll('button,select,textarea,input').forEach(node => { node.disabled = true; });
       try {
-        await actions.save({ ...note, instrumentId: select.value, text: text.value.trim(), color: note.color || 'yellow', icon: icon.select.value }, remove);
+        await actions.save({ ...note, instrumentId: select.value, text: text.value.trim(), color: note.color || 'yellow', customColor: colors.value() || undefined, icon: icon.select.value }, remove);
         if (dialog === pop) closeEditor();
       } catch (e) { error.textContent = e.message; }
-      finally { pop.querySelectorAll('button,select,textarea').forEach(node => { node.disabled = false; }); }
+      finally { pop.querySelectorAll('button,select,textarea,input').forEach(node => { node.disabled = false; }); }
     };
     button('Lưu ghi chú', () => submit(false), controls);
     if (note.id) button('Xóa ghi chú', () => submit(true), controls);
     button('Hủy', closeEditor, controls);
-    button('Tải lại dữ liệu', () => actions.reload(), controls);
+    button('Tải lại dữ liệu', async () => { await actions.reload(); colors.refresh(); }, controls);
     pop.addEventListener('cancel', event => { if (state.saving) event.preventDefault(); });
     pop.addEventListener('close', () => { if (dialog === pop) closeEditor(); });
     document.body.append(pop); pop.showModal();
