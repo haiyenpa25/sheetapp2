@@ -349,7 +349,8 @@ test('an existing instrument note replaces the yellow plus and opens for direct 
 test('a pending instrument color survives sheet redraws and save errors', async ({ page }) => {
   await setup(page, true);
   await page.getByLabel('Nhạc cụ đang soạn').selectOption('guitar');
-  await page.getByLabel('Màu nhạc cụ', { exact: true }).fill('#123456');
+  // WebKit's headless color input lacks a native picker; dispatch its value-change event.
+  await page.getByLabel('Màu nhạc cụ', { exact: true }).evaluate(input => { input.value = '#123456'; input.dispatchEvent(new Event('input', { bubbles: true })); });
   await page.evaluate(() => AnnotationCanvas.reposition());
   await page.waitForTimeout(200);
   await expect(page.getByLabel('Màu nhạc cụ', { exact: true })).toHaveValue('#123456');
