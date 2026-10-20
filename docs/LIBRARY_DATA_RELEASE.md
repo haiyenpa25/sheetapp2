@@ -64,3 +64,15 @@ Thư mục đích mới nằm ngoài webroot/Git. Script từ chối đè file �
 Ca thử sử dụng bản cài riêng có marker `.roadmap6-isolated`; không chạy test ghi lên DB/storage thật. Kiểm tra tất cả đường dẫn MusicXML trong seed, cài admin mới, từ chối ghi đè, cập nhật từ thư viện thiếu các nhóm bổ sung và giữ nguyên dữ liệu server. Kiểm tra trình duyệt truy vấn đủ danh mục, đọc sheet Biệt Thánh Ca cả hai giao diện, ghi/lưu màu và chuyển giao diện. Kiểm tra HTTP chặn tải trực tiếp DB và registry private.
 
 `npm audit` ghi nhận 7 cảnh báo high hiện có trong `puppeteer-core` và cây phụ thuộc của nó (devDependencies); không có critical. Không thêm dependency hoặc tự nâng major trong đợt đóng gói dữ liệu này. Runtime PHP không dùng các gói Node này. Kết quả không xác nhận server production đã triển khai hay kiểm thử Safari/iPad phần cứng.
+
+
+## Kết quả bản cuối
+
+- PHP: **176/176 suite, 3.473 check (2.768 hành vi, 705 static), 337 file lint**, không skip/fail. Bộ cài/cập nhật riêng: 37 check nằm trong tổng trên.
+- Trình duyệt: **20/20** trên Chromium/WebKit headless, gồm danh mục/asset của cả 7 nhóm, sheet Biệt Thánh Ca, CRUD ghi chú, màu và chuyển giao diện. Không có lỗi runtime trong các ca render.
+- Python export: **2/2**, kiểm tra byte riêng tư bị xóa, source không đổi, từ chối ghi đè và từ chối phát hành bài private.
+- Đọc và parse **1.731/1.731** XML không lỗi; mọi đường dẫn bài có file trong bản xuất từ Git index. JS spec mới qua syntax/ESLint; `git diff --check` PASS. Whitespace trong MusicXML direction text được giữ như nội dung bản nhạc.
+- Snapshot release SHA256: `6366e9fdb0752d47c6c626b35c25fc93cbd699326279b38398345b3fce99d745`.
+- Sửa các giả định của test phát hiện khi clone sạch: ID admin không cố định, thư mục rỗng không lưu trong Git, `.`/`..` không phải file LiveSync bị rò rỉ. Không thêm file giả để làm đủ số lượng; các guard JSON đối chiếu checksum nội dung và được kiểm tra với file bị thay đổi/bị thiếu.
+
+Bằng chứng thô: [bản cuối](instrument-annotations-evidence/library-bundle-final.txt), [các lỗi tái hiện trước sửa](instrument-annotations-evidence/library-bundle-red.txt). Bản cài HTTP được dựng từ đúng nội dung Git index, cài bằng `install_library.php`, dùng DB/storage riêng. Sau kiểm thử được chuyển khỏi webroot vào `C:/xampp/sheetapp2-backups/source-archive-20261020-110530/sheetapp2-bundle-20261020`; trong htdocs chỉ giữ source chính `sheetapp2`.
