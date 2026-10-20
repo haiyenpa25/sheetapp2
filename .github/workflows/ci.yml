@@ -21,6 +21,8 @@ jobs:
           php-version: '8.3'
           extensions: pdo, pdo_sqlite, sqlite3, mbstring, json, openssl, ctype, fileinfo, zip, curl, dom
           coverage: none
+          # CLI controller suites print progress before capturing response headers.
+          ini-values: output_buffering=65536
 
       - name: Check PHP & Extensions
         run: |
@@ -38,9 +40,9 @@ jobs:
           ci_group="$(id -gn)"
           sudo sed -i "s/^export APACHE_RUN_USER=.*/export APACHE_RUN_USER=$ci_user/" /etc/apache2/envvars
           sudo sed -i "s/^export APACHE_RUN_GROUP=.*/export APACHE_RUN_GROUP=$ci_group/" /etc/apache2/envvars
-          sudo ln -s "$GITHUB_WORKSPACE" /var/www/html/sheetapp2
           sudo tee /etc/apache2/conf-available/sheetapp-ci.conf > /dev/null <<EOF
           ServerName localhost
+          Alias /sheetapp2 "$GITHUB_WORKSPACE"
           <Directory "$GITHUB_WORKSPACE">
               Options FollowSymLinks
               AllowOverride All
@@ -51,6 +53,9 @@ jobs:
           sudo a2enconf sheetapp-ci
           sudo service apache2 restart
           curl --fail --silent http://localhost/sheetapp2/api/index.php?route=categories > /dev/null
+          blocked_status="$(curl --silent -o /dev/null -w '%{http_code}' http://localhost/sheetapp2/api/core/Auth.php)"
+          echo "Private backend HTTP status: $blocked_status"
+          test "$blocked_status" = 403
 
       - name: Run Unified Test Runner
         env:

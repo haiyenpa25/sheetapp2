@@ -48,7 +48,7 @@ foreach ($files as $file) {
     $identityEtag = gzipHeader($identityHeaders, 'ETag');
     gzipCheck($gzipEtag !== '' && $identityEtag !== '' && $gzipEtag !== $identityEtag, "representations have distinct ETags: {$file}");
     [$notModified, $conditional] = gzipRead($url, 'gzip', "If-None-Match: {$gzipEtag}\r\n");
-    gzipCheck(str_contains($conditional[0] ?? '', '304') && $notModified === '', "gzip conditional request returns 304: {$file}");
+    gzipCheck(str_contains($conditional[0] ?? '', '304') && ($notModified === '' || $notModified === false), "gzip conditional request returns 304 without an entity body: {$file}");
     [$different, $crossVariant] = gzipRead($url, 'identity', "If-None-Match: {$gzipEtag}\r\n");
     gzipCheck(str_contains($crossVariant[0] ?? '', '200') && $different === $source, "gzip ETag does not suppress identity: {$file}");
     [$range, $rangeHeaders] = gzipRead($url, 'gzip', "Range: bytes=0-19\r\n");
