@@ -21,8 +21,6 @@ jobs:
           php-version: '8.3'
           extensions: pdo, pdo_sqlite, sqlite3, mbstring, json, openssl, ctype, fileinfo, zip, curl, dom
           coverage: none
-          # CLI controller suites print progress before capturing response headers.
-          ini-values: output_buffering=65536
 
       - name: Check PHP & Extensions
         run: |

@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+ob_start(); // Keep CLI progress output from committing simulated HTTP headers.
 require_once __DIR__ . '/fixtures/test_db_fixture.php';
 require_once __DIR__ . '/fixtures/tv41_setlists.php';
 require_once __DIR__ . '/../api/controllers/SetlistController.php';

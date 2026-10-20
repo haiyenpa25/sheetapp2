@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+ob_start(); // Keep CLI progress output from committing simulated HTTP headers.
 
 /**
  * tests/chord_edit_permission_and_flow_regression.php

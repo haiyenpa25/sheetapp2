@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+ob_start(); // Keep CLI progress output from committing simulated HTTP headers.
 
 /**
  * tests/api_http_exception_preservation_regression.php

@@ -1,6 +1,10 @@
 # Transport-only gzip sidecars. No server restart or mod_deflate required.
 # Source: https://httpd.apache.org/docs/2.4/mod/mod_deflate.html#precompressed
 # Regenerate/check with: php tools/generate_asset_gzip.php [--check]
+# Ranges refer to identity bytes; dynamic mod_deflate must not compress them.
+<IfModule mod_setenvif.c>
+    SetEnvIfNoCase Range ".+" no-gzip=1
+</IfModule>
 <IfModule mod_headers.c>
     <IfModule mod_rewrite.c>
         RewriteEngine On
