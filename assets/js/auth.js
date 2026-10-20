@@ -277,6 +277,7 @@ const Auth = (() => {
     document.querySelectorAll('.song-add-setlist-btn').forEach(btn => {
       btn.classList.toggle('hidden', !canEditChords);
     });
+    window.EventBus?.emit?.('auth:changed', { role: _role });
   }
 
   function showError(msg) {

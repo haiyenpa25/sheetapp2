@@ -7,6 +7,7 @@ const AnnotationCanvas = (() => {
   let loaded = false, loading = false, saving = false, error = '', editing = false;
   let instrumentId = 'general', relocating = null, selected = null, hasPreference = false;
   let renderTimer, observer, unplaced = [], fingerprint = '', fingerprintXml = null;
+  let gestureStart = null, gestureMoved = false;
   const admin = () => !!window.Auth?.isAdmin?.();
   const current = () => window.App?.getCurrentSongId?.() || window.Store?.get?.('currentSong')?.id;
 
@@ -31,6 +32,10 @@ const AnnotationCanvas = (() => {
     document.addEventListener('keydown', event => {
       if (event.key === 'Escape' && !document.querySelector('.ano-editor[open]')) setAddMode(false);
     });
+    document.addEventListener('pointermove', event => {
+      if (gestureStart && Math.hypot(event.clientX - gestureStart.x, event.clientY - gestureStart.y) > 8) gestureMoved = true;
+    }, { passive: true });
+    document.addEventListener('pointercancel', () => { gestureMoved = true; }, { passive: true });
     window.EventBus?.on?.('auth:changed', () => { if (!admin()) setAddMode(false); updatePanel(); });
     const container = document.getElementById('osmd-container');
     if (container) {
@@ -86,7 +91,8 @@ const AnnotationCanvas = (() => {
   }
   function setAddMode(on) {
     if (on && !admin()) return;
-    editing = !!on; if (!on) relocating = null;
+    editing = !!on;
+    if (!on) { relocating = null; window.AnnotationPanel?.closeEditor(); }
     document.getElementById('btn-add-annotate-mode')?.classList.toggle('active', editing);
     if (editing) {
       window.ChordCanvas?.setAddMode?.(false);
@@ -132,13 +138,9 @@ const AnnotationCanvas = (() => {
     updatePanel();
   }
   function clickAfterTap(node, callback) {
-    let start = null, moved = false;
-    node.addEventListener('pointerdown', event => { start = { x: event.clientX, y: event.clientY }; moved = false; });
-    node.addEventListener('pointermove', event => {
-      if (start && Math.hypot(event.clientX - start.x, event.clientY - start.y) > 8) moved = true;
-    });
-    node.addEventListener('pointercancel', () => { moved = true; });
-    node.addEventListener('click', event => { event.stopPropagation(); if (!moved || event.detail === 0) callback(); });
+    // Keep the gesture outside individual badges: resize can replace a badge mid-scroll.
+    node.addEventListener('pointerdown', event => { gestureStart = { x: event.clientX, y: event.clientY }; gestureMoved = false; });
+    node.addEventListener('click', event => { event.stopPropagation(); if (!gestureMoved || event.detail === 0) callback(); });
   }
   function place(container, bounds, anchor, found, layout) {
     const rect = anchor.el.getBoundingClientRect();

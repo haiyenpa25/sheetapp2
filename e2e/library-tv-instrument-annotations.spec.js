@@ -18,6 +18,8 @@ async function setup(page, admin = false) {
   await page.evaluate(({ admin, instruments, notes }) => {
     window.currentSong = 'song-a'; window.isAdmin = admin; window.saved = []; window.failSave = false;
     window.Auth = { isAdmin: () => window.isAdmin };
+    const events = {};
+    window.EventBus = { on: (name, callback) => { events[name] = callback; }, emit: name => events[name]?.() };
     window.Store = { get: key => key === 'currentSong' ? { id: currentSong } : null };
     window.App = { getCurrentSongId: () => currentSong, showToast() {} };
     window.ApiService = { annotations: {
@@ -195,4 +197,37 @@ test('annotation labels avoid notation and lyrics rather than covering them', as
     return Array.from(document.querySelectorAll('.ano-dot')).every(dot =>
       Array.from(document.querySelectorAll('#osmd-container svg rect')).every(node => !overlap(dot.getBoundingClientRect(), node.getBoundingClientRect())));
   })).toBe(true);
+});
+
+test('losing admin access closes the editor and removes authoring controls', async ({ page }) => {
+  await setup(page, true);
+  await page.getByRole('button', { name: 'Soạn ghi chú', exact: true }).click();
+  await page.locator('.ano-dot-btn').first().click();
+  await page.evaluate(() => { isAdmin = false; EventBus.emit('auth:changed'); });
+  await expect(page.getByRole('dialog')).not.toBeVisible();
+  await expect(page.locator('.ano-dot-btn')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Soạn ghi chú', exact: true })).toHaveCount(0);
+});
+
+test('conflict reload preserves the draft and saves it alongside newer notes', async ({ page }) => {
+  await setup(page, true);
+  await page.getByRole('button', { name: 'Soạn ghi chú', exact: true }).click();
+  await page.locator('.ano-dot-btn').first().click();
+  await page.getByLabel('Nội dung ghi chú').fill('Bản nháp đang soạn');
+  await page.evaluate(() => {
+    ApiService.annotations.save = async () => { const error = new Error('Phiên khác đã thay đổi. Hãy tải lại.'); error.status = 409; throw error; };
+  });
+  await page.getByRole('button', { name: 'Lưu ghi chú', exact: true }).click();
+  await expect(page.getByRole('dialog').getByRole('alert')).toContainText('Phiên khác');
+  await page.evaluate(() => {
+    ApiService.annotations.load = async () => ({ annotations: [{ id: 'newer', instrumentId: 'drums', measureIdx: 0, staffIdx: 0, noteIdx: 0, text: 'Phiên mới' }], instruments: [{ id: 'drums', name: 'Trống' }], revision: 'r-new' });
+    ApiService.annotations.save = async (song, list, revision) => { saved.push({ song, list, revision }); return { annotations: list, revision: 'r-final' }; };
+  });
+  await page.getByRole('dialog').getByRole('button', { name: 'Tải lại dữ liệu', exact: true }).click();
+  await expect(page.getByLabel('Nội dung ghi chú')).toHaveValue('Bản nháp đang soạn');
+  await page.getByRole('button', { name: 'Lưu ghi chú', exact: true }).click();
+  await expect(page.getByRole('dialog')).not.toBeVisible();
+  const result = await page.evaluate(() => saved.at(-1));
+  expect(result.revision).toBe('r-new');
+  expect(result.list.map(n => n.text)).toEqual(['Phiên mới', 'Bản nháp đang soạn']);
 });
