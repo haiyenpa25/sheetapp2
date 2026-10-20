@@ -16,6 +16,7 @@
 - Chủ dự án chọn CSDL phát hành đã làm sạch vì repo công khai. `storage/seed/library.sqlite` chứa 1.737 bộ hợp âm, 388 đoạn nhạc, bản phối/phiên bản công khai; không chứa mật khẩu/email/hồ sơ/histories nguồn. Contributor ẩn danh bị khóa, không dùng để đăng nhập. DB thật vẫn bị ignore và giữ checksum.
 - `tools/export_library_seed.py` xuất snapshot read-only, scrub dữ liệu, secure-delete/VACUUM, kiểm tra byte thô và xuất manifest; `tools/install_library.php` cài mới và tạo admin riêng; `tools/update_library.php --apply` sao lưu rồi bổ sung dữ liệu còn thiếu trong transaction, giữ tài khoản, chương trình và hợp âm hiện có.
 - Thêm `tests/library_bundle_regression.php`, `tests/library_seed_export_test.py`, `e2e/library-tv-bundle.spec.js` và helper checksum JSON. Cập nhật test cũ để kiểm tra nội dung file thay vì đếm thư mục rỗng; RBAC dùng fixture riêng, dò LiveSync bỏ đúng `.`/`..`. CI cài seed trước khi chạy bộ PHP.
+- Nghiệm thu bản cuối trên bản cài từ Git index: PHP 176/176 suite / 3.473 check, 337 PHP lint; trình duyệt Chromium/WebKit 20/20; Python export 2/2; 1.731 XML parse không lỗi; JS spec syntax/ESLint và diff-check PASS. Bằng chứng tại `docs/instrument-annotations-evidence/library-bundle-{final,red}.txt`.
 - Hướng dẫn cài mới/server cũ và phạm vi dữ liệu: `docs/LIBRARY_DATA_RELEASE.md`; README bỏ hướng dẫn chmod 777/tự sync. Không chạy migration hoặc thay DB thật; không xác nhận triển khai production.
 
 
