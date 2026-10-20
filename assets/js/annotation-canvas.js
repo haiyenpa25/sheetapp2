@@ -37,6 +37,13 @@ const AnnotationCanvas = (() => {
     }, { passive: true });
     document.addEventListener('pointercancel', () => { gestureMoved = true; }, { passive: true });
     window.EventBus?.on?.('auth:changed', () => { if (!admin()) setAddMode(false); updatePanel(); });
+    const modeObserver = new window.MutationObserver(() => {
+      if (editing && document.querySelector('#btn-add-chord-mode.active,#btn-add-chord-mode-bar.active')) setAddMode(false);
+    });
+    ['btn-add-chord-mode', 'btn-add-chord-mode-bar'].forEach(id => {
+      const button = document.getElementById(id);
+      if (button) modeObserver.observe(button, { attributes: true, attributeFilter: ['class'] });
+    });
     const container = document.getElementById('osmd-container');
     if (container) {
       observer = new ResizeObserver(reposition); observer.observe(container);

@@ -14,7 +14,7 @@ async function setup(page, admin = false) {
   await page.route('https://annotations.test/**', route => route.fulfill({ contentType: 'text/html', body: '<!doctype html>' }));
   await page.goto('https://annotations.test/');
   await page.evaluate(() => localStorage.removeItem('sheetapp_annotation_layers'));
-  await page.setContent('<main id="sheet-viewer-wrapper"><div id="sheet-area"><div id="osmd-container" style="position:relative"><svg width="500" height="140"><g id="n1"><rect x="60" y="40" width="10" height="10"/></g></svg><svg width="500" height="140"><g id="n2"><rect x="90" y="40" width="10" height="10"/></g></svg></div></div></main><button id="btn-add-annotate-mode"></button>');
+  await page.setContent('<main id="sheet-viewer-wrapper"><div id="sheet-area"><div id="osmd-container" style="position:relative"><svg width="500" height="140"><g id="n1"><rect x="60" y="40" width="10" height="10"/></g></svg><svg width="500" height="140"><g id="n2"><rect x="90" y="40" width="10" height="10"/></g></svg></div></div></main><button id="btn-add-annotate-mode"></button><button id="btn-add-chord-mode"></button>');
   await page.addStyleTag({ path: path.join(root, 'assets/css/instrument-annotations.css') });
   await page.evaluate(({ admin, instruments, notes }) => {
     window.currentSong = 'song-a'; window.isAdmin = admin; window.saved = []; window.failSave = false;
@@ -265,4 +265,13 @@ test('a compact sheet badge opens and focuses its full note', async ({ page }) =
   await page.locator('.ano-dot').last().click();
   await expect(page.locator('#annotation-panel-body')).toBeVisible();
   await expect(page.locator('[data-annotation-id="d2"]')).toBeFocused();
+});
+
+test('switching to chord editing ends instrument annotation editing', async ({ page }) => {
+  await setup(page, true);
+  await page.getByRole('button', { name: 'Soạn ghi chú', exact: true }).click();
+  await expect(page.locator('.ano-dot-btn')).toHaveCount(2);
+  await page.evaluate(() => document.getElementById('btn-add-chord-mode').classList.add('active'));
+  await expect(page.locator('.ano-dot-btn')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Soạn ghi chú', exact: true })).toBeVisible();
 });
