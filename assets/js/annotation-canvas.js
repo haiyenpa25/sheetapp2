@@ -119,13 +119,14 @@ const AnnotationCanvas = (() => {
     const anchors = window.AnnotationGeometry.anchors().filter(anchor => container.contains(anchor.el));
     const score = currentFingerprint(), mapped = new Set(), occupied = [];
     const bounds = container.getBoundingClientRect();
+    const obstacles = window.AnnotationGeometry.obstacles(container, bounds);
     anchors.forEach(anchor => {
       const found = notes.filter(note => (!score || !note.scoreFingerprint || note.scoreFingerprint === score)
         && window.AnnotationGeometry.matches(note, anchor));
       found.forEach(note => mapped.add(note.id));
       const visible = found.filter(note => selected === null || selected.includes(note.instrumentId));
-      if (visible.length) place(container, bounds, anchor, visible, occupied);
-      if (editing && admin()) place(container, bounds, anchor, null, occupied);
+      if (visible.length) place(container, bounds, anchor, visible, { occupied, obstacles });
+      if (editing && admin()) place(container, bounds, anchor, null, { occupied, obstacles });
     });
     unplaced = notes.filter(note => !mapped.has(note.id)).map(note => note.id);
     updatePanel();
@@ -139,7 +140,7 @@ const AnnotationCanvas = (() => {
     node.addEventListener('pointercancel', () => { moved = true; });
     node.addEventListener('click', event => { event.stopPropagation(); if (!moved || event.detail === 0) callback(); });
   }
-  function place(container, bounds, anchor, found, occupied) {
+  function place(container, bounds, anchor, found, layout) {
     const rect = anchor.el.getBoundingClientRect();
     const button = document.createElement('button'); button.type = 'button';
     button.className = found ? 'ano-dot' : 'ano-dot-btn';
@@ -148,6 +149,7 @@ const AnnotationCanvas = (() => {
       const name = instruments.find(item => item.id === found[0].instrumentId)?.name || found[0].instrumentId;
       button.textContent = found.length > 1 ? `${found.length} ghi chú · Ô ${anchor.measureIdx + 1}` : `${name} · ${found[0].text}`;
       button.title = found.map(note => `${instruments.find(item => item.id === note.instrumentId)?.name || note.instrumentId}: ${note.text}`).join('\n');
+      button.setAttribute('aria-label', `${button.title} · Ô ${anchor.measureIdx + 1}, khuông ${anchor.staffIdx + 1}. Mở bảng ghi chú`);
       clickAfterTap(button, () => window.AnnotationPanel.show());
     } else {
       button.textContent = '+'; button.setAttribute('aria-label', `Thêm ghi chú ô ${anchor.measureIdx + 1}, khuông ${anchor.staffIdx + 1}, vị trí ${anchor.noteIdx + 1}`);
@@ -155,12 +157,7 @@ const AnnotationCanvas = (() => {
         instrumentId: relocating?.instrumentId || instrumentId, scoreFingerprint: currentFingerprint() || undefined }));
     }
     container.append(button);
-    const width = button.offsetWidth, height = button.offsetHeight;
-    const left = Math.max(0, Math.min(bounds.width - width, rect.left - bounds.left));
-    let top = Math.max(0, rect.top - bounds.top - height - 5);
-    while (occupied.some(box => left < box.right && left + width > box.left && top < box.bottom && top + height > box.top)) top += height + 3;
-    button.style.left = `${left}px`; button.style.top = `${top}px`;
-    occupied.push({ left, right: left + width, top, bottom: top + height });
+    window.AnnotationGeometry.position(button, { bounds, rect, ...layout });
   }
   function openEditor(note) {
     if (!admin() || !loaded || saving) return;

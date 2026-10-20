@@ -41,5 +41,43 @@ window.AnnotationGeometry = (() => {
     for (let i = 0; i < structure.length; i++) hash = Math.imul(hash ^ structure.charCodeAt(i), 16777619);
     return (hash >>> 0).toString(16).padStart(8, '0');
   }
-  return { anchors, matches, fingerprint };
+  function obstacles(container, bounds) {
+    return Array.from(container.querySelectorAll('svg text,svg path,svg line,svg rect,svg ellipse,.cc-note-dot'))
+      .filter(node => {
+        const style = getComputedStyle(node);
+        if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) return false;
+        // TLH chord text remains in SVG with transparent fill when HD is shown.
+        return !(node instanceof SVGElement && ['rgba(0, 0, 0, 0)', 'transparent', 'none'].includes(style.fill) && ['none', 'rgba(0, 0, 0, 0)'].includes(style.stroke));
+      })
+      .map(node => node.getBoundingClientRect()).filter(rect => rect.width || rect.height)
+      .map(rect => ({ left: rect.left - bounds.left - 2, right: rect.right - bounds.left + 2,
+        top: rect.top - bounds.top - 2, bottom: rect.bottom - bounds.top + 2 }));
+  }
+  function position(button, context) {
+    const { bounds, rect, occupied, obstacles: score } = context;
+    const overlaps = (box, other) => box.left < other.right && box.right > other.left && box.top < other.bottom && box.bottom > other.top;
+    const collides = box => score.some(other => overlaps(box, other)) || occupied.some(other => overlaps(box, other));
+    const search = compact => {
+      const width = button.offsetWidth, height = button.offsetHeight;
+      const lefts = [Math.max(0, Math.min(bounds.width - width, rect.left - bounds.left))];
+      if (compact) lefts.push(0, Math.max(0, bounds.width - width));
+      for (const left of lefts) {
+        for (let step = 0; step < 12; step++) {
+          const offset = step ? Math.ceil(step / 2) * (height + 4) * (step % 2 ? -1 : 1) : 0;
+          const top = rect.top - bounds.top - height - 5 + offset;
+          const box = { left, right: left + width, top, bottom: top + height };
+          if (top >= 0 && box.bottom <= bounds.height && !collides(box)) return box;
+        }
+      }
+      return null;
+    };
+    let box = search(false);
+    if (!box && button.classList.contains('ano-dot')) {
+      button.textContent = '✎'; button.classList.add('ano-compact'); box = search(true);
+    }
+    if (!box) box = search(true);
+    if (!box) { button.remove(); return; }
+    button.style.left = `${box.left}px`; button.style.top = `${box.top}px`; occupied.push(box);
+  }
+  return { anchors, matches, fingerprint, obstacles, position };
 })();

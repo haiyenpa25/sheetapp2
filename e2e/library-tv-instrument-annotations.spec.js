@@ -47,10 +47,10 @@ test('readers filter multiple instrument layers and both staves without edit con
   await expect(page.locator('[data-annotation-id="d2"]')).toContainText('Điệu 6/8');
   await page.getByRole('button', { name: 'Ẩn tất cả', exact: true }).click();
   await expect(page.locator('.ano-dot')).toHaveCount(0);
-  await page.getByLabel('Guitar', { exact: false }).check();
+  await page.getByRole('checkbox', { name: /^Guitar/ }).check();
   await expect(page.locator('.ano-dot')).toHaveCount(1);
   await expect(page.locator('.ano-dot')).toContainText('Guitar');
-  await page.getByLabel('Trống', { exact: false }).check();
+  await page.getByRole('checkbox', { name: /^Trống/ }).check();
   await expect(page.locator('.ano-dot')).toHaveCount(2);
   await expect(page.getByRole('button', { name: 'Soạn ghi chú', exact: true })).toHaveCount(0);
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('sheetapp_annotation_layers')))).toEqual(['guitar', 'drums']);
@@ -112,4 +112,87 @@ test('a delayed old song response cannot replace the current song', async ({ pag
   });
   await expect(page.locator('.ano-dot')).toHaveCount(0);
   await expect(page.locator('#instrument-annotations')).not.toContainText('Bài cũ');
+});
+
+test('scroll gestures do not open an editor and keyboard activation still works', async ({ page }) => {
+  await setup(page, true);
+  await page.getByRole('button', { name: 'Soạn ghi chú', exact: true }).click();
+  const point = page.locator('.ano-dot-btn').first();
+  await point.dispatchEvent('pointerdown', { clientX: 60, clientY: 40 });
+  await point.dispatchEvent('pointermove', { clientX: 61, clientY: 80 });
+  await point.dispatchEvent('click', { detail: 1 });
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await point.focus(); await page.keyboard.press('Enter');
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).not.toBeVisible();
+});
+
+test('failed load can be retried and does not enable an empty editor', async ({ page }) => {
+  await setup(page, true);
+  await page.evaluate(async () => {
+    ApiService.annotations.load = async () => { throw new Error('Không có mạng'); };
+    await AnnotationCanvas.loadSong('song-a', true);
+  });
+  await expect(page.locator('#instrument-annotations [role=alert]')).toContainText('Không có mạng');
+  await expect(page.getByRole('button', { name: 'Soạn ghi chú', exact: true })).toHaveCount(0);
+  await page.evaluate(() => { ApiService.annotations.load = async () => ({ annotations: [], instruments: [], revision: 'retry' }); });
+  await page.getByRole('button', { name: 'Thử tải lại', exact: true }).click();
+  await expect(page.locator('#instrument-annotations')).toContainText('Bài này chưa có ghi chú.');
+});
+
+test('a changed score hides stale anchors and lets admin place the same note again', async ({ page }) => {
+  await setup(page, true);
+  await page.evaluate(async () => {
+    Store.get = key => key === 'originalXml' ? '<score-partwise><part><measure><note><rest/><duration>1</duration></note></measure></part></score-partwise>' : { id: currentSong };
+    ApiService.annotations.load = async () => ({
+      annotations: [{ id: 'moved', instrumentId: 'drums', measureIdx: 0, staffIdx: 0, noteIdx: 0, text: 'Giữ nguyên', scoreFingerprint: 'ffffffff' }],
+      instruments: [{ id: 'drums', name: 'Trống' }], revision: 'changed'
+    });
+    await AnnotationCanvas.loadSong('song-a', true);
+  });
+  await expect(page.locator('.ano-dot')).toHaveCount(0);
+  await expect(page.locator('[data-annotation-id=moved]')).toContainText('Cần kiểm tra vị trí');
+  await page.getByRole('button', { name: 'Đặt lại vị trí', exact: true }).click();
+  await page.locator('.ano-dot-btn').last().click();
+  await page.getByRole('button', { name: 'Lưu ghi chú', exact: true }).click();
+  await expect(page.locator('.ano-dot')).toHaveCount(1);
+  const record = await page.evaluate(() => saved.at(-1).list[0]);
+  expect(record.id).toBe('moved'); expect(record.staffIdx).toBe(1);
+  expect(record.scoreFingerprint).not.toBe('ffffffff');
+});
+
+test('semantic time survives note index changes and equivalent fractions', async ({ page }) => {
+  await setup(page);
+  await page.evaluate(async () => {
+    const instance = OSMDRenderer.getInstance();
+    instance.graphic.measureList[0][0].staffEntries.unshift({ graphicalVoiceEntries: [] });
+    instance.graphic.measureList[0][0].staffEntries[1].relInMeasureTimestamp = { numerator: 1, denominator: 4 };
+    OSMDRenderer.getInstance = () => instance;
+    ApiService.annotations.load = async () => ({
+      annotations: [{ id: 'beat', instrumentId: 'drums', measureIdx: 0, staffIdx: 0, noteIdx: 0, beat: '2/8', text: 'Đúng phách' }],
+      instruments: [{ id: 'drums', name: 'Trống' }], revision: 'beat'
+    });
+    await AnnotationCanvas.loadSong('song-a', true);
+  });
+  await expect(page.locator('.ano-dot')).toHaveCount(1);
+  await expect(page.locator('.ano-dot')).toContainText('Đúng phách');
+  await expect(page.locator('.ano-warning')).toHaveCount(0);
+});
+
+test('annotation labels avoid notation and lyrics rather than covering them', async ({ page }) => {
+  await setup(page);
+  await page.evaluate(() => {
+    document.querySelectorAll('#osmd-container svg').forEach(svg => {
+      const obstacle = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      for (const [key, value] of Object.entries({ x: 0, y: 5, width: 500, height: 30 })) obstacle.setAttribute(key, value);
+      svg.append(obstacle);
+    });
+    AnnotationCanvas.reposition();
+  });
+  await expect.poll(() => page.evaluate(() => {
+    const overlap = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+    return Array.from(document.querySelectorAll('.ano-dot')).every(dot =>
+      Array.from(document.querySelectorAll('#osmd-container svg rect')).every(node => !overlap(dot.getBoundingClientRect(), node.getBoundingClientRect())));
+  })).toBe(true);
 });
