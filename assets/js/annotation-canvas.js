@@ -189,12 +189,14 @@ const AnnotationCanvas = (() => {
     if (!admin() || !loaded || saving || songId !== current()) throw new Error('Chưa thể lưu. Hãy tải lại ghi chú.');
     saving = true;
     const token = generation, id = songId;
-    const next = notes.filter(item => item.id !== note.id);
-    if (!remove) {
-      const { el, ...record } = note;
-      next.push({ ...record, id: note.id || `note-${crypto.randomUUID()}` });
-    }
     try {
+      const next = notes.filter(item => item.id !== note.id);
+      if (!remove) {
+        const { el, ...record } = note;
+        // Record IDs are not credentials; keep authoring usable on HTTP LAN hosts too.
+        const suffix = window.crypto?.randomUUID?.() || `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 14)}`;
+        next.push({ ...record, id: note.id || `note-${suffix}` });
+      }
       const data = await window.ApiService.annotations.save(id, next, revision);
       if (token !== generation || id !== current()) return;
       accept(data); relocating = null; build();

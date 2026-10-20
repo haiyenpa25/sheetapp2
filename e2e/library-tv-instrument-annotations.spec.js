@@ -265,6 +265,9 @@ test('a compact sheet badge opens and focuses its full note', async ({ page }) =
   await page.locator('.ano-dot').last().click();
   await expect(page.locator('#annotation-panel-body')).toBeVisible();
   await expect(page.locator('[data-annotation-id="d2"]')).toBeFocused();
+  await page.evaluate(() => { window.previousNoteCard = document.activeElement; AnnotationCanvas.reposition(); });
+  await expect.poll(() => page.evaluate(() => previousNoteCard.isConnected)).toBe(false);
+  await expect(page.locator('[data-annotation-id="d2"]')).toBeFocused();
 });
 
 test('switching to chord editing ends instrument annotation editing', async ({ page }) => {
@@ -287,4 +290,15 @@ test('the new editor retains existing color and icon authoring', async ({ page }
   await page.locator('[data-annotation-id="g1"] [data-action="edit"]').click();
   await expect(page.getByLabel('Màu ghi chú', { exact: true })).toHaveValue('blue');
   await expect(page.getByLabel('Biểu tượng ghi chú', { exact: true })).toHaveValue('🎹');
+});
+
+test('adding a note works when the browser has no randomUUID API', async ({ page }) => {
+  await setup(page, true);
+  await page.evaluate(() => Object.defineProperty(crypto, 'randomUUID', { value: undefined, configurable: true }));
+  await page.getByRole('button', { name: 'Soạn ghi chú', exact: true }).click();
+  await page.locator('.ano-dot-btn').first().click();
+  await page.getByLabel('Nội dung ghi chú').fill('Ghi chú trên máy trong mạng nội bộ');
+  await page.getByRole('button', { name: 'Lưu ghi chú', exact: true }).click();
+  await expect(page.getByRole('dialog')).not.toBeVisible();
+  expect(await page.evaluate(() => saved.at(-1).list.at(-1).id)).toMatch(/^note-[a-zA-Z0-9_-]+$/);
 });

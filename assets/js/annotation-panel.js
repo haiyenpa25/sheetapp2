@@ -90,6 +90,7 @@ window.AnnotationPanel = (() => {
   }
   function renderNote(note, list) {
     const item = element('li'); item.dataset.annotationId = note.id;
+    item.dataset.focusKey = `note:${note.id}`; item.tabIndex = -1;
     const name = state.instruments.find(instrument => instrument.id === note.instrumentId)?.name || note.instrumentId;
     item.append(element('strong', `${name} · Ô ${note.measureIdx + 1} · Khuông ${(note.staffIdx || 0) + 1}`), element('p', `${note.icon || ''} ${note.text}`.trim()));
     if (state.unplaced.includes(note.id)) item.append(element('p', 'Cần kiểm tra vị trí: bản nhạc đã thay đổi hoặc chưa tìm thấy điểm gắn.', 'ano-warning'));
