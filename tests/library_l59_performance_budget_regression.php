@@ -9,10 +9,11 @@
  * 4. API OSMDRenderer.getRenderCount() và resetRenderCount() phục vụ Performance Monitoring.
  * 5. Giới hạn số lượng thẻ <script> ban đầu trong index.php <= 30.
  * 6. Line Budget < 600 dòng trên mọi file.
- * 7. Bảo vệ toàn vẹn CSDL thật app.sqlite và 62 files chord_sets theo chuẩn K2.
+ * 7. Bảo vệ toàn vẹn CSDL thật app.sqlite và JSON chord_sets trong manifest phát hành theo chuẩn K2.
  */
 
 declare(strict_types=1);
+require_once __DIR__ . '/fixtures/library_storage_guard.php';
 
 $totalChecks = 0;
 $passedChecks = 0;
@@ -171,7 +172,7 @@ if ($dbExists) {
 
 $chordSetsDir = $root . '/storage/data/chord_sets';
 $chordSetFiles = is_dir($chordSetsDir) ? (scandir($chordSetsDir) ?: []) : [];
-check(count($chordSetFiles) >= 62, 'l59_chord_sets_62', 'Bảo vệ toàn vẹn >= 62 files bản phối chord_sets (hiện có ' . count($chordSetFiles) . ' files theo K2 scandir)', true);
+check(libraryChordFilesIntact(dirname(__DIR__)), 'l59_chord_sets_manifest', 'Bảo vệ toàn vẹn nội dung JSON chord_sets theo manifest (hiện có ' . count($chordSetFiles) . ' files theo K2 scandir)', true);
 
 echo "\n--------------------------------------------------------\n";
 echo "Kết quả kiểm thử L5-9: {$passedChecks}/{$totalChecks} checks passed (Behavioral: {$behavioralChecks}, Static: {$staticChecks}).\n";

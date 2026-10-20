@@ -8,10 +8,11 @@
  * 3. Loại bỏ hoàn toàn 24 dummy elements "legacy ID" trong includes (0 phần tử giả trong DOM).
  * 4. Dọn dẹp inline styles trong includes/ (toolbar, sidebar, sheet_viewer, quick_numpad, follow_leader = 0).
  * 5. Line Budget < 600 dòng trên mọi file CSS & PHP đã tinh chỉnh.
- * 6. Bảo vệ 100% tính toàn vẹn CSDL thật app.sqlite và 62 chord_sets theo chuẩn K2.
+ * 6. Bảo vệ 100% tính toàn vẹn CSDL thật app.sqlite và JSON chord_sets trong manifest phát hành theo chuẩn K2.
  */
 
 declare(strict_types=1);
+require_once __DIR__ . '/fixtures/library_storage_guard.php';
 
 $totalChecks = 0;
 $passedChecks = 0;
@@ -223,7 +224,7 @@ if ($dbExists) {
 
 $chordSetsDir = $root . '/storage/data/chord_sets';
 $chordSetFiles = is_dir($chordSetsDir) ? (scandir($chordSetsDir) ?: []) : [];
-check(count($chordSetFiles) >= 62, 'l58_chord_sets_62', 'Bảo vệ toàn vẹn >= 62 files bản phối chord_sets (hiện có ' . count($chordSetFiles) . ' files theo K2 scandir)', true);
+check(libraryChordFilesIntact(dirname(__DIR__)), 'l58_chord_sets_manifest', 'Bảo vệ toàn vẹn nội dung JSON chord_sets theo manifest (hiện có ' . count($chordSetFiles) . ' files theo K2 scandir)', true);
 
 echo "\n--------------------------------------------------------\n";
 echo "Kết quả kiểm thử L5-8: {$passedChecks}/{$totalChecks} checks passed (Behavioral: {$behavioralChecks}, Static: {$staticChecks}).\n";

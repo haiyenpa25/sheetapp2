@@ -27,5 +27,8 @@ jobs:
           php -v
           php -m
 
+      - name: Install sanitized library for a fresh checkout
+        run: openssl rand -hex 24 | php tools/install_library.php --password-stdin
+
       - name: Run Unified Test Runner
         run: php tests/run_all_tests.php

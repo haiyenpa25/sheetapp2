@@ -15,6 +15,11 @@ require_once __DIR__ . '/../api/services/UserService.php';
 require_once __DIR__ . '/../api/services/SongService.php';
 require_once __DIR__ . '/../api/services/SongSearchHelper.php';
 require_once __DIR__ . '/../api/services/ImportService.php';
+require_once __DIR__ . '/fixtures/test_db_fixture.php';
+
+// Test roles against independent accounts, never the deployment's user IDs.
+DB::setPdo(createTestDatabase());
+Auth::resetDbCache();
 
 if (session_status() === PHP_SESSION_NONE) {
     @session_start();

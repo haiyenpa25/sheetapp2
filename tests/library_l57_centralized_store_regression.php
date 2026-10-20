@@ -15,6 +15,7 @@
  */
 
 declare(strict_types=1);
+require_once __DIR__ . '/fixtures/library_storage_guard.php';
 
 $root = dirname(__DIR__);
 
@@ -323,7 +324,7 @@ check($setlistCount >= 0, "Bảng setlists nguyên vẹn ({$setlistCount} bản 
 
 $chordDir = $root . '/storage/data/chord_sets';
 $chordEntries = is_dir($chordDir) ? (scandir($chordDir) ?: []) : [];
-check(count($chordEntries) >= 62, "Kho chord_sets giữ nguyên vẹn >= 62 entries (" . count($chordEntries) . " entries)", true);
+check(libraryChordFilesIntact(dirname(__DIR__)), "JSON chord_sets giữ nguyên theo manifest phát hành (" . count($chordEntries) . " entries)", true);
 
 // ─────────────────────────────────────────────────────────────
 // TỔNG KẾT SUITE
