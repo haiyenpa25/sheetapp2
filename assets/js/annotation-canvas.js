@@ -168,7 +168,8 @@ const AnnotationCanvas = (() => {
     button.dataset.measureIdx = anchor.measureIdx; button.dataset.staffIdx = anchor.staffIdx; button.dataset.noteIdx = anchor.noteIdx;
     if (found) {
       const name = instruments.find(item => item.id === found[0].instrumentId)?.name || found[0].instrumentId;
-      button.textContent = found.length > 1 ? `${found.length} ghi chú · Ô ${anchor.measureIdx + 1}` : `${name} · ${found[0].text}`;
+      button.textContent = found.length > 1 ? `${found.length} ghi chú · Ô ${anchor.measureIdx + 1}` : `${found[0].icon || ''} ${name} · ${found[0].text}`.trim();
+      button.dataset.color = found.length === 1 ? found[0].color || 'yellow' : 'yellow';
       button.title = found.map(note => `${instruments.find(item => item.id === note.instrumentId)?.name || note.instrumentId}: ${note.text}`).join('\n');
       button.setAttribute('aria-label', `${button.title} · Ô ${anchor.measureIdx + 1}, khuông ${anchor.staffIdx + 1}. Mở bảng ghi chú`);
       clickAfterTap(button, () => window.AnnotationPanel.show(found[0].id));

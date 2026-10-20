@@ -63,8 +63,12 @@ window.AnnotationPanel = (() => {
     if (focusKey) Array.from(body.querySelectorAll('[data-focus-key]')).find(node => node.dataset.focusKey === focusKey)?.focus({ preventScroll: true });
   }
   function selectInstrument(value, labelText) {
+    return choices(labelText, value, state.instruments);
+  }
+  function choices(labelText, value, options) {
     const label = element('label', labelText), select = element('select');
-    state.instruments.forEach(item => { const option = element('option', item.name); option.value = item.id; select.append(option); });
+    select.setAttribute('aria-label', labelText);
+    options.forEach(item => { const option = element('option', item.name); option.value = item.id; select.append(option); });
     select.value = value; label.append(select); return { label, select };
   }
   function renderAdmin(controls) {
@@ -106,6 +110,14 @@ window.AnnotationPanel = (() => {
     const title = element('h2', note.id ? 'Sửa ghi chú' : 'Thêm ghi chú'); title.id = 'ano-editor-title';
     pop.setAttribute('aria-labelledby', title.id); pop.append(title);
     const { label, select } = selectInstrument(note.instrumentId, 'Nhạc cụ'); pop.append(label);
+    const color = choices('Màu ghi chú', note.color || 'yellow', [
+      { id: 'yellow', name: 'Nhắc nhở' }, { id: 'blue', name: 'Kỹ thuật' }, { id: 'red', name: 'Quan trọng' },
+      { id: 'green', name: 'Hiệu quả' }, { id: 'purple', name: 'Nâng cao' }
+    ]);
+    const icons = ['', '🎹', '🎵', '⚡', '🐢', '⚠️', '🔄'];
+    if (note.icon && !icons.includes(note.icon)) icons.push(note.icon);
+    const icon = choices('Biểu tượng ghi chú', note.icon || '', icons.map(id => ({ id, name: id || 'Không biểu tượng' })));
+    pop.append(color.label, icon.label);
     const textLabel = element('label', 'Nội dung ghi chú'), text = element('textarea'); text.maxLength = 500; text.rows = 4;
     text.value = note.text || ''; textLabel.append(text); pop.append(textLabel);
     const error = element('p'); error.setAttribute('role', 'alert'); pop.append(error);
@@ -114,7 +126,7 @@ window.AnnotationPanel = (() => {
       if (!remove && !text.value.trim()) { error.textContent = 'Hãy nhập nội dung ghi chú.'; text.focus(); return; }
       pop.querySelectorAll('button,select,textarea').forEach(node => { node.disabled = true; });
       try {
-        await actions.save({ ...note, instrumentId: select.value, text: text.value.trim() }, remove);
+        await actions.save({ ...note, instrumentId: select.value, text: text.value.trim(), color: color.select.value, icon: icon.select.value }, remove);
         if (dialog === pop) closeEditor();
       } catch (e) { error.textContent = e.message; }
       finally { pop.querySelectorAll('button,select,textarea').forEach(node => { node.disabled = false; }); }

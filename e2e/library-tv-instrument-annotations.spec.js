@@ -275,3 +275,16 @@ test('switching to chord editing ends instrument annotation editing', async ({ p
   await expect(page.locator('.ano-dot-btn')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Soạn ghi chú', exact: true })).toBeVisible();
 });
+
+test('the new editor retains existing color and icon authoring', async ({ page }) => {
+  await setup(page, true);
+  await page.locator('[data-annotation-id="g1"] [data-action="edit"]').click();
+  await page.getByLabel('Màu ghi chú', { exact: true }).selectOption('blue');
+  await page.getByLabel('Biểu tượng ghi chú', { exact: true }).selectOption('🎹');
+  await page.getByRole('button', { name: 'Lưu ghi chú', exact: true }).click();
+  await expect(page.getByRole('dialog')).not.toBeVisible();
+  expect(await page.evaluate(() => saved.at(-1).list.find(note => note.id === 'g1'))).toMatchObject({ color: 'blue', icon: '🎹' });
+  await page.locator('[data-annotation-id="g1"] [data-action="edit"]').click();
+  await expect(page.getByLabel('Màu ghi chú', { exact: true })).toHaveValue('blue');
+  await expect(page.getByLabel('Biểu tượng ghi chú', { exact: true })).toHaveValue('🎹');
+});
