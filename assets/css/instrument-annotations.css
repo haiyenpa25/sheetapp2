@@ -44,7 +44,22 @@
 .ano-presets button { border-color: var(--instrument-color, #64748b); }
 
 #toolbar > .instrument-annotations { margin-left: auto; }
-#toolbar:has(> .instrument-annotations) .toolbar-left { min-width: 0; flex-shrink: 1; }
+
 @media (max-width: 680px) { #toolbar:has(> .instrument-annotations) .song-info-pill { max-width: calc(100vw - 180px); } }
 
 #toolbar .instrument-annotations > button.active { border-bottom: 4px solid var(--instrument-color); background: #fff3ba; color: #302400; }
+
+@media (max-width: 680px) {
+  #toolbar:has(> .instrument-annotations) .toolbar-left { min-width: 0; flex-shrink: 1; }
+}
+@media (min-width: 681px) and (max-width: 1100px) {
+  #toolbar.unified-toolbar:has(> .instrument-annotations) {
+    height: 92px !important; min-height: 92px !important; flex-wrap: wrap !important;
+    align-content: center; gap: 4px 8px; padding: 4px 10px !important;
+  }
+  #toolbar.unified-toolbar:has(> .instrument-annotations) > .toolbar-left { order: 1; }
+  #toolbar.unified-toolbar > .instrument-annotations { order: 2; }
+  #toolbar.unified-toolbar:has(> .instrument-annotations) > .toolbar-right { order: 3; }
+  #toolbar.unified-toolbar:has(> .instrument-annotations) > #toolbar-controls { order: 4; flex: 1 0 100%; width: 100%; }
+  #toolbar .instrument-annotations > button { min-width: 68px; padding-inline: .5rem; }
+}

@@ -43,6 +43,7 @@ window.AnnotationPanel = (() => {
     actions = callbacks;
     root = element('section', undefined, 'instrument-annotations'); root.id = 'instrument-annotations';
     const toggle = button('Nhạc cụ', () => setOpen(!open), root);
+    toggle.id = 'btn-instrument-annotations';
     toggle.title = 'Chọn nhạc cụ và ghi chú trên bản nhạc';
     toggle.setAttribute('aria-expanded', 'false'); toggle.setAttribute('aria-controls', 'annotation-panel-body');
     body = element('div', undefined, 'ano-menu'); body.id = 'annotation-panel-body'; body.hidden = true;
@@ -124,7 +125,7 @@ window.AnnotationPanel = (() => {
     const error = element('span'); error.setAttribute('role', 'alert'); form.append(error);
     form.addEventListener('submit', async event => {
       event.preventDefault(); submit.disabled = true;
-      try { await actions.createInstrument(input.value); instrumentNameDraft = ''; input.value = ''; } catch (e) { error.textContent = e.message; }
+      try { await actions.createInstrument(input.value); instrumentNameDraft = ''; render(state); } catch (e) { error.textContent = e.message; }
       finally { submit.disabled = false; }
     }); body.append(form);
   }

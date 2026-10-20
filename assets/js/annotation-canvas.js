@@ -217,7 +217,7 @@ const AnnotationCanvas = (() => {
     try {
       const data = await window.ApiService.annotations.saveInstrument({ instrumentId: id, name: instrument.name, color, registryRevision });
       if (token !== generation) return;
-      instruments = data.instruments; registryRevision = data.registryRevision; build();
+      instruments = data.instruments; registryRevision = data.registryRevision; error = ''; build();
     } catch (e) { error = e.message; throw e; }
     finally { saving = false; updatePanel(); }
   }

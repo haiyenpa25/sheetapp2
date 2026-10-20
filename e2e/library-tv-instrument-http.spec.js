@@ -78,7 +78,7 @@ for (const classic of [false, true]) {
     await page.getByRole('button', { name: 'Nhạc cụ', exact: true }).click();
     await page.getByRole('button', { name: 'Chọn tất cả', exact: true }).click();
     await page.getByLabel('Nhạc cụ đang soạn').selectOption('drums');
-    await page.getByLabel('Màu nhạc cụ', { exact: true }).fill('#0e7490');
+    await page.getByLabel('Màu nhạc cụ', { exact: true }).evaluate(input => { input.value = '#0e7490'; input.dispatchEvent(new Event('input', { bubbles: true })); });
     await page.getByRole('button', { name: 'Lưu màu nhạc cụ', exact: true }).click();
     await expect(page.getByLabel('Màu nhạc cụ', { exact: true })).toHaveValue('#0e7490');
     await page.getByRole('button', { name: 'Ghi chú', exact: true }).click();

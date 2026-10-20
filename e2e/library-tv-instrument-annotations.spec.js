@@ -358,4 +358,8 @@ test('a pending instrument color survives sheet redraws and save errors', async 
   await page.getByRole('button', { name: 'Lưu màu nhạc cụ', exact: true }).click();
   await expect(page.locator('#annotation-panel-body [role=alert]').first()).toContainText('Không lưu được màu');
   await expect(page.getByLabel('Màu nhạc cụ', { exact: true })).toHaveValue('#123456');
+  await page.evaluate(() => { ApiService.annotations.saveInstrument = async payload => ({ instruments: [{ id: 'guitar', name: 'Guitar', color: payload.color }, { id: 'drums', name: 'Trống', color: '#c2410c' }], registryRevision: 'i2' }); });
+  await page.getByRole('button', { name: 'Lưu màu nhạc cụ', exact: true }).click();
+  await expect(page.locator('#annotation-panel-body p[role=alert]')).toHaveCount(0);
+  await expect(page.getByLabel('Màu nhạc cụ', { exact: true })).toHaveValue('#123456');
 });
