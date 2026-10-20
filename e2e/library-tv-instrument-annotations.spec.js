@@ -350,18 +350,18 @@ test('a pending instrument color survives sheet redraws and save errors', async 
   await setup(page, true);
   await page.getByLabel('Nhạc cụ đang soạn').selectOption('guitar');
   // WebKit's headless color input lacks a native picker; dispatch its value-change event.
-  await page.getByLabel('Màu nhạc cụ', { exact: true }).evaluate(input => { input.value = '#123456'; input.dispatchEvent(new Event('input', { bubbles: true })); });
+  await page.getByLabel('Màu nhạc cụ', { exact: true }).evaluate(input => { input.value = '#284b63'; input.dispatchEvent(new Event('input', { bubbles: true })); });
   await page.evaluate(() => AnnotationCanvas.reposition());
   await page.waitForTimeout(200);
-  await expect(page.getByLabel('Màu nhạc cụ', { exact: true })).toHaveValue('#123456');
+  await expect(page.getByLabel('Màu nhạc cụ', { exact: true })).toHaveValue('#284b63');
   await page.evaluate(() => { ApiService.annotations.saveInstrument = async () => { throw new Error('Không lưu được màu'); }; });
   await page.getByRole('button', { name: 'Lưu màu nhạc cụ', exact: true }).click();
   await expect(page.locator('#annotation-panel-body [role=alert]').first()).toContainText('Không lưu được màu');
-  await expect(page.getByLabel('Màu nhạc cụ', { exact: true })).toHaveValue('#123456');
+  await expect(page.getByLabel('Màu nhạc cụ', { exact: true })).toHaveValue('#284b63');
   await page.evaluate(() => { ApiService.annotations.saveInstrument = async payload => ({ instruments: [{ id: 'guitar', name: 'Guitar', color: payload.color }, { id: 'drums', name: 'Trống', color: '#c2410c' }], registryRevision: 'i2' }); });
   await page.getByRole('button', { name: 'Lưu màu nhạc cụ', exact: true }).click();
   await expect(page.locator('#annotation-panel-body p[role=alert]')).toHaveCount(0);
-  await expect(page.getByLabel('Màu nhạc cụ', { exact: true })).toHaveValue('#123456');
+  await expect(page.getByLabel('Màu nhạc cụ', { exact: true })).toHaveValue('#284b63');
 });
 
 
@@ -382,13 +382,13 @@ test('editor saves a custom note color and leaves other notes unchanged', async 
 test('custom note color survives a failed save and can return to instrument color', async ({ page }) => {
   await setup(page, true);
   await page.locator('[data-annotation-id="g1"] [data-action="edit"]').click();
-  await page.getByLabel('Màu ghi chú', { exact: true }).evaluate(input => { input.value = '#123456'; input.dispatchEvent(new Event('input', { bubbles: true })); });
+  await page.getByLabel('Màu ghi chú', { exact: true }).evaluate(input => { input.value = '#284b63'; input.dispatchEvent(new Event('input', { bubbles: true })); });
   await page.getByLabel('Nhạc cụ', { exact: true }).selectOption('drums');
-  await expect(page.getByLabel('Màu ghi chú', { exact: true })).toHaveValue('#123456');
+  await expect(page.getByLabel('Màu ghi chú', { exact: true })).toHaveValue('#284b63');
   await page.evaluate(() => { failSave = true; });
   await page.getByRole('button', { name: 'Lưu ghi chú', exact: true }).click();
   await expect(page.getByRole('dialog').getByRole('alert')).toContainText('Mất mạng');
-  await expect(page.getByLabel('Màu ghi chú', { exact: true })).toHaveValue('#123456');
+  await expect(page.getByLabel('Màu ghi chú', { exact: true })).toHaveValue('#284b63');
   await page.getByRole('button', { name: 'Theo màu nhạc cụ', exact: true }).click();
   await expect(page.getByLabel('Màu ghi chú', { exact: true })).toHaveValue('#c2410c');
   await page.evaluate(() => { failSave = false; });
@@ -401,4 +401,17 @@ test('starting note authoring remembers visible layers for reload and interface 
   await setup(page, true);
   await page.getByRole('button', { name: 'Ghi chú', exact: true }).click();
   expect(await page.evaluate(() => localStorage.getItem('sheetapp_annotation_layers'))).toBe('null');
+});
+
+
+test('mobile note editor stays centered even when the application resets element margins', async ({ page }) => {
+  await setup(page, true);
+  await page.addStyleTag({ content: '* { margin: 0; }' });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.locator('[data-annotation-id="g1"] [data-action="edit"]').click();
+  const bounds = await page.getByRole('dialog').boundingBox();
+  expect(bounds.x).toBeGreaterThanOrEqual(10);
+  expect(Math.abs(bounds.x + bounds.width / 2 - 195)).toBeLessThan(2);
+  expect(bounds.y).toBeGreaterThanOrEqual(10);
+  expect(bounds.y + bounds.height).toBeLessThanOrEqual(834);
 });

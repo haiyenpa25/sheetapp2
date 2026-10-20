@@ -19,7 +19,7 @@
 .ano-dot[data-color=red] { background: #ffe0e0; border-color: #9e3030; color: #6c1919; }
 .ano-dot[data-color=green] { background: #dcf5e7; border-color: #267d4d; color: #154c30; }
 .ano-dot[data-color=purple] { background: #eee1ff; border-color: #7244a6; color: #4c2474; }
-.ano-editor { box-sizing: border-box; width: min(420px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow: auto; color: var(--text-primary, #222); background: var(--bg-surface, #fff); border: 1px solid var(--border, #aaa); border-radius: 10px; padding: 1rem; }
+.ano-editor { margin: auto; box-sizing: border-box; width: min(420px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow: auto; color: var(--text-primary, #222); background: var(--bg-surface, #fff); border: 1px solid var(--border, #aaa); border-radius: 10px; padding: 1rem; }
 .ano-editor::backdrop { background: rgb(0 0 0 / 40%); }
 .ano-editor h2 { margin: 0 0 .75rem; font-size: 1.1rem; }
 .ano-editor label { display: grid; gap: .35rem; margin: .65rem 0; }

@@ -85,11 +85,12 @@ for (const classic of [false, true]) {
     await expect(page.locator('.ano-dot-btn')).toHaveCount(await page.evaluate(() => AnnotationGeometry.anchors().length));
     await page.locator('.ano-dot-btn').first().click();
     await page.getByLabel('Nội dung ghi chú').fill('Fill trước điệp khúc');
+    await page.getByRole('button', { name: 'Màu đỏ', exact: true }).click();
     await page.getByRole('button', { name: 'Lưu ghi chú', exact: true }).click();
     await expect(page.getByRole('dialog')).not.toBeVisible();
     await expect(page.locator('.ano-dot')).toHaveCount(1);
     const doc = await document();
-    expect(doc.annotations[0]).toMatchObject({ instrumentId: 'drums', text: 'Fill trước điệp khúc', measureIdx: 0, staffIdx: 0 });
+    expect(doc.annotations[0]).toMatchObject({ instrumentId: 'drums', text: 'Fill trước điệp khúc', customColor: '#e11d48', measureIdx: 0, staffIdx: 0 });
     expect(doc.annotations[0].scoreFingerprint).toMatch(/^[a-f0-9]{8}$/);
     expect(doc.instruments.find(item => item.id === 'drums').color).toBe('#0e7490');
     expect(doc.annotations[0].beat).toMatch(/^\d+\/\d+$/);
@@ -101,6 +102,7 @@ for (const classic of [false, true]) {
     for (const width of [1366, 820, 390, 360]) {
       await page.setViewportSize({ width, height: 844 });
       await expect(page.locator('.ano-dot')).toHaveCount(1);
+      await expect(page.locator('.ano-dot')).toHaveCSS('border-left-color', 'rgb(225, 29, 72)');
       await expect(page.locator('#toolbar #instrument-annotations > button')).toBeInViewport();
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
     }
@@ -150,5 +152,52 @@ for (const classic of [false, true]) {
       }).toPass({ timeout: 5000 });
       await page.screenshot({ path: `test-results/instrument-annotations/${classic ? 'classic' : 'modern'}-${width}.png` });
     }
+  });
+}
+
+
+for (const fromClassic of [false, true]) {
+  test(`${fromClassic ? 'Classic to Modern' : 'Modern to Classic'} shares note colors and keeps viewing context`, async ({ page, context }) => {
+    test.setTimeout(45000);
+    await reset();
+    await context.addCookies([{ name: 'PHPSESSID', value: session, domain: 'localhost', path: '/' }]);
+    await page.goto(`${base}/${fromClassic ? 'old/' : ''}?song=${songId}&v=sheet&t=2&set=HD`);
+    await expect(page.locator('#osmd-container svg').first()).toBeVisible();
+    await expect.poll(() => page.evaluate(() => Auth.isAdmin())).toBe(true);
+    await page.getByRole('button', { name: 'Nhạc cụ', exact: true }).click();
+    await page.getByLabel('Nhạc cụ đang soạn').selectOption('drums');
+    await page.getByRole('button', { name: 'Ghi chú', exact: true }).click();
+    await page.locator('.ano-dot-btn').first().click();
+    await page.getByLabel('Nội dung ghi chú').fill('Ghi chú liên thông');
+    await page.getByRole('button', { name: 'Màu tím', exact: true }).click();
+    await page.getByRole('button', { name: 'Lưu ghi chú', exact: true }).click();
+    await expect(page.locator('.ano-dot')).toHaveCSS('border-left-color', 'rgb(126, 34, 206)');
+    const switchUi = async classic => {
+      if (classic) await page.locator('#btn-switch-new-ui').click();
+      else { await page.locator('#btn-more-options').click(); await page.locator('#btn-menu-old-ui').click(); }
+      await expect.poll(() => new URL(page.url()).pathname).toBe(new URL(base).pathname.replace(/\/$/, '') + (classic ? '/' : '/old/'));
+      expect(new URL(page.url()).searchParams.get('song')).toBe(songId);
+      expect(new URL(page.url()).searchParams.get('v')).toBe('sheet');
+      expect(new URL(page.url()).searchParams.get('t')).toBe('2');
+      await expect(page.locator('#osmd-container svg').first()).toBeVisible();
+      await expect(page.locator('.ano-dot')).toHaveCount(1);
+    };
+    await switchUi(fromClassic);
+    await expect(page.locator('.ano-dot')).toHaveCSS('border-left-color', 'rgb(126, 34, 206)');
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.locator('.ano-dot').click();
+    await page.locator('[data-annotation-id] [data-action=edit]').click();
+    await expect(page.getByLabel('Màu ghi chú', { exact: true })).toHaveValue('#7e22ce');
+    const editorBounds = await page.getByRole('dialog').boundingBox();
+    expect(editorBounds.x).toBeGreaterThanOrEqual(10);
+    expect(Math.abs(editorBounds.x + editorBounds.width / 2 - 195)).toBeLessThan(2);
+    expect(editorBounds.y).toBeGreaterThanOrEqual(10);
+    expect(editorBounds.y + editorBounds.height).toBeLessThanOrEqual(834);
+    await page.getByRole('button', { name: 'Màu đỏ', exact: true }).click();
+    await page.screenshot({ path: `test-results/instrument-annotations/color-editor-${fromClassic ? 'modern' : 'classic'}.png` });
+    await page.getByRole('button', { name: 'Lưu ghi chú', exact: true }).click();
+    await switchUi(!fromClassic);
+    await expect(page.locator('.ano-dot')).toHaveCSS('border-left-color', 'rgb(225, 29, 72)');
+    expect((await document()).annotations[0].customColor).toBe('#e11d48');
   });
 }
