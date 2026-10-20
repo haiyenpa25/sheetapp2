@@ -415,3 +415,14 @@ test('mobile note editor stays centered even when the application resets element
   expect(bounds.y).toBeGreaterThanOrEqual(10);
   expect(bounds.y + bounds.height).toBeLessThanOrEqual(834);
 });
+
+
+test('changing an instrument default repaints inherited notes immediately and keeps custom colors', async ({ page }) => {
+  await setup(page, true, [notes[0], { ...notes[2], id: 'pinned', instrumentId: 'guitar', customColor: '#7e22ce' }]);
+  await page.getByLabel('Nhạc cụ đang soạn').selectOption('guitar');
+  await page.getByLabel('Màu nhạc cụ', { exact: true }).evaluate(input => { input.value = '#0e7490'; input.dispatchEvent(new Event('input', { bubbles: true })); });
+  await page.evaluate(() => { ApiService.annotations.saveInstrument = async () => ({ instruments: [{ id: 'general', name: 'Chung' }, { id: 'guitar', name: 'Guitar', color: '#0e7490' }], registryRevision: 'i2' }); });
+  await page.getByRole('button', { name: 'Lưu màu nhạc cụ', exact: true }).click();
+  await expect(page.locator('.ano-dot[data-note-id=g1]')).toHaveCSS('border-left-color', 'rgb(14, 116, 144)');
+  await expect(page.locator('.ano-dot[data-note-id=pinned]')).toHaveCSS('border-left-color', 'rgb(126, 34, 206)');
+});

@@ -70,7 +70,7 @@ const AnnotationCanvas = (() => {
     notes = data.annotations; revision = data.revision;
     instruments = data.instruments || instruments; registryRevision = data.registryRevision || registryRevision;
     if (!instruments.some(item => item.id === instrumentId)) instrumentId = instruments[0]?.id || 'general';
-    loaded = true; error = '';
+    loaded = true; error = ''; updatePanel();
   }
   async function ensureLoaded() {
     if (!songId) return;
@@ -218,7 +218,7 @@ const AnnotationCanvas = (() => {
     try {
       const data = await window.ApiService.annotations.saveInstrument({ instrumentId: id, name: instrument.name, color, registryRevision });
       if (token !== generation) return;
-      instruments = data.instruments; registryRevision = data.registryRevision; error = ''; build();
+      instruments = data.instruments; registryRevision = data.registryRevision; error = ''; updatePanel(); build();
     } catch (e) { error = e.message; throw e; }
     finally { saving = false; updatePanel(); }
   }
@@ -227,7 +227,7 @@ const AnnotationCanvas = (() => {
     const token = generation;
     const data = await window.ApiService.annotations.saveInstrument({ name, registryRevision });
     if (token !== generation) return;
-    instruments = data.instruments; registryRevision = data.registryRevision; build();
+    instruments = data.instruments; registryRevision = data.registryRevision; updatePanel(); build();
   }
   function reposition() { clearTimeout(renderTimer); renderTimer = setTimeout(build, 150); }
   function onOSMDRendered() { reposition(); }
