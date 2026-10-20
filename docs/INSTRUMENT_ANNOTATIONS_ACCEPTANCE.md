@@ -82,3 +82,11 @@ Theo yêu cầu chốt lại trong hội thoại: toolbar → nhạc cụ → Gh
 Bằng chứng đợt này: [PHP](instrument-annotations-evidence/toolbar-php-final.txt), [trình duyệt](instrument-annotations-evidence/toolbar-browser-final.txt), [lỗi tái hiện trước sửa](instrument-annotations-evidence/toolbar-browser-red.txt).
 
 Cập nhật bàn giao local: chuyển checkout `C:/xampp/htdocs/sheetapp2` từ main sang nhánh đã kiểm tra `feature/roadmap5` để URL `http://localhost/sheetapp2/` có chức năng. Đây là đổi nhánh local; không merge main hay triển khai production. Bản gốc main vẫn giữ commit `623b745`. Backup DB/annotations tại `C:/xampp/sheetapp2-backups/instrument-toolbar-20261020-105222`; backup integrity `ok`, DB SHA256 `A91268B27DF548845C67B8F375C2D13B5899FFA4716BA99A00D59E4BC157CAC9`. Các dòng bàn giao trước mục này mô tả trạng thái phiên bản cũ.
+
+## Phát hành main và dọn bản thử — 2026-10-20
+
+Chủ dự án đã yêu cầu trực tiếp đưa bản hoàn tất lên main và chỉ giữ một source chính. Main được fast-forward tới mã `9bbea63` đã kiểm thử ở trên; việc phát hành không sửa mã ứng dụng. Checkout chính ở `C:/xampp/htdocs/sheetapp2` trên main, URL chính `http://localhost/sheetapp2/`, cùng chế độ Classic tại `/old/`.
+
+Bảy thư mục `sheetapp2-instrument-php-20261020`, `sheetapp2-roadmap6-check-20261018-130707`, `sheetapp2-roadmap6-final-20261018-133659`, `sheetapp2-roadmap6-import-20261018-133307`, `sheetapp2-roadmap6-oct19-061901`, `sheetapp2-roadmap6-review-20261018-215048`, `sheetapp2-roadmap6-work` đã được chuyển khỏi htdocs, vào `C:/xampp/sheetapp2-backups/source-archive-20261020-110530`. Source chính và DB thật được giữ nguyên. Worktree trong bản lưu trữ là detached, không chiếm nhánh main.
+
+Các URL thử nghiệm/lệnh chạy ở những mục lịch sử phía trên không còn là các server đang phục vụ. Khi tái kiểm HTTP, tạo bản cài cô lập có DB/storage riêng, marker `.roadmap6-isolated`, rồi truyền URL/root tương ứng; không trỏ bộ test vào source chính. Bằng chứng kiểm thử được giữ trong Git tại `docs/instrument-annotations-evidence/`. Đây là xuất bản lên GitHub main và dọn source local; không tự xác nhận server production đã triển khai.

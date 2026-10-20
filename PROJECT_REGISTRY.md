@@ -1,5 +1,12 @@
 # PROJECT_REGISTRY.md — Sơ Đồ Dự Án SheetApp
 
+## 2026-10-20 — Đưa bản chính lên main và dọn các bản thử
+
+- Theo yêu cầu trực tiếp của chủ dự án, main được fast-forward tới bản đã nghiệm thu `9bbea63`, giữ nguyên mã đã đạt PHP 175 suite/3.427 check, Chromium 124/124 và WebKit 24/24. Checkout chính `C:/xampp/htdocs/sheetapp2` chuyển sang main; không chạy sync.
+- Đưa 7 bản cài/worktree thử nghiệm ra khỏi `C:/xampp/htdocs`, vào `C:/xampp/sheetapp2-backups/source-archive-20261020-110530`. Trong htdocs chỉ còn một bản SheetApp2: `sheetapp2`. Worktree lưu trữ ở chế độ detached, ngoài webroot.
+- Modern `/` và Classic `/old/` là hai chế độ của cùng bản chính, tiếp tục được giữ theo quyết định của chủ dự án. Không xóa dữ liệu thật; DB giữ SHA256 `A91268B27DF548845C67B8F375C2D13B5899FFA4716BA99A00D59E4BC157CAC9`, có thêm bản sao trong thư mục lưu trữ trên.
+
+
 ## 2026-10-20 — Toolbar ghi chú nhạc cụ, màu dùng chung
 
 - Luồng mới cả Modern/Classic: Nhạc cụ trên toolbar → chọn nhạc cụ → Ghi chú → + vàng phía trên hợp âm → mẫu/chữ tự do → lưu; bấm nhãn sửa trực tiếp.
