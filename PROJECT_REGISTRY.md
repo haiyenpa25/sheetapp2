@@ -6,6 +6,8 @@
 - Nhãn sheet, thẻ chi tiết và viền editor cùng dùng màu hiệu lực. Editor căn giữa trên điện thoại, mở gần nốt trên màn hình rộng. Metadata màu/icon cũ được giữ.
 - Chuyển giao diện giữ bài, tông, kiểu xem/lời, bộ hợp âm và compact; bắt đầu soạn nhớ lớp đang hiện. Thêm `URLState.interfaceUrl()` dùng chung ba liên kết chuyển giao diện và test `e2e/library-tv-interface-links.spec.js`.
 - PHP service kiểm tra hex và lưu màu riêng cùng cơ chế revision hiện hữu; không migration DB, không đổi quyền. Xem kết quả và bằng chứng ở mục mới nhất trong `docs/INSTRUMENT_ANNOTATIONS_ACCEPTANCE.md`.
+- Nghiệm thu bản cuối: PHP 175/175 suite / 3.434 check; Chromium 133/133, WebKit 34/34; thành phần riêng 48/48; JS syntax 331 file và ESLint PASS. Vá việc đổi màu mặc định chưa cập nhật nhãn ngay; màu riêng giữ nguyên. SW hash `cfb9c9eb0c`. Bản cài thử đã đưa lại ra ngoài webroot, DB nguồn giữ checksum.
+
 
 
 ## 2026-10-20 — Đưa bản chính lên main và dọn các bản thử

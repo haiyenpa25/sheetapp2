@@ -100,3 +100,15 @@ Editor có sáu màu mẫu, màu tùy chọn, xem trước và nút **Theo màu 
 `URLState.interfaceUrl()` dùng chung cho các liên kết chuyển giao diện, giữ bài đang mở cùng các tham số tông, sheet/lời, kiểu lời, bộ hợp âm và compact trong URL. Khi bắt đầu soạn, client nhớ lớp hiển thị để khi chuyển giao diện/tải lại trang thì ghi chú được tải lại. Ca HTTP ghi màu tím ở giao diện đầu, chuyển giao diện giữ tông/chế độ xem, đổi sang màu đỏ rồi quay lại; chạy ở cả hai chiều và hai engine. Có thêm ca ở 390 px kiểm tra editor nằm giữa và vừa màn hình.
 
 Đợt kiểm tra đầu phát hiện guard mật khẩu quét chuỗi cũng nhận nhầm mã màu mẫu `#123456` trong test. Đã dùng mẫu màu `#284b63`; không sửa hay bỏ guard. Các ca mật khẩu được chạy lại; không đổi chính sách mật khẩu.
+
+Rà soát cuối phát hiện nhãn đang theo màu nhạc cụ chưa đổi ngay khi cập nhật registry. Đã đồng bộ trạng thái panel trước khi vẽ lại sheet; ca hồi quy xác nhận màu mặc định đổi ngay và ghi chú có màu riêng giữ nguyên.
+
+Kết quả bản cuối sau bản vá trên:
+
+- PHP: **175/175 suite, 3.434 check (2.731 hành vi, 703 static), 333 PHP lint**, không skip/fail, chạy trên bản cài cô lập.
+- Chromium: **133/133** ca hồi quy ROADMAP6. WebKit headless: **34/34** ca ghi chú/liên kết/PWA. Bộ thành phần riêng: **48/48** trên hai engine (24 mỗi engine); đây là lượt kiểm tra riêng, không cộng vào số ca duy nhất.
+- JS syntax: **331 file PASS**; ESLint các module sửa PASS. SW manifest hash `cfb9c9eb0c`.
+- Chín file runtime đã đối chiếu hash giữa source chính và bản cài HTTP được kiểm thử, đều khớp. Hai bản cài kiểm thử đã chuyển lại vào `C:/xampp/sheetapp2-backups/source-archive-20261020-110530`; htdocs chỉ còn `sheetapp2`. DB nguồn giữ SHA256 `A91268B27DF548845C67B8F375C2D13B5899FFA4716BA99A00D59E4BC157CAC9`.
+- WebKit headless không xác nhận Safari/iPad phần cứng; thao tác màu được kiểm tra bằng sự kiện input của picker. Chưa xác nhận triển khai server production.
+
+Bằng chứng bản cuối: [PHP](instrument-annotations-evidence/note-colors-php-final.txt), [trình duyệt và cú pháp](instrument-annotations-evidence/note-colors-browser-final.txt), [lỗi tái hiện trước sửa](instrument-annotations-evidence/note-colors-red.txt). Các số liệu và trạng thái bàn giao trong mục này thay thế những mục lịch sử phía trên.
