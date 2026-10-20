@@ -15,7 +15,9 @@ const ServiceWorkerManager = (() => {
       try {
         const appBase = (typeof window.__APP_BASE__ === 'string') ? window.__APP_BASE__ : '';
         const swVer = (typeof window !== 'undefined' && window.SHEETAPP_CACHE_VERSION) ? window.SHEETAPP_CACHE_VERSION : 'v5';
-        const swUrl = (appBase ? appBase : '') + '/sw.js?v=' + encodeURIComponent(swVer);
+        // CDN giữ nguyên bản sw.js theo URL: gắn mốc sửa đổi của sw.js để mỗi bản mới có URL riêng.
+        const swRev = (typeof window.__SW_REV__ === 'string' && window.__SW_REV__) ? '&r=' + encodeURIComponent(window.__SW_REV__) : '';
+        const swUrl = (appBase ? appBase : '') + '/sw.js?v=' + encodeURIComponent(swVer) + swRev;
         const swScope = (appBase ? appBase : '') + '/';
         const reg = await navigator.serviceWorker.register(swUrl, { scope: swScope });
 

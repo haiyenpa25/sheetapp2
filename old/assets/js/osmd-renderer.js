@@ -408,6 +408,9 @@ const OSMDRenderer = (() => {
    * Tinh chỉnh title SVG sau render — ẩn title bị duplicate, style đẹp hơn.
    * XML Finale xuất ra: <movement-title> + <credit-words> cùng nội dung → OSMD vẽ chồng.
    */
+  // Cùng mẫu với assets/js/osmd-svg-text.js (bản mới)
+  const CHORD_TEXT_REGEX = /^[A-G][b#]?(m|maj|min|dim|aug|sus|add|M)?[0-9]?(\/[A-G][b#]?)?$/;
+
   function _compactTitleSVG() {
     if (_titleCompacted) return;
     const container = document.getElementById(containerId);
@@ -415,10 +418,10 @@ const OSMDRenderer = (() => {
     const svg = container.querySelector('svg');
     if (!svg) return;
 
-    // Lấy tất cả text elements, bỏ chord symbols
+    // Lấy tất cả text elements, bỏ chord symbols (hợp âm đầu bài có thể to bằng tiêu đề → bị tô nhầm màu tiêu đề)
     const texts = Array.from(svg.querySelectorAll('text')).filter(t => {
       const ff = t.getAttribute('font-family') || '';
-      return !ff.includes('OSMDChordFont');
+      return !ff.includes('OSMDChordFont') && !CHORD_TEXT_REGEX.test(t.textContent.trim());
     });
     if (!texts.length) { _titleCompacted = true; return; }
 

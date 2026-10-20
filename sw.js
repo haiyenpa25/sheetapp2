@@ -11,7 +11,7 @@
 
 const urlParams      = new URLSearchParams(self.location.search);
 const SW_VERSION     = urlParams.get('v') || 'v5';
-const SW_MANIFEST_HASH = 'cfb9c9eb0c';
+const SW_MANIFEST_HASH = '487476ff21';
 const CACHE_VENDOR   = `sheetapp-vendor-${SW_VERSION}`;
 const CACHE_APP      = `sheetapp-app-${SW_VERSION}-${SW_MANIFEST_HASH}`;
 const CACHE_MUSICXML = `sheetapp-musicxml-${SW_VERSION}`;
@@ -85,11 +85,18 @@ const PRECACHE_APP = [
 
 async function safeAddAll(cache, urls) {
   return Promise.all(
-    urls.map(url =>
-      cache.add(url).catch(err => {
+    urls.map(async url => {
+      try {
+        // URL trơn bị CDN (Cloudflare) giữ tới 7 ngày: thêm hash manifest để luôn lấy bản mới từ origin,
+        // nhưng lưu dưới URL gốc để các lượt match ignoreSearch vẫn tìm thấy.
+        const busted = url + (url.includes('?') ? '&' : '?') + 'swv=' + SW_MANIFEST_HASH;
+        const response = await fetch(busted, { cache: 'reload' });
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        await cache.put(url, response);
+      } catch (err) {
         console.warn('[SW] Failed to cache:', url, err);
-      })
-    )
+      }
+    })
   );
 }
 
@@ -257,16 +264,18 @@ async function networkFirstWithQuota(request, cacheName, maxItems = 60) {
 /** Stale While Revalidate: trả cache ngay, update ngầm */
 async function staleWhileRevalidate(request, cacheName) {
   const cache = await caches.open(cacheName);
-  let cached = await cache.match(request);
-  if (!cached) {
-    cached = await cache.match(request, { ignoreSearch: true });
-  }
+  const cached = await cache.match(request);
   const fetchPromise = fetch(request).then(response => {
     if (response.ok) cache.put(request, response.clone());
     return response;
   }).catch(() => null);
 
-  return cached ?? (await fetchPromise);
+  if (cached) return cached;
+  // Trang xin phiên bản mới (?v=...) mà cache chưa có đúng bản đó: ưu tiên mạng để HTML và JS/CSS
+  // không lệch phiên bản; chỉ dùng bản cũ bỏ qua query khi mất mạng.
+  const fresh = await fetchPromise;
+  if (fresh) return fresh;
+  return (await cache.match(request, { ignoreSearch: true })) ?? Response.error();
 }
 
 /** Network First cho điều hướng: khi offline trả app shell đã cache, bỏ qua query string */

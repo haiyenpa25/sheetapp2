@@ -72,7 +72,7 @@ class SongController {
                     // ApiService unwraps data for LibraryUI; hash and body use the same public cache snapshot.
                     $isGuest = !Auth::isBanhat() && !Auth::isAdmin();
                     if ($isGuest) {
-                        $cacheFile = __DIR__ . '/../../storage/data/songs_cache.json';
+                        $cacheFile = SongService::cachePath();
                         if (!file_exists($cacheFile) || (time() - filemtime($cacheFile) >= 3600)) {
                             SongService::writePublicCache();
                         }

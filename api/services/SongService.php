@@ -34,8 +34,23 @@ class SongService {
         return null;
     }
 
-    private static function cachePath(): string {
-        return __DIR__ . '/../../storage/data/songs_cache.json';
+    public static function cachePath(): string {
+        $default = __DIR__ . '/../../storage/data/songs_cache.json';
+        try {
+            $rows = DB::get()->query('PRAGMA database_list')->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Throwable $e) {
+            return $default;
+        }
+        $file = '';
+        foreach ($rows as $row) {
+            if (($row['name'] ?? '') === 'main') $file = (string)($row['file'] ?? '');
+        }
+        $prodDb = realpath(__DIR__ . '/../../storage/data/app.sqlite');
+        $realFile = $file !== '' ? (realpath($file) ?: $file) : '';
+        if ($prodDb !== false && $realFile === $prodDb) return $default;
+        // DB bản sao (test, staging, CLI --db) hoặc in-memory: cache riêng, nếu không khách sẽ thấy danh sách của DB khác.
+        $key = $realFile !== '' ? $realFile : 'memory-' . getmypid() . '-' . spl_object_id(DB::get());
+        return sys_get_temp_dir() . '/sheetapp_songs_cache_' . md5($key) . '.json';
     }
 
     public static function invalidateCache(): void {

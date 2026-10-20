@@ -1,5 +1,16 @@
 # PROJECT_REGISTRY.md — Sơ Đồ Dự Án SheetApp
 
+## 2026-10-20 — Rà soát hiển thị Modern/Classic trên điện thoại, iPad, máy tính (server sheet.hyb.io.vn)
+
+- Quyền: 398 file thuộc root (gồm `songs_cache.json`, 81 object `.git`) đã trả về `sheet5566`; mọi lệnh kiểm thử chạy bằng `sheet5566`.
+- Cache danh sách bài: `SongService::cachePath()` chỉ dùng `storage/data/songs_cache.json` khi kết nối là DB production; DB bản sao/test/in-memory ghi cache riêng trong thư mục tạm. Trước đó test/CLI với DB khác ghi đè cache thật (khách thấy 1.731 bài/7 danh mục trong khi DB có 903).
+- Service Worker: precache thêm `?swv=<hash>` để vượt cache Cloudflare; asset có `?v=` mà cache không khớp thì lấy mạng trước (chỉ dùng bản cũ khi offline); trang đăng ký `sw.js?...&r=<filemtime>`. Khắc phục lỗi trộn HTML mới + JS/CSS cũ (vd. `URLState.interfaceUrl is not a function`). Server là OpenLiteSpeed: `Header set` trong `.htaccess` không có hiệu lực.
+- Modern điện thoại: ô tên bài co theo flex, không đè nút ⋯ (360–430px); ẩn nhãn danh mục khi ≤ 430px.
+- Classic: HD rỗng hiện TLH (Core Rule 1); hợp âm đầu bài không bị nhận nhầm là tiêu đề; điện thoại tự co zoom ≤ 75% như Modern; export `window.ChordCanvasUI/AppUI/PageNav/AdminUI` (thiếu `ChordCanvasUI` làm mọi ngưỡng căn hợp âm luôn tính như zoom 100%).
+- Căn hợp âm HD (cả hai): cộng dồn đoạn dòng kẻ cùng hàng để không sót hệ có ô nhịp ngắn; Classic lọc nốt theo hệ gần nhất và bỏ lọc theo viewport.
+- Kiểm chứng (Chromium headless): 5.000+ lượt đặt hợp âm HD qua 50–200% hai giao diện, máy tính và điện thoại; 10 tổ hợp thiết bị không tràn ngang/chồng lấn/lỗi console. PHP suite: không có suite FAIL mới so với HEAD trên cùng server (19 suite FAIL sẵn do môi trường CLI/HTTP, cũng FAIL ở HEAD). DB nguồn giữ nguyên checksum. Chưa commit.
+- Còn mở: điện thoại zoom ≥ 125% làm OSMD nén nốt chồng nhau (cả hai giao diện) — chờ chủ dự án chọn hướng.
+
 ## 2026-10-20 — Màu riêng từng ghi chú, liên thông Classic/Modern trên main
 
 - Theo lựa chọn chủ dự án: từng ghi chú có `customColor` tùy chọn, mặc định theo nhạc cụ. Ô soạn có bảng màu/tùy chọn và nút quay về màu nhạc cụ; giữ bản nháp màu khi lỗi, không đổi các ghi chú khác.

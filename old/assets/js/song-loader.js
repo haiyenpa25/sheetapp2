@@ -248,7 +248,9 @@ const SongLoader = (() => {
 
     const ratio = avail / svgW;
     // Snap sang bước zoom gần nhất (10%, 15%, ..., 200%)
-    const pct = Math.round(Math.max(0.1, Math.min(2.0, ratio)) * 20) * 5; // bước 5%
+    let pct = Math.round(Math.max(0.1, Math.min(2.0, ratio)) * 20) * 5; // bước 5%
+    // OSMD luôn vẽ đầy khung nên ratio ≈ 1; trên điện thoại cần co như bản mới (R4-3), nếu không lời ca dính nhau
+    if (window.innerWidth <= 680 && pct > 75) pct = 75;
     // Chỉ apply autofit nếu user chưa chỉnh zoom trong session
     // (container đã được unhide trước render nên OSMD render đúng rồi)
     if (Store.get('currentZoom') === 1.0) window.App?.setZoom?.(pct);

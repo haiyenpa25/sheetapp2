@@ -204,7 +204,11 @@ const ChordCanvas = (() => {
       }
     }
 
-    if (_currentSet === 'default') {
+    // Core Rule 1: HD chưa có hợp âm (và không đang soạn) thì hiện TLH gốc thay vì để trống
+    const showTlh = _currentSet === 'default'
+      || (_currentSet === 'HD' && !Object.keys(_customChords || {}).length && !_editEnabled);
+
+    if (showTlh) {
       _styleBlockEl.textContent = '';
     } else {
       const chordColor = window.DisplaySettings?.getChordPrefs?.()?.color || '#dc2626';
@@ -220,7 +224,7 @@ const ChordCanvas = (() => {
       `;
     }
 
-    const rawChordMap = _currentSet === 'default'
+    const rawChordMap = showTlh
       ? ChordCanvasXML.readXmlChords()
       : _applyTranspose(_customChords);
 
@@ -241,7 +245,7 @@ const ChordCanvas = (() => {
     const chordTextPositions = window.ChordCanvasDots.buildChordTextPositions(dedupedMapped, container);
     dedupedMapped.forEach(m => window.ChordCanvasDots.placeDot(m, chordTextPositions, {
       editEnabled: _editEnabled,
-      currentSet: _currentSet,
+      currentSet: showTlh ? 'default' : _currentSet,
       highlightMode: _highlightMode,
       onShowPopup: _showPopup,
       onSetAddMode: setAddMode

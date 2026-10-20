@@ -29,19 +29,25 @@ const ChordCanvasDots = (() => {
     if (staveGroups.length) {
       staveGroups.forEach(g => {
         const r = g.getBoundingClientRect();
-        if (r.width > 30 * scale && r.height > 0 && r.top > 0) {
+        if (r.width > 30 * scale && r.height > 0) {
           staffLineRects.push(r.top - cRect.top);
         }
       });
     }
 
     if (!staffLineRects.length) {
-      Array.from(svg.querySelectorAll('line, path')).forEach(el => {
+      // Dòng kẻ khuông được vẽ theo từng ô nhịp (và mỗi trang một SVG): cộng dồn các đoạn cùng hàng,
+      // nếu không hệ có ô nhịp ngắn (nốt tròn cuối bài) bị bỏ sót và hợp âm nhảy sang hệ khác.
+      // Đoạn ngắn hơn minLineW/4 (dòng kẻ phụ) không tính.
+      const rowWidths = new Map();
+      Array.from(container.querySelectorAll('svg line, svg path')).forEach(el => {
         const r = el.getBoundingClientRect();
-        if (r.width > minLineW && r.height < maxLineH && r.top > 0) {
-          staffLineRects.push(r.top - cRect.top);
+        if (r.width > minLineW / 4 && r.height < maxLineH) {
+          const y = Math.round(r.top - cRect.top);
+          rowWidths.set(y, (rowWidths.get(y) || 0) + r.width);
         }
       });
+      rowWidths.forEach((w, y) => { if (w > minLineW) staffLineRects.push(y); });
     }
 
     if (!staffLineRects.length) {
@@ -74,18 +80,23 @@ const ChordCanvasDots = (() => {
     );
     if (!allBadges.length) return;
 
-    const assigned = new Map();
-    allBadges.forEach(badge => {
-      const badgeY = parseFloat(badge.dataset.noteTop ?? badge.style.top);
-      if (isNaN(badgeY)) return;
+    const nearestSystem = y => {
       let bestSys = null, minDist = Infinity, minTopDist = Infinity;
       for (const sys of systems) {
-        const dist = badgeY < sys.topLine ? (sys.topLine - badgeY) : (badgeY > sys.bottomLine ? (badgeY - sys.bottomLine) : 0);
-        const topDist = Math.abs(badgeY - sys.topLine);
+        const dist = y < sys.topLine ? (sys.topLine - y) : (y > sys.bottomLine ? (y - sys.bottomLine) : 0);
+        const topDist = Math.abs(y - sys.topLine);
         if (dist < minDist || (dist === minDist && topDist < minTopDist)) {
           minDist = dist; minTopDist = topDist; bestSys = sys;
         }
       }
+      return bestSys;
+    };
+
+    const assigned = new Map();
+    allBadges.forEach(badge => {
+      const badgeY = parseFloat(badge.dataset.noteTop ?? badge.style.top);
+      if (isNaN(badgeY)) return;
+      const bestSys = nearestSystem(badgeY);
       if (bestSys) {
         if (!assigned.has(bestSys)) assigned.set(bestSys, []);
         assigned.get(bestSys).push(badge);
@@ -101,7 +112,10 @@ const ChordCanvasDots = (() => {
     for (const [sys, badges] of assigned.entries()) {
       const badgeH = Math.max(...badges.map(b => b.offsetHeight || 0), Math.round(16 * scale));
       let targetY = Math.round(sys.topLine - badgeH - Math.round(8 * scale));
-      const sysNotes = noteRects.filter(nr => nr.top >= sys.topLine - noteRange && nr.bottom <= sys.bottomLine + noteRange);
+      // Chỉ lấy nốt mà khuông gần nhất chính là khuông này: ở zoom thấp noteRange chạm cả khuông Fa của hệ trên,
+      // kéo hợp âm lên sai dòng.
+      const sysNotes = noteRects.filter(nr => nr.top >= sys.topLine - noteRange && nr.bottom <= sys.bottomLine + noteRange
+        && nearestSystem((nr.top + nr.bottom) / 2) === sys);
       if (sysNotes.length) {
         const minNoteTop = Math.min(...sysNotes.map(nr => nr.top));
         if (minNoteTop < sys.topLine) {

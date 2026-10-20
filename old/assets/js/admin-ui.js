@@ -310,6 +310,8 @@ const AdminUI = (() => {
   return { init, openModal, editCategory, saveCategory, deleteCategory, updateSongTitle, updateSongCategory, deleteSong, updateUserRole, changeUserPass, deleteUser };
 })();
 
+window.AdminUI = AdminUI;
+
 document.addEventListener('DOMContentLoaded', () => {
     AdminUI.init();
 });

@@ -45,7 +45,12 @@
 
 #toolbar > .instrument-annotations { margin-left: auto; }
 
-@media (max-width: 680px) { #toolbar:has(> .instrument-annotations) .song-info-pill { max-width: calc(100vw - 180px); } }
+/* Nút Nhạc cụ chiếm chỗ trên điện thoại: ô tên bài phải co theo flex, nếu không sẽ đè nút ⋯ */
+@media (max-width: 680px) {
+  #toolbar:has(> .instrument-annotations) .song-info-pill { min-width: 0; overflow: hidden; }
+  #toolbar:has(> .instrument-annotations) .song-info-pill .song-title { min-width: 0; flex: 1 1 auto; max-width: none; }
+}
+@media (max-width: 430px) { #toolbar:has(> .instrument-annotations) .song-info-pill .song-cat-pill { display: none; } }
 
 #toolbar .instrument-annotations > button.active { border-bottom: 4px solid var(--instrument-color); background: #fff3ba; color: #302400; }
 

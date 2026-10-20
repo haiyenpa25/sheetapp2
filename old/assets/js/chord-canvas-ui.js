@@ -443,3 +443,5 @@ const ChordCanvasUI = (() => {
 
   return { getScale, getTextSize, getDotSize, applyAbsolute, createPopup, showNewSetModal, showDeleteConfirmModal };
 })();
+
+window.ChordCanvasUI = ChordCanvasUI;

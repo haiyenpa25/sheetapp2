@@ -36,12 +36,15 @@ const ChordCanvasDots = (() => {
     }
 
     if (!staffLineRects.length) {
-      Array.from(svg.querySelectorAll('line, path')).forEach(el => {
+      // Dòng kẻ vẽ theo từng ô nhịp/trang: cộng dồn đoạn cùng hàng (bỏ dòng kẻ phụ < minLineW/4),
+      // nếu không hệ có ô nhịp ngắn bị sót và hợp âm nhảy sang hệ khác.
+      const rowWidths = new Map();
+      Array.from(container.querySelectorAll('svg line, svg path')).forEach(el => {
         const r = el.getBoundingClientRect();
-        if (r.width > minLineW && r.height < maxLineH) {
-          staffLineRects.push(r.top - cRect.top);
-        }
+        const y = Math.round(r.top - cRect.top);
+        if (r.width > minLineW / 4 && r.height < maxLineH) rowWidths.set(y, (rowWidths.get(y) || 0) + r.width);
       });
+      rowWidths.forEach((w, y) => { if (w > minLineW) staffLineRects.push(y); });
     }
 
     if (!staffLineRects.length) {

@@ -260,3 +260,5 @@ const AppUI = (() => {
 
   return { showToast, showWelcome, showLoading, hideLoading, setLoadingText, showOSMD, enableControls, updateTransposeDisplay, updateCapoBadge, updateSongInfo, toggleFullscreen, updateSessionPanel };
 })();
+
+window.AppUI = AppUI;
