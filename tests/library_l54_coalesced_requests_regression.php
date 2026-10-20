@@ -10,7 +10,7 @@
  *
  * Đảm bảo:
  * - Tỷ lệ kiểm tra hành vi (Behavioral) ≥ 56%.
- * - Bảo vệ 100% CSDL thật app.sqlite và 62 files chord_sets theo chuẩn K2.
+ * - Bảo vệ 100% CSDL thật app.sqlite và JSON chord_sets trong manifest phát hành theo chuẩn K2.
  * - Có dòng SUITE_COMPLETE.
  */
 
@@ -235,7 +235,7 @@ foreach ($sampleSongs as $idx => $s) {
 $chordSetsDir = 'storage/data/chord_sets';
 $chordEntries = is_dir($chordSetsDir) ? (scandir($chordSetsDir) ?: []) : [];
 $chordEntriesCount = count($chordEntries);
-reportCheck("Toàn vẹn thư mục chord_sets ({$chordEntriesCount} mục theo scandir)", $chordEntriesCount >= 62, true);
+reportCheck("Nội dung JSON chord_sets khớp manifest phát hành ({$chordEntriesCount} mục theo scandir)", libraryChordFilesIntact(dirname(__DIR__)), true);
 
 // ── TỔNG KẾT VÀ TỶ LỆ BEHAVIORAL ──
 $ratio = round(($behavioralCount / $testCount) * 100, 1);

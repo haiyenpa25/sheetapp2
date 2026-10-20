@@ -54,7 +54,7 @@ $totalChecksFailed = 0;
 
 // Giám sát thư mục storage/data/live_sync/ để phát hiện rò rỉ file
 $liveSyncDir = $root . '/storage/data/live_sync';
-$initialLiveSyncFiles = is_dir($liveSyncDir) ? (scandir($liveSyncDir) ?: []) : [];
+$initialLiveSyncFiles = is_dir($liveSyncDir) ? array_values(array_diff(scandir($liveSyncDir) ?: [], ['.', '..'])) : [];
 
 // Ticket K2: Đo lường số dòng CSDL thật (app.sqlite) và thư mục chord_sets trước kiểm thử
 $realDbPath = $root . '/storage/data/app.sqlite';
@@ -382,7 +382,7 @@ foreach ($regressionSuites as $suitePath) {
 // 4. KIỂM TRA RÒ RỈ FILE LIVE SYNC
 // ==========================================
 echo "\n[Kiểm tra rò rỉ file test vào storage/data/live_sync/]... ";
-$finalLiveSyncFiles = is_dir($liveSyncDir) ? (scandir($liveSyncDir) ?: []) : [];
+$finalLiveSyncFiles = is_dir($liveSyncDir) ? array_values(array_diff(scandir($liveSyncDir) ?: [], ['.', '..'])) : [];
 $leakedFiles = array_values(array_diff($finalLiveSyncFiles, $initialLiveSyncFiles));
 
 if (!empty($leakedFiles)) {

@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/fixtures/library_storage_guard.php';
 
 /**
  * tests/library_l53_xml_cache_and_geom_regression.php
@@ -8,7 +9,7 @@ declare(strict_types=1);
  * - L5-3: Parse XML 1 lần và cache theo bài (thay cho 8 chỗ gọi DOMParser).
  * - Tính vị trí hợp âm dùng dữ liệu hình học của OSMD, có cache.
  * - Nghiệm thu: Profile: ≤2 lần gọi DOMParser mỗi lần đổi bài.
- * - Bảo vệ 100% CSDL SQLite và 62 files chord_sets.
+ * - Bảo vệ 100% CSDL SQLite và JSON chord_sets trong manifest phát hành.
  * - Line budget < 600 dòng & Behavioral checks >= 56%.
  */
 
@@ -323,7 +324,7 @@ assertCondition($songCount > 0, "CSDL SQLite nguyên vẹn, số bài hát = {$s
 
 $chordEntries = is_dir($chordSetsDir) ? (scandir($chordSetsDir) ?: []) : [];
 $chordEntriesCount = count($chordEntries);
-assertCondition($chordEntriesCount >= 62, "Toàn vẹn thư mục chord_sets ({$chordEntriesCount} mục theo scandir)", true);
+assertCondition(libraryChordFilesIntact(dirname(__DIR__)), "Nội dung JSON chord_sets khớp manifest phát hành ({$chordEntriesCount} mục theo scandir)", true);
 
 // Core Rule: SongLoader luôn reset XmlDocCache khi đổi bài
 $slSrc = file_get_contents(__DIR__ . '/../assets/js/song-loader.js');

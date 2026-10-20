@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/fixtures/library_storage_guard.php';
 
 /**
  * tests/library_l52_instant_transpose_regression.php
@@ -10,7 +11,7 @@ declare(strict_types=1);
  * - Không gọi osmd.load(processedXml) khi dịch giọng.
  * - Triệt tiêu độ trễ 350ms trong ChordCanvas, cập nhật overlay ngay cùng khung hình.
  * - Giảm debounce của transposeBy trong app.js xuống 100ms.
- * - Bảo vệ 100% CSDL SQLite và 62 files chord_sets.
+ * - Bảo vệ 100% CSDL SQLite và JSON chord_sets trong manifest phát hành.
  * - Line budget < 600 dòng & Behavioral checks >= 56%.
  */
 
@@ -249,7 +250,7 @@ assertCondition($songCount > 0, "CSDL SQLite nguyên vẹn, số bài hát = {$s
 
 $chordEntries = is_dir($chordSetsDir) ? (scandir($chordSetsDir) ?: []) : [];
 $chordEntriesCount = count($chordEntries);
-assertCondition($chordEntriesCount >= 62, "Toàn vẹn thư mục chord_sets ({$chordEntriesCount} mục theo scandir)", true);
+assertCondition(libraryChordFilesIntact(dirname(__DIR__)), "Nội dung JSON chord_sets khớp manifest phát hành ({$chordEntriesCount} mục theo scandir)", true);
 
 // Kiểm tra Core Rule: nạp bài mới luôn set currentTranspose = 0
 assertCondition(
