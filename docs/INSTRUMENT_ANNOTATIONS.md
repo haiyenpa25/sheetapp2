@@ -38,17 +38,17 @@ Không chạy sync, không merge main, không thay bảng quyết định/chữ 
 
 1. Mở bài ở chế độ **Bản Nhạc** trong Modern hoặc Classic, bấm **Nhạc cụ** trên toolbar (điện thoại cũng có nút này).
 2. Tick các nhạc cụ muốn xem, hoặc **Chọn tất cả** / **Ẩn tất cả**. Bộ lọc được nhớ trong `sheetapp_annotation_layers` trên thiết bị, độc lập StageLens.
-3. Nhãn trên sheet hiện nhạc cụ và chỉ dẫn; nhãn quá dài được cắt gọn. Mỗi nhạc cụ có một màu dùng chung trên mọi bài và hai giao diện. Tên nhạc cụ vẫn hiện bên cạnh màu; bật nhiều lớp thì các dòng được xếp riêng.
+3. Nhãn trên sheet hiện nhạc cụ và chỉ dẫn; nhãn quá dài được cắt gọn. Mỗi nhạc cụ có màu mặc định dùng chung trên mọi bài và hai giao diện; từng ghi chú có thể chọn màu riêng. Tên nhạc cụ vẫn hiện bên cạnh màu; bật nhiều lớp thì các dòng được xếp riêng.
 4. Chạm nhãn để mở ghi chú đầy đủ trong menu; danh sách ghi rõ ô nhịp và khuông. Khi đang soạn, admin bấm nhãn để sửa trực tiếp.
 5. **Tải lại ghi chú** lấy phiên bản mới từ máy chủ. Khi lỗi tải có **Thử tải lại**; không coi lỗi mạng là bài chưa có ghi chú.
 
 ### Admin
 
 1. Mở bài ở **Bản Nhạc** → **Nhạc cụ** trên toolbar → chọn **Nhạc cụ đang soạn** → **Ghi chú**. Bảng đóng lại để sheet có chỗ thao tác; toolbar có dấu đang soạn.
-2. Chạm **+ màu vàng** tại nốt, phía trên dòng hợp âm. Chọn mẫu gợi ý hoặc nhập chữ tự do (tối đa 500 ký tự), rồi **Lưu ghi chú**. Trên màn hình rộng ô nhập nằm gần điểm vừa chọn; điện thoại dùng dialog vừa màn hình.
+2. Chạm **+ màu vàng** tại nốt, phía trên dòng hợp âm. Chọn mẫu gợi ý hoặc nhập chữ tự do (tối đa 500 ký tự). Ở **Màu ghi chú**, chọn một màu mẫu hoặc màu tùy chọn; bấm **Theo màu nhạc cụ** để dùng lại mặc định, rồi **Lưu ghi chú**. Trên màn hình rộng ô nhập nằm gần điểm vừa chọn; điện thoại dùng dialog vừa màn hình.
 3. Mẫu theo nhạc cụ: Trống có Fill/Vào điệu/Ngắt/Crash/Nhẹ/Tăng dần; Guitar có Quạt/Rải/Palm mute/Ngắt/Vào mạnh; Keyboard có Đệm nền/Rải/Giữ hợp âm/Dạo/Ngưng; Bass có Nốt gốc/Đi đều/Chạy nối/Ngắt/Vào lại; Hát có Vào hát/Nhẹ/Mạnh/Lấy hơi/Ngắt. Nhạc cụ mới dùng mẫu Chung. Bấm nhiều mẫu nối bằng ` · `; đổi nhạc cụ không xóa chữ đã nhập.
 4. Vị trí đã có ghi chú của nhạc cụ đang soạn hiện chữ thay dấu +; bấm chữ để sửa/xóa trực tiếp. Những ghi chú cũ trùng điểm vẫn được giữ độc lập. Cũng có thể dùng **Sửa** trong danh sách chi tiết. Mở toolbar → **Kết thúc ghi** để thoát.
-5. Trong toolbar, chọn nhạc cụ → **Màu nhạc cụ** → **Lưu màu nhạc cụ**. Màu áp dụng cho tất cả ghi chú của nhạc cụ đó, qua các bài và cả hai giao diện. Màu nằm trên viền nhãn, ô chọn và dialog; nội dung giữ màu chữ dễ đọc. Đây là màu theo **nhạc cụ**, không phải màu riêng theo điện thoại/máy tính. Màu ghi chú cũ vẫn được giữ trong dữ liệu để tương thích; màu hiển thị hiện lấy theo nhạc cụ.
+5. Trong toolbar, chọn nhạc cụ → **Màu nhạc cụ** → **Lưu màu nhạc cụ**. Màu áp dụng cho những ghi chú đang theo màu mặc định của nhạc cụ, qua các bài và cả hai giao diện. Ghi chú đã chọn màu riêng giữ nguyên màu của nó. Màu nằm trên viền nhãn, ô chọn và dialog; nội dung giữ màu chữ dễ đọc. Đây là màu theo **nhạc cụ**, không phải màu riêng theo điện thoại/máy tính. Màu ghi chú cũ vẫn được giữ trong dữ liệu để tương thích; màu hiển thị lấy theo nhạc cụ nếu chưa chọn màu riêng.
 6. Nhập **Nhạc cụ mới** → **Thêm nhạc cụ** để bổ sung danh mục. Không thay quyền thành viên hoặc bộ lọc StageLens.
 7. Nếu máy chủ báo phiên khác đã thay đổi: giữ dialog mở, chọn **Tải lại dữ liệu**, kiểm tra rồi lưu lại bản nháp. Lỗi mạng giữ nguyên chữ đã nhập; màu đang chọn cũng giữ qua các lần sheet dựng lại.
 8. Nếu bản nhạc đã thay đổi, dùng **Đặt lại vị trí** trên thẻ cảnh báo rồi chọn điểm mới; không tự chuyển ghi chú sang nốt khác.
@@ -63,3 +63,10 @@ Không chạy sync, không merge main, không thay bảng quyết định/chữ 
 - CSS/geometry/panel/canvas được đưa vào precache. Cache giao diện dùng cả phiên bản và manifest hash, giúp thay đồng bộ module; cache MusicXML và gói `sheetapp-offline-*` được giữ lại.
 - Khi thay tài nguyên nằm trong manifest, chạy `php tools/generate_sw_manifest.php` ở bản build/cài đặt cách ly và đưa `sw.js` mới vào bản phát hành. Không chạy sync tự push.
 - Chưa cung cấp tải ghi chú ngoại tuyến, bản phối riêng từng chương trình, ghi chú theo đoạn, hoặc xuất PDF chuyên biệt.
+
+## Màu riêng và liên kết hai giao diện
+
+- Màu riêng nằm trong `customColor` của từng ghi chú (hex `#RRGGBB`), không đổi màu nhạc cụ hay ghi chú khác. Không có trường này nghĩa là theo màu nhạc cụ; reset sẽ bỏ trường màu riêng. Máy chủ kiểm tra và chuẩn hóa mã màu. Metadata `color` cũ vẫn được giữ để tương thích.
+- Nhãn trên sheet, thẻ chi tiết và viền ô soạn cùng hiển thị màu đang áp dụng; chữ dùng màu dễ đọc trên nền nhạt. Bảng màu có tên và trạng thái chọn để dùng được bằng bàn phím.
+- Classic và Modern đọc/ghi cùng API và file JSON. Khi chuyển giao diện qua các nút có sẵn, liên kết giữ bài đang mở, tông, chế độ sheet/lời, kiểu lời, bộ hợp âm và compact nếu có trong URL. Bắt đầu soạn sẽ nhớ lớp hiển thị để ghi chú được tải lại khi đổi giao diện hoặc tải lại trang.
+- Kiểm thử HTTP tạo/sửa ghi chú ở cả hai chiều Modern → Classic và Classic → Modern, xác nhận màu và nội dung vẫn giữ. Không cần nhập lại ghi chú khi đổi giao diện.

@@ -90,3 +90,13 @@ Chủ dự án đã yêu cầu trực tiếp đưa bản hoàn tất lên main v
 Bảy thư mục `sheetapp2-instrument-php-20261020`, `sheetapp2-roadmap6-check-20261018-130707`, `sheetapp2-roadmap6-final-20261018-133659`, `sheetapp2-roadmap6-import-20261018-133307`, `sheetapp2-roadmap6-oct19-061901`, `sheetapp2-roadmap6-review-20261018-215048`, `sheetapp2-roadmap6-work` đã được chuyển khỏi htdocs, vào `C:/xampp/sheetapp2-backups/source-archive-20261020-110530`. Source chính và DB thật được giữ nguyên. Worktree trong bản lưu trữ là detached, không chiếm nhánh main.
 
 Các URL thử nghiệm/lệnh chạy ở những mục lịch sử phía trên không còn là các server đang phục vụ. Khi tái kiểm HTTP, tạo bản cài cô lập có DB/storage riêng, marker `.roadmap6-isolated`, rồi truyền URL/root tương ứng; không trỏ bộ test vào source chính. Bằng chứng kiểm thử được giữ trong Git tại `docs/instrument-annotations-evidence/`. Đây là xuất bản lên GitHub main và dọn source local; không tự xác nhận server production đã triển khai.
+
+## Hoàn thiện màu riêng và liên thông hai giao diện — 2026-10-20
+
+Chủ dự án chốt màu riêng từng ghi chú, mặc định theo màu nhạc cụ, thực hiện trực tiếp trên main. Field `customColor` là tùy chọn; máy chủ chỉ nhận hex sáu chữ số và chuẩn hóa chữ thường. Bỏ field này để trở về màu nhạc cụ. Việc đổi màu registry chỉ tác động các ghi chú đang theo mặc định, không ghi đè màu riêng. Giữ metadata màu/icon cũ và cơ chế revision/role hiện có; không đổi SQLite.
+
+Editor có sáu màu mẫu, màu tùy chọn, xem trước và nút **Theo màu nhạc cụ**. Màu được dùng nhất quán trên nhãn sheet, thẻ chi tiết và viền editor. Màu/chữ nháp giữ nguyên khi lỗi hoặc đổi nhạc cụ. CSS căn lại native dialog sau khi tái hiện việc margin reset của trang kéo hộp soạn sát mép trên điện thoại; desktop vẫn mở gần vị trí nốt.
+
+`URLState.interfaceUrl()` dùng chung cho các liên kết chuyển giao diện, giữ bài đang mở cùng các tham số tông, sheet/lời, kiểu lời, bộ hợp âm và compact trong URL. Khi bắt đầu soạn, client nhớ lớp hiển thị để khi chuyển giao diện/tải lại trang thì ghi chú được tải lại. Ca HTTP ghi màu tím ở giao diện đầu, chuyển giao diện giữ tông/chế độ xem, đổi sang màu đỏ rồi quay lại; chạy ở cả hai chiều và hai engine. Có thêm ca ở 390 px kiểm tra editor nằm giữa và vừa màn hình.
+
+Đợt kiểm tra đầu phát hiện guard mật khẩu quét chuỗi cũng nhận nhầm mã màu mẫu `#123456` trong test. Đã dùng mẫu màu `#284b63`; không sửa hay bỏ guard. Các ca mật khẩu được chạy lại; không đổi chính sách mật khẩu.

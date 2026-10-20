@@ -1,5 +1,13 @@
 # PROJECT_REGISTRY.md — Sơ Đồ Dự Án SheetApp
 
+## 2026-10-20 — Màu riêng từng ghi chú, liên thông Classic/Modern trên main
+
+- Theo lựa chọn chủ dự án: từng ghi chú có `customColor` tùy chọn, mặc định theo nhạc cụ. Ô soạn có bảng màu/tùy chọn và nút quay về màu nhạc cụ; giữ bản nháp màu khi lỗi, không đổi các ghi chú khác.
+- Nhãn sheet, thẻ chi tiết và viền editor cùng dùng màu hiệu lực. Editor căn giữa trên điện thoại, mở gần nốt trên màn hình rộng. Metadata màu/icon cũ được giữ.
+- Chuyển giao diện giữ bài, tông, kiểu xem/lời, bộ hợp âm và compact; bắt đầu soạn nhớ lớp đang hiện. Thêm `URLState.interfaceUrl()` dùng chung ba liên kết chuyển giao diện và test `e2e/library-tv-interface-links.spec.js`.
+- PHP service kiểm tra hex và lưu màu riêng cùng cơ chế revision hiện hữu; không migration DB, không đổi quyền. Xem kết quả và bằng chứng ở mục mới nhất trong `docs/INSTRUMENT_ANNOTATIONS_ACCEPTANCE.md`.
+
+
 ## 2026-10-20 — Đưa bản chính lên main và dọn các bản thử
 
 - Theo yêu cầu trực tiếp của chủ dự án, main được fast-forward tới bản đã nghiệm thu `9bbea63`, giữ nguyên mã đã đạt PHP 175 suite/3.427 check, Chromium 124/124 và WebKit 24/24. Checkout chính `C:/xampp/htdocs/sheetapp2` chuyển sang main; không chạy sync.
