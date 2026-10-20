@@ -74,6 +74,7 @@ Theo yêu cầu chốt lại trong hội thoại: toolbar → nhạc cụ → Gh
 - OSMD chừa khoảng trống theo số dòng và mức zoom. Các nhạc cụ có hàng riêng; nhãn tránh lời, nốt, hợp âm và không chuyển nhầm lên khuông khác. Bản rất dày có thể cao hơn vì thêm khoảng trống. Nội dung dài trên nhãn được cắt gọn, có toàn văn qua thao tác mở chi tiết.
 - Màu dùng chung theo registry, mã hex được kiểm tra phía máy chủ, vẫn có bảo vệ revision/role. Registry cũ thiếu màu được bổ sung trong phản hồi mà không tự ghi file khi GET. Không migration SQLite.
 - Bản PHP mới: **175/175 suite, 3.427 check (2.724 hành vi, 703 static), 333 PHP lint**, không skip/fail; chạy trên bản cài cô lập.
+- Hồi quy ROADMAP6 trên Chromium bản cuối: **124/124**, gồm **25/25** ca tính năng ghi chú.
 - Tính năng Chromium: **25/25** gồm thành phần, HTTP thật hai UI ở 1366/820/390/360, lưu/tải màu, đúng khuông/phía trên hợp âm và nâng cache PWA.
 - Thành phần Chromium + WebKit: **38/38** (19 mỗi engine). WebKit còn chạy **24/24** ca gồm 19 thành phần và 5 HTTP thật cho cả Modern/Classic trên bản cài riêng `sheetapp2-instrument-php-20261020`. WebKit headless không có hộp chọn màu hệ điều hành; ca màu phát sự kiện input của picker. Đây không phải kiểm tra Safari/iPad phần cứng.
 - JS syntax **330 file**, ESLint ba module sửa PASS. SW manifest hash `1c594c1904`.

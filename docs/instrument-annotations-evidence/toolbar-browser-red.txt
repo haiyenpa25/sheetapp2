@@ -1,0 +1,256 @@
+
+Running 24 tests using 1 worker
+
+
+
+node.exe : (node:11604) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:11604) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+[1/24] [chromium] › e2e\library-tv-instrument-annotations.spec.js:47:1 › readers filter multiple instrument layers and both staves without edit controls
+[2/24] [chromium] › e2e\library-tv-instrument-annotations.spec.js:66:1 › admin adds an independent layer, edits and deletes without losing other instruments
+[3/24] [chromium] › e2e\library-tv-instrument-annotations.spec.js:91:1 › failed save keeps the draft and allows retry
+[4/24] [chromium] › e2e\library-tv-instrument-annotations.spec.js:107:1 › a delayed old song response cannot replace the current song
+[5/24] [chromium] › e2e\library-tv-instrument-annotations.spec.js:122:1 › scroll gestures do not open an editor and keyboard activation still works
+[6/24] [chromium] › e2e\library-tv-instrument-annotations.spec.js:136:1 › failed load can be retried and does not enable an empty editor
+[7/24] [chromium] › e2e\library-tv-instrument-annotations.spec.js:149:1 › a changed score hides stale anchors and lets admin place the same note again
+[8/24] [chromium] › e2e\library-tv-instrument-annotations.spec.js:170:1 › semantic time survives note index changes and equivalent fractions
+[9/24] [chromium] › e2e\library-tv-instrument-annotations.spec.js:188:1 › annotation labels avoid notation and lyrics rather than covering them
+[10/24] [chromium] › e2e\library-tv-instrument-annotations.spec.js:205:1 › losing admin access closes the editor and removes authoring controls
+[11/24] [chromium] › e2e\library-tv-instrument-annotations.spec.js:215:1 › conflict reload preserves the draft and saves it alongside newer notes
+[12/24] [chromium] › e2e\library-tv-instrument-annotations.spec.js:238:1 › API client sends revisions and refreshes cached registries after adding an instrument
+[13/24] [chromium] › e2e\library-tv-instrument-annotations.spec.js:264:1 › a compact sheet badge opens and focuses its full note
+[14/24] [chromium] › e2e\library-tv-instrument-annotations.spec.js:275:1 › switching to chord editing ends instrument annotation editing
+[15/24] [chromium] › e2e\library-tv-instrument-annotations.spec.js:285:1 › instrument editor preserves legacy color metadata and icon authoring
+[16/24] [chromium] › e2e\library-tv-instrument-annotations.spec.js:299:1 › adding a note works when the browser has no randomUUID API
+[17/24] [chromium] › e2e\library-tv-instrument-annotations.spec.js:311:1 › toolbar selects an instrument, offers its presets and uses one color per instrument
+[18/24] [chromium] › e2e\library-tv-instrument-annotations.spec.js:334:1 › an existing instrument note replaces the yellow plus and opens for direct editing
+[19/24] [chromium] › e2e\library-tv-instrument-http.spec.js:43:1 › HTTP keeps admin writes, guest/member read access and revision conflicts
+[20/24] [chromium] › e2e\library-tv-instrument-http.spec.js:71:3 › Modern real score saves and reloads instrument notes
+  1) [chromium] › e2e\library-tv-instrument-http.spec.js:71:3 › Modern real score saves and reloads instrument notes 
+
+    Error: expect(locator).toHaveValue(expected) failed
+
+    Locator:  getByLabel('Màu nhạc cụ', { exact: true })
+    Expected: "#0e7490"
+    Received: "#c2410c"
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveValue" getByLabel('Màu nhạc cụ', { exact: true }) with timeout 5000ms
+      - waiting for getByLabel('Màu nhạc cụ', { exact: true })
+        13 × locator resolved to <input type="color" aria-label="Màu nhạc cụ" data-focus-key="instrument-color"/>
+           - unexpected value "#c2410c"
+
+
+      81 |     await page.getByLabel('Màu nhạc cụ', { exact: true }).fill('#0e7490');
+      82 |     await page.getByRole('button', { name: 'Lưu màu nhạc cụ', exact: true }).click();
+    > 83 |     await expect(page.getByLabel('Màu nhạc cụ', { exact: true })).toHaveValue('#0e7490');
+         |                                                                   ^
+      84 |     await page.getByRole('button', { name: 'Ghi chú', exact: true }).click();
+      85 |     await expect(page.locator('.ano-dot-btn')).toHaveCount(await page.evaluate(() => AnnotationGeometry.anchors().length));
+      86 |     await page.locator('.ano-dot-btn').first().click();
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv-instrument-http.spec.js:83:67
+
+    Error Context: test-results\roadmap6\library-tv-instrument-http-1e127-nd-reloads-instrument-notes-chromium\error-context.md
+
+    Error Context: test-results\roadmap6\library-tv-instrument-http-1e127-nd-reloads-instrument-notes-chromium\error-context.md
+
+
+[21/24] [chromium] › e2e\library-tv-instrument-http.spec.js:110:3 › Modern dense notes stay readable at four screen widths
+[22/24] [chromium] › e2e\library-tv-instrument-http.spec.js:71:3 › Classic real score saves and reloads instrument notes
+[23/24] [chromium] › e2e\library-tv-instrument-http.spec.js:110:3 › Classic dense notes stay readable at four screen widths
+(node:28876) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[24/24] [chromium] › e2e\library-tv-instrument-sw.spec.js:5:1 › PWA refreshes annotation code together and keeps offline music packages
+  1 failed
+    [chromium] › e2e\library-tv-instrument-http.spec.js:71:3 › Modern real score saves and reloads instrument notes 
+  3 did not run
+  20 passed (19.1s)
+
+
+Running 124 tests using 1 worker
+
+
+
+node.exe : (node:34272) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ((node:34272) Wa... env being set.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+(Use `node --trace-warnings ...` to show where the warning was created)
+[1/124] [chromium] › e2e\library-tv-instrument-annotations.spec.js:47:1 › readers filter multiple instrument layers and both staves without edit controls
+[2/124] [chromium] › e2e\library-tv-instrument-annotations.spec.js:66:1 › admin adds an independent layer, edits and deletes without losing other instruments
+[3/124] [chromium] › e2e\library-tv-instrument-annotations.spec.js:91:1 › failed save keeps the draft and allows retry
+[4/124] [chromium] › e2e\library-tv-instrument-annotations.spec.js:107:1 › a delayed old song response cannot replace the current song
+[5/124] [chromium] › e2e\library-tv-instrument-annotations.spec.js:122:1 › scroll gestures do not open an editor and keyboard activation still works
+[6/124] [chromium] › e2e\library-tv-instrument-annotations.spec.js:136:1 › failed load can be retried and does not enable an empty editor
+[7/124] [chromium] › e2e\library-tv-instrument-annotations.spec.js:149:1 › a changed score hides stale anchors and lets admin place the same note again
+[8/124] [chromium] › e2e\library-tv-instrument-annotations.spec.js:170:1 › semantic time survives note index changes and equivalent fractions
+[9/124] [chromium] › e2e\library-tv-instrument-annotations.spec.js:188:1 › annotation labels avoid notation and lyrics rather than covering them
+[10/124] [chromium] › e2e\library-tv-instrument-annotations.spec.js:205:1 › losing admin access closes the editor and removes authoring controls
+[11/124] [chromium] › e2e\library-tv-instrument-annotations.spec.js:215:1 › conflict reload preserves the draft and saves it alongside newer notes
+[12/124] [chromium] › e2e\library-tv-instrument-annotations.spec.js:238:1 › API client sends revisions and refreshes cached registries after adding an instrument
+[13/124] [chromium] › e2e\library-tv-instrument-annotations.spec.js:264:1 › a compact sheet badge opens and focuses its full note
+[14/124] [chromium] › e2e\library-tv-instrument-annotations.spec.js:275:1 › switching to chord editing ends instrument annotation editing
+[15/124] [chromium] › e2e\library-tv-instrument-annotations.spec.js:285:1 › instrument editor preserves legacy color metadata and icon authoring
+[16/124] [chromium] › e2e\library-tv-instrument-annotations.spec.js:299:1 › adding a note works when the browser has no randomUUID API
+[17/124] [chromium] › e2e\library-tv-instrument-annotations.spec.js:311:1 › toolbar selects an instrument, offers its presets and uses one color per instrument
+[18/124] [chromium] › e2e\library-tv-instrument-annotations.spec.js:334:1 › an existing instrument note replaces the yellow plus and opens for direct editing
+[19/124] [chromium] › e2e\library-tv-instrument-annotations.spec.js:349:1 › a pending instrument color survives sheet redraws and save errors
+[20/124] [chromium] › e2e\library-tv-instrument-http.spec.js:43:1 › HTTP keeps admin writes, guest/member read access and revision conflicts
+[21/124] [chromium] › e2e\library-tv-instrument-http.spec.js:71:3 › Modern real score saves and reloads instrument notes
+[22/124] [chromium] › e2e\library-tv-instrument-http.spec.js:110:3 › Modern dense notes stay readable at four screen widths
+[23/124] [chromium] › e2e\library-tv-instrument-http.spec.js:71:3 › Classic real score saves and reloads instrument notes
+[24/124] [chromium] › e2e\library-tv-instrument-http.spec.js:110:3 › Classic dense notes stay readable at four screen widths
+[25/124] [chromium] › e2e\library-tv-instrument-sw.spec.js:5:1 › PWA refreshes annotation code together and keeps offline music packages
+[26/124] [chromium] › e2e\library-tv0-chord-geometry.spec.js:4:3 › Modern chord boxes avoid notes and each other at scale 0.75
+[27/124] [chromium] › e2e\library-tv0-chord-geometry.spec.js:4:3 › Modern chord boxes avoid notes and each other at scale 1
+[28/124] [chromium] › e2e\library-tv0-chord-geometry.spec.js:4:3 › Modern chord boxes avoid notes and each other at scale 1.5
+[29/124] [chromium] › e2e\library-tv0-chord-geometry.spec.js:4:3 › Classic chord boxes avoid notes and each other at scale 0.75
+[30/124] [chromium] › e2e\library-tv0-chord-geometry.spec.js:4:3 › Classic chord boxes avoid notes and each other at scale 1
+[31/124] [chromium] › e2e\library-tv0-chord-geometry.spec.js:4:3 › Classic chord boxes avoid notes and each other at scale 1.5
+[32/124] [chromium] › e2e\library-tv0-chord-geometry.spec.js:28:1 › Modern chord font follows the selected preset and remains bounded across zoom
+[33/124] [chromium] › e2e\library-tv0-chord-labels.spec.js:4:1 › chord labels distinguish HD fallback from an empty personal set
+[34/124] [chromium] › e2e\library-tv0-chord-labels.spec.js:14:1 › Modern selected option, mobile chip, HUD and toast share the full fallback description
+[35/124] [chromium] › e2e\library-tv0-chord-labels.spec.js:31:1 › Classic selected option and toast share the fallback description
+[36/124] [chromium] › e2e\library-tv0-drawer.spec.js:4:1 › 390 drawer exposes the final result without the bottom action bar
+[37/124] [chromium] › e2e\library-tv0-empty.spec.js:4:3 › Modern empty search renders payload as text
+[38/124] [chromium] › e2e\library-tv0-empty.spec.js:4:3 › Classic empty search renders payload as text
+[39/124] [chromium] › e2e\library-tv0-import.spec.js:9:1 › Import: managed files remain distinct, immediately searchable and readable over HTTP
+[40/124] [chromium] › e2e\library-tv0-layers.spec.js:5:1 › CSS contains no hardcoded z-index >= 3000
+[41/124] [chromium] › e2e\library-tv0-layers.spec.js:14:1 › modal remains above performance HUD
+[42/124] [chromium] › e2e\library-tv0-real-touch.spec.js:8:5 › Modern 390: native swipe loads zero XML; native tap loads one
+[43/124] [chromium] › e2e\library-tv0-real-touch.spec.js:8:5 › Modern 820: native swipe loads zero XML; native tap loads one
+[44/124] [chromium] › e2e\library-tv0-real-touch.spec.js:8:5 › Classic 390: native swipe loads zero XML; native tap loads one
+[45/124] [chromium] › e2e\library-tv0-real-touch.spec.js:8:5 › Classic 820: native swipe loads zero XML; native tap loads one
+[46/124] [chromium] › e2e\library-tv0-toast.spec.js:5:5 › Modern 1366: one info toast, icon and text do not overlap
+[47/124] [chromium] › e2e\library-tv0-toast.spec.js:5:5 › Modern 820: one info toast, icon and text do not overlap
+[48/124] [chromium] › e2e\library-tv0-toast.spec.js:5:5 › Modern 390: one info toast, icon and text do not overlap
+[49/124] [chromium] › e2e\library-tv0-toast.spec.js:5:5 › Classic 1366: one info toast, icon and text do not overlap
+[50/124] [chromium] › e2e\library-tv0-toast.spec.js:5:5 › Classic 820: one info toast, icon and text do not overlap
+[51/124] [chromium] › e2e\library-tv0-toast.spec.js:5:5 › Classic 390: one info toast, icon and text do not overlap
+[52/124] [chromium] › e2e\library-tv0-toolbar.spec.js:7:3 › Modern toolbar 1366, sidebar open
+[53/124] [chromium] › e2e\library-tv0-toolbar.spec.js:7:3 › Modern toolbar 1366, sidebar closed
+[54/124] [chromium] › e2e\library-tv0-toolbar.spec.js:7:3 › Modern toolbar 1440, sidebar open
+[55/124] [chromium] › e2e\library-tv0-toolbar.spec.js:7:3 › Modern toolbar 1180, sidebar open
+[56/124] [chromium] › e2e\library-tv0-toolbar.spec.js:7:3 › Modern toolbar 820, sidebar open
+  1) [chromium] › e2e\library-tv0-toolbar.spec.js:7:3 › Modern toolbar 820, sidebar open ───────────
+
+    Error: sheet
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 5
+
+    - Array []
+    + Array [
+    +   "overflow:btn-more-options",
+    +   "overlap:btn-open-sidebar/",
+    +   "overlap:btn-song-info-popover/",
+    + ]
+
+      33 |       });
+      34 |       await page.screenshot({ path: path.resolve(__dirname, `../test-results/roadmap6-evidence/TV0-4-${width}-${collapsed}-${mode}.png`) });
+    > 35 |       expect(issues, mode).toEqual([]);
+         |                            ^
+      36 |     }
+      37 |   });
+      38 | }
+        at C:\xampp\htdocs\sheetapp2-roadmap6-work\e2e\library-tv0-toolbar.spec.js:35:28
+
+    Error Context: test-results\roadmap6\library-tv0-toolbar-Modern-toolbar-820-sidebar-open-chromium\error-context.md
+
+
+(node:34340) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[57/124] [chromium] › e2e\library-tv0-touch.spec.js:22:3 › 390 Classic: swipe, hold, cancel ignored; tap selects once
+[58/124] [chromium] › e2e\library-tv0-touch.spec.js:22:3 › 820 Classic: swipe, hold, cancel ignored; tap selects once
+[59/124] [chromium] › e2e\library-tv0-touch.spec.js:43:1 › tap duration ends at pointerup, independent of compatibility click delay
+[60/124] [chromium] › e2e\library-tv0-touch.spec.js:56:5 › 390 #song-list .song-item: swipe, hold, cancel ignored; tap selects once
+[61/124] [chromium] › e2e\library-tv0-touch.spec.js:56:5 › 390 #recently-viewed-section .recent-item: swipe, hold, cancel ignored; tap selects once
+[62/124] [chromium] › e2e\library-tv0-touch.spec.js:56:5 › 390 #quick-favorites-section .recent-item: swipe, hold, cancel ignored; tap selects once
+[63/124] [chromium] › e2e\library-tv0-touch.spec.js:69:3 › 390 quick jump ignores long presses and scrolling
+[64/124] [chromium] › e2e\library-tv0-touch.spec.js:56:5 › 820 #song-list .song-item: swipe, hold, cancel ignored; tap selects once
+[65/124] [chromium] › e2e\library-tv0-touch.spec.js:56:5 › 820 #recently-viewed-section .recent-item: swipe, hold, cancel ignored; tap selects once
+[66/124] [chromium] › e2e\library-tv0-touch.spec.js:56:5 › 820 #quick-favorites-section .recent-item: swipe, hold, cancel ignored; tap selects once
+[67/124] [chromium] › e2e\library-tv0-touch.spec.js:69:3 › 820 quick jump ignores long presses and scrolling
+[68/124] [chromium] › e2e\library-tv0-virtual.spec.js:7:3 › Modern: 1731 rows keep exact scroll geometry and selected row after rotation
+[69/124] [chromium] › e2e\library-tv0-virtual.spec.js:7:3 › Classic: 1731 rows keep exact scroll geometry and selected row after rotation
+[70/124] [chromium] › e2e\library-tv1-classic-program.spec.js:26:1 › Classic browsing a program does not capture library navigation
+[71/124] [chromium] › e2e\library-tv1-classic-program.spec.js:32:1 › Classic playing program loads exactly once and applies stored tempo after loading
+[72/124] [chromium] › e2e\library-tv1-classic-program.spec.js:43:1 › Classic leaving a program during load does not restore its tempo or playing state
+[73/124] [chromium] › e2e\library-tv1-focus-rerender.spec.js:3:1 › Virtual grid preserves action focus across a row replacement and never steals outside focus
+[74/124] [chromium] › e2e\library-tv1-http.spec.js:6:1 › HTTP search returns the complete 343-song theme across two pages
+[75/124] [chromium] › e2e\library-tv1-http.spec.js:20:1 › Modern theme filter reaches the final song through Xem thêm
+[76/124] [chromium] › e2e\library-tv1-http.spec.js:34:3 › Modern real page uses lyric mode for song 259
+[77/124] [chromium] › e2e\library-tv1-http.spec.js:34:3 › Classic real page uses lyric mode for song 259
+[78/124] [chromium] › e2e\library-tv1-keyboard-http.spec.js:7:3 › Modern sidebar keyboard and axe at 1366
+[79/124] [chromium] › e2e\library-tv1-keyboard-http.spec.js:7:3 › Modern sidebar keyboard and axe at 390
+[80/124] [chromium] › e2e\library-tv1-keyboard-http.spec.js:7:3 › Classic sidebar keyboard and axe at 1366
+[81/124] [chromium] › e2e\library-tv1-keyboard-http.spec.js:7:3 › Classic sidebar keyboard and axe at 390
+[82/124] [chromium] › e2e\library-tv1-keyboard.spec.js:8:3 › Modern keyboard navigates virtual rows and row actions without opening on arrows
+[83/124] [chromium] › e2e\library-tv1-keyboard.spec.js:8:3 › Classic keyboard navigates virtual rows and row actions without opening on arrows
+[84/124] [chromium] › e2e\library-tv1-navigation-http.spec.js:5:3 › Modern booted toolbar and keyboard navigate the displayed list
+[85/124] [chromium] › e2e\library-tv1-navigation-http.spec.js:5:3 › Classic booted toolbar and keyboard navigate the displayed list
+[86/124] [chromium] › e2e\library-tv1-navigation.spec.js:6:3 › Modern prev/next follows the displayed order and gives playing setlists priority
+[87/124] [chromium] › e2e\library-tv1-navigation.spec.js:6:3 › Classic prev/next follows the displayed order and gives playing setlists priority
+[88/124] [chromium] › e2e\library-tv1-numbers-http.spec.js:5:3 › Modern number 1 opens Tôn Vinh 1 and an unnumbered catalog cannot open Thánh ca 1
+[89/124] [chromium] › e2e\library-tv1-numbers-http.spec.js:5:3 › Classic number 1 opens Tôn Vinh 1 and an unnumbered catalog cannot open Thánh ca 1
+[90/124] [chromium] › e2e\library-tv1-numbers.spec.js:5:3 › Modern number lookup stays in its catalog and never guesses unofficial numbers
+[91/124] [chromium] › e2e\library-tv1-numbers.spec.js:5:3 › Classic number lookup stays in its catalog and never guesses unofficial numbers
+[92/124] [chromium] › e2e\library-tv1-offline.spec.js:3:1 › Offline lyric mode searches cached lyrics without title or catalog-number matches
+[93/124] [chromium] › e2e\library-tv1-search.spec.js:6:3 › Modern: search loads all 343 filtered songs in bounded pages
+[94/124] [chromium] › e2e\library-tv1-search.spec.js:6:3 › Classic: search loads all 343 filtered songs in bounded pages
+[95/124] [chromium] › e2e\library-tv1-shared.spec.js:5:1 › Shared highlighter preserves Vietnamese word boundaries, HTML and aliases
+[96/124] [chromium] › e2e\library-tv1-shared.spec.js:18:1 › Failed next page can retry without losing rows or changing offset
+[97/124] [chromium] › e2e\library-tv1-shared.spec.js:38:1 › Late search response cannot replace a newer query
+[98/124] [chromium] › e2e\library-tv2-arrangements.spec.js:3:1 › arrangement requests coalesce, empty results stay loaded, late responses never replace the current song
+[99/124] [chromium] › e2e\library-tv2-audio-http.spec.js:5:3 › Modern reading creates no AudioContext and audio vendors wait for playback
+[100/124] [chromium] › e2e\library-tv2-audio-http.spec.js:27:3 › Modern first playback loads real vendors and supports stop and timbre changes
+[101/124] [chromium] › e2e\library-tv2-audio-http.spec.js:5:3 › Classic reading creates no AudioContext and audio vendors wait for playback
+[102/124] [chromium] › e2e\library-tv2-audio-http.spec.js:27:3 › Classic first playback loads real vendors and supports stop and timbre changes
+[103/124] [chromium] › e2e\library-tv2-audio-races.spec.js:30:1 › Stop while vendors load prevents any score/player startup; resume is synchronous in the click
+[104/124] [chromium] › e2e\library-tv2-audio-races.spec.js:39:1 › Double play shares one pending load and a new song cancels the old score
+[105/124] [chromium] › e2e\library-tv2-audio-races.spec.js:55:1 › Stop during an asynchronous native play also stops a late vendor start
+[106/124] [chromium] › e2e\library-tv2-chord-list.spec.js:6:3 › Modern loads chord-set names only on interaction and shares pending requests
+[107/124] [chromium] › e2e\library-tv2-chord-list.spec.js:6:3 › Classic loads chord-set names only on interaction and shares pending requests
+[108/124] [chromium] › e2e\library-tv2-demand-http.spec.js:6:1 › Modern reading avoids usage and performance API; explicit info and performance still load
+[109/124] [chromium] › e2e\library-tv2-demand-http.spec.js:28:1 › Info popover can retry a failed usage request without changing songs
+[110/124] [chromium] › e2e\library-tv2-script-loader.spec.js:10:1 › Classic subdirectory requests use the application root and coalesce while loading
+[111/124] [chromium] › e2e\library-tv2-script-loader.spec.js:21:1 › A failed script is removed and the next attempt really fetches and executes it
+[112/124] [chromium] › e2e\library-tv4-categories.spec.js:6:1 › Category rename refreshes cached songs; deletion transfers songs atomically through both APIs
+[113/124] [chromium] › e2e\library-tv4-categories.spec.js:43:1 › Concurrent cache readers always receive complete JSON documents
+[114/124] [chromium] › e2e\library-tv4-contract.spec.js:6:38 › ApiService songs.list returns an array for legacy responses
+[115/124] [chromium] › e2e\library-tv4-contract.spec.js:6:38 › ApiService songs.list returns an array for canonical responses
+[116/124] [chromium] › e2e\library-tv4-contract.spec.js:15:1 › All songs read branches return success/data and write errors use proper HTTP codes without SQL details
+[chromium] › e2e\library-tv4-contract.spec.js:15:1 › All songs read branches return success/data and write errors use 
+proper HTTP codes without SQL details
+
+
+[117/124] [chromium] › e2e\library-tv4-csrf.spec.js:6:1 › CSRF flag rejects missing tokens and browser ApiService still saves chords
+[chromium] › e2e\library-tv4-csrf.spec.js:6:1 › CSRF flag rejects missing tokens and browser ApiService still saves 
+chords
+
+
+[118/124] [chromium] › e2e\library-tv4-public-programs.spec.js:27:1 › Guest API omits nonpublic programs and personnel; offline aliases require login
+[119/124] [chromium] › e2e\library-tv4-public-programs.spec.js:42:1 › Authenticated member retains draft assignments and offline package
+[120/124] [chromium] › e2e\library-tv4-public-programs.spec.js:56:1 › Guest printed booklet cannot reveal draft or assignment notes
+[121/124] [chromium] › e2e\library-tv4-public-programs.spec.js:65:38 › Modern guest can open a published program without personnel data
+[122/124] [chromium] › e2e\library-tv4-public-programs.spec.js:65:38 › Classic guest can open a published program without personnel data
+[123/124] [chromium] › e2e\library-tv4-xml-owner.spec.js:7:1 › XML save and restore allow the owner/admin and reject another user without modifying files
+[124/124] [chromium] › e2e\library-tv4-xml-path.spec.js:7:1 › Song update rejects unmanaged XML and FTS never extracts lyrics from an unmanaged file
+  1 failed
+    [chromium] › e2e\library-tv0-toolbar.spec.js:7:3 › Modern toolbar 820, sidebar open ────────────
+  123 passed (3.5m)
