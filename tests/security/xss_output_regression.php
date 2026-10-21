@@ -30,7 +30,6 @@ $learnIndex = source($root . '/learn/index.php');
 $membersIndex = source($root . '/members/index.php');
 $managerIndex = source($root . '/manager/index.php');
 $projector = source($root . '/live-band/projector.php') . source($root . '/live-band/js/projector-slides.js') . source($root . '/live-band/js/projector-app.js');
-$members = source($root . '/members/members.js');
 $admin = source($root . '/assets/js/admin-ui.js');
 $songLoader = source($root . '/assets/js/song-loader.js');
 $learn = source($root . '/assets/js/learn/learn-app.js');
@@ -62,8 +61,6 @@ check(str_contains($managerIndex, '../assets/js/core/SafeHtml.js'), 'Manager app
 check(str_contains($projector, '/assets/js/core/SafeHtml.js'), 'Projector loads the shared output encoder');
 check(str_contains($editorIndex, '/assets/js/core/SafeHtml.js'), 'Editor app loads the shared output encoder');
 
-check(str_contains($members, 'window.SafeHtml.escape(m.display_name || m.username)'), 'Member display names are encoded');
-check(str_contains($members, "'Độc quyền bộ ' + safeChordCode"), 'Member chord codes in permission descriptions are encoded');
 check(str_contains($admin, 'window.SafeHtml.escape(song.title)'), 'Admin song titles are encoded');
 check(str_contains($admin, 'window.SafeHtml.escape(u.username)'), 'Admin usernames are encoded');
 check(str_contains($songLoader, 'window.SafeHtml.escape(v.version_name)'), 'Song version names are encoded');

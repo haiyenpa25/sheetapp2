@@ -202,4 +202,18 @@
     isLoopActive: () => _isLoopActive,
     getLoopRange: () => ({ start: _loopStartMeasure, end: _loopEndMeasure })
   };
+
+  // Chưa có engine tách bè vocal: khi LIVE_BAND_SATB tắt thì ẩn bộ chọn bè để không có nút "+3dB Solo" không tác dụng
+  function applySatbFeatureFlag() {
+    const enabled = window.FeatureFlags ? window.FeatureFlags.get('LIVE_BAND_SATB') : false;
+    document.querySelectorAll('.vocal-satb-selector').forEach(el => {
+      el.style.display = enabled ? '' : 'none';
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applySatbFeatureFlag);
+  } else {
+    applySatbFeatureFlag();
+  }
 })();

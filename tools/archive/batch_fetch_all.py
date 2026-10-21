@@ -31,7 +31,7 @@ from datetime import date
 from pathlib import Path
 
 SCRIPT_DIR    = Path(__file__).parent
-ROOT_DIR      = SCRIPT_DIR.parent
+ROOT_DIR      = SCRIPT_DIR.parent.parent  # tools/archive/ -> gốc dự án
 SHEETS_DIR    = ROOT_DIR / "storage" / "Thanh ca"   # <<< Folder mới
 SONGS_FILE    = ROOT_DIR / "storage" / "data" / "songs.json"
 PROGRESS_FILE = SCRIPT_DIR / "batch_progress.json"

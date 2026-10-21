@@ -8,22 +8,9 @@
 (function(window) {
   'use strict';
 
+  // Chỉ khai báo cờ có code thật đọc qua FeatureFlags.get(); cờ server lấy từ window.__FEATURES__.
   const DEFAULT_FLAGS = {
-    // Live Band Studio
-    LIVE_BAND_A_B_LOOP: true,        // Đồng bộ vòng lặp A-B loop giữa Ca Trưởng và Ban Nhạc
-    LIVE_BAND_STAGE_INK: true,       // Bút vẽ chú thích Apple Pencil / S-Pen đồng bộ
-    LIVE_BAND_BAND_STATES: true,     // 6 trạng thái năng lượng ban nhạc (Break, Build, Drop...)
-    LIVE_BAND_STEREO_SPLIT: true,    // Tách kênh In-Ear (L: Click / R: Nhạc đệm Pad)
-    LIVE_BAND_SATB: false,           // ẨN: Live Band chưa có multi-track audio engine tách bè vocal
-
-    // Main Sheet Viewer
-    MIXER_PART_TOGGLE: true,         // Bật/tắt dải bè nhạc cụ khi bài hát có > 1 bè
-    OFFLINE_XML_CACHE: true,         // Cache MusicXML quota FIFO v4
-
-    // Smart Learning
-    LEARN_PRACTICE_TRACKER: true,    // Đo lường độ chính xác luyện tập thực tế
-    LEARN_MELODY_WAIT: true,         // Chờ nốt giai điệu MIDI
-    LEARN_VOICING_ASSIST: true       // Gợi ý hợp âm nâng cao
+    LIVE_BAND_SATB: false            // ẨN bộ chọn bè (live-band/js/stage-rehearsal.js): chưa có engine tách bè vocal
   };
 
   // Hỗ trợ ghi đè cờ qua localStorage khi thử nghiệm (Dev/Admin)

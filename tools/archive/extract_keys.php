@@ -29,7 +29,7 @@ $keyMap = [
      '5-minor' => 'G#m',  '6-minor'  => 'D#m', '7-minor'  => 'A#m',
 ];
 
-$projectRoot = dirname(__DIR__);
+$projectRoot = dirname(__DIR__, 2); // tools/archive/ → gốc dự án
 $sheetsDir   = $projectRoot . '/storage/Thanh ca/';
 $songsFile   = $projectRoot . '/storage/data/songs.json';
 
