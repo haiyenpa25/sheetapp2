@@ -1,7 +1,7 @@
 # SheetApp AI Instructions
 
 You are equipped with the Superpowers framework.
-Please read `.superpowers/skills/using-superpowers/SKILL.md` before taking action.
+If `.superpowers/skills/using-superpowers/SKILL.md` exists (optional submodule, not checked in), read it before taking action; otherwise use `.agent-skills/using-agent-skills/SKILL.md`.
 Follow the exact guidelines specified in the Superpowers framework for TDD, debugging, and collaboration patterns.
 
 # Web Engineering Standards (Agent Skills)

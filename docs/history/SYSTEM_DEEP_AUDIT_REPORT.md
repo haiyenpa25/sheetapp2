@@ -2,7 +2,7 @@
 
 > **Loại tài liệu:** Báo cáo Rà soát Chuyên sâu (System Deep Audit Report)  
 > **Dự án:** SheetApp — Ứng dụng đọc & biểu diễn bản nhạc chuyên nghiệp  
-> **Môi trường:** Linux Server (`sheet5566@172.20.0.239` - `/home/sheet.hyb.io.vn/public_html`)  
+> **Môi trường:** Linux Server (tài khoản và IP nội bộ đã được che khi rà soát 2026-10-21)
 > **Công nghệ:** PHP 8+ MVC | SQLite (PDO) | Vanilla JS (IIFE + EventBus + Store) | OSMD (OpenSheetMusicDisplay) | Superpowers & Gitnexus Integrated  
 > **Ngày lập báo cáo:** 06/08/2026  
 

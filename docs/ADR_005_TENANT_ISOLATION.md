@@ -1,6 +1,6 @@
 # ADR-005: Chiến Lược Cô Lập Dữ Liệu & Kiến Trúc Đa Hội Thánh (Multi-Tenant Architecture)
 
-- **Trạng thái:** ĐỀ XUẤT / SẴN SÀNG CHO GIAI ĐOẠN 4 (Epic 4.5)
+- **Trạng thái:** ĐÃ GỠ — bản spike multi-tenant được lưu trữ và gỡ khỏi mã ở commit `595b507` (2026-09-26, baseline 4.9). `api/core/DB.php` chỉ còn single-tenant. Giữ ADR để tham khảo nếu mở lại.
 - **Tác giả:** SheetApp Core Architecture Team
 - **Ngày lập:** 2026-09-26
 - **Liên quan:** [ROADMAP2.md](file:///c:/xampp/htdocs/sheetapp2/ROADMAP2.md) (Mục D.7 Epic 4.5), [PROJECT_REGISTRY.md](file:///c:/xampp/htdocs/sheetapp2/PROJECT_REGISTRY.md)

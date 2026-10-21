@@ -4,7 +4,7 @@
 > **Phạm vi:** chỉ trang Thư viện — giao diện mới `index.php` (ví dụ `http://localhost/sheetapp2/?song=thanh-ca-001`), giao diện cũ `old/index.php`, và các API/dữ liệu mà Thư viện dùng (`route=songs`, `chord_sets`, `setlists`, `import`).
 > **Người đọc:** chủ dự án (duyệt, trả lời mục 5) và **một** người/AI thực thi.
 > **Luật thực thi:** `ROADMAPS.md` mục 2 (chép từ `docs/history/ROADMAP3.md` Phần 0) vẫn áp dụng nguyên văn (bằng chứng FAIL→PASS thô, test không ghi DB/storage thật, không push/deploy/`sync.*`, mỗi ticket ≤ ~5 file, gặp xoá dữ liệu / đổi Core Rule / đổi quyền thì dừng và hỏi).
-> **Thay cho:** `ROADMAP6.md` cũ (R6-0…R6-7, giao diện Thư viện, đã triển khai và bị gỡ khỏi thư mục gốc ở commit `6819f39`; lịch sử còn ở `docs/ROADMAP6_IMPLEMENTATION_REPORT.md`). Mã ticket bản này dùng tiền tố **TV** để không nhầm với R6-x cũ.
+> **Thay cho:** `ROADMAP6.md` cũ (R6-0…R6-7, giao diện Thư viện, đã triển khai và bị gỡ khỏi thư mục gốc ở commit `6819f39`; lịch sử còn ở `docs/history/ROADMAP6_IMPLEMENTATION_REPORT.md`). Mã ticket bản này dùng tiền tố **TV** để không nhầm với R6-x cũ.
 
 ## TRẠNG THÁI TRIỂN KHAI (người thực thi cập nhật sau mỗi ticket)
 

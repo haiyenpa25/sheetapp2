@@ -54,9 +54,9 @@ Tất cả nằm trong [docs/history/](docs/history/). Không làm theo các fil
 | `GIAO_VIEC_G3.9.md` | 09-25 | Phiếu giao việc G3.9 | Xong |
 | `GEMINI_IMPLEMENTATION_RULES.md` | 09-25 | Luật bàn giao cho Gemini thời G0–G3.9 | Thay bởi mục 2 của file này |
 | `ROADMAP3.md` | 09-26 | GĐ 4.9 "Ổn định trước Pilot" (K, F, Q, P, D) | Xong; Phần 0 chuyển sang mục 2 ở trên |
-| `ROADMAP4.md` | 09-26 | Thư viện L0–L6 | Xong. **Chỉ còn bản local** trong `docs/archive/` (bị git ignore), không có trên GitHub |
-| `ROADMAP5.md` | 09-29 | Thư viện R0–R5 | Xong; nghiệm thu ở `docs/ROADMAP5_R5_ACCEPTANCE_REPORT.md` |
-| `ROADMAP6` cũ, `ROADMAP7` | 10-01 → 10-02 | Thư viện R6-x, tối ưu điện thoại/laptop | Xong; báo cáo ở `docs/ROADMAP6_IMPLEMENTATION_REPORT.md`, `docs/ROADMAP7_IMPLEMENTATION_REPORT.md`. Bản gốc chỉ còn local trong `docs/archive/` |
+| `ROADMAP4.md` | 09-26 | Thư viện L0–L6 | Xong. Đưa lên từ bản local ngày 2026-10-21; đã che chi tiết mật khẩu ở mục L-D5 |
+| `ROADMAP5.md` | 09-29 | Thư viện R0–R5 | Xong; nghiệm thu ở `docs/history/ROADMAP5_R5_ACCEPTANCE_REPORT.md` |
+| `ROADMAP6_R6_2026-10-01.md`, `ROADMAP7.md` | 10-01 → 10-02 | Thư viện R6-x (bản cũ, khác `ROADMAP6.md` hiện hành), tối ưu điện thoại/laptop | Xong; báo cáo ở `docs/history/ROADMAP6_IMPLEMENTATION_REPORT.md`, `docs/history/ROADMAP7_IMPLEMENTATION_REPORT.md` |
 | `KE_HOACH_SKILLS_VA_GITHUB.md` | 10-17 | Sprint S1–S3: skill, thư viện GitHub, OfflineVault | Xong |
 | `PHUONG_AN_TOI_UU_HE_THONG_2026-10-17.md` | 10-17 | Phương án tối ưu P0–P3 | Đã thực hiện ở commit `e3dc9a3`; thay bằng bản 2026-10-21 |
 
@@ -68,6 +68,6 @@ Tất cả nằm trong [docs/history/](docs/history/). Không làm theo các fil
 - `docs/STAGING_AND_BACKUP_RUNBOOK.md`: staging, backup mã hoá, diễn tập phục hồi
 - `docs/LIBRARY_DATA_RELEASE.md`: cài mới hoặc cập nhật thư viện từ seed
 - `docs/INSTRUMENT_ANNOTATIONS.md`: ghi chú theo nhạc cụ
-- `docs/ADR_005_TENANT_ISOLATION.md`: quyết định kiến trúc đa hội thánh
+- `docs/ADR_005_TENANT_ISOLATION.md`: quyết định kiến trúc đa hội thánh (đã gỡ khỏi mã, chỉ để tham khảo)
 
 **Quy ước:** khi một roadmap xong hoặc bị thay, `git mv` nó vào `docs/history/` và cập nhật bảng ở mục 3. Không dùng `docs/archive/` vì thư mục đó bị `.gitignore` nên sẽ không lên GitHub.
