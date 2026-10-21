@@ -3,7 +3,7 @@
 > **Ngày lập:** 2026-10-17
 > **Phạm vi:** chỉ trang Thư viện — giao diện mới `index.php` (ví dụ `http://localhost/sheetapp2/?song=thanh-ca-001`), giao diện cũ `old/index.php`, và các API/dữ liệu mà Thư viện dùng (`route=songs`, `chord_sets`, `setlists`, `import`).
 > **Người đọc:** chủ dự án (duyệt, trả lời mục 5) và **một** người/AI thực thi.
-> **Luật thực thi:** `ROADMAP3.md` Phần 0 vẫn áp dụng nguyên văn (bằng chứng FAIL→PASS thô, test không ghi DB/storage thật, không push/deploy/`sync.*`, mỗi ticket ≤ ~5 file, gặp xoá dữ liệu / đổi Core Rule / đổi quyền thì dừng và hỏi).
+> **Luật thực thi:** `ROADMAPS.md` mục 2 (chép từ `docs/history/ROADMAP3.md` Phần 0) vẫn áp dụng nguyên văn (bằng chứng FAIL→PASS thô, test không ghi DB/storage thật, không push/deploy/`sync.*`, mỗi ticket ≤ ~5 file, gặp xoá dữ liệu / đổi Core Rule / đổi quyền thì dừng và hỏi).
 > **Thay cho:** `ROADMAP6.md` cũ (R6-0…R6-7, giao diện Thư viện, đã triển khai và bị gỡ khỏi thư mục gốc ở commit `6819f39`; lịch sử còn ở `docs/ROADMAP6_IMPLEMENTATION_REPORT.md`). Mã ticket bản này dùng tiền tố **TV** để không nhầm với R6-x cũ.
 
 ## TRẠNG THÁI TRIỂN KHAI (người thực thi cập nhật sau mỗi ticket)
@@ -324,7 +324,7 @@ Mọi ticket TV5 gồm: tool CLI có `--dry-run` và `--execute`, chạy trên b
 - Không đổi bốn Core Rules (HD mặc định, tông gốc = 0, khoá TLH/HD, đồng bộ setlist).
 - Không làm lại các ticket R0–R7 và L0–L6 đã đóng, trừ khi có lỗi tái hiện được (các lỗi B1–B16 ở trên đều có bằng chứng riêng).
 - Không đụng Live Band, Learn, Editor, Manager, ngoại trừ phần Manager phục vụ TV5 (nhập nhãn, tiến độ HD).
-- Không bundler/minify toàn bộ (P3-2 của `PHUONG_AN_TOI_UU_HE_THONG.md`) trước khi TV2-2 cho thấy tải theo nhu cầu chưa đủ đạt Q6.
+- Không bundler/minify toàn bộ (P3-2 của `docs/history/PHUONG_AN_TOI_UU_HE_THONG_2026-10-17.md`) trước khi TV2-2 cho thấy tải theo nhu cầu chưa đủ đạt Q6.
 
 ---
 

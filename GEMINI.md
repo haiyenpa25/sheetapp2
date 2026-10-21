@@ -2,7 +2,7 @@
 @./.superpowers/skills/using-superpowers/references/gemini-tools.md
 
 # Bàn giao triển khai — BẮT BUỘC đọc trước khi sửa code
-@./GEMINI_IMPLEMENTATION_RULES.md
+@./ROADMAPS.md
 
 # Web Engineering & SheetApp2 Domain Skills (Agent Skills)
 @./.agent-skills/using-agent-skills/SKILL.md

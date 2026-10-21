@@ -1,180 +1,349 @@
-# PHƯƠNG ÁN CHỈNH SỬA CHI TIẾT & TỐI ƯU HÓA HỆ THỐNG SHEETAPP2
+# PHƯƠNG ÁN TỐI ƯU HỆ THỐNG SHEETAPP2 (bản 2026-10-21)
 
-> **Ngày lập:** 2026-10-17  
-> **Phạm vi:** Toàn bộ dự án SheetApp2 (Giao diện Mới `/`, Giao diện Cũ `/old/`, Backend `api/`, Cơ sở dữ liệu SQLite, CI/CD & Quy trình Git)  
-> **Trạng thái hiện tại:** `164/164` test suites PASS (`3.206` checks), `280/280` file JS hợp lệ cú pháp, `1.731` bài hát thuộc 7 danh mục.
-
----
-
-## 1. TỔNG QUAN ĐÁNH GIÁ HIỆN TRẠNG
-
-| Hạng mục | Điểm | Điểm mạnh | Điểm nghẽn cần tối ưu |
-| :--- | :---: | :--- | :--- |
-| **1. Nghiệp vụ & Tính năng** | **8.5 / 10** | Đầy đủ 2 giao diện (`/` và `/old/`), 1.731 bài hát (7 danh mục), dịch giọng tức thì, bộ hợp âm HD/TLH, Setlist, Live Band, Smart Practice, Manager. | Cần đồng bộ liên kết PWA `manifest.json` khi chạy trong thư mục con `/sheetapp2/`. |
-| **2. Kiến trúc Mã nguồn** | **7.5 / 10** | Backend phân lớp chuẩn (`Controller → Service → Core`), 100% lệnh gọi API đi qua `ApiService`. Mọi file `.php`/`.js` đều `< 600` dòng. | Thư mục `/old/assets/js/core/` đang tách riêng 4 file lõi (`ApiService`, `Store`, `EventBus`, `ServiceWorkerManager`) thay vì dùng chung với `assets/js/core/`. |
-| **3. Hiệu năng (Performance)** | **7.5 / 10** | Có Service Worker precache, XML cache, coalesced requests, FTS5 search. | Danh sách 1.731 bài trên `/old/` đang render toàn bộ DOM cùng lúc; trang chính tải ~30 file JS rời chưa gộp bundle. |
-| **4. Bảo mật (Security)** | **7.5 / 10** | `.htaccess` chặn truy cập `storage/*.sqlite`, mật khẩu `password_hash`, cookie `HttpOnly + SameSite=Lax`, `LoginRateLimiter`, `RequestSecurity::isSameOrigin`. | Cần bổ sung CSRF Token (`X-CSRF-Token`) cho các request thay đổi dữ liệu và siết `isSameOrigin` khi thiếu cả `Origin` lẫn `Referer`. |
-| **5. Kiểm thử & Quy trình Git** | **7.5 / 10** | 164 bộ kiểm thử PHP regression + 134 file Playwright E2E. | Giao diện `/old/` chưa có bộ test hồi quy riêng; `sync.bat`/`sync.sh` đang tự động đẩy thẳng lên `main` gây xung đột `CODE_MAP.md`. |
+> **Ngày lập:** 2026-10-21 · **Mốc mã nguồn:** `main` @ `406aef6` (đã đồng bộ với `origin/main`)
+> **Người đọc:** chủ dự án (duyệt, trả lời mục 6) và **một** người/AI thực thi.
+> **Luật thực thi:** `ROADMAPS.md` mục 2. Ticket nào ghi DB thật, xoá dữ liệu, đổi quyền hoặc đổi Core Rule thì phải chờ chủ dự án duyệt.
+> **Quan hệ với ROADMAP6:** ROADMAP6 vẫn là roadmap của trang Thư viện. File này chỉ thêm việc **toàn hệ thống** mà ROADMAP6 không có. Trùng chỗ nào thì ghi "→ TVx-y" và làm theo ROADMAP6, không làm hai lần.
+> **Thay cho:** `docs/history/PHUONG_AN_TOI_UU_HE_THONG_2026-10-17.md` (P0–P3, đã thực hiện ở commit `e3dc9a3`).
+> **Phương pháp:** đọc mã, đo bằng `wc`/`du`/`grep`/`diff`, đọc DB ở chế độ `mode=ro`. Chưa chạy lại toàn bộ test suite trong đợt rà soát này. Mục nào đánh ✅ là đã kiểm chứng trực tiếp trong code.
 
 ---
 
-## 2. LỘ TRÌNH THỰC HIỆN (4 GIAI ĐOẠN: P0 → P3)
+## 0. TÓM TẮT
+
+Về tính năng, hệ thống đã khá đầy đủ: hai giao diện Modern `/` và Classic `/old/`, 1.731 bài, 7 sub-app, 176 bộ test PHP, 172 spec E2E. Vấn đề còn lại nằm ở 5 nhóm, xếp theo mức nghiêm trọng:
+
+1. **Test và tool đang ghi vào dữ liệu thật.** Có 66 file backup (478 MB) do một bộ test tự tạo. 97% dòng trong `audit.log` sinh ra từ CLI. Cache bài hát không bao giờ bị xoá đúng chỗ.
+2. **Bảo mật:** CSRF vẫn tắt. API đọc bộ hợp âm không kiểm tra quyền riêng tư. Có endpoint ghi log không qua router.
+3. **Hai nguồn dữ liệu cho bộ hợp âm:** DB có 1.737 dòng, đĩa có 60 file JSON, và hệ thống lặng lẽ đọc file đĩa khi DB lỗi.
+4. **Tải trang nặng:** Modern nạp 84 file JS, 1,99 MB, thấy bản nhạc sau 11,2 s trên 4G. Khoảng 1 MB JS còn truyền không nén.
+5. **Mã trùng và mã chết:** Classic có 22 file JS fork đã lệch hẳn bản chính. Hai hệ đồng bộ live chạy song song, hai bộ đọc SATB. Có các wrapper chỉ để lách ngân sách 600 dòng, và 10 feature flag phía JS không có ai đọc.
+
+**Việc đã làm ngay trong đợt này** (chỉ đụng tài liệu và file rác, không đụng mã chạy hay dữ liệu thật):
+- Chuyển 9 roadmap/phiếu cũ ở thư mục gốc vào `docs/history/` bằng `git mv`, giữ nguyên lịch sử.
+- Tạo `ROADMAPS.md` làm chỉ mục duy nhất. File này gồm luật thực thi chép từ ROADMAP3 Phần 0 và bảng lịch sử.
+- Sửa các con trỏ đã cũ trong `AGENTS.md`, `GEMINI.md` và `ROADMAP6.md`.
+- Xoá `.superpowers/scratch_find_bpm_tables.php` (script nháp dùng một lần) và các thư mục sinh lại được: `test-results/` (5,3 MB), `tests/__pycache__`, `tools/__pycache__`.
+
+---
+
+## 1. HIỆN TRẠNG ĐO ĐƯỢC
+
+| Hạng mục | Số đo | Nguồn |
+|---|---|---|
+| Backend | 20 controller (2.568 dòng), 35 service (8.933), 12 core (862), 16 migration | `wc -l api/**` |
+| Frontend Modern | 119 file JS của dự án, 35.010 dòng; 8 file CSS 362 KB, 673 `!important` | `assets/` |
+| Frontend Classic | 22 file JS fork (7.226 dòng) cộng 23 file lấy từ Modern; 4 file CSS 104 KB, 207 `!important`; 86% selector trùng Modern | `old/` |
+| Tải trang 4G, cache lạnh | Modern 84 JS / 103 request / 1.993.443 byte / SVG 11.225 ms · Classic 45 / 59 / 1.299.141 / 7.759 ms. Ngân sách: ≤40 / ≤60 / ≤1,5 MB / ≤2.500 ms | `docs/ROADMAP6_TV2_AUDIO_COMPRESSION.md` |
+| Test | 176 bộ PHP; theo heuristic thì khoảng 65 bộ (~37%) chỉ grep file nguồn · 172 spec E2E, trong đó 151 thuộc Thư viện; live-band 3, learn 1, editor 2 | `tests/`, `e2e/` |
+| CI | 1 job: chạy `run_all_tests.php` trên Apache. Không có ESLint, không có E2E, không có `--strict` | `.github/workflows/ci.yml` |
+| Storage | `storage/backups` 74 file / 493 MB · `storage/logs` 2,4 MB, không xoay vòng | `du` |
+| Tài liệu nạp mỗi phiên AI | `PROJECT_REGISTRY.md` 1.521 dòng / 185 KB, nạp qua `CLAUDE.md` vào mọi phiên | `wc -c` |
+
+---
+
+## 2. LỘ TRÌNH
 
 ```mermaid
 flowchart LR
-  P0["Giai đoạn P0 (Ngay lập tức)<br/>Quy trình Git, Manifest & Tài liệu"] --> P1["Giai đoạn P1 (Ngắn hạn)<br/>Bảo mật CSRF & Kiểm thử /old/"]
-  P1 --> P2["Giai đoạn P2 (Trung hạn)<br/>Hợp nhất Core JS & Chống XSS"]
-  P2 --> P3["Giai đoạn P3 (Dài hạn)<br/>Virtual List, Bundle JS/CSS & Backup"]
+  P0["P0 — Ngừng làm bẩn dữ liệu thật<br/>(1–2 ngày)"] --> P1["P1 — Bảo mật & một nguồn dữ liệu<br/>(3–4 ngày)"]
+  P1 --> P2["P2 — Tải trang & CI<br/>(1 tuần, song song TV2)"]
+  P2 --> P3["P3 — Hội tụ mã trùng<br/>(2–3 tuần, theo đợt)"]
 ```
 
----
-
-## 3. CHI TIẾT TỪNG HẠNG MỤC CHỈNH SỬA & TỐI ƯU
-
-### GIAI ĐOẠN P0 — ỔN ĐỊNH QUY TRÌNH, TÀI LIỆU & SỬA LỖI NHỎ (Thực hiện ngay)
-
-#### Ticket P0-1: Chuẩn hóa tài liệu điều hành & liên kết nội bộ
-- **Vấn đề:** Các file quy tắc (`GEMINI_IMPLEMENTATION_RULES.md`, `PROJECT_REGISTRY.md`) có tham chiếu tới `GIAO_VIEC_G3.9.md`, `ROADMAP.md`, `ROADMAP2.md` và báo cáo tổng thể `2026-09-24`.
-- **Giải pháp thực hiện:**
-  1. Lưu trữ gọn các tài liệu lịch sử vào thư mục `docs/archive/` và giữ các file điều hành cốt lõi hoặc cập nhật lại đường dẫn trong `GEMINI_IMPLEMENTATION_RULES.md` và `PROJECT_REGISTRY.md` để không còn bất kỳ liên kết chết nào.
-- **File tác động:** `GEMINI_IMPLEMENTATION_RULES.md`, `PROJECT_REGISTRY.md`, `docs/archive/`.
-
-#### Ticket P0-2: Tối ưu `sync.bat` & `sync.sh` (Chặn auto-push lỗi và xung đột `CODE_MAP.md`)
-- **Vấn đề:** Tiến trình chạy nền gọi `sync.bat` tự động commit `"Auto-sync from Antigravity"` và push thẳng lên `main` mà không kiểm tra cú pháp trước, gây xung đột `CODE_MAP.md`.
-- **Giải pháp thực hiện:**
-  1. Trong `sync.bat` và `sync.sh`, chạy `node tools/check_syntax.js` trước khi tạo commit.
-  2. Trước khi `git push`, thực hiện `git pull --rebase origin <branch>` và tự động chạy lại `node tools/generate_code_map.js` nếu có thay đổi từ remote để triệt tiêu hoàn toàn lỗi conflict `CODE_MAP.md`.
-  3. Cấu hình `.gitattributes` thêm dòng `CODE_MAP.md merge=ours` để Git không bao giờ dừng rebase vì xung đột dòng timestamp của `CODE_MAP.md`.
-- **File tác động:** `sync.bat`, `sync.sh`, `.gitattributes`.
-
-#### Ticket P0-3: Sửa lỗi 404 icon trong `manifest.json` & đường dẫn PWA
-- **Vấn đề:** `manifest.json` đang khai báo `"src": "/assets/img/icon-192.png"` và `"start_url": "/"`. Khi chạy ở `http://localhost/sheetapp2/` hoặc `http://localhost/sheetapp2/old/`, trình duyệt tìm `/assets/img/icon-192.png` ở gốc máy chủ gây lỗi 404 trên Console.
-- **Giải pháp thực hiện:**
-  1. Đổi đường dẫn trong `manifest.json` sang tương đối chuẩn:
-     ```json
-     {
-       "name": "SheetApp — Nhạc Thánh Ca",
-       "short_name": "SheetApp",
-       "start_url": "./",
-       "scope": "./",
-       "display": "standalone",
-       "background_color": "#ffffff",
-       "theme_color": "#3730a3",
-       "icons": [
-         { "src": "assets/img/icon-192.png", "sizes": "192x192", "type": "image/png" },
-         { "src": "assets/img/icon-512.png", "sizes": "512x512", "type": "image/png" },
-         { "src": "assets/img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
-       ]
-     }
-     ```
-- **File tác động:** `manifest.json`.
-
-#### Ticket P0-4: Gỡ bỏ thư mục `.ua/` khỏi Git tracking
-- **Vấn đề:** Thư mục `.ua/knowledge-graph.json` (~1 MB) đã nằm trong `.gitignore` nhưng vẫn còn lưu trong Git index.
-- **Giải pháp thực hiện:**
-  - Chạy `git rm -r --cached .ua` để giảm dung lượng repository mà vẫn giữ file trên máy local.
+Ước lượng tính cho một người thực thi và chưa gồm thời gian chờ chủ dự án duyệt.
 
 ---
 
-### GIAI ĐOẠN P1 — BẢO MẬT & KIỂM THỬ HỒI QUY CHO GIAO DIỆN CŨ `/old/`
+## 3. CHI TIẾT TICKET
 
-#### Ticket P1-1: Bổ sung cơ chế chống CSRF (Double-Submit Cookie + Header)
-- **Vấn đề:** `api/core/RequestSecurity.php` hiện cho phép request đi qua nếu trình duyệt/client không gửi header `Origin`.
-- **Giải pháp thực hiện:**
-  1. **`api/core/RequestSecurity.php`**:
-     - Khi `HTTP_ORIGIN` rỗng trên các method `POST`, `PUT`, `PATCH`, `DELETE`, kiểm tra fallback sang `HTTP_REFERER`.
-     - Sinh cookie `XSRF-TOKEN` (`SameSite=Lax`, `HttpOnly=false`) khi khởi tạo session.
-     - Kiểm tra header `X-CSRF-Token` khớp với `$_SESSION['csrf_token']` bằng `hash_equals()`.
-  2. **`assets/js/core/ApiService.js` & `old/assets/js/core/ApiService.js`**:
-     - Tự động đọc cookie `XSRF-TOKEN` và đính kèm header `'X-CSRF-Token'` vào mọi request `POST / PUT / PATCH / DELETE`.
-  3. **Chuyển đổi an toàn với Feature Flag:** Dùng cờ `csrf_enforce` trong `storage/config/features.json` để không làm gãy bất kỳ bài test CLI nào.
-- **File tác động:** `api/core/RequestSecurity.php`, `api/index.php`, `assets/js/core/ApiService.js`, `old/assets/js/core/ApiService.js`.
+### 🔴 P0 — Ngừng làm bẩn dữ liệu thật & vệ sinh kho
 
-#### Ticket P1-2: Chuẩn hóa Prepared Statement 100% trong `PracticeService.php`
-- **Vấn đề:** Tại `api/services/PracticeService.php:140`, câu lệnh SQL dùng nội suy chuỗi `WHERE id = {$sessionId}` (dù `$sessionId` đã ép kiểu `int`).
-- **Giải pháp thực hiện:**
-  - Chuyển sang `$stmt = $db->prepare("SELECT user_id, assignment_id FROM practice_sessions WHERE id = ?")` và `$stmt->execute([$sessionId])` để đạt chuẩn 100% prepared statements trên toàn bộ `api/`.
-- **File tác động:** `api/services/PracticeService.php`.
+#### OPT-01 · Test r34 không được tạo backup vào storage thật · S ✅
+- **Vấn đề:**
+  - `tests/library_r34_labels_migration_regression.php:150` gọi `tools/manage_song_labels.php --backup` trên DB production.
+  - Tool này dùng `copy()` ở `:125` để tạo file `storage/backups/app_before_r34_*.sqlite`.
+  - Mỗi lần chạy test sinh thêm khoảng 7–10 MB. Hiện đã có 66 file / 478 MB. Đây là vi phạm luật 6.
+- **Sửa:**
+  - Thêm cờ `--db=<path>` và `--backup-dir=<path>` cho tool.
+  - Test dùng bản sao trong thư mục tạm và dọn sau khi chạy.
+  - Đổi `copy()` sang `VACUUM INTO`, đúng mẫu đã có ở `tools/update_library.php:33`, để backup nhất quán khi DB đang ở chế độ WAL.
+- **Nghiệm thu:** chạy test 3 lần liên tiếp, số file trong `storage/backups/` không đổi.
+- **File:** `tools/manage_song_labels.php`, `tests/library_r34_labels_migration_regression.php`.
 
-#### Ticket P1-3: Xây dựng bộ kiểm thử hồi quy `tests/old_ui_flat_compact_regression.php`
-- **Vấn đề:** Giao diện mới `/` đã có 164 bộ test bảo vệ, nhưng giao diện cũ `/old/` chưa có bộ test tự động nào.
-- **Giải pháp thực hiện:**
-  - Tạo file `tests/old_ui_flat_compact_regression.php` kiểm tra tự động:
-    1. Cấu trúc HTML phẳng của `old/includes/sidebar.php` (`#category-flat-list`, `#key-filter`, `#quick-jump`, `#search-input`).
-    2. Cấu trúc HTML của `old/includes/sheet_viewer.php` (`#quick-pin-bar`, `#quick-num-hud`, `#btn-pin-current-song`).
-    3. Các hàm public của `old/assets/js/library-ui.js` (`jumpByNumber`, `togglePin`, `isPinned`, hiển thị 1 dòng `.song-item`).
-    4. Phím tắt trong `old/assets/js/keyboard-handler.js` (`0-9` + `Enter`, `/`, `G`).
-    5. Quy tắc CSS phẳng (`border-radius: 0 !important` trong `old/assets/css/base.css`) và giới hạn `< 600` dòng cho toàn bộ file trong `old/`.
-- **File tác động:** `tests/old_ui_flat_compact_regression.php`.
+#### OPT-02 · Chính sách giữ backup & dọn 478 MB · S · **cần chủ dự án duyệt (Q1)**
+- **Sửa:**
+  - Viết `tools/prune_backups.php`, mặc định chạy dry-run.
+  - Mỗi tiền tố giữ N bản mới nhất, cộng mọi bản được tạo trước một migration.
+  - Chỉ xoá khi có `--apply`.
+- **Lưu ý:** bước xoá thật chỉ chạy sau khi chủ dự án duyệt danh sách dry-run.
 
----
+#### OPT-03 · Test không ghi vào log thật · S
+- **Vấn đề:**
+  - `storage/logs/audit.log` có 8.480 dòng, trong đó 8.234 dòng mang IP "CLI".
+  - `storage/logs/mail/` có 462 file mail giả.
+- **Sửa:**
+  - Thêm `AuditLogger::setLogPath()`, `NotificationDeliveryService` nhận thư mục mail cấu hình được.
+  - `tests/run_all_tests.php` đặt cả hai vào thư mục tạm.
+  - Thêm xoay vòng log theo kích thước cho `audit.log` và `client_errors.log`.
+- **Nghiệm thu:** chạy toàn bộ suite xong, `audit.log` không thêm dòng nào.
 
-### GIAI ĐOẠN P2 — HỢP NHẤT HẠ TẦNG CORE JS & CHỐNG XSS TRIỆT ĐỂ
+#### OPT-04 · Cache bài hát được xoá đúng chỗ · S ✅
+- **Vấn đề:** `invalidateLabelsCache()` ở `tools/manage_song_labels.php:134-145` xoá file trong `storage/cache/`, nhưng thư mục này không tồn tại. Cache thật nằm ở `storage/data/songs_cache.json`. Hậu quả: gắn nhãn xong, khách vẫn thấy dữ liệu cũ tới 1 giờ.
+- **Sửa:**
+  - Mọi tool ghi dữ liệu bài hát đều gọi một hàm xoá cache chung (lấy đường dẫn từ `SongService::cachePath()`).
+  - Lưu sẵn ETag cạnh file cache, để mỗi request không phải hash lại 636 KB.
 
-#### Ticket P2-1: Dùng chung tầng Core JS giữa Giao diện Mới (`/`) và Giao diện Cũ (`/old/`)
-- **Vấn đề:** `old/assets/js/core/` đang duy trì bản sao riêng của `EventBus.js`, `Store.js`, `ApiService.js`, `ServiceWorkerManager.js`. Khi thêm tính năng ở API hoặc Store phải sửa ở 2 nơi.
-- **Giải pháp thực hiện:**
-  1. Kiểm tra và giữ nguyên các hàm tương thích ngược trong `assets/js/core/ApiService.js` và `assets/js/core/Store.js`.
-  2. Cập nhật `old/index.php` nạp trực tiếp `../assets/js/core/EventBus.js`, `../assets/js/core/Store.js`, `../assets/js/core/ApiService.js`, `../assets/js/core/ServiceWorkerManager.js`.
-  3. Xóa thư mục trùng lặp `old/assets/js/core/`.
-- **File tác động:** `old/index.php`, `assets/js/core/ApiService.js`, `old/assets/js/core/*`.
+#### OPT-05 · Bỏ tự push trong `sync.sh` / `sync.bat` · S ✅
+- **Vấn đề:** cả hai script chạy `git add -A`, `commit --amend` rồi `git push origin main` (`sync.sh:18-23`). `npm run sync` vẫn trỏ vào đây. Việc này trái với `AI_AGENT.md` mục 1.7.
+- **Sửa:**
+  - Chỉ giữ ba bước: kiểm cú pháp, sinh `CODE_MAP.md`, sinh SW manifest.
+  - Bỏ add/commit/push và đổi tên thành `prepare`.
+  - Xoá script `test:ui` vì nó trỏ tới file không tồn tại `tools/test_editor_ui.js`.
+  - Gỡ `puppeteer-core` khỏi `package.json` vì không chỗ nào dùng.
 
-#### Ticket P2-2: Chuẩn hóa hàm chống XSS `escapeHtml` / `safeHtml` dùng chung
-- **Vấn đề:** Nhiều module JS tự định nghĩa hàm `_esc(str)` riêng lẻ khi gán `innerHTML`.
-- **Giải pháp thực hiện:**
-  1. Đưa hàm `window.escapeHtml(str)` và tagged template `window.safeHtml` vào tầng `core` để mọi module dùng chung.
-  2. Bổ sung quy tắc kiểm tra trong `eslint.config.js` cảnh báo khi gán `innerHTML` mà không qua hàm escape.
-- **File tác động:** `assets/js/core/EventBus.js` (hoặc `safe-html.js`), `eslint.config.js`.
+#### OPT-06 · `.gitignore` & file không nên theo dõi · S
+- **Ngừng theo dõi** (dùng `git rm --cached`, file trên đĩa giữ nguyên):
+  - `storage/data/songs_cache.json`: file sinh lúc chạy, 11 commit, 648 KB.
+  - `storage/users/**/*.xml.bak`.
+  - `storage/config/features.json`: cấu hình riêng từng server; thay bằng `features.example.json`.
+- **Bổ sung `.gitignore`:**
+  - Thêm `*.bak` và `.superpowers/scratch_*`.
+  - Bỏ dòng lặp `storage/omr_workspace/` và dòng thừa `storage/tenants/`, vì multi-tenant đã gỡ ở `595b507`.
+- **Pattern `archive/`:** hiện pattern này ignore cả `docs/archive/`, nên ROADMAP4 và ROADMAP6/7 bản gốc chỉ còn trên máy local. Theo **Q2**, chọn một trong hai:
+  - đưa các file đó vào `docs/history/`;
+  - hoặc chấp nhận để local-only.
 
-#### Ticket P2-3: Xử lý triệt để các cảnh báo cũ trong `client_errors.log`
-- **Vấn đề:** Log lỗi trình duyệt cũ ghi nhận một số trường hợp `AudioContext` chưa được khởi tạo hoặc `ctx` bằng `null` khi bấm giữ nhịp nhanh trên trình duyệt di động.
-- **Giải pháp thực hiện:**
-  1. Thêm guard kiểm tra `window.AudioContext || window.webkitAudioContext` và kiểm tra `if (!ctx) return;` trong `assets/js/metronome.js`, `old/assets/js/metronome.js`, và `assets/js/performance/count-in-engine.js`.
-  2. Làm sạch file `storage/logs/client_errors.log` sau khi vá.
-- **File tác động:** `assets/js/metronome.js`, `old/assets/js/metronome.js`, `assets/js/performance/count-in-engine.js`.
+#### OPT-07 · Tách nhật ký khỏi `PROJECT_REGISTRY.md` · S · **cần chủ dự án duyệt (Q3)**
+- **Vấn đề:**
+  - File 185 KB, nạp vào mọi phiên AI qua `CLAUDE.md`. Khoảng 80% là nhật ký thay đổi từ 2026-05 tới nay.
+  - Có mục mô tả file không còn tồn tại, ví dụ `TenantContext` và `TenantProvisioningService` ở `:247` và `:1231-1241`.
+  - Danh sách `ROADMAP7.md` ở sơ đồ thư mục cũng đã sai.
+- **Sửa:**
+  - Chuyển nhật ký theo ngày sang `docs/history/CHANGELOG_2026.md`.
+  - Registry chỉ giữ cấu trúc, API contract, schema, gotchas, ADR và 5 mục nhật ký mới nhất.
+  - Sửa các mục đã lỗi thời. Đánh dấu ADR-005 là "Đã gỡ".
+- **Lợi ích:** mỗi phiên AI nạp ít đi khoảng 150 KB ngữ cảnh.
 
----
-
-### GIAI ĐOẠN P3 — TỐI ƯU HIỆU NĂNG CAO CẤP (VIRTUAL LIST & BUNDLING)
-
-#### Ticket P3-1: Virtual Scroll (Danh sách ảo) cho 1.731 bài hát trên Giao diện Cũ `/old/`
-- **Vấn đề:** Khi chọn danh mục "Tất cả (1731)", `/old/` tạo 1.731 thẻ `.song-item` trong DOM cùng lúc. Trên máy tính bảng hoặc điện thoại cấu hình thấp, việc lọc từ khóa liên tục sẽ tốn bộ nhớ DOM.
-- **Giải pháp thực hiện:**
-  - Vì mỗi dòng `.song-item` trên `/old/` đã được chuẩn hóa chiều cao cố định `26px`, có thể áp dụng **Virtual Scrolling** cực nhẹ (~70 dòng code trong `old/assets/js/library-ui.js`):
-    - Chỉ render ~40 dòng đang nằm trong khung nhìn (`viewport` + buffer trên/dưới 10 dòng).
-    - Dùng `padding-top` và `padding-bottom` tính theo `(index * 26)px` để giữ thanh cuộn mượt 60fps trên mọi thiết bị.
-- **Kỳ vọng hiệu năng:** Giảm số node DOM trong danh sách từ **~8.600 nodes xuống còn ~200 nodes** (nhanh hơn 15 lần khi gõ tìm kiếm).
-- **File tác động:** `old/assets/js/library-ui.js`.
-
-#### Ticket P3-2: Gộp và nén tài nguyên JS/CSS khi chạy Production (`tools/build_assets.mjs`)
-- **Vấn đề:** Trang chính `index.php` và `old/index.php` đang tải 25–40 file `.js` và `.css` riêng lẻ.
-- **Giải pháp thực hiện:**
-  1. Tạo script `tools/build_assets.mjs` nối và minify các file JS/CSS theo đúng thứ tự nạp trong `index.php` và `old/index.php` ra `assets/dist/` và `old/assets/dist/`.
-  2. Nếu tồn tại file build trong `dist/` và không có `?debug=1`, PHP tự động nạp 1 file bundle duy nhất; ngược lại nạp từng file lẻ để dễ debug khi phát triển.
-- **Kỳ vọng hiệu năng:** Giảm số lượng HTTP requests khi tải trang từ **~45 requests xuống còn 6 requests**.
-
-#### Ticket P3-3: Chia nhỏ 2 file CSS lớn (`assets/css/layout.css` & `assets/css/sheet.css`)
-- **Vấn đề:** `assets/css/layout.css` (3.344 dòng) và `assets/css/sheet.css` (3.216 dòng) trên giao diện mới khá dài, khó bảo trì.
-- **Giải pháp thực hiện:**
-  - Tách theo từng vùng chức năng (`sidebar.css`, `toolbar.css`, `chord-overlay.css`, `osmd-sheet.css`) dưới 800 dòng/file.
+#### OPT-08 · Dọn mã chết đã xác định · S
+- `assets/js/key-service.js`: 184 dòng, không trang nào nạp. Bản đang dùng là `core/KeyService.js`. Cần cập nhật test đang tham chiếu tới file này.
+- `members/members.js` (476 dòng) và `members/members.css` (818 dòng): `members/index.php` chỉ redirect sang `/manager/`.
+- Trong `assets/js/core/FeatureFlags.js` có 10 cờ phía JS không chỗ nào gọi `FeatureFlags.get()`. Mỗi cờ phải được nối vào code thật hoặc xoá.
+- Theo luật 1.3 của `AI_AGENT.md`, liệt kê danh sách cho chủ dự án duyệt trước khi xoá.
 
 ---
 
-## 4. BẢNG TỔNG HỢP ƯU TIÊN THỰC THI
+### 🟠 P1 — Bảo mật & một nguồn dữ liệu
 
-| Thứ tự | Mã Ticket | Nội dung công việc | Thời gian dự kiến | Mức độ rủi ro |
-| :---: | :---: | :--- | :---: | :---: |
-| **1** | **P0-1 → P0-4** | Chuẩn hóa tài liệu, sửa `manifest.json` (hết lỗi 404 icon), tối ưu `sync.bat`, gỡ `.ua/` khỏi Git index | **15 phút** | Rất thấp |
-| **2** | **P1-1 → P1-3** | Vá prepared statement `PracticeService.php`, siết Origin/CSRF, thêm bộ test hồi quy thứ 165 cho `/old/` | **30 phút** | Thấp |
-| **3** | **P2-1 → P2-3** | Dùng chung `core/*.js` giữa `/` và `/old/`, thêm guard `AudioContext` chống lỗi runtime | **30 phút** | Thấp |
-| **4** | **P3-1** | Nâng cấp Virtual List (cuộn ảo 60fps) cho 1.731 bài hát trên `/old/` | **30 phút** | Thấp |
-| **5** | **P3-2 → P3-3** | Tạo bộ đóng gói bundle JS/CSS và tách nhỏ file CSS lớn | **1–2 giờ** | Trung bình |
+#### OPT-09 · Quyền đọc bộ hợp âm · S · **lỗ hổng mới, cần chủ dự án xác nhận (Q4)** ✅
+- **Vấn đề:**
+  - `ChordSetController.php:19-40` cho khách gọi `list`, `load`, `details`.
+  - `ChordSetService::loadSet` ở `:91-110` không lọc `is_public` hay chủ sở hữu.
+  - `listSets` gộp tên file trên đĩa mà không xét quyền riêng tư.
+  - `deleteSet` vẫn xoá file trên đĩa khi DB không xoá được dòng nào.
+- **Sửa:**
+  - `load`/`details` chỉ trả bộ HD, bộ TLH, bộ công khai, hoặc bộ của chính người đang đăng nhập.
+  - `list` bỏ phần gộp từ đĩa.
+  - `deleteSet` chỉ xoá file khi `rowCount() > 0`.
+- **Core Rule 1:** HD và TLH vẫn đọc được với mọi người.
+- **Nghiệm thu:** test HTTP cho bốn tình huống: khách, chủ bộ, người khác, admin.
+
+#### OPT-10 · Bật CSRF → TV4-4 · S
+- `csrf_enforce` mặc định là `false` (`api/core/FeatureFlags.php:9`), và `features.json` không có key này.
+- Ticket này thuộc ROADMAP6 TV4-4. File này chỉ đề xuất **lịch bật**:
+  1. bật trên staging;
+  2. chạy E2E toàn bộ thao tác ghi (lưu hợp âm, setlist, ghi chú, quản trị);
+  3. bật trên production theo **Q5**.
+
+#### OPT-11 · Siết các endpoint phụ · S
+- **`api/log_error.php`:** đang đi vòng qua router, không auth, không giới hạn, ghi nối không hạn chế. Sửa:
+  - đưa vào router (`route=client_log`);
+  - kiểm tra Origin;
+  - giới hạn kích thước body ≤ 8 KB;
+  - rate-limit theo IP.
+- **Đăng ký tài khoản:** thêm rate-limit, dùng lại `LoginRateLimiter`.
+- **Export ChordPro:** `ChordProService.php:40-48` đang dùng `file_exists` thô. Đổi sang đọc qua `SongService::resolveManagedXmlPath`.
+- **Lộ thông báo lỗi:** thay `Throwable->getMessage()` trả ra client bằng `Response::serverError` ở các chỗ sau:
+  - `ChordSetController:127`
+  - `AuthController:148`
+  - `PracticeAssignmentController:73,93`
+
+#### OPT-12 · SQLite là nguồn duy nhất của bộ hợp âm · M · **cần Q6**
+- **Hiện trạng:** DB có 1.737 dòng, đĩa có 60 file JSON (được theo dõi trong git). Hệ thống đọc dự phòng từ đĩa khi DB lỗi, và lỗi DB bị nuốt mất.
+- **Sửa:**
+  - Bỏ nhánh đọc dự phòng và log lỗi DB.
+  - Trước khi bỏ, chạy `tools/migrate_json_chord_sets_to_db.php --reconcile --dry-run` để chứng minh 60 file đều đã có trong DB.
+  - File JSON trở thành bản export, không còn là nguồn đọc.
+  - Gộp `ManagerService::saveUserChordSet:303` vào `ChordSetService`.
+- **Nghiệm thu:** đối chiếu checksum 60/60 trước khi bỏ. Test không có file đĩa vẫn PASS.
+
+#### OPT-13 · Đúng kiến trúc ở các điểm còn lệch · S
+- **SQL còn nằm trong controller:** chuyển vào service.
+  - `ReviewController.php:120-131`
+  - `SetlistController.php:229`
+- **`hasColumn`/`hasTable` bị chép y hệt** ở `SetlistService:24-38` và `SetlistUsageHelper:13-29`, mỗi lần gọi chạy `PRAGMA`, tổng 31 chỗ gọi. Schema đã có phiên bản migration nên có thể bỏ hẳn. Nếu chưa bỏ được thì gom vào `DB` kèm cache theo request.
 
 ---
 
-## 5. TIÊU CHÍ NGHIỆM THU SAU KHI HOÀN TẤT
-- [ ] `node tools/check_syntax.js` đạt **100% PASS**.
-- [ ] `php tools/metrics.php` và `php tests/run_all_tests.php` đạt **165/165 suites PASS (0 failed)**.
-- [ ] Mọi file `.php` và `.js` trong dự án đều **< 600 dòng**.
-- [ ] Không còn bất kỳ lỗi 404 hay lỗi Console nào trên cả 2 giao diện `/` và `/old/`.
-- [ ] Danh sách 1.731 bài hát trên `/old/` cuộn và lọc tức thì (< 5ms) nhờ Virtual List.
+### 🟡 P2 — Tải trang, offline & CI
+
+#### OPT-14 · Nén mọi JS/CSS tĩnh · S → bổ sung TV2
+- **Hiện trạng:**
+  - Gzip dựng sẵn mới áp cho 4 file: OSMD và 3 CSS (`assets/.htaccess`).
+  - Khoảng 1 MB JS của dự án vẫn truyền thô.
+  - Production chạy OpenLiteSpeed, nên `Header set` trong `.htaccess` không có hiệu lực (theo registry 2026-10-20).
+- **Sửa:**
+  - Mở rộng `tools/generate_asset_gzip.php` cho toàn bộ `assets/js/**/*.js` và `assets/css/*.css`.
+  - Thêm bước `--check` vào CI để chặn file `.gz` cũ.
+  - Kiểm tra cách phục vụ `.gz` trên OpenLiteSpeed.
+- **Mục tiêu:** Modern dưới 1,2 MB truyền trên 4G.
+
+#### OPT-15 · Bỏ thẻ script trùng với preset của ScriptLoader → TV2-2
+- **Số đo:** trong 34 đường dẫn mà `ScriptLoader` khai báo, 32 file đã có sẵn trong `index.php`. Hiện chỉ Tone.js và OsmdAudioPlayer thực sự tải theo nhu cầu.
+- `prefetchIdle` (`ScriptLoader.js:146`) prefetch hai file đã nạp sẵn, nên không có tác dụng.
+- Thực hiện theo TV2-2. Mục tiêu ≤ 40 JS lúc khởi động.
+
+#### OPT-16 · Ghép file nhóm core · M · **sau OPT-15, theo Q7**
+- Nếu sau OPT-15 vẫn vượt 60 request, viết bước nối file đơn giản (không minify) cho nhóm `core/*` của cả hai giao diện.
+- Giữ thứ tự nạp đúng như Load Order trong `PROJECT_REGISTRY.md` mục 8.
+- Không đưa bundler vào dự án.
+
+#### OPT-17 · Service Worker sinh từ công cụ → TV2-5
+- **Vấn đề:**
+  - `SW_MANIFEST_HASH` đang gõ cứng (`sw.js:14`). Danh sách precache lệch khỏi `tools/generate_sw_manifest.php`: chỉ có 39 JS so với 84 file nạp sẵn, và thiếu `library-polish.css`.
+  - Vendor dùng cache-first với phiên bản cố định `v5`, nên nâng OSMD mà quên đổi số thì người dùng vẫn nhận bản cũ.
+- **Sửa:**
+  - CI chạy generator ở chế độ `--check`.
+  - Cache vendor theo hash nội dung file.
+
+#### OPT-18 · CI đầy đủ hơn · M
+- Thêm ESLint (`--js`).
+- Thêm một job Playwright Chromium chạy khoảng 20 spec chính: Thư viện mở bài, đổi tông, lưu hợp âm, setlist, offline.
+- Cache npm và apt. Chạy `--strict` cho các suite HTTP vì CI đã có Apache.
+- Theo dõi riêng 19 suite đang FAIL do môi trường CLI/HTTP trên server. Không được che chúng bằng SKIP.
+
+#### OPT-19 · Báo cáo tỉ lệ test hành vi trung thực · S
+- `run_all_tests.php` đang mặc định coi mọi suite là "behavioral". Chỉ có 29 suite được khai báo là static, trong khi heuristic cho thấy khoảng 65 suite chỉ grep.
+- **Sửa:**
+  - Mỗi suite khai báo loại của nó.
+  - Runner tự đếm loại và in ra.
+  - Suite chưa khai báo thì tính là static.
+- Không viết lại test ở ticket này. Việc chuyển dần sang test hành vi làm theo đợt ở P3.
+
+#### OPT-20 · Hiệu năng backend nhỏ · S
+- Thêm index `songs(httlvnId)`, phục vụ `SongService::getById:177`.
+- Gói offline gọi `loadSet` theo từng bài, mỗi lần một query cộng glob (`SetlistOfflineHelper.php:71-73`). Gom thành một query `WHERE song_id IN (…)`.
+- Giãn khoảng poll SSE từ 100 ms lên 250 ms (`LiveSyncService:452,511`). Hiện mỗi kết nối giữ một PHP worker 25 giây.
+- Thêm job đối soát FTS: so số dòng `songs` với `songs_fts`. FTS hiện đồng bộ tay qua 7 chỗ gọi.
+
+---
+
+### ⚪ P3 — Hội tụ mã trùng (theo đợt, mỗi đợt có E2E chặn hồi quy)
+
+#### OPT-21 · Classic dùng chung module với Modern → TV6
+- Chủ dự án đã quyết định ngày 2026-10-18: Classic là chế độ chính thức, **không đóng băng**.
+- 22 file JS fork của Classic lệch bản Modern từ 538 tới 1.012 dòng diff mỗi file. Classic lại chạy lẫn 23 module Modern, nên dễ hỏng khi Modern thay đổi.
+- **Hướng làm:**
+  - Thêm cấu hình `__APP_PROFILE__ = 'classic' | 'modern'`.
+  - Mỗi đợt chuyển 2–3 module, bắt đầu từ file ít khác biệt nhất.
+  - Bỏ các nhánh `/old/` trong `core/Store.js`, `ServiceWorkerManager.js:12`, `OfflineVault.js` và `sw.js:141` (→ TV6-3).
+- **Nghiệm thu mỗi đợt:** E2E hai giao diện PASS, so ảnh chụp không đổi.
+
+#### OPT-22 · Một hệ đồng bộ live · M–L
+- **Hiện trạng:** trang chính dùng `live-sync.js` → `performance/live-session.js` + `performance-engine.js`, còn live-band dùng `performance/live-transport.js` (SSE).
+- **Sửa:**
+  - Chọn một transport (SSE có fallback polling), hai bên dùng chung.
+  - Bổ sung E2E cho live-band: hiện mới có 3 spec.
+
+#### OPT-23 · Một bộ đọc SATB · M
+- `editor/js/editor-parser.js` và `assets/js/learn/harmony/learn-satb.js` đều tự viết `parseNoteData` và gom hợp âm theo nhịp.
+- Tách thành `assets/js/core/SatbParser.js` và viết test đơn vị bằng MusicXML thật.
+
+#### OPT-24 · Bỏ wrapper chỉ để lách ngân sách 600 dòng · M · **theo Q8**
+- `ManagerService:70-117` chỉ chuyển tiếp sang hai helper. `LiveSyncService` bọc thêm một lớp quanh `LiveSyncStorageHelper`. Comment ở `ReviewActionHelper.php:6` và `PracticeAssignmentCreationHelper.php:6` nói rõ chúng được tách chỉ để lách ngân sách.
+- **Đề xuất:** đổi tiêu chí từ "≤ 600 dòng/file" sang "≤ 30 dòng/hàm và một trách nhiệm/file".
+- Tách theo nghiệp vụ thật: ví dụ `ManagerService` thành `RepertoireService` và `MemberService`. Controller gọi thẳng service, không qua facade.
+
+#### OPT-25 · CSS → TV3-7
+- Gộp `library-polish.css` vào các file gốc. File này chiếm 505 trên 673 `!important` của Modern.
+- Dùng token chung cho breakpoint: hiện có 20 giá trị khác nhau, từ 350 tới 1440 px.
+- Mục tiêu ≤ 120 `!important`. Làm theo TV3-7.
+
+#### OPT-26 · Lưu trữ tool & tài liệu đã xong · S
+- **Tool chạy một lần, đã xong việc:** chuyển vào `tools/archive/`.
+  - `migrate_json_chord_sets_to_db`, `extract_keys`, `create_hd_sets`, `seed_song_sections`
+  - `import_thanh_ca_catalog`, `fetch_sheet.py`, `batch_fetch_all.py`, `index_lyrics`, `omr_sync`
+- **Fixture E2E:** chuyển `create_test_*` và `setup_e2e_*` vào `e2e/helpers/`.
+- **Báo cáo đã xong:** chuyển vào `docs/history/`, rồi cập nhật đường dẫn trong registry.
+  - `ROADMAP5_R5_ACCEPTANCE_REPORT`, `ROADMAP6_IMPLEMENTATION_REPORT` (R6 cũ), `ROADMAP7_IMPLEMENTATION_REPORT`
+  - `SYSTEM_DEEP_AUDIT_REPORT`, `THU_VIEN_FULL_AUDIT_2026-10-02`, `MOBILE_CHORD_EDIT_UX_REVIEW_2026-10-02`, `SHEETAPP2_ARCHITECTURE_REVIEW_AND_ROADMAP`
+- Giữ nguyên `docs/SPELLING_AUDIT_REPORT.md` vì test `library_l65` kiểm tra file này tồn tại.
+- **Chỉ dẫn agent:** gộp nội dung chung của `CLAUDE.md`, `AGENTS.md` và `GEMINI.md` về một nguồn. Mỗi file chỉ còn phần riêng của công cụ đó.
+- **Tham chiếu chết:** `CLAUDE.md` yêu cầu đọc `.superpowers/skills/using-superpowers/SKILL.md`, nhưng file này không có trong kho. Cần sửa tham chiếu.
+
+---
+
+## 4. THỨ TỰ THỰC HIỆN ĐỀ XUẤT
+
+| Đợt | Ticket | Điều kiện |
+|---|---|---|
+| 1 | OPT-01, 03, 04, 05, 06 (trừ Q2) | Không cần quyết định |
+| 2 | OPT-02, 07, 08 | Q1, Q3 |
+| 3 | OPT-09, 11, 13 | Q4 |
+| 4 | OPT-10, 12 | Q5, Q6; backup trước |
+| 5 | OPT-14, 15, 17, 18, 19, 20 | Song song TV2 |
+| 6 | OPT-16 | Chỉ khi sau đợt 5 vẫn vượt ngân sách (Q7) |
+| 7+ | OPT-21 → 26 | Theo đợt nhỏ, E2E hai giao diện mỗi đợt |
+
+---
+
+## 5. THANG NGHIỆM THU
+
+| Chỉ số | Hiện tại | Mục tiêu |
+|---|---|---|
+| File backup do test tạo / lần chạy suite | ~1 file, 7–10 MB | 0 |
+| Dòng `audit.log` mang IP "CLI" sau một lần chạy suite | tăng | 0 |
+| Endpoint đọc bộ hợp âm riêng tư mà khách gọi được | có | 0 |
+| `csrf_enforce` trên production | tắt | bật |
+| Nguồn đọc bộ hợp âm | DB + đĩa | chỉ DB |
+| Modern, 4G cache lạnh | 84 JS / 103 req / 1,99 MB / SVG 11,2 s | ≤ 40 / ≤ 60 / ≤ 1,5 MB / ≤ 2,5 s (theo ROADMAP6 Q6) |
+| CI | PHP | PHP + ESLint + E2E smoke |
+| Tỉ lệ suite hành vi, runner tự đếm | báo cáo theo mặc định | số đo thật, tăng dần qua mỗi đợt |
+| `PROJECT_REGISTRY.md` | 185 KB | ≤ 40 KB |
+| JS fork của Classic | 22 file | giảm theo từng đợt OPT-21 |
+
+---
+
+## 6. QUYẾT ĐỊNH CẦN CHỦ DỰ ÁN
+
+| # | Câu hỏi | Đề xuất |
+|---|---|---|
+| Q1 | Bao nhiêu backup được giữ lại trong 74 file / 493 MB? | Giữ 3 bản `app_before_r34_*` mới nhất, cộng mọi bản trước migration. Duyệt danh sách dry-run trước khi xoá |
+| Q2 | Có đưa ROADMAP4, ROADMAP6 cũ và ROADMAP7 từ `docs/archive/` (chỉ có local) lên GitHub không? | Có: đưa vào `docs/history/` |
+| Q3 | Có tách nhật ký khỏi `PROJECT_REGISTRY.md` không? | Có: giảm ~150 KB ngữ cảnh mỗi phiên AI |
+| Q4 | Bộ hợp âm cá nhân không công khai có cần ẩn với khách và với người dùng khác không? | Có: chỉ HD, TLH, bộ công khai và bộ của chính mình |
+| Q5 | Bật CSRF trên production lúc nào? | Sau khi staging chạy E2E ghi PASS |
+| Q6 | Có bỏ đọc dự phòng bộ hợp âm từ file đĩa không? | Có, sau khi đối soát 60/60 |
+| Q7 | Có chấp nhận một bước nối file JS (không bundler) không? | Chỉ khi OPT-15 chưa đạt ngân sách |
+| Q8 | Có đổi tiêu chí "≤ 600 dòng/file" sang "≤ 30 dòng/hàm, một trách nhiệm/file" không? | Có |
+
+---
+
+## 7. NGOÀI PHẠM VI
+
+- Không đưa framework, bundler hay TypeScript vào dự án.
+- Không đóng băng hay gỡ Classic `/old/`.
+- Không đụng tới 4 Core Rule (HD mặc định, tông gốc = 0, khoá TLH/HD, đồng bộ setlist).
+- Không deploy, không push. Commit chuẩn bị trên nhánh để chủ dự án duyệt.
+
+## PHỤ LỤC — Nguồn bằng chứng
+
+- Số đo tải trang: `docs/ROADMAP6_TV2_AUDIO_COMPRESSION.md`, `docs/ROADMAP6_TV2_PROGRESS.md`.
+- Trạng thái TV: bảng ở đầu `ROADMAP6.md`, `docs/ROADMAP6_LIBRARY_ACCEPTANCE_REPORT.md`.
+- Đã kiểm chứng trực tiếp:
+  - `tests/library_r34_labels_migration_regression.php:150`
+  - `tools/manage_song_labels.php:125,134-145`
+  - `api/core/FeatureFlags.php:9`
+  - `api/controllers/ChordSetController.php:15-42`
+  - `api/services/ChordSetService.php:91-112`
+  - `sync.sh:18-23`, `package.json:6,8`
