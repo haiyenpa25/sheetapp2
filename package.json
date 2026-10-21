@@ -5,7 +5,6 @@
   "scripts": {
     "sync": "./sync.sh",
     "codemap": "node tools/generate_code_map.js",
-    "test:ui": "node tools/test_editor_ui.js",
     "lint": "eslint --no-error-on-unmatched-pattern assets/js editor manager live-band learn",
     "check:syntax": "node tools/check_syntax.js",
     "e2e": "playwright test"
@@ -13,7 +12,6 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.48.0",
-    "eslint": "^9.0.0",
-    "puppeteer-core": "^24.43.1"
+    "eslint": "^9.0.0"
   }
 }

@@ -99,6 +99,21 @@ putenv("SHEETAPP_CHORD_SETS_DIR={$isolatedTempChordSets}");
 $_ENV['CHORD_SETS_DIR'] = $isolatedTempChordSets;
 $_ENV['SHEETAPP_CHORD_SETS_DIR'] = $isolatedTempChordSets;
 
+// OPT-03: log kiểm toán và mail giả của suite con vào thư mục tạm, không vào storage/logs thật
+$isolatedTempLogs = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'sheetapp_ci_temp_logs_' . uniqid();
+@mkdir($isolatedTempLogs . DIRECTORY_SEPARATOR . 'mail', 0755, true);
+putenv('SHEETAPP_AUDIT_LOG=' . $isolatedTempLogs . DIRECTORY_SEPARATOR . 'audit.log');
+putenv('SHEETAPP_MAIL_DIR=' . $isolatedTempLogs . DIRECTORY_SEPARATOR . 'mail');
+$storageFootprint = static function () use ($root): array {
+    $audit = $root . '/storage/logs/audit.log';
+    return [
+        'audit.log (dòng)' => file_exists($audit) ? count(file($audit)) : 0,
+        'logs/mail (file)' => count(glob($root . '/storage/logs/mail/*') ?: []),
+        'backups (file)'   => count(glob($root . '/storage/backups/*') ?: []),
+    ];
+};
+$initialStorageFootprint = $storageFootprint();
+
 // ==========================================
 // 1. PHP SYNTAX CHECK (LINT)
 // ==========================================
@@ -447,6 +462,17 @@ if (file_exists($realDbPath)) {
         $leakReasons[] = "Lỗi kết nối CSDL: " . $e->getMessage();
     }
 }
+
+foreach ($storageFootprint() as $label => $after) {
+    if ($after !== $initialStorageFootprint[$label]) {
+        $dbLeakDetected = true;
+        $leakReasons[] = "storage {$label}: trước={$initialStorageFootprint[$label]}, sau={$after}";
+    }
+}
+foreach (glob($isolatedTempLogs . '/mail/*') ?: [] as $f) @unlink($f);
+@rmdir($isolatedTempLogs . '/mail');
+@unlink($isolatedTempLogs . '/audit.log');
+@rmdir($isolatedTempLogs);
 
 $finalChordSetsFiles = is_dir($chordSetsDir) ? (scandir($chordSetsDir) ?: []) : [];
 $chordDiff = array_diff($finalChordSetsFiles, $initialChordSetsFiles);

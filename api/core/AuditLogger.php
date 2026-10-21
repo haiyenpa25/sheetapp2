@@ -18,6 +18,11 @@ class AuditLogger {
         if (self::$customLogPath !== null) {
             return self::$customLogPath;
         }
+        // Runner test đặt biến này cho mọi suite con để không ghi vào audit.log thật
+        $envPath = getenv('SHEETAPP_AUDIT_LOG');
+        if (is_string($envPath) && $envPath !== '') {
+            return $envPath;
+        }
         return dirname(__DIR__, 2) . '/storage/logs/audit.log';
     }
 

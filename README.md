@@ -106,7 +106,7 @@ sheetapp2/
 ├── storage/                   # File Storage (MusicXML, Chord Sets, Live Sync Rooms, Cache)
 ├── CODE_MAP.md                # Bản đồ phụ thuộc mã nguồn (Tự động cập nhật qua Gitnexus)
 ├── CODING_STANDARDS.md        # Tiêu chuẩn mã nguồn dự án
-└── sync.sh                    # Script tự động cập nhật CODE_MAP.md & Sync GitHub
+└── sync.sh                    # Kiểm cú pháp, sinh SW manifest & CODE_MAP.md (không commit/push)
 ```
 
 ---

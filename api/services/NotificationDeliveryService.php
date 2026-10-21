@@ -249,7 +249,8 @@ class NotificationDeliveryService {
         }
 
         // Chế độ MOCK / Log Mailer (an toàn 100% trong dev/test khi không có SMTP server thực)
-        $mailDir = __DIR__ . '/../../storage/logs/mail';
+        // Runner test đặt SHEETAPP_MAIL_DIR để mail giả không rơi vào storage/logs thật
+        $mailDir = getenv('SHEETAPP_MAIL_DIR') ?: __DIR__ . '/../../storage/logs/mail';
         if (!is_dir($mailDir)) {
             @mkdir($mailDir, 0755, true);
         }

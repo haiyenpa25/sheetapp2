@@ -3,7 +3,6 @@ storage/data/*
 storage/logs/
 storage/users/*
 storage/backups/
-storage/tenants/
 *.sqlite*
 test-results/
 playwright-report/
@@ -14,9 +13,6 @@ archive/
 
 # ── Bộ hợp âm HD (data riêng từng server) ──
 data/chord_sets/
-
-# ── OMR workspace (file upload tạm) ──
-storage/omr_workspace/
 
 # ── Bản nhạc thư viện được theo dõi trong Git ──
 
@@ -62,4 +58,8 @@ storage/users/admin/*
 
 __pycache__/
 *.pyc
+
+# Bản sao lưu tạm (*.bak đã theo dõi từ trước vẫn giữ trong Git)
+*.bak
+.superpowers/scratch_*
 
