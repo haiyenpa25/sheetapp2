@@ -14,7 +14,7 @@
  *   php tools/manage_song_labels.php --dry-run
  *   php tools/manage_song_labels.php --seed
  *   php tools/manage_song_labels.php --status
- *   php tools/manage_song_labels.php --backup
+ *   php tools/manage_song_labels.php --backup [--backup-dir=<path>]
  */
 
 declare(strict_types=1);
@@ -24,7 +24,7 @@ if (php_sapi_name() !== 'cli') {
     exit('Forbidden: CLI only');
 }
 
-$options = getopt('', ['status', 'seed', 'dry-run', 'backup', 'clear', 'song:', 'season:', 'theme:', 'db::']);
+$options = getopt('', ['status', 'seed', 'dry-run', 'backup', 'clear', 'song:', 'season:', 'theme:', 'db::', 'backup-dir::']);
 
 $dbPath = $options['db'] ?? __DIR__ . '/../storage/data/app.sqlite';
 if (!file_exists($dbPath)) {
@@ -114,33 +114,29 @@ function getOfficialLabelMapping(): array {
 }
 
 /**
- * Tạo bản sao lưu CSDL trước migration
+ * Tạo bản sao lưu CSDL trước migration.
+ * VACUUM INTO thay cho copy(): DB chạy WAL nên copy file thô có thể bỏ sót trang chưa checkpoint.
  */
-function createDbBackup(string $dbPath): string {
-    $backupDir = dirname($dbPath) . '/../backups';
-    if (!is_dir($backupDir)) {
-        @mkdir($backupDir, 0777, true);
+function createDbBackup(PDO $pdo, string $dbPath, ?string $backupDir = null): string {
+    $backupDir = $backupDir ?? dirname($dbPath) . '/../backups';
+    if (!is_dir($backupDir) && !@mkdir($backupDir, 0775, true)) {
+        throw new RuntimeException("Không thể tạo thư mục sao lưu {$backupDir}");
     }
-    $timestamp = date('Ymd_His');
-    $backupFile = $backupDir . '/app_before_r34_' . $timestamp . '.sqlite';
-    if (!@copy($dbPath, $backupFile)) {
-        throw new RuntimeException("Không thể tạo bản sao lưu tại {$backupFile}");
+    $backupFile = rtrim($backupDir, '/\\') .'/app_before_r34_' . date('Ymd_His') . '.sqlite';
+    if (file_exists($backupFile)) {
+        throw new RuntimeException("Bản sao lưu đã tồn tại: {$backupFile}");
     }
+    $pdo->exec('VACUUM INTO ' . $pdo->quote($backupFile));
     return $backupFile;
 }
 
 /**
- * Xóa cache JSON / ETag
+ * Xóa cache danh sách bài của đúng DB đang dùng (DB thật hay bản sao có cache riêng).
  */
-function invalidateLabelsCache(): void {
-    $cacheDir = __DIR__ . '/../storage/cache';
-    $files = ['songs_v2.json', 'songs_compact.json', 'etag_songs.txt', 'etag_compact.txt'];
-    foreach ($files as $f) {
-        $p = $cacheDir . '/' . $f;
-        if (file_exists($p)) {
-            @unlink($p);
-        }
-    }
+function invalidateLabelsCache(PDO $pdo): void {
+    require_once __DIR__ . '/../api/services/SongService.php';
+    DB::setPdo($pdo);
+    SongService::invalidateCache();
 }
 
 /**
@@ -166,7 +162,7 @@ function syncAllFtsLabels(PDO $pdo): void {
 
 // ── 1. Lệnh Sao Lưu (--backup) ──────────────────────────────────────
 if (isset($options['backup'])) {
-    $bk = createDbBackup($dbPath);
+    $bk = createDbBackup($pdo, $dbPath, $options['backup-dir'] ?? null);
     echo "✅ Đã tạo bản sao lưu CSDL thành công tại: {$bk}\n";
     exit(0);
 }
@@ -302,7 +298,7 @@ if (isset($options['clear'])) {
     $pdo->commit();
 
     syncAllFtsLabels($pdo);
-    invalidateLabelsCache();
+    invalidateLabelsCache($pdo);
 
     echo "✅ Đã xóa nhãn (dịp lễ, chủ đề) cho {$count} bài hát.\n";
     exit(0);
@@ -318,7 +314,7 @@ if (isset($options['song'])) {
     $stmt->execute([$season ?: null, $theme ?: null, $songId]);
 
     syncAllFtsLabels($pdo);
-    invalidateLabelsCache();
+    invalidateLabelsCache($pdo);
 
     echo "✅ Đã cập nhật nhãn cho bài [{$songId}]: Dịp lễ='{$season}', Chủ đề='{$theme}'\n";
     exit(0);
@@ -327,7 +323,7 @@ if (isset($options['song'])) {
 // ── 6. Chạy Migration Thật (--seed) ─────────────────────────────────
 if (isset($options['seed'])) {
     // 1. Tự động sao lưu trước khi ghi
-    $backupFile = createDbBackup($dbPath);
+    $backupFile = createDbBackup($pdo, $dbPath, $options['backup-dir'] ?? null);
     echo "🔒 Đã tự động tạo bản sao lưu tại: {$backupFile}\n";
 
     $mapping = getOfficialLabelMapping();
@@ -348,7 +344,7 @@ if (isset($options['seed'])) {
     $pdo->commit();
 
     syncAllFtsLabels($pdo);
-    invalidateLabelsCache();
+    invalidateLabelsCache($pdo);
 
     $integrity = $pdo->query("PRAGMA integrity_check")->fetchColumn();
 

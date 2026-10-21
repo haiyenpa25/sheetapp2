@@ -59,7 +59,12 @@ check($hashBefore === $hashAfter, 'An toàn: CSDL giữ nguyên 100% sau khi ch�
 // ── 2. Kiểm tra Logic Migration trên CSDL Test độc lập ─────────────────
 echo "\n-- 2. Migration Execution & Coverage (Test DB) --\n";
 
-$testDbFile = $root . '/storage/data/test_r34_migration.sqlite';
+// Bản sao và backup của test nằm trong thư mục tạm: test không được ghi vào storage/ thật.
+$tmpDir = sys_get_temp_dir() . '/sheetapp_r34_' . getmypid();
+@mkdir($tmpDir, 0775, true);
+$tmpBackupDir = $tmpDir . '/backups';
+$prodBackupCountBefore = count(glob($root . '/storage/backups/*.sqlite') ?: []);
+$testDbFile = $tmpDir . '/test_r34_migration.sqlite';
 if (file_exists($testDbFile)) {
     @unlink($testDbFile);
 }
@@ -70,9 +75,18 @@ $testPdo = new PDO('sqlite:' . $testDbFile, null, null, [
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
 ]);
 
+// Cache danh sách bài của test DB: tool phải xoá đúng file này sau khi ghi nhãn
+require_once $root . '/api/services/SongService.php';
+DB::setPdo($testPdo);
+$testCacheFile = SongService::cachePath();
+DB::setPdo(null);
+file_put_contents($testCacheFile, '[]');
+
 // Chạy migration trên test DB
-$execOutput = shell_exec("php " . escapeshellarg($root . '/tools/manage_song_labels.php') . " --seed --db=" . escapeshellarg($testDbFile));
+$execOutput = shell_exec("php " . escapeshellarg($root . '/tools/manage_song_labels.php') . " --seed --db=" . escapeshellarg($testDbFile) . " --backup-dir=" . escapeshellarg($tmpBackupDir));
 check($execOutput !== null && str_contains($execOutput, 'Đã gắn nhãn thành công cho 903 bài hát'), 'Migration: Đã cập nhật thành công 903 bài hát trên test DB');
+check(!file_exists($testCacheFile), 'Cache: --seed xoá cache danh sách bài của đúng DB vừa ghi');
+@unlink($testCacheFile);
 
 // 2.1 Xóa sạch Thường Niên
 $thuongNienCount = (int)$testPdo->query("SELECT COUNT(*) FROM songs WHERE liturgical_season = 'Thường Niên'")->fetchColumn();
@@ -147,17 +161,32 @@ foreach ($checkKeyHymns as $hId => $expected) {
 // ── 4. Kiểm tra sao lưu tự động (--backup) ───────────────────────────
 echo "\n-- 4. Auto Backup Mechanism --\n";
 
-$backupOutput = shell_exec("php " . escapeshellarg($root . '/tools/manage_song_labels.php') . " --backup");
+$backupOutput = shell_exec("php " . escapeshellarg($root . '/tools/manage_song_labels.php') . " --backup --db=" . escapeshellarg($testDbFile) . " --backup-dir=" . escapeshellarg($tmpBackupDir));
 check($backupOutput !== null && str_contains($backupOutput, 'Đã tạo bản sao lưu CSDL thành công'), 'Backup: CLI --backup tạo file thành công');
 
-$backupFiles = glob($root . '/storage/backups/app_before_r34_*.sqlite');
-check(!empty($backupFiles), 'Backup: File sao lưu tồn tại trong storage/backups/');
+$backupFiles = glob($tmpBackupDir . '/app_before_r34_*.sqlite') ?: [];
+check(!empty($backupFiles), 'Backup: File sao lưu nằm trong --backup-dir');
+
+$backupIntegrity = '';
+if (!empty($backupFiles)) {
+    $bkPdo = new PDO('sqlite:' . end($backupFiles));
+    $backupIntegrity = (string)$bkPdo->query('PRAGMA integrity_check')->fetchColumn();
+    $bkSongs = (int)$bkPdo->query('SELECT COUNT(*) FROM songs')->fetchColumn();
+    $bkPdo = null;
+    check($bkSongs > 0, "Backup: bản VACUUM INTO đọc được ({$bkSongs} bài)");
+}
+check($backupIntegrity === 'ok', 'Backup: integrity_check của bản sao lưu = ok');
+
+$prodBackupCountAfter = count(glob($root . '/storage/backups/*.sqlite') ?: []);
+check($prodBackupCountAfter === $prodBackupCountBefore, "An toàn: storage/backups thật không thêm file ({$prodBackupCountBefore} → {$prodBackupCountAfter})");
 
 // Dọn dẹp test file
 unset($testPdo);
-if (file_exists($testDbFile)) {
-    @unlink($testDbFile);
+foreach (array_merge($backupFiles, [$testDbFile, $testDbFile . '-wal', $testDbFile . '-shm']) as $f) {
+    if (file_exists($f)) @unlink($f);
 }
+@rmdir($tmpBackupDir);
+@rmdir($tmpDir);
 
 // ── 5. Line Budget Disciplines (< 600 lines) ────────────────────────
 echo "\n-- 5. Line Budget Disciplines (< 600 lines) --\n";
