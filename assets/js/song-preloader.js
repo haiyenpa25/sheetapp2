@@ -182,6 +182,12 @@ const SongPreloader = (() => {
     _cache.clear();
     _inFlight.clear();
   }
+  function invalidate(songId) {
+    if (!songId) { clear(); return; }
+    const p = `${String(songId)}::`;
+    for (const k of _cache.keys()) if (k.startsWith(p)) _cache.delete(k);
+    for (const k of _inFlight.keys()) if (k.startsWith(p)) _inFlight.delete(k);
+  }
 
   /* ── Đồng hồ đo lường thời gian chuyển bài (Ticket L3-2: <= 150ms tới khi có SVG) ── */
   let _svgReadyTime = 0;
@@ -218,6 +224,7 @@ const SongPreloader = (() => {
     get,
     has,
     clear,
+    invalidate,
     startTransitionTimer,
     markSvgReady,
     endTransitionTimer,

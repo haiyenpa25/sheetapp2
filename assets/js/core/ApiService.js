@@ -154,7 +154,7 @@ const ApiService = (() => {
     _authGeneration++;
     _chordSetsListCache.clear(); _chordSetsListInFlight.clear();
     _songsListPromise = null;
-    _sessionsCache.clear(); _sessionsInFlight.clear();
+    _sessionsCache.clear(); _sessionsInFlight.clear(); window.SongPreloader?.clear?.();
   }
 
   const chordSets = {
@@ -171,16 +171,16 @@ const ApiService = (() => {
     },
     load:   (songId, name)       => _request(`api/index.php?route=chord_sets&action=load&songId=${encodeURIComponent(songId)}&name=${encodeURIComponent(name)}`),
     save:   (songId, name, chords, baseChecksum = null) => { 
-      _chordSetsListCache.delete(songId); 
+      _chordSetsListCache.delete(songId); window.SongPreloader?.invalidate?.(songId); 
       const payload = { action:'save', songId, name, chords };
       if (baseChecksum !== null && baseChecksum !== undefined) {
         payload.baseChecksum = baseChecksum;
       }
       return _json('POST', 'api/index.php?route=chord_sets', payload); 
     },
-    clone:  (songId, source, target) => { _chordSetsListCache.delete(songId); return _json('POST', 'api/index.php?route=chord_sets', { action:'clone', songId, source, target, sourceName: source, targetName: target, name: target }); },
-    delete: (songId, name)       => { _chordSetsListCache.delete(songId); return _json('POST', 'api/index.php?route=chord_sets', { action:'delete', songId, name }); },
-    clearCache: (songId) => { if (songId) _chordSetsListCache.delete(songId); else _chordSetsListCache.clear(); }
+    clone:  (songId, source, target) => { _chordSetsListCache.delete(songId); window.SongPreloader?.invalidate?.(songId); return _json('POST', 'api/index.php?route=chord_sets', { action:'clone', songId, source, target, sourceName: source, targetName: target, name: target }); },
+    delete: (songId, name)       => { _chordSetsListCache.delete(songId); window.SongPreloader?.invalidate?.(songId); return _json('POST', 'api/index.php?route=chord_sets', { action:'delete', songId, name }); },
+    clearCache: (songId) => { if (songId) _chordSetsListCache.delete(songId); else _chordSetsListCache.clear(); window.SongPreloader?.invalidate?.(songId); }
   };
 
   const _sessionsCache = new Map();

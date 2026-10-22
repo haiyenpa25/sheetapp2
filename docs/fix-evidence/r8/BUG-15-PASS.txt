@@ -1,0 +1,15 @@
+php : [SongLoader] TypeError: Cannot read properties of undefined (reading 'describe')
+At line:1 char:8
++ $out = php tests\bug15_preloader_invalidation_regression.php 2>&1 | O ...
++        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([SongLoader] Ty...ing 'describe'):String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+    at _showLoadToast (evalmachine.<anonymous>:428:41)
+    at Object.load (evalmachine.<anonymous>:160:7)
+    at async C:\xampp\htdocs\sheetapp2\tests\js\bug15_preloader_invalidation.cjs:109:3
+[PASS:B] Preload caches song-a for HD profile
+[PASS:B] Saving chord set invalidates SongPreloader cache for that song
+[PASS:B] Auth logout clears SongPreloader cache
+[PASS:B] SongLoader.load with song.versionId bypasses SongPreloader master cache and fetches version_xml
+SUITE_COMPLETE total=4 passed=4 failed=0

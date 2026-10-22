@@ -41,7 +41,7 @@ const SongLoader = (() => {
     window.PageNav?.reset?.();
 
     // Ticket L3-2: Chuyển bài tức thì không trắng màn hình nếu đã có trong Preloader
-    const hasPreloaded = window.SongPreloader?.has?.(song.id, profileOverride);
+    const hasPreloaded = !song.versionId && window.SongPreloader?.has?.(song.id, profileOverride);
     const isInstant = options?.instant === true || (hasPreloaded && options?.instant !== false);
 
     if (!isInstant) {
@@ -55,7 +55,7 @@ const SongLoader = (() => {
       let xml = '';
       let processedXml = '';
       let settings = null;
-      const preloaded = isInstant && !options.xml ? window.SongPreloader?.get?.(song.id, profileOverride) : null;
+      const preloaded = !song.versionId && isInstant && !options.xml ? window.SongPreloader?.get?.(song.id, profileOverride) : null;
 
       if (preloaded && preloaded.xml) {
         xml = preloaded.xml;
@@ -256,7 +256,7 @@ const SongLoader = (() => {
     try {
       const result = await ApiService.saveXml(song.xmlPath, newXml);
       if (!result.success) throw new Error(result.message || 'Lỗi không xác định');
-      Store.set('originalXml', newXml);
+      Store.set('originalXml', newXml); window.SongPreloader?.invalidate?.(song.id);
       if ('caches' in window) {
         const xmlCacheName = (typeof window !== 'undefined' && window.__SW_CACHE__) || 'sheetapp-musicxml-v5';
         caches.open(xmlCacheName).then(c => c.delete(song.xmlPath)).catch(() => {});
