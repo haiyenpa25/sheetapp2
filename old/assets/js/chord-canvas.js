@@ -117,7 +117,7 @@ const ChordCanvas = (() => {
     const token = ++_chordLoadToken;
     _clear();
     setAddMode(false);
-    _currentSet   = initialSet || 'HD';
+    resetUndo(); _currentSet   = initialSet || 'HD';
     _customChords = {};
     _songUseFlats = null;
 
@@ -136,7 +136,7 @@ const ChordCanvas = (() => {
     setTimeout(_refreshSetDropdown, 300);
   }
 
-  function clearSong() { ++_chordLoadToken; _clear(); setAddMode(false); }
+  function clearSong() { ++_chordLoadToken; _clear(); resetUndo(); setAddMode(false); }
 
   function setAddMode(on) {
     _editEnabled = !!on;
@@ -290,7 +290,7 @@ const ChordCanvas = (() => {
     }
   }
 
-  function _closePopup() { _popup?.remove(); _popup = null; }
+  function _closePopup() { _popup?.remove(); _popup = null; } function resetUndo() { _undoStack = []; _redoStack = []; }
 
   function _pushUndo() {
     _undoStack.push({ set: _currentSet, chords: { ..._customChords } });
@@ -370,7 +370,7 @@ const ChordCanvas = (() => {
     const token = ++_chordLoadToken;
     const songId = window.App?.getCurrentSongId?.();
     _closePopup();
-    _currentSet   = name;
+    resetUndo(); _currentSet   = name;
     _customChords = {};
     if (name !== 'default') {
       if (songId) {
@@ -577,7 +577,7 @@ const ChordCanvas = (() => {
     setHighlightMode,
     isHighlightMode: () => _highlightMode,
     undo,
-    redo
+    redo, resetUndo
   };
 })();
 

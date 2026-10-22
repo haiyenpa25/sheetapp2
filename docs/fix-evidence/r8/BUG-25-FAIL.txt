@@ -1,0 +1,3 @@
+[FAIL:B] Classic ChordCanvas.loadSong resets undo stack so undo() does not leak song-a chords onto song-b
+[FAIL:B] Classic ChordCanvas.switchSet resets undo stack so undo() does not revert set or chords
+SUITE_COMPLETE total=2 passed=0 failed=2
