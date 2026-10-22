@@ -37,9 +37,7 @@ SheetApp/
 ├── CODING_STANDARDS.md       ← Đọc thứ hai (tiêu chuẩn code, EventBus, API)
 ├── PROJECT_REGISTRY.md       ← File này. Bản đồ dự án (nhật ký cũ: docs/history/CHANGELOG_2026.md)
 ├── CODE_MAP.md               ← Bản đồ tri thức codebase (tự sinh bởi Gitnexus)
-├── ROADMAPS.md               ← Chỉ mục roadmap + luật thực thi (đọc trước khi nhận việc)
-├── ROADMAP6.md               ← Roadmap Thư viện đang hiệu lực (TV0–TV7)
-├── PHUONG_AN_TOI_UU_HE_THONG.md ← Phương án tối ưu toàn hệ thống (OPT-01…26)
+├── ROADMAP.md                ← Roadmap duy nhất đang hiệu lực + luật thực thi (đọc trước khi nhận việc)
 ├── sync.sh / sync.bat        ← Kiểm cú pháp, sinh SW manifest & CODE_MAP.md (không commit/push)
 │
 ├── index.php                 ← Entry point HTML (PHP partial includes)

@@ -1,5 +1,7 @@
 # PHƯƠNG ÁN TỐI ƯU HỆ THỐNG SHEETAPP2 (bản 2026-10-21)
 
+> **Lưu trữ 2026-10-22:** đã gộp vào [`ROADMAP.md`](../../ROADMAP.md). Chỉ để tra cứu, không làm theo file này.
+
 > **Ngày lập:** 2026-10-21 · **Mốc mã nguồn:** `main` @ `406aef6` (đã đồng bộ với `origin/main`)
 > **Người đọc:** chủ dự án (duyệt, trả lời mục 6) và **một** người/AI thực thi.
 > **Luật thực thi:** `ROADMAPS.md` mục 2. Ticket nào ghi DB thật, xoá dữ liệu, đổi quyền hoặc đổi Core Rule thì phải chờ chủ dự án duyệt.

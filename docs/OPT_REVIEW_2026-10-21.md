@@ -1,6 +1,6 @@
 # Rà soát lại phương án tối ưu — 2026-10-21
 
-> **Đợt sửa tiếp:** [PHUONG_AN_2_EXECUTION.md](PHUONG_AN_2_EXECUTION.md) ghi các bản vá FIX, kiểm thử và trạng thái mới nhất. Q-C/Q-D đã được duyệt và thực hiện sau backup: unique index mã hợp âm, xoá đúng 81 event/37 notification/2 delivery; không thay chủ bộ. Các số liệu kiểm thử bên dưới là mốc lịch sử của phiên OPT.
+> **Đợt sửa tiếp:** [PHUONG_AN_2_EXECUTION.md](history/PHUONG_AN_2_EXECUTION.md) ghi các bản vá FIX, kiểm thử và trạng thái mới nhất. Q-C/Q-D đã được duyệt và thực hiện sau backup: unique index mã hợp âm, xoá đúng 81 event/37 notification/2 delivery; không thay chủ bộ. Các số liệu kiểm thử bên dưới là mốc lịch sử của phiên OPT.
 
 Nhánh bàn giao: `fix/opt-review-20261021`. Đối chiếu bản Claude đã làm tại `b7f5f13` và chạy lại kiểm thử. Đây là báo cáo tiến độ thực thi, **chưa phải nghiệm thu toàn bộ OPT-01…26**. Không điền bảng quyết định hoặc chữ ký của chủ dự án.
 

@@ -1,5 +1,7 @@
 # Thực thi PHUONG_AN_2 — 2026-10-21
 
+> **Lưu trữ 2026-10-22:** đã gộp vào [`ROADMAP.md`](../../ROADMAP.md). Chỉ để tra cứu, không làm theo file này.
+
 Nhánh `fix/opt-review-20261021`; một người thực thi. Giữ các thay đổi OPT trước đó, khôi phục theo dõi cấu hình mặc định theo Q-A. Không sửa bảng quyết định/chữ ký. Chưa commit, merge, push hoặc deploy.
 
 ## Các quyết định đã nhận trong hội thoại

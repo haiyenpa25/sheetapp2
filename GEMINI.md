@@ -1,7 +1,7 @@
 # Superpowers (tuỳ chọn): If `.superpowers/skills/using-superpowers/SKILL.md` exists (optional submodule, not checked in), read it before taking action; otherwise use `.agent-skills/using-agent-skills/SKILL.md`.
 
 # Bàn giao triển khai — BẮT BUỘC đọc trước khi sửa code
-@./ROADMAPS.md
+@./ROADMAP.md
 
 # Web Engineering & SheetApp2 Domain Skills (Agent Skills)
 @./.agent-skills/using-agent-skills/SKILL.md

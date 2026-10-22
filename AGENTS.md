@@ -1,6 +1,6 @@
 # SheetApp AI Instructions
 
-> **Việc hiện hành (2026-10-21):** đọc `ROADMAPS.md` trước, rồi làm theo roadmap đang hiệu lực ở mục 1 của file đó (hiện là `ROADMAP6.md`). **Chỉ một người/AI thực thi**, không chạy `sync.bat`/`sync.sh` tự push. Luật thực thi: `ROADMAPS.md` mục 2. Không đánh dấu việc của chủ dự án, không sửa bảng quyết định/chữ ký.
+> **Việc hiện hành (2026-10-22):** đọc `ROADMAP.md` trước (roadmap duy nhất đang hiệu lực; luật thực thi ở mục 1). **Chỉ một người/AI thực thi**, không chạy `sync.bat`/`sync.sh`. Không đánh dấu việc của chủ dự án, không sửa bảng quyết định/chữ ký.
 
 You are equipped with the Superpowers framework.
 If `.superpowers/skills/using-superpowers/SKILL.md` exists (optional submodule, not checked in), read it before taking action; otherwise use `.agent-skills/using-agent-skills/SKILL.md`.
