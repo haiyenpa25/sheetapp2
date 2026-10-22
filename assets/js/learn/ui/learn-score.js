@@ -168,7 +168,7 @@ const LearnScore = (() => {
     const parser = new DOMParser();
     const originalDoc = parser.parseFromString(xml, 'application/xml');
     const xmlHarmonies = window.ChordTimelineNormalizer ? window.ChordTimelineNormalizer._extractHarmoniesFromXml(originalDoc, 0) : [];
-    const isStubProfile = (xmlHarmonies.length >= 6 && (!chordData || chordData.length <= 5));
+    const isStubProfile = false;
     const shouldInject = window.ChordCanvasXML?.cloneAndInjectChords 
       && profile !== 'default' 
       && profile?.toUpperCase() !== 'TLH'

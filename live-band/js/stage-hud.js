@@ -246,12 +246,12 @@
       try {
         _wakeLockSentinel = await navigator.wakeLock.request('screen');
         _updateWakeLockUI(true);
-        _wakeLockSentinel.addEventListener('release', () => _updateWakeLockUI(false));
+        const onRel = () => { _wakeLockSentinel = null; _updateWakeLockUI(false); }; _wakeLockSentinel.addEventListener('release', onRel);
         document.addEventListener('visibilitychange', async () => {
           if (document.visibilityState === 'visible' && !_wakeLockSentinel) {
             try {
               _wakeLockSentinel = await navigator.wakeLock.request('screen');
-              _updateWakeLockUI(true);
+              _wakeLockSentinel.addEventListener('release', onRel); _updateWakeLockUI(true);
             } catch (e) {}
           }
         });

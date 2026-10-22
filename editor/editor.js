@@ -315,8 +315,9 @@
     });
   }
 
+  let _loadToken = 0;
   async function loadSong(song, version = null) {
-    if (!song) return;
+    if (!song) return; const _tok = ++_loadToken;
     _currentSong = song;
     _currentVersion = version;
 
@@ -327,19 +328,19 @@
     if (overlay) overlay.classList.remove('hidden');
 
     try {
-      const rawPath = version ? (version.xml_path || version.xmlPath) : (song.xmlPath || song.xml_path);
+      const rawPath = (version && version.id) ? `api/index.php?route=songs&action=version_xml&version_id=${encodeURIComponent(version.id)}` : (version ? (version.xml_path || version.xmlPath) : (song.xmlPath || song.xml_path));
       if (!rawPath) throw new Error('Không tìm thấy đường dẫn XML!');
       const cleanPath = rawPath.replace(/^\//, '');
       const base = (typeof window.__APP_BASE__ === 'string') ? window.__APP_BASE__ : '';
-      const fetchUrl = `${base}/` + encodeURI(cleanPath);
+      const fetchUrl = (version && version.id && window.ApiService?.resolveUrl) ? window.ApiService.resolveUrl(cleanPath) : (`${base}/` + (version && version.id ? cleanPath : encodeURI(cleanPath)));
       // INTENTIONAL EXCEPTION: Static MusicXML asset fetch
       const res = await fetch(fetchUrl);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const xmlText = await res.text();
+      const xmlText = await res.text(); if (_tok !== _loadToken) return;
 
       _selectedPosition.measureNumber = 1;
       _selectedPosition.beatIndex = 0;
-      await _parseAndLoadXml(xmlText, true);
+      await _parseAndLoadXml(xmlText, true); if (_tok !== _loadToken) return;
 
       const url = new URL(window.location);
       url.searchParams.set('song', song.id);

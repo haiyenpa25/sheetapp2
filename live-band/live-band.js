@@ -24,7 +24,7 @@ const LiveBandApp = (() => {
   let _currentBpm         = 80;
   let _currentMeasure     = 1;
   let _hostMeasure        = 1;
-  let _isDetached         = false;
+  let _isDetached         = false, _scrollObserverBound = false, _loadToken = 0;
 
   let _songsList          = [];
   let _setlist            = null;
@@ -43,7 +43,7 @@ const LiveBandApp = (() => {
     _transport.subscribe(_handleTransportMessage);
 
     _initOSMD();
-    _bindUI();
+    _bindUI(); _bindScrollObserver();
     window.StageHud?.initWakeLock?.();
 
     window.StageTimer?.startVisualBeatPulser(_currentBpm, (isBeatOne) => {
@@ -118,7 +118,7 @@ const LiveBandApp = (() => {
   /* ── Throttled Scroll Listener ────────────────────────────── */
   function _bindScrollObserver() {
     const viewport = document.getElementById('stage-viewport');
-    if (!viewport) return;
+    if (!viewport || _scrollObserverBound) return; _scrollObserverBound = true;
 
     let ticking = false;
     let lastSent = 0;
@@ -298,7 +298,7 @@ const LiveBandApp = (() => {
         isDetached: _isDetached,
         onLoadSong: (id, trans, set) => _loadSong(id, trans, set),
         onSetTranspose: (trans) => _setTranspose(trans, false),
-        onUpdateBpm: (bpm) => {
+        onUpdateBpm: (bpm) => { if (bpm === _currentBpm) return;
           _currentBpm = bpm;
           _updateBpmUI(bpm);
           window.StageTimer?.startVisualBeatPulser(bpm, (isBeatOne) => window.StageAudio?.playMetronomeClick(isBeatOne));
@@ -312,12 +312,12 @@ const LiveBandApp = (() => {
 
   /* ── Host Actions ─────────────────────────────────────────── */
   async function hostSelectSong(songId, chordSet = null) {
-    if (!songId) return;
+    if (!songId) return; const _tok = ++_loadToken;
     const song = _songsList.find(s => s.id === songId);
     _currentSongTitle = song?.title || songId;
     if (chordSet) _currentChordSet = chordSet;
 
-    await _loadSong(songId, _currentTranspose, _currentChordSet);
+    _currentTranspose = 0; await _loadSong(songId, 0, _currentChordSet);
     broadcastState({
       song: { songId, songTitle: _currentSongTitle, chordSet: _currentChordSet },
       position: { measure: 1 }
@@ -467,12 +467,12 @@ const LiveBandApp = (() => {
   }
 
   async function _loadSong(songId, transpose = 0, chordSet = 'HD') {
-    if (!songId) return;
+    if (!songId) return; const _tok = ++_loadToken;
     _currentSongId = songId;
     _currentChordSet = chordSet;
     const song = _songsList.find(s => s.id === songId);
     _currentSongTitle = song?.title || songId;
-    _currentBaseKey = song?.key || 'C';
+    _currentBaseKey = song?.defaultKey || song?.key || 'C';
 
     const titleEl = document.getElementById('nav-song-title') || document.getElementById('stage-song-title');
     if (titleEl) titleEl.textContent = `${_currentSongTitle} (${_currentChordSet})`;
@@ -493,14 +493,14 @@ const LiveBandApp = (() => {
         // INTENTIONAL EXCEPTION: Static MusicXML asset fetch
         const res = await fetch(fullUrl);
         if (res.ok) {
-          xmlText = await res.text();
+          xmlText = await res.text(); if (_tok !== _loadToken) return;
           _cachedXmls.set(songId, xmlText);
         }
       }
 
       if (xmlText && _osmd) {
-        _currentXmlString = xmlText;
-        await _osmd.load(xmlText);
+        let renderXml = xmlText; if (_currentChordSet !== 'default' && _currentChordSet?.toUpperCase() !== 'TLH' && window.ApiService?.chordSets?.load) { const csRes = await window.ApiService.chordSets.load(songId, _currentChordSet).catch(() => null); if (_tok !== _loadToken) return; const list = csRes?.chords || (Array.isArray(csRes) ? csRes : []); const cMap = {}; list.forEach(c => { if (c?.chord) cMap[`${c.measureIdx}_${c.noteIdx}`] = c.chord; }); if (Object.keys(cMap).length > 0 && window.ChordCanvasXML?.cloneAndInjectChords) renderXml = window.ChordCanvasXML.cloneAndInjectChords(xmlText, cMap); else if (_currentChordSet === 'HD' && setEl) setEl.textContent = 'Bộ: HD (TLH)'; } _currentXmlString = renderXml;
+        await _osmd.load(renderXml); if (_tok !== _loadToken) return;
         _osmd.render();
         window.MusicalPosition?.attachContainer?.('stage-viewport');
         _renderTeleprompterLyrics(_currentSongTitle, xmlText);

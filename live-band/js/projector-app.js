@@ -195,9 +195,10 @@
     }
 
     // Tải MusicXML và sinh slides qua ProjectorSlides engine
-    async function loadAndRenderSongSlides(songId, songTitle) {
+    let _projLoadToken = 0, _lastProjCueKey = null;
+    async function loadAndRenderSongSlides(songId, songTitle) { const _tok = ++_projLoadToken;
       try {
-        const songData = await resolveSongData(songId);
+        const songData = await resolveSongData(songId); if (_tok !== _projLoadToken) return;
         if (!songData || !songData.xmlPath) {
           throw new Error('Song XML path not found in catalog');
         }
@@ -218,7 +219,7 @@
         // INTENTIONAL EXCEPTION: Static MusicXML asset fetch
         const res = await fetch(finalUrl);
         if (!res.ok) throw new Error(`Cannot load XML from ${finalUrl}`);
-        const xmlText = await res.text();
+        const xmlText = await res.text(); if (_tok !== _projLoadToken) return;
 
         if (!window.ProjectorSlides) {
           throw new Error('ProjectorSlides engine is not loaded');
@@ -281,7 +282,7 @@
       if (!state) return;
 
       // 1. Cue Message
-      if (state.cue && state.cue.text) {
+      if (state.cue && state.cue.text) { const ck = String(state.cue.cueId || `${state.cue.type||''}:${state.cue.text}:${state.cue.sentAt||''}`); if (ck !== _lastProjCueKey && (!state.cue.expiresAt || Date.now() < state.cue.expiresAt)) { _lastProjCueKey = ck; showCueBanner(state.cue.text, state.cue.type || 'warning', state.cue.durationMs || 3500); } } if (false) {
         showCueBanner(state.cue.text, state.cue.type || 'warning', state.cue.durationMs || 3500);
       }
 

@@ -1,0 +1,28 @@
+﻿[Mixer] init OK
+[PASS:B] BUG-27: Classic InstrumentMixer.openMixer escape an to├án t├¬n nhß║íc cß╗Ñ tß╗½ MusicXML
+[Editor] Lß╗ùi tß║úi phi├¬n bß║ún: TypeError: document.createElement is not a function
+    at _renderVersionsDropdown (evalmachine.<anonymous>:297:33)
+    at fetchSongVersions (evalmachine.<anonymous>:286:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Object.loadSong (evalmachine.<anonymous>:349:7)
+    at async C:\xampp\htdocs\sheetapp2\tests\js\bug27_to_37_subapps_medium.cjs:120:5
+[PASS:B] BUG-28: Editor tß║úi phi├¬n bß║ún b├ái h├ít qua endpoint version_xml thay v├¼ ─æß╗ìc trß╗▒c tiß║┐p storage/users/
+[Editor] Lß╗ùi tß║úi phi├¬n bß║ún: TypeError: document.createElement is not a function
+    at _renderVersionsDropdown (evalmachine.<anonymous>:297:33)
+    at fetchSongVersions (evalmachine.<anonymous>:286:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Object.loadSong (evalmachine.<anonymous>:349:7)
+    at async C:\xampp\htdocs\sheetapp2\tests\js\bug27_to_37_subapps_medium.cjs:133:5
+[PASS:B] BUG-37 (Editor): ─Éß╗òi b├ái nhanh trong Editor giß╗» trß║íng th├íi cß╗ºa b├ái B (kh├┤ng bß╗ï request A chß║¡m ghi ─æ├¿)
+[PASS:B] BUG-29 (StageRoom): C├╣ng mß╗Öt cue/bandState gß╗¡i 3 lß║ºn chß╗ë hiß╗ân thß╗ï banner 1 lß║ºn mß╗ùi loß║íi
+[PASS:B] BUG-30 (StageRoom): Kh├┤ng gß╗ìi onUpdateBpm khi BPM trong g├│i tin bß║▒ng currentBpm
+[LiveBandApp] Initialized successfully. Client ID: client-6m5qtj3-mvjm3knc
+[PASS:B] BUG-31: LiveBandApp ─æß╗ìc ─æ├║ng song.defaultKey (Eb) thay v├¼ lu├┤n mß║╖c ─æß╗ïnh C
+[PASS:B] BUG-32: Ca Tr╞░ß╗ƒng chß╗ìn b├ái mß╗¢i trong LiveBandApp tß╗▒ ─æß╗Öng ─æß║╖t lß║íi dß╗ïch giß╗ìng vß╗ü 0 (Core Rule 2)
+[PASS:B] BUG-33: LiveBandApp nß║íp bß╗Ö hß╗úp ├óm HD tß╗½ ApiService v├á ti├¬m v├áo XML tr╞░ß╗¢c khi render OSMD
+[PASS:B] BUG-34: _bindScrollObserver chß╗ë gß║»n listener scroll ─æ├║ng 1 lß║ºn duy nhß║Ñt qua nhiß╗üu lß║ºn ─æß╗òi b├ái
+[PASS:B] BUG-35: StageHud x├│a sentinel khi release v├á xin lß║íi WakeLock th├ánh c├┤ng khi quay lß║íi tab
+[PASS:B] BUG-36: LearnScore.prepareEffectiveXml lu├┤n ti├¬m hß╗úp ├óm cß╗ºa bß╗Ö HD kß╗â cß║ú khi b├ái c├│ ├¡t h╞ín 6 hß╗úp ├óm
+[PASS:B] BUG-37 (ManagerRepertoire): ─Éß╗òi b├ái nhanh trong Manager Repertoire giß╗» ─æ├║ng b├ái chß╗ìn sau c├╣ng
+SUITE_COMPLETE total=12 passed=12 failed=0
+

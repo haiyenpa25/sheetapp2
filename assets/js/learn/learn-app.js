@@ -142,7 +142,7 @@ const LearnApp = (() => {
     });
   }
 
-  async function _selectSong(song) {
+  let _selectToken = 0; async function _selectSong(song) { const _tok = ++_selectToken;
     if (!song?.xmlPath) {
       _showError('Bài này chưa có file sheet nhạc.');
       return;
@@ -165,7 +165,7 @@ const LearnApp = (() => {
     LearnStore.set('_pendingTransParam', null);
 
     const pendingSet = LearnStore.get('_pendingSetParam');
-    const initialSet = pendingSet || LearnStore.get('chordSet') || 'HD';
+    const initialSet = pendingSet || 'HD';
     LearnStore.set('_pendingSetParam', null);
 
     const transValEl = document.getElementById('learn-trans-val');
@@ -198,8 +198,8 @@ const LearnApp = (() => {
         _loadChordSet(song.id, initialSet),
       ]);
 
-      if (!xmlRes.ok) throw new Error(`XML fetch failed: ${xmlRes.status}`);
-      const xml = await xmlRes.text();
+      if (_tok !== _selectToken) return; if (!xmlRes.ok) throw new Error(`XML fetch failed: ${xmlRes.status}`);
+      const xml = await xmlRes.text(); if (_tok !== _selectToken) return;
       _rawXmlString = xml;
 
       const prepared = window.LearnScore
@@ -212,7 +212,7 @@ const LearnApp = (() => {
       _hideLoading();
       _showLoading('Đang render sheet nhạc...');
       if (window.LearnScore) {
-        await LearnScore.loadScore(prepared.xmlString, _currentTranspose);
+        await LearnScore.loadScore(prepared.xmlString, _currentTranspose); if (_tok !== _selectToken) return;
       }
 
       if (window.LearnSatb) LearnSatb.extractSongMeta(_xmlDoc);
@@ -431,7 +431,7 @@ const LearnApp = (() => {
     if (window.ChordCard) ChordCard.setChord(timeline[0] ?? null, timeline[1] ?? null, _currentSong?.defaultKey);
   }
 
-  async function _handleChordSetChange(profile) {
+  async function _handleChordSetChange(profile) { const _tok = ++_selectToken;
     LearnStore.set('chordSet', profile);
     if (_currentSong) {
       _showLoading(`Đang tải bộ hợp âm ${profile}...`);
@@ -441,7 +441,7 @@ const LearnApp = (() => {
         const prepared = LearnScore.prepareEffectiveXml(_rawXmlString, _rawChordData, profile);
         _xmlDoc = prepared.xmlDoc;
         try {
-          await LearnScore.loadScore(prepared.xmlString, _currentTranspose);
+          await LearnScore.loadScore(prepared.xmlString, _currentTranspose); if (_tok !== _selectToken) return;
         } catch (err) {
           console.warn('[LearnApp] OSMD re-render error:', err);
         }

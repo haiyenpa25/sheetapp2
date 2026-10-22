@@ -6,7 +6,7 @@
   'use strict';
 
   let _ctx = null;
-  const _selectedSongIds = new Set();
+  const _selectedSongIds = new Set(); let _selectSongToken = 0;
 
   function init(ctx) {
     _ctx = ctx;
@@ -134,7 +134,7 @@
 
   /* ================= SONG SELECTION & INSPECTOR ================= */
   async function selectSong(songId) {
-    if (!songId) return;
+    if (!songId) return; const _tok = ++_selectSongToken;
     const app = _getApp();
 
     const panel = document.getElementById('mgr-selected-song-panel');
@@ -148,7 +148,7 @@
     document.getElementById('sel-song-chords-grid').innerHTML = '<div class="mgr-table-loading" style="grid-column:1/-1;"><div class="mgr-spinner"></div><p>Đang tải hợp âm của bài...</p></div>';
 
     try {
-      const song = await window.ApiService.manager.songDetails(songId);
+      const song = await window.ApiService.manager.songDetails(songId); if (_tok !== _selectSongToken) return;
 
       if (song.success && song.id) {
         if (app.state) app.state.selectedSong = song;

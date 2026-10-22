@@ -47,7 +47,7 @@ const InstrumentMixer = (() => {
           <input type="checkbox" value="${i}" ${ins.Visible ? 'checked' : ''}>
           <div class="toggle-track"><div class="toggle-thumb"></div></div>
         </label>
-        <div style="font-weight:600;font-size:.9rem;color:var(--text-primary); cursor:pointer;" onclick="this.previousElementSibling.click()">${name}</div>
+        <div style="font-weight:600;font-size:.9rem;color:var(--text-primary); cursor:pointer;" onclick="this.previousElementSibling.click()">${window.SafeHtml ? window.SafeHtml.escape(name) : String(name).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')}</div>
       `;
       listEl.appendChild(div);
     });

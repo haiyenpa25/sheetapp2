@@ -145,6 +145,7 @@
     };
   }
 
+  let _lastCueKey = null, _lastBandStateKey = null;
   async function applyRemoteState(state, ctx) {
     if (!state || ctx.mode === 'host') return;
 
@@ -162,7 +163,7 @@
       ctx.onSetTranspose(state.music.transpose);
     }
 
-    if (state.music && state.music.bpm) {
+    if (state.music && state.music.bpm && state.music.bpm !== ctx.currentBpm) {
       ctx.onUpdateBpm(state.music.bpm);
     }
 
@@ -178,7 +179,7 @@
       }
     }
 
-    if (state.cue && state.cue.text) {
+    if (state.cue && state.cue.text) { const ck = String(state.cue.cueId || `${state.cue.type||''}:${state.cue.text}:${state.cue.sentAt||''}`); if (ck !== _lastCueKey && (!state.cue.expiresAt || Date.now() < state.cue.expiresAt)) { _lastCueKey = ck; window.StageRehearsal?.showCueBanner(state.cue.text, state.cue.icon || '⚡', state.cue.durationMs || 3000); } } if (false) {
       window.StageRehearsal?.showCueBanner(state.cue.text, state.cue.icon || '⚡', state.cue.durationMs || 3000);
     }
 
@@ -186,7 +187,7 @@
       window.StageAudio?.triggerVisualCountIn({ bpm: state.music?.bpm || ctx.currentBpm, beats: 4 });
     }
 
-    if (state.bandState && state.bandState.key) {
+    if (state.bandState && state.bandState.key) { const bk = String(state.bandState.stateId || state.bandState.sentAt || state.bandState.key); if (bk !== _lastBandStateKey) { _lastBandStateKey = bk; window.StageRehearsal?.applyBandStateUI(state.bandState.key); window.StageRehearsal?.showCueBanner(`⚡ LỆNH BAN NHẠC: ${state.bandState.label}`, state.bandState.icon || '⚡', 3500); } } if (false) {
       window.StageRehearsal?.applyBandStateUI(state.bandState.key);
       window.StageRehearsal?.showCueBanner(`⚡ LỆNH BAN NHẠC: ${state.bandState.label}`, state.bandState.icon || '⚡', 3500);
     }
