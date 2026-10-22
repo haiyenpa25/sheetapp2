@@ -89,12 +89,24 @@ class SetlistOfflineHelper {
             ];
         }
 
+        // Nội dung XML và hợp âm phải nằm trong phiên bản, nếu không máy offline giữ gói cũ khi bài đã sửa
+        $contentSignatures = [];
+        foreach ($songsMap as $sid => $song) {
+            $chordHashes = [];
+            foreach ($chordSetsMap[$sid] ?? [] as $prof => $chords) {
+                $chordHashes[$prof] = hash('crc32b', (string)json_encode($chords));
+            }
+            ksort($chordHashes);
+            $contentSignatures[$sid] = [$song['xml_hash'], $chordHashes];
+        }
+
         $versionSource = [
             $setlist['id'],
             $setlist['title'] ?? '',
             $setlist['scheduled_date'] ?? '',
             $itemSignatures,
-            array_keys($songsMap)
+            array_keys($songsMap),
+            $contentSignatures,
         ];
         $packageVersion = 'pkg-' . $setlistId . '-' . hash('crc32b', json_encode($versionSource));
 

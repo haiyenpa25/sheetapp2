@@ -12,6 +12,8 @@ require_once __DIR__ . '/LiveSyncStorageHelper.php';
 
 class LiveSyncService {
     public const ROOM_EXPIRE_HOURS = LiveSyncStorageHelper::ROOM_EXPIRE_HOURS;
+    // Mỗi kết nối SSE giữ một PHP worker; 250 ms vẫn dưới ngưỡng cảm nhận khi lật trang
+    public const SSE_POLL_INTERVAL_US = 250000;
 
     /**
      * Cho phép ghi đè thư mục lưu phòng (dùng cho test suite hoặc cấu hình môi trường)
@@ -508,7 +510,7 @@ class LiveSyncService {
         while (time() - $startTime < $maxDuration) {
             if (connection_aborted()) break;
 
-            usleep(100000); // 100ms
+            usleep(self::SSE_POLL_INTERVAL_US);
 
             $poll = self::pollRoom($room, $lastRev, $clientId, $role);
             if (!$poll['success'] || !($poll['active'] ?? true)) {
