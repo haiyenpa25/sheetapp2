@@ -183,6 +183,7 @@ function jsTag(string $file, bool $defer = true): string {
 // ── 1. CORE Infrastructure (không defer — cần sớm nhất) ──
 echo jsTag('core/ScriptLoader.js', false);
 echo jsTag('core/SafeHtml.js', false);
+echo jsTag('core/PointerTap.js', false);
 echo jsTag('vendor/idb-keyval.min.js', false);
 echo jsTag('core/OfflineVault.js', false);
 echo jsTag('core/EventBus.js', false);

@@ -9,7 +9,7 @@
 const OfflineVault = (() => {
   'use strict';
 
-  const CATALOG_KEY = 'sheetapp_catalog_v2';
+  const CATALOG_KEY = 'sheetapp_catalog_public_v3';
   const XML_PREFIX  = 'sheetapp_xml:';
   const _memXml     = new Map();
 

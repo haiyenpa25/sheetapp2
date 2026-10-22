@@ -33,6 +33,7 @@ const PerformanceNotes = (() => {
    *  loadSong — fetch notes từ server
    * ══════════════════════════════════════ */
   async function loadSong(songId, sessionData = null) {
+    clearTimeout(_saveTimer);
     _songId = songId;
     _cache  = {};
 
@@ -41,6 +42,7 @@ const PerformanceNotes = (() => {
     } else {
       try {
         const data = await window.ApiService?.sessions?.load?.(songId);
+        if (songId !== _songId) return {};
         if (data && data.perfNotes) {
           _cache = data.perfNotes;
         }

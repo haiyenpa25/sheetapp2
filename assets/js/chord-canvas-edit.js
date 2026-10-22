@@ -238,12 +238,12 @@ const ChordCanvasEdit = (() => {
   }
 
   let _saveDebounceTimer = null;
+  let _pendingSave = null, _saveChain = Promise.resolve(), _contextVersion = 0;
   let _baseChecksum = '', _lastConfirmedChords = {}, _statusChipEl = null;
   const OFFLINE_QUEUE_KEY = 'sheetapp_offline_chord_queue_v1';
   let _offlineQueue = [];
   function _loadOfflineQueue() { try { const raw = localStorage.getItem(OFFLINE_QUEUE_KEY); if (raw) _offlineQueue = JSON.parse(raw); } catch (_) { _offlineQueue = []; } }
   function _saveOfflineQueue() { try { localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(_offlineQueue)); } catch (_) {} }
-
   function _ensureStatusChip() {
     if (_statusChipEl && document.body.contains(_statusChipEl)) return _statusChipEl;
     let el = document.getElementById('cc-status-chip');
@@ -256,7 +256,6 @@ const ChordCanvasEdit = (() => {
     }
     return (_statusChipEl = el);
   }
-
   function _updateStatusChip(state, text) {
     const chip = _ensureStatusChip();
     if (!chip) return;
@@ -264,62 +263,66 @@ const ChordCanvasEdit = (() => {
     const txtEl = chip.querySelector('.cc-status-text');
     if (txtEl) txtEl.textContent = text || '';
   }
-
   function scheduleSave(delay = 1500) {
     _updateStatusChip('saving', 'Đang soạn…');
     if (_saveDebounceTimer) clearTimeout(_saveDebounceTimer);
+    _pendingSave = captureSave();
     _saveDebounceTimer = setTimeout(() => {
       _saveDebounceTimer = null;
-      executeSave();
+      const job = _pendingSave; _pendingSave = null;
+      return enqueueSave(job);
     }, delay);
   }
-
   async function flushSave() {
     if (_saveDebounceTimer) {
       clearTimeout(_saveDebounceTimer);
       _saveDebounceTimer = null;
     }
-    return executeSave();
+    const job = _pendingSave; _pendingSave = null;
+    if (job) enqueueSave(job);
+    return _saveChain;
   }
-
-  async function executeSave() {
+  function captureSave() {
     const app = _getApp();
-    const songId = window.App?.getCurrentSongId?.();
+    return { songId: window.App?.getCurrentSongId?.(), currentSet: app.getCurrentSet(),
+      chordsObj: { ...app.getCustomChords() }, baseChecksum: _baseChecksum,
+      version: _contextVersion };
+  }
+  function enqueueSave(job) {
+    if (job) _saveChain = _saveChain.then(() => executeSave(job));
+    return _saveChain;
+  }
+  async function executeSave(job = captureSave()) {
+    const app = _getApp();
+    const { songId, currentSet, chordsObj } = job;
+    const isCurrent = () => job.version === _contextVersion && songId === window.App?.getCurrentSongId?.() && currentSet === app.getCurrentSet();
     if (!songId) return;
-
-    const currentSet = app.getCurrentSet();
     if (currentSet === 'default') {
       window.App?.showToast?.('❌ Bản TLH gốc là bất biến, không thể lưu đè!', 'error');
       return;
     }
-
     const myChordCode = (window.Auth?.getChordCode?.() || '').toUpperCase();
     const curSetUpper = (currentSet || '').toUpperCase();
-
     if (!window.Auth?.isAdmin?.() && myChordCode && curSetUpper !== myChordCode && curSetUpper !== 'HD') {
       window.App?.showToast?.(`❌ Bạn chỉ có quyền lưu vào bộ hợp âm cá nhân (${myChordCode})!`, 'error');
       return;
     }
-
-    const chordsObj = app.getCustomChords();
     const arr = Object.entries(chordsObj).map(([k, chord]) => {
       const [measureIdx, noteIdx] = k.split('_').map(Number);
       return { measureIdx, noteIdx, chord };
     });
-
     if (typeof navigator !== 'undefined' && !navigator.onLine) {
-      _offlineQueue.push({ songId, currentSet, arr, baseChecksum: _baseChecksum, timestamp: Date.now() });
+      _offlineQueue.push({ songId, currentSet, arr, baseChecksum: job.baseChecksum, timestamp: Date.now() });
       _saveOfflineQueue();
       _updateStatusChip('offline', `Ngoại tuyến (${_offlineQueue.length} chờ)`);
       window.App?.showToast?.('Đã lưu vào bộ nhớ tạm ngoại tuyến (sẽ đồng bộ khi có mạng)', 'info');
       return;
     }
-
     _updateStatusChip('saving', 'Đang lưu…');
-
     try {
-      const r = await window.ApiService.chordSets.save(songId, currentSet, arr, _baseChecksum || null);
+      const r = await window.ApiService.chordSets.save(songId, currentSet, arr, (isCurrent() ? _baseChecksum : job.baseChecksum) || null);
       if (r && r.success) {
+        if (!isCurrent()) return;
         if (r.checksum) _baseChecksum = r.checksum;
         _lastConfirmedChords = { ...chordsObj };
         _updateStatusChip('saved', 'Đã lưu ✓');
@@ -328,6 +331,7 @@ const ChordCanvasEdit = (() => {
         throw new Error(r?.message || 'Lỗi không xác định khi lưu hợp âm');
       }
     } catch (err) {
+      if (!isCurrent()) return;
       if (err.status === 409 || err.data?.conflict) {
         _updateStatusChip('conflict', 'Xung đột ⚠');
         showConflictModal({
@@ -338,6 +342,7 @@ const ChordCanvasEdit = (() => {
             try {
               const res = await window.ApiService.chordSets.save(songId, currentSet, arr, null);
               if (res && res.success) {
+                if (!isCurrent()) return;
                 if (res.checksum) _baseChecksum = res.checksum;
                 _lastConfirmedChords = { ...chordsObj };
                 _updateStatusChip('saved', 'Đã lưu ✓');
@@ -349,6 +354,7 @@ const ChordCanvasEdit = (() => {
             }
           },
           onReload: () => {
+            if (!isCurrent()) return;
             const serverArr = err.data?.serverChords || [];
             const newChords = {};
             serverArr.forEach(({ measureIdx, noteIdx, chord }) => {
@@ -364,7 +370,6 @@ const ChordCanvasEdit = (() => {
         });
         return;
       }
-
       _updateStatusChip('error', 'Lỗi lưu ⚠');
       if (Object.keys(_lastConfirmedChords).length > 0) {
         app.setCustomChords({ ..._lastConfirmedChords });
@@ -375,7 +380,6 @@ const ChordCanvasEdit = (() => {
       }
     }
   }
-
   async function flushOfflineQueue() {
     _loadOfflineQueue();
     if (!_offlineQueue.length) return;
@@ -387,7 +391,7 @@ const ChordCanvasEdit = (() => {
         if (r && r.success) {
           _offlineQueue.shift();
           _saveOfflineQueue();
-          if (r.checksum) _baseChecksum = r.checksum;
+          if (r.checksum && item.songId === window.App?.getCurrentSongId?.() && item.currentSet === _getApp().getCurrentSet()) _baseChecksum = r.checksum;
         } else {
           break;
         }
@@ -402,8 +406,8 @@ const ChordCanvasEdit = (() => {
       _updateStatusChip('offline', `Ngoại tuyến (${_offlineQueue.length} chờ)`);
     }
   }
-
   function setBaseChecksum(checksum, chords) {
+    _contextVersion++;
     _baseChecksum = checksum || '';
     if (chords) _lastConfirmedChords = { ...chords };
     else {
@@ -411,7 +415,6 @@ const ChordCanvasEdit = (() => {
       _lastConfirmedChords = { ...(app.getCustomChords ? app.getCustomChords() : {}) };
     }
   }
-
   function showConflictModal({ serverChords, serverChecksum, onOverwrite, onReload }) {
     const isDark = document.body.classList.contains('dark-mode');
     const bgCard = isDark ? '#1e293b' : '#ffffff', textPri = isDark ? '#f8fafc' : '#0f172a';
@@ -554,7 +557,8 @@ const ChordCanvasEdit = (() => {
     });
 
     // R2-5: Chạm vào khuông nhạc để chọn nốt gần nhất không chồng lấn
-    document.addEventListener('pointerdown', e => {
+    const bindTap = window.PointerTap?.bind || ((el, fn) => el.addEventListener('click', fn));
+    bindTap(document, e => {
       if (!window.ChordCanvas?.isAddMode?.()) return;
       if (e.target?.closest?.('.cc-popup, .cc-popup-mobile, .modal, .cc-dot-btn, .cc-dot-badge, input, textarea, button')) return;
       const container = document.getElementById('osmd-container');

@@ -20,6 +20,7 @@ const SongInfoBar = (() => {
     if (!xmlString) { clearSong(); return; }
     _songId   = song?.id || song?.httlvnId || null;
     _songData = _parseXml(xmlString, song);
+    if (!_songData.key && song?.defaultKey) _songData.key = song.defaultKey;
     _render(_songData);
     document.getElementById('song-info-strip')?.classList.remove('si-hidden');
   }
@@ -108,9 +109,15 @@ const SongInfoBar = (() => {
 
     const chips = [];
     if (info.category)     chips.push(`<span class="si-chip si-category" title="Danh mục: ${_esc(info.category)}">📚 ${_esc(info.category)}</span>`);
-    if (info.key)          chips.push(`<span class="si-chip si-key">🎵 ${info.key} ${info.mode}</span>`);
+    const transpose = window.Store?.get?.('currentTranspose') ?? 0;
+    const practicedKey = window.KeyService?.displayKey?.(info.key, transpose)
+      || window.TransposeEngine?.transposeChord?.(info.key, transpose) || info.key;
+    if (info.key) chips.push(`<span class="si-chip si-key">🎵 Tông: ${_esc(info.key)} | Tập: ${_esc(practicedKey)}</span>`);
     if (info.timeBeats)    chips.push(`<span class="si-chip si-time">♩ ${info.timeBeats}/${info.timeBeatType}</span>`);
-    if (info.tempo)        chips.push(`<span class="si-chip si-tempo">= ${info.tempo} bpm</span>`);
+    const inSetlist = document.querySelector('.toolbar-left')?.classList.contains('in-setlist');
+    const setlist = window.SetlistUI?.getCurrentSetlist?.(), index = window.SetlistUI?.getCurrentIndex?.();
+    const tempo = Number.parseInt((inSetlist && setlist?.items?.[index]?.bpm) || _loadNotes()?.bpm || info.tempo, 10);
+    if (tempo > 0 && tempo !== 104) chips.push(`<span class="si-chip si-tempo">= ${tempo} bpm</span>`);
     if (info.measureCount) chips.push(`<span class="si-chip si-measures">${info.measureCount} nhịp</span>`);
 
     // Chord set chip
@@ -119,7 +126,7 @@ const SongInfoBar = (() => {
     if (currentSet && currentSet !== 'default') {
       const countLabel = chordCount > 0 ? `● ${chordCount} hợp âm` : '○ Chưa có';
       const chipClass  = chordCount > 0 ? 'si-chip si-chord-set si-chord-has' : 'si-chip si-chord-set si-chord-empty';
-      chips.push(`<span class="${chipClass}" title="Bộ hợp âm: ${currentSet}">🎸 ${currentSet} · ${countLabel}</span>`);
+      chips.push(`<span class="${chipClass}" title="Bộ hợp âm: ${_esc(currentSet)}">🎸 ${_esc(currentSet)} · ${countLabel}</span>`);
     } else if (currentSet === 'default') {
       chips.push(`<span class="si-chip si-chord-set" title="Hợp âm từ TLH (gốc)">🎸 TLH (gốc)</span>`);
     }

@@ -138,6 +138,11 @@ const OSMDRenderer = (() => {
       }
     });
 
+    container.addEventListener('touchcancel', () => {
+      isPinching = false; initTouchDist = 0; currentScaleRatio = 1;
+      const svg = container.querySelector('svg');
+      if (svg) svg.style.transform = '';
+    });
     return osmd;
   }
 

@@ -14,7 +14,7 @@
       const dropdown = document.getElementById('host-song-dropdown');
       if (dropdown && songsList.length > 0) {
         dropdown.innerHTML = '<option value="">-- Chọn bản nhạc biểu diễn --</option>' +
-          songsList.map(s => `<option value="${s.id}">${s.title} (${s.id})</option>`).join('');
+          songsList.map(s => `<option value="${window.SafeHtml.escape(s.id)}">${window.SafeHtml.escape(s.title)} (${window.SafeHtml.escape(s.id)})</option>`).join('');
       }
       if (typeof onCatalogLoaded === 'function') {
         onCatalogLoaded(songsList);

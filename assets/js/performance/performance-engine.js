@@ -130,8 +130,9 @@ const PerformanceEngine = (() => {
             songObj = res?.data || res;
           } catch (e) {}
         }
-        if (!songObj) {
-          songObj = { id: targetSongId, title: songTitle, xmlPath: `storage/Thanh ca/${targetSongId}.xml` };
+        if (!songObj?.xmlPath) {
+          window.App?.showToast?.('Không tìm thấy bản nhạc của ca trưởng', 'error');
+          return;
         }
         await window.SongLoader?.load?.(songObj, state.music?.transpose ?? 0);
       }
@@ -314,7 +315,13 @@ const PerformanceEngine = (() => {
       const songId = item.song_id;
       if (!songId || _preloadedSongs.has(songId)) return;
       try {
-        const xmlPath = `storage/Thanh ca/${encodeURIComponent(songId)}.xml`;
+        let song = window.LibraryUI?.getSongById?.(songId);
+        if (!song?.xmlPath && window.ApiService?.songs?.get) {
+          const response = await window.ApiService.songs.get(songId);
+          song = response?.data || response;
+        }
+        if (!song?.xmlPath) return;
+        const xmlPath = song.xmlPath;
         const xmlUrl = (window.ApiService && typeof window.ApiService.resolveUrl === 'function')
           ? window.ApiService.resolveUrl(xmlPath)
           : xmlPath;

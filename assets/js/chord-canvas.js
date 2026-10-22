@@ -27,24 +27,6 @@ const ChordCanvas = (() => {
 
     try { _highlightMode = localStorage.getItem(HIGHLIGHT_KEY) === 'true'; } catch(e) {}
 
-    // Ticket L0-16: Ủy quyền nút sửa hợp âm sang ModeManager để tránh kích hoạt trùng lặp
-    document.getElementById('btn-add-chord-mode')?.addEventListener('click', () => {
-      if (window.ModeManager?.toggleEditChords) window.ModeManager.toggleEditChords();
-      else toggleAddMode();
-    });
-
-    const doneBtn = document.getElementById('btn-cancel-add-chord');
-    if (doneBtn) {
-      doneBtn.addEventListener('click', async () => {
-        if (_currentSet !== 'default' && Object.keys(_customChords).length > 0) {
-          await window.ChordCanvasEdit?.saveCustomSet?.();
-        }
-        setAddMode(false);
-      });
-    }
-
-    document.getElementById('btn-chord-highlight')?.addEventListener('click', toggleHighlight);
-
     const container = document.getElementById('osmd-container');
     if (container) {
       let rTid = null;
@@ -146,6 +128,9 @@ const ChordCanvas = (() => {
 
   async function loadSong(songId, initialSet = 'HD') {
     const token = ++_chordLoadToken;
+    initialSet = initialSet || 'HD';
+    await window.ChordCanvasEdit?.flushSave?.();
+    if (token !== _chordLoadToken) return;
     window.ChordCanvasEdit?.closePopup?.();
     _clear();
     window.ChordCanvasEdit?.resetUndo?.(); // R0-4: tránh Ctrl+Z ghi nhầm sang bài mới
@@ -154,6 +139,7 @@ const ChordCanvas = (() => {
     _currentSet   = initialSet;
     _prevSet      = initialSet;
     _customChords = {};
+    window.ChordCanvasEdit?.setBaseChecksum?.('', _customChords);
 
     if (initialSet !== 'default') {
       try {
@@ -164,6 +150,7 @@ const ChordCanvas = (() => {
         } else {
           _loadOfflineChords(songId, initialSet);
         }
+        window.ChordCanvasEdit?.setBaseChecksum?.(r?.checksum || '', _customChords);
       } catch(e) {
         if (token !== _chordLoadToken) return;
         _loadOfflineChords(songId, initialSet);
@@ -215,13 +202,8 @@ const ChordCanvas = (() => {
       }
     }
     _editEnabled = on;
-    const btn = document.getElementById('btn-add-chord-mode');
     const barBtn = document.getElementById('btn-add-chord-mode-bar');
-    const bar = document.getElementById('add-chord-bar');
-
-    btn?.classList.toggle('active', on);
     barBtn?.classList.toggle('active', on);
-    bar?.classList.toggle('hidden', !on);
 
     if (!on) window.ChordCanvasEdit?.closePopup?.();
     _build();
@@ -243,11 +225,6 @@ const ChordCanvas = (() => {
   function setHighlightMode(on) {
     _highlightMode = on;
     try { localStorage.setItem(HIGHLIGHT_KEY, on ? 'true' : 'false'); } catch(e) {}
-    const btn = document.getElementById('btn-chord-highlight');
-    if (btn) {
-      btn.classList.toggle('active', on);
-      btn.title = on ? 'Đang bật nổi bật hợp âm (click để tắt)' : 'Bật nổi bật hợp âm';
-    }
     _build();
   }
 
@@ -352,17 +329,23 @@ const ChordCanvas = (() => {
       if (sel) sel.value = _currentSet;
       return;
     }
+    const token = ++_chordLoadToken;
+    const songId = window.App?.getCurrentSongId?.();
+    await window.ChordCanvasEdit?.flushSave?.();
+    if (token !== _chordLoadToken || songId !== window.App?.getCurrentSongId?.()) return;
     window.ChordCanvasEdit?.resetUndo?.(); // R0-4: tránh Ctrl+Z ghi nhầm sang bộ mới
     _currentSet   = name;
     _customChords = {};
+    window.ChordCanvasEdit?.setBaseChecksum?.('', _customChords);
     if (name !== 'default') {
-      const songId = window.App?.getCurrentSongId?.();
       if (songId) {
         try {
           const r = await window.ApiService.chordSets.load(songId, name);
+          if (token !== _chordLoadToken || songId !== window.App?.getCurrentSongId?.()) return;
           if (r.success && r.chords) {
             r.chords.forEach(({ measureIdx, noteIdx, chord }) => { _customChords[`${measureIdx}_${noteIdx}`] = chord; });
           }
+          window.ChordCanvasEdit?.setBaseChecksum?.(r?.checksum || '', _customChords);
         } catch(e) {}
       }
     }
@@ -437,8 +420,15 @@ const ChordCanvas = (() => {
     const songId = window.App?.getCurrentSongId?.();
     if (!songId) return;
     try {
-      await window.ApiService.chordSets.delete(songId, name);
-    } catch(e) {}
+      const result = await window.ApiService.chordSets.delete(songId, name);
+      if (!result?.success) {
+        window.App?.showToast?.(result?.error || 'Không thể xóa bộ hợp âm', 'error');
+        return;
+      }
+    } catch(e) {
+      window.App?.showToast?.(e.message || 'Không thể xóa bộ hợp âm', 'error');
+      return;
+    }
     if (_currentSet === name) await switchSet('HD');
     _refreshSetDropdown(true);
   }
@@ -454,8 +444,6 @@ const ChordCanvas = (() => {
   /* ─── Set dropdown UI ───────────────────────────────────────── */
   async function _refreshSetDropdown(forceRefresh = false, fetchNames = false) {
     const selector  = document.getElementById('chord-set-selector');
-    const deleteBtn = document.getElementById('btn-delete-chord-set');
-    const countBadge = document.getElementById('chord-set-count');
     if (!selector) return;
 
     const songId = window.App?.getCurrentSongId?.();
@@ -493,7 +481,6 @@ const ChordCanvas = (() => {
     _updateCountBadge();
 
     const myChordCode = (window.Auth?.getChordCode?.() || '').toUpperCase();
-    const isAdmin     = window.Auth?.isAdmin?.()   ?? false;
     const isLoggedIn  = window.Auth?.isLoggedIn?.() ?? false;
     const canCreate   = window.Auth?.isBanhat?.() ?? false;
 
@@ -522,8 +509,6 @@ const ChordCanvas = (() => {
       selector.addEventListener('change', (e) => handleSelectChange(e.target.value));
     }
 
-    const isDeletable = _currentSet !== 'default' && _currentSet !== 'HD' && (isAdmin || (myChordCode && _currentSet.toUpperCase() === myChordCode));
-    if (deleteBtn) deleteBtn.style.display = isDeletable ? 'inline-flex' : 'none';
     document.getElementById('btn-new-chord-set')?.classList.toggle('hidden', !isLoggedIn);
     document.getElementById('btn-propose-hd')?.classList.toggle('hidden', !(_currentSet !== 'default' && _currentSet !== 'HD' && canCreate));
   }
@@ -557,9 +542,11 @@ const ChordCanvas = (() => {
     getCurrentSet: () => _currentSet,
     getCustomChords: () => _customChords,
     setCustomChords: (c) => { _customChords = c; },
-    applyPreloaded: (set, chords) => {
+    applyPreloaded: (set, chords, checksum = '') => {
+      ++_chordLoadToken;
       _clear(); _songUseFlats = null; window.ChordCanvasTranspose?.resetCache?.();
       _currentSet = set || 'HD'; _prevSet = _currentSet; _customChords = chords ? { ...chords } : {};
+      window.ChordCanvasEdit?.setBaseChecksum?.(checksum, _customChords);
       _refreshSetDropdown(); window.SongInfoBar?.refreshChordChip?.();
     },
     getXmlChordCount: () => Object.keys(window.ChordCanvasXML?.readXmlChords?.() || {}).length,

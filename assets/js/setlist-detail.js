@@ -185,7 +185,7 @@ const SetlistDetail = (() => {
       const isSong = !item.item_type || item.item_type === 'song';
       const typeInfo = window.LiturgyCard?.getTypeInfo?.(item.item_type) || { icon: '⛪', label: 'Tiết mục', badge: 'TIẾT MỤC' };
       const songObj = isSong ? (allSongs.find(s => String(s.id) === String(item.song_id)) || window.LibraryUI?.getSongObj?.(item.song_id)) : null;
-      const title = isSong ? (songObj ? songObj.title : 'Bài hát không tồn tại') : `${typeInfo.icon} ${_esc(item.custom_title || typeInfo.label)}`;
+      const title = isSong ? (songObj ? songObj.title : 'Bài hát không tồn tại') : `${typeInfo.icon} ${item.custom_title || typeInfo.label}`;
       const el = document.createElement('div');
       el.className = 'song-item' + (currentIndex === idx ? ' active' : '');
 
@@ -415,6 +415,7 @@ const SetlistDetail = (() => {
       });
       if (data.success) {
         window.App?.showToast?.('Đã thêm bài hát vào Setlist!', 'success');
+        if (data.warning) window.App?.showToast?.(data.warning, 'info', 7000);
         await viewSetlistDetail(setId);
         ctx.fetchSetlists?.();
         const updated = ctx.getCurrentSetlist?.();

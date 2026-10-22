@@ -81,8 +81,8 @@ const AdminUI = (() => {
         tr.innerHTML = `
           <td>${cat.id}</td>
           <td>
-             <span id="cat-name-${cat.id}">${cat.name}</span>
-             <input type="text" id="cat-input-${cat.id}" class="form-input hidden" value="${cat.name}" style="padding:0.2rem 0.5rem; max-width:80%;">
+             <span id="cat-name-${Number(cat.id)}">${window.SafeHtml.escape(cat.name)}</span>
+             <input type="text" id="cat-input-${Number(cat.id)}" class="form-input hidden" value="${window.SafeHtml.escape(cat.name)}" style="padding:0.2rem 0.5rem; max-width:80%;">
           </td>
           <td style="text-align:center; display:flex; gap:0.25rem; justify-content:center;">
              <button class="btn btn-sm btn-ghost" onclick="AdminUI.editCategory(${cat.id})" id="btn-edit-cat-${cat.id}" title="Sửa tên">✏️</button>
@@ -166,21 +166,21 @@ const AdminUI = (() => {
           let catOptions = `<option value="">-- Chưa gán --</option>`;
           currentCategories.forEach(cat => {
              const selected = (song.category_id == cat.id) ? 'selected' : '';
-             catOptions += `<option value="${cat.id}" ${selected}>${cat.name}</option>`;
+             catOptions += `<option value="${Number(cat.id)}" ${selected}>${window.SafeHtml.escape(cat.name)}</option>`;
           });
 
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td>
-              <input type="text" value="${song.title}" class="form-input" style="padding:0.2rem 0.5rem; font-size:0.85rem;" onblur="AdminUI.updateSongTitle(${song.id}, this)">
+              <input type="text" value="${window.SafeHtml.escape(song.title)}" class="form-input" style="padding:0.2rem 0.5rem; font-size:0.85rem;" onblur="AdminUI.updateSongTitle('${window.SafeHtml.inlineJsString(song.id)}', this)">
             </td>
             <td>
-               <select class="form-input" style="padding:0.2rem; font-size:0.8rem; border-color:transparent;" onchange="AdminUI.updateSongCategory(${song.id}, this.value)">
+               <select class="form-input" style="padding:0.2rem; font-size:0.8rem; border-color:transparent;" onchange="AdminUI.updateSongCategory('${window.SafeHtml.inlineJsString(song.id)}', this.value)">
                   ${catOptions}
                </select>
             </td>
             <td style="text-align:center;">
-              <button class="btn btn-sm btn-ghost" style="color:var(--danger);" onclick="AdminUI.deleteSong(${song.id})" title="Xoá Bài Hát">🗑 Xoá</button>
+              <button class="btn btn-sm btn-ghost" style="color:var(--danger);" onclick="AdminUI.deleteSong('${window.SafeHtml.inlineJsString(song.id)}')" title="Xoá Bài Hát">🗑 Xoá</button>
             </td>
           `;
           tbody.appendChild(tr);
@@ -238,7 +238,7 @@ const AdminUI = (() => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td>#${u.id}</td>
-            <td><strong>${u.username}</strong></td>
+            <td><strong>${window.SafeHtml.escape(u.username)}</strong></td>
             <td>
               <select class="form-input" ${amIOwner ? 'disabled' : ''} style="padding:0.2rem; font-size:0.8rem;" onchange="AdminUI.updateUserRole(${u.id}, this.value)">
                 <option value="admin"  ${u.role === 'admin'  ? 'selected' : ''}>Admin (Quản Trị)</option>

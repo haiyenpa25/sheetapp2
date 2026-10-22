@@ -326,7 +326,7 @@ const ChordCanvasDots = (() => {
         ]);
         badge.addEventListener('mouseenter', () => { badge.style.transform = 'translateX(-50%) translateY(-100%) scale(1.15)'; badge.style.background = 'rgba(109,40,217,1)'; badge.style.boxShadow = '0 4px 12px rgba(109,40,217,0.7)'; });
         badge.addEventListener('mouseleave', () => { badge.style.transform = 'translateX(-50%) translateY(-100%) scale(1)'; badge.style.background = 'rgba(109,40,217,0.87)'; badge.style.boxShadow = '0 2px 7px rgba(109,40,217,0.55)'; });
-        badge.addEventListener('pointerdown', e => { e.stopPropagation(); onShowPopup(badge, measureIdx, noteIdx, chord); });
+        window.PointerTap.bind(badge, () => onShowPopup(badge, measureIdx, noteIdx, chord));
         container.appendChild(badge);
 
         const span = document.createElement('span');
@@ -397,7 +397,7 @@ const ChordCanvasDots = (() => {
             'border-radius: 0px', 'padding: 1px 5px',
             'cursor: pointer', 'pointer-events: auto'
           );
-          textBadge.addEventListener('pointerdown', e => { e.stopPropagation(); onShowPopup(textBadge, measureIdx, noteIdx, chord); });
+          window.PointerTap.bind(textBadge, () => onShowPopup(textBadge, measureIdx, noteIdx, chord));
         } else if (highlightMode) {
           baseStyle.push(
             'color: #fff', 'background: #3730a3',
@@ -406,7 +406,7 @@ const ChordCanvasDots = (() => {
             'cursor: pointer', 'pointer-events: auto',
             'font-family: "Georgia", serif', 'letter-spacing: 0.01em'
           );
-          textBadge.addEventListener('pointerdown', e => {
+          window.PointerTap.bind(textBadge, e => {
             e.stopPropagation();
             if (!window.Auth?.isBanhat?.()) {
               window.App?.showToast?.('⚠️ Cần đăng nhập với quyền Ban Hát để sửa hợp âm', 'error');
@@ -423,7 +423,7 @@ const ChordCanvasDots = (() => {
             'border-radius: 0px', 'padding: 0 2px', 'box-shadow: none',
             'cursor: pointer', 'pointer-events: auto'
           );
-          textBadge.addEventListener('pointerdown', e => {
+          window.PointerTap.bind(textBadge, e => {
             e.stopPropagation();
             if (!window.Auth?.isBanhat?.()) {
               window.App?.showToast?.('⚠️ Cần đăng nhập với quyền Ban Hát để sửa hợp âm', 'error');
@@ -457,17 +457,7 @@ const ChordCanvasDots = (() => {
       ]);
       btn.addEventListener('mouseenter', () => { btn.style.transform = 'translateX(-50%) scale(1.2)'; btn.style.background = 'rgba(109,40,217,1)'; });
       btn.addEventListener('mouseleave', () => { btn.style.transform = 'translateX(-50%) scale(1)';   btn.style.background = 'rgba(109,40,217,0.82)'; });
-      let _pointerHandled = false;
-      btn.addEventListener('pointerdown', e => {
-        e.stopPropagation();
-        _pointerHandled = true;
-        onShowPopup(btn, measureIdx, noteIdx, '');
-      });
-      btn.addEventListener('click', e => {
-        e.stopPropagation();
-        if (_pointerHandled) { _pointerHandled = false; return; }
-        onShowPopup(btn, measureIdx, noteIdx, '');
-      });
+      window.PointerTap.bind(btn, () => onShowPopup(btn, measureIdx, noteIdx, ''));
       container.appendChild(btn);
     }
   }

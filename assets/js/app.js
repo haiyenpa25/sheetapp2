@@ -207,7 +207,13 @@ const App = (() => {
       return options ? SongLoader.load(song, t, profile, options) : SongLoader.load(song, t, profile);
     },
     loadSongXmlDirect: async (songId, xml, transpose = 0, profile = 'HD') => {
-      return SongLoader.load({ id: songId, xmlPath: `storage/Thanh ca/${songId}.xml` }, transpose, profile, { instant: true });
+      let song = window.LibraryUI?.getSongById?.(songId);
+      if (!song?.xmlPath) {
+        const result = await window.ApiService.songs.get(songId);
+        song = result?.data || result;
+      }
+      if (!song?.xmlPath) throw new Error('Không tìm thấy bản nhạc của ca trưởng');
+      return SongLoader.load(song, transpose, profile, { instant: true, xml });
     },
     transposeBy, resetTranspose, setTransposeDirect, setZoom, navigateNext, navigatePrev,
     toggleSidebar:       ()    => ToolbarController?.toggleSidebar?.(),

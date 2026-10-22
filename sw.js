@@ -11,8 +11,9 @@
 
 const urlParams      = new URLSearchParams(self.location.search);
 const SW_VERSION     = urlParams.get('v') || 'v5';
-const SW_MANIFEST_HASH = '487476ff21';
-const CACHE_VENDOR   = `sheetapp-vendor-${SW_VERSION}`;
+const SW_MANIFEST_HASH = '714a2a446b';
+const SW_VENDOR_HASH = 'e8b6692a09';
+const CACHE_VENDOR   = `sheetapp-vendor-${SW_VENDOR_HASH}`;
 const CACHE_APP      = `sheetapp-app-${SW_VERSION}-${SW_MANIFEST_HASH}`;
 const CACHE_MUSICXML = `sheetapp-musicxml-${SW_VERSION}`;
 const MAX_MUSICXML_CACHE_ITEMS = 60; // Giới hạn cache tránh phình dung lượng vô hạn
@@ -23,6 +24,7 @@ const SW_BASE = self.location.pathname.replace(/\/sw\.js$/, '');
 const PRECACHE_VENDOR = [
   '/assets/js/vendor/opensheetmusicdisplay.min.js',
   '/assets/js/vendor/tonal.min.js',
+  '/assets/js/vendor/idb-keyval.min.js',
   '/assets/js/vendor/Tone.js',
   '/assets/js/vendor/OsmdAudioPlayer.min.js',
 ].map(p => SW_BASE + p);
@@ -41,45 +43,100 @@ const PRECACHE_APP = [
   '/assets/css/instrument-annotations.css',
   '/assets/css/fab.css',
   '/assets/css/app-shell.css',
+  '/assets/css/library-polish.css',
+  '/assets/js/core/OfflineVault.js',
   '/assets/js/core/ScriptLoader.js',
   '/assets/js/core/FeatureFlags.js',
   '/assets/js/core/SafeHtml.js',
+  '/assets/js/core/PointerTap.js',
   '/assets/js/core/KeyService.js',
-  '/assets/js/core/ChordSetNames.js',
   '/assets/js/core/ApiService.js',
   '/assets/js/core/EventBus.js',
   '/assets/js/core/Store.js',
   '/assets/js/core/XmlDocCache.js',
   '/assets/js/core/ModalManager.js',
   '/assets/js/core/ModeManager.js',
+  '/assets/js/core/AppShell.js',
   '/assets/js/core/VerseManager.js',
+  '/assets/js/core/TapTempo.js',
+  '/assets/js/core/AudioUnlocker.js',
+  '/assets/js/core/MidiEngine.js',
   '/assets/js/core/SongLoaderCore.js',
-  '/assets/js/core/OfflineSetlistManager.js',
+  '/assets/js/core/ErrorReporter.js',
   '/assets/js/core/ServiceWorkerManager.js',
+  '/assets/js/core/OfflineSetlistManager.js',
   '/assets/js/osmd-svg-text.js',
+  '/assets/js/compact-score.js',
   '/assets/js/osmd-renderer.js',
+  '/assets/js/lyric-extractor.js',
   '/assets/js/transpose-engine.js',
-  '/assets/js/display-settings.js',
-  '/assets/js/chord-canvas-xml.js',
-  '/assets/js/chord-canvas-ui.js',
-  '/assets/js/chord-canvas-dots.js',
-  '/assets/js/chord-canvas.js',
-  '/assets/js/annotation-geometry.js',
-  '/assets/js/annotation-panel.js',
-  '/assets/js/annotation-canvas.js',
-  '/assets/js/song-info-bar.js',
-  '/assets/js/song-loader.js',
+  '/assets/js/session-tracker.js',
+  '/assets/js/auth.js',
+  '/assets/js/history-manager.js',
+  '/assets/js/url-state.js',
+  '/assets/js/modals/HelpModal.js',
+  '/assets/js/modals/TransposePickerModal.js',
+  '/assets/js/modals/TempoPickerSheet.js',
+  '/assets/js/modals/ServicePlanAssignModal.js',
+  '/assets/js/modals/PracticeTeamBoardModal.js',
+  '/assets/js/core/ChordSetNames.js',
   '/assets/js/library-gestures.js',
   '/assets/js/library-list.js',
   '/assets/js/song-navigation.js',
   '/assets/js/core/LibrarySearch.js',
   '/assets/js/library-ui.js',
+  '/assets/js/modals/QuickNumpadModal.js',
+  '/assets/js/service-plan-ui.js',
+  '/assets/js/leader-notes-banner.js',
+  '/assets/js/liturgy-card.js',
+  '/assets/js/setlist-player.js',
+  '/assets/js/setlist-list.js',
+  '/assets/js/setlist-detail.js',
+  '/assets/js/setlist-ui.js',
+  '/assets/js/importer.js',
+  '/assets/js/admin-ui.js',
+  '/assets/js/display-settings.js',
+  '/assets/js/stage-lens.js',
+  '/assets/js/guitar-lens.js',
+  '/assets/js/bass-lens.js',
+  '/assets/js/drums-lens.js',
+  '/assets/js/vocals-lens.js',
+  '/assets/js/harmonic-numeral.js',
+  '/assets/js/chord-canvas-xml.js',
+  '/assets/js/chord-canvas-ui.js',
+  '/assets/js/chord-canvas-transpose.js',
+  '/assets/js/chord-canvas-dots.js',
+  '/assets/js/chord-canvas-edit.js',
+  '/assets/js/chord-canvas.js',
+  '/assets/js/annotation-geometry.js',
+  '/assets/js/annotation-panel.js',
+  '/assets/js/annotation-canvas.js',
+  '/assets/js/performance-notes.js',
+  '/assets/js/instruments.js',
+  '/assets/js/audio-player.js',
+  '/assets/js/metronome.js',
+  '/assets/js/auto-scroller.js',
+  '/assets/js/page-nav.js',
   '/assets/js/app-ui.js',
-  '/assets/js/toolbar-controller.js',
+  '/assets/js/song-info-bar.js',
+  '/assets/js/live-sync.js',
+  '/assets/js/follow-leader.js',
+  '/assets/js/song-preloader.js',
+  '/assets/js/song-loader.js',
   '/assets/js/keyboard-handler.js',
+  '/assets/js/toolbar-controller.js',
   '/assets/js/mobile-controller.js',
   '/assets/js/app.js',
-  '/assets/js/auth.js',
+  '/assets/js/fab.js',
+  '/assets/js/performance/transport-clock.js',
+  '/assets/js/performance/count-in-engine.js',
+  '/assets/js/performance/musical-position.js',
+  '/assets/js/performance/arrangement-engine.js',
+  '/assets/js/performance/cue-engine.js',
+  '/assets/js/performance/live-transport.js',
+  '/assets/js/performance/qr-helper.js',
+  '/assets/js/performance/live-session.js',
+  '/assets/js/performance/performance-engine.js',
   '/api/index.php?route=songs',
 ].map(p => (SW_BASE && !p.startsWith(SW_BASE)) ? SW_BASE + p : p);
 
@@ -138,11 +195,11 @@ self.addEventListener('message', event => {
 // ── Fetch: routing strategy ───────────────────────────────────────
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
-  if (url.pathname.includes('/old/')) return;
 
   // 1. API: Network Only (không cache), NGOẠI TRỪ danh mục bài hát cho offline fallback
   if (url.pathname.includes('/api/')) {
-    if (url.searchParams.get('route') === 'songs' && !url.searchParams.has('action')) {
+    if (event.request.method === 'GET' && url.searchParams.get('route') === 'songs'
+        && Array.from(url.searchParams.keys()).every(key => key === 'route')) {
       event.respondWith(networkFirstForApiSongs(event.request, CACHE_APP));
       return;
     }
@@ -180,20 +237,18 @@ self.addEventListener('fetch', event => {
 async function networkFirstForApiSongs(request, cacheName) {
   try {
     const response = await fetch(request);
-    if (response.ok) {
+    if (response.ok && response.headers.get('X-SheetApp-Catalog-Scope') === 'public') {
       const cache = await caches.open(cacheName);
-      cache.put(request, response.clone());
+      await cache.put(request, response.clone()).catch(() => {});
     }
     return response;
   } catch (err) {
     const cache = await caches.open(cacheName);
     let cached = await cache.match(request);
-    if (cached) return cached;
-    cached = await cache.match(request, { ignoreSearch: true });
-    if (cached) return cached;
+    if (cached?.headers.get('X-SheetApp-Catalog-Scope') === 'public') return cached;
     const fallbackPath = SW_BASE ? `${SW_BASE}/api/index.php?route=songs` : '/api/index.php?route=songs';
     cached = await cache.match(fallbackPath);
-    if (cached) return cached;
+    if (cached?.headers.get('X-SheetApp-Catalog-Scope') === 'public') return cached;
     throw err;
   }
 }
@@ -280,67 +335,26 @@ async function staleWhileRevalidate(request, cacheName) {
 
 /** Network First cho điều hướng: khi offline trả app shell đã cache, bỏ qua query string */
 async function networkFirstForNavigation(request, cacheName) {
+  const pathname = new URL(request.url).pathname;
+  const base = SW_BASE || '';
+  const shell = [base + '/', base + '/index.php'].includes(pathname) ? base + '/'
+    : [base + '/old/', base + '/old/index.php'].includes(pathname) ? base + '/old/' : null;
   try {
     const response = await fetch(request);
-    if (response.ok) {
+    if (response.ok && shell) {
       const cache = await caches.open(cacheName);
-      cache.put(request, response.clone());
-
-      const baseAppShell = SW_BASE ? `${SW_BASE}/` : '/';
-      const cleanUrl = new URL(request.url);
-      if (cleanUrl.pathname === (SW_BASE ? `${SW_BASE}/` : '/') || cleanUrl.pathname.endsWith('/index.php')) {
-        const cleanRequest = new Request(baseAppShell, { credentials: 'same-origin' });
-        cache.put(cleanRequest, response.clone());
-      }
+      await cache.put(request, response.clone()).catch(() => {});
+      await cache.put(new URL(shell, request.url).href, response.clone()).catch(() => {});
     }
     return response;
   } catch (err) {
-    // Khi offline: mọi request điều hướng (mode: 'navigate') trả app shell đã cache, bỏ qua query string (R-10 fix)
+    if (!shell) throw err;
     const cache = await caches.open(cacheName);
-
-    // 1. Thử match chính xác request bỏ qua search
-    let cached = await cache.match(request, { ignoreSearch: true });
+    const cached = await cache.match(request, { ignoreSearch: true }) || await cache.match(shell, { ignoreSearch: true });
     if (cached) return cached;
-
-    // 2. Thử match root URL app shell
-    const baseAppShell = SW_BASE ? `${SW_BASE}/` : '/';
-    cached = await cache.match(baseAppShell, { ignoreSearch: true });
-    if (cached) return cached;
-
-    cached = await cache.match(baseAppShell);
-    if (cached) return cached;
-
-    // 3. Thử match index.php
-    const indexPath = SW_BASE ? `${SW_BASE}/index.php` : '/index.php';
-    cached = await cache.match(indexPath, { ignoreSearch: true });
-    if (cached) return cached;
-
-    cached = await cache.match(indexPath);
-    if (cached) return cached;
-
-    // 4. Tìm kiếm match trong tất cả cache
-    cached = await caches.match(baseAppShell, { ignoreSearch: true });
-    if (cached) return cached;
-
-    cached = await caches.match(indexPath, { ignoreSearch: true });
-    if (cached) return cached;
-
-    // 5. Quét tất cả keys trong cache để lấy bất kỳ entry HTML/shell nào
-    const keys = await cache.keys();
-    for (const k of keys) {
-      try {
-        const u = new URL(k.url);
-        if (u.pathname === (SW_BASE ? `${SW_BASE}/` : '/') || u.pathname.endsWith('/index.php')) {
-          const match = await cache.match(k);
-          if (match) return match;
-        }
-      } catch (e) {}
-    }
-
     throw err;
   }
 }
-
 // ── Web Push Notifications (Epic 4.4) ─────────────────────────────
 self.addEventListener('push', event => {
   let data = { title: 'SheetApp', body: 'Bạn có thông báo mới từ ban hát/chương trình', url: SW_BASE || '/' };

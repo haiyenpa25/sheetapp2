@@ -11,6 +11,7 @@ const ChordCanvas = (() => {
   let _currentSet    = 'default';
   let _prevSet       = 'default';
   let _customChords  = {};
+  let _chordLoadToken = 0;
   let _noteEls       = [];
   let _ro            = null;
   let _undoStack     = [];
@@ -113,6 +114,7 @@ const ChordCanvas = (() => {
   }
 
   async function loadSong(songId, initialSet = 'HD') {
+    const token = ++_chordLoadToken;
     _clear();
     setAddMode(false);
     _currentSet   = initialSet || 'HD';
@@ -122,6 +124,7 @@ const ChordCanvas = (() => {
     if (songId) {
       try {
         const r = await window.ApiService.chordSets.load(songId, _currentSet);
+        if (token !== _chordLoadToken) return;
         if (r.success && r.chords) {
           r.chords.forEach(({ measureIdx, noteIdx, chord }) => {
             _customChords[`${measureIdx}_${noteIdx}`] = chord;
@@ -133,7 +136,7 @@ const ChordCanvas = (() => {
     setTimeout(_refreshSetDropdown, 300);
   }
 
-  function clearSong() { _clear(); setAddMode(false); }
+  function clearSong() { ++_chordLoadToken; _clear(); setAddMode(false); }
 
   function setAddMode(on) {
     _editEnabled = !!on;
@@ -364,14 +367,16 @@ const ChordCanvas = (() => {
   }
 
   async function switchSet(name) {
+    const token = ++_chordLoadToken;
+    const songId = window.App?.getCurrentSongId?.();
     _closePopup();
     _currentSet   = name;
     _customChords = {};
     if (name !== 'default') {
-      const songId = window.App?.getCurrentSongId?.();
       if (songId) {
         try {
           const r = await window.ApiService.chordSets.load(songId, name);
+          if (token !== _chordLoadToken || songId !== window.App?.getCurrentSongId?.()) return;
           if (r.success && r.chords) {
             r.chords.forEach(({ measureIdx, noteIdx, chord }) => { _customChords[`${measureIdx}_${noteIdx}`] = chord; });
           }

@@ -292,7 +292,7 @@ const Importer = (() => {
       const cats = await window.ApiService.categories.list();
       const sel = document.getElementById('omr-review-category');
       if (sel && Array.isArray(cats)) {
-        sel.innerHTML = cats.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        sel.innerHTML = cats.map(c => `<option value="${Number(c.id)}">${window.SafeHtml.escape(c.name)}</option>`).join('');
       }
     } catch(err){}
   }

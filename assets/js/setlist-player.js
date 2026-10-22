@@ -11,6 +11,7 @@ const SetlistPlayer = (() => {
   'use strict';
 
   let _context = null;
+  let _playToken = 0;
 
   function setContext(ctx) {
     _context = ctx;
@@ -112,6 +113,7 @@ const SetlistPlayer = (() => {
   }
 
   async function playCurrentItem() {
+    const token = ++_playToken;
     const ctx = getContext();
     const currentSetlist = ctx.getCurrentSetlist?.();
     let currentIndex = ctx.getCurrentIndex?.();
@@ -151,6 +153,7 @@ const SetlistPlayer = (() => {
 
     if (ctx.ensureSongsLoaded) {
       await ctx.ensureSongsLoaded();
+      if (token !== _playToken) return;
     }
 
     const allSongs = ctx.getAllSongsCache?.() || [];
@@ -189,6 +192,7 @@ const SetlistPlayer = (() => {
 
     // Đưa cả profile lẫn transpose_key qua bên App và chờ load hoàn tất (Core Rule 4, Fix F1)
     await window.App?.loadSongWithProfile?.(songObj, item.chord_profile, item.transpose_key, { instant: hasPreloaded });
+    if (token !== _playToken) return;
     document.querySelector('.toolbar-left')?.classList.add('in-setlist');
 
     // Cập nhật Thanh chương trình (Ticket L3-1)
@@ -214,6 +218,7 @@ const SetlistPlayer = (() => {
   }
 
   function endSetlist(notify = true) {
+    ++_playToken;
     const ctx = getContext();
     ctx.setCurrentIndex?.(-1);
     ctx.setCurrentSetlist?.(null);

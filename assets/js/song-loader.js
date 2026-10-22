@@ -16,6 +16,9 @@ const SongLoader = (() => {
     if (!song?.xmlPath) { AppUI.showToast('Bài hát chưa có file sheet nhạc', 'error'); return; }
 
     const loadToken = ++_currentLoadToken;
+    profileOverride = profileOverride || 'HD';
+    await window.ChordCanvasEdit?.flushSave?.();
+    if (loadToken !== _currentLoadToken) return;
     if (_currentAbortController) {
       try { _currentAbortController.abort(); } catch (e) {}
     }
@@ -52,11 +55,11 @@ const SongLoader = (() => {
       let xml = '';
       let processedXml = '';
       let settings = null;
-      const preloaded = isInstant ? window.SongPreloader?.get?.(song.id, profileOverride) : null;
+      const preloaded = isInstant && !options.xml ? window.SongPreloader?.get?.(song.id, profileOverride) : null;
 
       if (preloaded && preloaded.xml) {
         xml = preloaded.xml;
-        window.ChordCanvas?.applyPreloaded?.(profileOverride, preloaded.chordsMap);
+        window.ChordCanvas?.applyPreloaded?.(profileOverride, preloaded.chordsMap, preloaded.chordChecksum);
         // processedXml của preloader được tính theo trạng thái khổ của bài TRƯỚC;
         // phải cập nhật VerseManager theo bài mới rồi xử lý lại (áp selected_verses của setlist).
         processedXml = _injectChords(xml);
@@ -64,16 +67,18 @@ const SongLoader = (() => {
         if (window.VerseManager?.processXml) processedXml = window.VerseManager.processXml(processedXml);
       } else {
         AppUI.setLoadingText('Đang tải dữ liệu...');
+        const xmlSource = song.versionId ? `api/index.php?route=songs&action=version_xml&version_id=${encodeURIComponent(song.versionId)}` : song.xmlPath;
         const xmlUrl = (window.ApiService && typeof window.ApiService.resolveUrl === 'function')
-          ? window.ApiService.resolveUrl(song.xmlPath)
-          : (song.xmlPath || '');
+          ? window.ApiService.resolveUrl(xmlSource)
+          : (xmlSource || '');
         const fetchXml = async () => {
+          if (typeof options.xml === 'string' && options.xml) return new Response(options.xml);
           try {
             // INTENTIONAL EXCEPTION: Static MusicXML asset fetch
             const r = await fetch(xmlUrl, { signal: abortSignal });
             if (r.ok) return r;
           } catch (e) {}
-          if (typeof caches !== 'undefined') {
+          if (!song.versionId && typeof caches !== 'undefined') {
             const cached = await caches.match(xmlUrl);
             if (cached) return cached;
           }

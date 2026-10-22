@@ -295,6 +295,7 @@ const SetlistUI = (() => {
       const data = await window.ApiService.setlists.addItem({ setlist_id: setId, song_id: songId, order_index: songIndex, transpose_key: transpose_key, chord_profile: currentSet });
       if (data.success) {
         window.App?.showToast?.('Đã thêm vào Setlist!', 'success');
+        if (data.warning) window.App?.showToast?.(data.warning, 'info', 7000);
         if (_currentSetlist?.id === setId) viewSetlistDetail(setId); // Refresh detail
         fetchSetlists(); // Refresh count
       } else {

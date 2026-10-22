@@ -8,10 +8,12 @@ const SongLoader = (() => {
 
   let _isFirstLoad = true;
   let _autoFitRetryCount = 0; // Module-scoped, không dùng window.*
+  let _currentLoadToken = 0;
 
   /* ── Load bài hát hoàn chỉnh ── */
   async function load(song, transposeOverride = null, profileOverride = 'HD') {
     if (!song?.xmlPath) { AppUI.showToast('Bài hát chưa có file sheet nhạc', 'error'); return; }
+    const token = ++_currentLoadToken;
 
     Store.set('currentSong', song);
     Store.set('currentTranspose', transposeOverride ?? 0);
@@ -45,11 +47,11 @@ const SongLoader = (() => {
           const res = await fetch(xmlFetchUrl);
           if (res.ok) {
             const text = await res.text();
-            window.OfflineVault?.saveSongXml?.(song.id, text);
+            window.OfflineVault?.saveXml?.(song.xmlPath, text);
             return text;
           }
         } catch (_) {}
-        const cachedXml = await window.OfflineVault?.getSongXml?.(song.id);
+        const cachedXml = await window.OfflineVault?.getXml?.(song.xmlPath);
         if (cachedXml) return cachedXml;
         throw new Error('Không thể tải file XML (Mất mạng và chưa lưu ngoại tuyến)');
       };
@@ -58,6 +60,7 @@ const SongLoader = (() => {
         ApiService.sessions.load(song.id).catch(() => ({})),
         ChordCanvas.loadSong(song.id, profileOverride)  // đảm bảo chords ready trước render
       ]);
+      if (token !== _currentLoadToken) return;
       Store.set('originalXml', xml);
 
       const transpose = transposeOverride ?? 0;
@@ -75,6 +78,7 @@ const SongLoader = (() => {
       document.getElementById('sheet-area')?.classList.remove('hidden');
 
       await OSMDRenderer.load(processedXml, transpose);
+      if (token !== _currentLoadToken) return;
 
       // ── Post-render tasks ──
       _syncZoomUI(zoom);
@@ -114,6 +118,7 @@ const SongLoader = (() => {
       EventBus.emit('song:loaded', { song, xml });
 
     } catch (err) {
+      if (token !== _currentLoadToken) return;
       console.error('[SongLoader]', err);
       AppUI.showToast(`Lỗi: ${err.message}`, 'error');
       AppUI.showWelcome();

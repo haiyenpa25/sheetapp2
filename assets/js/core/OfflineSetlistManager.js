@@ -152,7 +152,8 @@ const OfflineSetlistManager = (() => {
     }
 
     // 4. Kiểm tra tính toàn vẹn (Verification Step)
-    const isReady = (totalSongs === 0) || (cachedCount === totalSongs && failedSongs.length === 0);
+    const hasForbidden = Object.values(pkgData.chord_set_status || {}).some(sets => Object.values(sets).includes('forbidden'));
+    const isReady = !hasForbidden && ((totalSongs === 0) || (cachedCount === totalSongs && failedSongs.length === 0));
 
     const savedData = {
       ...pkgData,
@@ -231,7 +232,8 @@ const OfflineSetlistManager = (() => {
       if (match) verifiedCount++;
     }
 
-    const isReady = verifiedCount === totalCount;
+    const hasForbidden = Object.values(pkg.chord_set_status || {}).some(sets => Object.values(sets).includes('forbidden'));
+    const isReady = !hasForbidden && verifiedCount === totalCount;
     if (pkg.is_ready !== isReady || pkg.cached_count !== verifiedCount) {
       pkg.is_ready = isReady;
       pkg.cached_count = verifiedCount;
@@ -341,9 +343,6 @@ const OfflineSetlistManager = (() => {
       if (pkg?.chord_sets && pkg.chord_sets[sId]) {
         const sets = pkg.chord_sets[sId];
         if (sets[profile]) return sets[profile];
-        if (sets['HD']) return sets['HD'];
-        const first = Object.values(sets)[0];
-        if (first) return first;
       }
     }
     return null;

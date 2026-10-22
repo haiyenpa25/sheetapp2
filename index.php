@@ -191,6 +191,7 @@ echo jsTag('core/OfflineVault.js', false);
 echo jsTag('core/ScriptLoader.js', false);
 echo jsTag('core/FeatureFlags.js', false);
 echo jsTag('core/SafeHtml.js',     false);
+echo jsTag('core/PointerTap.js',   false);
 echo jsTag('core/KeyService.js',   false);
 echo jsTag('core/ApiService.js',   false);
 echo jsTag('core/EventBus.js',     false);

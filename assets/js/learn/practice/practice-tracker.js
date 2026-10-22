@@ -29,6 +29,11 @@ const PracticeTracker = (() => {
   let _correctHits = 0;
   let _timingScoreTotal = 0;
 
+  function _writeHeaders() {
+    const token = (document.cookie || '').match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
+    return { 'Content-Type': 'application/json', 'X-CSRF-Token': token ? decodeURIComponent(token[1]) : '' };
+  }
+
   function _getBase() {
     if (typeof window !== 'undefined' && typeof window.__APP_BASE__ === 'string') {
       return window.__APP_BASE__.replace(/\/+$/, '');
@@ -81,7 +86,7 @@ const PracticeTracker = (() => {
         // INTENTIONAL EXCEPTION: Standalone practice-tracker fallback without ApiService
         const res = await fetch(`${base}/api/?route=practice&action=start`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: _writeHeaders(),
           body: JSON.stringify({
             song_id: _songId,
             mode: _mode,
@@ -238,7 +243,7 @@ const PracticeTracker = (() => {
         // INTENTIONAL EXCEPTION: Standalone practice-tracker fallback without ApiService
         await fetch(`${base}/api/?route=practice&action=finish`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: _writeHeaders(),
           body: JSON.stringify(payload)
         });
       }
@@ -279,17 +284,11 @@ const PracticeTracker = (() => {
 
     try {
       const base = _getBase();
-      if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
-        const blob = new Blob([payload], { type: 'application/json' });
-        const sent = navigator.sendBeacon(`${base}/api/?route=practice&action=finish`, blob);
-        if (sent) return;
-      }
-
       if (typeof fetch !== 'undefined') {
         // INTENTIONAL EXCEPTION: Keepalive beacon fallback on page unload
         fetch(`${base}/api/?route=practice&action=finish`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: _writeHeaders(),
           body: payload,
           keepalive: true
         }).catch(() => {});

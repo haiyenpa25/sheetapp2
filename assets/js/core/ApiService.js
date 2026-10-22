@@ -77,7 +77,9 @@ const ApiService = (() => {
         _songsListPromise = _request('api/index.php?route=songs')
           .then(res => {
             const items = Array.isArray(res) ? res : (res?.data || []);
-            if (items.length > 0) window.OfflineVault?.saveCatalog?.(items);
+            const publicItems = res?.scope === 'public' ? items
+              : items.filter(song => Number(song.is_public) === 1 && song.visibility === 'public');
+            if (publicItems.length > 0) window.OfflineVault?.saveCatalog?.(publicItems);
             return items;
           })
           .catch(async err => {
@@ -146,15 +148,24 @@ const ApiService = (() => {
 
   const _chordSetsListCache = new Map();
   const _chordSetsListInFlight = new Map();
+  let _authGeneration = 0;
+
+  function _clearAuthCaches() {
+    _authGeneration++;
+    _chordSetsListCache.clear(); _chordSetsListInFlight.clear();
+    _songsListPromise = null;
+    _sessionsCache.clear(); _sessionsInFlight.clear();
+  }
 
   const chordSets = {
     list: (songId) => {
       if (!songId) return Promise.resolve({ success: true, sets: ['HD', 'default'] });
       if (_chordSetsListCache.has(songId)) return Promise.resolve(_chordSetsListCache.get(songId));
       if (_chordSetsListInFlight.has(songId)) return _chordSetsListInFlight.get(songId);
+      const generation = _authGeneration;
       const p = _request(`api/index.php?route=chord_sets&action=list&songId=${encodeURIComponent(songId)}`)
-        .then(d => { _chordSetsListCache.set(songId, d); _chordSetsListInFlight.delete(songId); return d; })
-        .catch(e => { _chordSetsListInFlight.delete(songId); throw e; });
+        .then(d => { if (generation === _authGeneration) { _chordSetsListCache.set(songId, d); _chordSetsListInFlight.delete(songId); } return d; })
+        .catch(e => { if (generation === _authGeneration) _chordSetsListInFlight.delete(songId); throw e; });
       _chordSetsListInFlight.set(songId, p);
       return p;
     },
@@ -279,10 +290,10 @@ const ApiService = (() => {
 
   const auth = {
     me:            ()         => _request('api/index.php?route=auth&action=me'),
-    login:         (data)     => _json('POST', 'api/index.php?route=auth&action=login', data),
+    login:         (data)     => { _clearAuthCaches(); return _json('POST', 'api/index.php?route=auth&action=login', data); },
     register:      (data)     => _json('POST', 'api/index.php?route=auth&action=register', data),
     updateProfile: (data)     => _json('POST', 'api/index.php?route=auth&action=update_profile', data),
-    logout:        ()         => _request('api/index.php?route=auth&action=logout', { method: 'POST' }),
+    logout:        ()         => { _clearAuthCaches(); return _request('api/index.php?route=auth&action=logout', { method: 'POST' }); },
   };
 
   const omr = {
@@ -370,7 +381,7 @@ const ApiService = (() => {
   };
 
   const errors = {
-    report: (data) => _json('POST', 'api/log_error.php', data)
+    report: (data) => _json('POST', 'api/index.php?route=client_log', data)
   };
 
   const notifications = {

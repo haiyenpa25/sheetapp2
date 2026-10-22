@@ -114,6 +114,11 @@ const OSMDRenderer = (() => {
         if (window.App?.setZoom) await App.setZoom(finalZoomPercent);
       }
     });
+    container.addEventListener('touchcancel', () => {
+      isPinching = false; initTouchDist = 0; currentScaleRatio = 1;
+      const svg = container.querySelector('svg');
+      if (svg) svg.style.transform = '';
+    });
     return osmd;
   }
 
@@ -581,7 +586,6 @@ const OSMDRenderer = (() => {
     });
     setTimeout(() => _hideRepeatLabels(_isCompactMode), 400);
   }
-
   return {
     init, load, reload, transpose, setZoom, setZoomSilent, getInstance, getIsLoaded,
     getCurrentXml, getCurrentZoom, onReady, destroy, setCompactMode, getCompactMode,
@@ -590,5 +594,4 @@ const OSMDRenderer = (() => {
     canRender: _canRender, renderPending, hasPendingRender: () => _pendingRender
   };
 })();
-
 window.OSMDRenderer = OSMDRenderer;

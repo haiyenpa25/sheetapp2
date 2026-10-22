@@ -45,7 +45,8 @@ const SongPreloader = (() => {
       return _inFlight.get(key);
     }
 
-    const xmlPath = songObj.xmlPath || `storage/Thanh ca/${songId}.xml`;
+    const xmlPath = songObj.xmlPath;
+    if (!xmlPath) return null;
     const xmlUrl = (window.ApiService && typeof window.ApiService.resolveUrl === 'function')
       ? window.ApiService.resolveUrl(xmlPath)
       : xmlPath;
@@ -111,6 +112,7 @@ const SongPreloader = (() => {
           processedXml,
           xmlDoc,
           chordsMap,
+          chordChecksum: chordRes?.checksum || '',
           timestamp: Date.now()
         };
 
