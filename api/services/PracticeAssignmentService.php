@@ -320,6 +320,7 @@ class PracticeAssignmentService {
      * Thành viên tự đánh dấu bài tập là "Đã thuộc" (manual mark_done)
      */
     public static function markDone(int $assignmentId, int $userId): bool {
+        if (!(bool)DB::run("SELECT 1 FROM practice_assignments a JOIN practice_assignment_targets t ON t.assignment_id = a.id WHERE a.id = ? AND a.status = 'active' AND t.user_id = ? AND t.status NOT IN ('completed', 'excused')", [$assignmentId, $userId])->fetchColumn()) return false;
         $pdo = DB::get();
         $now = date('Y-m-d H:i:s');
 

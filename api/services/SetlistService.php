@@ -159,13 +159,13 @@ class SetlistService {
         }
 
         if (self::hasColumn('setlists', 'service_time')) {
-            DB::run(
+            $stmt = DB::run(
                 "INSERT INTO setlists (title, scheduled_date, service_time, theme, description, status, leader_user_id, created_by)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 [$title, $date, $time, $theme, $description, $status, $leaderId, $userId]
             );
         } else {
-            DB::run("INSERT INTO setlists (title, scheduled_date, created_by) VALUES (?, ?, ?)", [$title, $date, $userId]);
+            $stmt = DB::run("INSERT INTO setlists (title, scheduled_date, created_by) VALUES (?, ?, ?)", [$title, $date, $userId]);
         }
         $newId = (int)DB::lastId();
 
@@ -195,7 +195,7 @@ class SetlistService {
         if (empty($fields)) return false;
 
         $params[] = $id;
-        DB::run("UPDATE setlists SET " . implode(', ', $fields) . " WHERE id = ?", $params);
+        $stmt = DB::run("UPDATE setlists SET " . implode(', ', $fields) . " WHERE id = ?", $params);
 
         // Nếu chuyển sang published hoặc completed, tự động ghi nhận lịch sử bài hát
         if (isset($data['status']) && in_array($data['status'], ['published', 'completed'], true)) {
@@ -211,7 +211,7 @@ class SetlistService {
      */
     public static function delete(int $id, ?int $actorId = null): void {
         AuditLogger::log('service_plan_delete', $actorId, $id, []);
-        DB::run("DELETE FROM setlists WHERE id = ?", [$id]);
+        $stmt = DB::run("DELETE FROM setlists WHERE id = ?", [$id]);
     }
 
     /**
@@ -253,19 +253,19 @@ class SetlistService {
         $selectedVerses = $extra['selected_verses'] ?? $extra['stanzas'] ?? null;
 
         if (self::hasColumn('setlist_items', 'selected_verses')) {
-            DB::run(
+            $stmt = DB::run(
                 "INSERT INTO setlist_items (setlist_id, song_id, display_order, chord_profile, transpose_key, bpm, beats_per_measure, item_type, custom_title, leader_notes, duration_minutes, selected_verses)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 [$setlistId, $songId, $order, $chordProfile, $transposeKey, $bpm, $beatsPerMeasure, $itemType, $customTitle, $leaderNotes, $duration, $selectedVerses]
             );
         } elseif (self::hasColumn('setlist_items', 'item_type')) {
-            DB::run(
+            $stmt = DB::run(
                 "INSERT INTO setlist_items (setlist_id, song_id, display_order, chord_profile, transpose_key, bpm, beats_per_measure, item_type, custom_title, leader_notes, duration_minutes)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 [$setlistId, $songId, $order, $chordProfile, $transposeKey, $bpm, $beatsPerMeasure, $itemType, $customTitle, $leaderNotes, $duration]
             );
         } else {
-            DB::run(
+            $stmt = DB::run(
                 "INSERT INTO setlist_items (setlist_id, song_id, display_order, chord_profile, transpose_key, bpm, beats_per_measure) VALUES (?, ?, ?, ?, ?, ?, ?)",
                 [$setlistId, $songId, $order, $chordProfile, $transposeKey, $bpm, $beatsPerMeasure]
             );
@@ -295,12 +295,12 @@ class SetlistService {
         if (empty($fields)) return false;
 
         $params[] = $itemId;
-        DB::run("UPDATE setlist_items SET " . implode(', ', $fields) . " WHERE id = ?", $params);
+        $stmt = DB::run("UPDATE setlist_items SET " . implode(', ', $fields) . " WHERE id = ?", $params);
         return true;
     }
 
     public static function removeItem(int $itemId): void {
-        DB::run("DELETE FROM setlist_items WHERE id = ?", [$itemId]);
+        $stmt = DB::run("DELETE FROM setlist_items WHERE id = ?", [$itemId]);
     }
 
     /* ─── Team Assignments Operations ─── */
@@ -308,7 +308,7 @@ class SetlistService {
     public static function assignUser(int $setlistId, int $userId, string $role, ?string $notes = null, ?int $actorId = null): int {
         if (!self::hasTable('service_plan_assignments')) return 0;
 
-        DB::run(
+        $stmt = DB::run(
             "INSERT INTO service_plan_assignments (setlist_id, user_id, role, notes, status)
              VALUES (?, ?, ?, ?, 'pending')
              ON CONFLICT(setlist_id, user_id, role) DO UPDATE SET
@@ -351,7 +351,7 @@ class SetlistService {
     public static function removeAssignment(int $assignmentId, ?int $actorId = null): bool {
         if (!self::hasTable('service_plan_assignments')) return false;
         AuditLogger::log('assignment_delete', $actorId, $assignmentId, []);
-        DB::run("DELETE FROM service_plan_assignments WHERE id = ?", [$assignmentId]);
+        $stmt = DB::run("DELETE FROM service_plan_assignments WHERE id = ?", [$assignmentId]);
         return true;
     }
 
@@ -367,13 +367,14 @@ class SetlistService {
         }
 
         $confirmedAt = ($status === 'confirmed') ? date('Y-m-d H:i:s') : null;
-        DB::run(
+        $stmt = DB::run(
             "UPDATE service_plan_assignments
              SET status = ?, notes = IFNULL(?, notes), confirmed_at = ?, updated_at = CURRENT_TIMESTAMP
              WHERE id = ? AND user_id = ?",
             [$status, $notes, $confirmedAt, $assignmentId, $userId]
         );
 
+        if ($stmt->rowCount() === 0) return false;
         AuditLogger::log('assignment_respond', $userId, $assignmentId, [
             'status' => $status,
             'notes' => $notes

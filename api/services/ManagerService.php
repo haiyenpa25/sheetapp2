@@ -355,7 +355,7 @@ class ManagerService {
         $upd = $pdo->prepare("
             UPDATE user_chord_sets
             SET set_name = ?, instrument_type = ?, capo_fret = ?, custom_tempo = ?,
-                notes_guide = ?, chords_json = ?, chord_count = ?, is_public = ?,
+                notes_guide = ?, chords_json = ?, chord_count = ?, checksum = ?, is_public = ?,
                 updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
         ");
@@ -373,7 +373,7 @@ class ManagerService {
                 ->execute([(int)$current['user_id'], $current['username'], $current['song_id'], $oldDiskName]);
         }
         // Publish canonical metadata only after alias privacy updates succeeded.
-        $upd->execute([$setName, $instrument, $capoFret, $customTempo, $notesGuide, $chordsJson, $chordCount, $isPublic, $setId]);
+        $upd->execute([$setName, $instrument, $capoFret, $customTempo, $notesGuide, $chordsJson, $chordCount, md5(json_encode($exportChords)), $isPublic, $setId]);
 
         return [
             'success' => true,

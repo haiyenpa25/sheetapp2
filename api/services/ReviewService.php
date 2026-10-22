@@ -124,12 +124,12 @@ class ReviewService {
 
             $targetTitle = $version['version_name'];
             $xmlPath = $version['xml_path'];
-            $proposedXml = file_exists($xmlPath) ? file_get_contents($xmlPath) : '';
+            $resProp = SongService::resolveManagedXmlPath($xmlPath); $proposedXml = ($resProp && file_exists($resProp)) ? file_get_contents($resProp) : '';
             $proposedSnapshot = json_encode(['xml_path' => $xmlPath, 'version_name' => $version['version_name']], JSON_UNESCAPED_UNICODE);
 
             $song = SongService::getById($songId);
             $baseXmlPath = $song['xmlPath'] ?? '';
-            $baseXml = file_exists($baseXmlPath) ? file_get_contents($baseXmlPath) : '';
+            $resBase = SongService::resolveManagedXmlPath($baseXmlPath); $baseXml = ($resBase && file_exists($resBase)) ? file_get_contents($resBase) : '';
             $baseSnapshot = json_encode(['xml_path' => $baseXmlPath, 'version_name' => 'Bản gốc'], JSON_UNESCAPED_UNICODE);
 
             $diffData = ReviewDiffEngine::diffMusicXml($baseXml, $proposedXml);
@@ -331,8 +331,8 @@ class ReviewService {
         } else {
             $base = json_decode((string)$row['base_snapshot_json'], true);
             $prop = json_decode((string)$row['proposed_snapshot_json'], true);
-            $baseXml = isset($base['xml_path']) && file_exists($base['xml_path']) ? file_get_contents($base['xml_path']) : '';
-            $propXml = isset($prop['xml_path']) && file_exists($prop['xml_path']) ? file_get_contents($prop['xml_path']) : '';
+            $resBase = isset($base['xml_path']) ? SongService::resolveManagedXmlPath($base['xml_path']) : null; $baseXml = ($resBase && file_exists($resBase)) ? file_get_contents($resBase) : '';
+            $resProp = isset($prop['xml_path']) ? SongService::resolveManagedXmlPath($prop['xml_path']) : null; $propXml = ($resProp && file_exists($resProp)) ? file_get_contents($resProp) : '';
             $diff = ReviewDiffEngine::diffMusicXml($baseXml, $propXml);
         }
 

@@ -258,7 +258,7 @@ class SetlistController {
                     return;
                 }
 
-                SetlistService::respondAssignment($id, (int)$userId, $status, $notes);
+                if (!SetlistService::respondAssignment($id, (int)$userId, $status, $notes)) { Response::error('Bạn chỉ có quyền phản hồi phân công của chính mình', 403); return; }
                 Response::ok(['message' => 'Đã cập nhật trạng thái tham gia']);
                 return;
             }
