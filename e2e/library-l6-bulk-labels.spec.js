@@ -72,7 +72,7 @@ test.describe('L6-3 · Gắn Nhãn Hàng Loạt & Bộ Lọc Mùa Lễ, Chủ Đ
     // Tạo session banhat / admin để vào Manager
     let sessionId = '';
     try {
-      sessionId = execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php admin admin').toString().trim();
+      sessionId = require('./helpers/php-session').run(["admin", "admin"]).toString().trim();
     } catch (e) {
       // Fallback
     }

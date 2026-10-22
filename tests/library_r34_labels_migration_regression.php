@@ -40,14 +40,36 @@ $root = dirname(__DIR__);
 require_once $root . '/api/core/DB.php';
 require_once $root . '/tests/fixtures/test_db_fixture.php';
 
+// Dữ liệu tổng hợp đủ 903 số bài, không phụ thuộc DB đang vận hành.
+$tmpDir = sys_get_temp_dir() . '/sheetapp_r34_' . bin2hex(random_bytes(8));
+mkdir($tmpDir, 0775, true);
+$tmpBackupDir = $tmpDir . '/backups';
+$testDbFile = $tmpDir . '/test_r34_migration.sqlite';
+$fixture = createTestDatabase();
+$fixture->exec('DELETE FROM songs');
+$insert = $fixture->prepare("INSERT INTO songs (id, title, httlvnId, category_id, liturgical_season, xmlPath) VALUES (?, ?, ?, 1, ?, 'fixture.xml')");
+for ($number = 1; $number <= 903; $number++) {
+    $insert->execute(['r34-' . $number, 'R34 fixture ' . $number, $number, 'Thường Niên']);
+}
+$fixture->exec('VACUUM INTO ' . $fixture->quote($testDbFile));
+$fixture = null;
+register_shutdown_function(static function () use ($tmpDir): void {
+    $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($tmpDir, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);
+    foreach ($files as $file) {
+        $file->isDir() ? rmdir($file->getPathname()) : unlink($file->getPathname());
+    }
+    rmdir($tmpDir);
+});
+
 // ── 1. Kiểm tra CLI --dry-run không làm biến đổi CSDL ──────────────────
 echo "-- 1. CLI --dry-run Contract & Output Format --\n";
 
-$dbPath = $root . '/storage/data/app.sqlite';
+$dbPath = $testDbFile;
 $hashBefore = file_exists($dbPath) ? md5_file($dbPath) : '';
 
-$dryRunOutput = shell_exec("php " . escapeshellarg($root . '/tools/manage_song_labels.php') . " --dry-run");
+$dryRunOutput = shell_exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg($root . '/tools/manage_song_labels.php') . ' --dry-run --db=' . escapeshellarg($testDbFile));
 check($dryRunOutput !== null && str_contains($dryRunOutput, 'DRY-RUN BẢO TRÌ NHÃN THÁNH CA HTTLVN'), 'CLI: --dry-run in tiêu đề báo cáo');
+check(str_contains($dryRunOutput ?? '', 'R34 fixture'), 'CLI: --dry-run chỉ đọc dữ liệu fixture tổng hợp');
 check(str_contains($dryRunOutput, '903 / 903 bài (100% mục lục)'), 'CLI: --dry-run ghi nhận 903 bài được phủ nhãn');
 check(str_contains($dryRunOutput, 'integrity_check = ok'), 'CLI: --dry-run kiểm tra integrity_check = ok');
 check(str_contains($dryRunOutput, 'MẪU ĐỐI CHIẾU 20 BÀI ĐIỂN HÌNH'), 'CLI: --dry-run in bảng mẫu đối chiếu 20 bài');
@@ -60,15 +82,7 @@ check($hashBefore === $hashAfter, 'An toàn: CSDL giữ nguyên 100% sau khi ch�
 echo "\n-- 2. Migration Execution & Coverage (Test DB) --\n";
 
 // Bản sao và backup của test nằm trong thư mục tạm: test không được ghi vào storage/ thật.
-$tmpDir = sys_get_temp_dir() . '/sheetapp_r34_' . getmypid();
-@mkdir($tmpDir, 0775, true);
-$tmpBackupDir = $tmpDir . '/backups';
 $prodBackupCountBefore = count(glob($root . '/storage/backups/*.sqlite') ?: []);
-$testDbFile = $tmpDir . '/test_r34_migration.sqlite';
-if (file_exists($testDbFile)) {
-    @unlink($testDbFile);
-}
-@copy($dbPath, $testDbFile);
 
 $testPdo = new PDO('sqlite:' . $testDbFile, null, null, [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -83,7 +97,7 @@ DB::setPdo(null);
 file_put_contents($testCacheFile, '[]');
 
 // Chạy migration trên test DB
-$execOutput = shell_exec("php " . escapeshellarg($root . '/tools/manage_song_labels.php') . " --seed --db=" . escapeshellarg($testDbFile) . " --backup-dir=" . escapeshellarg($tmpBackupDir));
+$execOutput = shell_exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg($root . '/tools/manage_song_labels.php') . " --seed --db=" . escapeshellarg($testDbFile) . " --backup-dir=" . escapeshellarg($tmpBackupDir));
 check($execOutput !== null && str_contains($execOutput, 'Đã gắn nhãn thành công cho 903 bài hát'), 'Migration: Đã cập nhật thành công 903 bài hát trên test DB');
 check(!file_exists($testCacheFile), 'Cache: --seed xoá cache danh sách bài của đúng DB vừa ghi');
 @unlink($testCacheFile);
@@ -161,10 +175,11 @@ foreach ($checkKeyHymns as $hId => $expected) {
 // ── 4. Kiểm tra sao lưu tự động (--backup) ───────────────────────────
 echo "\n-- 4. Auto Backup Mechanism --\n";
 
-$backupOutput = shell_exec("php " . escapeshellarg($root . '/tools/manage_song_labels.php') . " --backup --db=" . escapeshellarg($testDbFile) . " --backup-dir=" . escapeshellarg($tmpBackupDir));
+$manualBackupDir = $tmpBackupDir . '/manual';
+$backupOutput = shell_exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg($root . '/tools/manage_song_labels.php') . " --backup --db=" . escapeshellarg($testDbFile) . " --backup-dir=" . escapeshellarg($manualBackupDir));
 check($backupOutput !== null && str_contains($backupOutput, 'Đã tạo bản sao lưu CSDL thành công'), 'Backup: CLI --backup tạo file thành công');
 
-$backupFiles = glob($tmpBackupDir . '/app_before_r34_*.sqlite') ?: [];
+$backupFiles = glob($manualBackupDir . '/app_before_r34_*.sqlite') ?: [];
 check(!empty($backupFiles), 'Backup: File sao lưu nằm trong --backup-dir');
 
 $backupIntegrity = '';
@@ -180,13 +195,8 @@ check($backupIntegrity === 'ok', 'Backup: integrity_check của bản sao lưu =
 $prodBackupCountAfter = count(glob($root . '/storage/backups/*.sqlite') ?: []);
 check($prodBackupCountAfter === $prodBackupCountBefore, "An toàn: storage/backups thật không thêm file ({$prodBackupCountBefore} → {$prodBackupCountAfter})");
 
-// Dọn dẹp test file
+// Đóng kết nối trước khi shutdown dọn fixture trên Windows.
 unset($testPdo);
-foreach (array_merge($backupFiles, [$testDbFile, $testDbFile . '-wal', $testDbFile . '-shm']) as $f) {
-    if (file_exists($f)) @unlink($f);
-}
-@rmdir($tmpBackupDir);
-@rmdir($tmpDir);
 
 // ── 5. Line Budget Disciplines (< 600 lines) ────────────────────────
 echo "\n-- 5. Line Budget Disciplines (< 600 lines) --\n";

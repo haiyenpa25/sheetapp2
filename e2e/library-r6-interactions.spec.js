@@ -18,7 +18,7 @@ test('Guest cannot see chord authoring actions in the real Tools menu', async ({
 
 for (const username of ['admin', 'hoaidinh']) {
   test(`${username} can reach chord editing from Tools menu`, async ({ page }) => {
-    const sid = execSync(`C:\\xampp\\php\\php.exe tools/create_test_session.php ${username}`).toString().trim();
+    const sid = require('./helpers/php-session').run([username]).toString().trim();
     await page.context().addCookies([{ name: 'PHPSESSID', value: sid, url: new URL('/', test.info().project.use.baseURL).href }]);
     await page.goto('./?song=thanh-ca-001', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('#osmd-container svg').first()).toBeVisible({ timeout: 25000 });
@@ -33,7 +33,7 @@ for (const username of ['admin', 'hoaidinh']) {
 }
 
 test('Ban Hát must choose their own set before editing while viewing HD', async ({ page }) => {
-  const sid = execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php banhat').toString().trim();
+  const sid = require('./helpers/php-session').run(["banhat"]).toString().trim();
   await page.context().addCookies([{ name: 'PHPSESSID', value: sid, url: new URL('/', test.info().project.use.baseURL).href }]);
   await page.goto('./?song=thanh-ca-001&v=sheet', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('#osmd-container svg').first()).toBeVisible({ timeout: 25000 });
@@ -47,7 +47,7 @@ test('Ban Hát must choose their own set before editing while viewing HD', async
 });
 
 test('Admin sees chord placement buttons on notes after enabling Soạn', async ({ page }) => {
-  const sid = execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php admin').toString().trim();
+  const sid = require('./helpers/php-session').run(["admin"]).toString().trim();
   await page.context().addCookies([{ name: 'PHPSESSID', value: sid, url: new URL('/', test.info().project.use.baseURL).href }]);
   await page.goto('./?song=thanh-ca-001&v=sheet', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('#osmd-container svg').first()).toBeVisible({ timeout: 25000 });
@@ -67,7 +67,7 @@ test('Admin sees chord placement buttons on notes after enabling Soạn', async 
 });
 
 test('Admin can open a purple chord target from mobile Tools', async ({ page }) => {
-  const sid = execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php admin').toString().trim();
+  const sid = require('./helpers/php-session').run(["admin"]).toString().trim();
   await page.context().addCookies([{ name: 'PHPSESSID', value: sid, url: new URL('/', test.info().project.use.baseURL).href }]);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('./?song=thanh-ca-001&v=sheet', { waitUntil: 'domcontentloaded' });
@@ -86,7 +86,7 @@ test('Admin can open a purple chord target from mobile Tools', async ({ page }) 
 });
 
 test('Chord targets retain their score positions after scrolling and rebuilding', async ({ page }) => {
-  const sid = execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php admin').toString().trim();
+  const sid = require('./helpers/php-session').run(["admin"]).toString().trim();
   await page.context().addCookies([{ name: 'PHPSESSID', value: sid, url: new URL('/', test.info().project.use.baseURL).href }]);
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('./?song=thanh-ca-001&v=sheet', { waitUntil: 'domcontentloaded' });
@@ -108,7 +108,7 @@ test('Chord targets retain their score positions after scrolling and rebuilding'
 
 for (const [width, songId] of [[360, 'thanh-ca-001'], [390, 'thanh-ca-001'], [820, 'thanh-ca-001'], [1366, 'thanh-ca-001'], [390, 'thanh-ca-002'], [820, 'thanh-ca-123']]) {
   test(`Chord targets stay beside their notes for ${songId} at ${width}px`, async ({ page }) => {
-    const sid = execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php admin').toString().trim();
+    const sid = require('./helpers/php-session').run(["admin"]).toString().trim();
     await page.context().addCookies([{ name: 'PHPSESSID', value: sid, url: new URL('/', test.info().project.use.baseURL).href }]);
     await page.setViewportSize({ width, height: 844 });
     await page.goto(`./?song=${songId}&v=sheet`, { waitUntil: 'domcontentloaded' });
@@ -129,7 +129,7 @@ for (const [width, songId] of [[360, 'thanh-ca-001'], [390, 'thanh-ca-001'], [82
 }
 
 test('HD new-set action never overwrites an existing HD set with empty chords', async ({ page }) => {
-  const sid = execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php hoaidinh').toString().trim();
+  const sid = require('./helpers/php-session').run(["hoaidinh"]).toString().trim();
   await page.context().addCookies([{ name: 'PHPSESSID', value: sid, url: new URL('/', test.info().project.use.baseURL).href }]);
   const writes = [];
   page.on('request', (request) => {
@@ -242,7 +242,7 @@ for (const width of [1366, 820, 390]) {
 
 for (const [username, setName] of [['hoaidinh', 'HD'], ['admin', 'ADMIN']]) {
   test(`${username} saves a chord and sees it after reload`, async ({ page }) => {
-    const sid = execSync(`C:\\xampp\\php\\php.exe tools/create_test_session.php ${username}`).toString().trim();
+    const sid = require('./helpers/php-session').run([username]).toString().trim();
     await page.context().addCookies([{ name: 'PHPSESSID', value: sid, url: new URL('/', test.info().project.use.baseURL).href }]);
     await page.goto('./?song=thanh-ca-001', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('#osmd-container svg').first()).toBeVisible({ timeout: 25000 });
@@ -269,7 +269,7 @@ for (const [username, setName] of [['hoaidinh', 'HD'], ['admin', 'ADMIN']]) {
 
 for (const status of [403, 409]) {
   test(`Chord save ${status} never reports success`, async ({ page }) => {
-    const sid = execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php hoaidinh').toString().trim();
+    const sid = require('./helpers/php-session').run(["hoaidinh"]).toString().trim();
     await page.context().addCookies([{ name: 'PHPSESSID', value: sid, url: new URL('/', test.info().project.use.baseURL).href }]);
     await page.goto('./?song=thanh-ca-001', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('#osmd-container svg').first()).toBeVisible({ timeout: 25000 });

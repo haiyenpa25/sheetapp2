@@ -11,6 +11,12 @@ declare(strict_types=1);
 
 $root = dirname(__DIR__);
 $phpBin = PHP_BINARY ?: 'php';
+$fixtureSessionDir = sys_get_temp_dir().'/sheetapp_liturgy_sessions_'.bin2hex(random_bytes(8));
+mkdir($fixtureSessionDir, 0775, true);
+register_shutdown_function(static function () use ($fixtureSessionDir): void {
+    foreach (glob($fixtureSessionDir.'/sess_*') ?: [] as $file) unlink($file);
+    rmdir($fixtureSessionDir);
+});
 
 // Bảo đảm cô lập hoàn toàn CSDL thật (Ticket K2) ngay cả khi chạy độc lập ngoài run_all_tests.php
 $ownTempDb = null;
@@ -48,7 +54,7 @@ function check(bool $condition, string $message): void {
  * @return array{code: int, body: string}
  */
 function runIsolatedEndpoint(string $relScript, array $queryParams, string $sessId = ''): array {
-    global $root, $phpBin, $activeDbPath;
+    global $root, $phpBin, $activeDbPath, $fixtureSessionDir;
     $scriptPath = $root . '/' . ltrim($relScript, '/');
     $runnerCode = sprintf(
         'putenv(%s); $_ENV["SHEETAPP_DB_PATH"] = %s; putenv("SHEETAPP_E2E=1"); $_GET = %s; $_SERVER["REQUEST_METHOD"] = "GET"; $_SERVER["REMOTE_ADDR"] = "127.0.0.1"; if (%s !== "") { $_COOKIE["PHPSESSID"] = %s; session_id(%s); } require %s; $c = http_response_code(); echo "\n__HTTP_CODE__=" . (is_int($c) ? $c : 200);',
@@ -60,6 +66,7 @@ function runIsolatedEndpoint(string $relScript, array $queryParams, string $sess
         var_export($sessId, true),
         var_export($scriptPath, true)
     );
+    $runnerCode = 'session_save_path('.var_export($fixtureSessionDir,true).');'.$runnerCode;
     $tmpRunner = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'sheetapp_ep_' . uniqid() . '.php';
     file_put_contents($tmpRunner, "<?php\n" . $runnerCode);
     $raw = (string)shell_exec(escapeshellcmd($phpBin) . ' ' . escapeshellarg($tmpRunner));
@@ -132,7 +139,17 @@ check(str_contains($htmlBooklet, 'page-break-after: always') || str_contains($ht
 echo "\n[3/5] Kiểm tra API Cảnh Báo Lặp Bài (action=check_recent_usage)...\n";
 
 putenv('SHEETAPP_E2E=1');
-$sessId = trim((string)shell_exec(escapeshellcmd($phpBin) . ' ' . escapeshellarg($root . '/tools/create_test_session.php') . ' admin admin'));
+$actor = DB::run("SELECT id, username FROM users WHERE role='admin' AND status='active' LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+if (!$actor) {
+    DB::run("INSERT INTO users(username,password_hash,role,status) VALUES (?,?,'admin','active')", ['liturgy_'.bin2hex(random_bytes(6)),password_hash(bin2hex(random_bytes(16)),PASSWORD_DEFAULT)]);
+    $actor=['id'=>(int)DB::pdo()->lastInsertId(),'username'=>'liturgy_fixture'];
+}
+$sessId = bin2hex(random_bytes(16));
+$sessionRunner = $fixtureSessionDir.'/create-session.php';
+file_put_contents($sessionRunner, '<?php session_save_path('.var_export($fixtureSessionDir,true).');session_id('.var_export($sessId,true).');session_start();$_SESSION='.var_export(['user_id'=>(int)$actor['id'],'username'=>$actor['username'],'role'=>'admin'],true).';session_write_close();');
+exec(escapeshellarg($phpBin).' '.escapeshellarg($sessionRunner),$sessionOutput,$sessionExit);
+unlink($sessionRunner);
+check($sessionExit===0,'Tạo session fixture riêng, không dùng helper E2E trên workspace');
 
 // 3.1: Kiểm tra bài đã được sử dụng gần đây (thanh-ca-001)
 $respCheck1 = runIsolatedEndpoint('api/index.php', [

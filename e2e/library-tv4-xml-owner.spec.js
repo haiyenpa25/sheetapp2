@@ -15,7 +15,7 @@ test('XML save and restore allow the owner/admin and reject another user without
   const before = xml('before'), backup = xml('backup'), after = xml('after');
   try {
     for (const user of ['admin', 'banhat']) {
-      const sid = execFileSync('C:/xampp/php/php.exe', ['tools/create_test_session.php', user], { cwd: isolated, env: { ...process.env, SHEETAPP_E2E: '1' }, encoding: 'utf8' }).trim();
+      const sid = require('./helpers/php-session').run([user], { cwd: isolated, env: { ...process.env, SHEETAPP_E2E: '1' }, encoding: 'utf8' }).trim();
       clients[user] = await api.newContext({ extraHTTPHeaders: { Cookie: `PHPSESSID=${sid}`, Origin: new URL(base).origin } });
       const directory = path.join(isolated, 'storage/users', user);
       fs.mkdirSync(directory, { recursive: true });

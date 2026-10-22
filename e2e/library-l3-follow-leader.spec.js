@@ -28,7 +28,7 @@ test.describe('L3-5: Theo Ca Trưởng Ngay Trên Trang Chính (Follow Leader)',
     const followerContext = await browser.newContext();
 
     // Tạo phiên đăng nhập Ca Trưởng cho Host Context
-    const hostSessionId = execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php banhat leader').toString().trim();
+    const hostSessionId = require('./helpers/php-session').run(["banhat", "leader"]).toString().trim();
 
     await hostContext.addCookies([{
       name: 'PHPSESSID',

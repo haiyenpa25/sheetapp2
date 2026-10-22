@@ -15,7 +15,7 @@ test.beforeAll(async () => {
   expect(fs.realpathSync(isolated)).not.toBe(fs.realpathSync('C:/xampp/htdocs/sheetapp2'));
   expect(new URL(base).hostname).toBe('localhost');
   expect(new URL(base).pathname.replace(/\/$/, '')).toBe('/' + path.basename(isolated));
-  const sid = role => execFileSync('C:/xampp/php/php.exe', ['tools/create_test_session.php', role],
+  const sid = role => require('./helpers/php-session').run([role],
     { cwd: isolated, env: { ...process.env, SHEETAPP_E2E: '1' }, encoding: 'utf8' }).trim();
   session = sid('admin');
   admin = await api.newContext({ extraHTTPHeaders: { Cookie: `PHPSESSID=${session}`, Origin: new URL(base).origin } });

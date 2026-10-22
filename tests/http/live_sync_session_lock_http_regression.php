@@ -131,10 +131,7 @@ curl_close($ch);
 file_put_contents($bgWorkerScript, $workerCode);
 
 $sseEndpoint = "{$baseUrl}/api/index.php?route=live_sync&action=events&room={$testRoom}&rev=0&clientId=t08-client";
-$phpBin = 'C:\\xampp\\php\\php.exe';
-if (!file_exists($phpBin)) {
-    $phpBin = PHP_BINARY;
-}
+$phpBin = PHP_BINARY;
 
 $cmd = "\"{$phpBin}\" \"{$bgWorkerScript}\" \"{$sseEndpoint}\" \"{$sessionCookie}\" \"{$flagFile}\"";
 $proc = proc_open($cmd, [
@@ -145,7 +142,7 @@ $proc = proc_open($cmd, [
 
 $sseConnected = false;
 for ($i = 0; $i < 30; $i++) {
-    if (file_exists($flagFile) && str_contains(file_get_contents($flagFile), 'connected')) {
+    if (file_exists($flagFile) && str_contains(file_get_contents($flagFile), 'stream')) {
         $sseConnected = true;
         break;
     }
@@ -153,9 +150,6 @@ for ($i = 0; $i < 30; $i++) {
 }
 
 check($sseConnected, "Tiến trình nền đã kết nối và đang stream SSE với session cookie");
-
-// Chờ thêm 300ms đảm bảo request SSE đã chạy vào loop chính
-usleep(300000);
 
 // Bước 2.4: Trong lúc SSE đang stream, gọi route=songs với cùng sessionCookie
 $startTime = microtime(true);

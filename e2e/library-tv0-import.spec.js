@@ -9,7 +9,7 @@ test.skip(!base || !isolated, 'Requires an explicit isolated Apache installation
 test('Import: managed files remain distinct, immediately searchable and readable over HTTP', async ({ context, request }) => {
   expect(fs.realpathSync(isolated)).not.toBe(fs.realpathSync(path.resolve(__dirname, '..')));
   expect(fs.existsSync(path.join(isolated, '.roadmap6-isolated'))).toBe(true);
-  const sid = execFileSync('C:/xampp/php/php.exe', ['tools/create_test_session.php', 'admin'], {
+  const sid = require('./helpers/php-session').run(['admin'], {
     cwd: isolated, env: { ...process.env, SHEETAPP_E2E: '1' }, encoding: 'utf8',
   }).trim();
   await context.addCookies([{ name: 'PHPSESSID', value: sid, url: base + '/' }]);

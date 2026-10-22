@@ -19,14 +19,14 @@ test.describe('Epic 4.1 — Giao bài & Tập bè cho ca đoàn (/learn)', () =>
 
   test.beforeEach(async () => {
     // 1. Tạo bài tập thử nghiệm cho ca viên @banhat
-    const out = execSync('C:\\xampp\\php\\php.exe tools/setup_e2e_practice_assignment.php setup banhat').toString().trim();
+    const out = require('./helpers/php-session').php(['tools/setup_e2e_practice_assignment.php', 'setup', 'banhat']).toString().trim();
     testData = JSON.parse(out);
   });
 
   test.afterEach(async () => {
     // Dọn dẹp sau khi kiểm thử
     if (testData && testData.assignment_id) {
-      execSync(`C:\\xampp\\php\\php.exe tools/setup_e2e_practice_assignment.php cleanup ${testData.assignment_id}`);
+      require('./helpers/php-session').php(['tools/setup_e2e_practice_assignment.php', 'cleanup', String(testData.assignment_id)]);
     }
   });
 
@@ -34,10 +34,10 @@ test.describe('Epic 4.1 — Giao bài & Tập bè cho ca đoàn (/learn)', () =>
     page.on('dialog', dialog => dialog.dismiss());
 
     // 1. Tạo session đăng nhập cho ca viên @banhat
-    const sessionId = execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php banhat banhat').toString().trim();
+    const sessionId = require('./helpers/php-session').run(["banhat", "banhat"]).toString().trim();
     await page.context().clearCookies();
     await page.context().addCookies([
-      { name: 'PHPSESSID', value: sessionId, url: 'http://localhost/sheetapp2/' },
+      { name: 'PHPSESSID', value: sessionId, url: process.env.SHEETAPP_E2E_BASE_URL },
     ]);
 
     // 2. Mở Learn Studio (/learn/)

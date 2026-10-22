@@ -16,7 +16,7 @@ const { execSync } = require('child_process');
 test.describe('Epic 4.0 — Lát 4.0-a: Vai trò Ca Trưởng & Bè trong Manager Portal', () => {
   test('Admin có thể phân quyền Ca Trưởng và gán Bè cho thành viên', async ({ page }) => {
     // 1. Tạo session admin
-    const sessionId = execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php admin admin').toString().trim();
+    const sessionId = require('./helpers/php-session').run(["admin", "admin"]).toString().trim();
     await page.context().addCookies([{
       name: 'PHPSESSID',
       value: sessionId,

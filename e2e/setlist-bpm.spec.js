@@ -13,7 +13,7 @@ const { execSync } = require('child_process');
  */
 
 const fs = require('fs');
-const phpBin = process.env.PHP_BIN || (fs.existsSync('C:\\xampp\\php\\php.exe') ? 'C:\\xampp\\php\\php.exe' : 'php');
+const phpBin = process.env.SHEETAPP_PHP_BINARY || process.env.PHP_BIN || 'php';
 
 test.describe('E2E-06: Setlist BPM Preservation (Core Rule 4)', () => {
   let setlistId = null;

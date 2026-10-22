@@ -63,7 +63,7 @@ test.describe('Ticket L0-1: Module Window Exports & Core Integrations', () => {
     expect(isEditChordsGuest).toBe(false);
 
     // 2. Kiểm tra khi đăng nhập tài khoản Nhạc công (banhat)
-    const sessionId = execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php banhat banhat', {
+    const sessionId = require('./helpers/php-session').run(["banhat", "banhat"], {
       env: { ...process.env, SHEETAPP_E2E: '1' }
     }).toString().trim();
 

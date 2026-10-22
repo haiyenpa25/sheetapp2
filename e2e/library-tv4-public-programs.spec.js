@@ -7,7 +7,7 @@ const isolated = process.env.SHEETAPP_TV_ISOLATED_ROOT;
 test.skip(!base || !isolated, 'Requires explicit isolated Apache installation');
 let fixture, member;
 function php(code, extra = {}) {
-  return execFileSync('C:/xampp/php/php.exe', [], { cwd: isolated, input: '<?php ' + code,
+  return execFileSync((process.env.SHEETAPP_PHP_BINARY || 'php'), [], { cwd: isolated, input: '<?php ' + code,
     env: { ...process.env, DB_PATH: path.join(isolated, 'storage/data/app.sqlite'), SHEETAPP_DB_PATH: path.join(isolated, 'storage/data/app.sqlite'), ...extra }, encoding: 'utf8' }).trim();
 }
 test.beforeAll(async () => {
@@ -16,7 +16,7 @@ test.beforeAll(async () => {
   expect(new URL(base).hostname).toBe('localhost');
   expect(new URL(base).pathname.replace(/\/$/, '')).toBe('/' + path.basename(isolated));
   fixture = JSON.parse(php("require 'api/core/DB.php'; require 'tests/fixtures/tv41_setlists.php'; echo json_encode(seedTv41Setlists(DB::get()));"));
-  const sid = execFileSync('C:/xampp/php/php.exe', ['tools/create_test_session.php', 'banhat'], { cwd: isolated, env: { ...process.env, SHEETAPP_E2E: '1' }, encoding: 'utf8' }).trim();
+  const sid = require('./helpers/php-session').run(['banhat'], { cwd: isolated, env: { ...process.env, SHEETAPP_E2E: '1' }, encoding: 'utf8' }).trim();
   member = await api.newContext({ extraHTTPHeaders: { Cookie: `PHPSESSID=${sid}` } });
 });
 test.afterAll(async () => {

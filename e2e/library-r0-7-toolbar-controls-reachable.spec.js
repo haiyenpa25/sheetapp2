@@ -21,7 +21,7 @@ const { execSync } = require('child_process');
  */
 
 function loginAsBanhat() {
-  return execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php banhat').toString().trim();
+  return require('./helpers/php-session').run(["banhat"]).toString().trim();
 }
 
 async function ensureSidebarOpen(page) {

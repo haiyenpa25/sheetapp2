@@ -20,7 +20,7 @@ test.describe('E2E-04: Projector Máy Chiếu Đồng Bộ Ban Nhạc', () => {
     const projectorContext = await browser.newContext();
 
     // Khởi tạo phiên đăng nhập Ca Trưởng cho Host Context
-    const hostSessionId = execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php').toString().trim();
+    const hostSessionId = require('./helpers/php-session').run([]).toString().trim();
     await hostContext.addCookies([{
       name: 'PHPSESSID',
       value: hostSessionId,

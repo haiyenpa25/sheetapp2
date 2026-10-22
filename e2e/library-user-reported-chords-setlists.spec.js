@@ -5,7 +5,7 @@ const { execFileSync } = require('child_process');
 test.use({ serviceWorkers: 'block' });
 
 async function login(page) {
-  const sid = execFileSync('C:\\xampp\\php\\php.exe', ['tools/create_test_session.php', 'hoaidinh'], { encoding: 'utf8' }).trim();
+  const sid = require('./helpers/php-session').run(['hoaidinh'], { encoding: 'utf8' }).trim();
   await page.context().addCookies([{ name: 'PHPSESSID', value: sid, domain: 'localhost', path: '/' }]);
 }
 

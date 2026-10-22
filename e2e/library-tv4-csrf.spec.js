@@ -11,7 +11,7 @@ test('CSRF flag rejects missing tokens and browser ApiService still saves chords
   const config = path.join(isolated, 'storage/config/features.json');
   const original = fs.existsSync(config) ? fs.readFileSync(config) : null;
   const name = `TV44_${Date.now()}`, song = 'thanh-ca-001';
-  const sid = execFileSync('C:/xampp/php/php.exe', ['tools/create_test_session.php', 'admin'], { cwd: isolated, env: { ...process.env, SHEETAPP_E2E: '1' }, encoding: 'utf8' }).trim();
+  const sid = require('./helpers/php-session').run(['admin'], { cwd: isolated, env: { ...process.env, SHEETAPP_E2E: '1' }, encoding: 'utf8' }).trim();
   await context.addCookies([{ name: 'PHPSESSID', value: sid, url: base + '/' }]);
   try {
     fs.mkdirSync(path.dirname(config), { recursive: true });
@@ -29,7 +29,7 @@ test('CSRF flag rejects missing tokens and browser ApiService still saves chords
     expect(JSON.stringify(saved)).toContain('"0_0":"C"');
   } finally {
     if (original) fs.writeFileSync(config, original); else if (fs.existsSync(config)) fs.unlinkSync(config);
-    execFileSync('C:/xampp/php/php.exe', [], { cwd: isolated, input: "<?php if(!is_file('.roadmap6-isolated'))exit(1); require 'api/core/DB.php'; DB::run('DELETE FROM user_chord_sets WHERE set_name=?',[getenv('TV44_NAME')]);", env: { ...process.env, DB_PATH: path.join(isolated, 'storage/data/app.sqlite'), TV44_NAME: name } });
+    execFileSync((process.env.SHEETAPP_PHP_BINARY || 'php'), [], { cwd: isolated, input: "<?php if(!is_file('.roadmap6-isolated'))exit(1); require 'api/core/DB.php'; DB::run('DELETE FROM user_chord_sets WHERE set_name=?',[getenv('TV44_NAME')]);", env: { ...process.env, DB_PATH: path.join(isolated, 'storage/data/app.sqlite'), TV44_NAME: name } });
     const file = path.join(isolated, 'storage/data/chord_sets', song, name + '.json');
     if (fs.existsSync(file)) fs.unlinkSync(file);
   }

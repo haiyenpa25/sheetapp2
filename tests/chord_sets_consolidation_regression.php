@@ -14,6 +14,7 @@
  */
 
 declare(strict_types=1);
+require_once __DIR__ . '/fixtures/isolated_storage.php';
 
 function check(bool $condition, string $message): void {
     $GLOBALS['suiteTotalChecks'] = ($GLOBALS['suiteTotalChecks'] ?? 0) + 1;

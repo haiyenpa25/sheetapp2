@@ -36,10 +36,7 @@ function check(bool $cond, string $msg): void {
 echo "=== KIỂM THỬ HỒI QUY: DIỄN TẬP SAO LƯU MÃ HÓA & PHỤC HỒI OFF-SITE (CHECKPOINT G3.9) ===\n\n";
 
 $root = dirname(__DIR__);
-$phpBinary = PHP_BINARY ?: 'php';
-if (PHP_OS_FAMILY === 'Windows' && file_exists('C:\\xampp\\php\\php.exe')) {
-    $phpBinary = 'C:\\xampp\\php\\php.exe';
-}
+$phpBinary = PHP_BINARY;
 
 $tempDir = sys_get_temp_dir() . '/sheetapp_backup_drill_' . date('Ymd_His') . '_' . bin2hex(random_bytes(3));
 if (!is_dir($tempDir)) {
@@ -49,20 +46,27 @@ if (!is_dir($tempDir)) {
 $backupEncFile = $tempDir . '/test_backup.enc';
 $restoreTargetDir = $tempDir . '/restored_data';
 $secretPassphrase = 'TestStrongOffsiteSecret_2026_#@!';
+require_once __DIR__ . '/fixtures/test_db_fixture.php';
+$fixtureDb = $tempDir . '/fixture.sqlite';
+$fixture = createTestDatabase();
+$fixture->exec('VACUUM INTO ' . $fixture->quote($fixtureDb));
+$fixture = null;
 
 try {
     // ── 1. Tạo bản sao lưu mã hóa ──
     echo "[1/4] Tạo bản sao lưu toàn diện được mã hóa OpenSSL AES-256-CBC...\n";
     $createCmd = sprintf(
-        '%s %s --passphrase=%s --output=%s 2>&1',
+        '%s %s --db=%s --backup-dir=%s --output=%s 2>&1',
         escapeshellarg($phpBinary),
         escapeshellarg($root . '/tools/create_encrypted_backup.php'),
-        escapeshellarg($secretPassphrase),
+        escapeshellarg($fixtureDb),
+        escapeshellarg($tempDir),
         escapeshellarg($backupEncFile)
     );
 
     $createOut = [];
     $createCode = 0;
+    putenv('SHEETAPP_BACKUP_PASSPHRASE=' . $secretPassphrase);
     exec($createCmd, $createOut, $createCode);
     $createOutStr = implode("\n", $createOut);
 
@@ -77,15 +81,15 @@ try {
     echo "\n[2/4] Kiểm tra phòng vệ: Thử giải mã với mật mã không hợp lệ...\n";
     $wrongPassphrase = 'IncorrectPassword999!';
     $wrongCmd = sprintf(
-        '%s %s --input=%s --passphrase=%s 2>&1',
+        '%s %s --input=%s 2>&1',
         escapeshellarg($phpBinary),
         escapeshellarg($root . '/tools/restore_encrypted_backup.php'),
-        escapeshellarg($backupEncFile),
-        escapeshellarg($wrongPassphrase)
+        escapeshellarg($backupEncFile)
     );
 
     $wrongOut = [];
     $wrongCode = 0;
+    putenv('SHEETAPP_BACKUP_PASSPHRASE=' . $wrongPassphrase);
     exec($wrongCmd, $wrongOut, $wrongCode);
     $wrongOutStr = implode("\n", $wrongOut);
 
@@ -95,16 +99,16 @@ try {
     // ── 3. Diễn tập phục hồi với mật mã ĐÚNG ──
     echo "\n[3/4] Diễn tập phục hồi cơ sở dữ liệu với mật mã hợp lệ...\n";
     $restoreCmd = sprintf(
-        '%s %s --input=%s --passphrase=%s --out-dir=%s 2>&1',
+        '%s %s --input=%s --out-dir=%s 2>&1',
         escapeshellarg($phpBinary),
         escapeshellarg($root . '/tools/restore_encrypted_backup.php'),
         escapeshellarg($backupEncFile),
-        escapeshellarg($secretPassphrase),
         escapeshellarg($restoreTargetDir)
     );
 
     $restoreOut = [];
     $restoreCode = 0;
+    putenv('SHEETAPP_BACKUP_PASSPHRASE=' . $secretPassphrase);
     exec($restoreCmd, $restoreOut, $restoreCode);
     $restoreOutStr = implode("\n", $restoreOut);
 
@@ -144,6 +148,7 @@ try {
     check($songsCount >= 1, "Số lượng bài hát hợp lệ trong bản sao lưu: {$songsCount}");
 
 } finally {
+    putenv('SHEETAPP_BACKUP_PASSPHRASE');
     // Dọn dẹp an toàn các tệp tạm thời
     if (is_dir($restoreTargetDir)) {
         foreach (glob($restoreTargetDir . '/*.*') ?: [] as $rf) {
@@ -155,6 +160,7 @@ try {
         @unlink($backupEncFile);
     }
     if (is_dir($tempDir)) {
+        @unlink($fixtureDb);
         @rmdir($tempDir);
     }
 }

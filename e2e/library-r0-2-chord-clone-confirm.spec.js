@@ -23,7 +23,7 @@ const { execSync } = require('child_process');
 test.use({ serviceWorkers: 'block' });
 
 function loginAs(username) {
-  return execSync(`C:\\xampp\\php\\php.exe tools/create_test_session.php ${username}`).toString().trim();
+  return require('./helpers/php-session').run([username]).toString().trim();
 }
 
 /** Chặn toàn bộ request route=chord_sets, ghi log lại, trả dữ liệu giả lập. */

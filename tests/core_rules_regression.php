@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__.'/fixtures/isolated_storage.php';
 
 /**
  * tests/core_rules_regression.php
@@ -189,15 +190,17 @@ try {
     $ctrlRejectsHdAndTlh = str_contains($chordCtrlSrc, "\$name === 'default' || \$name === 'TLH' || \$name === 'HD'")
         && str_contains($chordCtrlSrc, "Response::forbidden('Bộ hợp âm này được bảo vệ, không thể xóa!');");
     
-    // Kiểm tra Frontend ChordCanvas UI: nút xóa không hiển thị cho default và HD
-    $frontendHidesDeleteBtn = str_contains($chordCanvasSrc, "const isDeletable = _currentSet !== 'default' && _currentSet !== 'HD'")
-        && str_contains($chordCanvasSrc, "if (!name || name === 'default' || name === 'TLH' || name === 'HD')");
+    // Execute the current frontend guard; the former delete button no longer exists.
+    $node = getenv('SHEETAPP_NODE_BINARY') ?: 'node';
+    $frontendOutput = [];
+    exec(escapeshellarg($node) . ' ' . escapeshellarg(__DIR__.'/js/chord_save_context.cjs') . ' 2>&1', $frontendOutput, $frontendExit);
+    $frontendProtectsSets = $frontendExit === 0;
 
     assertRule(
         'CR3-a',
-        $svcProtectsHdAndTlh && $ctrlRejectsHdAndTlh && $frontendHidesDeleteBtn,
-        'Bộ TLH và HD bị khóa bất biến: Service & Controller từ chối xóa (HTTP 403), UI ẩn hoàn toàn nút xóa kể cả với Admin',
-        "svcProtects=" . ($svcProtectsHdAndTlh ? 'true' : 'false') . ", ctrlRejects=" . ($ctrlRejectsHdAndTlh ? 'true' : 'false') . ", uiHides=" . ($frontendHidesDeleteBtn ? 'true' : 'false')
+        $svcProtectsHdAndTlh && $ctrlRejectsHdAndTlh && $frontendProtectsSets,
+        'Bộ TLH và HD được bảo vệ: service/controller từ chối xoá, frontend chặn trước HTTP kể cả Admin',
+        "svcProtects=" . ($svcProtectsHdAndTlh ? 'true' : 'false') . ", ctrlRejects=" . ($ctrlRejectsHdAndTlh ? 'true' : 'false') . ", frontendProtects=" . ($frontendProtectsSets ? 'true' : 'false')
     );
 
     // CR3-b: Xoá bộ cá nhân đang chọn -> Quay về HD

@@ -5,6 +5,7 @@
  */
 
 declare(strict_types=1);
+// SUITE_TYPE: behavioral
 
 $total = 0;
 $passed = 0;
@@ -59,4 +60,5 @@ foreach (glob("{$dir}/*") ?: [] as $f) @unlink($f);
 echo "Tổng số kiểm tra: {$total} (Behavioral: {$total}, Static: 0)\n";
 echo "Số kiểm tra đạt: {$passed}\n";
 echo "Số kiểm tra lỗi: " . ($total - $passed) . "\n";
+echo "SUITE_COMPLETE total={$total}\n";
 exit($passed === $total ? 0 : 1);

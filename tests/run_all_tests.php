@@ -104,6 +104,7 @@ $isolatedTempLogs = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'sheetapp_ci_temp
 @mkdir($isolatedTempLogs . DIRECTORY_SEPARATOR . 'mail', 0755, true);
 putenv('SHEETAPP_AUDIT_LOG=' . $isolatedTempLogs . DIRECTORY_SEPARATOR . 'audit.log');
 putenv('SHEETAPP_MAIL_DIR=' . $isolatedTempLogs . DIRECTORY_SEPARATOR . 'mail');
+putenv('SHEETAPP_CLIENT_ERROR_LOG=' . $isolatedTempLogs . DIRECTORY_SEPARATOR . 'client_errors.log');
 $storageFootprint = static function () use ($root): array {
     $audit = $root . '/storage/logs/audit.log';
     return [
@@ -166,14 +167,11 @@ if ($lintErrors === 0) {
 // ==========================================
 echo "[1b/4] Kiểm tra cú pháp JavaScript (check:syntax)... ";
 $nodeBin = null;
-if (PHP_OS_FAMILY === 'Windows' && file_exists('C:\\Program Files\\nodejs\\node.exe')) {
-    $nodeBin = 'C:\\Program Files\\nodejs\\node.exe';
-} else {
-    $out = [];
-    $code = 0;
-    exec('node -v 2>&1', $out, $code);
-    if ($code === 0) $nodeBin = 'node';
-}
+$nodeCandidate = getenv('SHEETAPP_NODE_BINARY') ?: 'node';
+$out = []; $code = 0;
+exec(escapeshellarg($nodeCandidate) . ' -p ' . escapeshellarg('process.execPath') . ' 2>&1', $out, $code);
+if ($code === 0 && is_file(trim($out[0] ?? ''))) $nodeBin = trim($out[0]);
+if ($nodeBin) putenv('SHEETAPP_NODE_BINARY=' . $nodeBin);
 
 if (!$nodeBin) {
     echo "SKIP (Không tìm thấy Node.js trên hệ thống)\n";
@@ -196,7 +194,7 @@ if (!$nodeBin) {
         echo "       → Chạy ESLint (npx eslint assets/js editor manager live-band learn)... ";
         $eslintOut = [];
         $eslintCode = 0;
-        $eslintCmd = 'npx eslint assets/js editor manager live-band learn --no-error-on-unmatched-pattern';
+        $eslintCmd = 'npx eslint assets/js old/assets/js editor manager live-band learn --no-error-on-unmatched-pattern';
         exec($eslintCmd . ' 2>&1', $eslintOut, $eslintCode);
         if ($eslintCode === 0) {
             echo "PASS (0 lỗi lint)\n";
@@ -471,7 +469,9 @@ foreach ($storageFootprint() as $label => $after) {
 }
 foreach (glob($isolatedTempLogs . '/mail/*') ?: [] as $f) @unlink($f);
 @rmdir($isolatedTempLogs . '/mail');
-@unlink($isolatedTempLogs . '/audit.log');
+foreach (glob($isolatedTempLogs . '/*') ?: [] as $f) {
+    if (is_file($f)) @unlink($f);
+}
 @rmdir($isolatedTempLogs);
 
 $finalChordSetsFiles = is_dir($chordSetsDir) ? (scandir($chordSetsDir) ?: []) : [];

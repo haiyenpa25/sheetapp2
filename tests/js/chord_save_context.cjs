@@ -1,0 +1,54 @@
+const fs = require('fs'), vm = require('vm'), path = require('path');
+const root = path.resolve(__dirname, '../..');
+let total = 0, failed = 0;
+function check(ok, message) { total++; if (!ok) failed++; console.log(`${ok ? '[PASS:B]' : '[FAIL:B]'} ${message}`); }
+const chip = { setAttribute() {}, querySelector() { return { textContent: '' }; } };
+const document = { getElementById() { return null; }, querySelectorAll() { return []; }, addEventListener() {},
+  createElement() { return chip; }, body: { contains() { return true; }, appendChild() {}, classList: { contains() { return false; } } } };
+const timers = new Map(); let timerId = 0;
+const w = { addEventListener() {}, Auth: { isAdmin: () => true }, App: { getCurrentSongId: () => song, showToast() {} } };
+const context = vm.createContext({ window: w, document, navigator: { onLine: true }, localStorage: { getItem() {}, setItem() {} }, console,
+  setTimeout(fn) { timers.set(++timerId, fn); return timerId; }, clearTimeout(id) { timers.delete(id); }, requestAnimationFrame() {} });
+let song = 'A', set = 'BH', chords = { '0_0': 'C' }, requests = [];
+w.ApiService = { chordSets: { async save(...args) { requests.push(args); return { success: true, checksum: 'saved' }; }, async load() { return { success: true, checksum: 'fresh', chords: [{measureIdx:0,noteIdx:0,chord:'F'}] }; } } };
+vm.runInContext(fs.readFileSync(path.join(root, 'assets/js/chord-canvas-edit.js'), 'utf8'), context);
+const edit = w.ChordCanvasEdit;
+edit.init({ getCurrentSet: () => set, getCustomChords: () => chords, setCustomChords: c => { chords = c; }, updateSetUI() {}, build() {} });
+(async () => {
+  edit.setBaseChecksum('base-A', chords);
+  edit.scheduleSave();
+  song = 'B'; chords = { '0_0': 'Dm' };
+  for (const fn of [...timers.values()]) await fn(); timers.clear();
+  await edit.flushSave();
+  check(requests.length === 1 && requests[0][0] === 'A' && requests[0][2][0].chord === 'C', 'Debounced save retains song A and its original chord snapshot');
+  requests = [];
+  edit.setBaseChecksum('base-B', chords);
+  let reject;
+  w.ApiService.chordSets.save = (...args) => { requests.push(args); return new Promise((resolve, fail) => { reject = fail; }); };
+  const saving = edit.executeSave();
+  song = 'C'; chords = { '0_0': 'Em' }; edit.setBaseChecksum('base-C', chords);
+  reject(new Error('fixture save failure')); await saving;
+  check(chords['0_0'] === 'Em', 'Late failure from B cannot roll back C to B chords');
+  const seen = [];
+  w.ChordCanvasEdit = { setBaseChecksum: (...args) => seen.push(args), resetUndo() {}, closePopup() {}, flushSave: async () => {} };
+  vm.runInContext(fs.readFileSync(path.join(root, 'assets/js/chord-canvas.js'), 'utf8'), context);
+  await w.ChordCanvas.loadSong('C', 'BH');
+  check(seen.some(args => args[0] === 'fresh' && args[1]?.['0_0'] === 'F'), 'Loading a song seeds checksum and confirmed chord snapshot');
+  seen.length = 0; w.ChordCanvas.applyPreloaded('BH', {'0_0':'G'}, 'preloaded-checksum');
+  check(seen.some(args => args[0] === 'preloaded-checksum' && args[1]?.['0_0'] === 'G'), 'Preloaded song resets checksum and confirmed snapshot');
+  await w.ChordCanvas.loadSong('C', null);
+  check(w.ChordCanvas.getCurrentSet() === 'HD', 'Null profile is normalized to HD');
+  let resolveOld;
+  w.ApiService.chordSets.load=()=>new Promise(resolve=>{resolveOld=resolve;});
+  const oldLoad=w.ChordCanvas.loadSong('old','BH');await new Promise(resolve=>setImmediate(resolve));
+  w.ChordCanvas.applyPreloaded('BH',{'0_0':'G'},'new-checksum');
+  resolveOld({success:true,chords:[{measureIdx:0,noteIdx:0,chord:'OLD'}],checksum:'old-checksum'});await oldLoad;
+  check(w.ChordCanvas.getCustomChords()['0_0']==='G','Late network load cannot overwrite a newer preloaded set');
+  w.ApiService.chordSets.delete=async()=>({success:false,error:'Denied fixture'});
+  await w.ChordCanvas.deleteSet('BH');
+  check(w.ChordCanvas.getCurrentSet()==='BH'&&w.ChordCanvas.getCustomChords()['0_0']==='G','Failed delete preserves current set and chords');
+  let deletes=0;w.ApiService.chordSets.delete=async()=>{deletes++;return {success:true};};
+  for(const name of ['HD','TLH','default']) await w.ChordCanvas.deleteSet(name);
+  check(deletes===0,'Frontend rejects deleting every protected set before sending HTTP, even for admin');
+  console.log(`SUITE_COMPLETE total=${total}`); process.exitCode = failed ? 1 : 0;
+})().catch(err => { console.error(err); process.exitCode = 1; });

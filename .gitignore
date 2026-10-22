@@ -60,7 +60,9 @@ storage/users/admin/*
 __pycache__/
 *.pyc
 
-# Bản sao lưu tạm (*.bak đã theo dõi từ trước vẫn giữ trong Git)
+# Cấu hình riêng của server và bản sao lưu tạm
+storage/config/features.local.json
 *.bak
 .superpowers/scratch_*
+.sheetapp-e2e-isolated.json
 

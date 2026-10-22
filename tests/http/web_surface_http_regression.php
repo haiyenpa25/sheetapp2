@@ -131,7 +131,7 @@ function assertPhpJsonEndpoint(string $url, string $method, string $description,
     }
 }
 
-assertPhpJsonEndpoint("{$baseUrl}/api/log_error.php", "POST", "api/log_error.php endpoint ghi log client", 200);
+assertPhpJsonEndpoint("{$baseUrl}/api/log_error.php", "POST", "api/log_error.php từ chối ghi log thiếu Origin", 403);
 assertPhpJsonEndpoint("{$baseUrl}/api/import.php", "POST", "api/import.php legacy shim (phản hồi JSON từ router)", 403);
 
 echo "\n----------------------------------------\n";

@@ -21,7 +21,7 @@ test.describe('Ticket F9: Thống nhất Cache Service Worker & Đồng bộ Edi
     });
 
     // 1. Tạo session admin/leader để có quyền truy cập editor
-    const sessionId = execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php admin admin').toString().trim();
+    const sessionId = require('./helpers/php-session').run(["admin", "admin"]).toString().trim();
     await page.context().addCookies([{
       name: 'PHPSESSID',
       value: sessionId,

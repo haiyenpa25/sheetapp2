@@ -11,9 +11,9 @@ test('Song update rejects unmanaged XML and FTS never extracts lyrics from an un
   expect(new URL(base).pathname.replace(/\/$/, '')).toBe('/' + path.basename(isolated));
   const token = `tv43-${Date.now()}`, relative = `test-results/${token}.xml`;
   const target = path.join(isolated, relative);
-  const php = code => execFileSync('C:/xampp/php/php.exe', [], { cwd: isolated, input: '<?php ' + code,
+  const php = code => execFileSync((process.env.SHEETAPP_PHP_BINARY || 'php'), [], { cwd: isolated, input: '<?php ' + code,
     env: { ...process.env, DB_PATH: path.join(isolated, 'storage/data/app.sqlite'), TV43_ID: token, TV43_PATH: relative }, encoding: 'utf8' }).trim();
-  const sid = execFileSync('C:/xampp/php/php.exe', ['tools/create_test_session.php', 'admin'], { cwd: isolated, env: { ...process.env, SHEETAPP_E2E: '1' }, encoding: 'utf8' }).trim();
+  const sid = require('./helpers/php-session').run(['admin'], { cwd: isolated, env: { ...process.env, SHEETAPP_E2E: '1' }, encoding: 'utf8' }).trim();
   const client = await api.newContext({ extraHTTPHeaders: { Cookie: `PHPSESSID=${sid}`, Origin: new URL(base).origin } });
   fs.mkdirSync(path.dirname(target), { recursive: true });
   fs.writeFileSync(target, '<?xml version="1.0"?><score-partwise><part><measure><note><lyric><text>Forbiddenoutsideprobe</text></lyric></note></measure></part></score-partwise>', { flag: 'wx' });

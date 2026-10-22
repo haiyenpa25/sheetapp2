@@ -27,8 +27,22 @@ jobs:
           php -v
           php -m
 
+      - name: Setup Node for JS and browser regressions
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          cache: npm
+
+      - name: Install pinned JS dependencies and Chromium
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
       - name: Install sanitized library for a fresh checkout
         run: openssl rand -hex 24 | php tools/install_library.php --password-stdin
+
+      - name: Configure feature flags for the isolated HTTP tests
+        run: php -r 'file_put_contents("storage/config/features.json", json_encode(["EXPORT_CHORDPRO" => true]));'
 
       - name: Start isolated Apache for HTTP and gzip regression tests
         run: |
@@ -58,4 +72,10 @@ jobs:
       - name: Run Unified Test Runner
         env:
           SHEETAPP_TEST_URL: http://localhost/sheetapp2
-        run: php tests/run_all_tests.php
+        run: php tests/run_all_tests.php --strict --js
+
+      - name: Verify generated service worker without writing tracked files
+        run: php tools/generate_sw_manifest.php --check
+
+      - name: Chromium component smoke on isolated DOM fixtures
+        run: npx playwright test --config=e2e/roadmap6.config.js --project=chromium

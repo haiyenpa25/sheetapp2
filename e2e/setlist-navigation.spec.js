@@ -14,7 +14,7 @@ const { execSync } = require('child_process');
  */
 
 const fs = require('fs');
-const phpBin = process.env.PHP_BIN || (fs.existsSync('C:\\xampp\\php\\php.exe') ? 'C:\\xampp\\php\\php.exe' : 'php');
+const phpBin = process.env.SHEETAPP_PHP_BINARY || process.env.PHP_BIN || 'php';
 
 test.describe('E2E-07: Setlist Fast Navigation (5 bài liên tiếp)', () => {
   let setlistId = null;

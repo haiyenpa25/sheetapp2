@@ -22,7 +22,7 @@ test.describe('Epic 4.4: Tùy Chọn Thông Báo Đa Kênh & Khung Giờ Yên L�
     });
 
     // 1. Tạo session admin
-    const sessionId = execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php admin admin').toString().trim();
+    const sessionId = require('./helpers/php-session').run(["admin", "admin"]).toString().trim();
     await page.context().addCookies([{
       name: 'PHPSESSID',
       value: sessionId,

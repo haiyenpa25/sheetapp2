@@ -110,10 +110,10 @@ runCheck(
 
 // 9. Behavioral: SongLoader.load nạp dữ liệu từ SongPreloader bỏ qua network fetch
 runCheck(
-    "9. [Hành vi] SongLoader.load tái sử dụng xml và processedXml từ SongPreloader",
+    "9. [Static] SongLoader.load tái sử dụng XML và checksum từ SongPreloader",
     strpos($songLoaderJs, 'window.SongPreloader?.get?.(song.id, profileOverride)') !== false &&
-    strpos($songLoaderJs, 'window.ChordCanvas?.applyPreloaded?.(profileOverride, preloaded.chordsMap)') !== false,
-    true
+    strpos($songLoaderJs, 'window.ChordCanvas?.applyPreloaded?.(profileOverride, preloaded.chordsMap, preloaded.chordChecksum)') !== false,
+    false
 );
 
 // 10. Behavioral: Hệ thống đo thời gian chuyển bài và SetlistPlayer kích hoạt instant swap khi phát bài đã preload

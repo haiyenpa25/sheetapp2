@@ -20,19 +20,19 @@ test.describe('Epic 4.0 — Lát 4.0-c: Trung tâm thông báo trong ứng dụn
 
   test.beforeEach(async () => {
     // Chuẩn bị dữ liệu: tạo plan + assign @banhat + publish
-    const out = execSync('C:\\xampp\\php\\php.exe tools/setup_e2e_notification.php setup banhat').toString().trim();
+    const out = require('./helpers/php-session').php(['tools/setup_e2e_notification.php', 'setup', 'banhat']).toString().trim();
     testData = JSON.parse(out);
   });
 
   test.afterEach(async () => {
     if (testData && testData.plan_id) {
-      execSync(`C:\\xampp\\php\\php.exe tools/setup_e2e_notification.php cleanup ${testData.plan_id} ${testData.user_id}`);
+      require('./helpers/php-session').php(['tools/setup_e2e_notification.php', 'cleanup', String(testData.plan_id), String(testData.user_id)]);
     }
   });
 
   test('Thành viên nhận thông báo khi có Service Plan phát hành và có thể đánh dấu đã đọc', async ({ page }) => {
     // 1. Tạo session đăng nhập cho user @banhat
-    const sessionId = execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php banhat banhat').toString().trim();
+    const sessionId = require('./helpers/php-session').run(["banhat", "banhat"]).toString().trim();
     await page.context().addCookies([{
       name: 'PHPSESSID',
       value: sessionId,

@@ -227,7 +227,7 @@ test('selected song in the left picker uses compact type and a blue highlight', 
 
 for (const username of ['admin', 'hoaidinh']) {
   test(`${username} sees mobile Soạn and enters chord placement directly`, async ({ page }) => {
-    const sid = execSync(`C:\\xampp\\php\\php.exe tools/create_test_session.php ${username}`).toString().trim();
+    const sid = require('./helpers/php-session').run([username]).toString().trim();
     await page.context().addCookies([{ name: 'PHPSESSID', value: sid, url: new URL('/', test.info().project.use.baseURL).href }]);
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('./?song=thanh-ca-001&v=sheet', { waitUntil: 'domcontentloaded' });
@@ -254,7 +254,7 @@ test('phone guest does not see Soạn', async ({ page }) => {
 });
 
 test('admin mobile toolbar fits at 320px with Soạn visible', async ({ page }) => {
-  const sid = execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php admin').toString().trim();
+  const sid = require('./helpers/php-session').run(["admin"]).toString().trim();
   await page.context().addCookies([{ name: 'PHPSESSID', value: sid, url: new URL('/', test.info().project.use.baseURL).href }]);
   await page.setViewportSize({ width: 320, height: 568 });
   await page.goto('./?song=thanh-ca-001&v=sheet', { waitUntil: 'domcontentloaded' });

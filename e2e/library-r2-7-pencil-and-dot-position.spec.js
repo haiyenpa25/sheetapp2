@@ -5,7 +5,7 @@ const { execSync } = require('child_process');
 test.use({ serviceWorkers: 'block' });
 
 function loginAsHoaiDinh() {
-  return execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php hoaidinh').toString().trim();
+  return require('./helpers/php-session').run(["hoaidinh"]).toString().trim();
 }
 
 test.describe('R2-7 · Sửa vị trí ✎ và chấm (B9, B16)', () => {

@@ -3,9 +3,9 @@
   "version": "2.0.0-dev",
   "description": "SheetApp - Application for reading and performing sheet music and chord charts",
   "scripts": {
-    "sync": "./sync.sh",
+    "prepare:assets": "node tools/check_syntax.js && php tools/generate_sw_manifest.php && node tools/generate_code_map.js",
     "codemap": "node tools/generate_code_map.js",
-    "lint": "eslint --no-error-on-unmatched-pattern assets/js editor manager live-band learn",
+    "lint": "eslint --no-error-on-unmatched-pattern assets/js old/assets/js editor manager live-band learn",
     "check:syntax": "node tools/check_syntax.js",
     "e2e": "playwright test"
   },

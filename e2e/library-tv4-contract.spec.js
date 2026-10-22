@@ -17,7 +17,7 @@ test('All songs read branches return success/data and write errors use proper HT
   for (const source of [path.resolve(__dirname, '..'), 'C:/xampp/htdocs/sheetapp2']) expect(fs.realpathSync(isolated)).not.toBe(fs.realpathSync(source));
   expect(new URL(base).hostname).toBe('localhost');
   expect(new URL(base).pathname.replace(/\/$/, '')).toBe('/' + path.basename(isolated));
-  const sid = execFileSync('C:/xampp/php/php.exe', ['tools/create_test_session.php', 'admin'], { cwd: isolated, env: { ...process.env, SHEETAPP_E2E: '1' }, encoding: 'utf8' }).trim();
+  const sid = require('./helpers/php-session').run(['admin'], { cwd: isolated, env: { ...process.env, SHEETAPP_E2E: '1' }, encoding: 'utf8' }).trim();
   const client = await api.newContext({ extraHTTPHeaders: { Cookie: `PHPSESSID=${sid}`, Origin: new URL(base).origin } });
   const endpoint = `${base}/api/index.php?route=songs`, id = `tv46-${Date.now()}`;
   try {
@@ -43,6 +43,6 @@ test('All songs read branches return success/data and write errors use proper HT
     expect(deleted.status()).toBe(200); expect.soft(await deleted.json()).toHaveProperty('data');
   } finally {
     await client.dispose();
-    execFileSync('C:/xampp/php/php.exe', [], { cwd: isolated, input: "<?php if(!is_file('.roadmap6-isolated'))exit(1); require 'api/services/SongService.php'; DB::run('DELETE FROM songs_fts WHERE song_id=?',[getenv('TV46_ID')]); DB::run('DELETE FROM songs WHERE id=?',[getenv('TV46_ID')]); SongService::invalidateCache();", env: { ...process.env, DB_PATH: path.join(isolated, 'storage/data/app.sqlite'), TV46_ID: id } });
+    execFileSync((process.env.SHEETAPP_PHP_BINARY || 'php'), [], { cwd: isolated, input: "<?php if(!is_file('.roadmap6-isolated'))exit(1); require 'api/services/SongService.php'; DB::run('DELETE FROM songs_fts WHERE song_id=?',[getenv('TV46_ID')]); DB::run('DELETE FROM songs WHERE id=?',[getenv('TV46_ID')]); SongService::invalidateCache();", env: { ...process.env, DB_PATH: path.join(isolated, 'storage/data/app.sqlite'), TV46_ID: id } });
   }
 });

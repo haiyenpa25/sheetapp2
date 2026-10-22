@@ -10,9 +10,9 @@ test('Category rename refreshes cached songs; deletion transfers songs atomicall
   expect(new URL(base).pathname.replace(/\/$/, '')).toBe('/' + path.basename(isolated));
   const token = `tv45-${Date.now()}`;
   const env = { ...process.env, DB_PATH: path.join(isolated, 'storage/data/app.sqlite'), TV45_TOKEN: token };
-  const php = code => execFileSync('C:/xampp/php/php.exe', [], { cwd: isolated, input: '<?php ' + code, env, encoding: 'utf8' }).trim();
+  const php = code => execFileSync((process.env.SHEETAPP_PHP_BINARY || 'php'), [], { cwd: isolated, input: '<?php ' + code, env, encoding: 'utf8' }).trim();
   const fixture = JSON.parse(php("require 'api/core/DB.php'; $t=getenv('TV45_TOKEN'); $ids=[]; foreach(['source','rollback'] as $kind){ DB::run('INSERT INTO categories(name,slug) VALUES(?,?)',[$t.$kind,$t.$kind]); $ids[$kind]=(int)DB::lastId(); DB::run(\"INSERT INTO songs(id,title,category_id,xmlPath) VALUES(?,?,?,'fixture.xml')\",[$t.$kind,$t.$kind,$ids[$kind]]); } echo json_encode($ids);"));
-  const sid = execFileSync('C:/xampp/php/php.exe', ['tools/create_test_session.php', 'admin'], { cwd: isolated, env: { ...env, SHEETAPP_E2E: '1' }, encoding: 'utf8' }).trim();
+  const sid = require('./helpers/php-session').run(['admin'], { cwd: isolated, env: { ...env, SHEETAPP_E2E: '1' }, encoding: 'utf8' }).trim();
   const client = await api.newContext({ extraHTTPHeaders: { Cookie: `PHPSESSID=${sid}`, Origin: new URL(base).origin } });
   const songs = async () => { const data = await (await request.get(`${base}/api/index.php?route=songs`)).json(); return Array.isArray(data) ? data : data.data; };
   try {
@@ -49,7 +49,7 @@ test('Concurrent cache readers always receive complete JSON documents', async ()
   let child;
   try {
     fs.writeFileSync(cache, JSON.stringify([{ id: 'cache-probe', title: 'initial' }]));
-    child = spawn('C:/xampp/php/php.exe', [], { cwd: isolated, stdio: ['pipe', 'pipe', 'pipe'] });
+    child = spawn((process.env.SHEETAPP_PHP_BINARY || 'php'), [], { cwd: isolated, stdio: ['pipe', 'pipe', 'pipe'] });
     const done = new Promise((resolve, reject) => { child.on('error', reject); child.on('exit', code => code === 0 ? resolve() : reject(new Error(`Writer exited ${code}`))); });
     child.stdin.end(command);
     for (let i = 0; i < 2500; i++) {

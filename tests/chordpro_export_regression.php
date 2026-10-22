@@ -138,7 +138,7 @@ check(!str_contains($cpTrans, '[D7]'), "Không còn hợp âm D7 chưa dịch gi
 
 // [6/6] Kiểm tra HTTP API Route & Controller
 echo "\n[6/6] Kiểm tra API HTTP route=export&format=chordpro...\n";
-$baseUrl = 'http://localhost/sheetapp2';
+$baseUrl = rtrim(getenv('SHEETAPP_TEST_URL') ?: 'http://localhost/sheetapp2', '/');
 
 // 6.1: Gọi text/plain ChordPro
 $ch = curl_init("{$baseUrl}/api/index.php?route=export&format=chordpro&song_id=thanh-ca-001&set=HD&transpose=1");
@@ -148,6 +148,7 @@ curl_setopt_array($ch, [
     CURLOPT_TIMEOUT => 10
 ]);
 $rawResp = curl_exec($ch);
+check(is_string($rawResp), 'HTTP export kết nối được tới server kiểm thử cô lập');
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
 $headers = substr($rawResp, 0, $headerSize);

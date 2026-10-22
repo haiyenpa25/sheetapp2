@@ -5,7 +5,7 @@ const { execSync } = require('child_process');
 test.use({ serviceWorkers: 'block' });
 
 function loginAsBanHat() {
-  return execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php banhat', {
+  return require('./helpers/php-session').run(["banhat"], {
     env: { ...process.env, SHEETAPP_E2E: '1' }
   }).toString().trim();
 }

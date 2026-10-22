@@ -19,7 +19,7 @@ test.use({
 });
 
 function loginAsHoaiDinh() {
-  return execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php hoaidinh').toString().trim();
+  return require('./helpers/php-session').run(["hoaidinh"]).toString().trim();
 }
 
 test.describe('R2-5 · Điện thoại: Bảng hợp âm 38% màn hình, chip 48px, chạm 1 lần đặt & tiến', () => {

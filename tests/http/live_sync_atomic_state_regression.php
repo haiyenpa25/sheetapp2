@@ -100,10 +100,7 @@ for ($i = 1; $i <= 200; $i++) {
 file_put_contents($followerWorkerScript, $followerCode);
 
 $hostLogFile = $tempDir . '/host_history.json';
-$phpBin = 'C:\\xampp\\php\\php.exe';
-if (!file_exists($phpBin)) {
-    $phpBin = PHP_BINARY;
-}
+$phpBin = PHP_BINARY;
 
 $pHost = proc_open("\"$phpBin\" \"$hostWorkerScript\" \"$room\" \"$hostToken\" \"$hostLogFile\"", [
     0 => ['pipe', 'r'],

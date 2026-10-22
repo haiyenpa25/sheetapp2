@@ -408,7 +408,7 @@ test('Trang Thư viện bật và tắt Tối giản khôi phục bản nhạc g
     sessionStorage.setItem('sheetapp_guest_chosen', '1');
     localStorage.setItem('sheetapp_guest_toast_shown', '1');
   });
-  const base = process.env.SHEETAPP_E2E_BASE_URL || 'http://localhost/sheetapp2/';
+  const base = process.env.SHEETAPP_E2E_BASE_URL;
   await page.goto(new URL('?song=thanh-ca-021&v=sheet', base).toString(), { waitUntil: 'domcontentloaded' });
   await expect(page.locator('#osmd-container svg').first()).toBeVisible({ timeout: 25000 });
   const normalBass = await page.evaluate(() => window.OSMDRenderer.getInstance().Sheet.Instruments[1].Visible);

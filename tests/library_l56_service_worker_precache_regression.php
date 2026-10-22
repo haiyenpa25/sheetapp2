@@ -51,24 +51,59 @@ it("Script có logic quét filesize của tài nguyên", strpos($generatorConten
 it("Script có logic tính hash MD5 từng file", strpos($generatorContent, 'md5_file(') !== false);
 it("Script có logic tính hash tổng hợp toàn bộ manifest", strpos($generatorContent, 'md5(implode(') !== false);
 
-// Chạy trực tiếp generator
+// Chạy generator ở chế độ --check --json: không ghi file tracked nào (sw.js, manifest).
 $genOutput = [];
 $genExitCode = 0;
-exec('php ' . escapeshellarg($generatorPath) . ' 2>&1', $genOutput, $genExitCode);
-it("tools/generate_sw_manifest.php thực thi thành công (exit code 0)", $genExitCode === 0, true);
+$swBefore = md5_file($baseDir . '/sw.js');
+$manifestStdout = shell_exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg($generatorPath) . ' --check --json 2>' . (PHP_OS_FAMILY === 'Windows' ? 'NUL' : '/dev/null'));
+exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg($generatorPath) . ' --check 2>&1', $genOutput, $genExitCode);
+it("generate_sw_manifest.php --check PASS: sw.js khớp manifest (exit 0) — " . implode(' ', $genOutput), $genExitCode === 0, true);
+it("Chạy --check không sửa sw.js", md5_file($baseDir . '/sw.js') === $swBefore, true);
 
-// ── 2. KIỂM THỬ MANIFEST JSON (storage/data/sw-manifest.json) ──
+// ── 2. KIỂM THỬ MANIFEST JSON (stdout của --json) ──
 echo "\n--- 2. Cấu trúc Manifest JSON ---\n";
 
-$manifestPath = $baseDir . '/storage/data/sw-manifest.json';
-it("File storage/data/sw-manifest.json tồn tại sau khi sinh", file_exists($manifestPath));
-
-$manifestJson = json_decode(file_get_contents($manifestPath), true);
-it("storage/data/sw-manifest.json là JSON hợp lệ", is_array($manifestJson), true);
+$manifestJson = json_decode((string) $manifestStdout, true);
+it("--json in manifest JSON hợp lệ", is_array($manifestJson), true);
 
 it("Manifest có trường manifest_version (hash)", !empty($manifestJson['manifest_version']));
+it("Manifest có trường vendor_version (hash nội dung vendor)", !empty($manifestJson['vendor_version']));
 it("Manifest có trường generated_at", !empty($manifestJson['generated_at']));
 it("Manifest có trường total_files >= 40 (Hiện tại: " . ($manifestJson['total_files'] ?? 0) . ")", ($manifestJson['total_files'] ?? 0) >= 40, true);
+
+// Mọi CSS/JS index.php nạp lúc khởi động phải có trong PRECACHE của sw.js (TV2-5)
+$indexSrc = file_get_contents($baseDir . '/index.php');
+preg_match_all("/(cssTag|jsTag)\(\s*'([^']+)'/", $indexSrc, $tagHits, PREG_SET_ORDER);
+$swNow = file_get_contents($baseDir . '/sw.js');
+$missing = [];
+foreach ($tagHits as $hit) {
+    $rel = ($hit[1] === 'cssTag' ? 'assets/css/' : 'assets/js/') . $hit[2];
+    if (strpos($swNow, "'/{$rel}'") === false) $missing[] = $rel;
+}
+it("Mọi file index.php nạp sẵn (" . count($tagHits) . ") đều có trong precache sw.js" . ($missing ? ' — thiếu: ' . implode(', ', $missing) : ''), count($tagHits) > 0 && !$missing, true);
+it("sw.js đặt tên vendor cache theo SW_VENDOR_HASH khớp manifest", isset($manifestJson['vendor_version']) && strpos($swNow, "const SW_VENDOR_HASH = '{$manifestJson['vendor_version']}';") !== false && strpos($swNow, 'sheetapp-vendor-${SW_VENDOR_HASH}') !== false, true);
+
+// Hash không phụ thuộc xuống dòng: bản sao toàn LF (như checkout Linux) phải cho cùng kết quả --check
+$lfRoot = sys_get_temp_dir() . '/sheetapp_l56_lf_' . getmypid();
+$copyRel = array_merge(['index.php', 'sw.js', 'tools/generate_sw_manifest.php', 'api/index.php', 'manifest.json', 'favicon.svg', 'favicon.ico', 'assets/img/icon-192.png', 'assets/js/core/ScriptLoader.js', 'assets/js/live-sync.js'], array_keys($manifestJson['files'] ?? []));
+foreach (array_unique($copyRel) as $rel) {
+    $rel = explode('?', $rel)[0];
+    if ($rel === '' || !is_file($baseDir . '/' . $rel)) continue;
+    $dst = $lfRoot . '/' . $rel;
+    @mkdir(dirname($dst), 0777, true);
+    $bytes = file_get_contents($baseDir . '/' . $rel);
+    $isText = in_array(strtolower(pathinfo($rel, PATHINFO_EXTENSION)), ['js', 'css', 'php', 'json', 'svg'], true);
+    file_put_contents($dst, $isText ? str_replace("\r\n", "\n", $bytes) : $bytes);
+}
+$lfOut = [];
+$lfCode = 0;
+exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg($lfRoot . '/tools/generate_sw_manifest.php') . ' --check 2>&1', $lfOut, $lfCode);
+it("Bản sao chuyển LF cho cùng SW_MANIFEST_HASH (--check exit 0) — " . implode(' ', $lfOut), $lfCode === 0, true);
+$rmTree = function (string $dir) use (&$rmTree): void {
+    foreach (glob($dir . '/{,.}[!.,!..]*', GLOB_BRACE) ?: [] as $f) { is_dir($f) ? $rmTree($f) : @unlink($f); }
+    @rmdir($dir);
+};
+$rmTree($lfRoot);
 
 $files = $manifestJson['files'] ?? [];
 $requiredFiles = [

@@ -20,7 +20,7 @@ test.describe('E2E-08: Ngoại Tuyến Setlist Không Bị Đẩy Khỏi Cache',
     const context = await browser.newContext();
 
     // Tạo phiên đăng nhập admin để có quyền tạo setlist test nếu cần
-    const sessionId = execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php').toString().trim();
+    const sessionId = require('./helpers/php-session').run([]).toString().trim();
     await context.addCookies([{
       name: 'PHPSESSID',
       value: sessionId,

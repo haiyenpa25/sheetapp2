@@ -16,7 +16,7 @@ const { execSync } = require('child_process');
 test.describe('Ticket L0-1: Gắn module cốt lõi vào window và kiểm tra tính năng', () => {
   test('Kiểm tra window exports, chip hợp âm, phím C, Yêu thích và Gần đây', async ({ page }) => {
     // 1. Khởi tạo session đăng nhập banhat qua CLI
-    const sessionId = execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php banhat banhat').toString().trim();
+    const sessionId = require('./helpers/php-session').run(["banhat", "banhat"]).toString().trim();
     await page.context().addCookies([{
       name: 'PHPSESSID',
       value: sessionId,

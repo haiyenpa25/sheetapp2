@@ -57,7 +57,7 @@ test('nút bộ hợp âm điện thoại chỉ đổi HD và TLH, luôn hiện 
 
 for (const status of [403, 409]) {
   test(`lỗi lưu ${status} trên điện thoại không báo Đã lưu`, async ({ page }) => {
-    const sid = execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php admin', {
+    const sid = require('./helpers/php-session').run(["admin"], {
       env: { ...process.env, SHEETAPP_E2E: '1' }
     }).toString().trim();
     await page.context().addCookies([{ name: 'PHPSESSID', value: sid, url: new URL('/', test.info().project.use.baseURL).href }]);
@@ -89,7 +89,7 @@ for (const status of [403, 409]) {
 }
 
 test('mất mạng lúc đặt hợp âm báo lưu ngoại tuyến, không báo Đã lưu', async ({ page }) => {
-  const sid = execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php admin', {
+  const sid = require('./helpers/php-session').run(["admin"], {
     env: { ...process.env, SHEETAPP_E2E: '1' }
   }).toString().trim();
   await page.context().addCookies([{ name: 'PHPSESSID', value: sid, url: new URL('/', test.info().project.use.baseURL).href }]);
@@ -117,7 +117,7 @@ test('mất mạng lúc đặt hợp âm báo lưu ngoại tuyến, không báo 
 });
 
 test('Ban Hát chạm Soạn từ HD, chọn bộ BH và lưu vào BH', async ({ page }) => {
-  const sid = execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php banhat', {
+  const sid = require('./helpers/php-session').run(["banhat"], {
     env: { ...process.env, SHEETAPP_E2E: '1' }
   }).toString().trim();
   await page.context().addCookies([{ name: 'PHPSESSID', value: sid, url: new URL('/', test.info().project.use.baseURL).href }]);
@@ -150,7 +150,7 @@ test('Ban Hát chạm Soạn từ HD, chọn bộ BH và lưu vào BH', async ({
 
 for (const username of ['admin', 'hoaidinh']) {
 test(`${username} chạm Soạn, đặt hợp âm HD và thấy dữ liệu sau khi tải lại`, async ({ page }) => {
-  const sid = execSync(`C:\\xampp\\php\\php.exe tools/create_test_session.php ${username}`, {
+  const sid = require('./helpers/php-session').run([username], {
     env: { ...process.env, SHEETAPP_E2E: '1' }
   }).toString().trim();
   await page.context().addCookies([{ name: 'PHPSESSID', value: sid, url: new URL('/', test.info().project.use.baseURL).href }]);

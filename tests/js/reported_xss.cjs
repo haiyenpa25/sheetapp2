@@ -1,0 +1,34 @@
+const {chromium}=require('playwright'); const path=require('path');
+const root=path.resolve(__dirname,'../..'); let total=0,failed=0;
+function check(ok,msg){total++;if(!ok)failed++;console.log(`${ok?'[PASS:B]':'[FAIL:B]'} ${msg}`);}
+(async()=>{const browser=await chromium.launch({headless:true});try{
+ const page=await browser.newPage(); await page.setContent('<div id="si-inner"></div><div id="si-notes-inline"></div><select id="host-song-dropdown"></select><button id="btn-admin-console">Admin</button><div id="admin-modal"></div><table id="admin-categories-table"><tbody></tbody></table><table id="admin-songs-table"><tbody></tbody></table><table id="admin-users-table"><tbody></tbody></table><select id="omr-review-category"></select>');
+ await page.addScriptTag({path:path.join(root,'assets/js/core/SafeHtml.js')});
+ const payload='"><img src=x onerror="window.__xss=1">';
+ await page.evaluate(p=>{window.payload=p;window.ChordCanvas={getCurrentSet:()=>p,getCustomChords:()=>({})};},payload);
+ await page.addScriptTag({path:path.join(root,'old/assets/js/song-info-bar.js')});
+ await page.evaluate(()=>SongInfoBar.loadSong('<score-partwise/>',{id:'fixture'}));
+ check(await page.locator('#si-inner img').count()===0,'Classic chord set is rendered as text, not injected HTML');
+ await page.evaluate(()=>{window.Store={get:k=>k==='currentTranspose'?2:null};window.KeyService={displayKey:()=> 'D'};window.SetlistUI={getCurrentSetlist:()=>({items:[{bpm:123}]}),getCurrentIndex:()=>0};document.body.insertAdjacentHTML('beforeend','<div class="toolbar-left in-setlist"></div>');SongInfoBar.loadSong('<score-partwise><part><measure><attributes><key><fifths>0</fifths></key></attributes><direction><sound tempo="80"/></direction></measure></part></score-partwise>',{id:'fixture',defaultKey:'C'});});
+ check((await page.locator('#si-inner').textContent()).includes('Tông: C')&&(await page.locator('#si-inner').textContent()).includes('Tập: D'),'Classic displays original and practiced keys');
+ check((await page.locator('#si-inner').textContent()).includes('123 bpm'),'Classic tempo chip uses setlist BPM');
+ await page.evaluate(()=>{window.ApiService={songs:{list:async()=>({data:[{id:payload,title:payload}]})}};});
+ await page.addScriptTag({path:path.join(root,'live-band/js/stage-catalog.js')});
+ await page.evaluate(()=>StageCatalog.loadSongCatalog());
+ check((await page.locator('#host-song-dropdown option').nth(1).textContent()).includes(payload),'Stage title retains literal payload text');
+ check(await page.locator('#host-song-dropdown option').nth(1).getAttribute('value')===payload,'Stage song ID is safely encoded in attribute');
+ await page.evaluate(()=>{const cats=[{id:1,name:payload}];cats.data=cats;window.ApiService={categories:{list:async()=>cats},songs:{list:async()=>[{id:'song-fixture',title:payload}]},users:{list:async()=>({success:true,users:[{id:2,username:payload,role:'viewer'}]})},omr:{list:async()=>({jobs:[]})}};});
+ await page.addScriptTag({path:path.join(root,'old/assets/js/admin-ui.js')});
+ await page.evaluate(()=>{AdminUI.init();document.getElementById('btn-admin-console').click();});
+ await page.waitForFunction(()=>document.querySelector('#admin-users-table tbody tr'));
+ check(await page.locator('#admin-categories-table img').count()===0,'Admin category name is safely rendered');
+ check(await page.locator('#admin-categories-table input').first().inputValue()===payload,'Admin category input retains literal value');
+ check(await page.locator('#admin-songs-table input').first().inputValue()===payload,'Admin song title input retains literal value');
+ check(await page.locator('#admin-users-table img').count()===0,'Admin username is safely rendered');
+ await page.addScriptTag({path:path.join(root,'old/assets/js/importer.js')});
+ await page.evaluate(()=>Importer.switchTab('omr'));
+ await page.waitForFunction(()=>document.getElementById('omr-review-category').options.length>0);
+ check((await page.locator('#omr-review-category option').first().textContent())===payload,'OMR category retains literal text');
+ check(await page.evaluate(()=>!window.__xss),'Payload did not execute in Chromium');
+ }finally{await browser.close();}console.log(`SUITE_COMPLETE total=${total}`);process.exitCode=failed?1:0;
+})().catch(e=>{console.error(e);process.exitCode=1;});

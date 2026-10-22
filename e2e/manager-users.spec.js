@@ -11,7 +11,7 @@ const { execSync } = require('child_process');
 test.describe('Ticket T15a: Quản lý thành viên qua ApiService trong Manager Portal', () => {
   test('Admin mở tab Users, đổi role của user fixture và xác nhận sau khi reload', async ({ page }) => {
     // 1. Tạo session đăng nhập quyền admin
-    const sessionId = execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php admin admin').toString().trim();
+    const sessionId = require('./helpers/php-session').run(["admin", "admin"]).toString().trim();
     await page.context().addCookies([{
       name: 'PHPSESSID',
       value: sessionId,

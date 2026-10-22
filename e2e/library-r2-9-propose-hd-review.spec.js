@@ -5,13 +5,13 @@ const { execSync } = require('child_process');
 test.use({ serviceWorkers: 'block' });
 
 function loginAsBanHat() {
-  return execSync('C:\\xampp\\php\\php.exe tools/create_test_session.php banhat', {
+  return require('./helpers/php-session').run(["banhat"], {
     env: { ...process.env, SHEETAPP_E2E: '1' }
   }).toString().trim();
 }
 
 function runPhp(code) {
-  return execSync('C:\\xampp\\php\\php.exe', {
+  return require('./helpers/php-session').php([], {
     input: `<?php require 'api/core/DB.php'; ${code}`,
     env: { ...process.env, SHEETAPP_E2E: '1' }
   }).toString().trim();

@@ -21,8 +21,10 @@ if errorlevel 1 (
 
 echo [2/3] Regenerate Service Worker Precache Manifest...
 "%PHP_EXE%" tools/generate_sw_manifest.php
+if errorlevel 1 exit /b 1
 
 echo [3/3] Regenerate Gitnexus Second Brain Code Map...
 "%NODE_EXE%" tools/generate_code_map.js
+if errorlevel 1 exit /b 1
 
 echo Done. Review "git status" and commit on a branch; nothing was committed or pushed.
