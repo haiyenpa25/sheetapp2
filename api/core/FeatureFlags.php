@@ -44,8 +44,10 @@ class FeatureFlags {
 
         self::$flags = self::DEFAULTS;
 
-        $configFile = dirname(__DIR__, 2) . '/storage/config/features.json';
-        if (file_exists($configFile)) {
+        $configDir = dirname(__DIR__, 2) . '/storage/config/';
+        foreach (['features.json', 'features.local.json'] as $name) {
+            $configFile = $configDir . $name;
+            if (!is_file($configFile)) continue;
             $content = @file_get_contents($configFile);
             if ($content !== false) {
                 $json = json_decode($content, true);

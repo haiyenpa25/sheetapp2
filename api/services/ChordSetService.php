@@ -15,9 +15,11 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../core/DB.php';
+require_once __DIR__ . '/../core/Auth.php';
 
 class ChordSetService {
     public const BASE_DIR = __DIR__ . '/../../storage/data/chord_sets';
+    private const READABLE_SQL = "(LOWER(set_name) IN ('hd', 'tlh', 'default') OR is_public = 1 OR user_id = ?)";
 
     public static function getBaseDir(): string {
         $env = getenv('CHORD_SETS_DIR') ?: (getenv('SHEETAPP_CHORD_SETS_DIR') ?: null);
@@ -39,6 +41,12 @@ class ChordSetService {
         return preg_replace('/[^a-zA-Z0-9_\-]+/', '_', trim($normalized));
     }
 
+    public static function isReservedName(string $name): bool {
+        $safe = self::sanitizeName($name);
+        return $safe === '' || str_starts_with($safe, '__')
+            || in_array(strtolower($safe), ['hd', 'tlh', 'default'], true);
+    }
+
     private static function getSetFile(string $songId, string $name, bool $create = false): string {
         $safe = self::sanitizeName($name);
         return self::getSongDir($songId, $create) . '/' . $safe . '.json';
@@ -46,7 +54,7 @@ class ChordSetService {
 
     /**
      * Liệt kê tất cả các bộ hợp âm có sẵn cho bài hát
-     * (Lấy từ SQLite DB kết hợp quét fallback thư mục đĩa)
+     * Chỉ liệt kê bộ chuẩn, công khai hoặc của chính người đọc.
      */
     public static function listSets(string $songId, ?int $userId = null): array {
         $names = [];
@@ -56,25 +64,15 @@ class ChordSetService {
             $sql = "
                 SELECT DISTINCT set_name 
                 FROM user_chord_sets 
-                WHERE song_id = ? AND (is_public = 1 " . ($userId ? "OR user_id = ?" : "") . ")
+                WHERE song_id = ? AND " . self::READABLE_SQL . "
                 ORDER BY (set_name = 'HD') DESC, set_name ASC
             ";
             $stmt = $pdo->prepare($sql);
-            $params = $userId ? [$songId, $userId] : [$songId];
+            $params = [$songId, $userId ?? 0];
             $stmt->execute($params);
             $names = $stmt->fetchAll(PDO::FETCH_COLUMN) ?: [];
         } catch (Throwable $e) {
             // Fallback đọc file nếu DB lỗi
-        }
-
-        // Quét thêm từ thư mục disk nếu có file chưa kịp index
-        $dir = self::getSongDir($songId);
-        $files = glob($dir . '/*.json') ?: [];
-        foreach ($files as $f) {
-            $filename = pathinfo($f, PATHINFO_FILENAME);
-            if (!in_array($filename, $names, true)) {
-                $names[] = $filename;
-            }
         }
 
         // CORE RULE 1: HD luôn là bộ hợp âm mặc định và phải luôn xuất hiện
@@ -89,6 +87,7 @@ class ChordSetService {
      * Nạp dữ liệu hợp âm của một bộ
      */
     public static function loadSet(string $songId, string $name): array {
+        $readableOnDisk = in_array(strtolower($name), ['hd', 'tlh', 'default'], true);
         // 1. Tìm trong DB SQLite trước (Single Source of Truth)
         try {
             $pdo = DB::get();
@@ -96,11 +95,13 @@ class ChordSetService {
                 SELECT chords_json 
                 FROM user_chord_sets 
                 WHERE song_id = ? AND (set_name = ? COLLATE NOCASE OR username || '__' || set_name = ? COLLATE NOCASE)
-                ORDER BY (set_name = ?) DESC, updated_at DESC LIMIT 1
+                  AND " . self::READABLE_SQL . "
+                ORDER BY (set_name = ?) DESC, id ASC LIMIT 1
             ");
-            $stmt->execute([$songId, $name, $name, $name]);
+            $stmt->execute([$songId, $name, $name, Auth::userId() ?? 0, $name]);
             $json = $stmt->fetchColumn();
             if ($json !== false && $json !== null) {
+                $readableOnDisk = true;
                 $data = json_decode((string)$json, true);
                 if (is_array($data)) return $data;
             }
@@ -108,6 +109,8 @@ class ChordSetService {
             // Fallback sang file disk
         }
 
+        // Chỉ fallback khi DB đã xác nhận quyền, hoặc bộ chuẩn HD/TLH/default.
+        if (!$readableOnDisk) return [];
         // 2. Fallback đọc file đĩa
         $file = self::getSetFile($songId, $name);
         if (file_exists($file)) {
@@ -133,20 +136,8 @@ class ChordSetService {
      * Lấy checksum MD5 hiện tại của bộ hợp âm (phát hiện xung đột R2-3)
      */
     public static function getChecksum(string $songId, string $name): string {
-        try {
-            $pdo = DB::get();
-            $stmt = $pdo->prepare("
-                SELECT checksum 
-                FROM user_chord_sets 
-                WHERE song_id = ? AND set_name = ? COLLATE NOCASE
-                LIMIT 1
-            ");
-            $stmt->execute([$songId, $name]);
-            $cs = $stmt->fetchColumn();
-            if ($cs !== false && $cs !== null && $cs !== '') {
-                return (string)$cs;
-            }
-        } catch (Throwable $e) {}
+        $details = self::getSetDetails($songId, $name);
+        if (!empty($details['checksum'])) return (string)$details['checksum'];
 
         $chords = self::loadSet($songId, $name);
         return md5(json_encode($chords));
@@ -161,10 +152,11 @@ class ChordSetService {
         array $chords, 
         ?int $userId = null, 
         ?string $username = null,
-        ?string $attribution = null
+        ?string $attribution = null,
+        ?bool $isPublic = null
     ): bool {
         // CORE RULE 3: Không cho phép ghi đè lên bộ gốc TLH / default hoặc các tên giả lập hành động
-        if ($name === 'default' || $name === 'TLH' || str_starts_with($name, '__')) {
+        if ($name !== 'HD' && self::isReservedName($name)) {
             return false;
         }
 
@@ -175,17 +167,27 @@ class ChordSetService {
         // 1. Lưu vào SQLite Database
         try {
             $pdo = DB::get();
-            $checkStmt = $pdo->prepare("SELECT id FROM user_chord_sets WHERE song_id = ? AND set_name = ?");
+            $checkStmt = $pdo->prepare("SELECT id, user_id FROM user_chord_sets WHERE song_id = ? AND set_name = ? ORDER BY id ASC LIMIT 1");
             $checkStmt->execute([$songId, $name]);
-            $existingId = $checkStmt->fetchColumn();
+            $existing = $checkStmt->fetch(PDO::FETCH_ASSOC);
+            $existingId = $existing['id'] ?? null;
+            if ($existingId && $userId !== null && (int)$existing['user_id'] !== $userId && $name !== 'HD'
+                && !($isPublic !== null && $username && str_starts_with($name, $username . '__'))) {
+                return false;
+            }
 
             if ($existingId) {
+                // Explicit alias metadata is updated with its content in one statement.
+                $aliasSql = $isPublic !== null ? ', user_id = ?, username = ?, is_public = ?' : '';
                 $upd = $pdo->prepare("
                     UPDATE user_chord_sets 
-                    SET chords_json = ?, chord_count = ?, checksum = ?, updated_at = CURRENT_TIMESTAMP
+                    SET chords_json = ?, chord_count = ?, checksum = ?, updated_at = CURRENT_TIMESTAMP {$aliasSql}
                     WHERE id = ?
                 ");
-                $upd->execute([$chordsJson, $chordCount, $checksum, $existingId]);
+                $params = [$chordsJson, $chordCount, $checksum];
+                if ($isPublic !== null) array_push($params, $userId, $username, (int)$isPublic);
+                $params[] = $existingId;
+                $upd->execute($params);
             } else {
                 $uId = $userId ?: 1;
                 $uName = $username ?: 'banhat';
@@ -193,11 +195,13 @@ class ChordSetService {
                 $ins = $pdo->prepare("
                     INSERT INTO user_chord_sets 
                     (song_id, user_id, username, set_name, chord_count, chords_json, checksum, attribution, is_public, is_recommended, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
                 ");
-                $ins->execute([$songId, $uId, $uName, $name, $chordCount, $chordsJson, $checksum, $attribution, $isRec]);
+                $ins->execute([$songId, $uId, $uName, $name, $chordCount, $chordsJson, $checksum, $attribution, (int)($isPublic ?? true), $isRec]);
             }
         } catch (Throwable $e) {
+            // A privacy change must never succeed via the disk-only fallback.
+            if ($isPublic !== null) throw $e;
             // Tiếp tục ghi file disk nếu DB gặp lỗi tạm thời
         }
 
@@ -271,6 +275,7 @@ class ChordSetService {
      * Sao chép bản phối (Clone)
      */
     public static function cloneSet(string $songId, string $sourceName, string $targetName, ?int $userId = null, ?string $username = null): bool {
+        if (self::isReservedName($targetName)) return false;
         $sourceChords = self::loadSet($songId, $sourceName);
         $attribution = "Sao chép từ bản phối '{$sourceName}'";
         return self::saveSet($songId, $targetName, $sourceChords, $userId, $username, $attribution);
@@ -288,7 +293,7 @@ class ChordSetService {
         array $options = []
     ): array {
         // CORE RULE 3 Guard
-        if ($targetName === 'default' || $targetName === 'TLH' || str_starts_with($targetName, '__')) {
+        if (self::isReservedName($targetName)) {
             return ['success' => false, 'message' => 'Tên bộ hợp âm không hợp lệ'];
         }
 
@@ -352,11 +357,13 @@ class ChordSetService {
         if ($name === 'default' || $name === 'TLH' || $name === 'HD') {
             return false;
         }
+        if (!$isAdmin && !$userId) return false;
 
         // 1. Xóa trong CSDL SQLite
         try {
             $pdo = DB::get();
-            $sql = "DELETE FROM user_chord_sets WHERE song_id = ? AND (set_name = ? OR username || '__' || set_name = ?)";
+            // Protect the stored set, including requests using username-qualified aliases.
+            $sql = "DELETE FROM user_chord_sets WHERE song_id = ? AND (set_name = ? OR username || '__' || set_name = ?) AND LOWER(set_name) NOT IN ('hd', 'tlh', 'default')";
             if (!$isAdmin && $userId) {
                 $sql .= " AND user_id = ?";
                 $stmt = $pdo->prepare($sql);
@@ -365,8 +372,9 @@ class ChordSetService {
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([$songId, $name, $name]);
             }
+            if ($stmt->rowCount() === 0) return false;
         } catch (Throwable $e) {
-            // Không block
+            return false;
         }
 
         // 2. Xóa file đĩa nếu có
@@ -387,10 +395,12 @@ class ChordSetService {
             $stmt = $pdo->prepare("
                 SELECT id, song_id, user_id, username, set_name, instrument_type, capo_fret, custom_tempo, chord_count, notes_guide, checksum, parent_id, attribution, is_public, is_recommended, updated_at
                 FROM user_chord_sets 
-                WHERE song_id = ? AND (set_name = ? OR username || '__' || set_name = ?)
+                WHERE song_id = ? AND (set_name = ? COLLATE NOCASE OR username || '__' || set_name = ? COLLATE NOCASE)
+                  AND " . self::READABLE_SQL . "
+                ORDER BY (set_name = ?) DESC, id ASC
                 LIMIT 1
             ");
-            $stmt->execute([$songId, $name, $name]);
+            $stmt->execute([$songId, $name, $name, Auth::userId() ?? 0, $name]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             return $row ?: null;
         } catch (Throwable $e) {

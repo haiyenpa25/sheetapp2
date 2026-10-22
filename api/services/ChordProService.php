@@ -42,12 +42,7 @@ class ChordProService {
         $xmlContent = $overrideXml;
         if ($xmlContent === null) {
             $xmlPath = $song['xmlPath'] ?? '';
-            $fullPath = null;
-            if (file_exists($xmlPath)) {
-                $fullPath = $xmlPath;
-            } elseif (file_exists(__DIR__ . '/../../' . ltrim($xmlPath, '/\\'))) {
-                $fullPath = __DIR__ . '/../../' . ltrim($xmlPath, '/\\');
-            }
+            $fullPath = SongService::resolveManagedXmlPath($xmlPath);
 
             if (!$fullPath || !file_exists($fullPath)) {
                 throw new RuntimeException("Không tìm thấy file MusicXML cho bài hát: {$songId}");

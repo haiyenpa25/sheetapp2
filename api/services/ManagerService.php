@@ -223,6 +223,9 @@ class ManagerService {
                 $instrumentName = ucfirst($params['instrument_type'] ?? $userInfo['instrument'] ?? 'Guitar');
                 $setName = "Bản {$instrumentName} của " . $displayName;
             }
+            if (ChordSetService::isReservedName($setName)) {
+                return ['success' => false, 'message' => 'Tên bộ hợp âm được bảo vệ'];
+            }
 
             $instrument = trim($params['instrument_type'] ?? $userInfo['instrument'] ?? 'guitar');
             $capoFret   = isset($params['capo_fret']) ? (int)$params['capo_fret'] : 0;
@@ -248,7 +251,7 @@ class ManagerService {
 
             // Đồng bộ ra file disk storage/data/chord_sets/{songId}/{safeName}.json để chord-canvas.js có thể load
             $safeDiskName = $username . '__' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', $setName);
-            ChordSetService::saveSet($songId, $safeDiskName, $baselineChords);
+            ChordSetService::saveSet($songId, $safeDiskName, $baselineChords, $userId, $username, null, (bool)$isPublic);
 
             return [
                 'success' => true,
@@ -317,6 +320,9 @@ class ManagerService {
         }
 
         $setName     = !empty($data['set_name']) ? trim($data['set_name']) : $current['set_name'];
+        if (ChordSetService::isReservedName($setName) || ChordSetService::isReservedName($current['set_name'])) {
+            return ['success' => false, 'message' => 'Không thể sửa bộ hợp âm được bảo vệ qua Manager'];
+        }
         $instrument  = !empty($data['instrument_type']) ? trim($data['instrument_type']) : $current['instrument_type'];
         $capoFret    = isset($data['capo_fret']) ? (int)$data['capo_fret'] : $current['capo_fret'];
         $customTempo = isset($data['custom_tempo']) ? (int)$data['custom_tempo'] : $current['custom_tempo'];
@@ -330,9 +336,6 @@ class ManagerService {
             $chordsJson = json_encode($data['chords'], JSON_UNESCAPED_UNICODE);
             $chordCount = count($data['chords']);
 
-            // Lưu ra file disk storage/data/chord_sets/
-            $safeDiskName = $current['username'] . '__' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', $setName);
-            ChordSetService::saveSet($current['song_id'], $safeDiskName, $data['chords']);
         }
 
         $upd = $pdo->prepare("
@@ -342,6 +345,20 @@ class ManagerService {
                 updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
         ");
+
+        // Synchronize visibility even for metadata-only edits, using the actual owner.
+        $exportChords = json_decode((string)$chordsJson, true);
+        $exportChords = is_array($exportChords) ? $exportChords : [];
+        $safeDiskName = $current['username'] . '__' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', $setName);
+        ChordSetService::saveSet($current['song_id'], $safeDiskName, $exportChords,
+            (int)$current['user_id'], $current['username'], null, (bool)$isPublic);
+        $oldDiskName = $current['username'] . '__' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', $current['set_name']);
+        if ($oldDiskName !== $safeDiskName) {
+            // Retired aliases must not retain a formerly public copy after renaming.
+            $pdo->prepare('UPDATE user_chord_sets SET user_id = ?, username = ?, is_public = 0 WHERE song_id = ? AND set_name = ?')
+                ->execute([(int)$current['user_id'], $current['username'], $current['song_id'], $oldDiskName]);
+        }
+        // Publish canonical metadata only after alias privacy updates succeeded.
         $upd->execute([$setName, $instrument, $capoFret, $customTempo, $notesGuide, $chordsJson, $chordCount, $isPublic, $setId]);
 
         return [
@@ -374,9 +391,13 @@ class ManagerService {
             return ['success' => false, 'message' => 'Bạn không có quyền xóa bộ hợp âm này'];
         }
 
+        if (in_array(strtolower((string)$current['set_name']), ['hd', 'tlh', 'default'], true)) {
+            return ['success' => false, 'message' => 'Không thể xóa bộ hợp âm được bảo vệ'];
+        }
+
         // Xóa file disk nếu có
         $safeDiskName = $current['username'] . '__' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', $current['set_name']);
-        ChordSetService::deleteSet($current['song_id'], $safeDiskName);
+        ChordSetService::deleteSet($current['song_id'], $safeDiskName, Auth::userId(), Auth::isAdmin());
 
         $del = $pdo->prepare("DELETE FROM user_chord_sets WHERE id = ?");
         $del->execute([$setId]);
@@ -455,8 +476,8 @@ class ManagerService {
     public static function getVersionsList(array $filters = []): array {
         $pdo = DB::get();
 
-        $where = ["1=1"];
-        $params = [];
+        $where = [SongService::visibilitySqlClause('s'), '(v.is_public = 1 OR v.user_id = ? OR ? = 1)'];
+        $params = [Auth::userId() ?? 0, (int)Auth::isAdmin()];
 
         if (!empty($filters['song_id'])) {
             $where[] = "v.song_id = ?";

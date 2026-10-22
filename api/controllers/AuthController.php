@@ -60,6 +60,12 @@ class AuthController {
                 break;
 
             case 'register':
+                $rateKey = LoginRateLimiter::key('register:' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), '');
+                if (LoginRateLimiter::isBlocked($rateKey)) {
+                    Response::error('Quá nhiều lần đăng ký. Vui lòng thử lại sau 15 phút.', 429);
+                    return;
+                }
+                LoginRateLimiter::recordFailure($rateKey);
                 $data        = json_decode(file_get_contents('php://input'), true) ?? [];
                 $username    = trim($data['username'] ?? '');
                 $password    = $data['password'] ?? '';
@@ -95,7 +101,7 @@ class AuthController {
 
                 try {
                     // Tài khoản tự đăng ký chỉ có quyền xem; admin chủ động nâng quyền khi cần.
-                    $chordCode = strtoupper(substr($username, 0, 4));
+                    $chordCode = UserService::generateChordCode($username);
                     $newId = UserService::createWithProfile($username, $password, 'viewer', $displayName, $instrument, $chordCode);
                     session_regenerate_id(true);
                     $_SESSION['user_id']              = $newId;
@@ -144,12 +150,15 @@ class AuthController {
                     ]));
                 } catch (HttpException $e) {
                     Response::error($e->getMessage(), $e->getStatusCode());
-                } catch (Throwable $e) {
+                } catch (InvalidArgumentException $e) {
                     Response::error($e->getMessage(), 400);
+                } catch (Throwable $e) {
+                    Response::serverError($e, 'UpdateProfile');
                 }
                 break;
 
             case 'logout':
+                if ($method !== 'POST') { Response::methodNotAllowed(); return; }
                 $_SESSION = [];
                 if (ini_get('session.use_cookies')) {
                     $params = session_get_cookie_params();

@@ -55,8 +55,54 @@ class SongService {
 
     public static function invalidateCache(): void {
         $file = self::cachePath();
-        if (file_exists($file)) {
-            @unlink($file);
+        $lock = self::lockPublicCache($file);
+        if ($lock === false) {
+            foreach ([$file, $file . '.etag'] as $path) if (is_file($path)) @unlink($path);
+            return;
+        }
+        try {
+            rewind($lock); ftruncate($lock, 0);
+            fwrite($lock, bin2hex(random_bytes(16))); fflush($lock);
+            foreach ([$file, $file . '.etag'] as $path) if (is_file($path)) @unlink($path);
+        } finally {
+            flock($lock, LOCK_UN);
+            fclose($lock);
+        }
+    }
+
+    /** A stable lock keeps the JSON and ETag pair consistent across replacement. */
+    private static function lockPublicCache(string $file) {
+        if (!is_dir(dirname($file))) @mkdir(dirname($file), 0755, true);
+        $lock = @fopen($file . '.lock', 'c+');
+        if ($lock === false) return false;
+        if (!flock($lock, LOCK_EX)) { fclose($lock); return false; }
+        return $lock;
+    }
+
+    private static function cacheGeneration(string $file): ?string {
+        $lock = self::lockPublicCache($file);
+        if ($lock === false) return null;
+        try { rewind($lock); return (string)stream_get_contents($lock); }
+        finally { flock($lock, LOCK_UN); fclose($lock); }
+    }
+
+    public static function publicCacheSnapshot(): ?array {
+        $file = self::cachePath();
+        $lock = self::lockPublicCache($file);
+        if ($lock === false) return null;
+        try {
+            if (!is_file($file)) return null;
+            $json = @file_get_contents($file);
+            if ($json === false) return null;
+            $etag = is_file($file . '.etag') ? trim((string)@file_get_contents($file . '.etag')) : '';
+            if (!preg_match('/^[a-f0-9]{64}$/D', $etag)) {
+                $etag = hash('sha256', $json);
+                @file_put_contents($file . '.etag', $etag, LOCK_EX);
+            }
+            return ['json' => $json, 'etag' => $etag];
+        } finally {
+            flock($lock, LOCK_UN);
+            fclose($lock);
         }
     }
 
@@ -134,37 +180,51 @@ class SongService {
             if (is_array($data)) return $data;
         }
 
+        $generation = $isGuest ? self::cacheGeneration($cacheFile) : null;
         $whereVis = self::visibilitySqlClause('s');
         $sql = "SELECT s.id, s.title, s.httlvnId, s.xmlPath, s.defaultKey, s.category_id, s.liturgical_season, s.theme, s.composer, s.tags, s.tempo, COALESCE(s.visibility, 'public') as visibility, COALESCE(s.is_public, 1) as is_public, s.created_by, c.name as category FROM songs s LEFT JOIN categories c ON s.category_id = c.id WHERE {$whereVis} ORDER BY COALESCE(c.display_order, s.category_id, 1) ASC, COALESCE(s.httlvnId, 999999) ASC, s.title ASC";
         $songs = DB::run($sql)->fetchAll();
 
         // Chỉ ghi cache dùng chung cho danh sách bài hát Public (Guest)
-        if ($isGuest) {
-            self::writePublicCache($songs);
+        if ($isGuest && $generation !== null) {
+            self::writePublicCache($songs, $generation);
         }
 
         return $songs;
     }
 
-    public static function writePublicCache(?array $publicSongs = null): void {
+    public static function writePublicCache(?array $publicSongs = null, ?string $generation = null): void {
         $cacheFile = self::cachePath();
+        $generation ??= self::cacheGeneration($cacheFile);
+        if ($generation === null) return;
         if ($publicSongs === null) {
             $sql = "SELECT s.id, s.title, s.httlvnId, s.xmlPath, s.defaultKey, s.category_id, s.liturgical_season, s.theme, s.composer, s.tags, s.tempo, COALESCE(s.visibility, 'public') as visibility, COALESCE(s.is_public, 1) as is_public, s.created_by, c.name as category FROM songs s LEFT JOIN categories c ON s.category_id = c.id WHERE (COALESCE(s.is_public, 1) = 1 AND COALESCE(s.visibility, 'public') = 'public') ORDER BY COALESCE(c.display_order, s.category_id, 1) ASC, COALESCE(s.httlvnId, 999999) ASC, s.title ASC";
             $publicSongs = DB::run($sql)->fetchAll();
         }
-        $cacheDir = dirname($cacheFile);
-        if (!is_dir($cacheDir)) {
-            @mkdir($cacheDir, 0755, true);
-        }
         $jsonPayload = json_encode($publicSongs, JSON_UNESCAPED_UNICODE);
-        if ($jsonPayload !== false) {
-            $tmpFile = $cacheFile . '.tmp.' . getmypid() . '.' . bin2hex(random_bytes(2));
+        if ($jsonPayload !== false) self::storePublicCache($cacheFile, $jsonPayload, $generation);
+    }
+
+    private static function storePublicCache(string $cacheFile, string $jsonPayload, string $generation): void {
+        $lock = self::lockPublicCache($cacheFile);
+        if ($lock === false) return;
+        $tmpFile = $cacheFile . '.tmp.' . getmypid() . '.' . bin2hex(random_bytes(2));
+        try {
+            rewind($lock);
+            if ((string)stream_get_contents($lock) !== $generation) return;
+            // A crash after JSON replacement leaves a missing ETag, rebuilt on the next read.
+            if (is_file($cacheFile . '.etag') && !@unlink($cacheFile . '.etag')) return;
             if (@file_put_contents($tmpFile, $jsonPayload, LOCK_EX) !== false) {
-                if (!@rename($tmpFile, $cacheFile)) {
+                if (@rename($tmpFile, $cacheFile)) {
+                    @file_put_contents($cacheFile . '.etag', hash('sha256', $jsonPayload), LOCK_EX);
+                } else {
                     error_log('SheetApp public song cache: atomic replacement failed; retaining previous cache');
-                    @unlink($tmpFile);
                 }
             }
+        } finally {
+            if (is_file($tmpFile)) @unlink($tmpFile);
+            flock($lock, LOCK_UN);
+            fclose($lock);
         }
     }
 

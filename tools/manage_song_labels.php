@@ -37,7 +37,12 @@ $pdo = new PDO('sqlite:' . $dbPath, null, null, [
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
 ]);
 $pdo->exec('PRAGMA foreign_keys = ON;');
-$pdo->exec('PRAGMA journal_mode = WAL;');
+// Dry-run không được đổi journal mode (thao tác này vẫn ghi header SQLite).
+if (isset($options['dry-run']) || (isset($options['status']) && !isset($options['backup']))) {
+    $pdo->exec('PRAGMA query_only = ON;');
+} else {
+    $pdo->exec('PRAGMA journal_mode = WAL;');
+}
 
 /**
  * Trả về ánh xạ chính thức 903 bài theo mục lục Thánh Ca HTTLVN (Phụ lục B.1, B.2, B.3)
@@ -151,8 +156,8 @@ function syncAllFtsLabels(PDO $pdo): void {
             $hasTheme = in_array('theme', $ftsCols, true);
             if ($hasSeason && $hasTheme) {
                 $pdo->exec("UPDATE songs_fts SET 
-                    liturgical_season = (SELECT liturgical_season FROM songs WHERE songs.rowid = songs_fts.rowid),
-                    theme = (SELECT theme FROM songs WHERE songs.rowid = songs_fts.rowid)");
+                    liturgical_season = (SELECT liturgical_season FROM songs WHERE songs.id = songs_fts.song_id),
+                    theme = (SELECT theme FROM songs WHERE songs.id = songs_fts.song_id)");
             }
         }
     } catch (Throwable $e) {

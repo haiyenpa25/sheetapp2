@@ -11,22 +11,11 @@ require_once __DIR__ . '/../core/DB.php';
 class SetlistUsageHelper {
 
     public static function hasColumn(string $table, string $column): bool {
-        try {
-            $cols = DB::run("PRAGMA table_info({$table})")->fetchAll(PDO::FETCH_ASSOC);
-            foreach ($cols as $c) {
-                if (strcasecmp($c['name'] ?? '', $column) === 0) {
-                    return true;
-                }
-            }
-        } catch (Throwable $e) {}
-        return false;
+        return DB::hasColumn($table, $column);
     }
 
     public static function hasTable(string $table): bool {
-        try {
-            return (int)DB::run("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name = ?", [$table])->fetchColumn() > 0;
-        } catch (Throwable $e) {}
-        return false;
+        return DB::hasTable($table);
     }
 
     public static function recordSongUsage(int $setlistId): int {

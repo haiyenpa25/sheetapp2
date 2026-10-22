@@ -16,9 +16,10 @@ if (PHP_SAPI !== 'cli') {
  *   php tools/restore_encrypted_backup.php --input=path/to/backup.enc [--passphrase="..."] [--out-dir=path/to/target] [--verify-only]
  */
 
-$options = getopt('', ['input:', 'passphrase:', 'out-dir:', 'verify-only']);
+$options = getopt('', ['input:', 'passphrase:', 'passphrase-stdin', 'out-dir:', 'verify-only']);
 $inputPath = $options['input'] ?? ($argv[1] ?? '');
-$passphrase = $options['passphrase'] ?? '';
+$passphrase = isset($options['passphrase-stdin']) ? rtrim(stream_get_contents(STDIN), "\r\n")
+    : (getenv('SHEETAPP_BACKUP_PASSPHRASE') ?: ($options['passphrase'] ?? ''));
 $outDir = $options['out-dir'] ?? '';
 $verifyOnly = isset($options['verify-only']);
 

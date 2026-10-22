@@ -4,6 +4,8 @@
  * Ghi nhận nhật ký kiểm toán (Audit Trail) cho các thao tác quản trị và bảo mật nhạy cảm.
  */
 
+require_once __DIR__ . '/RotatingLog.php';
+
 class AuditLogger {
     private static ?string $customLogPath = null;
 
@@ -46,6 +48,6 @@ class AuditLogger {
         }
 
         $jsonLine = json_encode($entry, JSON_UNESCAPED_UNICODE) . "\n";
-        return @file_put_contents($filePath, $jsonLine, FILE_APPEND | LOCK_EX) !== false;
+        return RotatingLog::append($filePath, $jsonLine);
     }
 }

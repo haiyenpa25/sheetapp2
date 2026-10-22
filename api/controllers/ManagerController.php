@@ -252,6 +252,8 @@ class ManagerController {
                 Response::methodNotAllowed();
             }
 
+        } catch (InvalidArgumentException $e) {
+            Response::badRequest($e->getMessage());
         } catch (Throwable $e) {
             Response::serverError($e, 'Manager');
         }

@@ -70,19 +70,10 @@ function normalizeTitleTypography(string $title): string {
 /**
  * Xóa cache JSON / ETag
  */
-function invalidateSongCache(): void {
-    $cacheDir = __DIR__ . '/../storage/cache';
-    $files = ['songs_v2.json', 'songs_compact.json', 'etag_songs.txt', 'etag_compact.txt'];
-    foreach ($files as $f) {
-        $p = $cacheDir . '/' . $f;
-        if (file_exists($p)) {
-            @unlink($p);
-        }
-    }
-    $dataFile = __DIR__ . '/../storage/data/songs_cache.json';
-    if (file_exists($dataFile)) {
-        @unlink($dataFile);
-    }
+function invalidateSongCache(PDO $pdo): void {
+    require_once __DIR__ . '/../api/services/SongService.php';
+    DB::setPdo($pdo);
+    SongService::invalidateCache();
 }
 
 /**
@@ -98,9 +89,9 @@ function syncFts(PDO $pdo, string $songId): void {
 
         // Bỏ dấu tiếng Việt đơn giản cho FTS unaccented
         $unaccented = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $song['title']);
-        $sql = "UPDATE songs_fts SET title = ?, title_unaccented = ? WHERE rowid = ?";
+        $sql = "UPDATE songs_fts SET title = ?, title_unaccented = ? WHERE song_id = ?";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$song['title'], $unaccented, $song['rowid']]);
+        $stmt->execute([$song['title'], $unaccented, $songId]);
     } catch (\Throwable $e) {
         // non-fatal
     }
@@ -209,7 +200,7 @@ if (isset($options['fix'])) {
     }
 
     $pdo->commit();
-    invalidateSongCache();
+    invalidateSongCache($pdo);
 
     echo "✅ ĐÃ CẬP NHẬT THÀNH CÔNG CHÍNH TẢ & ĐỊNH DẠNG CHO {$updated} BÀI HÁT!\n";
     echo "  - 7 bài sửa lỗi gõ Telex 'NGUYỀN' → 'NGUYỆN'\n";

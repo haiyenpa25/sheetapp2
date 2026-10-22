@@ -168,7 +168,8 @@ class SetlistController {
                 $beats        = isset($data['beats_per_measure']) && $data['beats_per_measure'] !== '' ? (int)$data['beats_per_measure'] : null;
 
                 $itemId = SetlistService::addItem($setlistId, $songId, $chordProfile, $transposeKey, $bpm, $beats, $data);
-                Response::ok(['id' => $itemId, 'message' => 'Đã thêm mục vào chương trình']);
+                Response::ok(['id' => $itemId, 'message' => 'Đã thêm mục vào chương trình',
+                    'warning' => SetlistService::profileSharingWarning($songId, $chordProfile)]);
                 return;
             }
 
@@ -226,10 +227,10 @@ class SetlistController {
             // ── Gỡ phân công ──
             if ($method === 'DELETE' && $action === 'remove_assignment') {
                 if ($id <= 0) { Response::error('Thiếu assignment ID', 400); return; }
-                $assignment = DB::run("SELECT setlist_id FROM service_plan_assignments WHERE id = ?", [$id])->fetch(PDO::FETCH_ASSOC);
-                if (!$assignment) { Response::notFound('Không tìm thấy mục phân công'); return; }
+                $setlistId = SetlistService::getAssignmentSetlistId($id);
+                if ($setlistId === null) { Response::notFound('Không tìm thấy mục phân công'); return; }
 
-                if (!Auth::isAdmin() && !SetlistService::isLeaderOrOwner((int)$assignment['setlist_id'], (int)$userId)) {
+                if (!Auth::isAdmin() && !SetlistService::isLeaderOrOwner($setlistId, (int)$userId)) {
                     Response::forbidden('Bạn không có quyền gỡ phân công này');
                     return;
                 }

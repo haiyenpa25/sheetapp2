@@ -13,6 +13,15 @@ class SongController {
                 case 'HEAD':
                 case 'GET':
                     $action = $_GET['action'] ?? '';
+                    if ($action === 'version_xml') {
+                        $xml = SongVersionHelper::getVersionXml((int)($_GET['version_id'] ?? 0));
+                        if ($xml === null) { Response::notFound('Không tìm thấy phiên bản'); return; }
+                        header('Content-Type: application/xml; charset=utf-8');
+                        header('Cache-Control: private, no-store');
+                        header('X-Content-Type-Options: nosniff');
+                        if ($method !== 'HEAD') echo $xml;
+                        return;
+                    }
                     if ($action === 'get_versions' || $action === 'versions') {
                         $songId = $_GET['song_id'] ?? '';
                         if (!$songId) {
@@ -77,12 +86,14 @@ class SongController {
                             SongService::writePublicCache();
                         }
 
-                        if (file_exists($cacheFile)) {
-                            $cachedJson = (string)file_get_contents($cacheFile);
-                            $rawEtag = hash('sha256', $cachedJson);
+                        $snapshot = SongService::publicCacheSnapshot();
+                        if ($snapshot !== null) {
+                            $cachedJson = $snapshot['json'];
+                            $rawEtag = $snapshot['etag'];
                             $etag = '"' . $rawEtag . '"';
 
                             header('ETag: ' . $etag);
+                            header('X-SheetApp-Catalog-Scope: public');
                             header('Cache-Control: no-cache, must-revalidate');
 
                             $ifNoneMatch = $_SERVER['HTTP_IF_NONE_MATCH'] ?? '';
@@ -107,7 +118,7 @@ class SongController {
                                 exit;
                             }
 
-                            echo '{"success":true,"data":';
+                            echo '{"success":true,"scope":"public","data":';
                             echo $cachedJson;
                             echo '}';
                             exit;

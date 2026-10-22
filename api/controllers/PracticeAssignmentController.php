@@ -69,8 +69,10 @@ class PracticeAssignmentController {
                     Response::ok($result);
                 } catch (HttpException $e) {
                     Response::error($e->getMessage(), $e->getStatusCode());
+                } catch (InvalidArgumentException $e) {
+                    Response::error($e->getMessage(), 400);
                 } catch (Throwable $e) {
-                    Response::error($e->getMessage());
+                    Response::serverError($e, 'CreateAssignmentsFromPlan');
                 }
                 break;
 
@@ -89,8 +91,10 @@ class PracticeAssignmentController {
                     ]);
                 } catch (HttpException $e) {
                     Response::error($e->getMessage(), $e->getStatusCode());
+                } catch (InvalidArgumentException $e) {
+                    Response::error($e->getMessage(), 400);
                 } catch (Throwable $e) {
-                    Response::error($e->getMessage());
+                    Response::serverError($e, 'CreateAssignment');
                 }
                 break;
 

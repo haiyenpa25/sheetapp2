@@ -124,7 +124,7 @@ class ChordSetController {
                             $ok ? Response::ok(['message' => 'Đã lưu ' . count($chords) . ' hợp âm vào bộ HD và ghi nhận lịch sử', 'checksum' => $newChecksum])
                                 : Response::error('Lỗi khi ghi bộ hợp âm HD');
                         } catch (Throwable $e) {
-                            Response::error($e->getMessage());
+                            Response::serverError($e, 'WriteHd');
                         }
                         return;
                     }
@@ -235,7 +235,7 @@ class ChordSetController {
 
                     $ok = ChordSetService::deleteSet($songId, $name, Auth::userId(), Auth::isAdmin());
                     $ok ? Response::ok(['message' => "Đã xóa bộ hợp âm {$name}"])
-                        : Response::forbidden('Không thể xóa bộ hợp âm được bảo vệ');
+                        : Response::forbidden('Không thể xóa bộ hợp âm. Hãy kiểm tra quyền sở hữu và thử tải lại.');
                     return;
                 }
 

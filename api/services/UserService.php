@@ -7,6 +7,21 @@ require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../core/AuditLogger.php';
 
 class UserService {
+    public static function assertChordCodeAvailable(?string $code, ?int $exceptUser = null): void {
+        $code = strtoupper(trim($code ?? ''));
+        if ($code === '') return;
+        $count = DB::run('SELECT COUNT(*) FROM users WHERE UPPER(TRIM(chord_code)) = ? AND id != ?', [$code, $exceptUser ?? 0])->fetchColumn();
+        if ((int)$count > 0) throw new InvalidArgumentException('Mã hợp âm đã thuộc về tài khoản khác');
+    }
+
+    public static function generateChordCode(string $username): string {
+        $prefix = substr(preg_replace('/[^A-Z0-9]/', '', strtoupper($username)), 0, 4) ?: 'USER';
+        for ($suffix = 0; ; $suffix++) {
+            $code = $prefix . ($suffix ? (string)$suffix : '');
+            if (in_array($code, ['HD', 'TLH', 'DEFAULT'], true)) continue;
+            if (!(int)DB::run('SELECT COUNT(*) FROM users WHERE UPPER(TRIM(chord_code)) = ?', [$code])->fetchColumn()) return $code;
+        }
+    }
     public static function getAll(): array {
         return DB::query("SELECT id, username, role, display_name, instrument, chord_code, voice_part, avatar_url, bio, status, created_at FROM users ORDER BY created_at DESC");
     }
@@ -87,6 +102,7 @@ class UserService {
         }
         $hash = password_hash($password, PASSWORD_DEFAULT);
         $chordCode = !empty($chordCode) ? strtoupper(trim($chordCode)) : null;
+        self::assertChordCodeAvailable($chordCode);
         $voicePart = !empty($voicePart) ? strtoupper(trim($voicePart)) : null;
         if ($voicePart !== null && !in_array($voicePart, ['S', 'A', 'T', 'B', 'INSTR'], true)) {
             $voicePart = null;
@@ -131,6 +147,7 @@ class UserService {
         }
 
         $chordCode = strtoupper(trim($chordCode));
+        self::assertChordCodeAvailable($chordCode, $id);
         $voicePart = $voicePart !== null ? strtoupper(trim($voicePart)) : ($existing['voice_part'] ?? null);
         if ($voicePart !== null && !in_array($voicePart, ['S', 'A', 'T', 'B', 'INSTR'], true)) {
             $voicePart = null;
@@ -168,7 +185,7 @@ class UserService {
     public static function updateProfile(int $id, ?string $displayName, ?string $instrument, ?string $currentPassword, ?string $newPassword): array {
         $user = DB::run("SELECT * FROM users WHERE id = ?", [$id])->fetch();
         if (!$user) {
-            throw new Exception("Không tìm thấy tài khoản người dùng");
+            throw new InvalidArgumentException("Không tìm thấy tài khoản người dùng");
         }
 
         $fields = [];
@@ -186,13 +203,13 @@ class UserService {
 
         if (!empty($newPassword)) {
             if (empty($currentPassword) || !password_verify($currentPassword, $user['password_hash'])) {
-                throw new Exception("Mật khẩu hiện tại không chính xác");
+                throw new InvalidArgumentException("Mật khẩu hiện tại không chính xác");
             }
             if (strlen($newPassword) < 10) {
-                throw new Exception("Mật khẩu mới phải có ít nhất 10 ký tự");
+                throw new InvalidArgumentException("Mật khẩu mới phải có ít nhất 10 ký tự");
             }
             if (self::isWeakPassword($newPassword, $user['username'])) {
-                throw new Exception("Mật khẩu quá yếu hoặc dễ đoán, vui lòng chọn mật khẩu mạnh hơn");
+                throw new InvalidArgumentException("Mật khẩu quá yếu hoặc dễ đoán, vui lòng chọn mật khẩu mạnh hơn");
             }
             $fields[] = "password_hash = ?";
             $params[] = password_hash($newPassword, PASSWORD_DEFAULT);

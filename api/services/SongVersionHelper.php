@@ -111,18 +111,32 @@ class SongVersionHelper {
      */
     public static function getVersions(string $songId): array {
         try {
-            $stmt = DB::run("SELECT * FROM song_versions WHERE song_id = ? ORDER BY created_at DESC", [$songId]);
+            require_once __DIR__ . '/SongService.php';
+            if (!SongService::getById($songId)) return [];
+            $stmt = DB::run("SELECT * FROM song_versions WHERE song_id = ? AND (is_public = 1 OR user_id = ? OR ? = 1) ORDER BY created_at DESC", [$songId, Auth::userId() ?? 0, (int)Auth::isAdmin()]);
             return $stmt->fetchAll();
         } catch (\Exception $e) {
             return [];
         }
     }
 
+    public static function getVersionXml(int $versionId): ?string {
+        $version = DB::run('SELECT * FROM song_versions WHERE id = ?', [$versionId])->fetch();
+        if (!$version) return null;
+        require_once __DIR__ . '/SongService.php';
+        if (!SongService::getById($version['song_id'])) return null;
+        if (!(int)$version['is_public'] && (int)$version['user_id'] !== Auth::userId() && !Auth::isAdmin()) return null;
+        $path = SongService::resolveManagedXmlPath((string)$version['xml_path']);
+        if ($path === null || !is_readable($path)) return null;
+        $xml = file_get_contents($path);
+        return $xml === false ? null : $xml;
+    }
+
     /**
      * Lưu phiên bản sheet nhạc theo người dùng
      */
     public static function saveVersion(string $songId, string $xmlContent, string $versionName, ?int $versionId = null, ?string $description = null): array {
-        $storageRoot = realpath(__DIR__ . '/../../storage');
+        $storageRoot = realpath((PHP_SAPI === 'cli' ? getenv('SHEETAPP_STORAGE_ROOT') : false) ?: __DIR__ . '/../../storage');
         if (!$storageRoot) {
             return ['success' => false, 'message' => 'Lỗi: Thư mục storage không tồn tại'];
         }
@@ -191,13 +205,15 @@ class SongVersionHelper {
         $slugPart = substr(preg_replace('/[^a-z0-9\-]/', '', $slugPart), 0, 30);
         if (!$slugPart) $slugPart = "ver-{$nextIdx}";
 
-        $versionSlug = "v{$nextIdx}_{$slugPart}";
+        $versionSlug = "v{$nextIdx}_{$slugPart}_" . bin2hex(random_bytes(6));
         $filename = "{$versionSlug}.xml";
         $fullFilePath = $userSongDir . '/' . $filename;
         $relativeXmlPath = "storage/users/{$safeUsername}/{$safeSongId}/{$filename}";
 
-        $res = file_put_contents($fullFilePath, $xmlContent);
-        if ($res === false) {
+        $handle = @fopen($fullFilePath, 'x');
+        $res = $handle !== false ? fwrite($handle, $xmlContent) : false;
+        if ($handle !== false) fclose($handle);
+        if ($res !== strlen($xmlContent)) {
             return ['success' => false, 'message' => 'Lỗi: Không thể lưu file MusicXML của phiên bản mới'];
         }
         // Tạo luôn bản .bak ban đầu

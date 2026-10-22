@@ -17,8 +17,11 @@ if (PHP_SAPI !== 'cli') {
  */
 
 $root = dirname(__DIR__);
-$dbPath = $root . '/storage/data/app.sqlite';
-$backupDir = $root . '/storage/backups';
+$options = getopt('', ['passphrase:', 'passphrase-stdin', 'output:', 'db:', 'backup-dir:']);
+$dbPath = $options['db'] ?? $root . '/storage/data/app.sqlite';
+$backupDir = $options['backup-dir'] ?? $root . '/storage/backups';
+$passphrase = isset($options['passphrase-stdin']) ? rtrim(stream_get_contents(STDIN), "\r\n")
+    : (getenv('SHEETAPP_BACKUP_PASSPHRASE') ?: ($options['passphrase'] ?? ''));
 
 if (!is_file($dbPath)) {
     fwrite(STDERR, "Lỗi: Không tìm thấy tệp cơ sở dữ liệu tại {$dbPath}\n");
@@ -55,8 +58,6 @@ try {
 }
 
 // 3. Phân tích tham số dòng lệnh
-$options = getopt('', ['passphrase:', 'output:']);
-$passphrase = $options['passphrase'] ?? '';
 $outputPath = $options['output'] ?? ($backupDir . "/sheetapp_backup_{$timestamp}.enc");
 
 // 4. Lập danh mục và tính SHA-256 checksum cho các tệp quan trọng

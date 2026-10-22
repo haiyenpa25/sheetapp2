@@ -113,7 +113,7 @@ class LiveSyncService {
         return self::withLock($safeRoom, function() use ($safeRoom, $hostToken, $file, $leader) {
             if (file_exists($file)) {
                 $old = self::readJsonSafe($file);
-                $isStale = empty($old['active']) || (isset($old['expiresAt']) && $old['expiresAt'] < time()) || (isset($old['createdAt']) && (time() - $old['createdAt'] > 7200));
+                $isStale = empty($old['active']) || (isset($old['expiresAt']) && $old['expiresAt'] < time());
                 if (!$isStale) {
                     return ['success' => false, 'error' => 'Mã phòng đang được sử dụng'];
                 }

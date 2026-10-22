@@ -27,6 +27,16 @@ require_once __DIR__ . '/NotificationService.php';
 require_once __DIR__ . '/ReviewActionHelper.php';
 
 class ReviewService {
+    /** Resolve a submitted chord-set name without SQL in the HTTP controller. */
+    public static function resolveChordSetTarget(string $songId, string $setName, int $userId): int {
+        $pdo = DB::get();
+        $stmt = $pdo->prepare("SELECT id FROM user_chord_sets WHERE song_id = ? AND user_id = ? AND (set_name = ? OR username || '__' || set_name = ?) LIMIT 1");
+        $stmt->execute([$songId, $userId, $setName, $setName]);
+        $found = $stmt->fetchColumn();
+        // Resolving a review is read-only: never create, claim or overwrite a set.
+        return $found !== false ? (int)$found : 0;
+    }
+
     /**
      * Gửi đề xuất phê duyệt bộ hợp âm hoặc phiên bản
      */

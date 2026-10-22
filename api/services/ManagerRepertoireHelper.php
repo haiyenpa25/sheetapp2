@@ -185,6 +185,7 @@ class ManagerRepertoireHelper {
      */
     public static function searchSongsFast(string $keyword): array {
         $pdo = DB::get();
+        $visibility = SongService::visibilitySqlClause('s');
         $q = trim($keyword);
         if ($q === '') {
             // Trả 25 bài đầu tiên
@@ -194,6 +195,7 @@ class ManagerRepertoireHelper {
                        (SELECT COUNT(*) FROM user_chord_sets WHERE song_id = s.id AND is_public = 1) as chord_sets_count
                 FROM songs s
                 LEFT JOIN categories c ON s.category_id = c.id
+                WHERE {$visibility}
                 ORDER BY s.httlvnId ASC LIMIT 25
             ");
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -220,7 +222,7 @@ class ManagerRepertoireHelper {
                    (SELECT COUNT(*) FROM user_chord_sets WHERE song_id = s.id AND is_public = 1) as chord_sets_count
             FROM songs s
             LEFT JOIN categories c ON s.category_id = c.id
-            WHERE {$whereSql}
+            WHERE ({$whereSql}) AND ({$visibility})
             ORDER BY 
                 CASE 
                     WHEN CAST(s.httlvnId AS TEXT) = ? THEN 1
@@ -241,6 +243,7 @@ class ManagerRepertoireHelper {
      */
     public static function getSongDetails(string $songId): array {
         $pdo = DB::get();
+        if (!SongService::getById($songId)) return [];
 
         $stmt = $pdo->prepare("
             SELECT s.id, s.title, s.httlvnId, s.xmlPath, s.defaultKey, s.category_id, s.lyrics_text,
@@ -276,10 +279,10 @@ class ManagerRepertoireHelper {
             SELECT v.*, u.display_name
             FROM song_versions v
             LEFT JOIN users u ON v.user_id = u.id
-            WHERE v.song_id = ?
+            WHERE v.song_id = ? AND (v.is_public = 1 OR v.user_id = ? OR ? = 1)
             ORDER BY v.created_at DESC
         ");
-        $stmtVers->execute([$songId]);
+        $stmtVers->execute([$songId, Auth::userId() ?? 0, (int)Auth::isAdmin()]);
         $song['song_versions'] = $stmtVers->fetchAll(PDO::FETCH_ASSOC);
 
         return $song;

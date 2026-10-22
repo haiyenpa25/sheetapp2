@@ -20,23 +20,18 @@ require_once __DIR__ . '/SetlistUsageHelper.php';
 require_once __DIR__ . '/SetlistOfflineHelper.php';
 
 class SetlistService {
+    public static function profileSharingWarning(string $songId, string $profile): ?string {
+        if (ChordSetService::isReservedName($profile)) return null;
+        $details = ChordSetService::getSetDetails($songId, $profile);
+        if ($details && (int)$details['is_public'] === 1) return null;
+        return 'Bộ hợp âm này không công khai. Thành viên khác có thể không đọc được; hãy công khai bộ hoặc chọn HD.';
+    }
     private static function hasColumn(string $table, string $column): bool {
-        try {
-            $cols = DB::run("PRAGMA table_info({$table})")->fetchAll(PDO::FETCH_ASSOC);
-            foreach ($cols as $c) {
-                if (strcasecmp($c['name'] ?? '', $column) === 0) {
-                    return true;
-                }
-            }
-        } catch (Throwable $e) {}
-        return false;
+        return DB::hasColumn($table, $column);
     }
 
     private static function hasTable(string $table): bool {
-        try {
-            return (int)DB::run("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name = ?", [$table])->fetchColumn() > 0;
-        } catch (Throwable $e) {}
-        return false;
+        return DB::hasTable($table);
     }
 
     public static function isOwner(int $setlistId, int $userId): bool {
@@ -358,6 +353,11 @@ class SetlistService {
         AuditLogger::log('assignment_delete', $actorId, $assignmentId, []);
         DB::run("DELETE FROM service_plan_assignments WHERE id = ?", [$assignmentId]);
         return true;
+    }
+
+    public static function getAssignmentSetlistId(int $assignmentId): ?int {
+        $value = DB::run('SELECT setlist_id FROM service_plan_assignments WHERE id = ?', [$assignmentId])->fetchColumn();
+        return $value === false ? null : (int)$value;
     }
 
     public static function respondAssignment(int $assignmentId, int $userId, string $status, ?string $notes = null): bool {

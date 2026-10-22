@@ -11,7 +11,7 @@ if (PHP_SAPI !== 'cli') {
 }
 
 require_once __DIR__ . '/../api/core/DB.php';
-require_once __DIR__ . '/../api/services/SongSearchHelper.php';
+require_once __DIR__ . '/../api/services/SongService.php';
 
 // Hỗ trợ tham số --db=<path> để chạy trên bản sao trước (ROADMAP4 L6-1)
 $customDb = null;
@@ -80,12 +80,8 @@ foreach ($songs as $song) {
     }
 }
 
-// Xóa file cache nếu có để làm mới dữ liệu
-$cacheFile = __DIR__ . '/../storage/data/songs_cache.json';
-if (file_exists($cacheFile)) {
-    @unlink($cacheFile);
-    echo "Đã làm mới cache songs_cache.json\n";
-}
+SongService::invalidateCache();
+echo "Đã làm mới cache danh sách bài của DB đang dùng\n";
 
 $totalElapsed = round(microtime(true) - $startTime, 2);
 echo "\n✅ Hoàn tất! Đã trích xuất và index: {$done}, Thất bại: {$failed}, Tổng cộng: {$total} trong {$totalElapsed}s\n";

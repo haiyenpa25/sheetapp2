@@ -41,6 +41,11 @@ if (!RequestSecurity::isAllowedRequest($_SERVER, $method, FeatureFlags::isEnable
 
 try {
     switch ($route) {
+        case 'client_log':
+            require_once __DIR__ . '/controllers/ClientLogController.php';
+            (new ClientLogController())->handleRequest($method);
+            break;
+
         case 'users':
             require_once __DIR__ . '/controllers/UserController.php';
             $controller = new UserController();

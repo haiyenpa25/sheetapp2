@@ -221,10 +221,10 @@ if (isset($_SERVER['SCRIPT_FILENAME']) && realpath(__FILE__) === realpath($_SERV
         }
     }
 
-    // Xóa cache songs_cache.json nếu có thay đổi
-    $cacheFile = __DIR__ . '/../storage/data/songs_cache.json';
-    if (file_exists($cacheFile)) {
-        @unlink($cacheFile);
+    if (isset($options['clear-fake']) || isset($options['seed-top-100']) || isset($options['set'])) {
+        require_once __DIR__ . '/../api/services/SongService.php';
+        DB::setPdo($pdo);
+        SongService::invalidateCache();
     }
 
     // In báo cáo trạng thái

@@ -9,8 +9,8 @@ final class LoginRateLimiter {
         return hash('sha256', strtolower(trim($ipAddress)) . '|' . strtolower(trim($username)));
     }
 
-    public static function isBlocked(string $key): bool {
-        return count(self::read($key)) >= self::MAX_ATTEMPTS;
+    public static function isBlocked(string $key, int $maxAttempts = self::MAX_ATTEMPTS): bool {
+        return count(self::read($key)) >= $maxAttempts;
     }
 
     public static function recordFailure(string $key): void {

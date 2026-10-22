@@ -63,7 +63,7 @@ class ManagerUserHelper {
                     return ['success' => false, 'message' => 'Quyền người dùng không hợp lệ'];
                 }
                 if (empty($chordCode)) {
-                    $chordCode = strtoupper(substr($username, 0, 4));
+                    $chordCode = UserService::generateChordCode($username);
                 }
 
                 $check = $pdo->prepare("SELECT COUNT(*) FROM users WHERE username = ?");
@@ -72,6 +72,7 @@ class ManagerUserHelper {
                     return ['success' => false, 'message' => 'Tên đăng nhập này đã tồn tại'];
                 }
 
+                UserService::assertChordCodeAvailable($chordCode);
                 $hash = password_hash($password, PASSWORD_DEFAULT);
                 $ins = $pdo->prepare("INSERT INTO users (username, password_hash, role, display_name, instrument, chord_code, voice_part) VALUES (?, ?, ?, ?, ?, ?, ?)");
                 $ins->execute([$username, $hash, $role, $displayName, $instrument, $chordCode, $voicePart]);
@@ -100,6 +101,7 @@ class ManagerUserHelper {
                 $displayName  = isset($data['display_name']) ? trim($data['display_name']) : $target['display_name'];
                 $instrument   = isset($data['instrument']) ? trim($data['instrument']) : $target['instrument'];
                 $chordCode    = isset($data['chord_code']) ? strtoupper(trim($data['chord_code'])) : ($target['chord_code'] ?? '');
+                UserService::assertChordCodeAvailable($chordCode, $userId);
                 $newRole      = isset($data['role']) ? Auth::normalizeRole((string)$data['role']) : $target['role'];
                 $newPass      = !empty($data['password']) ? $data['password'] : null;
                 $newVoicePart = isset($data['voice_part'])

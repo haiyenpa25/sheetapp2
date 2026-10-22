@@ -117,27 +117,10 @@ class ReviewController {
                             Response::error("Không thể đề xuất bộ chuẩn {$setName}", 400);
                             return;
                         }
-                        $pdo = DB::get();
-                        $stmtUser = $pdo->prepare("SELECT id FROM user_chord_sets WHERE song_id = ? AND user_id = ? AND (set_name = ? OR username || '__' || set_name = ?) LIMIT 1");
-                        $stmtUser->execute([$songId, $userId, $setName, $setName]);
-                        $foundId = $stmtUser->fetchColumn();
-                        if ($foundId) {
-                            $targetId = (int)$foundId;
-                        } else {
-                            $details = ChordSetService::getSetDetails($songId, $setName);
-                            if ($details && isset($details['id'])) {
-                                $targetId = (int)$details['id'];
-                                if ((int)($details['user_id'] ?? 0) === 0 && $userId > 0) {
-                                    $pdo->prepare("UPDATE user_chord_sets SET user_id = ?, username = ? WHERE id = ?")->execute([$userId, Auth::username() ?: 'user', $targetId]);
-                                }
-                            } else {
-                                $chords = ChordSetService::loadSet($songId, $setName);
-                                ChordSetService::saveSet($songId, $setName, $chords, (int)$userId, Auth::username() ?: 'user');
-                                $details = ChordSetService::getSetDetails($songId, $setName);
-                                if ($details && isset($details['id'])) {
-                                    $targetId = (int)$details['id'];
-                                }
-                            }
+                        $targetId = ReviewService::resolveChordSetTarget($songId, $setName, (int)$userId);
+                        if ($targetId <= 0) {
+                            Response::notFound('Không tìm thấy bộ hợp âm của bạn');
+                            return;
                         }
                     }
                 }

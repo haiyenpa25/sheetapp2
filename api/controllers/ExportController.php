@@ -12,12 +12,17 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../core/Response.php';
 require_once __DIR__ . '/../core/Auth.php';
+require_once __DIR__ . '/../core/FeatureFlags.php';
 require_once __DIR__ . '/../services/ChordProService.php';
 
 class ExportController {
     public function handleRequest(string $method): void {
         if ($method !== 'GET') {
             Response::methodNotAllowed();
+            return;
+        }
+        if (!FeatureFlags::isEnabled('EXPORT_CHORDPRO')) {
+            Response::notFound('Tính năng xuất bản nhạc hiện đang tắt');
             return;
         }
 

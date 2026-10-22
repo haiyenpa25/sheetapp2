@@ -84,7 +84,7 @@ try {
     }
     if ($pdo->query('PRAGMA foreign_key_check')->fetch()) throw new RuntimeException('Updated library fails foreign key validation.');
     $pdo->commit();
-    if (realpath($target) === realpath($root . '/storage/data/app.sqlite')) SongService::invalidateCache();
+    SongService::invalidateCache();
     echo "Library updated: {$addedSongs} songs, {$addedChords} chord sets added. Existing edits and accounts preserved.\nBackup: {$backup}\n";
 } catch (Throwable $error) {
     if ($pdo && $pdo->inTransaction()) $pdo->rollBack();

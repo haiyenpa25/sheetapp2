@@ -37,6 +37,7 @@ class SetlistOfflineHelper {
 
         $songsMap = [];
         $chordSetsMap = [];
+        $chordSetStatus = [];
         $rootDir = dirname(__DIR__, 2);
 
         if (!empty($songIds)) {
@@ -71,6 +72,8 @@ class SetlistOfflineHelper {
                 foreach ($profiles as $prof) {
                     $chords = ChordSetService::loadSet($sid, $prof);
                     $chordSetsMap[$sid][$prof] = $chords;
+                    $chordSetStatus[$sid][$prof] = !ChordSetService::isReservedName($prof) && ChordSetService::getSetDetails($sid, $prof) === null
+                        ? 'forbidden' : 'readable';
                 }
             }
         }
@@ -101,6 +104,7 @@ class SetlistOfflineHelper {
             'setlist' => $setlist,
             'songs' => $songsMap,
             'chord_sets' => $chordSetsMap,
+            'chord_set_status' => $chordSetStatus,
             'total_songs' => count($songsMap),
         ];
     }

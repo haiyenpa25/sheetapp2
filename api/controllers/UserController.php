@@ -105,6 +105,8 @@ class UserController {
                 default:
                     Response::methodNotAllowed();
             }
+        } catch (InvalidArgumentException $e) {
+            Response::badRequest($e->getMessage());
         } catch (Throwable $e) {
             Response::serverError($e, 'User');
         }
