@@ -509,7 +509,7 @@ const SongLoader = (() => {
       const data = await (window.ApiService?.songs?.getVersions
         ? window.ApiService.songs.getVersions(song.id)
         : { data: [] });
-      const versions = data.data || (Array.isArray(data) ? data : []);
+      if (String(Store.get('currentSong')?.id || '') !== String(song.id)) return; const versions = data.data || (Array.isArray(data) ? data : []);
 
       listContainer.innerHTML = '';
 
@@ -531,7 +531,7 @@ const SongLoader = (() => {
           delete baseSong.versionId;
           delete baseSong.versionName;
           baseSong.xmlPath = song.masterXmlPath || song.xmlPath;
-          load(baseSong);
+          load(baseSong, Store.get('currentTranspose') ?? 0, window.ChordCanvas?.getCurrentSet?.() || 'HD');
         }
       };
       listContainer.appendChild(origBtn);
@@ -564,7 +564,7 @@ const SongLoader = (() => {
               versionId: v.id,
               versionName: `${v.username}: ${v.version_name}`
             };
-            load(verSong);
+            load(verSong, Store.get('currentTranspose') ?? 0, window.ChordCanvas?.getCurrentSet?.() || 'HD');
           };
           listContainer.appendChild(vBtn);
         });

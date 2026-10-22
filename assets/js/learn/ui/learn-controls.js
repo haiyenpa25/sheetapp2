@@ -24,7 +24,7 @@ const LearnControls = (() => {
 
     const backBtn = document.querySelector('.learn-back-btn');
     if (backBtn) {
-      backBtn.href = `/?song=${encodeURIComponent(songId)}&set=${encodeURIComponent(chordSet || 'HD')}`;
+      const rel = `?song=${encodeURIComponent(songId)}&set=${encodeURIComponent(chordSet || 'HD')}`; backBtn.href = window.ApiService?.resolveUrl ? window.ApiService.resolveUrl(rel) : `${window.__APP_BASE__ || ''}/${rel}`;
       backBtn.title = `Quay về SheetApp đánh live bài "${songTitle || songId}"`;
     }
   }

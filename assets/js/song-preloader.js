@@ -155,13 +155,13 @@ const SongPreloader = (() => {
                    || window.LibraryUI?.getSongObj?.(nextItem.song_id)
                    || window.OfflineSetlistManager?.getOfflineSong?.(nextItem.song_id);
 
-    if (!nextSongObj) {
-      nextSongObj = {
-        id: nextItem.song_id,
-        title: nextItem.title || `Bài #${nextItem.song_id}`,
-        xmlPath: `storage/Thanh ca/${nextItem.song_id}.xml`
-      };
+    if (!nextSongObj?.xmlPath && window.ApiService?.songs?.get) {
+      try {
+        const res = await window.ApiService.songs.get(nextItem.song_id);
+        nextSongObj = res?.data || res;
+      } catch (e) {}
     }
+    if (!nextSongObj?.xmlPath) return null;
 
     const profile = nextItem.chord_profile || 'HD';
     const transpose = parseInt(nextItem.transpose_key || 0, 10);

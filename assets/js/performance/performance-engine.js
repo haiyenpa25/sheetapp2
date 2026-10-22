@@ -121,8 +121,8 @@ const PerformanceEngine = (() => {
         let songObj = null;
         if (state.song?.xmlPath) {
           songObj = { id: targetSongId, title: songTitle, xmlPath: state.song.xmlPath };
-        } else if (window.LibraryUI?.getSongById) {
-          songObj = window.LibraryUI.getSongById(targetSongId);
+        } else if (window.LibraryUI?.getSongObj || window.LibraryUI?.getSongById) {
+          songObj = (window.LibraryUI.getSongObj || window.LibraryUI.getSongById)(targetSongId);
         }
         if (!songObj && window.ApiService?.songs?.get) {
           try {

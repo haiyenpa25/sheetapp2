@@ -424,7 +424,7 @@ const ChordCanvas = (() => {
     }
     const songId = window.App?.getCurrentSongId?.();
     if (!songId) return;
-    try { await window.ApiService.chordSets.delete(songId, name); } catch(e) {}
+    try { const res = await window.ApiService.chordSets.delete(songId, name); if (res && res.success === false) { window.App?.showToast?.(res.error || 'Xóa thất bại', 'error'); return; } } catch(e) { window.App?.showToast?.(e.message || 'Xóa thất bại', 'error'); return; }
     if (_currentSet === name) await switchSet('HD');
     _refreshSetDropdown(true);
   }

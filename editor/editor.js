@@ -317,7 +317,7 @@
 
   let _loadToken = 0;
   async function loadSong(song, version = null) {
-    if (!song) return; const _tok = ++_loadToken;
+    if (!song) return; if (_isDirty && _currentSong && typeof window.confirm === 'function' && !window.confirm('Bạn có thay đổi chưa lưu. Vẫn chuyển bài / phiên bản?')) return; const _tok = ++_loadToken;
     _currentSong = song;
     _currentVersion = version;
 
@@ -340,7 +340,7 @@
 
       _selectedPosition.measureNumber = 1;
       _selectedPosition.beatIndex = 0;
-      await _parseAndLoadXml(xmlText, true); if (_tok !== _loadToken) return;
+      await _parseAndLoadXml(xmlText, true); if (_tok !== _loadToken) return; _setDirty(false);
 
       const url = new URL(window.location);
       url.searchParams.set('song', song.id);
@@ -538,7 +538,7 @@
     await fetchSongsList();
   }
 
-  document.addEventListener('DOMContentLoaded', init);
+  document.addEventListener('DOMContentLoaded', init); window.addEventListener?.('beforeunload', (e) => { if (_isDirty) { e.preventDefault?.(); e.returnValue = ''; } });
 
   // Xuất API toàn cục
   window.SheetEditor = {

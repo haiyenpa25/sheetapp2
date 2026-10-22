@@ -68,7 +68,7 @@
 
     const currentUserId = app.state?.currentUser?.user_id;
     const isAdmin = app.state?.currentUser?.role === 'admin';
-    const isBanhat = app.state?.currentUser?.role === 'banhat' || isAdmin;
+    const isBanhat = app.state?.currentUser?.role === 'leader' || isAdmin;
 
     let html = '';
     sets.forEach(set => {

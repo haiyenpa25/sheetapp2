@@ -207,7 +207,7 @@ const App = (() => {
       return options ? SongLoader.load(song, t, profile, options) : SongLoader.load(song, t, profile);
     },
     loadSongXmlDirect: async (songId, xml, transpose = 0, profile = 'HD') => {
-      let song = window.LibraryUI?.getSongById?.(songId);
+      let song = window.LibraryUI?.getSongObj?.(songId) || window.LibraryUI?.getSongById?.(songId);
       if (!song?.xmlPath) {
         const result = await window.ApiService.songs.get(songId);
         song = result?.data || result;

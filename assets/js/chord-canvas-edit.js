@@ -8,7 +8,7 @@ const ChordCanvasEdit = (() => {
   let _ctx = null;
   let _popup = null;
   let _undoStack = [];
-  let _redoStack = [];
+  let _redoStack = [], _flushingOffline = false;
 
   function init(ctx) {
     _ctx = ctx;
@@ -380,14 +380,14 @@ const ChordCanvasEdit = (() => {
       }
     }
   }
-  async function flushOfflineQueue() {
+  async function flushOfflineQueue() { if (_flushingOffline) return; _flushingOffline = true;
     _loadOfflineQueue();
-    if (!_offlineQueue.length) return;
+    if (!_offlineQueue.length) { _flushingOffline = false; return; }
     _updateStatusChip('saving', `Đang đồng bộ ${_offlineQueue.length} bản lưu…`);
     while (_offlineQueue.length > 0) {
       const item = _offlineQueue[0];
       try {
-        const r = await window.ApiService.chordSets.save(item.songId, item.currentSet, item.arr, item.baseChecksum);
+        const r = await window.ApiService.chordSets.save(item.songId, item.currentSet, item.arr, item.baseChecksum).catch(e => (e?.conflict || e?.status === 409) ? { conflict: true } : Promise.reject(e)); if (r?.conflict) { _offlineQueue.shift(); _saveOfflineQueue(); showConflictModal({}); continue; }
         if (r && r.success) {
           _offlineQueue.shift();
           _saveOfflineQueue();
@@ -399,7 +399,7 @@ const ChordCanvasEdit = (() => {
         break;
       }
     }
-    if (_offlineQueue.length === 0) {
+    _flushingOffline = false; if (_offlineQueue.length === 0) {
       _updateStatusChip('saved', 'Đã lưu ✓');
       window.App?.showToast?.('Đã đồng bộ xong dữ liệu ngoại tuyến', 'success');
     } else {

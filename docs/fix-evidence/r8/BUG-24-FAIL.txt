@@ -1,0 +1,18 @@
+[FAIL:B] BUG-22: Chß╗ìn phi├¬n bß║ún b├ái h├ít giß╗» nguy├¬n dß╗ïch giß╗ìng (currentTranspose=4) v├á bß╗Ö hß╗úp ├óm (BanNhac_A)
+[FAIL:B] BUG-23: SongPreloader.preloadNextInSetlist lß║Ñy ─æ├║ng xmlPath thß║¡t cß╗ºa b├ái thay v├¼ tß╗▒ gh├⌐p ─æ╞░ß╗¥ng dß║½n giß║ú
+[FAIL:B] BUG-24: Hai lß║ºn gß╗ìi flushOfflineQueue ─æß╗ông thß╗¥i kh├┤ng gß╗¡i tr├╣ng v├á mß╗Ñc 409 kh├┤ng chß║╖n mß╗Ñc hß╗úp lß╗ç ph├¡a sau
+[Editor] Lß╗ùi tß║úi phi├¬n bß║ún: TypeError: listEl.appendChild is not a function
+    at _renderVersionsDropdown (evalmachine.<anonymous>:304:12)
+    at fetchSongVersions (evalmachine.<anonymous>:286:7)
+    at async Object.loadSong (evalmachine.<anonymous>:349:7)
+    at async C:\xampp\htdocs\sheetapp2\tests\js\bug22_to_24_and_38_to_41_low.cjs:286:5
+[Editor] Lß╗ùi tß║úi phi├¬n bß║ún: TypeError: listEl.appendChild is not a function
+    at _renderVersionsDropdown (evalmachine.<anonymous>:304:12)
+    at fetchSongVersions (evalmachine.<anonymous>:286:7)
+    at async Object.loadSong (evalmachine.<anonymous>:349:7)
+    at async C:\xampp\htdocs\sheetapp2\tests\js\bug22_to_24_and_38_to_41_low.cjs:293:5
+[FAIL:B] BUG-38: Editor hß╗Åi x├íc nhß║¡n khi ─æang c├│ thay ─æß╗òi ch╞░a l╞░u (_isDirty) v├á ─æ─âng k├╜ beforeunload
+[FAIL:B] BUG-39: T├ái khoß║ún Ban H├ít th╞░ß╗¥ng kh├┤ng thß║Ñy n├║t Ghim (toggleRecommend / toggleVersionRecommend) trong Manager
+[FAIL:B] BUG-40 (ChordCanvas): Classic deleteSet giß╗» nguy├¬n bß╗Ö v├á b├ío lß╗ùi khi server trß║ú vß╗ü thß║Ñt bß║íi
+[FAIL:B] BUG-41: LearnControls.updateUrlAndBackLink dß╗▒ng link Quay vß╗ü c├│ chß╗⌐a base path (/sheetapp2/)
+SUITE_COMPLETE total=7 passed=0 failed=7

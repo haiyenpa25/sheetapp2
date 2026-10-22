@@ -231,7 +231,7 @@ const Importer = (() => {
       if (data && data.length > 0) {
         container.classList.remove('hidden');
         list.innerHTML = data.map(job => 
-          `<div class="job-item flex justify-between align-center p-half border-b" style="cursor:pointer;" onclick="Importer.selectOmrJob('${job.id}', '${job.status}', '${_esc(job.original_filename)}', '${job.musicxml_path}')">
+          `<div class="job-item flex justify-between align-center p-half border-b" style="cursor:pointer;" onclick="Importer.selectOmrJob('${window.SafeHtml.inlineJsString(job.id)}', '${window.SafeHtml.inlineJsString(job.status)}', '${window.SafeHtml.inlineJsString(job.original_filename)}', '${window.SafeHtml.inlineJsString(job.musicxml_path)}')">
             <div>
               <strong>${_esc(job.original_filename)}</strong><br>
               <span class="text-xs text-muted">${job.created_at}</span>
