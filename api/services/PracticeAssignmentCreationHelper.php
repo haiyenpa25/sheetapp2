@@ -68,6 +68,7 @@ class PracticeAssignmentCreationHelper {
                 $checkStmt->execute([$planId, $songId]);
                 $existingId = $checkStmt->fetchColumn();
 
+                $title = "Tập bài: " . $songId . " — " . ($plan['title'] ?? 'Buổi nhóm');
                 if ($existingId) {
                     $assignmentId = (int)$existingId;
                 } else {
@@ -89,12 +90,13 @@ class PracticeAssignmentCreationHelper {
                         $bpm, $transpose, $chordProfile
                     ]);
                     $assignmentId = (int)$pdo->lastInsertId();
+                } {
 
                     // Gán target cho từng ca viên trong ban và thu thập user_ids để gửi thông báo (F5)
                     $targetUserIds = [];
                     foreach ($assignees as $assignee) {
                         $targetUserId = (int)$assignee['user_id'];
-                        $targetUserIds[] = $targetUserId;
+                        // Only newly inserted targets are added below
                         $voicePart = $assignee['voice_part'] ?? null;
                         if (!$voicePart && !empty($assignee['role'])) {
                             // Tự suy đoán nếu role chứa S/A/T/B
@@ -108,10 +110,11 @@ class PracticeAssignmentCreationHelper {
                                 assignment_id, user_id, voice_part, status
                             ) VALUES (?, ?, ?, 'assigned')
                         ")->execute([$assignmentId, $targetUserId, $voicePart]);
+                        if ((int)$pdo->query("SELECT changes()")->fetchColumn() > 0) $targetUserIds[] = $targetUserId;
                     }
 
                     // Ghi nhận sự kiện miền practice.assigned với đầy đủ danh sách user_ids
-                    DomainEvents::record(
+                    if (!empty($targetUserIds)) DomainEvents::record(
                         'practice.assigned',
                         $actorId,
                         'practice_assignment',
@@ -124,7 +127,7 @@ class PracticeAssignmentCreationHelper {
                         ]
                     );
 
-                    $createdAssignments[] = $assignmentId;
+                    if (!$existingId) $createdAssignments[] = $assignmentId;
                 }
             }
 

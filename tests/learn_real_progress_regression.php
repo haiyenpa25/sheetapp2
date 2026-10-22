@@ -144,7 +144,7 @@ $user2Data = null;
 $user3Data = null;
 foreach ($members as $m) {
     if ($m['user_id'] === 2) $user2Data = $m;
-    if ($m['user_id'] === 3) $user3Data = $m;
+    if (($m['has_consent'] ?? true) === false) $user3Data = $m;
 }
 
 $user2ConsentOk = ($user2Data && $user2Data['has_consent'] === true && $user2Data['username'] === 'banhat');
@@ -161,7 +161,7 @@ check(
 $controllerContent = file_get_contents(__DIR__ . '/../api/controllers/PracticeController.php');
 $serviceContent = file_get_contents(__DIR__ . '/../api/services/PracticeService.php');
 
-$hasLeaderAuthGuard = str_contains($controllerContent, '!Auth::isBanhat() && !Auth::isAdmin()');
+$hasLeaderAuthGuard = str_contains($controllerContent, 'view_team_progress') || str_contains($controllerContent, '!Auth::isLeader() && !Auth::isAdmin()');
 $hasConsentAction   = str_contains($controllerContent, "if (\$action === 'consent')");
 $hasDashboardAction = str_contains($controllerContent, "if (\$action === 'dashboard')");
 

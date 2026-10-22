@@ -396,7 +396,7 @@ class PracticeService {
                 $username    = $u['username'];
                 $instrument  = $u['instrument'] ?? 'Thành viên';
             } else {
-                $displayName = "Thành viên ẩn danh #" . $uId;
+                $displayName = "Thành viên ẩn danh";
                 $username    = "anonymous";
                 $instrument  = "Bảo mật";
             }
@@ -413,17 +413,17 @@ class PracticeService {
             }
 
             $leaderboard[] = [
-                'user_id' => $uId,
+                'user_id' => $hasConsent ? $uId : null,
                 'display_name' => $displayName,
                 'username' => $username,
-                'role' => $u['role'],
+                'role' => $hasConsent ? $u['role'] : null,
                 'instrument' => $instrument,
                 'has_consent' => $hasConsent,
-                'sessions_count' => $sessionsCount,
-                'total_minutes' => $totalMinutes,
-                'avg_accuracy' => $avgAcc,
-                'highest_bpm' => $highestBpm,
-                'last_practice_at' => $lastAt,
+                'sessions_count' => $hasConsent ? $sessionsCount : null,
+                'total_minutes' => $hasConsent ? $totalMinutes : null,
+                'avg_accuracy' => $hasConsent ? $avgAcc : null,
+                'highest_bpm' => $hasConsent ? $highestBpm : null,
+                'last_practice_at' => $hasConsent ? $lastAt : null,
                 'recent_songs' => $recentSongs
             ];
         }

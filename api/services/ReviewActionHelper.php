@@ -75,9 +75,12 @@ class ReviewActionHelper {
                     $up->execute([$reviewerId, $targetId]);
                 }
             } elseif ($reviewType === 'update_hd') {
+                if ($targetType !== 'chord_set') {
+                    throw new DomainException("Chỉ có thể cập nhật bộ HD từ bộ hợp âm (chord_set)");
+                }
                 // Cập nhật vào bộ HD chính thức
                 $proposedChords = json_decode((string)$req['proposed_snapshot_json'], true);
-                if (!is_array($proposedChords) || empty($proposedChords)) {
+                if (!is_array($proposedChords) || empty($proposedChords) || isset($proposedChords['xml_path'])) {
                     // CORE RULE 1: Không cho phép đề xuất làm rỗng bộ HD
                     throw new DomainException("Không thể duyệt: Bộ hợp âm đề xuất rỗng (Vi phạm Core Rule 1)");
                 }

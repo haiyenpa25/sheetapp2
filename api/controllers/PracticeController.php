@@ -33,8 +33,9 @@ class PracticeController {
                 }
 
                 if ($action === 'leader_view') {
+                    AuthPolicy::authorize('view_team_progress', 'Chỉ Ca Trưởng hoặc Quản Trị Viên mới có quyền xem tiến độ ca đoàn');
                     // Quyền xem: Chỉ Ca Trưởng / Ban Hát hoặc Quản Trị Viên
-                    if (!Auth::isBanhat() && !Auth::isAdmin()) {
+                    if (!Auth::isLeader() && !Auth::isAdmin()) {
                         Response::forbidden('Chỉ Ca Trưởng hoặc Quản Trị Viên mới có quyền xem tiến độ ca đoàn');
                         return;
                     }

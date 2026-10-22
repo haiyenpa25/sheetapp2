@@ -1,0 +1,14 @@
+﻿[PASS:B] BUG-02: ReviewService::submit tß╗½ chß╗æi cß║╖p target_type=song_version + review_type=update_hd
+[PASS:B] BUG-02: ReviewActionHelper::approve chß║╖n update_hd cho song_version, giß╗» nguy├¬n HD v├á kh├┤ng chß║ím user_chord_sets c├│ c├╣ng ID
+[PASS:B] BUG-03: SongService::delete x├│a b├ái c├│ XML th├ánh c├┤ng (kh├┤ng lß╗ùi 500) v├á bß║úo to├án file XML trong storage/Thanh ca/
+[PASS:B] BUG-04: Viewer gß╗ìi GET /api/setlists chß╗ë thß║Ñy ch╞░╞íng tr├¼nh published, kh├┤ng thß║Ñy bß║ún draft
+[PASS:B] BUG-04: Viewer gß╗ìi GET /api/setlists?id=<draft> bß╗ï tß╗½ chß╗æi (404)
+[PASS:B] BUG-04: Viewer gß╗ìi GET /api/setlists?id=<published> kh├┤ng nhß║¡n danh s├ích ph├ón c├┤ng nß╗Öi bß╗Ö (assignments)
+[PASS:B] BUG-04: Viewer kh├┤ng tß║úi ─æ╞░ß╗úc offline_package cß╗ºa ch╞░╞íng tr├¼nh draft
+[PASS:B] BUG-05: ArrangementService::saveArrangement chß║╖n sß╗¡a/x├│a steps cß╗ºa kß╗ïch bß║ún thuß╗Öc b├ái h├ít kh├íc (IDOR)
+[PASS:B] BUG-05: ArrangementService::saveArrangement tß╗½ chß╗æi section_id thuß╗Öc b├ái h├ít kh├íc
+[PASS:B] BUG-06: Ban H├ít th╞░ß╗¥ng bß╗ï chß║╖n (403) khi gß╗ìi action=leader_view
+[PASS:B] BUG-06: PracticeService::getLeaderView ß║⌐n ho├án to├án user_id, role v├á c├íc chß╗ë sß╗æ tß║¡p cß╗ºa th├ánh vi├¬n tß║»t chia sß║╗
+[PASS:B] BUG-07: createFromServicePlan lß║ºn 2 g├ín target cho ng╞░ß╗¥i mß╗¢i ph├ón c├┤ng v├á chß╗ë ph├ít th├┤ng b├ío cho ng╞░ß╗¥i mß╗¢i
+SUITE_COMPLETE total=12 passed=12 failed=0
+

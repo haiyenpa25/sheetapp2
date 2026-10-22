@@ -185,6 +185,9 @@ class ArrangementService {
 
         try {
             if ($id) {
+                if (!(bool)DB::run("SELECT 1 FROM arrangements WHERE id = ? AND song_id = ?", [$id, $songId])->fetchColumn()) {
+                    throw new InvalidArgumentException('Kịch bản không tồn tại hoặc không thuộc bài hát này');
+                }
                 DB::run(
                     "UPDATE arrangements SET name = ?, description = ?, is_default = ? WHERE id = ? AND song_id = ?",
                     [$name, $description, $isDefault, $id, $songId]
@@ -210,6 +213,9 @@ class ArrangementService {
                 $cueText        = !empty($st['cue_text']) ? (is_array($st['cue_text']) ? json_encode($st['cue_text'], JSON_UNESCAPED_UNICODE) : (string)$st['cue_text']) : null;
 
                 if ($sectionId > 0) {
+                    if (!(bool)DB::run("SELECT 1 FROM song_sections WHERE id = ? AND song_id = ?", [$sectionId, $songId])->fetchColumn()) {
+                        throw new InvalidArgumentException('Phân đoạn không thuộc bài hát này');
+                    }
                     DB::run(
                         "INSERT INTO arrangement_steps (arrangement_id, seq, section_id, repeat_count, transpose_delta, bpm, cue_text) 
                          VALUES (?, ?, ?, ?, ?, ?, ?)",

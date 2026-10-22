@@ -40,7 +40,7 @@ class SetlistController {
                         Response::error('Thiếu song_id', 400);
                         return;
                     }
-                    Response::ok(['data' => $userId === null
+                    Response::ok(['data' => (!Auth::isBanhat() && !Auth::isAdmin())
                         ? SetlistPublicReadService::getSongUsageHistory($songId)
                         : SetlistService::getSongUsageHistory($songId)]);
                     return;
@@ -78,7 +78,10 @@ class SetlistController {
                         Response::error('Thiếu ID chương trình', 400);
                         return;
                     }
-                    $package = SetlistService::getOfflinePackage($id);
+                    $isPublicViewer = !Auth::isBanhat() && !Auth::isAdmin();
+                    $package = $isPublicViewer
+                        ? (($pub = SetlistPublicReadService::getById($id)) ? SetlistOfflineHelper::getOfflinePackage($id, $pub) : null)
+                        : SetlistService::getOfflinePackage($id);
                     if (!$package) {
                         Response::notFound('Chương trình không tồn tại');
                         return;
@@ -88,14 +91,14 @@ class SetlistController {
                 }
 
                 if ($id > 0) {
-                    $setlist = $userId === null ? SetlistPublicReadService::getById($id) : SetlistService::getById($id);
+                    $setlist = (!Auth::isBanhat() && !Auth::isAdmin()) ? SetlistPublicReadService::getById($id) : SetlistService::getById($id);
                     if (!$setlist) {
                         Response::notFound('Chương trình không tồn tại');
                         return;
                     }
                     Response::ok(['data' => $setlist]);
                 } else {
-                    Response::ok(['data' => $userId === null ? SetlistPublicReadService::getAll() : SetlistService::getAll($userId)]);
+                    Response::ok(['data' => (!Auth::isBanhat() && !Auth::isAdmin()) ? SetlistPublicReadService::getAll() : SetlistService::getAll($userId)]);
                 }
                 return;
             }

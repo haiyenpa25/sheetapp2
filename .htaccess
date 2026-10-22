@@ -30,6 +30,7 @@ Options -Indexes
     Header always set X-Content-Type-Options "nosniff"
     Header always set X-Frame-Options "SAMEORIGIN"
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always unset X-Powered-By
 </IfModule>
 
 # ─── GZIP Compression ──────────────────────────────────────────────
@@ -86,9 +87,11 @@ Options -Indexes
     php_value post_max_size 20M
     php_value max_execution_time 60
     php_value allow_url_fopen On
+    php_flag session.upload_progress.enabled Off
 </IfModule>
 
 # PHP output buffering để gzip hoạt động đúng
 <IfModule mod_php8.c>
     php_flag output_buffering On
+    php_flag session.upload_progress.enabled Off
 </IfModule>

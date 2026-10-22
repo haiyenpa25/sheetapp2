@@ -59,6 +59,9 @@ class ReviewService {
         if (!in_array($reviewType, ['recommend', 'update_hd'], true)) {
             throw new InvalidArgumentException("review_type không hợp lệ: {$reviewType}");
         }
+        if ($reviewType === 'update_hd' && $targetType !== 'chord_set') {
+            throw new InvalidArgumentException("Chỉ có thể cập nhật bộ HD từ bộ hợp âm (chord_set)");
+        }
 
         $pdo = DB::get();
 

@@ -356,7 +356,7 @@ class SongService {
                 $xmlFile = self::resolveManagedXmlPath($song['xmlPath']);
                 if ($xmlFile !== null && file_exists($xmlFile)) {
                     // Không xóa trực tiếp thư viện gốc, chỉ xóa nếu nằm trong uploads
-                    if (strpos($xmlFile, realpath(__DIR__ . '/../../storage/uploads')) === 0) {
+                    if (($up = realpath(__DIR__ . '/../../storage/uploads')) !== false && str_starts_with($xmlFile, rtrim($up, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR)) {
                         @unlink($xmlFile);
                     }
                 }
