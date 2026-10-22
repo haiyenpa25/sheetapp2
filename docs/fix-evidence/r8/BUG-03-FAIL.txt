@@ -1,0 +1,8 @@
+[PASS:B] Guest bß╗ï chß║╖n ─æß╗ìc getSongDetails cß╗ºa b├ái h├ít private (BUG-02)
+[PASS:B] Guest bß╗ï chß║╖n ─æß╗ìc SongService::getVersions cß╗ºa b├ái h├ít private (BUG-02)
+[PASS:B] User B kh├┤ng thß║Ñy bß╗Ö hß╗úp ├óm is_public=0 cß╗ºa User A trong getSongDetails (BUG-02)
+[FAIL:B] Chß╗º sß╗ƒ hß╗»u (User A) thß║Ñy bß╗Ö hß╗úp ├óm is_public=0 cß╗ºa ch├¡nh m├¼nh trong getSongDetails (BUG-02)
+[FAIL:B] Guest gß╗ìi getCommunityChordSets kh├┤ng thß║Ñy bß╗Ö hß╗úp ├óm thuß╗Öc b├ái h├ít private (BUG-02)
+[PASS:B] Guest gß╗ìi getVersionsList kh├┤ng thß║Ñy version cß╗ºa b├ái private hay version is_public=0 (BUG-03)
+[FAIL:B] User B gß╗ìi getRepertoire kh├┤ng thß║Ñy song_versions c├│ is_public=0 cß╗ºa User A (BUG-03)
+SUITE_COMPLETE total=7 passed=4 failed=3

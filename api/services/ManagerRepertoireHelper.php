@@ -95,10 +95,10 @@ class ManagerRepertoireHelper {
                        u.display_name
                 FROM song_versions v
                 LEFT JOIN users u ON v.user_id = u.id
-                WHERE v.song_id IN ($inClause)
+                WHERE v.song_id IN ($inClause) AND (v.is_public = 1 OR v.user_id = ? OR ? = 1)
                 ORDER BY v.created_at DESC
             ");
-            $stmtVers->execute($songIds);
+            $stmtVers->execute(array_merge($songIds, [Auth::userId() ?? 0, (int)Auth::isAdmin()]));
             $allVers = $stmtVers->fetchAll(PDO::FETCH_ASSOC);
 
             $versBySong = [];
@@ -261,10 +261,10 @@ class ManagerRepertoireHelper {
             SELECT cs.*, u.display_name, u.role as user_role, u.instrument as user_instrument, u.avatar_url
             FROM user_chord_sets cs
             LEFT JOIN users u ON cs.user_id = u.id
-            WHERE cs.song_id = ? AND cs.is_public = 1
+            WHERE cs.song_id = ? AND (cs.is_public = 1 OR cs.user_id = ? OR ? = 1)
             ORDER BY cs.is_recommended DESC, cs.created_at DESC
         ");
-        $stmtChords->execute([$songId]);
+        $stmtChords->execute([$songId, Auth::userId() ?? 0, (int)Auth::isAdmin()]);
         $song['user_chord_sets'] = $stmtChords->fetchAll(PDO::FETCH_ASSOC);
 
         // Kiểm tra xem có bộ HD chuẩn không

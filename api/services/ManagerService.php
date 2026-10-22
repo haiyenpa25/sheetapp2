@@ -119,7 +119,7 @@ class ManagerService {
     public static function getCommunityChordSets(array $filters = []): array {
         $pdo = DB::get();
 
-        $where = ["cs.is_public = 1"];
+        $where = ["cs.is_public = 1", SongService::visibilitySqlClause('s')];
         $params = [];
 
         if (!empty($filters['song_id'])) {
