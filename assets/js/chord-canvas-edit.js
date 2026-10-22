@@ -37,7 +37,7 @@ const ChordCanvasEdit = (() => {
     }
   }
 
-  function _destroyPopup() { _clearNoteCursor(); _popup?.remove(); _popup = null; }
+  function _destroyPopup() { _clearNoteCursor(); _popup?.dispose?.(); _popup?.remove(); _popup = null; }
   function _closePopup(rebuild = true) { _destroyPopup(); if (rebuild) _getApp()?.build?.(); }
 
   function _pushUndo() {

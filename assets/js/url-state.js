@@ -16,6 +16,7 @@ const URLState = (() => {
 
   // Default values — omit from URL if matches
   const DEFAULTS = { t: 0, v: 'sheet', lv: 'stacked', set: 'HD', compact: false };
+  let _inPopstate = false;
 
   /**
    * Đọc state hiện tại từ URL
@@ -62,7 +63,7 @@ const URLState = (() => {
   function resetForNewSong(songId) {
     const url = new URL(location.origin + location.pathname);
     url.searchParams.set('song', songId);
-    history.pushState({ song: songId }, '', url);
+    if (_inPopstate) history.replaceState({ song: songId }, '', url); else history.pushState({ song: songId }, '', url);
   }
 
   /**
@@ -87,6 +88,7 @@ const URLState = (() => {
     return url.href;
   }
 
+  window.addEventListener?.('popstate', (ev) => { const sid = ev?.state?.song || get().song; if (!sid || String(window.App?.getCurrentSongId?.() || '') === String(sid)) return; _inPopstate = true; try { const sObj = window.LibraryUI?.getSongObj?.(sid) || window.LibraryUI?.getSongById?.(sid); if (sObj && window.App?.loadSong) { resetForNewSong(sid); window.App.loadSong(sObj, get().t || 0); } else window.LibraryUI?.selectSongById?.(sid); } finally { _inPopstate = false; } });
   return { get, update, resetForNewSong, restore, interfaceUrl };
 })();
 

@@ -122,6 +122,7 @@ const SetlistDetail = (() => {
   }
 
   async function _handleSaveItemBpm(item, songObj, btn) {
+    if (String(item.song_id) !== String(window.App?.getCurrentSongId?.() || window.Store?.get?.('currentSong')?.id || '')) { window.App?.showToast?.('Chỉ lưu được cho bài đang mở trên màn hình', 'warning'); return; }
     const currentBpm = window.Metronome?.getBpm?.() ?? null;
     const currentBeats = window.Metronome?.getBeatsPerMeasure?.() ?? 4;
     const currentTranspose = window.Store?.get?.('currentTranspose') ?? 0;
@@ -219,7 +220,7 @@ const SetlistDetail = (() => {
         metaHtml = `${typeBadge} ${durBadge} ${notesBadge}`;
       }
 
-      const saveBpmBtn = isSong 
+      const saveBpmBtn = (isSong && String(item.song_id) === String(window.App?.getCurrentSongId?.() || window.Store?.get?.('currentSong')?.id || ''))
         ? `<button class="icon-btn-xs btn-save-bpm" title="Lưu Tone & BPM đang tập vào bài này" style="color:var(--accent);font-size:.7rem;padding:.25rem .5rem;font-weight:700;touch-action:manipulation;">💾 Lưu Tập</button>`
         : '';
 

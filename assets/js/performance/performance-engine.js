@@ -116,7 +116,7 @@ const PerformanceEngine = (() => {
       // Tải bài mới (ưu tiên cache preload)
       const cachedXml = _preloadedSongs.get(targetSongId);
       if (cachedXml && window.App?.loadSongXmlDirect) {
-        await window.App.loadSongXmlDirect(targetSongId, cachedXml, state.music?.transpose ?? 0);
+        window.URLState?.resetForNewSong?.(targetSongId); await window.App.loadSongXmlDirect(targetSongId, cachedXml, state.music?.transpose ?? 0);
       } else {
         let songObj = null;
         if (state.song?.xmlPath) {
@@ -134,7 +134,7 @@ const PerformanceEngine = (() => {
           window.App?.showToast?.('Không tìm thấy bản nhạc của ca trưởng', 'error');
           return;
         }
-        await window.SongLoader?.load?.(songObj, state.music?.transpose ?? 0);
+        window.URLState?.resetForNewSong?.(targetSongId); await window.SongLoader?.load?.(songObj, state.music?.transpose ?? 0);
       }
     }
 

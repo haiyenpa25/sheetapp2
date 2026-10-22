@@ -434,12 +434,12 @@ const ChordCanvasUI = (() => {
     pop.addEventListener('click', e => e.stopPropagation());
 
     const outside = ev => {
-      if (pop.contains(ev.target)) return;
+      if (_saved || !pop.isConnected) { document.removeEventListener('pointerdown', outside, true); return; } if (pop.contains(ev.target)) return;
       if (ev.target === anchor || anchor.contains(ev.target)) return;
       document.removeEventListener('pointerdown', outside, true);
       _cleanupMob(); doSave();
     };
-    setTimeout(() => document.addEventListener('pointerdown', outside, true), 300);
+    const _outTimer = setTimeout(() => { if (!_saved && pop.isConnected) document.addEventListener('pointerdown', outside, true); }, 300); pop.dispose = () => { _saved = true; clearTimeout(_blurTimer); clearTimeout(_outTimer); document.removeEventListener('pointerdown', outside, true); _cleanupMob(); };
 
     return pop;
   }

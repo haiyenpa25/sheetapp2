@@ -204,7 +204,7 @@ const GuitarLens = (() => {
    */
   function renderChordSvg(chordName, width = 76, height = 90) {
     const fingering = getChordFingering(chordName);
-    const displayName = chordName || '';
+    const displayName = window.SafeHtml ? window.SafeHtml.escape(chordName || '') : String(chordName || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     if (!fingering) {
       return `
         <svg class="guitar-chord-svg" width="${width}" height="${height}" viewBox="0 0 76 90" aria-label="${displayName}">
@@ -389,7 +389,7 @@ const GuitarLens = (() => {
     for (const c of chords) {
       const svg = renderChordSvg(c, 64, 76);
       html += `
-        <div class="guitar-chord-card" data-chord="${window.SafeHtml ? window.SafeHtml.escape(c) : c}" title="Bấm để xem thế bấm ${c}" style="display:inline-flex;flex-direction:column;align-items:center;background:var(--bg-card, rgba(255,255,255,0.06));border:1px solid var(--border);border-radius:6px;padding:4px 6px;cursor:pointer;touch-action:manipulation;">
+        <div class="guitar-chord-card" data-chord="${window.SafeHtml ? window.SafeHtml.escape(c) : c}" title="Bấm để xem thế bấm ${window.SafeHtml ? window.SafeHtml.escape(c) : c}" style="display:inline-flex;flex-direction:column;align-items:center;background:var(--bg-card, rgba(255,255,255,0.06));border:1px solid var(--border);border-radius:6px;padding:4px 6px;cursor:pointer;touch-action:manipulation;">
           ${svg}
         </div>
       `;

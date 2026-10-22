@@ -260,7 +260,7 @@ const SongInfoBar = (() => {
 
     // 6. Số chỉ nhịp
     if (_songData.timeBeats && _songData.timeBeatType) {
-      chips.push(`<span class="si-chip si-time" title="Số chỉ nhịp">♩ ${_songData.timeBeats}/${_songData.timeBeatType}</span>`);
+      chips.push(`<span class="si-chip si-time" title="Số chỉ nhịp">♩ ${_esc(_songData.timeBeats)}/${_esc(_songData.timeBeatType)}</span>`);
     }
 
     // 7. Số ô nhịp

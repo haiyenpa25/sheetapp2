@@ -8,14 +8,14 @@ const SongLoader = (() => {
 
   let _isFirstLoad = true;
   let _autoFitRetryCount = 0; // Module-scoped, không dùng window.*
-  let _currentLoadToken = 0; // Token phiên tải: ngăn race condition khi đổi bài nhanh
+  let _currentLoadToken = 0, _inFlightLoadToken = 0; // Token phiên tải: ngăn race condition khi đổi bài nhanh
   let _currentAbortController = null; // AbortController: hủy ngay lập tức request fetch XML của bài cũ
 
   /* ── Load bài hát hoàn chỉnh ── */
   async function load(song, transposeOverride = null, profileOverride = 'HD', options = {}) {
     if (!song?.xmlPath) { AppUI.showToast('Bài hát chưa có file sheet nhạc', 'error'); return; }
 
-    const loadToken = ++_currentLoadToken;
+    const loadToken = ++_currentLoadToken; _inFlightLoadToken = loadToken;
     profileOverride = profileOverride || 'HD';
     await window.ChordCanvasEdit?.flushSave?.();
     if (loadToken !== _currentLoadToken) return;
@@ -107,7 +107,7 @@ const SongLoader = (() => {
 
       Store.set('originalXml', xml);
 
-      const transpose = transposeOverride ?? 0;
+      const curStoreT = Store.get('currentTranspose'); const transpose = typeof curStoreT === 'number' ? curStoreT : (transposeOverride ?? 0);
       // L5-1: Bắt buộc hiển thị container trước khi render để tính đúng clientWidth và fit zoom
       document.getElementById('sheet-area')?.classList.remove('hidden');
       const zoom = _computePreloadFitZoom();
@@ -177,10 +177,10 @@ const SongLoader = (() => {
 
       window.PageNav?.computePages?.();
       setTimeout(() => window.PageNav?.computePages?.(), 150);
-      EventBus.emit('song:loaded', { song, xml, settings });
+      if (_inFlightLoadToken === loadToken) _inFlightLoadToken = 0; EventBus.emit('song:loaded', { song, xml, settings });
 
     } catch (err) {
-      if (err.name === 'AbortError' || loadToken !== _currentLoadToken) {
+      if (_inFlightLoadToken === loadToken) _inFlightLoadToken = 0; if (err.name === 'AbortError' || loadToken !== _currentLoadToken) {
         // Request cũ đã bị hủy hoặc đè bởi bài mới hơn — bỏ qua âm thầm
         return;
       }
@@ -192,7 +192,7 @@ const SongLoader = (() => {
 
   /* ── Commit transpose (reload OSMD với XML mới) ── */
   async function commitTranspose(scrollSnapshot = null) {
-    const xml = Store.get('originalXml');
+    if (_inFlightLoadToken !== 0) return; const xml = Store.get('originalXml');
     if (!xml) return;
     const transpose = Store.get('currentTranspose');
     const disp = document.getElementById('transpose-display');
