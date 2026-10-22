@@ -446,6 +446,14 @@ Ghi chú nằm trong `storage/data/annotations/*.json`; settings/notes theo user
 
 > Chỉ giữ 5 mục mới nhất. Nhật ký đầy đủ: `docs/history/CHANGELOG_2026.md`. Khi thêm mục mới, đưa mục cũ nhất ở đây sang file đó.
 
+## 2026-10-22 — Hoàn tất Giai đoạn 1 (BUG-01…41) & gia cố bảo mật PHP (CVE-2026-109618/109619)
+
+- Gia cố bảo mật khẩn cấp trước CVE-2026-109618 & CVE-2026-109619 (PHP2Shell): rà soát `storage/` (0 file `.php*`) và `access.log` (chỉ có truy cập nội bộ), tắt `expose_php` và `session.upload_progress.enabled` trong `php.ini` cục bộ cùng `.htaccess` (`Header always unset X-Powered-By`, `php_flag session.upload_progress.enabled Off`).
+- Khắc phục toàn bộ 41 lỗi `BUG-01…41` (7 Cao, 23 Trung bình, 11 Thấp) trên nhánh `fix/opt-review-20261021` theo đúng quyết định phân quyền của chủ dự án (2026-10-22): fork bộ hợp âm yêu cầu Ban Hát và chống đụng tên toàn bài (`BUG-01`), chặn lệch `target_type`/`review_action` (`BUG-02`), sửa xoá XML/quyền viewer chương trình/IDOR arrangement/quyền `leader_view` + ẩn người tắt chia sẻ/bổ sung target `create_from_plan` (`BUG-03…07`), diff review/checksum Manager/`respond_assignment`/`mark_done` (`BUG-08…11`).
+- Frontend Modern (`BUG-12…24`): xoá undo & đóng popup khi chuyển bài qua preload, chặn XSS ở chế độ Lời/Live Sync/Guitar Lens/Info Bar, đồng bộ cache preload với `chord_sets` & `versionId`, giữ thông số Lưu Tập theo đúng dòng setlist (Core Rule 4), giữ dịch giọng khi đang tải bài, huỷ listener `pointerdown` mồ côi, gắn `popstate` + reset URL follower, giữ tông/bộ khi chọn phiên bản, lấy đúng `xmlPath` khi preload, chống gửi trùng & kẹt 409 ở hàng đợi ngoại tuyến.
+- Classic & các ứng dụng phụ (`BUG-25…41`): thêm `resetUndo` và chặn XSS ở Classic/Importer, tải `version_xml` qua API có kiểm quyền trong Editor + cảnh báo chưa lưu (`beforeunload`), chống lặp cue/command và khởi động lại metronome ở Live-band/Projector, chuẩn hoá tông gốc `defaultKey`/reset tông (Core Rule 2)/nạp bộ HD (Core Rule 1)/chống nhân bản listener cuộn/xin lại WakeLock ở Live-band, giữ Core Rule 1 & chống rò bộ hợp âm ở Learn, thêm token chống race condition bất đồng bộ ở Live-band/Projector/Learn/Manager/Editor, chuẩn hoá quyền nút Ghim Manager và base path nút Quay về Learn.
+- Bằng chứng đầy đủ trước/sau cho cả 41 lỗi tại `docs/fix-evidence/r8/BUG-01..41-{FAIL,PASS}.txt` và báo cáo tổng `docs/fix-evidence/r8/final-suite.txt`. Cổng kiểm thử nghiêm ngặt (`php tests/run_all_tests.php --strict --js`): **222/222 suite PASS, 4.134 checks (1.078 Behavioral), 0 skip, 393 file PHP lint PASS**, CSDL thật bảo toàn nguyên vẹn tuyệt đối. SW manifest hash `cf5a6d56b0`.
+
 ## 2026-10-21 — Dọn kho, gộp chỉ mục roadmap, phương án tối ưu toàn hệ thống
 
 - Đợt FIX: sửa review/alias, save context, XSS, privacy, offline/SW, pointer và test isolation. Thêm `PointerTap.js`, guard E2E, tool plan/apply/verify dữ liệu; Q-C/Q-D đã backup và áp dụng đúng manifest, không đổi chủ. Trạng thái từng FIX, bằng chứng và việc chủ dự án: [PHUONG_AN_2_EXECUTION](docs/PHUONG_AN_2_EXECUTION.md). Đồng bộ router/schema/load order; sinh lại SW manifest và CODE_MAP.
@@ -489,8 +497,4 @@ Ghi chú nằm trong `storage/data/annotations/*.json`; settings/notes theo user
 
 
 
-## 2026-10-20 — Đưa bản chính lên main và dọn các bản thử
 
-- Theo yêu cầu trực tiếp của chủ dự án, main được fast-forward tới bản đã nghiệm thu `9bbea63`, giữ nguyên mã đã đạt PHP 175 suite/3.427 check, Chromium 124/124 và WebKit 24/24. Checkout chính `C:/xampp/htdocs/sheetapp2` chuyển sang main; không chạy sync.
-- Đưa 7 bản cài/worktree thử nghiệm ra khỏi `C:/xampp/htdocs`, vào `C:/xampp/sheetapp2-backups/source-archive-20261020-110530`. Trong htdocs chỉ còn một bản SheetApp2: `sheetapp2`. Worktree lưu trữ ở chế độ detached, ngoài webroot.
-- Modern `/` và Classic `/old/` là hai chế độ của cùng bản chính, tiếp tục được giữ theo quyết định của chủ dự án. Không xóa dữ liệu thật; DB giữ SHA256 `A91268B27DF548845C67B8F375C2D13B5899FFA4716BA99A00D59E4BC157CAC9`, có thêm bản sao trong thư mục lưu trữ trên.

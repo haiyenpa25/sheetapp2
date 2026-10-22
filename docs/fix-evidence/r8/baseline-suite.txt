@@ -1,0 +1,303 @@
+========================================================
+   SheetApp2 ΓÇö Unified Test Runner & Quality Gate CI   
+   Chß║┐ ─æß╗Ö: [STRICT] [JS-LINT] 
+========================================================
+
+[1/4] Kiß╗âm tra c├║ ph├íp PHP (php -l)... PASS (380 files)
+[1b/4] Kiß╗âm tra c├║ ph├íp JavaScript (check:syntax)... PASS (Tß║Ñt cß║ú file JS c├║ ph├íp hß╗úp lß╗ç)
+       ΓåÆ Chß║íy ESLint (npx eslint assets/js editor manager live-band learn)... PASS (0 lß╗ùi lint)
+[2/4] Kiß╗âm tra Test DB Fixture (SQLite in-memory)... PASS (Integrity ok, FKs ok, Seed ok)
+[3/4] Qu├⌐t v├á chß║íy to├án bß╗Ö Regression Test Suites:
+  ΓåÆ T├¼m thß║Ñy 209 bß╗Ö test regression suites.
+
+  [1/209] Γ£à PASS: tests/api_contract_regression.php (7 checks pass)
+  [2/209] Γ£à PASS: tests/api_http_exception_preservation_regression.php (15 checks pass)
+  [3/209] Γ£à PASS: tests/app_shell_navigation_regression.php (19 checks pass)
+  [4/209] Γ£à PASS: tests/async_context_guards_regression.php (7 checks pass)
+  [5/209] Γ£à PASS: tests/auth_chord_cache_regression.php (2 checks pass)
+  [6/209] Γ£à PASS: tests/auxiliary_guards_regression.php (4 checks pass)
+  [7/209] Γ£à PASS: tests/backup_prune_regression.php (12 checks pass)
+  [8/209] Γ£à PASS: tests/backup_restore_drill_regression.php (24 checks pass)
+  [9/209] Γ£à PASS: tests/cache_generation_regression.php (3 checks pass)
+  [10/209] Γ£à PASS: tests/chord_code_uniqueness_regression.php (4 checks pass)
+  [11/209] Γ£à PASS: tests/chord_edit_permission_and_flow_regression.php (10 checks pass)
+  [12/209] Γ£à PASS: tests/chord_save_capo_transpose_regression.php (6 checks pass)
+  [13/209] Γ£à PASS: tests/chord_save_context_regression.php (8 checks pass)
+  [14/209] Γ£à PASS: tests/chord_set_guard_regression.php (6 checks pass)
+  [15/209] Γ£à PASS: tests/chord_sets_consolidation_regression.php (32 checks pass)
+  [16/209] Γ£à PASS: tests/chordpro_core_rule_1_regression.php (10 checks pass)
+  [17/209] Γ£à PASS: tests/chordpro_export_regression.php (27 checks pass)
+  [18/209] Γ£à PASS: tests/classic_song_load_regression.php (3 checks pass)
+  [19/209] Γ£à PASS: tests/controller_service_boundaries_regression.php (6 checks pass)
+  [20/209] Γ£à PASS: tests/core_rules_regression.php (9 checks pass)
+  [21/209] Γ£à PASS: tests/data_repair_dry_run_regression.php (8 checks pass)
+  [22/209] Γ£à PASS: tests/domain_events_and_notifications_regression.php (21 checks pass)
+  [23/209] Γ£à PASS: tests/e2e_isolation_boundary_regression.php (4 checks pass)
+  [24/209] Γ£à PASS: tests/feature_flags_regression.php (20 checks pass)
+  [25/209] Γ£à PASS: tests/feature_local_override_regression.php (5 checks pass)
+  [26/209] Γ£à PASS: tests/fetch_anti_regression.php (19 checks pass)
+  [27/209] Γ£à PASS: tests/follower_xml_regression.php (4 checks pass)
+  [28/209] Γ£à PASS: tests/fts5_taxonomy_search_regression.php (27 checks pass)
+  [29/209] Γ£à PASS: tests/hd_history_and_permission_regression.php (14 checks pass)
+  [30/209] Γ£à PASS: tests/http/chord_set_privacy_regression.php (173 checks pass)
+  [31/209] Γ£à PASS: tests/http/client_log_regression.php (95 checks pass)
+  [32/209] Γ£à PASS: tests/http/js_tooling_regression.php (24 checks pass)
+  [33/209] Γ£à PASS: tests/http/live_sync_atomic_state_regression.php (7 checks pass)
+  [34/209] Γ£à PASS: tests/http/live_sync_last_event_id_regression.php (5 checks pass)
+  [35/209] Γ£à PASS: tests/http/live_sync_route_http_regression.php (7 checks pass)
+  [36/209] Γ£à PASS: tests/http/live_sync_session_lock_http_regression.php (6 checks pass)
+  [37/209] Γ£à PASS: tests/http/song_search_contract_http_regression.php (16 checks pass)
+  [38/209] Γ£à PASS: tests/http/test_suite_hygiene_regression.php (10 checks pass)
+  [39/209] Γ£à PASS: tests/http/weak_password_http_regression.php (14 checks pass)
+  [40/209] Γ£à PASS: tests/http/web_surface_http_regression.php (18 checks pass)
+  [41/209] Γ£à PASS: tests/import_tv08_regression.php (7 checks pass)
+  [42/209] Γ£à PASS: tests/instrument_annotations_regression.php (35 checks pass)
+  [43/209] Γ£à PASS: tests/learn_real_progress_regression.php (8 checks pass)
+  [44/209] Γ£à PASS: tests/library_bundle_regression.php (37 checks pass)
+  [45/209] Γ£à PASS: tests/library_l010_guest_toast_fab_regression.php (2 checks pass)
+  [46/209] Γ£à PASS: tests/library_l011_key_enharmonics_regression.php (16 checks pass)
+  [47/209] Γ£à PASS: tests/library_l011_key_service_regression.php (6 checks pass)
+  [48/209] Γ£à PASS: tests/library_l012_true_capo_regression.php (16 checks pass)
+  [49/209] Γ£à PASS: tests/library_l013_accented_vietnamese_sidebar_regression.php (31 checks pass)
+  [50/209] Γ£à PASS: tests/library_l014_links_base_and_leader_role_regression.php (17 checks pass)
+  [51/209] Γ£à PASS: tests/library_l015_tempo_unset_104_regression.php (8 checks pass)
+  [52/209] Γ£à PASS: tests/library_l016_dedup_handlers_and_escape_regression.php (12 checks pass)
+  [53/209] Γ£à PASS: tests/library_l02_chord_fallback_regression.php (10 checks pass)
+  [54/209] Γ£à PASS: tests/library_l03_chord_hide_by_class_regression.php (8 checks pass)
+  [55/209] Γ£à PASS: tests/library_l04_toolbar_overflow_regression.php (11 checks pass)
+  [56/209] Γ£à PASS: tests/library_l05_true_dark_mode_regression.php (6 checks pass)
+  [57/209] Γ£à PASS: tests/library_l06_controls_and_chips_regression.php (7 checks pass)
+  [58/209] Γ£à PASS: tests/library_l07_search_by_number_regression.php (8 checks pass)
+  [59/209] Γ£à PASS: tests/library_l08_safe_pedal_regression.php (5 checks pass)
+  [60/209] Γ£à PASS: tests/library_l09_no_welcome_modal_regression.php (4 checks pass)
+  [61/209] Γ£à PASS: tests/library_l0_window_exports_regression.php (11 checks pass)
+  [62/209] Γ£à PASS: tests/library_l110_metronome_minibar_regression.php (14 checks pass)
+  [63/209] Γ£à PASS: tests/library_l111_a11y_contrast_regression.php (10 checks pass)
+  [64/209] Γ£à PASS: tests/library_l11_chord_zoom_collision_regression.php (5 checks pass)
+  [65/209] Γ£à PASS: tests/library_l12_chord_presets_regression.php (6 checks pass)
+  [66/209] Γ£à PASS: tests/library_l13_toolbar_and_ipad_overlay_regression.php (6 checks pass)
+  [67/209] Γ£à PASS: tests/library_l14_touch_targets_44px_regression.php (18 checks pass)
+  [68/209] Γ£à PASS: tests/library_l15_gig_mode_regression.php (17 checks pass)
+  [69/209] Γ£à PASS: tests/library_l16_verse_selection_regression.php (18 checks pass)
+  [70/209] Γ£à PASS: tests/library_l17_band_mode_regression.php (14 checks pass)
+  [71/209] Γ£à PASS: tests/library_l18_mobile_view_regression.php (15 checks pass)
+  [72/209] Γ£à PASS: tests/library_l19_half_page_turn_regression.php (13 checks pass)
+  [73/209] Γ£à PASS: tests/library_l21_search_ranking_regression.php (10 checks pass)
+  [74/209] Γ£à PASS: tests/library_l22_compact_virtual_list_regression.php (10 checks pass)
+  [75/209] Γ£à PASS: tests/library_l23_consolidated_filters_regression.php (11 checks pass)
+  [76/209] Γ£à PASS: tests/library_l24_upcoming_setlist_and_quick_sections_regression.php (10 checks pass)
+  [77/209] Γ£à PASS: tests/library_l25_quick_numpad_regression.php (10 checks pass)
+  [78/209] Γ£à PASS: tests/library_l26_lyrics_search_by_verse_regression.php (16 checks pass)
+  [79/209] Γ£à PASS: tests/library_l27_compact_list_and_etag_regression.php (11 checks pass)
+  [80/209] Γ£à PASS: tests/library_l310_setlist_end_and_cleanup_regression.php (19 checks pass)
+  [81/209] Γ£à PASS: tests/library_l31_program_bar_regression.php (14 checks pass)
+  [82/209] Γ£à PASS: tests/library_l32_preloader_regression.php (14 checks pass)
+  [83/209] Γ£à PASS: tests/library_l33_setlist_item_customization_regression.php (15 checks pass)
+  [84/209] Γ£à PASS: tests/library_l34_non_song_card_and_duration_regression.php (15 checks pass)
+  [85/209] Γ£à PASS: tests/library_l35_follow_leader_regression.php (28 checks pass)
+  [86/209] Γ£à PASS: tests/library_l36_leader_cues_regression.php (28 checks pass)
+  [87/209] Γ£à PASS: tests/library_l37_song_sections_and_jump_regression.php (26 checks pass)
+  [88/209] Γ£à PASS: tests/library_l38_setlist_bpm_and_autoscroll_regression.php (23 checks pass)
+  [89/209] Γ£à PASS: tests/library_l39_offline_sunday_package_regression.php (15 checks pass)
+  [90/209] Γ£à PASS: tests/library_l41_stage_lens_roles_regression.php (19 checks pass)
+  [91/209] Γ£à PASS: tests/library_l42_guitar_lens_regression.php (21 checks pass)
+  [92/209] Γ£à PASS: tests/library_l43_keyboard_lens_regression.php (17 checks pass)
+  [93/209] Γ£à PASS: tests/library_l44_bass_lens_regression.php (19 checks pass)
+  [94/209] Γ£à PASS: tests/library_l45_drums_lens_regression.php (15 checks pass)
+  [95/209] Γ£à PASS: tests/library_l46_vocals_lens_regression.php (16 checks pass)
+  [96/209] Γ£à PASS: tests/library_l47_harmonic_numeral_regression.php (18 checks pass)
+  [97/209] Γ£à PASS: tests/library_l51_single_render_regression.php (29 checks pass)
+  [98/209] Γ£à PASS: tests/library_l52_instant_transpose_regression.php (28 checks pass)
+  [99/209] Γ£à PASS: tests/library_l53_xml_cache_and_geom_regression.php (56 checks pass)
+  [100/209] Γ£à PASS: tests/library_l54_coalesced_requests_regression.php (35 checks pass)
+  [101/209] Γ£à PASS: tests/library_l55_on_demand_and_no_hidden_render_regression.php (60 checks pass)
+  [102/209] Γ£à PASS: tests/library_l56_service_worker_precache_regression.php (77 checks pass)
+  [103/209] Γ£à PASS: tests/library_l57_centralized_store_regression.php (51 checks pass)
+  [104/209] Γ£à PASS: tests/library_l58_css_cleanup_regression.php (16 checks pass)
+  [105/209] Γ£à PASS: tests/library_l59_performance_budget_regression.php (11 checks pass)
+  [106/209] Γ£à PASS: tests/library_l61_lyrics_verse_and_chorus_extraction_regression.php (20 checks pass)
+  [107/209] Γ£à PASS: tests/library_l62_tempo_management_and_tap_regression.php (23 checks pass)
+  [108/209] Γ£à PASS: tests/library_l63_bulk_labels_regression.php (38 checks pass)
+  [109/209] Γ£à PASS: tests/library_l65_spelling_audit_regression.php (22 checks pass)
+  [110/209] Γ£à PASS: tests/library_l66_song_sections_top100_regression.php (17 checks pass)
+  [111/209] Γ£à PASS: tests/library_r11_lucide_icons_regression.php (10 checks pass)
+  [112/209] Γ£à PASS: tests/library_r12_laptop_toolbar_regression.php (7 checks pass)
+  [113/209] Γ£à PASS: tests/library_r13_clean_sheet_start_regression.php (6 checks pass)
+  [114/209] Γ£à PASS: tests/library_r14_section_jump_bar_regression.php (9 checks pass)
+  [115/209] Γ£à PASS: tests/library_r15_tools_menu_regression.php (17 checks pass)
+  [116/209] Γ£à PASS: tests/library_r16_clean_performance_mode_regression.php (14 checks pass)
+  [117/209] Γ£à PASS: tests/library_r17_sidebar_default_closed_regression.php (7 checks pass)
+  [118/209] Γ£à PASS: tests/library_r18_login_single_location_regression.php (16 checks pass)
+  [119/209] Γ£à PASS: tests/library_r19_design_tokens_and_a11y_regression.php (10 checks pass)
+  [120/209] Γ£à PASS: tests/library_r210_polyphonic_note_key_mapping_regression.php (18 checks pass)
+  [121/209] Γ£à PASS: tests/library_r21_note_cursor_and_navigation_regression.php (12 checks pass)
+  [122/209] Γ£à PASS: tests/library_r22_chord_palette_diatonic_regression.php (14 checks pass)
+  [123/209] Γ£à PASS: tests/library_r23_debounced_save_and_conflict_regression.php (12 checks pass)
+  [124/209] Γ£à PASS: tests/library_r24_copy_measures_regression.php (8 checks pass)
+  [125/209] Γ£à PASS: tests/library_r25_mobile_chord_palette_regression.php (17 checks pass)
+  [126/209] Γ£à PASS: tests/library_r26_band_mode_chord_edit_regression.php (19 checks pass)
+  [127/209] Γ£à PASS: tests/library_r27_pencil_and_dot_position_regression.php (11 checks pass)
+  [128/209] Γ£à PASS: tests/library_r28_active_set_display_and_dropdown_regression.php (16 checks pass)
+  [129/209] Γ£à PASS: tests/library_r29_propose_hd_review_regression.php (19 checks pass)
+  [130/209] Γ£à PASS: tests/library_r31_vocabulary_audit_regression.php (28 checks pass)
+  [131/209] Γ£à PASS: tests/library_r32_labels_and_fullscreen_regression.php (42 checks pass)
+  [132/209] Γ£à PASS: tests/library_r33_unified_taxonomy_regression.php (43 checks pass)
+  [133/209] Γ£à PASS: tests/library_r34_labels_migration_regression.php (98 checks pass)
+  [134/209] Γ£à PASS: tests/library_r35_section_standardization_regression.php (36 checks pass)
+  [135/209] Γ£à PASS: tests/library_r36_program_roles_regression.php (23 checks pass)
+  [136/209] Γ£à PASS: tests/library_r37_search_alias_matching_regression.php (25 checks pass)
+  [137/209] Γ£à PASS: tests/library_r38_test_data_cleanup_regression.php (21 checks pass)
+  [138/209] Γ£à PASS: tests/library_r41_instrument_view_menu_regression.php (22 checks pass)
+  [139/209] Γ£à PASS: tests/library_r42_lyric_chords_view_regression.php (20 checks pass)
+  [140/209] Γ£à PASS: tests/library_r43_mobile_sheet_layout_regression.php (24 checks pass)
+  [141/209] Γ£à PASS: tests/library_r44_device_default_view_regression.php (25 checks pass)
+  [142/209] Γ£à PASS: tests/library_r45_print_service_program_regression.php (24 checks pass)
+  [143/209] Γ£à PASS: tests/library_r5_acceptance_criteria_regression.php (27 checks pass)
+  [144/209] Γ£à PASS: tests/library_tv11_pagination_regression.php (18 checks pass)
+  [145/209] Γ£à PASS: tests/library_tv12_lyrics_regression.php (5 checks pass)
+  [146/209] Γ£à PASS: tests/library_tv13_highlight_regression.php (10 checks pass)
+  [147/209] Γ¥î FAIL: tests/library_tv2_gzip_regression.php (thiß║┐u d├▓ng SUITE_COMPLETE total=<n> (tho├ít sß╗¢m hoß║╖c lß╗ùi ngß║ºm))
+  [148/209] Γ£à PASS: tests/library_tv41_public_setlists_regression.php (13 checks pass)
+  [149/209] Γ£à PASS: tests/library_tv46_api_regression.php (9 checks pass)
+  [150/209] Γ£à PASS: tests/liturgical_export_and_usage_regression.php (42 checks pass)
+  [151/209] Γ£à PASS: tests/live_sync_v2_regression.php (35 checks pass)
+  [152/209] Γ£à PASS: tests/log_rotation_regression.php (18 checks pass)
+  [153/209] Γ£à PASS: tests/main_page_modes_regression.php (36 checks pass)
+  [154/209] Γ£à PASS: tests/manager_alias_privacy_regression.php (80 checks pass)
+  [155/209] Γ£à PASS: tests/manager_song_visibility_regression.php (7 checks pass)
+  [156/209] Γ£à PASS: tests/members_manager_consolidation_regression.php (7 checks pass)
+  [157/209] Γ£à PASS: tests/migration_integrity_regression.php (5 checks pass)
+  [158/209] Γ£à PASS: tests/modal_a11y_regression.php (82 checks pass)
+  [159/209] Γ£à PASS: tests/modular_architecture_regression.php (106 checks pass)
+  [160/209] Γ£à PASS: tests/notification_delivery_f7_regression.php (23 checks pass)
+  [161/209] Γ£à PASS: tests/notification_preferences_regression.php (43 checks pass)
+  [162/209] Γ£à PASS: tests/offline_package_version_regression.php (3 checks pass)
+  [163/209] Γ£à PASS: tests/offline_setlist_regression.php (46 checks pass)
+  [164/209] Γ£à PASS: tests/old_ui_flat_compact_regression.php (44 checks pass)
+  [165/209] Γ£à PASS: tests/page_performance_regression.php (37 checks pass)
+  [166/209] Γ£à PASS: tests/pointer_tap_regression.php (11 checks pass)
+  [167/209] Γ£à PASS: tests/practice_assignments_regression.php (33 checks pass)
+  [168/209] Γ£à PASS: tests/practice_csrf_regression.php (2 checks pass)
+  [169/209] Γ£à PASS: tests/practice_notifications_and_idor_regression.php (8 checks pass)
+  [170/209] Γ£à PASS: tests/projector_service_plan_regression.php (31 checks pass)
+  [171/209] Γ£à PASS: tests/public_cache_snapshot_regression.php (7 checks pass)
+  [172/209] Γ£à PASS: tests/public_catalog_vault_regression.php (2 checks pass)
+  [173/209] Γ£à PASS: tests/race_condition_regression.php (7 checks pass)
+  [174/209] Γ£à PASS: tests/rbac_and_song_visibility_regression.php (24 checks pass)
+  [175/209] Γ£à PASS: tests/reported_xss_regression.php (11 checks pass)
+  [176/209] Γ£à PASS: tests/reserved_chord_names_regression.php (39 checks pass)
+  [177/209] Γ£à PASS: tests/review_integrity_f4_regression.php (9 checks pass)
+  [178/209] Γ£à PASS: tests/review_target_ownership_regression.php (6 checks pass)
+  [179/209] Γ£à PASS: tests/review_workflow_regression.php (45 checks pass)
+  [180/209] Γ£à PASS: tests/runner_classification_regression.php (10 checks pass)
+  [181/209] Γ£à PASS: tests/schema_metadata_regression.php (10 checks pass)
+  [182/209] Γ£à PASS: tests/security/auth_matrix_regression.php (44 checks pass)
+  [183/209] Γ£à PASS: tests/security/auth_regression.php (7 checks pass)
+  [184/209] Γ£à PASS: tests/security/authorization_abort_regression.php (9 checks pass)
+  [185/209] Γ£à PASS: tests/security/error_disclosure_regression.php (5 checks pass)
+  [186/209] Γ£à PASS: tests/security/import_ssrf_regression.php (15 checks pass)
+  [187/209] Γ£à PASS: tests/security/learning_ownership_regression.php (12 checks pass)
+  [188/209] Γ£à PASS: tests/security/library_tv44_csrf_regression.php (8 checks pass)
+  [189/209] Γ£à PASS: tests/security/live_sync_regression.php (6 checks pass)
+  [190/209] Γ£à PASS: tests/security/managed_path_regression.php (4 checks pass)
+  [191/209] Γ£à PASS: tests/security/practice_ownership_regression.php (5 checks pass)
+  [192/209] Γ£à PASS: tests/security/request_origin_regression.php (6 checks pass)
+  [193/209] Γ£à PASS: tests/security/response_contract_regression.php (4 checks pass)
+  [194/209] Γ£à PASS: tests/security/session_ownership_regression.php (5 checks pass)
+  [195/209] Γ£à PASS: tests/security/session_rate_limit_regression.php (7 checks pass)
+  [196/209] Γ£à PASS: tests/security/setlist_ownership_regression.php (6 checks pass)
+  [197/209] Γ£à PASS: tests/security/web_surface_regression.php (45 checks pass)
+  [198/209] Γ£à PASS: tests/security/write_auth_regression.php (7 checks pass)
+  [199/209] Γ£à PASS: tests/security/xss_output_regression.php (56 checks pass)
+  [200/209] Γ£à PASS: tests/service_plan_regression.php (53 checks pass)
+  [201/209] Γ£à PASS: tests/service_worker_cache_regression.php (7 checks pass)
+  [202/209] Γ£à PASS: tests/setlist_cr4_regression.php (6 checks pass)
+  [203/209] Γ£à PASS: tests/setlist_private_profile_regression.php (5 checks pass)
+  [204/209] Γ£à PASS: tests/shared_platform_regression.php (31 checks pass)
+  [205/209] Γ£à PASS: tests/sw_scope_navigation_regression.php (5 checks pass)
+  [206/209] Γ£à PASS: tests/tool_cache_invalidation_regression.php (13 checks pass)
+  [207/209] Γ£à PASS: tests/ui_bugs_regression.php (7 checks pass)
+  [208/209] Γ£à PASS: tests/version_filename_regression.php (2 checks pass)
+  [209/209] Γ£à PASS: tests/version_xml_access_regression.php (7 checks pass)
+
+[Kiß╗âm tra r├▓ rß╗ë file test v├áo storage/data/live_sync/]... PASS (Kh├┤ng c├│ r├▓ rß╗ë)
+
+[Kiß╗âm tra t├¡nh to├án vß║╣n CSDL thß║¡t (K2 DB Checksum & Row Counts)]... PASS (CSDL thß║¡t app.sqlite v├á chord_sets ─æ╞░ß╗úc bß║úo vß╗ç to├án vß║╣n tuyß╗çt ─æß╗æi)
+  ΓåÆ Bß║úng sß╗æ d├▓ng CSDL thß║¡t (app.sqlite) tr╞░ß╗¢c v├á sau kiß╗âm thß╗¡:
+    ΓÇó setlists: tr╞░ß╗¢c=0, sau=0 (giß╗æng nhau)
+    ΓÇó domain_events: tr╞░ß╗¢c=0, sau=0 (giß╗æng nhau)
+    ΓÇó notifications: tr╞░ß╗¢c=0, sau=0 (giß╗æng nhau)
+    ΓÇó song_usage_history: tr╞░ß╗¢c=0, sau=0 (giß╗æng nhau)
+    ΓÇó users.email (admin): tr╞░ß╗¢c=NULL, sau=NULL (giß╗æng nhau)
+    ΓÇó chord_sets: tr╞░ß╗¢c=65 files, sau=65 files (giß╗æng nhau)
+
+--------------------------------------------------------
+Tß╗òng kß║┐t kiß╗âm thß╗¡ Unified Quality Gate CI:
+  - Thß╗¥i gian thß╗▒c thi: 193.81s
+  - File PHP ─æ├ú lint: 380
+  - Regression Suites ─æ├ú chß║íy: 209 (Pass: 208, Skip: 0, Fail: 1)
+  - Tß╗òng sß╗æ test checks ghi nhß║¡n: 4018 passed, 0 failed
+  - Ph├ón loß║íi kiß╗âm thß╗¡: 962 Behavioral (23.9%), 707 Static, 2349 ch╞░a gß║»n nh├ún (kh├┤ng t├¡nh l├á h├ánh vi)
+  - Trß║íng th├íi tß╗òng thß╗â: Γ¥î C├ô 1 Hß║áNG Mß╗ñC THß║ñT Bß║áI:
+    * tests/library_tv2_gzip_regression.php (thiß║┐u d├▓ng SUITE_COMPLETE total=<n> (tho├ít sß╗¢m hoß║╖c lß╗ùi ngß║ºm))
+--------------------------------------------------------
+
+--- Re-run tests/library_tv2_gzip_regression.php with SHEETAPP_TEST_URL=http://localhost/sheetapp2 ---
+[PASS:S] sidecar exists: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:B] gunzip is byte-identical: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:B] sidecar cuts transport by more than half: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:S] sidecar exists: assets/css/sheet.css
+[PASS:B] gunzip is byte-identical: assets/css/sheet.css
+[PASS:B] sidecar cuts transport by more than half: assets/css/sheet.css
+[PASS:S] sidecar exists: assets/css/layout.css
+[PASS:B] gunzip is byte-identical: assets/css/layout.css
+[PASS:B] sidecar cuts transport by more than half: assets/css/layout.css
+[PASS:S] sidecar exists: assets/css/library-polish.css
+[PASS:B] gunzip is byte-identical: assets/css/library-polish.css
+[PASS:B] sidecar cuts transport by more than half: assets/css/library-polish.css
+[PASS:B] HTTP serves gzip: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:B] HTTP gzip decodes exactly: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:B] HTTP preserves MIME: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:B] HTTP declares encoding variance: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:B] identity stays uncompressed: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:B] gzip q=0 is respected: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:B] identity also declares variance: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:B] representations have distinct ETags: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:B] gzip conditional request returns 304 without an entity body: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:B] gzip ETag does not suppress identity: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:B] range stays a valid identity range: assets/js/vendor/opensheetmusicdisplay.min.js
+[PASS:B] HTTP serves gzip: assets/css/sheet.css
+[PASS:B] HTTP gzip decodes exactly: assets/css/sheet.css
+[PASS:B] HTTP preserves MIME: assets/css/sheet.css
+[PASS:B] HTTP declares encoding variance: assets/css/sheet.css
+[PASS:B] identity stays uncompressed: assets/css/sheet.css
+[PASS:B] gzip q=0 is respected: assets/css/sheet.css
+[PASS:B] identity also declares variance: assets/css/sheet.css
+[PASS:B] representations have distinct ETags: assets/css/sheet.css
+[PASS:B] gzip conditional request returns 304 without an entity body: assets/css/sheet.css
+[PASS:B] gzip ETag does not suppress identity: assets/css/sheet.css
+[PASS:B] range stays a valid identity range: assets/css/sheet.css
+[PASS:B] HTTP serves gzip: assets/css/layout.css
+[PASS:B] HTTP gzip decodes exactly: assets/css/layout.css
+[PASS:B] HTTP preserves MIME: assets/css/layout.css
+[PASS:B] HTTP declares encoding variance: assets/css/layout.css
+[PASS:B] identity stays uncompressed: assets/css/layout.css
+[PASS:B] gzip q=0 is respected: assets/css/layout.css
+[PASS:B] identity also declares variance: assets/css/layout.css
+[PASS:B] representations have distinct ETags: assets/css/layout.css
+[PASS:B] gzip conditional request returns 304 without an entity body: assets/css/layout.css
+[PASS:B] gzip ETag does not suppress identity: assets/css/layout.css
+[PASS:B] range stays a valid identity range: assets/css/layout.css
+[PASS:B] HTTP serves gzip: assets/css/library-polish.css
+[PASS:B] HTTP gzip decodes exactly: assets/css/library-polish.css
+[PASS:B] HTTP preserves MIME: assets/css/library-polish.css
+[PASS:B] HTTP declares encoding variance: assets/css/library-polish.css
+[PASS:B] identity stays uncompressed: assets/css/library-polish.css
+[PASS:B] gzip q=0 is respected: assets/css/library-polish.css
+[PASS:B] identity also declares variance: assets/css/library-polish.css
+[PASS:B] representations have distinct ETags: assets/css/library-polish.css
+[PASS:B] gzip conditional request returns 304 without an entity body: assets/css/library-polish.css
+[PASS:B] gzip ETag does not suppress identity: assets/css/library-polish.css
+[PASS:B] range stays a valid identity range: assets/css/library-polish.css
+SUITE_COMPLETE total=56
+

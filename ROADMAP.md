@@ -79,7 +79,7 @@ npx playwright test --reporter=line         # E2E (chỉ trên bản sao cách l
 | FIX-01…37, 39…44 | 43/45 lỗi của Phương án 2 đã sửa; Q-C/Q-D áp dụng trên DB thật sau backup | `docs/history/PHUONG_AN_2_EXECUTION.md`, `docs/fix-evidence/` |
 | P2-01, P2-06, P2-12 | Generator SW `--check`, CI strict + Chromium smoke, registry khớp mã | như trên |
 
-Cổng hồi quy gần nhất (2026-10-21): **207/207 suite PASS, 4.049 check, 0 skip**; browser nghiệm thu 8/8 Chromium/WebKit.
+Cổng hồi quy gần nhất (2026-10-22): **222/222 suite PASS, 4.134 check (1.078 hành vi), 0 skip** (docs/fix-evidence/r8/final-suite.txt); browser nghiệm thu 8/8 Chromium/WebKit.
 Commit trên nhánh `fix/opt-review-20261021`: `1a36dca`, `e0e9d69`, `945233e`, `6962ce8` (đã đẩy lên GitHub 2026-10-22).
 
 ---
@@ -95,57 +95,57 @@ Quyết định quyền của chủ dự án (2026-10-22): BUG-01 cần Ban Hát
 
 | ID | Mức | Lỗi | Vị trí |
 |---|:-:|---|---|
-| BUG-01 | C | Viewer fork được bộ trùng tên bộ của người khác → chủ thật không lưu/xoá được, mọi người đọc hợp âm giả | `ManagerService::forkSong`, `ChordSetService::forkSet`, rename trong `saveUserChordSet` |
-| BUG-02 | T | Duyệt `update_hd` cho đề xuất `song_version` ghi metadata vào HD và sửa nhầm bộ có id trùng | `ReviewService` submit/approve, `ReviewActionHelper:77-100` |
-| BUG-03 | T | Xoá bài có XML luôn lỗi 500 (`strpos(..., false)` khi `storage/uploads` không tồn tại) | `SongService.php:358` |
-| BUG-04 | T | Viewer đã đăng nhập đọc chương trình nháp, phân công, gói offline | `SetlistController.php:43-98` |
-| BUG-05 | T | `save_arrangement` xoá/ghi bước của kịch bản thuộc bài khác (IDOR) | `ArrangementService.php:182-205` |
-| BUG-06 | T | `leader_view` mở cho mọi Ban Hát và lộ số liệu người tắt chia sẻ | `PracticeController:35-45`, `PracticeService:362-421` |
-| BUG-07 | T | `create_from_plan` không giao bài cho người được phân công sau lần tạo đầu | `PracticeAssignmentCreationHelper:71-110` |
-| BUG-08 | L | Diff MusicXML trong review luôn rỗng (đường dẫn tương đối) | `ReviewService:123-130, 331` |
-| BUG-09 | L | Manager sửa hợp âm không cập nhật checksum → ghi đè thầm lặng | `ManagerService:341-362` |
-| BUG-10 | L | `respond_assignment` của admin báo thành công mà không đổi gì | `SetlistService:370-382` |
-| BUG-11 | L | `mark_done` phát lại sự kiện mỗi lần gọi, kể cả bài tập đã lưu trữ | `PracticeAssignmentService:322-347` |
+| [x] BUG-01 | C | Viewer fork được bộ trùng tên bộ của người khác → chủ thật không lưu/xoá được, mọi người đọc hợp âm giả | `ManagerService::forkSong`, `ChordSetService::forkSet`, rename trong `saveUserChordSet` |
+| [x] BUG-02 | T | Duyệt `update_hd` cho đề xuất `song_version` ghi metadata vào HD và sửa nhầm bộ có id trùng | `ReviewService` submit/approve, `ReviewActionHelper:77-100` |
+| [x] BUG-03 | T | Xoá bài có XML luôn lỗi 500 (`strpos(..., false)` khi `storage/uploads` không tồn tại) | `SongService.php:358` |
+| [x] BUG-04 | T | Viewer đã đăng nhập đọc chương trình nháp, phân công, gói offline | `SetlistController.php:43-98` |
+| [x] BUG-05 | T | `save_arrangement` xoá/ghi bước của kịch bản thuộc bài khác (IDOR) | `ArrangementService.php:182-205` |
+| [x] BUG-06 | T | `leader_view` mở cho mọi Ban Hát và lộ số liệu người tắt chia sẻ | `PracticeController:35-45`, `PracticeService:362-421` |
+| [x] BUG-07 | T | `create_from_plan` không giao bài cho người được phân công sau lần tạo đầu | `PracticeAssignmentCreationHelper:71-110` |
+| [x] BUG-08 | L | Diff MusicXML trong review luôn rỗng (đường dẫn tương đối) | `ReviewService:123-130, 331` |
+| [x] BUG-09 | L | Manager sửa hợp âm không cập nhật checksum → ghi đè thầm lặng | `ManagerService:341-362` |
+| [x] BUG-10 | L | `respond_assignment` của admin báo thành công mà không đổi gì | `SetlistService:370-382` |
+| [x] BUG-11 | L | `mark_done` phát lại sự kiện mỗi lần gọi, kể cả bài tập đã lưu trữ | `PracticeAssignmentService:322-347` |
 
 **Frontend Modern**
 
 | ID | Mức | Lỗi | Vị trí |
 |---|:-:|---|---|
-| BUG-12 | C | Chuyển bài qua preload không xoá undo/không đóng popup → Ctrl+Z ghi hợp âm bài cũ vào bài mới | `chord-canvas.js` `applyPreloaded` |
-| BUG-13 | C | XSS: tên bài/tông chèn thẳng vào chế độ Lời | `lyric-extractor.js:244-247` |
-| BUG-14 | C | XSS qua cue Live Sync và tên phân đoạn | `cue-engine.js:114`, `arrangement-engine.js:256` |
-| BUG-15 | C | Cache preload giữ hợp âm/checksum cũ (409 giả, mất bản sửa, sống qua đăng xuất), bỏ qua `versionId` | `song-preloader.js`, `song-loader.js:44-58` |
-| BUG-16 | T | "Lưu Tập" ở mọi dòng setlist ghi thông số bài đang mở (Core Rule 4) | `setlist-detail.js:126-137, 316-320` |
-| BUG-17 | T | XSS qua `<beats>` trong MusicXML ở thanh thông tin | `song-info-bar.js:263` |
-| BUG-18 | T | XSS qua tên hợp âm ở Guitar Lens | `guitar-lens.js:209-226, 390` |
-| BUG-19 | T | Dịch giọng trong lúc tải bài bị đè (follower lệch tông host) | `song-loader.js:108-115`, `app.js` |
-| BUG-20 | T | Listener `pointerdown` của popup hợp âm sống sau khi popup bị đóng bằng code → ghi hợp âm vào bài mới | `chord-canvas-ui.js:436-442` |
-| BUG-21 | T | `pushState` không có `popstate` → URL lệch bài; follower không reset URL (CODING_STANDARDS 4.4) | `url-state.js:62-66`, `performance-engine.js:137` |
-| BUG-22 | L | Chọn phiên bản reset tông/bộ kể cả trong setlist; danh sách phiên bản của bài cũ | `song-loader.js:534, 567` |
-| BUG-23 | L | FIX-05 chưa hết: preload còn dựng `storage/Thanh ca/<id>.xml`; gọi `LibraryUI.getSongById` không tồn tại | `song-preloader.js:159-163`, `app.js:210` |
-| BUG-24 | L | Hàng đợi lưu offline kẹt vĩnh viễn khi gặp 409; gửi trùng | `chord-canvas-edit.js:383-408` |
+| [x] BUG-12 | C | Chuyển bài qua preload không xoá undo/không đóng popup → Ctrl+Z ghi hợp âm bài cũ vào bài mới | `chord-canvas.js` `applyPreloaded` |
+| [x] BUG-13 | C | XSS: tên bài/tông chèn thẳng vào chế độ Lời | `lyric-extractor.js:244-247` |
+| [x] BUG-14 | C | XSS qua cue Live Sync và tên phân đoạn | `cue-engine.js:114`, `arrangement-engine.js:256` |
+| [x] BUG-15 | C | Cache preload giữ hợp âm/checksum cũ (409 giả, mất bản sửa, sống qua đăng xuất), bỏ qua `versionId` | `song-preloader.js`, `song-loader.js:44-58` |
+| [x] BUG-16 | T | "Lưu Tập" ở mọi dòng setlist ghi thông số bài đang mở (Core Rule 4) | `setlist-detail.js:126-137, 316-320` |
+| [x] BUG-17 | T | XSS qua `<beats>` trong MusicXML ở thanh thông tin | `song-info-bar.js:263` |
+| [x] BUG-18 | T | XSS qua tên hợp âm ở Guitar Lens | `guitar-lens.js:209-226, 390` |
+| [x] BUG-19 | T | Dịch giọng trong lúc tải bài bị đè (follower lệch tông host) | `song-loader.js:108-115`, `app.js` |
+| [x] BUG-20 | T | Listener `pointerdown` của popup hợp âm sống sau khi popup bị đóng bằng code → ghi hợp âm vào bài mới | `chord-canvas-ui.js:436-442` |
+| [x] BUG-21 | T | `pushState` không có `popstate` → URL lệch bài; follower không reset URL (CODING_STANDARDS 4.4) | `url-state.js:62-66`, `performance-engine.js:137` |
+| [x] BUG-22 | L | Chọn phiên bản reset tông/bộ kể cả trong setlist; danh sách phiên bản của bài cũ | `song-loader.js:534, 567` |
+| [x] BUG-23 | L | FIX-05 chưa hết: preload còn dựng `storage/Thanh ca/<id>.xml`; gọi `LibraryUI.getSongById` không tồn tại | `song-preloader.js:159-163`, `app.js:210` |
+| [x] BUG-24 | L | Hàng đợi lưu offline kẹt vĩnh viễn khi gặp 409; gửi trùng | `chord-canvas-edit.js:383-408` |
 
 **Classic và app phụ**
 
 | ID | Mức | Lỗi | Vị trí |
 |---|:-:|---|---|
-| BUG-25 | C | Classic: Ctrl+Z sau khi đổi bài ghi hợp âm bài cũ đè bài mới (thiếu `resetUndo`) | `old/assets/js/chord-canvas.js` |
-| BUG-26 | C | Classic: XSS qua `?set=` và chuỗi hợp âm trong popup | `old/assets/js/chord-canvas-ui.js:142, 147, 428` |
-| BUG-27 | T | Classic: XSS qua tên nhạc cụ trong MusicXML | `old/assets/js/instruments.js:50` |
-| BUG-28 | T | Editor: mở phiên bản đã lưu luôn 403 (fetch thẳng `storage/users`) | `editor/editor.js:330-336` |
-| BUG-29 | T | Live-band/máy chiếu: cue và lệnh ban nhạc hiện lại sau mỗi cập nhật | `stage-room.js:181-192`, `projector-app.js:284-286` |
-| BUG-30 | T | Live-band: máy đếm nhịp khởi động lại ở mọi state → không phát nhịp | `stage-room.js:165-167`, `live-band.js:301-305` |
-| BUG-31 | T | Live-band: tông gốc luôn C (`song.key` thay vì `defaultKey`) | `live-band.js:475` |
-| BUG-32 | T | Live-band: bài mới giữ tông bài trước (Core Rule 2) | `live-band.js:320` |
-| BUG-33 | T | Live-band: không nạp bộ HD, nhãn ghi HD nhưng hiện TLH (Core Rule 1) | `live-band.js:469-515` |
-| BUG-34 | T | Live-band: listener cuộn cộng dồn sau mỗi bài | `live-band.js:126, 514` |
-| BUG-35 | T | Live-band: WakeLock không xin lại sau khi rời tab | `stage-hud.js:249-256` |
-| BUG-36 | T | Learn: bộ hợp âm bài trước mang sang bài mới; HD ít hợp âm bị bỏ (Core Rule 1) | `learn-app.js:166`, `learn-score.js:171` |
-| BUG-37 | T | Phản hồi bất đồng bộ cũ đè bài mới ở live-band, máy chiếu, learn, manager, editor (Khả năng) | xem báo cáo |
-| BUG-38 | L | Editor không cảnh báo khi rời trang/đổi bài lúc chưa lưu | `editor/editor.js` |
-| BUG-39 | L | Manager: nút Ghim hiện cho banhat (backend chỉ cho leader/admin) | `manager-community.js:71`, `manager-repertoire.js:206`, `manager-versions.js:100` |
-| BUG-40 | L | Classic: `deleteSet` bỏ qua kết quả; OMR dùng escape HTML trong chuỗi JS | `old/assets/js/chord-canvas.js:425`, `old/assets/js/importer.js:234` |
-| BUG-41 | L | Learn: link "Quay về" sai khi cài trong thư mục con | `learn-controls.js:27` |
+| [x] BUG-25 | C | Classic: Ctrl+Z sau khi đổi bài ghi hợp âm bài cũ đè bài mới (thiếu `resetUndo`) | `old/assets/js/chord-canvas.js` |
+| [x] BUG-26 | C | Classic: XSS qua `?set=` và chuỗi hợp âm trong popup | `old/assets/js/chord-canvas-ui.js:142, 147, 428` |
+| [x] BUG-27 | T | Classic: XSS qua tên nhạc cụ trong MusicXML | `old/assets/js/instruments.js:50` |
+| [x] BUG-28 | T | Editor: mở phiên bản đã lưu luôn 403 (fetch thẳng `storage/users`) | `editor/editor.js:330-336` |
+| [x] BUG-29 | T | Live-band/máy chiếu: cue và lệnh ban nhạc hiện lại sau mỗi cập nhật | `stage-room.js:181-192`, `projector-app.js:284-286` |
+| [x] BUG-30 | T | Live-band: máy đếm nhịp khởi động lại ở mọi state → không phát nhịp | `stage-room.js:165-167`, `live-band.js:301-305` |
+| [x] BUG-31 | T | Live-band: tông gốc luôn C (`song.key` thay vì `defaultKey`) | `live-band.js:475` |
+| [x] BUG-32 | T | Live-band: bài mới giữ tông bài trước (Core Rule 2) | `live-band.js:320` |
+| [x] BUG-33 | T | Live-band: không nạp bộ HD, nhãn ghi HD nhưng hiện TLH (Core Rule 1) | `live-band.js:469-515` |
+| [x] BUG-34 | T | Live-band: listener cuộn cộng dồn sau mỗi bài | `live-band.js:126, 514` |
+| [x] BUG-35 | T | Live-band: WakeLock không xin lại sau khi rời tab | `stage-hud.js:249-256` |
+| [x] BUG-36 | T | Learn: bộ hợp âm bài trước mang sang bài mới; HD ít hợp âm bị bỏ (Core Rule 1) | `learn-app.js:166`, `learn-score.js:171` |
+| [x] BUG-37 | T | Phản hồi bất đồng bộ cũ đè bài mới ở live-band, máy chiếu, learn, manager, editor (Khả năng) | xem báo cáo |
+| [x] BUG-38 | L | Editor không cảnh báo khi rời trang/đổi bài lúc chưa lưu | `editor/editor.js` |
+| [x] BUG-39 | L | Manager: nút Ghim hiện cho banhat (backend chỉ cho leader/admin) | `manager-community.js:71`, `manager-repertoire.js:206`, `manager-versions.js:100` |
+| [x] BUG-40 | L | Classic: `deleteSet` bỏ qua kết quả; OMR dùng escape HTML trong chuỗi JS | `old/assets/js/chord-canvas.js:425`, `old/assets/js/importer.js:234` |
+| [x] BUG-41 | L | Learn: link "Quay về" sai khi cài trong thư mục con | `learn-controls.js:27` |
 
 Đưa sang tối ưu: căn hợp âm gọi `getBBox` O(hợp âm × nốt) mỗi lần render và `readXmlChords` duyệt lại XML nhiều lần (`chord-canvas.js:89-115`) → **OP-12**. Ghi chú phụ chưa xếp hạng (metadata bài private qua `arrangements`/`annotations`/`hd_history`; `getById` ép `(int)`; `SessionService` không giới hạn) → rà tiếp ở đợt sau.
 

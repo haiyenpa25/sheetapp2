@@ -8,7 +8,7 @@ const SongLoader = (() => {
 
   let _isFirstLoad = true;
   let _autoFitRetryCount = 0; // Module-scoped, không dùng window.*
-  let _currentLoadToken = 0, _inFlightLoadToken = 0; // Token phiên tải: ngăn race condition khi đổi bài nhanh
+  let _currentLoadToken = 0; let _inFlightLoadToken = 0; // Token phiên tải: ngăn race condition khi đổi bài nhanh
   let _currentAbortController = null; // AbortController: hủy ngay lập tức request fetch XML của bài cũ
 
   /* ── Load bài hát hoàn chỉnh ── */
