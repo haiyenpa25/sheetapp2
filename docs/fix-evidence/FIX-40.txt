@@ -1,0 +1,244 @@
+RED standalone suite on isolated copy (no CHORD_SETS_DIR override):
+========================================================
+   SheetApp2 — F3: HD History & Permission Regression   
+========================================================
+
+--- 1. Kiểm tra ChordSetService::writeHd & chord_set_history ---
+  [PASS:B] [F3-1.1] Ban đầu bảng chord_set_history chưa có bản ghi nào
+  [PASS:B] [F3-1.2] ChordSetService::writeHd thực thi thành công
+  [PASS:B] [F3-1.3] chord_set_history có đúng 1 dòng snapshot
+  [PASS:B] [F3-1.4] Bản snapshot lưu chính xác dữ liệu cũ (2 hợp âm)
+  [PASS:B] [F3-1.5] created_by ghi nhận đúng ID của hoaidinh
+  [PASS:B] [F3-1.6] Bộ HD hiện tại đã mang 3 hợp âm mới
+
+--- 2. Kiểm tra Core Rule 1 Guard trong writeHd ---
+  [PASS:B] [F3-2.1] writeHd từ chối mảng hợp âm rỗng (Core Rule 1)
+
+--- 3. Kiểm tra phân quyền sửa HD qua Controller (Quyết định B4) ---
+  [PASS:B] [F3-3.1] Viewer không có quyền sửa HD
+  [PASS:B] [F3-3.2] Leader không có chord_code=HD không được sửa trực tiếp HD
+  [PASS:B] [F3-3.3] User hoaidinh (chord_code=HD) được phép sửa trực tiếp HD (theo B4)
+  [PASS:B] [F3-3.4] Admin có toàn quyền sửa trực tiếp bộ HD
+
+--- 4. Kiểm tra Hoàn tác (Rollback HD) khôi phục bản cũ ---
+  [PASS:B] [F3-4.1] ReviewService::rollbackHd thực hiện thành công
+  [PASS:B] [F3-4.2] Sau rollback, bộ HD khôi phục chính xác 2 hợp âm cũ
+  [PASS:B] [F3-4.3] Rollback tự động lưu thêm snapshot của bản trước khi rollback vào chord_set_history
+
+--------------------------------------------------------
+Tổng số kiểm tra: 14 | Đạt: 14 | Lỗi: 0
+✅ KẾT QUẢ: TẤT CẢ KIỂM TRA ĐỀU ĐẠT (PASS 100%)!
+
+SUITE_COMPLETE total=14
+Storage files touched=
+p2\storage\data\chord_sets\song-f3-test\HD.json
+
+GREEN standalone php tests/hd_history_and_permission_regression.php
+========================================================
+   SheetApp2 — F3: HD History & Permission Regression   
+========================================================
+
+--- 1. Kiểm tra ChordSetService::writeHd & chord_set_history ---
+  [PASS:B] [F3-1.1] Ban đầu bảng chord_set_history chưa có bản ghi nào
+  [PASS:B] [F3-1.2] ChordSetService::writeHd thực thi thành công
+  [PASS:B] [F3-1.3] chord_set_history có đúng 1 dòng snapshot
+  [PASS:B] [F3-1.4] Bản snapshot lưu chính xác dữ liệu cũ (2 hợp âm)
+  [PASS:B] [F3-1.5] created_by ghi nhận đúng ID của hoaidinh
+  [PASS:B] [F3-1.6] Bộ HD hiện tại đã mang 3 hợp âm mới
+
+--- 2. Kiểm tra Core Rule 1 Guard trong writeHd ---
+  [PASS:B] [F3-2.1] writeHd từ chối mảng hợp âm rỗng (Core Rule 1)
+
+--- 3. Kiểm tra phân quyền sửa HD qua Controller (Quyết định B4) ---
+  [PASS:B] [F3-3.1] Viewer không có quyền sửa HD
+  [PASS:B] [F3-3.2] Leader không có chord_code=HD không được sửa trực tiếp HD
+  [PASS:B] [F3-3.3] User hoaidinh (chord_code=HD) được phép sửa trực tiếp HD (theo B4)
+  [PASS:B] [F3-3.4] Admin có toàn quyền sửa trực tiếp bộ HD
+
+--- 4. Kiểm tra Hoàn tác (Rollback HD) khôi phục bản cũ ---
+  [PASS:B] [F3-4.1] ReviewService::rollbackHd thực hiện thành công
+  [PASS:B] [F3-4.2] Sau rollback, bộ HD khôi phục chính xác 2 hợp âm cũ
+  [PASS:B] [F3-4.3] Rollback tự động lưu thêm snapshot của bản trước khi rollback vào chord_set_history
+
+--------------------------------------------------------
+Tổng số kiểm tra: 14 | Đạt: 14 | Lỗi: 0
+✅ KẾT QUẢ: TẤT CẢ KIỂM TRA ĐỀU ĐẠT (PASS 100%)!
+
+SUITE_COMPLETE total=14
+EXIT=0
+
+GREEN standalone php tests/review_integrity_f4_regression.php
+========================================================
+   SheetApp2 — F4: Review Integrity & Workflow Tests    
+========================================================
+
+--- 1. Kiểm tra gửi đề xuất sai song_id (Anti-Spoofing 422) ---
+  [PASS:B] [F4-1.1] Submit bộ hợp âm sai song_id bị ném HttpException 422
+  [PASS:B] [F4-1.2] HD bài B hoàn toàn không bị ảnh hưởng
+
+--- 2. Kiểm tra Cấm Leader Tự Duyệt Đề Xuất Của Mình (B5) ---
+  [PASS:B] [F4-2.1] Leader tự duyệt đề xuất của mình bị chặn 403 Forbidden theo B5
+  [PASS:B] [F4-2.2] Trạng thái đề xuất vẫn giữ nguyên là pending
+  [PASS:B] [F4-2.3] Admin có quyền duyệt đề xuất của Leader
+
+--- 3. Kiểm tra thông báo duy nhất (No duplicate notifications) ---
+  [PASS:B] [F4-3.1] Mỗi quyết định phê duyệt sinh ra ĐÚNG 1 thông báo tới tác giả (không bị trùng 2 lần)
+
+--- 4. Kiểm tra tính toàn vẹn Transaction khi có lỗi giữa chừng ---
+  [PASS:B] [F4-4.1] Duyệt đề xuất lỗi bị chặn ném Exception
+  [PASS:B] [F4-4.2] Không có dòng chord_set_history mồ côi nào được sinh ra
+  [PASS:B] [F4-4.3] review_requests vẫn ở trạng thái pending, không bị cập nhật dở dang
+
+--------------------------------------------------------
+Tổng số kiểm tra: 9 | Đạt: 9 | Lỗi: 0
+✅ KẾT QUẢ: TẤT CẢ KIỂM TRA F4 ĐỀU ĐẠT (PASS 100%)!
+
+SUITE_COMPLETE total=9
+EXIT=0
+
+GREEN standalone php tests/review_workflow_regression.php
+=== KIỂM THỬ HỒI QUY QUY TRÌNH DUYỆT & DIFF ENGINE (EPIC 4.2) ===
+
+[1/8] Kiểm tra Schema Migration 011 & CSDL SQLite In-Memory...
+  ✅ PASS: Bảng review_requests tồn tại trong CSDL
+  ✅ PASS: Bảng chord_set_history tồn tại trong CSDL
+  ✅ PASS: Bảng user_chord_sets có cột review_status
+  ✅ PASS: Bảng user_chord_sets có cột approved_by
+  ✅ PASS: Bảng song_versions có cột review_status
+
+[2/8] Kiểm tra Engine So Sánh Khác Biệt (ReviewDiffEngine)...
+  ✅ PASS: DiffEngine trả về cấu trúc gồm summary và changes
+  ✅ PASS: Phát hiện chính xác 1 hợp âm thêm mới (Dm)
+  ✅ PASS: Phát hiện chính xác 1 hợp âm sửa đổi (C -> Cmaj7)
+  ✅ PASS: Phát hiện chính xác 1 hợp âm bị xóa (G)
+  ✅ PASS: Phát hiện chính xác 1 hợp âm giữ nguyên (F)
+  ✅ PASS: Tổng số thay đổi = 3
+  ✅ PASS: Hai bộ hợp âm giống nhau cho total_changes = 0
+  ✅ PASS: Tất cả 3 nốt đều là unchanged
+
+[3/8] Kiểm tra Nộp Đề Xuất Phê Duyệt (ReviewService::submit)...
+  ✅ PASS: Member submit review request thành công
+  ✅ PASS: Đã tạo review_requests record với ID = 1
+  ✅ PASS: Trạng thái đề xuất là pending
+  ✅ PASS: Loại đề xuất là recommend
+  ✅ PASS: user_chord_sets.review_status được cập nhật sang pending
+  ✅ PASS: Sự kiện domain_events review.submitted đã được ghi nhận
+  ✅ PASS: Đề xuất pending cũ được tự động chuyển thành superseded
+
+[4/8] Kiểm tra RBAC (Chỉ Leader & Admin có quyền duyệt)...
+  ✅ PASS: Viewer không có quyền approve (bị chặn DomainException)
+  ✅ PASS: Banhat thông thường không có quyền approve (bị chặn DomainException)
+
+[5/8] Kiểm tra Phê Duyệt Recommend (Leader/Admin)...
+  ✅ PASS: Leader phê duyệt đề xuất recommend thành công
+  ✅ PASS: user_chord_sets.is_recommended = 1
+  ✅ PASS: user_chord_sets.review_status = approved
+  ✅ PASS: approved_by = 4 (Leader)
+  ✅ PASS: Đã gửi thông báo in-app phê duyệt tới tác giả
+
+[6/8] Kiểm tra Cập Nhật Bản HD & Hoàn Tác Snapshot (CR1 & CR4)...
+  ✅ PASS: Admin duyệt đề xuất update_hd thành công
+  ✅ PASS: Bản HD.json trên đĩa đã cập nhật đủ 4 hợp âm
+  ✅ PASS: Hợp âm ô nhịp 1 là Fmaj7
+  ✅ PASS: Đã ghi snapshot vào bảng chord_set_history (CR4)
+  ✅ PASS: Bản snapshot lịch sử lưu chính xác 3 hợp âm của bản HD cũ
+  ✅ PASS: Rollback HD về snapshot thành công
+  ✅ PASS: Sau khi rollback, HD.json khôi phục chuẩn xác 3 hợp âm cũ
+  ✅ PASS: Hợp âm ô nhịp 1 được khôi phục về F
+
+[7/8] Kiểm tra Từ Chối Đề Xuất Có Lý Do (ReviewService::reject)...
+  ✅ PASS: Từ chối không có ghi chú lý do bị chặn lại
+  ✅ PASS: Từ chối đề xuất thành công khi có lý do
+  ✅ PASS: review_requests.status = rejected
+  ✅ PASS: review_note được lưu lại trong DB
+  ✅ PASS: user_chord_sets.review_status = rejected
+  ✅ PASS: Đã gửi thông báo từ chối kèm lý do tới tác giả
+
+[8/8] Kiểm tra Tác Giả Rút Đề Xuất & Chặn Đường Tắt (Anti-Bypass)...
+  ✅ PASS: Người khác không thể rút đề xuất của tác giả
+  ✅ PASS: Chính tác giả rút đề xuất thành công
+  ✅ PASS: review_requests.status = withdrawn
+  ✅ PASS: Anti-Bypass Guard: Viewer gọi toggleRecommend nhận 403 Forbidden
+
+=======================================================
+🎉 TẤT CẢ 45 KIỂM THỬ ĐÃ PASS HOÀN TOÀN!
+
+SUITE_COMPLETE total=45
+EXIT=0
+
+GREEN standalone php tests/chord_sets_consolidation_regression.php
+=== CHORD SETS CONSOLIDATION REGRESSION (TASK 2.4) ===
+PASS: user_chord_sets có cột id
+PASS: user_chord_sets có cột song_id
+PASS: user_chord_sets có cột user_id
+PASS: user_chord_sets có cột set_name
+PASS: user_chord_sets có cột chords_json
+PASS: user_chord_sets có cột parent_id (Migration 004)
+PASS: user_chord_sets có cột attribution (Migration 004)
+PASS: user_chord_sets có cột checksum (Migration 004)
+PASS: ChordSetService::saveSet lưu thành công bộ HD vào CSDL
+PASS: ChordSetService::loadSet nạp đúng 3 hợp âm từ CSDL
+PASS: Hợp âm ô 0 đúng nốt G
+PASS: getSetDetails trả về thông tin chi tiết của bộ HD
+PASS: Attribution của HD được lưu chính xác
+PASS: Checksum MD5 được tự động tính toán
+PASS: Core Rule 1: HD luôn xuất hiện trong listSets
+PASS: Core Rule 1: HD luôn được ưu tiên đứng đầu
+PASS: ChordSetService::forkSet tạo thành công bản fork
+PASS: Bản fork có liên kết parent_id
+PASS: Attribution ghi nhận nguồn fork từ HD
+PASS: Bản fork Acoustic_Guitar được lưu vào DB
+PASS: parent_id của bản fork trỏ đúng vào id của bộ HD
+PASS: Cấu hình capo_fret được lưu đúng
+PASS: Core Rule 3: Chặn ghi đè lên bộ default
+PASS: Core Rule 3: Chặn ghi đè lên bộ TLH
+PASS: Core Rule 3: Chặn lưu tên bộ rác bắt đầu bằng __
+PASS: Core Rule 3: Chặn tuyệt đối không cho xóa bộ HD
+PASS: Core Rule 3: Chặn tuyệt đối không cho xóa bộ TLH
+PASS: Cho phép tác giả xóa bộ hợp âm do mình tạo
+PASS: Bộ Acoustic_Guitar đã bị xóa khỏi CSDL
+PASS: File tools/migrate_json_chord_sets_to_db.php tồn tại
+PASS: tools/migrate_json_chord_sets_to_db.php --reconcile thực thi thành công
+PASS: Công cụ đối soát phát hiện đủ 903 bài thánh ca
+
+>>> ALL 7/7 CHORD SETS CONSOLIDATION REGRESSION CHECKS PASSED!
+
+SUITE_COMPLETE total=32
+EXIT=0
+
+Application storage files touched after all four suites: 0
+
+Standalone core_rules audit isolation follow-up
+Audit before=C478F2CE2378F9D6A7FEB79DDA5166504869A4E6C2FF8CABEF2644B1EBBAE6A0
+Audit after=C478F2CE2378F9D6A7FEB79DDA5166504869A4E6C2FF8CABEF2644B1EBBAE6A0
+========================================================
+   SheetApp2 — Core Rules Automated Regression Suite   
+========================================================
+
+--- Kiểm tra CORE RULE 1: Bộ Hợp Âm HD là Mặc Định ---
+  [PASS] CR1-a: Mở bài có HD > 0 hợp âm: loadSong mặc định chọn HD và _injectChords tiêm hợp âm HD vào bản nhạc
+  [PASS] CR1-b: Mở bài có HD rỗng: _injectChords bảo vệ không tiêm map rỗng, trả về XML gốc TLH chuẩn mực
+
+--- Kiểm tra CORE RULE 2: Tông Gốc = 0 Luôn Luôn ---
+  [PASS] CR2-a: Dịch +3 rồi chuyển bài từ thư viện: transposeOverride là null -> currentTranspose luôn reset về 0 (loại bỏ hoàn toàn lastTranspose)
+  [PASS] CR2-b: Mở bài từ setlist có transpose = +2: SetlistUI truyền item.transpose_key (+2) làm transposeOverride vào SongLoader.load
+
+--- Kiểm tra CORE RULE 3: Khóa TLH và HD ---
+  [PASS] CR3-a: Bộ TLH và HD được bảo vệ: service/controller từ chối xoá, frontend chặn trước HTTP kể cả Admin
+  [PASS] CR3-b: Xóa bộ cá nhân đang chọn: ChordCanvas.deleteSet tự động fallback sang bộ "HD" thay vì default
+
+--- Kiểm tra CORE RULE 4: Đồng Bộ Tông & Tempo Trong Setlist ---
+  [PASS] CR4-a: Bấm phát bài trong Setlist: Metronome nhận trực tiếp item.bpm đã lưu và áp dụng nhịp/phách ghi đè tempo XML gốc
+  [PASS] CR4-b: Lưu vào setlist & cập nhật Lưu Tập: DB lưu trữ toàn vẹn chord_profile, transpose_key và bpm
+  [PASS] CR4-c: Tài khoản không phải admin (Ban Hát): nút Lưu Tập hiển thị đầy đủ và API update_item cho phép chủ setlist cập nhật
+
+--------------------------------------------------------
+Tổng kết kiểm thử Core Rules:
+  - Tổng số test kịch bản: 9/9
+  - Số test thất bại: 0
+  - Trạng thái: ✅ TẤT CẢ 9 KỊCH BẢN CORE RULES ĐẠT CHUẨN (PASS)
+--------------------------------------------------------
+
+
+SUITE_COMPLETE total=9
+EXIT=0

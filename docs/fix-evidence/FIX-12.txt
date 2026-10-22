@@ -1,0 +1,15 @@
+RED php tests/setlist_private_profile_regression.php
+[FAIL:B] Sharing warning service exists
+[FAIL:B] Offline package explicitly marks private profile forbidden
+[PASS:B] Forbidden package does not contain private chords
+SUITE_COMPLETE total=3
+EXIT=1
+
+GREEN php tests/setlist_private_profile_regression.php
+[PASS:B] Sharing warning service exists
+[PASS:B] Owner is warned before sharing private profile
+[PASS:B] Standard HD does not produce a warning
+[PASS:B] Offline package explicitly marks private profile forbidden
+[PASS:B] Forbidden package does not contain private chords
+SUITE_COMPLETE total=5
+EXIT=0

@@ -1,0 +1,25 @@
+RED php tests/reported_xss_regression.php
+[FAIL:B] Classic chord set is rendered as text, not injected HTML
+[FAIL:B] Stage title retains literal payload text
+[FAIL:B] Stage song ID is safely encoded in attribute
+[FAIL:B] Admin category name is safely rendered
+[FAIL:B] Admin category input retains literal value
+[FAIL:B] Admin song title input retains literal value
+[FAIL:B] Admin username is safely rendered
+[FAIL:B] OMR category retains literal text
+[FAIL:B] Payload did not execute in Chromium
+SUITE_COMPLETE total=9
+EXIT=1
+
+GREEN php tests/reported_xss_regression.php
+[PASS:B] Classic chord set is rendered as text, not injected HTML
+[PASS:B] Stage title retains literal payload text
+[PASS:B] Stage song ID is safely encoded in attribute
+[PASS:B] Admin category name is safely rendered
+[PASS:B] Admin category input retains literal value
+[PASS:B] Admin song title input retains literal value
+[PASS:B] Admin username is safely rendered
+[PASS:B] OMR category retains literal text
+[PASS:B] Payload did not execute in Chromium
+SUITE_COMPLETE total=9
+EXIT=0

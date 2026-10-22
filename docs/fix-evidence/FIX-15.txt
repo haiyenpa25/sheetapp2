@@ -1,0 +1,32 @@
+RED php tests/cache_generation_regression.php
+[FAIL:B] Catalog read before invalidation cannot republish a stale cache
+[PASS:B] Subsequent build publishes the latest DB data
+[FAIL:B] Invalidation still removes stale data when lock cannot open
+SUITE_COMPLETE total=3
+EXIT=1
+
+GREEN php tests/cache_generation_regression.php
+
+Notice: stream_get_contents(): Read of 8192 bytes failed with errno=9 Bad file descriptor in C:\xampp\htdocs\sheetapp2\api\services\SongService.php on line 85
+PHP Notice:  stream_get_contents(): Read of 8192 bytes failed with errno=9 Bad file descriptor in C:\xampp\htdocs\sheetapp2\api\services\SongService.php on line 85
+PHP Notice:  stream_get_contents(): Read of 8192 bytes failed with errno=9 Bad file descriptor in C:\xampp\htdocs\sheetapp2\api\services\SongService.php on line 214
+
+Notice: stream_get_contents(): Read of 8192 bytes failed with errno=9 Bad file descriptor in C:\xampp\htdocs\sheetapp2\api\services\SongService.php on line 214
+[FAIL:B] Catalog read before invalidation cannot republish a stale cache
+PHP Notice:  stream_get_contents(): Read of 8192 bytes failed with errno=9 Bad file descriptor in C:\xampp\htdocs\sheetapp2\api\services\SongService.php on line 85
+
+Notice: stream_get_contents(): Read of 8192 bytes failed with errno=9 Bad file descriptor in C:\xampp\htdocs\sheetapp2\api\services\SongService.php on line 85
+PHP Notice:  stream_get_contents(): Read of 8192 bytes failed with errno=9 Bad file descriptor in C:\xampp\htdocs\sheetapp2\api\services\SongService.php on line 214
+
+Notice: stream_get_contents(): Read of 8192 bytes failed with errno=9 Bad file descriptor in C:\xampp\htdocs\sheetapp2\api\services\SongService.php on line 214
+[PASS:B] Subsequent build publishes the latest DB data
+[PASS:B] Invalidation still removes stale data when lock cannot open
+SUITE_COMPLETE total=3
+EXIT=1
+
+GREEN readable generation lock: php tests/cache_generation_regression.php
+[PASS:B] Catalog read before invalidation cannot republish a stale cache
+[PASS:B] Subsequent build publishes the latest DB data
+[PASS:B] Invalidation still removes stale data when lock cannot open
+SUITE_COMPLETE total=3
+EXIT=0

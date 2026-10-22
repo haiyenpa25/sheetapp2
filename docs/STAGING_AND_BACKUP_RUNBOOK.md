@@ -1,156 +1,69 @@
-# SheetApp2 — Tài Liệu Thiết Lập Staging & Quy Trình Backup Off-site Mã Hoá
+# Staging và sao lưu — hướng dẫn theo công cụ hiện có
 
-> Ngày ban hành: 2026-09-25  
-> Trạng thái: Hoàn tất tài liệu điều hành & quy trình phục hồi (G0-B)  
-> Áp dụng cho: Quản trị viên hệ thống, DevOps, và AI Agent
+Cập nhật 2026-10-21 (FIX-43). Đây là quy trình, không phải xác nhận staging/scheduler/off-site đã được thiết lập. Chủ dự án xác nhận trước deploy, migration, xoá hoặc phục hồi dữ liệu thật.
 
----
+## Môi trường cách ly
 
-## 1. Mục Tiêu & Nguyên Tắc Tách Biệt Môi Trường
+Staging phải có DocumentRoot, DB, storage, session và tài khoản riêng. Không dùng workspace nguồn làm dữ liệu thử. `tests/run_all_tests.php --strict --js` và E2E ghi phải chạy trên bản sao ngoài workspace. Global E2E yêu cầu `.sheetapp-e2e-isolated.json` và URL trùng marker; không còn snapshot/restore đè DB nguồn sau test.
 
-Nhằm ngăn chặn sự cố can thiệp trực tiếp vào dữ liệu ca đoàn và hệ thống production (`sheet.hyb.io.vn`), hệ thống SheetApp2 vận hành theo mô hình 3 tầng độc lập:
+Không coi biến DB_PATH của PHP CLI là cấu hình DB cho Apache: `Config::get('DB_PATH')` chỉ dùng override đó ở CLI. Dùng bản sao cây ứng dụng riêng cho HTTP. Bảo vệ api/core, api/services, storage/data, storage/config, logs, tools và docs bằng cấu hình máy chủ; kiểm lại HTTP 403/404 trước mở staging.
 
-| Môi trường | URL truy cập | Vị trí lưu trữ dữ liệu | Quyền hạn / Dữ liệu |
-|---|---|---|---|
-| **Development** | `http://localhost/sheetapp2/` | `C:\xampp\htdocs\sheetapp2\storage\data\` | Dữ liệu kiểm thử, SQLite local, log chi tiết |
-| **Staging** | `https://staging.sheet.hyb.io.vn/` | Thư mục staging riêng biệt trên server | Bản sao có cấu trúc giống Production, dữ liệu ẩn danh |
-| **Production** | `https://sheet.hyb.io.vn/` | Server chính thức | Dữ liệu thật, khóa nghiêm ngặt, tự động backup |
+## Giữ cấu hình tính năng (Q-A)
 
-### Quy tắc bất biến:
-1. **Không dùng chung cơ sở dữ liệu:** Staging tuyệt đối không trỏ tới `storage/data/app.sqlite` của Production.
-2. **Không tự động push vào nhánh chính (main):** Mọi thay đổi phải đi qua Pull Request, kiểm thử local và staging trước khi merge vào Production.
-3. **Bảo mật file cấu hình & Secret:** Không lưu trữ mật khẩu, session token hoặc private key trong mã nguồn git.
+`features.json` là mặc định trong Git; `features.local.json` ngoài Git nạp sau để ghi đè. Trước cập nhật lần đầu, sao chép cấu hình đang dùng sang local nếu local chưa tồn tại. Không ghi đè local hiện có. Xem `docs/LIBRARY_DATA_RELEASE.md`. Chưa bật CSRF production trước staging/E2E ghi.
 
----
+## Phạm vi backup thực tế
 
-## 2. Thiết Lập Môi Trường Staging
+`tools/create_encrypted_backup.php` hiện đóng gói **snapshot DB SQLite và manifest**, dưới dạng ZIP (hoặc GZ/JSON nếu thiếu ZipArchive), rồi mã hoá AES-256-CBC/PBKDF2 khi có passphrase. Tệp `.enc` không phải `.tar.gz`; không dùng `tar -xzf` để mở trực tiếp. Manifest có SHA256 snapshot, integrity, số songs/users.
 
-### 2.1 Cấu hình Web Server (Apache / LiteSpeed / Nginx)
-- Tạo VirtualHost hoặc Subdomain riêng: `staging.sheet.hyb.io.vn`.
-- Thư mục gốc (DocumentRoot): `/home/sheet.hyb.io.vn/staging_html/`.
-- Kích hoạt `.htaccess` để bảo vệ các thư mục nhạy cảm (`storage/data/`, `storage/logs/`, `tools/`, `docs/`, `*.sqlite`, `*.log`, `*.md`).
+Tool này **chưa sao lưu MusicXML, storage/users, cấu hình local hoặc upload**. Cần một backup filesystem riêng cho `storage/Thanh ca`, `storage/users`, `storage/data/chord_sets`, annotations, tài sản upload cần giữ và cấu hình server; ghi version code và thời điểm tương ứng. Không gọi bản DB-only là full backup. Để chụp DB và file đồng bộ, lên lịch khoảng bảo trì/ngừng ghi, hoặc dùng snapshot filesystem phù hợp do quản trị viên triển khai.
 
-### 2.2 Cấu hình Ứng dụng & SQLite
-1. Sao chép cây thư mục mã nguồn từ bản phát hành mới nhất sang thư mục staging.
-2. Tạo tệp SQLite trắng hoặc nhập từ bản backup staging:
-   ```bash
-   mkdir -p storage/data storage/logs storage/users
-   chmod -R 750 storage/data storage/logs
-   ```
-3. Chạy kiểm tra tính toàn vẹn:
-   ```bash
-   php tools/check_db.php
-   ```
+## Tạo và xác minh DB backup
 
----
+Truyền passphrase qua biến `SHEETAPP_BACKUP_PASSPHRASE` của **tiến trình hiện tại**, lấy từ kho secret, hoặc dùng `--passphrase-stdin`. Không gõ passphrase vào argv, script trong Git hay lịch sử shell. Tên mặc định: `sheetapp_backup_YYYYmmdd_HHMMSS.enc`.
 
-## 3. Quy Trình Tạo Bản Sao Lưu (Full Backup) & Mã Hoá Off-Site
-
-### 3.1 Các thành phần bắt buộc trong gói Backup
-Một gói sao lưu hợp lệ phải bao gồm đầy đủ 4 thành phần:
-1. **Cơ sở dữ liệu SQLite:** `storage/data/app.sqlite` (sau khi đồng bộ checkpoint WAL).
-2. **Kho bản nhạc Thánh Ca Master:** `storage/Thanh ca/` (~903 file MusicXML).
-3. **Các bản phối cá nhân & phiên bản SATB:** `storage/users/` (các file XML do thành viên tạo).
-4. **Bản đồ bảng mã hợp âm & cấu hình:** bảng `user_chord_sets`, `song_versions`, `users`.
-
-### 3.2 Lệnh thực hiện sao lưu & kiểm tra tính toàn vẹn
-Chạy script CLI chuyên dụng tạo snapshot nhất quán:
-```bash
-php tools/create_encrypted_backup.php --output=storage/backups/backup-$(date +%Y%m%d_%H%M%S).tar.gz.enc --passphrase="<KHOA_MA_HOA_MANH>"
+```powershell
+# Biến môi trường đã được cấp cho tiến trình từ nguồn secret bên ngoài.
+php tools/create_encrypted_backup.php
+php tools/restore_encrypted_backup.php --input=storage/backups/sheetapp_backup_YYYYmmdd_HHMMSS.enc --verify-only
 ```
 
-*Trường hợp thực hiện thủ công bằng lệnh hệ thống:*
-```bash
-# 1. Tạo snapshot SQLite an toàn (sử dụng lệnh VACUUM INTO để khóa đọc nhất quán)
-php -r "$db = new PDO('sqlite:storage/data/app.sqlite'); $db->exec('VACUUM INTO \"storage/data/snapshot.sqlite\"');"
+Có thể chỉ định `--output=<file.enc>`. Kiểm thử hoặc dry-run vận hành dùng DB/thư mục riêng:
 
-# 2. Đóng gói các tệp dữ liệu quan trọng
-tar -czf storage/backups/snapshot.tar.gz \
-    storage/data/snapshot.sqlite \
-    storage/Thanh\ ca \
-    storage/users
-
-# 3. Mã hoá gói sao lưu bằng OpenSSL AES-256-CBC
-openssl enc -aes-256-cbc -salt -pbkdf2 -iter 100000 \
-    -in storage/backups/snapshot.tar.gz \
-    -out storage/backups/sheetapp-backup-$(date +%Y%m%d).enc \
-    -k "<OFFSITE_BACKUP_SECRET_KEY>"
-
-# 4. Dọn dẹp tệp snapshot tạm thời
-rm -f storage/data/snapshot.sqlite storage/backups/snapshot.tar.gz
+```powershell
+php tools/create_encrypted_backup.php --db=<fixture.sqlite> --backup-dir=<temp-backups> --output=<temp-backup.enc>
 ```
 
-### 3.3 Chuyển giao lưu trữ Off-site
-Tệp `.enc` đã được mã hoá mạnh bằng AES-256-CBC và PBKDF2 (100.000 vòng lặp) được đồng bộ ra ngoài server qua:
-- S3 Compatible Storage (Cloudflare R2, AWS S3, Wasabi).
-- Hoặc SFTP Remote Backup Server tách biệt vật lý.
-- Giữ chu kỳ lưu trữ (Retention Policy): 7 bản hàng ngày, 4 bản hàng tuần, 12 bản hàng tháng.
+`--verify-only` giải mã và đối chiếu SHA256/integrity trong thư mục tạm rồi dọn phần DB/manifest đã giải nén. Tiêu chí: exit 0, integrity ok, SHA256 KHỚP; số songs/users phải khớp manifest của bản sao lưu, không dùng mốc cứng 903 bài. Giữ checksum của cả tệp mã hoá để đối chiếu sau chuyển off-site.
 
----
-
-## 4. Quy Trình Khôi Phục & Diễn Tập (Restore Runbook)
-
-Khi cần khôi phục dữ liệu lên môi trường Staging hoặc khắc phục sự cố:
-
-### Bước 1: Giải mã gói sao lưu
-```bash
-openssl enc -d -aes-256-cbc -pbkdf2 -iter 100000 \
-    -in sheetapp-backup-YYYYMMDD.enc \
-    -out restored_package.tar.gz \
-    -k "<OFFSITE_BACKUP_SECRET_KEY>"
-
-tar -xzf restored_package.tar.gz -C /tmp/restore_drill/
+```powershell
+Get-FileHash -Algorithm SHA256 -LiteralPath <backup.enc>
 ```
 
-### Bước 2: Kiểm chứng cơ sở dữ liệu đã khôi phục
-Chạy script `verify_sqlite_backup.php` để đối chiếu số lượng:
-```bash
-php tools/verify_sqlite_backup.php /tmp/restore_drill/storage/data/snapshot.sqlite
-```
-**Tiêu chí thành công:**
-- `integrity=ok`
-- `songs=903`
-- `users >= 4`
-- Các bảng `song_versions`, `user_chord_sets` đầy đủ.
+Không có `tools/check_db.php` hoặc `tools/verify_sqlite_backup.php`; dùng tool restore nêu trên. Regression drill tạo DB từ fixture memory và backup trong temp: `php tests/backup_restore_drill_regression.php`.
 
-### Bước 3: Đưa dữ liệu vào vị trí hoạt động
-```bash
-cp /tmp/restore_drill/storage/data/snapshot.sqlite storage/data/app.sqlite
-cp -rn /tmp/restore_drill/storage/Thanh\ ca/* storage/Thanh\ ca/
-cp -rn /tmp/restore_drill/storage/users/* storage/users/
-rm -rf /tmp/restore_drill restored_package.tar.gz
+## Phục hồi thử và phục hồi thật
+
+Phục hồi thử vào thư mục mới, ngoài DocumentRoot và ngoài DB đang mở:
+
+```powershell
+php tools/restore_encrypted_backup.php --input=<backup.enc> --out-dir=<new-empty-restore-dir>
 ```
 
----
+Kết quả gồm `app.sqlite` và `manifest.json`. Lệnh không tự đưa DB vào vị trí hoạt động. Trước phục hồi thật: chủ dự án duyệt bản nguồn/đích; backup hiện trạng; dừng các tiến trình đang giữ DB và WAL; xác minh backup; khôi phục cả filesystem đi kèm cùng mốc; kiểm integrity, khóa ngoại, đăng nhập và mở bài trên staging. Việc chuyển vào production và xử lý WAL/SHM do người có quyền máy chủ thực hiện trong maintenance, không chép snapshot đè khi Apache còn giữ DB.
 
-## 5. Cổng Nghiệm Thu Checkpoint G0 (Definition of Done)
+## Lịch chạy và giữ bản
 
-Hệ thống đạt đủ điều kiện đóng **Giai đoạn 0 (Bảo mật khẩn cấp & Lưới an toàn)** khi:
-1. Toàn bộ 15 bộ Security Regression Suites (149+ test assertions) đạt trạng thái **PASS**.
-2. Các lỗ hổng bảo mật P0 (S1–S11) được vá triệt để:
-   - Không còn bypass quyền User API (yêu cầu Admin token/session).
-   - Đã loại bỏ mật khẩu hiển thị và quick-login trên form.
-   - Thư mục nội bộ, script CLI, docs và storage nhạy cảm đã bị chặn từ Web.
-   - Live Sync yêu cầu đăng nhập và `hostToken` nguyên tử.
-   - MusicXML upload/delete bị giới hạn nghiêm ngặt trong 2 managed roots.
-   - Không còn lỗ hổng Stored XSS trong toàn bộ 6 ứng dụng.
-3. Diễn tập sao lưu và khôi phục cơ sở dữ liệu cục bộ đã thành công với đối chiếu toàn vẹn `integrity=ok`.
-4. Quy trình thiết lập Staging và sao lưu mã hoá off-site đã được chuẩn hóa thành tài liệu hướng dẫn điều hành.
+Repository chưa cài scheduler. Đề xuất một lượt mỗi ngày lúc 02:00, cộng một lượt trước mỗi migration/release. Chủ dự án tạo Task Scheduler (Windows) hoặc cron (Linux) bằng tài khoản riêng; WorkingDirectory là đúng ứng dụng, PHP lấy đường dẫn thực tế trên máy. Cấp secret cho tiến trình, ghi exit code và báo lỗi khi tạo/xác minh thất bại; không đưa secret vào trường Arguments của lịch.
 
----
+Chỉ chuyển off-site qua kênh/tài khoản đã được chủ dự án cấu hình. Kiểm SHA256 tệp mã hoá sau truyền và diễn tập restore định kỳ. Lưu khóa giải mã tách khỏi backup, có người được phân công phục hồi.
 
-## 6. Biên Bản Diễn Tập Phục Hồi Ngoại Tuyến (Restore Drill Report — Checkpoint G3.9)
+Chính sách đề xuất: 7 bản ngày, 4 bản tuần, 12 bản tháng; một file có thể đại diện nhiều mốc và phải giữ nếu còn thuộc bất kỳ mốc nào. Đây chưa phải job xoá tự động. Lập danh sách tên/checksum/kích thước cần giữ/xoá, xác minh bản off-site phục hồi được, rồi xin duyệt danh sách trước khi xoá.
 
-- **Ngày thực hiện:** 2026-09-26 11:01:45
-- **Công cụ tự động hóa:**
-  - Tạo sao lưu mã hóa: `tools/create_encrypted_backup.php` (OpenSSL AES-256-CBC, PBKDF2 100.000 vòng lặp)
-  - Giải mã & Phục hồi: `tools/restore_encrypted_backup.php`
-  - Bộ kiểm thử hồi quy: `tests/backup_restore_drill_regression.php` (24/24 checks PASS)
-- **Kết quả diễn tập:**
-  - Header mã hóa: Chuẩn `Salted__` (16 bytes salt + ciphertext)
-  - Thử nghiệm mật mã sai: Từ chối giải mã an toàn, exit code 1, không lộ dữ liệu
-  - Thử nghiệm mật mã đúng: Giải mã và giải nén thành công 100%
-  - Trạng thái toàn vẹn SQLite: `PRAGMA integrity_check = ok`
-  - Đối chiếu SHA-256 Checksum: Khớp tuyệt đối với `manifest.json`
-  - Kiểm tra dữ liệu: 903 bài hát, 4 tài khoản người dùng, 11 bảng cốt lõi đầy đủ.
-- **Trạng thái:** ĐẠT YÊU CẦU CHECKPOINT G3.9 (VERIFIED).
+`tools/prune_backups.php` chỉ xử lý mẫu backup SQLite tự động, **không xử lý `.enc`**; không coi việc chạy nó là đã áp retention cho backup mã hoá. Không đổi đuôi `.enc` sang `.sqlite` để tool nhận nhầm.
+
+## Việc của chủ dự án trước merge
+
+- Q-E: đổi mật khẩu hai tài khoản yếu; tài khoản dùng chung chỉ viewer. Chưa thực hiện trên DB thật.
+- Q-F: kiểm gzip trên production (OpenLiteSpeed), ghi status/header thật. Dùng `curl -I -H "Accept-Encoding: gzip" <asset-url>`; nếu server trả file `.gz` mà thiếu `Content-Encoding: gzip`, ngừng quy tắc precompressed ở server đó trước release. Không suy kết quả Apache local sang production.
+- Q-C/Q-D và Q6: duyệt dry-run và backup trước migration/dọn dữ liệu, không suy ra từ phê duyệt sửa mã.

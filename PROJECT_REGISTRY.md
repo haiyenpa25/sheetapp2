@@ -11,7 +11,7 @@
 Tên dự án:   SheetApp — Ứng dụng đọc & biểu diễn bản nhạc
 Phiên bản:   v2.0-dev
 Ngày tạo:    2026-04-25
-Cập nhật:    2026-09-05
+Cập nhật:    2026-10-21
 
 Stack:
   Frontend:  Vanilla JS (ES6+ IIFE modules) + OSMD (OpenSheetMusicDisplay)
@@ -204,8 +204,10 @@ SheetApp/
 |------|-------|-----------------|
 | `Auth.php` | Session auth: `isAdmin()`, `requireLogin()`, `userId()` | Thêm role mới |
 | `Config.php` | Config: `DB_PATH`, `OMR_ENGINE_URL` | Thêm config key |
-| `DB.php` | PDO singleton: `DB::getConnection()` | Ít khi |
+| `DB.php` | PDO singleton: `DB::get()`, test inject `setPdo()` | Ít khi |
 | `Response.php` | JSON helpers: `ok()`, `error()`, `notFound()`, `forbidden()` | Ít khi |
+
+`RotatingLog.php` ghi log có khóa chung, giới hạn 5 MiB/file và giữ 3 bản xoay vòng. `DB::hasTable/hasColumn` dùng cache theo PDO và SQLite schema_version.
 
 ### Backend Controllers (`api/controllers/`)
 
@@ -217,12 +219,21 @@ SheetApp/
 | `SessionController` | `sessions` | GET, POST | `SessionService` |
 | `SetlistController` | `setlists` | GET, POST, DELETE | `SetlistService` |
 | `CategoryController` | `categories` | GET, POST, PUT, DELETE | `CategoryService` |
-| `AuthController` | `auth` | POST (login/logout/me) | `UserService` |
+| `AuthController` | `auth` | GET (me), POST (login/logout) | `UserService` |
+| `ClientLogController` | `client_log` | POST (Origin/CSRF, ≤8 KiB, hạn mức IP) | `ClientLogService` |
 | `UserController` | `users` | GET, POST, PUT, DELETE | `UserService` |
 | `ImportController` | `import` | POST | `ImportService` |
 | `OmrController` | `omr` | GET, POST, DELETE | `OmrService` |
 | `LearningController` | `learning` | GET, POST | `LearningService` |
 | `PracticeController` | `practice` | GET, POST | `PracticeService` |
+| `LiveSyncController` | `live_sync` | GET, POST | `LiveSyncService` |
+| `ArrangementController` | `arrangements` | GET, POST, PUT, DELETE | `ArrangementService` |
+| `ManagerController` | `manager` | GET, POST | `ManagerService` và các helper |
+| `NotificationController` | `notifications` | GET, POST | `NotificationService` |
+| `PracticeAssignmentController` | `practice_assignments` | GET, POST | `PracticeAssignmentService` |
+| `ExportController` | `export` | GET | `ChordProService`; kiểm cờ EXPORT_CHORDPRO |
+| `ReviewController` | `reviews` | GET, POST | `ReviewService` |
+| `NotificationPreferenceController` | `notification_preferences` | GET, POST | `NotificationPreferenceService` |
 
 ### Learn Studio Modules (`assets/js/learn/`)
 
@@ -249,6 +260,7 @@ SheetApp/
 | `ApiService.js` | `songs`, `chordSets`, `sessions`, `annotations`, `setlists`, `categories`, `omr`, `importer`, `users`, `auth`, `saveXml` | - |
 | `EventBus.js` | `on(event, handler)`, `off()`, `emit(event, data)`, `once()` | - |
 | `Store.js` | `get(key)`, `set(key, val)`, `reset(keys)` | `EventBus` |
+| `PointerTap.js` | `bind(element, handler)`; phân biệt tap với kéo/hủy pointer | DOM Pointer Events |
 
 ### Frontend Modules (`assets/js/`)
 
@@ -294,8 +306,8 @@ SheetApp/
 | `songs` | PUT | `?id=X` + body | `{data: Song}` | Cập nhật |
 | `songs` | PUT | `?action=save_xml&id=X` | `{success}` | Lưu XML |
 | `songs` | DELETE | `?id=X` | `{success}` | Xóa bài |
-| `chord_sets` | GET | `?action=list&songId=X` | `{data: string[]}` | Danh sách set |
-| `chord_sets` | GET | `?action=load&songId=X&name=N` | `{data: ChordMap}` | Load set |
+| `chord_sets` | GET | `?action=list&songId=X` | `{success, sets: string[]}` | Danh sách set được đọc |
+| `chord_sets` | GET | `?action=load&songId=X&name=N` | `{success, chords, checksum}` | Load set theo quyền |
 | `chord_sets` | POST | `{action:save, songId, name, chords}` | `{success}` | Lưu set |
 | `chord_sets` | POST | `{action:delete, songId, name}` | `{success}` | Xóa set |
 | `annotations` | GET | `?action=load&songId=X` | `{data: Annotation[]}` | Load ghi chú |
@@ -313,12 +325,23 @@ SheetApp/
 | `categories` | GET | - | `{data: Category[]}` | Danh mục |
 | `auth` | POST | `?action=login` + `{username, password}` | `{data: User}` | Đăng nhập |
 | `auth` | GET | `?action=me` | `{data: User}` | User hiện tại |
-| `auth` | GET | `?action=logout` | `{success}` | Đăng xuất |
+| `auth` | POST | `?action=logout` | `{success}` | Đăng xuất; GET trả 405 |
 | `omr` | GET | - | `{data: OmrJob[]}` | Danh sách OMR jobs |
 | `omr` | POST | FormData (image) | `{data: OmrJob}` | Upload ảnh OMR |
 | `omr` | DELETE | `?id=X` | `{success}` | Xóa OMR job |
+| `songs` | GET / HEAD | `?action=version_xml&version_id=X` | MusicXML / body rỗng | Kiểm quyền bài và phiên bản; private, no-store |
+| `live_sync` | GET / POST | `room`, `rev`; action create/close hoặc cập nhật state | `{success, ...}` | Host token, polling/SSE |
+| `arrangements` | GET / POST / PUT / DELETE | `song_id`, `id`, action theo controller | `{success, ...}` | Đoạn/bản phối |
+| `manager` | GET / POST | `action` theo ManagerController | `{success, ...}` | Kho nhạc, bộ hợp âm, thành viên |
+| `notifications` | GET / POST | list/unread/read theo action | `{success, ...}` | Cờ NOTIFICATIONS_INAPP |
+| `practice_assignments` | GET / POST | action và assignment ID | `{success, ...}` | Cờ PRACTICE_ASSIGNMENTS |
+| `export` | GET | `song_id`, `format` | File xuất | Cờ EXPORT_CHORDPRO cho mọi định dạng |
+| `reviews` | GET / POST | action và target | `{success, ...}` | Cờ REVIEW_WORKFLOW; submit không tạo/chiếm bộ |
+| `notification_preferences` | GET / POST | action get/save | `{success, ...}` | Tùy chọn cá nhân |
 
-### Response Format Chuẩn (BẮT BUỘC)
+### Response format
+
+`Response::ok()` ghép `success: true` với các trường truyền vào; controller có thể dùng `data`, `sets`, `chords` hoặc trường trực tiếp. Kiểm contract tại controller và ApiService trước khi dùng `.data`.
 
 ```javascript
 // Thành công
@@ -336,23 +359,25 @@ SheetApp/
 
 | Bảng | Cột quan trọng | Ghi chú |
 |------|---------------|---------|
-| `songs` | `id, title, xml_path, category_id, default_key` | Bài hát |
-| `chord_sets` | `id, song_id, name, chords_json` | `name='HD'` và `name='default'` là protected |
-| `annotations` | `id, song_id, measure_idx, note_idx, text` | Sticky notes |
-| `sessions` | `id, song_id, user_id, user_settings_json, perf_notes_json` | Per-user per-song |
-| `setlists` | `id, name, user_id` | Header |
-| `setlist_items` | `id, setlist_id, song_id, order_index, chord_profile, transpose_key, bpm, beats_per_measure` | Items trong Setlist kèm Tông tập & Tempo tập |
+| `songs` | `id, title, httlvnId, xmlPath, category_id, defaultKey, visibility, is_public, created_by` | Tên cột camelCase được giữ theo schema thật |
+| `user_chord_sets` | `id, song_id, user_id, username, set_name, chords_json, is_public, checksum` | HD/TLH/default được bảo vệ cả khi gọi bằng alias |
+| `setlists` | `id, title, created_by, scheduled_date, status, leader_user_id` | Header chương trình |
+| `setlist_items` | `id, setlist_id, song_id, display_order, chord_profile, transpose_key, bpm, beats_per_measure, selected_verses` | Tông và tempo tập |
 | `categories` | `id, name, sort_order` | Danh mục bài |
-| `users` | `id, username, password_hash, role, email, quiet_hours_start, quiet_hours_end` | `role: 'admin'\|'leader'\|'banhat'\|'viewer'` |
-| `omr_jobs` | `id, filename, status, result_xml` | OMR processing queue |
+| `users` | `id, username, password_hash, role, email, quiet_hours_start, quiet_hours_end` | `role: 'admin'\|'leader'\|'bannhac'\|'banhat'\|'viewer'` |
+| `omr_workspace` | `id, original_filename, status, musicxml_path, created_at` | OMR processing queue |
 | `domain_events` | `id, type, actor_user_id, subject_type, subject_id, payload_json` | Event log nội bộ phục vụ fan-out |
 | `notifications` | `id, user_id, event_id, title, body, link, read_at` | Trung tâm thông báo trong app |
 | `notification_preferences` | `user_id, event_type, channel, enabled` | Tùy chọn đa kênh theo người dùng |
 | `notification_deliveries` | `id, notification_id, user_id, channel, status, attempts, sent_at` | Hàng đợi chuyển phát (queued/sent/failed/skipped) |
 | `practice_assignments` | `id, setlist_id, song_id, created_by, title, due_at, status` | Bài tập ca đoàn |
 | `practice_assignment_targets`| `assignment_id, user_id, voice_part, status, completed_at` | Mục tiêu luyện tập phân công theo ca viên |
-| `review_requests` | `id, entity_type, entity_id, song_id, requester_id, status` | Hàng đợi phê duyệt hợp âm/MusicXML |
-| `chord_set_history` | `id, chord_set_id, song_id, chords_json, changed_by` | Lịch sử phục vụ rollback HD |
+| `review_requests` | `id, target_type, target_id, song_id, submitted_by, reviewer_id, status` | Hàng đợi phê duyệt hợp âm/MusicXML |
+| `chord_set_history` | `id, song_id, set_name, chords_json, created_by, review_request_id` | Lịch sử phục vụ rollback HD |
+| `song_versions` | `id, song_id, user_id, username, version_name, xml_path, is_public` | XML riêng qua API có kiểm quyền |
+| `service_plan_assignments` | `id, setlist_id, user_id, role, status` | Phân công chương trình |
+
+Ghi chú nằm trong `storage/data/annotations/*.json`; settings/notes theo user và bài ở `storage/data/sessions/*.json`. Không có bảng SQL `annotations`/`sessions`. Unique index `users_chord_code_unique` trên `UPPER(TRIM(chord_code))` (bỏ mã rỗng) được tạo bằng tool apply đã duyệt; không tự áp dụng trên bản cài khác.
 
 ---
 
@@ -405,24 +430,16 @@ SheetApp/
 > Thứ tự script quan trọng — vi phạm gây lỗi "X is not defined"
 
 ```
-1. OSMD library (vendor)
-2. core/EventBus.js
-3. core/Store.js
-4. core/ApiService.js
-5. transpose-engine.js
-6. osmd-renderer.js
-7. chord-canvas.js, chord-canvas-ui.js, chord-canvas-xml.js
-8. annotation-canvas.js
-9. audio-player.js
-10. auto-scroller.js
-11. library-ui.js, setlist-ui.js
-12. song-info-bar.js, display-settings.js, page-nav.js
-13. fab.js, keyboard-handler.js, history-manager.js, url-state.js
-14. session-tracker.js, performance-notes.js
-15. toolbar-controller.js, app-ui.js
-16. song-loader.js
-17. auth.js, admin-ui.js, importer.js
-18. app.js ← bootstrap cuối cùng
+1. Vendor OSMD/Tonal (defer); Tone/SATB tải theo nhu cầu.
+2. Inline cache/features → idb-keyval, OfflineVault, ScriptLoader, FeatureFlags.
+3. SafeHtml, PointerTap, KeyService, ApiService, EventBus, Store.
+4. Core cache/modal/mode/shell/verse/tempo/audio/MIDI/loader/error/SW/offline helpers.
+5. Renderers, transpose, session-tracker, auth, history, URL state (defer).
+6. Modals, library/search/navigation, chương trình/setlist, importer/admin, display/lenses.
+7. Chord XML/UI/transpose/dots/edit → chord-canvas coordinator; annotation helpers → canvas.
+8. Notes, instruments, audio, metronome, scroller, page-nav, app-ui, song-info-bar.
+9. LiveSync adapter và FollowLeader; performance engine tải qua ensureLoaded().
+10. SongPreloader, SongLoader, keyboard, toolbar, mobile, app.js, fab.js.
 ```
 
 ---
@@ -433,6 +450,12 @@ SheetApp/
 
 ## 2026-10-21 — Dọn kho, gộp chỉ mục roadmap, phương án tối ưu toàn hệ thống
 
+- Đợt FIX: sửa review/alias, save context, XSS, privacy, offline/SW, pointer và test isolation. Thêm `PointerTap.js`, guard E2E, tool plan/apply/verify dữ liệu; Q-C/Q-D đã backup và áp dụng đúng manifest, không đổi chủ. Trạng thái từng FIX, bằng chứng và việc chủ dự án: [PHUONG_AN_2_EXECUTION](docs/PHUONG_AN_2_EXECUTION.md). Đồng bộ router/schema/load order; sinh lại SW manifest và CODE_MAP.
+
+- Theo phê duyệt riêng trong phiên: xoá 63 backup r34 cũ (470.441.984 byte), giữ 10 file với checksum không đổi; chặn alias xoá HD/TLH/default theo dòng DB thực tế ở ChordSetService và luồng Manager. Test riêng 161 checks PASS; lượt tổng strict + JS: 184/184 suite, 3.740 checks PASS, 0 SKIP; không đổi Core Rule 3. Bằng chứng trong `docs/opt-evidence/` và báo cáo OPT.
+- Rà soát lại OPT: R34 dùng fixture 903 bài, dry-run không đổi journal mode; audit/client log xoay vòng, test có đường dẫn log tạm; npm dùng `prepare:assets`; ngừng theo dõi cache/config/backup cá nhân, file local giữ nguyên. Catalog lưu ETag cạnh JSON, khóa snapshot chung; tool tempo/lời/chính tả/update_library xoá cache theo đúng DB qua SongService.
+- OPT-09 theo Q4 được duyệt trong phiên: bộ riêng tư chỉ chủ bộ đọc được (chords/metadata/checksum); chỉ xoá file khi DB xoá được dòng. OPT-11 đưa client log qua router, giới hạn body/IP và đăng ký theo IP, che lỗi nội bộ, export XML qua managed path. OPT-13 chuyển SQL Review/Setlist vào service và gom metadata schema vào DB.
+- Test mới trong `tests/`: `log_rotation_regression.php`, `schema_metadata_regression.php`, `controller_service_boundaries_regression.php`, `public_cache_snapshot_regression.php`, `tool_cache_invalidation_regression.php`, `http/chord_set_privacy_regression.php`, `http/client_log_regression.php`. Báo cáo trạng thái và bằng chứng: `docs/OPT_REVIEW_2026-10-21.md`, `docs/opt-evidence/`.
 - `ROADMAPS.md` là chỉ mục duy nhất (luật thực thi chép từ ROADMAP3 Phần 0); roadmap/báo cáo đã xong chuyển vào `docs/history/`. Kế hoạch toàn hệ thống: `PHUONG_AN_TOI_UU_HE_THONG.md` (OPT-01…26).
 - Test/tool không còn ghi vào storage thật: backup r34, `audit.log`, mail giả; runner chặn rò rỉ bằng cổng K2. Tool dọn backup `tools/prune_backups.php` (dry-run mặc định). `sync.sh`/`sync.bat` không còn commit/push.
 - Nhật ký cũ tách sang `docs/history/CHANGELOG_2026.md`.
@@ -473,11 +496,3 @@ SheetApp/
 - Theo yêu cầu trực tiếp của chủ dự án, main được fast-forward tới bản đã nghiệm thu `9bbea63`, giữ nguyên mã đã đạt PHP 175 suite/3.427 check, Chromium 124/124 và WebKit 24/24. Checkout chính `C:/xampp/htdocs/sheetapp2` chuyển sang main; không chạy sync.
 - Đưa 7 bản cài/worktree thử nghiệm ra khỏi `C:/xampp/htdocs`, vào `C:/xampp/sheetapp2-backups/source-archive-20261020-110530`. Trong htdocs chỉ còn một bản SheetApp2: `sheetapp2`. Worktree lưu trữ ở chế độ detached, ngoài webroot.
 - Modern `/` và Classic `/old/` là hai chế độ của cùng bản chính, tiếp tục được giữ theo quyết định của chủ dự án. Không xóa dữ liệu thật; DB giữ SHA256 `A91268B27DF548845C67B8F375C2D13B5899FFA4716BA99A00D59E4BC157CAC9`, có thêm bản sao trong thư mục lưu trữ trên.
-
-
-## 2026-10-20 — Toolbar ghi chú nhạc cụ, màu dùng chung
-
-- Luồng mới cả Modern/Classic: Nhạc cụ trên toolbar → chọn nhạc cụ → Ghi chú → + vàng phía trên hợp âm → mẫu/chữ tự do → lưu; bấm nhãn sửa trực tiếp.
-- Registry lưu màu theo nhạc cụ, admin đổi màu; renderer chừa khoảng trống theo lớp/zoom, bộ lọc nhiều nhạc cụ giữ nguyên.
-- Kiểm chứng: PHP 175 suite/3.427 check; Chromium 124 ca hồi quy (25 ca tính năng); WebKit 24 ca thành phần/HTTP; thành phần Chromium/WebKit 38 ca; JS syntax 330 file, ESLint module sửa PASS. Xem `docs/INSTRUMENT_ANNOTATIONS_ACCEPTANCE.md`.
-- Bàn giao local trên feature/roadmap5 tại thư mục người dùng đang mở; main không merge, DB không migration. Chỉ push nhánh GitHub đã được ủy quyền, không chạy sync.

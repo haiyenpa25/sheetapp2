@@ -1,0 +1,29 @@
+RED php tests/sw_scope_navigation_regression.php
+[FAIL:B] Authenticated catalog is never stored in shared SW cache
+[FAIL:B] Legacy unscoped/private catalog is not reused offline
+[FAIL:B] Editor offline navigation never receives Modern shell
+[FAIL:B] Classic offline navigation uses its own shell
+[FAIL:B] Classic navigation participates in service worker routing
+SUITE_COMPLETE total=5
+EXIT=1
+
+GREEN php tests/sw_scope_navigation_regression.php
+[PASS:B] Authenticated catalog is never stored in shared SW cache
+[PASS:B] Legacy unscoped/private catalog is not reused offline
+[PASS:B] Editor offline navigation never receives Modern shell
+[PASS:B] Classic offline navigation uses its own shell
+[PASS:B] Classic navigation participates in service worker routing
+SUITE_COMPLETE total=5
+EXIT=0
+
+RED IndexedDB: php tests/public_catalog_vault_regression.php
+[FAIL:B] Unscoped legacy catalog is not reused
+[FAIL:B] Only public songs from an authenticated list persist in shared IndexedDB
+SUITE_COMPLETE total=2
+EXIT=1
+
+GREEN IndexedDB: php tests/public_catalog_vault_regression.php
+[PASS:B] Unscoped legacy catalog is not reused
+[PASS:B] Only public songs from an authenticated list persist in shared IndexedDB
+SUITE_COMPLETE total=2
+EXIT=0

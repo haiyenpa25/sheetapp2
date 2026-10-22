@@ -1,0 +1,26 @@
+[PASS:B] /api/index.php?route=client_log: rejects cross-origin write
+[PASS:B] /api/index.php?route=client_log: rejects missing origin
+[FAIL:B] /api/index.php?route=client_log: only POST is accepted
+[FAIL:B] /api/index.php?route=client_log: body is capped at 8 KiB
+[FAIL:B] /api/index.php?route=client_log: rejects malformed JSON
+[FAIL:B] /api/index.php?route=client_log: rejects non-string log fields
+[FAIL:B] /api/log_error.php: rejects cross-origin write
+[FAIL:B] /api/log_error.php: rejects missing origin
+[PASS:B] /api/log_error.php: only POST is accepted
+[FAIL:B] /api/log_error.php: body is capped at 8 KiB
+[FAIL:B] /api/log_error.php: rejects malformed JSON
+[FAIL:B] /api/log_error.php: rejects non-string log fields
+[FAIL:B] Rejected requests do not write log entries
+[FAIL:B] Accepted same-origin record 1
+[PASS:B] Accepted same-origin record 2
+[FAIL:B] Accepted same-origin record 3
+[PASS:B] Accepted same-origin record 4
+[FAIL:B] Accepted same-origin record 5
+[PASS:B] Accepted same-origin record 6
+[FAIL:B] Accepted same-origin record 7
+[PASS:B] Accepted same-origin record 8
+[FAIL:B] Accepted same-origin record 9
+[PASS:B] Accepted same-origin record 10
+[FAIL:B] Shared IP quota rejects request 11
+[FAIL:B] Only the ten accepted records reach isolated log
+SUITE_COMPLETE total=25

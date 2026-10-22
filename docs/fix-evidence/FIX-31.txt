@@ -1,0 +1,11 @@
+RED php tests/auth_chord_cache_regression.php
+[FAIL:B] Logout invalidates previous user chord-set names
+[FAIL:B] Old in-flight names cannot repopulate cache after login
+SUITE_COMPLETE total=2
+EXIT=1
+
+GREEN php tests/auth_chord_cache_regression.php
+[PASS:B] Logout invalidates previous user chord-set names
+[PASS:B] Old in-flight names cannot repopulate cache after login
+SUITE_COMPLETE total=2
+EXIT=0

@@ -1,0 +1,17 @@
+RED php tests/auxiliary_guards_regression.php
+[FAIL:B] Active unexpired room older than two hours cannot be taken over
+[FAIL:B] Existing host token is preserved
+PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\sheetapp2\tests\auxiliary_guards_regression.php:7) in C:\xampp\htdocs\sheetapp2\api\controllers\AuthController.php on line 164
+PHP Warning:  session_destroy(): Trying to destroy uninitialized session in C:\xampp\htdocs\sheetapp2\api\controllers\AuthController.php on line 166
+[FAIL:B] GET logout is rejected without changing session
+[FAIL:B] Text export honors the same feature gate
+SUITE_COMPLETE total=4
+EXIT=1
+
+GREEN php tests/auxiliary_guards_regression.php
+[PASS:B] Active unexpired room older than two hours cannot be taken over
+[PASS:B] Existing host token is preserved
+[PASS:B] GET logout is rejected without changing session
+[PASS:B] Text export honors the same feature gate
+SUITE_COMPLETE total=4
+EXIT=0

@@ -1,0 +1,193 @@
+RED (isolated copy): php tests/library_l56_service_worker_precache_regression.php
+=== SUITE L5-6: Service Worker Precache Đầy Đủ & Offline Shell ===
+
+--- 1. Công cụ sinh Precache Manifest theo filemtime ---
+  [PASS] File tools/generate_sw_manifest.php tồn tại vật lý
+  [PASS] tools/generate_sw_manifest.php tuân thủ Line budget < 600 dòng (Hiện tại: 222)
+  [PASS] Script có logic quét filemtime của tài nguyên
+  [PASS] Script có logic quét filesize của tài nguyên
+  [PASS] Script có logic tính hash MD5 từng file
+  [PASS] Script có logic tính hash tổng hợp toàn bộ manifest
+  [PASS] generate_sw_manifest.php --check PASS: sw.js khớp manifest (exit 0) — === SheetApp2: Tự động sinh Precache Manifest cho Service Worker (Ticket L5-6) ===   ✓ Đã sinh manifest: storage/data/sw-manifest.json (57 files, hash: 17ac246a60)   ✓ Đã đồng bộ mảng precache và SW_MANIFEST_HASH ('17ac246a60') vào sw.js === Hoàn tất sinh precache manifest thành công! ===
+  [PASS] Chạy --check không sửa sw.js
+
+--- 2. Cấu trúc Manifest JSON ---
+  [FAIL] --json in manifest JSON hợp lệ
+  [FAIL] Manifest có trường manifest_version (hash)
+  [FAIL] Manifest có trường vendor_version (hash nội dung vendor)
+  [FAIL] Manifest có trường generated_at
+  [FAIL] Manifest có trường total_files >= 40 (Hiện tại: 0)
+  [FAIL] Mọi file index.php nạp sẵn (92) đều có trong precache sw.js — thiếu: assets/css/library-polish.css, assets/js/vendor/idb-keyval.min.js, assets/js/core/OfflineVault.js, assets/js/core/AppShell.js, assets/js/core/TapTempo.js, assets/js/core/AudioUnlocker.js, assets/js/core/MidiEngine.js, assets/js/core/ErrorReporter.js, assets/js/compact-score.js, assets/js/lyric-extractor.js, assets/js/session-tracker.js, assets/js/history-manager.js, assets/js/url-state.js, assets/js/modals/HelpModal.js, assets/js/modals/TransposePickerModal.js, assets/js/modals/TempoPickerSheet.js, assets/js/modals/ServicePlanAssignModal.js, assets/js/modals/PracticeTeamBoardModal.js, assets/js/modals/QuickNumpadModal.js, assets/js/service-plan-ui.js, assets/js/leader-notes-banner.js, assets/js/liturgy-card.js, assets/js/setlist-player.js, assets/js/setlist-list.js, assets/js/setlist-detail.js, assets/js/setlist-ui.js, assets/js/importer.js, assets/js/admin-ui.js, assets/js/stage-lens.js, assets/js/guitar-lens.js, assets/js/bass-lens.js, assets/js/drums-lens.js, assets/js/vocals-lens.js, assets/js/harmonic-numeral.js, assets/js/chord-canvas-transpose.js, assets/js/chord-canvas-edit.js, assets/js/performance-notes.js, assets/js/instruments.js, assets/js/audio-player.js, assets/js/metronome.js, assets/js/auto-scroller.js, assets/js/page-nav.js, assets/js/live-sync.js, assets/js/follow-leader.js, assets/js/song-preloader.js, assets/js/fab.js
+  [FAIL] sw.js đặt tên vendor cache theo SW_VENDOR_HASH khớp manifest
+  [PASS] Bản sao chuyển LF cho cùng SW_MANIFEST_HASH (--check exit 0) — === SheetApp2: Tự động sinh Precache Manifest cho Service Worker (Ticket L5-6) ===   [CẢNH BÁO] Không tìm thấy vendor: assets/js/vendor/opensheetmusicdisplay.min.js   [CẢNH BÁO] Không tìm thấy vendor: assets/js/vendor/tonal.min.js   [CẢNH BÁO] Không tìm thấy vendor: assets/js/vendor/Tone.js   [CẢNH BÁO] Không tìm thấy vendor: assets/js/vendor/OsmdAudioPlayer.min.js   [CẢNH BÁO] Không tìm thấy asset: assets/css/base.css   [CẢNH BÁO] Không tìm thấy asset: assets/css/layout.css   [CẢNH BÁO] Không tìm thấy asset: assets/css/sheet.css   [CẢNH BÁO] Không tìm thấy asset: assets/css/components.css   [CẢNH BÁO] Không tìm thấy asset: assets/css/instrument-annotations.css   [CẢNH BÁO] Không tìm thấy asset: assets/css/fab.css   [CẢNH BÁO] Không tìm thấy asset: assets/css/app-shell.css   [CẢNH BÁO] Không tìm thấy asset: assets/js/core/FeatureFlags.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/core/SafeHtml.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/core/KeyService.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/core/ChordSetNames.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/core/ApiService.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/core/EventBus.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/core/Store.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/core/XmlDocCache.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/core/ModalManager.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/core/ModeManager.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/core/VerseManager.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/core/SongLoaderCore.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/core/OfflineSetlistManager.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/core/ServiceWorkerManager.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/osmd-svg-text.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/osmd-renderer.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/transpose-engine.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/display-settings.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/chord-canvas-xml.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/chord-canvas-ui.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/chord-canvas-dots.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/chord-canvas.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/annotation-geometry.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/annotation-panel.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/annotation-canvas.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/song-info-bar.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/song-loader.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/library-gestures.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/library-list.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/song-navigation.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/core/LibrarySearch.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/library-ui.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/app-ui.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/toolbar-controller.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/keyboard-handler.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/mobile-controller.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/app.js   [CẢNH BÁO] Không tìm thấy asset: assets/js/auth.js   ✓ Đã sinh manifest: storage/data/sw-manifest.json (8 files, hash: f8eea221d6)   ✓ Đã đồng bộ mảng precache và SW_MANIFEST_HASH ('f8eea221d6') vào sw.js === Hoàn tất sinh precache manifest thành công! ===
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/css/base.css
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/css/layout.css
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/css/sheet.css
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/css/components.css
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/css/fab.css
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/css/app-shell.css
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/vendor/opensheetmusicdisplay.min.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/vendor/tonal.min.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/vendor/Tone.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/vendor/OsmdAudioPlayer.min.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/core/ScriptLoader.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/core/FeatureFlags.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/core/SafeHtml.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/core/KeyService.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/core/ApiService.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/core/EventBus.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/core/Store.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/core/XmlDocCache.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/core/ModalManager.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/core/ModeManager.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/core/VerseManager.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/core/SongLoaderCore.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/core/OfflineSetlistManager.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/core/ServiceWorkerManager.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/osmd-renderer.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/transpose-engine.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/display-settings.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/chord-canvas-xml.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/chord-canvas-ui.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/chord-canvas-dots.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/chord-canvas.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/song-info-bar.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/song-loader.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/library-ui.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/app-ui.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/toolbar-controller.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/keyboard-handler.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/mobile-controller.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/app.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: assets/js/auth.js
+  [FAIL] Manifest chứa tài nguyên thiết yếu: api/index.php?route=songs
+
+--- 3. Kiến trúc sw.js & Chiến lược Cache ---
+  [PASS] File sw.js tồn tại
+  [PASS] sw.js tuân thủ Line budget < 600 dòng (Hiện tại: 387)
+  [PASS] sw.js chứa khai báo SW_MANIFEST_HASH
+  [PASS] sw.js chứa PRECACHE_VENDOR bao gồm vendor scripts
+  [PASS] sw.js chứa PRECACHE_APP bao gồm core scripts và api/index.php?route=songs
+  [PASS] sw.js có chiến lược networkFirstForApiSongs cho danh mục bài hát
+  [PASS] sw.js có fallback ignoreSearch trong cacheFirst
+  [PASS] sw.js có fallback ignoreSearch trong staleWhileRevalidate
+  [PASS] sw.js có cơ chế safeAddAll chống crash khi install
+  [PASS] sw.js có cơ chế networkFirstForNavigation fallback về App Shell khi offline
+
+--- 4. Kết nối ServiceWorkerManager & App Lifecycle ---
+  [PASS] assets/js/app.js gọi ServiceWorkerManager.register()
+  [PASS] assets/js/app.js có fallback nạp ServiceWorkerManager qua ScriptLoader
+  [PASS] assets/js/core/ServiceWorkerManager.js tồn tại
+  [PASS] ServiceWorkerManager.js tuân thủ Line budget < 600 dòng (Hiện tại: 128)
+  [PASS] ServiceWorkerManager xuất window.ServiceWorkerManager
+
+--- 5. Kiểm thử Behavioral Cache Lifecycle trên Node.js ---
+  [PASS] [Node.js Behavioral SW Simulation] safeAddAll precaches critical assets successfully into CacheStorage
+  [PASS] [Node.js Behavioral SW Simulation] staleWhileRevalidate resolves versioned asset (?v=...) via ignoreSearch when OFFLINE
+  [PASS] [Node.js Behavioral SW Simulation] cacheFirst resolves vendor asset with version query when OFFLINE
+  [PASS] [Node.js Behavioral SW Simulation] networkFirstForNavigation falls back to cached App Shell HTML when OFFLINE
+  [PASS] [Node.js Behavioral SW Simulation] staleWhileRevalidate returns cached and updates in background when ONLINE
+
+=======================================================
+KẾT QUẢ SUITE L5-6: 29/77 checks PASS (37.7%)
+TỶ LỆ BEHAVIORAL: 59/77 (76.6% - Yêu cầu >= 40%)
+SUITE_COMPLETE total=77 passed=29
+>>> QUALITY GATE FAILED <<<
+EXIT=1
+
+GREEN php tests/library_l56_service_worker_precache_regression.php
+=== SUITE L5-6: Service Worker Precache Đầy Đủ & Offline Shell ===
+
+--- 1. Công cụ sinh Precache Manifest theo filemtime ---
+  [PASS] File tools/generate_sw_manifest.php tồn tại vật lý
+  [PASS] tools/generate_sw_manifest.php tuân thủ Line budget < 600 dòng (Hiện tại: 196)
+  [PASS] Script có logic quét filemtime của tài nguyên
+  [PASS] Script có logic quét filesize của tài nguyên
+  [PASS] Script có logic tính hash MD5 từng file
+  [PASS] Script có logic tính hash tổng hợp toàn bộ manifest
+  [PASS] generate_sw_manifest.php --check PASS: sw.js khớp manifest (exit 0) — PASS: sw.js khớp manifest (112 files, hash fa65b81683, vendor e8b6692a09)
+  [PASS] Chạy --check không sửa sw.js
+
+--- 2. Cấu trúc Manifest JSON ---
+  [PASS] --json in manifest JSON hợp lệ
+  [PASS] Manifest có trường manifest_version (hash)
+  [PASS] Manifest có trường vendor_version (hash nội dung vendor)
+  [PASS] Manifest có trường generated_at
+  [PASS] Manifest có trường total_files >= 40 (Hiện tại: 112)
+  [PASS] Mọi file index.php nạp sẵn (92) đều có trong precache sw.js
+  [PASS] sw.js đặt tên vendor cache theo SW_VENDOR_HASH khớp manifest
+  [PASS] Bản sao chuyển LF cho cùng SW_MANIFEST_HASH (--check exit 0) — PASS: sw.js khớp manifest (112 files, hash fa65b81683, vendor e8b6692a09)
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/css/base.css
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/css/layout.css
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/css/sheet.css
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/css/components.css
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/css/fab.css
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/css/app-shell.css
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/vendor/opensheetmusicdisplay.min.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/vendor/tonal.min.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/vendor/Tone.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/vendor/OsmdAudioPlayer.min.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/core/ScriptLoader.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/core/FeatureFlags.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/core/SafeHtml.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/core/KeyService.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/core/ApiService.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/core/EventBus.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/core/Store.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/core/XmlDocCache.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/core/ModalManager.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/core/ModeManager.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/core/VerseManager.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/core/SongLoaderCore.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/core/OfflineSetlistManager.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/core/ServiceWorkerManager.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/osmd-renderer.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/transpose-engine.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/display-settings.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/chord-canvas-xml.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/chord-canvas-ui.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/chord-canvas-dots.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/chord-canvas.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/song-info-bar.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/song-loader.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/library-ui.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/app-ui.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/toolbar-controller.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/keyboard-handler.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/mobile-controller.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/app.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: assets/js/auth.js
+  [PASS] Manifest chứa tài nguyên thiết yếu: api/index.php?route=songs
+
+--- 3. Kiến trúc sw.js & Chiến lược Cache ---
+  [PASS] File sw.js tồn tại
+  [PASS] sw.js tuân thủ Line budget < 600 dòng (Hiện tại: 443)
+  [PASS] sw.js chứa khai báo SW_MANIFEST_HASH
+  [PASS] sw.js chứa PRECACHE_VENDOR bao gồm vendor scripts
+  [PASS] sw.js chứa PRECACHE_APP bao gồm core scripts và api/index.php?route=songs
+  [PASS] sw.js có chiến lược networkFirstForApiSongs cho danh mục bài hát
+  [PASS] sw.js có fallback ignoreSearch trong cacheFirst
+  [PASS] sw.js có fallback ignoreSearch trong staleWhileRevalidate
+  [PASS] sw.js có cơ chế safeAddAll chống crash khi install
+  [PASS] sw.js có cơ chế networkFirstForNavigation fallback về App Shell khi offline
+
+--- 4. Kết nối ServiceWorkerManager & App Lifecycle ---
+  [PASS] assets/js/app.js gọi ServiceWorkerManager.register()
+  [PASS] assets/js/app.js có fallback nạp ServiceWorkerManager qua ScriptLoader
+  [PASS] assets/js/core/ServiceWorkerManager.js tồn tại
+  [PASS] ServiceWorkerManager.js tuân thủ Line budget < 600 dòng (Hiện tại: 128)
+  [PASS] ServiceWorkerManager xuất window.ServiceWorkerManager
+
+--- 5. Kiểm thử Behavioral Cache Lifecycle trên Node.js ---
+  [PASS] [Node.js Behavioral SW Simulation] safeAddAll precaches critical assets successfully into CacheStorage
+  [PASS] [Node.js Behavioral SW Simulation] staleWhileRevalidate resolves versioned asset (?v=...) via ignoreSearch when OFFLINE
+  [PASS] [Node.js Behavioral SW Simulation] cacheFirst resolves vendor asset with version query when OFFLINE
+  [PASS] [Node.js Behavioral SW Simulation] networkFirstForNavigation falls back to cached App Shell HTML when OFFLINE
+  [PASS] [Node.js Behavioral SW Simulation] staleWhileRevalidate returns cached and updates in background when ONLINE
+
+=======================================================
+KẾT QUẢ SUITE L5-6: 77/77 checks PASS (100%)
+TỶ LỆ BEHAVIORAL: 59/77 (76.6% - Yêu cầu >= 40%)
+SUITE_COMPLETE total=77 passed=77
+>>> QUALITY GATE PASSED 100% - TICKET L5-6 SANCTIONED <<<
+EXIT=0

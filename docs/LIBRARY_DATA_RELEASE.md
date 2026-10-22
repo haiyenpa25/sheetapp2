@@ -31,6 +31,21 @@ Script từ chối xuất nếu có bài hoặc bản phối private cần rà s
 
 ## Cài mới
 
+### Cờ tính năng khi cập nhật (FIX-07, Q-A đã duyệt)
+
+`storage/config/features.json` tiếp tục được theo dõi trong Git làm cấu hình mặc định. Máy chủ dùng `storage/config/features.local.json` (ngoài Git) để ghi đè từng cờ; thứ tự nạp: mặc định trong PHP → `features.json` → `features.local.json`. Giữ nguyên giá trị mặc định đã phát hành để việc cập nhật mã không tự tắt Review/Practice/Export/Notifications.
+
+Trước lần cập nhật này, sao chép cấu hình hiện hành sang file local, chỉ khi file local chưa tồn tại:
+
+```powershell
+if (!(Test-Path -LiteralPath storage/config/features.local.json)) {
+    Copy-Item -LiteralPath storage/config/features.json -Destination storage/config/features.local.json
+}
+```
+
+Trên Linux: `test -f storage/config/features.local.json || cp storage/config/features.json storage/config/features.local.json`.
+Sau cập nhật, kiểm tra capabilities trả về và các luồng ghi trên staging. Không commit file local; không tự bật `csrf_enforce` trên production trước khi staging/E2E được duyệt. Việc cập nhật/push/deploy vẫn do chủ dự án xác nhận.
+
 ```bash
 php tools/install_library.php
 ```

@@ -10,7 +10,8 @@
 | Tài liệu | Phạm vi | Trạng thái |
 |---|---|---|
 | [ROADMAP6.md](ROADMAP6.md) | Trang Thư viện, Modern `/` và Classic `/old/` (ticket **TV0–TV7**) | 🟨 TV0, TV1, TV2, TV4 đã triển khai một phần; TV3, TV5, TV6, TV7 chưa bắt đầu. Bảng trạng thái ở đầu file |
-| [PHUONG_AN_TOI_UU_HE_THONG.md](PHUONG_AN_TOI_UU_HE_THONG.md) | Toàn hệ thống: dọn kho, kiến trúc, hiệu năng, bảo mật, dữ liệu, kiểm thử (ticket **OPT-**) | ⬜ Đề xuất 2026-10-21, chờ chủ dự án duyệt |
+| [PHUONG_AN_TOI_UU_HE_THONG.md](PHUONG_AN_TOI_UU_HE_THONG.md) | Toàn hệ thống: dọn kho, kiến trúc, hiệu năng, bảo mật, dữ liệu, kiểm thử (ticket **OPT-**) | 🟨 Đã thực hiện một phần theo duyệt; xem docs/OPT_REVIEW_2026-10-21.md và PHUONG_AN_2 |
+| [PHUONG_AN_2.md](PHUONG_AN_2.md) | Rà soát lỗi sau đợt OPT: 45 lỗi (FIX-01…45; 7 lỗi Cao trong mã về mất dữ liệu/XSS/Core Rule, 2 rủi ro Cao vận hành) và tối ưu tiếp (P2-01…13), cách xử lý 6 nhánh agent dở dang | 🟨 Đang thực thi theo duyệt trong hội thoại; Q-C/Q-D đã backup và apply. [Kết quả từng FIX](docs/PHUONG_AN_2_EXECUTION.md); FIX-38/45 còn việc chủ dự án. Chưa merge |
 
 Bằng chứng nghiệm thu của ROADMAP6 nằm ở `docs/ROADMAP6_*.md` và `docs/roadmap6-evidence/`.
 

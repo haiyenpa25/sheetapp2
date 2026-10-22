@@ -1,0 +1,197 @@
+RED php tests/http/client_log_regression.php
+[PASS:B] /api/index.php?route=client_log: rejects cross-origin write
+[PASS:B] /api/index.php?route=client_log: rejects missing origin
+[PASS:B] /api/index.php?route=client_log: only POST is accepted
+[PASS:B] /api/index.php?route=client_log: body is capped at 8 KiB
+[PASS:B] /api/index.php?route=client_log: rejects malformed JSON
+[PASS:B] /api/index.php?route=client_log: rejects non-string log fields
+[PASS:B] /api/log_error.php: rejects cross-origin write
+[PASS:B] /api/log_error.php: rejects missing origin
+[PASS:B] /api/log_error.php: only POST is accepted
+[PASS:B] /api/log_error.php: body is capped at 8 KiB
+[PASS:B] /api/log_error.php: rejects malformed JSON
+[PASS:B] /api/log_error.php: rejects non-string log fields
+[PASS:B] Rejected requests do not write log entries
+[PASS:B] Accepted same-origin record 1
+[PASS:B] Accepted same-origin record 2
+[PASS:B] Accepted same-origin record 3
+[PASS:B] Accepted same-origin record 4
+[PASS:B] Accepted same-origin record 5
+[PASS:B] Accepted same-origin record 6
+[PASS:B] Accepted same-origin record 7
+[PASS:B] Accepted same-origin record 8
+[PASS:B] Accepted same-origin record 9
+[PASS:B] Accepted same-origin record 10
+[FAIL:B] Accepted same-origin record 11
+[FAIL:B] Accepted same-origin record 12
+[FAIL:B] Accepted same-origin record 13
+[FAIL:B] Accepted same-origin record 14
+[FAIL:B] Accepted same-origin record 15
+[FAIL:B] Accepted same-origin record 16
+[FAIL:B] Accepted same-origin record 17
+[FAIL:B] Accepted same-origin record 18
+[FAIL:B] Accepted same-origin record 19
+[FAIL:B] Accepted same-origin record 20
+[FAIL:B] Accepted same-origin record 21
+[FAIL:B] Accepted same-origin record 22
+[FAIL:B] Accepted same-origin record 23
+[FAIL:B] Accepted same-origin record 24
+[FAIL:B] Accepted same-origin record 25
+[FAIL:B] Accepted same-origin record 26
+[FAIL:B] Accepted same-origin record 27
+[FAIL:B] Accepted same-origin record 28
+[FAIL:B] Accepted same-origin record 29
+[FAIL:B] Accepted same-origin record 30
+[FAIL:B] Accepted same-origin record 31
+[FAIL:B] Accepted same-origin record 32
+[FAIL:B] Accepted same-origin record 33
+[FAIL:B] Accepted same-origin record 34
+[FAIL:B] Accepted same-origin record 35
+[FAIL:B] Accepted same-origin record 36
+[FAIL:B] Accepted same-origin record 37
+[FAIL:B] Accepted same-origin record 38
+[FAIL:B] Accepted same-origin record 39
+[FAIL:B] Accepted same-origin record 40
+[FAIL:B] Accepted same-origin record 41
+[FAIL:B] Accepted same-origin record 42
+[FAIL:B] Accepted same-origin record 43
+[FAIL:B] Accepted same-origin record 44
+[FAIL:B] Accepted same-origin record 45
+[FAIL:B] Accepted same-origin record 46
+[FAIL:B] Accepted same-origin record 47
+[FAIL:B] Accepted same-origin record 48
+[FAIL:B] Accepted same-origin record 49
+[FAIL:B] Accepted same-origin record 50
+[FAIL:B] Accepted same-origin record 51
+[FAIL:B] Accepted same-origin record 52
+[FAIL:B] Accepted same-origin record 53
+[FAIL:B] Accepted same-origin record 54
+[FAIL:B] Accepted same-origin record 55
+[FAIL:B] Accepted same-origin record 56
+[FAIL:B] Accepted same-origin record 57
+[FAIL:B] Accepted same-origin record 58
+[FAIL:B] Accepted same-origin record 59
+[FAIL:B] Accepted same-origin record 60
+[PASS:B] Per-session quota rejects request 61
+[FAIL:B] Another device sharing the IP still reports errors
+[FAIL:B] Only accepted session records reach isolated log
+[PASS:B] Registration attempt 1 validates input
+[PASS:B] Registration attempt 2 validates input
+[PASS:B] Registration attempt 3 validates input
+[PASS:B] Registration attempt 4 validates input
+[PASS:B] Registration attempt 5 validates input
+[PASS:B] Registration attempt 6 validates input
+[PASS:B] Registration attempt 7 validates input
+[PASS:B] Registration attempt 8 validates input
+[PASS:B] Registration attempt 9 validates input
+[PASS:B] Registration attempt 10 validates input
+[PASS:B] Registration quota follows IP even when username changes
+[PASS:B] profile: internal DB failure returns safe 500
+[PASS:B] hd: internal DB failure returns safe 500
+[PASS:B] plan: internal DB failure returns safe 500
+[PASS:B] assignment: internal DB failure returns safe 500
+[PASS:B] ChordPro refuses existing XML outside managed roots
+[PASS:B] profile_validation: expected validation error remains HTTP 400
+[PASS:B] assignment_validation: expected validation error remains HTTP 400
+[PASS:B] plan_validation: expected validation error remains HTTP 400
+SUITE_COMPLETE total=95
+EXIT=1
+
+GREEN php tests/http/client_log_regression.php
+[PASS:B] /api/index.php?route=client_log: rejects cross-origin write
+[PASS:B] /api/index.php?route=client_log: rejects missing origin
+[PASS:B] /api/index.php?route=client_log: only POST is accepted
+[PASS:B] /api/index.php?route=client_log: body is capped at 8 KiB
+[PASS:B] /api/index.php?route=client_log: rejects malformed JSON
+[PASS:B] /api/index.php?route=client_log: rejects non-string log fields
+[PASS:B] /api/log_error.php: rejects cross-origin write
+[PASS:B] /api/log_error.php: rejects missing origin
+[PASS:B] /api/log_error.php: only POST is accepted
+[PASS:B] /api/log_error.php: body is capped at 8 KiB
+[PASS:B] /api/log_error.php: rejects malformed JSON
+[PASS:B] /api/log_error.php: rejects non-string log fields
+[PASS:B] Rejected requests do not write log entries
+[PASS:B] Accepted same-origin record 1
+[PASS:B] Accepted same-origin record 2
+[PASS:B] Accepted same-origin record 3
+[PASS:B] Accepted same-origin record 4
+[PASS:B] Accepted same-origin record 5
+[PASS:B] Accepted same-origin record 6
+[PASS:B] Accepted same-origin record 7
+[PASS:B] Accepted same-origin record 8
+[PASS:B] Accepted same-origin record 9
+[PASS:B] Accepted same-origin record 10
+[PASS:B] Accepted same-origin record 11
+[PASS:B] Accepted same-origin record 12
+[PASS:B] Accepted same-origin record 13
+[PASS:B] Accepted same-origin record 14
+[PASS:B] Accepted same-origin record 15
+[PASS:B] Accepted same-origin record 16
+[PASS:B] Accepted same-origin record 17
+[PASS:B] Accepted same-origin record 18
+[PASS:B] Accepted same-origin record 19
+[PASS:B] Accepted same-origin record 20
+[PASS:B] Accepted same-origin record 21
+[PASS:B] Accepted same-origin record 22
+[PASS:B] Accepted same-origin record 23
+[PASS:B] Accepted same-origin record 24
+[PASS:B] Accepted same-origin record 25
+[PASS:B] Accepted same-origin record 26
+[PASS:B] Accepted same-origin record 27
+[PASS:B] Accepted same-origin record 28
+[PASS:B] Accepted same-origin record 29
+[PASS:B] Accepted same-origin record 30
+[PASS:B] Accepted same-origin record 31
+[PASS:B] Accepted same-origin record 32
+[PASS:B] Accepted same-origin record 33
+[PASS:B] Accepted same-origin record 34
+[PASS:B] Accepted same-origin record 35
+[PASS:B] Accepted same-origin record 36
+[PASS:B] Accepted same-origin record 37
+[PASS:B] Accepted same-origin record 38
+[PASS:B] Accepted same-origin record 39
+[PASS:B] Accepted same-origin record 40
+[PASS:B] Accepted same-origin record 41
+[PASS:B] Accepted same-origin record 42
+[PASS:B] Accepted same-origin record 43
+[PASS:B] Accepted same-origin record 44
+[PASS:B] Accepted same-origin record 45
+[PASS:B] Accepted same-origin record 46
+[PASS:B] Accepted same-origin record 47
+[PASS:B] Accepted same-origin record 48
+[PASS:B] Accepted same-origin record 49
+[PASS:B] Accepted same-origin record 50
+[PASS:B] Accepted same-origin record 51
+[PASS:B] Accepted same-origin record 52
+[PASS:B] Accepted same-origin record 53
+[PASS:B] Accepted same-origin record 54
+[PASS:B] Accepted same-origin record 55
+[PASS:B] Accepted same-origin record 56
+[PASS:B] Accepted same-origin record 57
+[PASS:B] Accepted same-origin record 58
+[PASS:B] Accepted same-origin record 59
+[PASS:B] Accepted same-origin record 60
+[PASS:B] Per-session quota rejects request 61
+[PASS:B] Another device sharing the IP still reports errors
+[PASS:B] Only accepted session records reach isolated log
+[PASS:B] Registration attempt 1 validates input
+[PASS:B] Registration attempt 2 validates input
+[PASS:B] Registration attempt 3 validates input
+[PASS:B] Registration attempt 4 validates input
+[PASS:B] Registration attempt 5 validates input
+[PASS:B] Registration attempt 6 validates input
+[PASS:B] Registration attempt 7 validates input
+[PASS:B] Registration attempt 8 validates input
+[PASS:B] Registration attempt 9 validates input
+[PASS:B] Registration attempt 10 validates input
+[PASS:B] Registration quota follows IP even when username changes
+[PASS:B] profile: internal DB failure returns safe 500
+[PASS:B] hd: internal DB failure returns safe 500
+[PASS:B] plan: internal DB failure returns safe 500
+[PASS:B] assignment: internal DB failure returns safe 500
+[PASS:B] ChordPro refuses existing XML outside managed roots
+[PASS:B] profile_validation: expected validation error remains HTTP 400
+[PASS:B] assignment_validation: expected validation error remains HTTP 400
+[PASS:B] plan_validation: expected validation error remains HTTP 400
+SUITE_COMPLETE total=95
+EXIT=0

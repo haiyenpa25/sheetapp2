@@ -1,0 +1,66 @@
+COMMAND: C:\xampp\php\php.exe docs/opt-evidence/current-write-audit.php
+{
+    "database_insert_failure": {
+        "returned_success": true,
+        "database_rows": 0,
+        "disk_contains_new_data": true
+    },
+    "outer_transaction_rollback": {
+        "write_returned_success": true,
+        "database_has_original": true,
+        "disk_has_uncommitted_data": true,
+        "history_rows_after_rollback": 0
+    },
+    "one_fork": {
+        "returned_success": true,
+        "created_database_set_names": [
+            "AuditFork",
+            "banhat__AuditFork"
+        ]
+    },
+    "private_manager_update": {
+        "returned_success": true,
+        "rows": [
+            {
+                "set_name": "PrivateAudit",
+                "user_id": 2,
+                "is_public": 0
+            },
+            {
+                "set_name": "banhat__PrivateAudit",
+                "user_id": 1,
+                "is_public": 1
+            }
+        ],
+        "guest_can_load_original": false,
+        "guest_can_load_alias": true
+    }
+}
+
+COMMAND: C:\xampp\php\php.exe docs/opt-evidence/audit-readonly.php
+{
+    "db_sha256": "a91268b27df548845c67b8f375c2d13b5899ffa4716ba99a00d59e4bc157cac9",
+    "audit_lines": 8481,
+    "audit_sha256": "33b244f60903d760b2fc902a4ca56fbf422d38d31c36d842223eba6f5ede97c3",
+    "mail_files": 462,
+    "backup_files": 10,
+    "prune_candidate_files": 0,
+    "prune_candidate_bytes": 0,
+    "registry_bytes": 36055,
+    "reconciliation": {
+        "scanned": 60,
+        "matched": 57,
+        "missing": [
+            "storage/data/chord_sets/song-f3-test/HD.json",
+            "storage/data/chord_sets/thanh-ca-001/banhat__Acoustic_Guitar.json"
+        ],
+        "different": [
+            {
+                "file": "storage/data/chord_sets/thanh-ca-001/HD.json",
+                "disk_chord_count": 5,
+                "database_chord_count": 5,
+                "decoded_data_equal": false
+            }
+        ]
+    }
+}

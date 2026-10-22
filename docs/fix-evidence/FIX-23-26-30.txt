@@ -1,0 +1,50 @@
+RED php tests/async_context_guards_regression.php
+[FAIL:B] assets/js/late notes do not replace the current song
+[FAIL:B] old/assets/js/late notes do not replace the current song
+[FAIL:B] Missing HD never relabels an arbitrary offline set as HD
+[PASS:B] Exact offline profile remains available
+[PASS:B] assets/js/late set switch cannot replace newer chords
+[FAIL:B] old/assets/js/late set switch cannot replace newer chords
+SUITE_COMPLETE total=6
+EXIT=1
+
+GREEN php tests/async_context_guards_regression.php
+ReferenceError: clearTimeout is not defined
+    at Object.loadSong (evalmachine.<anonymous>:36:5)
+    at C:\xampp\htdocs\sheetapp2\tests\js\async_context_guards.cjs:7:108
+    at Object.<anonymous> (C:\xampp\htdocs\sheetapp2\tests\js\async_context_guards.cjs:21:3)
+    at Module._compile (node:internal/modules/cjs/loader:1929:14)
+    at Object..js (node:internal/modules/cjs/loader:2060:10)
+    at Module.load (node:internal/modules/cjs/loader:1651:32)
+    at Module._load (node:internal/modules/cjs/loader:1443:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+evalmachine.<anonymous>:36
+    clearTimeout(_saveTimer);
+    ^
+System.Management.Automation.RemoteException
+ReferenceError: clearTimeout is not defined
+    at Object.loadSong (evalmachine.<anonymous>:36:5)
+    at C:\xampp\htdocs\sheetapp2\tests\js\async_context_guards.cjs:7:69
+    at Object.<anonymous> (C:\xampp\htdocs\sheetapp2\tests\js\async_context_guards.cjs:21:3)
+    at Module._compile (node:internal/modules/cjs/loader:1929:14)
+    at Object..js (node:internal/modules/cjs/loader:2060:10)
+    at Module.load (node:internal/modules/cjs/loader:1651:32)
+    at Module._load (node:internal/modules/cjs/loader:1443:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+System.Management.Automation.RemoteException
+Node.js v24.21.0
+EXIT=1
+
+GREEN with browser timer fixture: php tests/async_context_guards_regression.php
+[PASS:B] assets/js/late notes do not replace the current song
+[PASS:B] old/assets/js/late notes do not replace the current song
+[PASS:B] Missing HD never relabels an arbitrary offline set as HD
+[PASS:B] Exact offline profile remains available
+[PASS:B] assets/js/late set switch cannot replace newer chords
+[PASS:B] old/assets/js/late set switch cannot replace newer chords
+SUITE_COMPLETE total=6
+EXIT=0

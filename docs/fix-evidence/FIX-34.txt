@@ -1,0 +1,17 @@
+RED php tests/practice_csrf_regression.php
+[PracticeTracker] Started practice session # 1
+[PracticeTracker] Finished session #1: 2s, max BPM 80, acc 0% (0/0 notes)
+[FAIL:B] Standalone start/finish attach decoded CSRF header
+[PracticeTracker] Started practice session # 1
+[FAIL:B] Unload uses authenticated keepalive request with CSRF header
+SUITE_COMPLETE total=2
+EXIT=1
+
+GREEN php tests/practice_csrf_regression.php
+[PracticeTracker] Started practice session # 1
+[PracticeTracker] Finished session #1: 2s, max BPM 80, acc 0% (0/0 notes)
+[PASS:B] Standalone start/finish attach decoded CSRF header
+[PracticeTracker] Started practice session # 1
+[PASS:B] Unload uses authenticated keepalive request with CSRF header
+SUITE_COMPLETE total=2
+EXIT=0

@@ -1,0 +1,416 @@
+
+COMMAND php tests/core_rules_regression.php
+========================================================
+   SheetApp2 — Core Rules Automated Regression Suite   
+========================================================
+
+--- Kiểm tra CORE RULE 1: Bộ Hợp Âm HD là Mặc Định ---
+  [PASS] CR1-a: Mở bài có HD > 0 hợp âm: loadSong mặc định chọn HD và _injectChords tiêm hợp âm HD vào bản nhạc
+  [PASS] CR1-b: Mở bài có HD rỗng: _injectChords bảo vệ không tiêm map rỗng, trả về XML gốc TLH chuẩn mực
+
+--- Kiểm tra CORE RULE 2: Tông Gốc = 0 Luôn Luôn ---
+  [PASS] CR2-a: Dịch +3 rồi chuyển bài từ thư viện: transposeOverride là null -> currentTranspose luôn reset về 0 (loại bỏ hoàn toàn lastTranspose)
+  [PASS] CR2-b: Mở bài từ setlist có transpose = +2: SetlistUI truyền item.transpose_key (+2) làm transposeOverride vào SongLoader.load
+
+--- Kiểm tra CORE RULE 3: Khóa TLH và HD ---
+  [PASS] CR3-a: Bộ TLH và HD được bảo vệ: service/controller từ chối xoá, frontend chặn trước HTTP kể cả Admin
+  [PASS] CR3-b: Xóa bộ cá nhân đang chọn: ChordCanvas.deleteSet tự động fallback sang bộ "HD" thay vì default
+
+--- Kiểm tra CORE RULE 4: Đồng Bộ Tông & Tempo Trong Setlist ---
+  [PASS] CR4-a: Bấm phát bài trong Setlist: Metronome nhận trực tiếp item.bpm đã lưu và áp dụng nhịp/phách ghi đè tempo XML gốc
+  [PASS] CR4-b: Lưu vào setlist & cập nhật Lưu Tập: DB lưu trữ toàn vẹn chord_profile, transpose_key và bpm
+  [PASS] CR4-c: Tài khoản không phải admin (Ban Hát): nút Lưu Tập hiển thị đầy đủ và API update_item cho phép chủ setlist cập nhật
+
+--------------------------------------------------------
+Tổng kết kiểm thử Core Rules:
+  - Tổng số test kịch bản: 9/9
+  - Số test thất bại: 0
+  - Trạng thái: ✅ TẤT CẢ 9 KỊCH BẢN CORE RULES ĐẠT CHUẨN (PASS)
+--------------------------------------------------------
+
+
+SUITE_COMPLETE total=9
+EXIT=0
+
+COMMAND php tests/library_l32_preloader_regression.php
+=== Kiểm thử Regression: Ticket L3-2 (Tải trước bài kế tiếp & Chuyển bài tức thì không trắng màn hình) ===
+
+  [PASS] 1. Module SongPreloader tồn tại và được export lên window
+  [PASS] 2. SongPreloader cung cấp đủ API: preload, preloadNextInSetlist, get, has, clear, startTransitionTimer
+  [PASS] 3. [Hành vi] SongPreloader giới hạn bộ nhớ LRU tránh tràn RAM
+  [PASS] 4. [Hành vi] SongPreloader tải song song MusicXML và Chord sets qua Promise.all
+  [PASS] 5. [Hành vi] SongPreloader tiêm hợp âm vào XML trước khi lưu vào cache
+  [PASS] 6. index.php nạp song-preloader.js trước song-loader.js
+  [PASS] 7. [Hành vi] ChordCanvas export applyPreloaded để nạp hợp âm từ RAM không chờ network
+  [PASS] 8. [Hành vi] SongLoader.load không ẩn sheet-area và không hiện loading screen khi chuyển tức thì
+  [PASS] 9. [Static] SongLoader.load tái sử dụng XML và checksum từ SongPreloader
+  [PASS] 10. [Hành vi] Hệ thống đo thời gian chuyển bài và SetlistPlayer kích hoạt instant swap khi phát bài đã preload
+  [PASS] 11. [Hành vi] SetlistPlayer tự động preload bài kế tiếp sau khi render và khi cập nhật thanh chương trình
+  [PASS] 12. [Hành vi] App export loadSongWithProfile hỗ trợ options và loadSongXmlDirect
+  [PASS] 13. [Hành vi] Cấu trúc XML sau khi tiêm hợp âm mới thay thế chuẩn xác hợp âm cũ
+  [PASS] 14. Ngân sách dòng mã (Line Budget) bảo đảm: preloader (229 < 400), song-loader (594 < 600), setlist-player (367 < 400), app (233 < 400)
+
+--------------------------------------------------------
+Tổng kết suite: 14/14 checks pass.
+Tỷ lệ kiểm thử hành vi (Behavioral): 64.3% (9/14)
+✅ TẤT CẢ KIỂM TRA ĐỀU ĐẠT!
+[SUITE_COMPLETE total=14]
+EXIT=0
+
+COMMAND php tests/library_l51_single_render_regression.php
+=== Bắt đầu kiểm thử hồi quy: Ticket L5-1: Single Render Per Song (Render 1 lần mỗi bài) ===
+  [PASS] File assets/js/osmd-renderer.js tồn tại
+  [PASS] assets/js/osmd-renderer.js duy trì 598 dòng (< 600 dòng)
+  [PASS] File assets/js/song-loader.js tồn tại
+  [PASS] assets/js/song-loader.js duy trì 595 dòng (< 600 dòng)
+  [PASS] File assets/js/toolbar-controller.js tồn tại
+  [PASS] assets/js/toolbar-controller.js duy trì 594 dòng (< 600 dòng)
+  [PASS] OSMDRenderer tắt autoResize nội bộ của OSMD (autoResize: false)
+  [PASS] OSMDRenderer đã loại bỏ toàn bộ các lệnh osmd.updateGraphic() thừa trước render
+  [PASS] OSMDRenderer cung cấp bộ đếm render chuẩn xác (getRenderCount, resetRenderCount)
+  [PASS] SongLoader có hàm _computePreloadFitZoom tính zoom vừa khung trước lần render đầu
+  [PASS] SongLoader áp dụng fit zoom qua setZoomSilent trước khi gọi OSMDRenderer.load
+  [PASS] ToolbarController không tự kích hoạt setZoom kép khi resize, bàn giao cho ResizeObserver
+  [PASS] Behavioral: Thuật toán _computePreloadFitZoom tính chính xác tỷ lệ 105% khi desktop mở sidebar (Behavioral)
+  [PASS] Behavioral: Thuật toán _computePreloadFitZoom tính chính xác tỷ lệ 105% khi desktop toàn màn hình (Behavioral)
+  [PASS] Behavioral: Thuật toán _computePreloadFitZoom snap chuẩn tỷ lệ 100% trên màn hình điện thoại 375px (Behavioral)
+  [PASS] Behavioral: Thuật toán _computePreloadFitZoom tính chính xác tỷ lệ trên máy tính bảng 768px (Behavioral)
+  [PASS] Behavioral: Thuật toán _computePreloadFitZoom tính chính xác tỷ lệ trên màn hình độ phân giải cao 1440px (Behavioral)
+  [PASS] Behavioral: Khi người dùng khóa tỷ lệ zoom (80% hoặc 120%), thuật toán bảo toàn tuyệt đối không tự đổi (Behavioral)
+  [PASS] Behavioral: Khi DOM container chưa mount (bề rộng 0), thuật toán fallback an toàn về 1.0 (100%) (Behavioral)
+  [PASS] Behavioral: Thuật toán fit zoom giới hạn an toàn trong dải min 50% đến max 200% (Behavioral)
+  [PASS] Behavioral: ResizeObserver bỏ qua khi chiều rộng container không đổi (delta = 0px) (Behavioral)
+  [PASS] Behavioral: ResizeObserver lọc bỏ biến động nhỏ (< 8px) do thanh cuộn hoặc thanh địa chỉ co giãn (Behavioral)
+  [PASS] Behavioral: Ngưỡng lọc delta 8px hoạt động chính xác tại biên (delta 7px skip, delta 9px trigger) (Behavioral)
+  [PASS] Behavioral: ResizeObserver kích hoạt render lại khi thay đổi kích thước thực tế (xoay ngang/dọc, co giãn cửa sổ) (Behavioral)
+  [PASS] Behavioral: Bộ đếm render ghi nhận chuẩn xác chu kỳ render: tăng đếm và reset độc lập (Behavioral)
+  [PASS] Behavioral: MusicXML bài 001 có chuẩn bề rộng khổ A4 phù hợp tính fit zoom trước (Behavioral)
+  [PASS] Behavioral: MusicXML bài 002 có chuẩn bề rộng khổ A4 phù hợp tính fit zoom trước (Behavioral)
+  [PASS] Behavioral: MusicXML bài 003 có chuẩn bề rộng khổ A4 phù hợp tính fit zoom trước (Behavioral)
+  [PASS] Behavioral: Kịch bản Playwright e2e/library-l5-single-render.spec.js sẵn sàng nghiệm thu E2E (Behavioral)
+
+--------------------------------------------------------
+Tổng kiểm tra: 29 | Đạt: 29 | Lỗi: 0
+Kiểm tra hành vi (Behavioral): 17/29 (58.6% - Yêu cầu >= 56%)
+✅ TẤT CẢ KIỂM TRA HỒI QUY L5-1 ĐÃ ĐẠT (PASS 100%)
+SUITE_COMPLETE total=29
+EXIT=0
+
+COMMAND php tests/library_l52_instant_transpose_regression.php
+=== Bắt đầu kiểm thử hồi quy: Ticket L5-2: Instant Transpose Without Reparse (Dịch giọng không reparse) ===
+  [PASS] File assets/js/osmd-renderer.js tồn tại
+  [PASS] assets/js/osmd-renderer.js duy trì 598 dòng (< 600 dòng)
+  [PASS] File assets/js/chord-canvas.js tồn tại
+  [PASS] assets/js/chord-canvas.js duy trì 562 dòng (< 600 dòng)
+  [PASS] File assets/js/song-loader.js tồn tại
+  [PASS] assets/js/song-loader.js duy trì 595 dòng (< 600 dòng)
+  [PASS] File assets/js/app.js tồn tại
+  [PASS] assets/js/app.js duy trì 234 dòng (< 600 dòng)
+  [PASS] OSMDRenderer định nghĩa hàm transpose(transposeValue = 0)
+  [PASS] OSMDRenderer export hàm transpose trong API trả về
+  [PASS] OSMDRenderer.transpose gán trực tiếp osmd.Sheet.Transpose = transposeValue
+  [PASS] OSMDRenderer.transpose KHÔNG gọi osmd.load() (giữ in-memory sheet, không reparse MusicXML) (Behavioral)
+  [PASS] OSMDRenderer.transpose gọi await osmd.render() và tăng _renderCount (Behavioral)
+  [PASS] OSMDRenderer.transpose kích hoạt ChordCanvas.reposition() cập nhật vị trí hợp âm (Behavioral)
+  [PASS] ChordCanvas loại bỏ hoàn toàn độ trễ setTimeout 350ms trong onOSMDRendered (Behavioral)
+  [PASS] ChordCanvas loại bỏ hoàn toàn độ trễ setTimeout 200ms trong reposition (Behavioral)
+  [PASS] ChordCanvas.onOSMDRendered gọi ngay requestAnimationFrame(_build) trong frame tiếp theo (Behavioral)
+  [PASS] ChordCanvas.reposition gọi ngay requestAnimationFrame(_build) trong frame tiếp theo (Behavioral)
+  [PASS] SongLoader.commitTranspose kiểm tra trạng thái loaded và phương thức transpose (Behavioral)
+  [PASS] SongLoader.commitTranspose gọi await OSMDRenderer.transpose(transpose) (Behavioral)
+  [PASS] SongLoader.commitTranspose giữ fallback reload nếu OSMD chưa load (Behavioral)
+  [PASS] assets/js/app.js giảm debounce _transposeTimer xuống 100ms (Behavioral)
+  [PASS] Mô phỏng Node.js: Dịch giọng in-memory không gọi load(), tốc độ tức thì, debounce 100ms gộp lệnh chuẩn xác (Behavioral)
+  [PASS] CSDL app.sqlite tồn tại
+  [PASS] CSDL SQLite nguyên vẹn, số bài hát = 1731 (Behavioral)
+  [PASS] Nội dung JSON chord_sets khớp manifest phát hành (65 mục theo scandir) (Behavioral)
+  [PASS] Core Rule: SongLoader luôn gán currentTranspose = 0 (hoặc transposeOverride) khi nạp bài mới (Behavioral)
+  [PASS] Core Rule: ChordCanvas khóa cứng bộ TLH và HD không cho phép sửa đổi quyền gốc (Behavioral)
+
+--- KẾT QUẢ KIỂM THỬ TICKET L5-2 ---
+Tổng số kiểm tra: 28
+Số kiểm tra hành vi (Behavioral): 16 / 28 (57.1%)
+=> TẤT CẢ CHECKS ĐỀU PASS!
+SUITE_COMPLETE total=28
+EXIT=0
+
+COMMAND php tests/library_l53_xml_cache_and_geom_regression.php
+=== Bắt đầu kiểm thử hồi quy: Ticket L5-3: Centralized XML Document Cache & Geometry Caching ===
+  [PASS] File assets/js/core/XmlDocCache.js tồn tại
+  [PASS] assets/js/core/XmlDocCache.js duy trì 85 dòng (< 600 dòng)
+  [PASS] File chord-canvas-xml.js tồn tại
+  [PASS] chord-canvas-xml.js duy trì 424 dòng (< 600 dòng)
+  [PASS] File chord-canvas-transpose.js tồn tại
+  [PASS] chord-canvas-transpose.js duy trì 275 dòng (< 600 dòng)
+  [PASS] File chord-canvas-ui.js tồn tại
+  [PASS] chord-canvas-ui.js duy trì 581 dòng (< 600 dòng)
+  [PASS] File lyric-extractor.js tồn tại
+  [PASS] lyric-extractor.js duy trì 539 dòng (< 600 dòng)
+  [PASS] File song-info-bar.js tồn tại
+  [PASS] song-info-bar.js duy trì 567 dòng (< 600 dòng)
+  [PASS] File transpose-engine.js tồn tại
+  [PASS] transpose-engine.js duy trì 254 dòng (< 600 dòng)
+  [PASS] File VerseManager.js tồn tại
+  [PASS] VerseManager.js duy trì 491 dòng (< 600 dòng)
+  [PASS] File osmd-renderer.js tồn tại
+  [PASS] osmd-renderer.js duy trì 598 dòng (< 600 dòng)
+  [PASS] File chord-canvas-dots.js tồn tại
+  [PASS] chord-canvas-dots.js duy trì 587 dòng (< 600 dòng)
+  [PASS] index.php nhúng core/XmlDocCache.js trong nhóm core scripts trước defer modules
+  [PASS] eslint.config.js khai báo global XmlDocCache: 'writable'
+  [PASS] XmlDocCache cung cấp đầy đủ API: getDoc, getClonedDoc, clear, getParseCount
+  [PASS] chord-canvas-xml.js sử dụng XmlDocCache.getDoc (Behavioral)
+  [PASS] chord-canvas-transpose.js sử dụng XmlDocCache.getDoc (Behavioral)
+  [PASS] chord-canvas-ui.js sử dụng XmlDocCache.getDoc (Behavioral)
+  [PASS] lyric-extractor.js sử dụng XmlDocCache.getDoc (Behavioral)
+  [PASS] song-info-bar.js sử dụng XmlDocCache.getDoc (Behavioral)
+  [PASS] transpose-engine.js sử dụng XmlDocCache.getDoc (Behavioral)
+  [PASS] VerseManager.js sử dụng XmlDocCache.getClonedDoc (Behavioral)
+  [PASS] CompactScore.preprocessXML dùng XmlDocCache.getClonedDoc thật khi rút gọn (Behavioral)
+  [PASS] chord-canvas-dots.js lưu trữ cache hình học cho cả chord text positions và note mapping (Behavioral)
+  [PASS] chord-canvas-dots.js cung cấp và export phương thức clearGeomCache (Behavioral)
+  [PASS] File MusicXML mẫu tồn tại để mô phỏng (001 HỠI THÁNH VƯƠNG, KÍP NGỰ LAI.xml) (Behavioral)
+  [PASS] Mô phỏng Node.js: 8+ module cùng chia sẻ 1 lần gọi DOMParser duy nhất, giảm 87.5% CPU overhead (Behavioral)
+  [PASS] MusicXML thực tế có cấu trúc hợp lệ (kích thước 75283 bytes) (Behavioral)
+  [PASS] Behavioral: Trích xuất chính xác 16 ô nhịp từ XML (Behavioral)
+  [PASS] Behavioral: Quét thành công 17 thẻ hợp âm gốc trong XML (Behavioral)
+  [PASS] Behavioral: Nhận diện thành công fifths key signature = 1 (Behavioral)
+  [PASS] Behavioral: Nhận diện thành công số phách = 3 (Behavioral)
+  [PASS] Behavioral: Trích xuất thành công 152 âm tiết lời ca từ XML (Behavioral)
+  [PASS] Behavioral: Bài [0] '001 HỠI THÁNH VƯƠNG, KÍP NGỰ LAI.xml' tương thích hoàn toàn với chuẩn nạp MusicXML Document (Behavioral)
+  [PASS] Behavioral: Bài [1] '002 NGUYỀN TỤNG MỸ CHÚA LINH NĂNG.xml' tương thích hoàn toàn với chuẩn nạp MusicXML Document (Behavioral)
+  [PASS] Behavioral: Bài [2] '003 NGỢI GIÊ-HÔ-VA THÁNH ĐẾ.xml' tương thích hoàn toàn với chuẩn nạp MusicXML Document (Behavioral)
+  [PASS] Behavioral: Bài [3] '004 HA-LÊ-LU-GIA !  VINH DANH NGÀI !.xml' tương thích hoàn toàn với chuẩn nạp MusicXML Document (Behavioral)
+  [PASS] Behavioral: Bài [4] '005 MUÔN DÂN TRÊN HOÀN CẦU NÊN CA XƯỚNG.xml' tương thích hoàn toàn với chuẩn nạp MusicXML Document (Behavioral)
+  [PASS] Behavioral: Bài [5] '006 THÀNH TÂM TÔN VUA THÁNH.xml' tương thích hoàn toàn với chuẩn nạp MusicXML Document (Behavioral)
+  [PASS] Behavioral: Bài [6] '007 CA CẢM TẠ.xml' tương thích hoàn toàn với chuẩn nạp MusicXML Document (Behavioral)
+  [PASS] Behavioral: Bài [7] '008 NGỢI DANH JÊSUS RẤT OAI QUYỀN.xml' tương thích hoàn toàn với chuẩn nạp MusicXML Document (Behavioral)
+  [PASS] Behavioral: Bài [8] '009 ƯỚC THUẬT CHUYỆN TUYỆT ĐỐI.xml' tương thích hoàn toàn với chuẩn nạp MusicXML Document (Behavioral)
+  [PASS] Behavioral: Bài [9] '010 NGUYỆN TỤNG NGỢI CHIÊN CON THÁNH.xml' tương thích hoàn toàn với chuẩn nạp MusicXML Document (Behavioral)
+  [PASS] Behavioral: Biến đổi trên cloned document không làm biến dạng document trong cache gốc (Behavioral)
+  [PASS] CSDL app.sqlite tồn tại
+  [PASS] CSDL SQLite nguyên vẹn, số bài hát = 1731 (Behavioral)
+  [PASS] Nội dung JSON chord_sets khớp manifest phát hành (65 mục theo scandir) (Behavioral)
+  [PASS] Core Rule: SongLoader tự động xóa cache XML và hình học khi nạp bài mới (Behavioral)
+
+--- KẾT QUẢ KIỂM THỬ TICKET L5-3 ---
+Tổng số kiểm tra: 56
+Số kiểm tra hành vi (Behavioral): 32 / 56 (57.1%)
+=> TẤT CẢ CHECKS ĐỀU PASS!
+SUITE_COMPLETE total=56
+EXIT=0
+
+COMMAND php tests/library_l55_on_demand_and_no_hidden_render_regression.php
+=== SUITE L5-5: Tải theo nhu cầu & Không render khi khung ẩn ===
+
+--- 1. Module bắt buộc được nạp trong index.php ---
+  [PASS] index.php nạp module bắt buộc: auth.js
+  [PASS] index.php nạp module bắt buộc: history-manager.js
+  [PASS] index.php nạp module bắt buộc: page-nav.js
+  [PASS] index.php nạp module bắt buộc: url-state.js
+  [PASS] index.php nạp module bắt buộc: session-tracker.js
+  [PASS] index.php nạp module bắt buộc: lyric-extractor.js
+  [PASS] index.php nạp module bắt buộc: metronome.js
+  [PASS] index.php nạp module bắt buộc: audio-player.js
+  [PASS] index.php nạp module bắt buộc: auto-scroller.js
+  [PASS] index.php nạp module bắt buộc: setlist-ui.js
+  [PASS] index.php nạp module bắt buộc: setlist-player.js
+  [PASS] index.php nạp module bắt buộc: chord-canvas-transpose.js
+  [PASS] index.php nạp module bắt buộc: chord-canvas-edit.js
+  [PASS] index.php nạp module bắt buộc: song-preloader.js
+  [PASS] index.php nạp module bắt buộc: stage-lens.js
+  [PASS] index.php nạp module bắt buộc: guitar-lens.js
+  [PASS] index.php nạp module bắt buộc: bass-lens.js
+  [PASS] index.php nạp module bắt buộc: drums-lens.js
+  [PASS] index.php nạp module bắt buộc: vocals-lens.js
+  [PASS] index.php nạp module bắt buộc: harmonic-numeral.js
+  [PASS] index.php nạp module bắt buộc: follow-leader.js
+  [PASS] index.php nạp module bắt buộc: core/AppShell.js
+  [PASS] index.php nạp module bắt buộc: modals/HelpModal.js
+  [PASS] index.php nạp module bắt buộc: modals/QuickNumpadModal.js
+  [PASS] index.php nạp module bắt buộc: osmd-svg-text.js
+  [PASS] index.php không còn nhánh ?all_scripts ẩn module
+  [PASS] includes/toolbar.php không còn chứa thẻ <script> inline
+  [PASS] includes/app_nav.php không còn chứa thẻ <script> inline trùng lặp
+
+--- 2. Kiến trúc ScriptLoader.js ---
+  [PASS] File assets/js/core/ScriptLoader.js tồn tại
+  [PASS] ScriptLoader.js tuân thủ Line budget < 600 dòng (Hiện tại: 284)
+  [PASS] ScriptLoader có hàm load(src)
+  [PASS] ScriptLoader có hàm loadSequence(srcs)
+  [PASS] ScriptLoader có hàm isLoaded(src)
+  [PASS] ScriptLoader có helper loadAudio()
+  [PASS] ScriptLoader có helper loadAdmin()
+  [PASS] ScriptLoader có helper loadSetlist()
+  [PASS] ScriptLoader có helper loadLiveSync()
+  [PASS] ScriptLoader có helper loadLenses()
+  [PASS] ScriptLoader có helper loadModal(name)
+  [PASS] ScriptLoader có cơ chế prefetchIdle()
+  [PASS] ScriptLoader có cơ chế setupAutoTriggers()
+
+--- 3. Cơ chế Chống Render Khi Khung Ẩn trong OSMDRenderer ---
+  [PASS] File assets/js/osmd-renderer.js tồn tại
+  [PASS] assets/js/osmd-renderer.js tuân thủ Line budget < 600 dòng (Hiện tại: 598)
+  [PASS] OSMDRenderer có hàm kiểm tra hiển thị _canRender()
+  [PASS] _canRender() kiểm tra clientWidth <= 0
+  [PASS] _canRender() kiểm tra class hidden hoặc closest('.hidden')
+  [PASS] _canRender() kiểm tra style display === 'none'
+  [PASS] ResizeObserver kiểm tra _canRender() trước khi render
+  [PASS] load() kiểm tra _canRender() và hoãn render (_pendingRender = true)
+  [PASS] OSMDRenderer cung cấp hàm renderPending()
+  [PASS] OSMDRenderer expose canRender và hasPendingRender
+
+--- 4. Kiểm thử Behavioral Logic trên Node.js DOM Mocks ---
+  [PASS] [Node.js Behavioral] canRender returns true when width > 0 and visible
+  [PASS] [Node.js Behavioral] canRender returns false when display is none
+  [PASS] [Node.js Behavioral] canRender returns false when class has hidden
+  [PASS] [Node.js Behavioral] canRender returns false when clientWidth is 0
+  [PASS] [Node.js Behavioral] load() sets pendingRender = true when hidden
+  [PASS] [Node.js Behavioral] load() does NOT increment renderCount when hidden
+  [PASS] [Node.js Behavioral] renderPending() executes when container becomes visible
+  [PASS] [Node.js Behavioral] renderPending() increments renderCount to 1
+  [PASS] [Node.js Behavioral] renderPending() clears hasPendingRender
+
+=======================================================
+KẾT QUẢ SUITE L5-5: 60/60 checks PASS (100%)
+TỶ LỆ BEHAVIORAL: 43/60 (71.7% - Yêu cầu >= 40%)
+SUITE_COMPLETE total=60 passed=60
+>>> QUALITY GATE PASSED 100% - TICKET L5-5 SANCTIONED <<<
+EXIT=0
+
+COMMAND php tests/library_l59_performance_budget_regression.php
+========================================================
+   Ticket L5-9: Performance Budget in CI Quality Gate   
+========================================================
+
+  [PASS:S] [l59_spec_exists] File e2e/library-l5-performance-budget.spec.js tồn tại
+  [PASS:B] [l59_budgets_defined] e2e/library-l5-performance-budget.spec.js định nghĩa đầy đủ 6 chỉ số ngân sách hiệu năng nghiêm ngặt
+  [PASS:B] [l59_fail_if_over_budget] E2E spec cài đặt cơ chế Fail If Over Budget (dừng kiểm thử và báo lỗi ngay khi vượt ngưỡng)
+  [PASS:B] [l59_ci_e2e_integration] tests/run_all_tests.php tích hợp đầy đủ cờ --e2e điều phối Playwright trong Unified Quality Gate CI
+  [PASS:B] [l59_osmd_render_count_api] assets/js/osmd-renderer.js xuất API getRenderCount() và resetRenderCount() cho CI profiling
+  [PASS:B] [l59_script_count_budget] Số script tags ban đầu trong index.php không phình bất thường (Hiện có: 89 scripts, trần 100)
+  [PASS:B] [l59_deferred_sw_load] assets/js/app.js trì hoãn nạp ServiceWorkerManager để bảo vệ ngân sách script và thời gian render bài đầu
+  [PASS:S] [l59_line_budget] Tất cả file mã nguồn liên quan đều tuân thủ Line Budget < 600 dòng
+  [PASS:S] [l59_sqlite_exists] CSDL app.sqlite tồn tại nguyên vẹn
+  [PASS:B] [l59_songs_count_903] Bảo vệ toàn vẹn >= 903 bài hát trong CSDL thật (hiện có 1731 bài)
+  [PASS:B] [l59_chord_sets_manifest] Bảo vệ toàn vẹn nội dung JSON chord_sets theo manifest (hiện có 65 files theo K2 scandir)
+
+--------------------------------------------------------
+Kết quả kiểm thử L5-9: 11/11 checks passed (Behavioral: 8, Static: 3).
+--------------------------------------------------------
+🎉 TẤT CẢ CÁC KIỂM TRA HỒI QUY TICKET L5-9 ĐỀU ĐẠT CHUẨN!
+SUITE_COMPLETE total=11 passed=11 failed=0 behavioral=8 static=3
+EXIT=0
+
+COMMAND php tests/liturgical_export_and_usage_regression.php
+=== KIỂM THỬ HỒI QUY EPIC 4.3: BẢN IN BOOKLET & BÁO CÁO LỊCH SỬ DÙNG BÀI ===
+
+[1/5] Kiểm tra Bản In Lời + Hợp Âm (print/chord-sheet.php)...
+  ✅ PASS: Truy cập print/chord-sheet.php trả về HTTP 200 OK
+  ✅ PASS: HTML chứa đúng tựa bài hát
+  ✅ PASS: Dịch giọng +2 bán âm (G -> A) hiển thị chính xác trên tiêu đề
+  ✅ PASS: Hỗ trợ tùy chọn 2 cột (cols=2) cho bài hát dài
+  ✅ PASS: Chứa các cặp từ ngữ và hợp âm nổi (chord-pair)
+  ✅ PASS: Tích hợp sẵn nút gọi in trình duyệt window.print()
+  ✅ PASS: Có khối CSS in ấn chuyên dụng chuẩn A4
+  ✅ PASS: Tùy chọn chords=0 ẩn hoàn toàn dòng hợp âm, chỉ giữ lời bài hát
+
+[2/5] Kiểm tra Cuốn Booklet Phụng Vụ A4 (print/service-booklet.php)...
+  ✅ PASS: Tìm thấy ít nhất 1 setlist trong cơ sở dữ liệu để test booklet
+  ✅ PASS: Truy cập print/service-booklet.php trả về HTTP 200 OK
+  ✅ PASS: Chứa các trang phân tách rõ ràng (booklet-page)
+  ✅ PASS: Trang bìa có bảng thứ tự chương trình (Order of Service)
+  ✅ PASS: Có CSS phân trang A4 cho từng bài hát
+
+[3/5] Kiểm tra API Cảnh Báo Lặp Bài (action=check_recent_usage)...
+  ✅ PASS: Tạo session fixture riêng, không dùng helper E2E trên workspace
+  ✅ PASS: API check_recent_usage trả về success=true
+  ✅ PASS: Trả về đúng song_id
+  ✅ PASS: Nhận diện đúng bài đã hát trong khoảng thời gian ngưỡng
+  ✅ PASS: Cờ cảnh báo warning = true
+  ✅ PASS: Có thông điệp cảnh báo rõ ràng gồm số tuần, ngày và tên buổi nhóm
+  ✅ PASS: Bài chưa từng dùng trả về is_recent = false
+  ✅ PASS: Bài chưa từng dùng không phát sinh warning
+
+[4/5] Kiểm tra API Báo Cáo Sử Dụng Bài (action=usage_report)...
+  ✅ PASS: API usage_report trả về success=true
+  ✅ PASS: Báo cáo có trường summary
+  ✅ PASS: Summary tính đúng tổng số buổi lễ
+  ✅ PASS: Summary tính đúng tổng lượt hát
+  ✅ PASS: Summary tính được tỷ lệ độ phủ bài hát
+  ✅ PASS: Báo cáo có danh sách bài dùng nhiều nhất (most_used)
+  ✅ PASS: Top bài có số lần sử dụng hợp lệ
+  ✅ PASS: Top bài có thống kê profile hợp âm thường dùng nhất
+  ✅ PASS: Báo cáo có danh sách bài tiềm năng chưa dùng / lâu chưa dùng
+  ✅ PASS: Báo cáo có nhật ký sử dụng bài gần nhất (recent_history)
+
+[5/5] Kiểm tra Tích Hợp UI & Client Services...
+  ✅ PASS: ApiService.setlists chứa phương thức checkRecentUsage
+  ✅ PASS: ApiService.setlists chứa phương thức usageReport
+  ✅ PASS: SongInfoBar chứa nút in ấn Lời & Hợp âm (si-ni-print-btn)
+  ✅ PASS: SongInfoBar mở trang print/chord-sheet.php
+  ✅ PASS: ServicePlanUI chứa nút in Booklet phụng vụ (btn-sp-print-booklet)
+  ✅ PASS: ServicePlanUI mở trang print/service-booklet.php
+  ✅ PASS: SetlistDetail gọi checkRecentUsage khi thêm bài vào Setlist
+  ✅ PASS: SetlistDetail hiển thị hộp thoại cảnh báo lặp bài theo D15 mà không chặn
+  ✅ PASS: Manager có tab Thống Kê Phụng Vụ
+  ✅ PASS: Manager có section tab-usage
+  ✅ PASS: Manager nạp module js/manager-usage.js
+
+----------------------------------------------------
+🎉 KẾT QUẢ: TẤT CẢ KIỂM TRA CHO EPIC 4.3 ĐỀU ĐẠT (PASS 100%)!
+
+SUITE_COMPLETE total=42
+EXIT=0
+
+COMMAND php tests/security/web_surface_regression.php
+PASS: C:/xampp/htdocs/sheetapp2/api/init_db.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/api/omr_worker.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/api/database/migrate_learn_tables.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/apply_data_repair_plan.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/assignment_due_reminder.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/audit_satb_harmony.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/check_song_spelling.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/clean_test_setlists.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/cleanup_expired_rooms.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/create_encrypted_backup.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/create_hd_sets.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/create_test_session.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/create_test_setlist.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/e2e_guard.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/generate_asset_gzip.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/generate_sw_manifest.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/import_thanh_ca_catalog.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/index_lyrics.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/install_library.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/loadtest_live_sync.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/manage_song_labels.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/manage_tempos.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/metrics.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/migrate.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/migrate_json_chord_sets_to_db.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/notification_worker.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/omr_sync.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/plan_data_repairs.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/prune_backups.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/restore_encrypted_backup.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/seed_song_sections.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/setup_e2e_notification.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/setup_e2e_practice_assignment.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/update_library.php is CLI-only
+PASS: C:/xampp/htdocs/sheetapp2/tools/verify_data_repair.php is CLI-only
+PASS: .htaccess blocks tools
+PASS: .htaccess blocks docs
+PASS: .htaccess blocks dashboard
+PASS: .htaccess blocks .ua
+PASS: .htaccess blocks .agents
+PASS: .htaccess blocks .agent-skills
+PASS: .htaccess blocks .md files
+PASS: .htaccess blocks .bak files
+PASS: .htaccess blocks .log files
+PASS: .htaccess blocks private storage while preserving the MusicXML directory
+
+All web-surface regression tests passed.
+
+SUITE_COMPLETE total=45
+EXIT=0

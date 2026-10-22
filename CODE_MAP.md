@@ -1,7 +1,7 @@
 # CODE_MAP.md — Gitnexus Codebase Knowledge Graph & Map (SheetApp)
 
 > **GITNEXUS SECOND BRAIN CODE MAP**
-> Bản đồ tri thức toàn bộ hệ thống SheetApp. Cập nhật tự động: 2026-10-18 08:36:59
+> Bản đồ tri thức toàn bộ hệ thống SheetApp. Cập nhật tự động: 2026-10-21 11:32:07
 > AI Agent BẮT BUỘC tra cứu sơ đồ phụ thuộc dưới đây trước khi chỉnh sửa file.
 
 ---
@@ -29,11 +29,12 @@ graph TD
 - **Nhiệm vụ:** Tiếp nhận request, phân tích parameter `route` và `action`, gọi Controller phù hợp và trả JSON chuẩn qua `Response::ok()`.
 
 ### 2.2 Controllers (`api/controllers/`)
-- **AnnotationController.php**: Route `annotations`: đọc document/danh mục; admin lưu ghi chú và nhạc cụ với revision.
+- **AnnotationController.php**: Handler cho route `annotation`
 - **ArrangementController.php**: Handler cho route `arrangement`
 - **AuthController.php**: Handler cho route `auth`
 - **CategoryController.php**: Handler cho route `category`
 - **ChordSetController.php**: Handler cho route `chordset`
+- **ClientLogController.php**: Handler cho route `clientlog`
 - **ExportController.php**: Handler cho route `export`
 - **ImportController.php**: Handler cho route `import`
 - **LearningController.php**: Handler cho route `learning`
@@ -51,12 +52,13 @@ graph TD
 - **UserController.php**: Handler cho route `user`
 
 ### 2.3 Services (`api/services/`)
-- **AnnotationService.php**: Ghi chú theo bài/bản phối mặc định, nhiều nhạc cụ tại cùng điểm; chuyển tiếp JSON cũ sang lớp Chung khi đọc, kiểm tra nội dung và revision.
-- **AnnotationDocumentStore.php**: Kho JSON dùng khóa ổn định và thay file nguyên tử; không dùng SQLite. Tham số directory chỉ do PHP nội bộ cấp để test cô lập.
+- **AnnotationDocumentStore.php**: Xử lý logic & truy vấn SQLite cho `AnnotationDocumentStore.php`
+- **AnnotationService.php**: Xử lý logic & truy vấn SQLite cho `Annotation`
 - **ArrangementService.php**: Xử lý logic & truy vấn SQLite cho `Arrangement`
 - **CategoryService.php**: Xử lý logic & truy vấn SQLite cho `Category`
 - **ChordProService.php**: Xử lý logic & truy vấn SQLite cho `ChordPro`
 - **ChordSetService.php**: Xử lý logic & truy vấn SQLite cho `ChordSet`
+- **ClientLogService.php**: Xử lý logic & truy vấn SQLite cho `ClientLog`
 - **DomainEventService.php**: Xử lý logic & truy vấn SQLite cho `DomainEvent`
 - **ImportService.php**: Xử lý logic & truy vấn SQLite cho `Import`
 - **LearningService.php**: Xử lý logic & truy vấn SQLite cho `Learning`
@@ -77,9 +79,11 @@ graph TD
 - **ReviewService.php**: Xử lý logic & truy vấn SQLite cho `Review`
 - **SessionService.php**: Xử lý logic & truy vấn SQLite cho `Session`
 - **SetlistOfflineHelper.php**: Xử lý logic & truy vấn SQLite cho `SetlistOfflineHelper.php`
+- **SetlistPublicReadService.php**: Xử lý logic & truy vấn SQLite cho `SetlistPublicRead`
 - **SetlistService.php**: Xử lý logic & truy vấn SQLite cho `Setlist`
 - **SetlistUsageHelper.php**: Xử lý logic & truy vấn SQLite cho `SetlistUsageHelper.php`
 - **SongSearchHelper.php**: Xử lý logic & truy vấn SQLite cho `SongSearchHelper.php`
+- **SongSearchPage.php**: Xử lý logic & truy vấn SQLite cho `SongSearchPage.php`
 - **SongService.php**: Xử lý logic & truy vấn SQLite cho `Song`
 - **SongVersionHelper.php**: Xử lý logic & truy vấn SQLite cho `SongVersionHelper.php`
 - **TransposeHelper.php**: Xử lý logic & truy vấn SQLite cho `TransposeHelper.php`
@@ -97,8 +101,8 @@ graph TD
 ### 3.2 Feature Modules
 - `assets\js\admin-ui.js`
 - `assets\js\annotation-canvas.js`
-- `assets\js\annotation-geometry.js` — ánh xạ tất cả khuông/trang OSMD, thời điểm âm nhạc, dấu cấu trúc XML, tránh chồng ký âm/hợp âm.
-- `assets\js\annotation-panel.js` — bộ lọc nhiều nhạc cụ, danh sách toàn văn và dialog soạn; không gọi mạng trực tiếp.
+- `assets\js\annotation-geometry.js`
+- `assets\js\annotation-panel.js`
 - `assets\js\app-ui.js`
 - `assets\js\app.js`
 - `assets\js\audio-player.js`
@@ -120,11 +124,13 @@ graph TD
 - `assets\js\core\EventBus.js`
 - `assets\js\core\FeatureFlags.js`
 - `assets\js\core\KeyService.js`
+- `assets\js\core\LibrarySearch.js`
 - `assets\js\core\MidiEngine.js`
 - `assets\js\core\ModalManager.js`
 - `assets\js\core\ModeManager.js`
 - `assets\js\core\OfflineSetlistManager.js`
 - `assets\js\core\OfflineVault.js`
+- `assets\js\core\PointerTap.js`
 - `assets\js\core\SafeHtml.js`
 - `assets\js\core\ScriptLoader.js`
 - `assets\js\core\ServiceWorkerManager.js`
@@ -170,6 +176,7 @@ graph TD
 - `assets\js\learn\ui\learn-score.js`
 - `assets\js\learn\ui\virtual-keyboard.js`
 - `assets\js\library-gestures.js`
+- `assets\js\library-list.js`
 - `assets\js\library-ui.js`
 - `assets\js\liturgy-card.js`
 - `assets\js\live-sync.js`
@@ -206,6 +213,7 @@ graph TD
 - `assets\js\setlist-ui.js`
 - `assets\js\song-info-bar.js`
 - `assets\js\song-loader.js`
+- `assets\js\song-navigation.js`
 - `assets\js\song-preloader.js`
 - `assets\js\stage-lens.js`
 - `assets\js\toolbar-controller.js`
@@ -225,5 +233,5 @@ graph TD
 
 ---
 
-## 5 · FILE REGISTRY INDEX (3150 files total)
-Total indexed files: 3150
+## 5 · FILE REGISTRY INDEX (3344 files total)
+Total indexed files: 3344

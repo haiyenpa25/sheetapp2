@@ -1,0 +1,17 @@
+RED php tests/feature_local_override_regression.php
+[FAIL:B] Local override can disable a tracked default
+[FAIL:B] Local override can enable a known flag
+[PASS:B] Missing local key retains tracked value
+[PASS:B] Malformed local config retains tracked defaults
+[PASS:B] Fresh checkout without config uses safe built-in defaults
+SUITE_COMPLETE total=5
+EXIT=1
+
+GREEN php tests/feature_local_override_regression.php
+[PASS:B] Local override can disable a tracked default
+[PASS:B] Local override can enable a known flag
+[PASS:B] Missing local key retains tracked value
+[PASS:B] Malformed local config retains tracked defaults
+[PASS:B] Fresh checkout without config uses safe built-in defaults
+SUITE_COMPLETE total=5
+EXIT=0

@@ -1,0 +1,85 @@
+RED php tests/reserved_chord_names_regression.php
+[FAIL:B] Manager rejects reserved fork HD
+[FAIL:B] Manager rejects reserved rename HD
+[FAIL:B] Service rejects reserved fork HD
+[FAIL:B] Clone rejects reserved target HD
+[FAIL:B] Manager rejects reserved fork hd
+[FAIL:B] Manager rejects reserved rename hd
+[FAIL:B] Service rejects reserved fork hd
+[FAIL:B] Clone rejects reserved target hd
+[FAIL:B] Manager rejects reserved fork HĐ
+[FAIL:B] Manager rejects reserved rename HĐ
+[FAIL:B] Service rejects reserved fork HĐ
+[FAIL:B] Clone rejects reserved target HĐ
+[FAIL:B] Manager rejects reserved fork  hd 
+[FAIL:B] Manager rejects reserved rename  hd 
+[FAIL:B] Service rejects reserved fork  hd 
+[FAIL:B] Clone rejects reserved target  hd 
+[FAIL:B] Manager rejects reserved fork TLH
+[FAIL:B] Manager rejects reserved rename TLH
+[PASS:B] Service rejects reserved fork TLH
+[PASS:B] Clone rejects reserved target TLH
+[FAIL:B] Manager rejects reserved fork tlh
+[FAIL:B] Manager rejects reserved rename tlh
+[FAIL:B] Service rejects reserved fork tlh
+[FAIL:B] Clone rejects reserved target tlh
+[FAIL:B] Manager rejects reserved fork default
+[FAIL:B] Manager rejects reserved rename default
+[PASS:B] Service rejects reserved fork default
+[PASS:B] Clone rejects reserved target default
+[FAIL:B] Manager rejects reserved fork DEFAULT
+[FAIL:B] Manager rejects reserved rename DEFAULT
+[FAIL:B] Service rejects reserved fork DEFAULT
+[FAIL:B] Clone rejects reserved target DEFAULT
+[FAIL:B] Manager rejects reserved fork __action
+[FAIL:B] Manager rejects reserved rename __action
+[PASS:B] Service rejects reserved fork __action
+[PASS:B] Clone rejects reserved target __action
+[FAIL:B] Save rejects lower-case TLH
+[FAIL:B] Save rejects normalized HD alias
+[FAIL:B] Earliest official HD survives later counterfeit row
+SUITE_COMPLETE total=39
+EXIT=1
+
+GREEN php tests/reserved_chord_names_regression.php
+[PASS:B] Manager rejects reserved fork HD
+[PASS:B] Manager rejects reserved rename HD
+[PASS:B] Service rejects reserved fork HD
+[PASS:B] Clone rejects reserved target HD
+[PASS:B] Manager rejects reserved fork hd
+[PASS:B] Manager rejects reserved rename hd
+[PASS:B] Service rejects reserved fork hd
+[PASS:B] Clone rejects reserved target hd
+[PASS:B] Manager rejects reserved fork HĐ
+[PASS:B] Manager rejects reserved rename HĐ
+[PASS:B] Service rejects reserved fork HĐ
+[PASS:B] Clone rejects reserved target HĐ
+[PASS:B] Manager rejects reserved fork  hd 
+[PASS:B] Manager rejects reserved rename  hd 
+[PASS:B] Service rejects reserved fork  hd 
+[PASS:B] Clone rejects reserved target  hd 
+[PASS:B] Manager rejects reserved fork TLH
+[PASS:B] Manager rejects reserved rename TLH
+[PASS:B] Service rejects reserved fork TLH
+[PASS:B] Clone rejects reserved target TLH
+[PASS:B] Manager rejects reserved fork tlh
+[PASS:B] Manager rejects reserved rename tlh
+[PASS:B] Service rejects reserved fork tlh
+[PASS:B] Clone rejects reserved target tlh
+[PASS:B] Manager rejects reserved fork default
+[PASS:B] Manager rejects reserved rename default
+[PASS:B] Service rejects reserved fork default
+[PASS:B] Clone rejects reserved target default
+[PASS:B] Manager rejects reserved fork DEFAULT
+[PASS:B] Manager rejects reserved rename DEFAULT
+[PASS:B] Service rejects reserved fork DEFAULT
+[PASS:B] Clone rejects reserved target DEFAULT
+[PASS:B] Manager rejects reserved fork __action
+[PASS:B] Manager rejects reserved rename __action
+[PASS:B] Service rejects reserved fork __action
+[PASS:B] Clone rejects reserved target __action
+[PASS:B] Save rejects lower-case TLH
+[PASS:B] Save rejects normalized HD alias
+[PASS:B] Earliest official HD survives later counterfeit row
+SUITE_COMPLETE total=39
+EXIT=0

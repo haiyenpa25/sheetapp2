@@ -9,6 +9,8 @@
 
 ---
 
+> **Rà soát lại 2026-10-21:** xem [báo cáo thực thi và phần còn mở](docs/OPT_REVIEW_2026-10-21.md). Q4 đã duyệt và triển khai; Q1 đã duyệt, xoá đúng 63 backup cũ. Lỗi alias xoá bộ chuẩn đã được duyệt và sửa. Lượt tổng sau sửa alias: 184/184 suite PASS, 3.740 checks, 0 SKIP. Chưa nghiệm thu toàn bộ phương án; OPT-12 mới khớp 57/60 file. Bảng quyết định/chữ ký giữ nguyên.
+
 ## 0. TÓM TẮT
 
 Về tính năng, hệ thống đã khá đầy đủ: hai giao diện Modern `/` và Classic `/old/`, 1.731 bài, 7 sub-app, 176 bộ test PHP, 172 spec E2E. Vấn đề còn lại nằm ở 5 nhóm, xếp theo mức nghiêm trọng:

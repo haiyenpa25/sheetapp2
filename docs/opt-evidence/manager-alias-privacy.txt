@@ -1,0 +1,800 @@
+RED: php tests/manager_alias_privacy_regression.php
+[PASS:B] Manager creates a private fork
+[PASS:B] Owner updates private chords
+[FAIL:B] Alias retains canonical owner and private flag
+[FAIL:B] guest: banhat__PrivateAudit chords obey privacy
+[FAIL:B] guest: banhat__PrivateAudit metadata obeys privacy
+[FAIL:B] guest: banhat__PrivateAudit listing obeys privacy
+[PASS:B] owner: banhat__PrivateAudit chords obey privacy
+[PASS:B] owner: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] owner: banhat__PrivateAudit listing obeys privacy
+[FAIL:B] other: banhat__PrivateAudit chords obey privacy
+[FAIL:B] other: banhat__PrivateAudit metadata obeys privacy
+[FAIL:B] other: banhat__PrivateAudit listing obeys privacy
+[FAIL:B] admin: banhat__PrivateAudit chords obey privacy
+[FAIL:B] admin: banhat__PrivateAudit metadata obeys privacy
+[FAIL:B] admin: banhat__PrivateAudit listing obeys privacy
+[PASS:B] guest: banhat__PrivateAudit chords obey privacy
+[PASS:B] guest: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] guest: banhat__PrivateAudit listing obeys privacy
+[PASS:B] owner: banhat__PrivateAudit chords obey privacy
+[PASS:B] owner: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] owner: banhat__PrivateAudit listing obeys privacy
+[PASS:B] other: banhat__PrivateAudit chords obey privacy
+[PASS:B] other: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] other: banhat__PrivateAudit listing obeys privacy
+[PASS:B] admin: banhat__PrivateAudit chords obey privacy
+[PASS:B] admin: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] admin: banhat__PrivateAudit listing obeys privacy
+[FAIL:B] guest: banhat__PrivateAudit chords obey privacy
+[FAIL:B] guest: banhat__PrivateAudit metadata obeys privacy
+[FAIL:B] guest: banhat__PrivateAudit listing obeys privacy
+[PASS:B] owner: banhat__PrivateAudit chords obey privacy
+[PASS:B] owner: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] owner: banhat__PrivateAudit listing obeys privacy
+[FAIL:B] other: banhat__PrivateAudit chords obey privacy
+[FAIL:B] other: banhat__PrivateAudit metadata obeys privacy
+[FAIL:B] other: banhat__PrivateAudit listing obeys privacy
+[FAIL:B] admin: banhat__PrivateAudit chords obey privacy
+[FAIL:B] admin: banhat__PrivateAudit metadata obeys privacy
+[FAIL:B] admin: banhat__PrivateAudit listing obeys privacy
+[FAIL:B] Editing legacy alias repairs its owner in fixture
+[PASS:B] guest: banhat__RenamedAudit chords obey privacy
+[PASS:B] guest: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] guest: banhat__RenamedAudit listing obeys privacy
+[PASS:B] owner: banhat__RenamedAudit chords obey privacy
+[PASS:B] owner: banhat__RenamedAudit metadata obeys privacy
+[FAIL:B] owner: banhat__RenamedAudit listing obeys privacy
+[PASS:B] other: banhat__RenamedAudit chords obey privacy
+[PASS:B] other: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] other: banhat__RenamedAudit listing obeys privacy
+[PASS:B] admin: banhat__RenamedAudit chords obey privacy
+[PASS:B] admin: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] admin: banhat__RenamedAudit listing obeys privacy
+[FAIL:B] guest: banhat__PrivateAudit chords obey privacy
+[FAIL:B] guest: banhat__PrivateAudit metadata obeys privacy
+[FAIL:B] guest: banhat__PrivateAudit listing obeys privacy
+[PASS:B] owner: banhat__PrivateAudit chords obey privacy
+[PASS:B] owner: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] owner: banhat__PrivateAudit listing obeys privacy
+[FAIL:B] other: banhat__PrivateAudit chords obey privacy
+[FAIL:B] other: banhat__PrivateAudit metadata obeys privacy
+[FAIL:B] other: banhat__PrivateAudit listing obeys privacy
+[FAIL:B] admin: banhat__PrivateAudit chords obey privacy
+[FAIL:B] admin: banhat__PrivateAudit metadata obeys privacy
+[FAIL:B] admin: banhat__PrivateAudit listing obeys privacy
+[FAIL:B] guest: banhat__RenamedAudit chords obey privacy
+[FAIL:B] guest: banhat__RenamedAudit metadata obeys privacy
+[FAIL:B] guest: banhat__RenamedAudit listing obeys privacy
+[PASS:B] owner: banhat__RenamedAudit chords obey privacy
+[PASS:B] owner: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] owner: banhat__RenamedAudit listing obeys privacy
+[FAIL:B] other: banhat__RenamedAudit chords obey privacy
+[FAIL:B] other: banhat__RenamedAudit metadata obeys privacy
+[FAIL:B] other: banhat__RenamedAudit listing obeys privacy
+[FAIL:B] admin: banhat__RenamedAudit chords obey privacy
+[FAIL:B] admin: banhat__RenamedAudit metadata obeys privacy
+[FAIL:B] admin: banhat__RenamedAudit listing obeys privacy
+[FAIL:B] Admin edit preserves actual owner
+[PASS:B] Disk export still contains updated chords
+SUITE_COMPLETE total=78
+EXIT=1
+
+GREEN: php tests/manager_alias_privacy_regression.php
+[PASS:B] Manager creates a private fork
+[PASS:B] Owner updates private chords
+[PASS:B] Alias retains canonical owner and private flag
+[PASS:B] guest: banhat__PrivateAudit chords obey privacy
+[PASS:B] guest: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] guest: banhat__PrivateAudit listing obeys privacy
+[PASS:B] owner: banhat__PrivateAudit chords obey privacy
+[PASS:B] owner: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] owner: banhat__PrivateAudit listing obeys privacy
+[PASS:B] other: banhat__PrivateAudit chords obey privacy
+[PASS:B] other: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] other: banhat__PrivateAudit listing obeys privacy
+[PASS:B] admin: banhat__PrivateAudit chords obey privacy
+[PASS:B] admin: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] admin: banhat__PrivateAudit listing obeys privacy
+[PASS:B] guest: banhat__PrivateAudit chords obey privacy
+[PASS:B] guest: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] guest: banhat__PrivateAudit listing obeys privacy
+[PASS:B] owner: banhat__PrivateAudit chords obey privacy
+[PASS:B] owner: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] owner: banhat__PrivateAudit listing obeys privacy
+[PASS:B] other: banhat__PrivateAudit chords obey privacy
+[PASS:B] other: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] other: banhat__PrivateAudit listing obeys privacy
+[PASS:B] admin: banhat__PrivateAudit chords obey privacy
+[PASS:B] admin: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] admin: banhat__PrivateAudit listing obeys privacy
+[PASS:B] guest: banhat__PrivateAudit chords obey privacy
+[PASS:B] guest: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] guest: banhat__PrivateAudit listing obeys privacy
+[PASS:B] owner: banhat__PrivateAudit chords obey privacy
+[PASS:B] owner: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] owner: banhat__PrivateAudit listing obeys privacy
+[PASS:B] other: banhat__PrivateAudit chords obey privacy
+[PASS:B] other: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] other: banhat__PrivateAudit listing obeys privacy
+[PASS:B] admin: banhat__PrivateAudit chords obey privacy
+[PASS:B] admin: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] admin: banhat__PrivateAudit listing obeys privacy
+[PASS:B] Editing legacy alias repairs its owner in fixture
+[PASS:B] guest: banhat__RenamedAudit chords obey privacy
+[PASS:B] guest: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] guest: banhat__RenamedAudit listing obeys privacy
+[PASS:B] owner: banhat__RenamedAudit chords obey privacy
+[PASS:B] owner: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] owner: banhat__RenamedAudit listing obeys privacy
+[PASS:B] other: banhat__RenamedAudit chords obey privacy
+[PASS:B] other: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] other: banhat__RenamedAudit listing obeys privacy
+[PASS:B] admin: banhat__RenamedAudit chords obey privacy
+[PASS:B] admin: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] admin: banhat__RenamedAudit listing obeys privacy
+[PASS:B] guest: banhat__PrivateAudit chords obey privacy
+[PASS:B] guest: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] guest: banhat__PrivateAudit listing obeys privacy
+[PASS:B] owner: banhat__PrivateAudit chords obey privacy
+[PASS:B] owner: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] owner: banhat__PrivateAudit listing obeys privacy
+[PASS:B] other: banhat__PrivateAudit chords obey privacy
+[PASS:B] other: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] other: banhat__PrivateAudit listing obeys privacy
+[PASS:B] admin: banhat__PrivateAudit chords obey privacy
+[PASS:B] admin: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] admin: banhat__PrivateAudit listing obeys privacy
+[PASS:B] guest: banhat__RenamedAudit chords obey privacy
+[PASS:B] guest: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] guest: banhat__RenamedAudit listing obeys privacy
+[PASS:B] owner: banhat__RenamedAudit chords obey privacy
+[PASS:B] owner: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] owner: banhat__RenamedAudit listing obeys privacy
+[PASS:B] other: banhat__RenamedAudit chords obey privacy
+[PASS:B] other: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] other: banhat__RenamedAudit listing obeys privacy
+[PASS:B] admin: banhat__RenamedAudit chords obey privacy
+[PASS:B] admin: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] admin: banhat__RenamedAudit listing obeys privacy
+[PASS:B] Admin edit preserves actual owner
+[PASS:B] Disk export still contains updated chords
+SUITE_COMPLETE total=78
+EXIT=0
+
+RED failure path: php tests/manager_alias_privacy_regression.php
+[PASS:B] Manager creates a private fork
+[PASS:B] Owner updates private chords
+[PASS:B] Alias retains canonical owner and private flag
+[PASS:B] guest: banhat__PrivateAudit chords obey privacy
+[PASS:B] guest: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] guest: banhat__PrivateAudit listing obeys privacy
+[PASS:B] owner: banhat__PrivateAudit chords obey privacy
+[PASS:B] owner: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] owner: banhat__PrivateAudit listing obeys privacy
+[PASS:B] other: banhat__PrivateAudit chords obey privacy
+[PASS:B] other: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] other: banhat__PrivateAudit listing obeys privacy
+[PASS:B] admin: banhat__PrivateAudit chords obey privacy
+[PASS:B] admin: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] admin: banhat__PrivateAudit listing obeys privacy
+[PASS:B] guest: banhat__PrivateAudit chords obey privacy
+[PASS:B] guest: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] guest: banhat__PrivateAudit listing obeys privacy
+[PASS:B] owner: banhat__PrivateAudit chords obey privacy
+[PASS:B] owner: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] owner: banhat__PrivateAudit listing obeys privacy
+[PASS:B] other: banhat__PrivateAudit chords obey privacy
+[PASS:B] other: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] other: banhat__PrivateAudit listing obeys privacy
+[PASS:B] admin: banhat__PrivateAudit chords obey privacy
+[PASS:B] admin: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] admin: banhat__PrivateAudit listing obeys privacy
+[PASS:B] guest: banhat__PrivateAudit chords obey privacy
+[PASS:B] guest: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] guest: banhat__PrivateAudit listing obeys privacy
+[PASS:B] owner: banhat__PrivateAudit chords obey privacy
+[PASS:B] owner: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] owner: banhat__PrivateAudit listing obeys privacy
+[PASS:B] other: banhat__PrivateAudit chords obey privacy
+[PASS:B] other: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] other: banhat__PrivateAudit listing obeys privacy
+[PASS:B] admin: banhat__PrivateAudit chords obey privacy
+[PASS:B] admin: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] admin: banhat__PrivateAudit listing obeys privacy
+[PASS:B] Editing legacy alias repairs its owner in fixture
+[PASS:B] guest: banhat__RenamedAudit chords obey privacy
+[PASS:B] guest: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] guest: banhat__RenamedAudit listing obeys privacy
+[PASS:B] owner: banhat__RenamedAudit chords obey privacy
+[PASS:B] owner: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] owner: banhat__RenamedAudit listing obeys privacy
+[PASS:B] other: banhat__RenamedAudit chords obey privacy
+[PASS:B] other: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] other: banhat__RenamedAudit listing obeys privacy
+[PASS:B] admin: banhat__RenamedAudit chords obey privacy
+[PASS:B] admin: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] admin: banhat__RenamedAudit listing obeys privacy
+[PASS:B] guest: banhat__PrivateAudit chords obey privacy
+[PASS:B] guest: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] guest: banhat__PrivateAudit listing obeys privacy
+[PASS:B] owner: banhat__PrivateAudit chords obey privacy
+[PASS:B] owner: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] owner: banhat__PrivateAudit listing obeys privacy
+[PASS:B] other: banhat__PrivateAudit chords obey privacy
+[PASS:B] other: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] other: banhat__PrivateAudit listing obeys privacy
+[PASS:B] admin: banhat__PrivateAudit chords obey privacy
+[PASS:B] admin: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] admin: banhat__PrivateAudit listing obeys privacy
+[PASS:B] guest: banhat__RenamedAudit chords obey privacy
+[PASS:B] guest: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] guest: banhat__RenamedAudit listing obeys privacy
+[PASS:B] owner: banhat__RenamedAudit chords obey privacy
+[PASS:B] owner: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] owner: banhat__RenamedAudit listing obeys privacy
+[PASS:B] other: banhat__RenamedAudit chords obey privacy
+[PASS:B] other: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] other: banhat__RenamedAudit listing obeys privacy
+[PASS:B] admin: banhat__RenamedAudit chords obey privacy
+[PASS:B] admin: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] admin: banhat__RenamedAudit listing obeys privacy
+[PASS:B] Admin edit preserves actual owner
+[PASS:B] Disk export still contains updated chords
+[FAIL:B] Failed alias privacy write is not reported as success
+[FAIL:B] Failed alias write does not claim canonical row became private
+SUITE_COMPLETE total=80
+EXIT=1
+
+GREEN failure path: php tests/manager_alias_privacy_regression.php
+[PASS:B] Manager creates a private fork
+[PASS:B] Owner updates private chords
+[PASS:B] Alias retains canonical owner and private flag
+[PASS:B] guest: banhat__PrivateAudit chords obey privacy
+[PASS:B] guest: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] guest: banhat__PrivateAudit listing obeys privacy
+[PASS:B] owner: banhat__PrivateAudit chords obey privacy
+[PASS:B] owner: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] owner: banhat__PrivateAudit listing obeys privacy
+[PASS:B] other: banhat__PrivateAudit chords obey privacy
+[PASS:B] other: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] other: banhat__PrivateAudit listing obeys privacy
+[PASS:B] admin: banhat__PrivateAudit chords obey privacy
+[PASS:B] admin: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] admin: banhat__PrivateAudit listing obeys privacy
+[PASS:B] guest: banhat__PrivateAudit chords obey privacy
+[PASS:B] guest: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] guest: banhat__PrivateAudit listing obeys privacy
+[PASS:B] owner: banhat__PrivateAudit chords obey privacy
+[PASS:B] owner: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] owner: banhat__PrivateAudit listing obeys privacy
+[PASS:B] other: banhat__PrivateAudit chords obey privacy
+[PASS:B] other: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] other: banhat__PrivateAudit listing obeys privacy
+[PASS:B] admin: banhat__PrivateAudit chords obey privacy
+[PASS:B] admin: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] admin: banhat__PrivateAudit listing obeys privacy
+[PASS:B] guest: banhat__PrivateAudit chords obey privacy
+[PASS:B] guest: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] guest: banhat__PrivateAudit listing obeys privacy
+[PASS:B] owner: banhat__PrivateAudit chords obey privacy
+[PASS:B] owner: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] owner: banhat__PrivateAudit listing obeys privacy
+[PASS:B] other: banhat__PrivateAudit chords obey privacy
+[PASS:B] other: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] other: banhat__PrivateAudit listing obeys privacy
+[PASS:B] admin: banhat__PrivateAudit chords obey privacy
+[PASS:B] admin: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] admin: banhat__PrivateAudit listing obeys privacy
+[PASS:B] Editing legacy alias repairs its owner in fixture
+[PASS:B] guest: banhat__RenamedAudit chords obey privacy
+[PASS:B] guest: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] guest: banhat__RenamedAudit listing obeys privacy
+[PASS:B] owner: banhat__RenamedAudit chords obey privacy
+[PASS:B] owner: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] owner: banhat__RenamedAudit listing obeys privacy
+[PASS:B] other: banhat__RenamedAudit chords obey privacy
+[PASS:B] other: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] other: banhat__RenamedAudit listing obeys privacy
+[PASS:B] admin: banhat__RenamedAudit chords obey privacy
+[PASS:B] admin: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] admin: banhat__RenamedAudit listing obeys privacy
+[PASS:B] guest: banhat__PrivateAudit chords obey privacy
+[PASS:B] guest: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] guest: banhat__PrivateAudit listing obeys privacy
+[PASS:B] owner: banhat__PrivateAudit chords obey privacy
+[PASS:B] owner: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] owner: banhat__PrivateAudit listing obeys privacy
+[PASS:B] other: banhat__PrivateAudit chords obey privacy
+[PASS:B] other: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] other: banhat__PrivateAudit listing obeys privacy
+[PASS:B] admin: banhat__PrivateAudit chords obey privacy
+[PASS:B] admin: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] admin: banhat__PrivateAudit listing obeys privacy
+[PASS:B] guest: banhat__RenamedAudit chords obey privacy
+[PASS:B] guest: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] guest: banhat__RenamedAudit listing obeys privacy
+[PASS:B] owner: banhat__RenamedAudit chords obey privacy
+[PASS:B] owner: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] owner: banhat__RenamedAudit listing obeys privacy
+[PASS:B] other: banhat__RenamedAudit chords obey privacy
+[PASS:B] other: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] other: banhat__RenamedAudit listing obeys privacy
+[PASS:B] admin: banhat__RenamedAudit chords obey privacy
+[PASS:B] admin: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] admin: banhat__RenamedAudit listing obeys privacy
+[PASS:B] Admin edit preserves actual owner
+[PASS:B] Disk export still contains updated chords
+[PASS:B] Failed alias privacy write is not reported as success
+[PASS:B] Failed alias write does not claim canonical row became private
+SUITE_COMPLETE total=80
+EXIT=0
+
+ISOLATED: php tests/manager_alias_privacy_regression.php
+[PASS:B] Manager creates a private fork
+[PASS:B] Owner updates private chords
+[PASS:B] Alias retains canonical owner and private flag
+[PASS:B] guest: banhat__PrivateAudit chords obey privacy
+[PASS:B] guest: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] guest: banhat__PrivateAudit listing obeys privacy
+[PASS:B] owner: banhat__PrivateAudit chords obey privacy
+[PASS:B] owner: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] owner: banhat__PrivateAudit listing obeys privacy
+[PASS:B] other: banhat__PrivateAudit chords obey privacy
+[PASS:B] other: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] other: banhat__PrivateAudit listing obeys privacy
+[PASS:B] admin: banhat__PrivateAudit chords obey privacy
+[PASS:B] admin: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] admin: banhat__PrivateAudit listing obeys privacy
+[PASS:B] guest: banhat__PrivateAudit chords obey privacy
+[PASS:B] guest: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] guest: banhat__PrivateAudit listing obeys privacy
+[PASS:B] owner: banhat__PrivateAudit chords obey privacy
+[PASS:B] owner: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] owner: banhat__PrivateAudit listing obeys privacy
+[PASS:B] other: banhat__PrivateAudit chords obey privacy
+[PASS:B] other: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] other: banhat__PrivateAudit listing obeys privacy
+[PASS:B] admin: banhat__PrivateAudit chords obey privacy
+[PASS:B] admin: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] admin: banhat__PrivateAudit listing obeys privacy
+[PASS:B] guest: banhat__PrivateAudit chords obey privacy
+[PASS:B] guest: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] guest: banhat__PrivateAudit listing obeys privacy
+[PASS:B] owner: banhat__PrivateAudit chords obey privacy
+[PASS:B] owner: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] owner: banhat__PrivateAudit listing obeys privacy
+[PASS:B] other: banhat__PrivateAudit chords obey privacy
+[PASS:B] other: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] other: banhat__PrivateAudit listing obeys privacy
+[PASS:B] admin: banhat__PrivateAudit chords obey privacy
+[PASS:B] admin: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] admin: banhat__PrivateAudit listing obeys privacy
+[PASS:B] Editing legacy alias repairs its owner in fixture
+[PASS:B] guest: banhat__RenamedAudit chords obey privacy
+[PASS:B] guest: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] guest: banhat__RenamedAudit listing obeys privacy
+[PASS:B] owner: banhat__RenamedAudit chords obey privacy
+[PASS:B] owner: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] owner: banhat__RenamedAudit listing obeys privacy
+[PASS:B] other: banhat__RenamedAudit chords obey privacy
+[PASS:B] other: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] other: banhat__RenamedAudit listing obeys privacy
+[PASS:B] admin: banhat__RenamedAudit chords obey privacy
+[PASS:B] admin: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] admin: banhat__RenamedAudit listing obeys privacy
+[PASS:B] guest: banhat__PrivateAudit chords obey privacy
+[PASS:B] guest: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] guest: banhat__PrivateAudit listing obeys privacy
+[PASS:B] owner: banhat__PrivateAudit chords obey privacy
+[PASS:B] owner: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] owner: banhat__PrivateAudit listing obeys privacy
+[PASS:B] other: banhat__PrivateAudit chords obey privacy
+[PASS:B] other: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] other: banhat__PrivateAudit listing obeys privacy
+[PASS:B] admin: banhat__PrivateAudit chords obey privacy
+[PASS:B] admin: banhat__PrivateAudit metadata obeys privacy
+[PASS:B] admin: banhat__PrivateAudit listing obeys privacy
+[PASS:B] guest: banhat__RenamedAudit chords obey privacy
+[PASS:B] guest: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] guest: banhat__RenamedAudit listing obeys privacy
+[PASS:B] owner: banhat__RenamedAudit chords obey privacy
+[PASS:B] owner: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] owner: banhat__RenamedAudit listing obeys privacy
+[PASS:B] other: banhat__RenamedAudit chords obey privacy
+[PASS:B] other: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] other: banhat__RenamedAudit listing obeys privacy
+[PASS:B] admin: banhat__RenamedAudit chords obey privacy
+[PASS:B] admin: banhat__RenamedAudit metadata obeys privacy
+[PASS:B] admin: banhat__RenamedAudit listing obeys privacy
+[PASS:B] Admin edit preserves actual owner
+[PASS:B] Disk export still contains updated chords
+[PASS:B] Failed alias privacy write is not reported as success
+[PASS:B] Failed alias write does not claim canonical row became private
+SUITE_COMPLETE total=80
+EXIT=0
+
+ISOLATED: php tests/http/chord_set_privacy_regression.php
+[PASS:B] HTTP list/ actor=0 returns JSON 200
+[PASS:B] guest: private set listed only for owner
+[PASS:B] guest: disk scan does not publish unknown sets
+[PASS:B] HTTP load/HD actor=0 returns JSON 200
+[PASS:B] guest: HD chord access follows Q4
+[PASS:B] HTTP details/HD actor=0 returns JSON 200
+[PASS:B] guest: HD metadata access follows Q4
+[PASS:B] HTTP load/TLH actor=0 returns JSON 200
+[PASS:B] guest: TLH chord access follows Q4
+[PASS:B] HTTP details/TLH actor=0 returns JSON 200
+[PASS:B] guest: TLH metadata access follows Q4
+[PASS:B] HTTP load/default actor=0 returns JSON 200
+[PASS:B] guest: default chord access follows Q4
+[PASS:B] HTTP details/default actor=0 returns JSON 200
+[PASS:B] guest: default metadata access follows Q4
+[PASS:B] HTTP load/Public actor=0 returns JSON 200
+[PASS:B] guest: Public chord access follows Q4
+[PASS:B] HTTP details/Public actor=0 returns JSON 200
+[PASS:B] guest: Public metadata access follows Q4
+[PASS:B] HTTP load/Secret actor=0 returns JSON 200
+[PASS:B] guest: Secret chord access follows Q4
+[PASS:B] guest: Secret checksum does not disclose private state
+[PASS:B] HTTP details/Secret actor=0 returns JSON 200
+[PASS:B] guest: Secret metadata access follows Q4
+[PASS:B] HTTP load/banhat__Secret actor=0 returns JSON 200
+[PASS:B] guest: banhat__Secret chord access follows Q4
+[PASS:B] guest: banhat__Secret checksum does not disclose private state
+[PASS:B] HTTP details/banhat__Secret actor=0 returns JSON 200
+[PASS:B] guest: banhat__Secret metadata access follows Q4
+[PASS:B] HTTP load/DiskOnly actor=0 returns JSON 200
+[PASS:B] guest: DiskOnly chord access follows Q4
+[PASS:B] guest: DiskOnly checksum does not disclose private state
+[PASS:B] HTTP details/DiskOnly actor=0 returns JSON 200
+[PASS:B] guest: DiskOnly metadata access follows Q4
+[PASS:B] HTTP list/ actor=2 returns JSON 200
+[PASS:B] owner: private set listed only for owner
+[PASS:B] owner: disk scan does not publish unknown sets
+[PASS:B] HTTP load/HD actor=2 returns JSON 200
+[PASS:B] owner: HD chord access follows Q4
+[PASS:B] HTTP details/HD actor=2 returns JSON 200
+[PASS:B] owner: HD metadata access follows Q4
+[PASS:B] HTTP load/TLH actor=2 returns JSON 200
+[PASS:B] owner: TLH chord access follows Q4
+[PASS:B] HTTP details/TLH actor=2 returns JSON 200
+[PASS:B] owner: TLH metadata access follows Q4
+[PASS:B] HTTP load/default actor=2 returns JSON 200
+[PASS:B] owner: default chord access follows Q4
+[PASS:B] HTTP details/default actor=2 returns JSON 200
+[PASS:B] owner: default metadata access follows Q4
+[PASS:B] HTTP load/Public actor=2 returns JSON 200
+[PASS:B] owner: Public chord access follows Q4
+[PASS:B] HTTP details/Public actor=2 returns JSON 200
+[PASS:B] owner: Public metadata access follows Q4
+[PASS:B] HTTP load/Secret actor=2 returns JSON 200
+[PASS:B] owner: Secret chord access follows Q4
+[PASS:B] HTTP details/Secret actor=2 returns JSON 200
+[PASS:B] owner: Secret metadata access follows Q4
+[PASS:B] HTTP load/banhat__Secret actor=2 returns JSON 200
+[PASS:B] owner: banhat__Secret chord access follows Q4
+[PASS:B] HTTP details/banhat__Secret actor=2 returns JSON 200
+[PASS:B] owner: banhat__Secret metadata access follows Q4
+[PASS:B] HTTP load/DiskOnly actor=2 returns JSON 200
+[PASS:B] owner: DiskOnly chord access follows Q4
+[PASS:B] owner: DiskOnly checksum does not disclose private state
+[PASS:B] HTTP details/DiskOnly actor=2 returns JSON 200
+[PASS:B] owner: DiskOnly metadata access follows Q4
+[PASS:B] HTTP list/ actor=3 returns JSON 200
+[PASS:B] other: private set listed only for owner
+[PASS:B] other: disk scan does not publish unknown sets
+[PASS:B] HTTP load/HD actor=3 returns JSON 200
+[PASS:B] other: HD chord access follows Q4
+[PASS:B] HTTP details/HD actor=3 returns JSON 200
+[PASS:B] other: HD metadata access follows Q4
+[PASS:B] HTTP load/TLH actor=3 returns JSON 200
+[PASS:B] other: TLH chord access follows Q4
+[PASS:B] HTTP details/TLH actor=3 returns JSON 200
+[PASS:B] other: TLH metadata access follows Q4
+[PASS:B] HTTP load/default actor=3 returns JSON 200
+[PASS:B] other: default chord access follows Q4
+[PASS:B] HTTP details/default actor=3 returns JSON 200
+[PASS:B] other: default metadata access follows Q4
+[PASS:B] HTTP load/Public actor=3 returns JSON 200
+[PASS:B] other: Public chord access follows Q4
+[PASS:B] HTTP details/Public actor=3 returns JSON 200
+[PASS:B] other: Public metadata access follows Q4
+[PASS:B] HTTP load/Secret actor=3 returns JSON 200
+[PASS:B] other: Secret chord access follows Q4
+[PASS:B] other: Secret checksum does not disclose private state
+[PASS:B] HTTP details/Secret actor=3 returns JSON 200
+[PASS:B] other: Secret metadata access follows Q4
+[PASS:B] HTTP load/banhat__Secret actor=3 returns JSON 200
+[PASS:B] other: banhat__Secret chord access follows Q4
+[PASS:B] other: banhat__Secret checksum does not disclose private state
+[PASS:B] HTTP details/banhat__Secret actor=3 returns JSON 200
+[PASS:B] other: banhat__Secret metadata access follows Q4
+[PASS:B] HTTP load/DiskOnly actor=3 returns JSON 200
+[PASS:B] other: DiskOnly chord access follows Q4
+[PASS:B] other: DiskOnly checksum does not disclose private state
+[PASS:B] HTTP details/DiskOnly actor=3 returns JSON 200
+[PASS:B] other: DiskOnly metadata access follows Q4
+[PASS:B] HTTP list/ actor=1 returns JSON 200
+[PASS:B] admin: private set listed only for owner
+[PASS:B] admin: disk scan does not publish unknown sets
+[PASS:B] HTTP load/HD actor=1 returns JSON 200
+[PASS:B] admin: HD chord access follows Q4
+[PASS:B] HTTP details/HD actor=1 returns JSON 200
+[PASS:B] admin: HD metadata access follows Q4
+[PASS:B] HTTP load/TLH actor=1 returns JSON 200
+[PASS:B] admin: TLH chord access follows Q4
+[PASS:B] HTTP details/TLH actor=1 returns JSON 200
+[PASS:B] admin: TLH metadata access follows Q4
+[PASS:B] HTTP load/default actor=1 returns JSON 200
+[PASS:B] admin: default chord access follows Q4
+[PASS:B] HTTP details/default actor=1 returns JSON 200
+[PASS:B] admin: default metadata access follows Q4
+[PASS:B] HTTP load/Public actor=1 returns JSON 200
+[PASS:B] admin: Public chord access follows Q4
+[PASS:B] HTTP details/Public actor=1 returns JSON 200
+[PASS:B] admin: Public metadata access follows Q4
+[PASS:B] HTTP load/Secret actor=1 returns JSON 200
+[PASS:B] admin: Secret chord access follows Q4
+[PASS:B] admin: Secret checksum does not disclose private state
+[PASS:B] HTTP details/Secret actor=1 returns JSON 200
+[PASS:B] admin: Secret metadata access follows Q4
+[PASS:B] HTTP load/banhat__Secret actor=1 returns JSON 200
+[PASS:B] admin: banhat__Secret chord access follows Q4
+[PASS:B] admin: banhat__Secret checksum does not disclose private state
+[PASS:B] HTTP details/banhat__Secret actor=1 returns JSON 200
+[PASS:B] admin: banhat__Secret metadata access follows Q4
+[PASS:B] HTTP load/DiskOnly actor=1 returns JSON 200
+[PASS:B] admin: DiskOnly chord access follows Q4
+[PASS:B] admin: DiskOnly checksum does not disclose private state
+[PASS:B] HTTP details/DiskOnly actor=1 returns JSON 200
+[PASS:B] admin: DiskOnly metadata access follows Q4
+[PASS:B] HTTP admin cannot delete qualified HD alias
+[PASS:B] HTTP admin cannot delete qualified TLH alias
+[PASS:B] HTTP admin cannot delete qualified default alias
+[PASS:B] Other user cannot delete private set
+[PASS:B] Denied DB delete preserves disk file
+[PASS:B] Anonymous service caller cannot delete private set
+[PASS:B] Owner can delete own private set
+[PASS:B] Authorized delete removes disk export
+[PASS:B] owner: service rejects HD alias deletion
+[PASS:B] owner: protected HD row and disk export survive
+[PASS:B] owner: Manager also preserves protected HD row
+[PASS:B] admin: service rejects HD alias deletion
+[PASS:B] admin: protected HD row and disk export survive
+[PASS:B] admin: Manager also preserves protected HD row
+[PASS:B] owner: service rejects TLH alias deletion
+[PASS:B] owner: protected TLH row and disk export survive
+[PASS:B] owner: Manager also preserves protected TLH row
+[PASS:B] admin: service rejects TLH alias deletion
+[PASS:B] admin: protected TLH row and disk export survive
+[PASS:B] admin: Manager also preserves protected TLH row
+[PASS:B] owner: service rejects default alias deletion
+[PASS:B] owner: protected default row and disk export survive
+[PASS:B] owner: Manager also preserves protected default row
+[PASS:B] admin: service rejects default alias deletion
+[PASS:B] admin: protected default row and disk export survive
+[PASS:B] admin: Manager also preserves protected default row
+[PASS:B] Manager still deletes an owned personal row and disk export
+SUITE_COMPLETE total=161
+EXIT=0
+
+ISOLATED: php tests/chord_sets_consolidation_regression.php
+=== CHORD SETS CONSOLIDATION REGRESSION (TASK 2.4) ===
+PASS: user_chord_sets có cột id
+PASS: user_chord_sets có cột song_id
+PASS: user_chord_sets có cột user_id
+PASS: user_chord_sets có cột set_name
+PASS: user_chord_sets có cột chords_json
+PASS: user_chord_sets có cột parent_id (Migration 004)
+PASS: user_chord_sets có cột attribution (Migration 004)
+PASS: user_chord_sets có cột checksum (Migration 004)
+PASS: ChordSetService::saveSet lưu thành công bộ HD vào CSDL
+PASS: ChordSetService::loadSet nạp đúng 3 hợp âm từ CSDL
+PASS: Hợp âm ô 0 đúng nốt G
+PASS: getSetDetails trả về thông tin chi tiết của bộ HD
+PASS: Attribution của HD được lưu chính xác
+PASS: Checksum MD5 được tự động tính toán
+PASS: Core Rule 1: HD luôn xuất hiện trong listSets
+PASS: Core Rule 1: HD luôn được ưu tiên đứng đầu
+PASS: ChordSetService::forkSet tạo thành công bản fork
+PASS: Bản fork có liên kết parent_id
+PASS: Attribution ghi nhận nguồn fork từ HD
+PASS: Bản fork Acoustic_Guitar được lưu vào DB
+PASS: parent_id của bản fork trỏ đúng vào id của bộ HD
+PASS: Cấu hình capo_fret được lưu đúng
+PASS: Core Rule 3: Chặn ghi đè lên bộ default
+PASS: Core Rule 3: Chặn ghi đè lên bộ TLH
+PASS: Core Rule 3: Chặn lưu tên bộ rác bắt đầu bằng __
+PASS: Core Rule 3: Chặn tuyệt đối không cho xóa bộ HD
+PASS: Core Rule 3: Chặn tuyệt đối không cho xóa bộ TLH
+PASS: Cho phép tác giả xóa bộ hợp âm do mình tạo
+PASS: Bộ Acoustic_Guitar đã bị xóa khỏi CSDL
+PASS: File tools/migrate_json_chord_sets_to_db.php tồn tại
+PASS: tools/migrate_json_chord_sets_to_db.php --reconcile thực thi thành công
+PASS: Công cụ đối soát phát hiện đủ 903 bài thánh ca
+
+>>> ALL 7/7 CHORD SETS CONSOLIDATION REGRESSION CHECKS PASSED!
+
+SUITE_COMPLETE total=32
+EXIT=0
+
+ISOLATED: php tests/members_manager_consolidation_regression.php
+========================================================
+   SheetApp2 — Members & Manager Consolidation Tests    
+========================================================
+
+  ✅ PASS: [1. Safe Redirect & UI Linkage] Trang /members/ chuyển hướng 302 an toàn sang /manager/#tab-users, toolbar & chord canvas trỏ đúng đích
+  ✅ PASS: [2. RBAC Enforcement] Tài khoản không phải Admin (Viewer/Banhat) bị chặn hoàn toàn khi gọi manageUser
+  ✅ PASS: [3. Anti Self-Demotion & Self-Harm] Admin không thể tự hạ quyền của chính mình, không thể tự khóa hoặc xóa tài khoản của mình
+  ✅ PASS: [4. Last Admin Protection] Cho phép điều chỉnh vai trò khi có nhiều Quản Trị Viên; bảo vệ Quản Trị Viên cuối cùng của hệ thống
+  ✅ PASS: [5. Chord Code Management & Auto-generation] Mã hợp âm cá nhân được chuẩn hóa chữ hoa, tự sinh khi để trống, cập nhật toàn vẹn qua update_profile
+  ✅ PASS: [6. Account Status & Password Reset] Chuyển đổi trạng thái active/locked chuẩn xác và đặt lại mật khẩu mã hóa an toàn
+  ✅ PASS: [7. Audit Trail Logging] Mọi hành vi nhạy cảm (tạo user, đổi quyền, sửa profile, khóa/mở khóa, đổi pass) đều được ghi nhận vào nhật ký kiểm toán
+
+--------------------------------------------------------
+Tổng kết kiểm thử Members & Manager Consolidation:
+  - Tổng số test: 7
+  - Đạt: 7
+  - Thất bại: 0
+  - Trạng thái: ✅ TẤT CẢ 7 TIÊU CHÍ ĐẠT CHUẨN (PASS)
+--------------------------------------------------------
+
+
+SUITE_COMPLETE total=7
+EXIT=0
+
+ISOLATED: php tests/review_integrity_f4_regression.php
+========================================================
+   SheetApp2 — F4: Review Integrity & Workflow Tests    
+========================================================
+
+--- 1. Kiểm tra gửi đề xuất sai song_id (Anti-Spoofing 422) ---
+  [PASS:B] [F4-1.1] Submit bộ hợp âm sai song_id bị ném HttpException 422
+  [PASS:B] [F4-1.2] HD bài B hoàn toàn không bị ảnh hưởng
+
+--- 2. Kiểm tra Cấm Leader Tự Duyệt Đề Xuất Của Mình (B5) ---
+  [PASS:B] [F4-2.1] Leader tự duyệt đề xuất của mình bị chặn 403 Forbidden theo B5
+  [PASS:B] [F4-2.2] Trạng thái đề xuất vẫn giữ nguyên là pending
+  [PASS:B] [F4-2.3] Admin có quyền duyệt đề xuất của Leader
+
+--- 3. Kiểm tra thông báo duy nhất (No duplicate notifications) ---
+  [PASS:B] [F4-3.1] Mỗi quyết định phê duyệt sinh ra ĐÚNG 1 thông báo tới tác giả (không bị trùng 2 lần)
+
+--- 4. Kiểm tra tính toàn vẹn Transaction khi có lỗi giữa chừng ---
+  [PASS:B] [F4-4.1] Duyệt đề xuất lỗi bị chặn ném Exception
+  [PASS:B] [F4-4.2] Không có dòng chord_set_history mồ côi nào được sinh ra
+  [PASS:B] [F4-4.3] review_requests vẫn ở trạng thái pending, không bị cập nhật dở dang
+
+--------------------------------------------------------
+Tổng số kiểm tra: 9 | Đạt: 9 | Lỗi: 0
+✅ KẾT QUẢ: TẤT CẢ KIỂM TRA F4 ĐỀU ĐẠT (PASS 100%)!
+
+SUITE_COMPLETE total=9
+EXIT=0
+
+ISOLATED: php tests/review_workflow_regression.php
+=== KIỂM THỬ HỒI QUY QUY TRÌNH DUYỆT & DIFF ENGINE (EPIC 4.2) ===
+
+[1/8] Kiểm tra Schema Migration 011 & CSDL SQLite In-Memory...
+  ✅ PASS: Bảng review_requests tồn tại trong CSDL
+  ✅ PASS: Bảng chord_set_history tồn tại trong CSDL
+  ✅ PASS: Bảng user_chord_sets có cột review_status
+  ✅ PASS: Bảng user_chord_sets có cột approved_by
+  ✅ PASS: Bảng song_versions có cột review_status
+
+[2/8] Kiểm tra Engine So Sánh Khác Biệt (ReviewDiffEngine)...
+  ✅ PASS: DiffEngine trả về cấu trúc gồm summary và changes
+  ✅ PASS: Phát hiện chính xác 1 hợp âm thêm mới (Dm)
+  ✅ PASS: Phát hiện chính xác 1 hợp âm sửa đổi (C -> Cmaj7)
+  ✅ PASS: Phát hiện chính xác 1 hợp âm bị xóa (G)
+  ✅ PASS: Phát hiện chính xác 1 hợp âm giữ nguyên (F)
+  ✅ PASS: Tổng số thay đổi = 3
+  ✅ PASS: Hai bộ hợp âm giống nhau cho total_changes = 0
+  ✅ PASS: Tất cả 3 nốt đều là unchanged
+
+[3/8] Kiểm tra Nộp Đề Xuất Phê Duyệt (ReviewService::submit)...
+  ✅ PASS: Member submit review request thành công
+  ✅ PASS: Đã tạo review_requests record với ID = 1
+  ✅ PASS: Trạng thái đề xuất là pending
+  ✅ PASS: Loại đề xuất là recommend
+  ✅ PASS: user_chord_sets.review_status được cập nhật sang pending
+  ✅ PASS: Sự kiện domain_events review.submitted đã được ghi nhận
+  ✅ PASS: Đề xuất pending cũ được tự động chuyển thành superseded
+
+[4/8] Kiểm tra RBAC (Chỉ Leader & Admin có quyền duyệt)...
+  ✅ PASS: Viewer không có quyền approve (bị chặn DomainException)
+  ✅ PASS: Banhat thông thường không có quyền approve (bị chặn DomainException)
+
+[5/8] Kiểm tra Phê Duyệt Recommend (Leader/Admin)...
+  ✅ PASS: Leader phê duyệt đề xuất recommend thành công
+  ✅ PASS: user_chord_sets.is_recommended = 1
+  ✅ PASS: user_chord_sets.review_status = approved
+  ✅ PASS: approved_by = 4 (Leader)
+  ✅ PASS: Đã gửi thông báo in-app phê duyệt tới tác giả
+
+[6/8] Kiểm tra Cập Nhật Bản HD & Hoàn Tác Snapshot (CR1 & CR4)...
+  ✅ PASS: Admin duyệt đề xuất update_hd thành công
+  ✅ PASS: Bản HD.json trên đĩa đã cập nhật đủ 4 hợp âm
+  ✅ PASS: Hợp âm ô nhịp 1 là Fmaj7
+  ✅ PASS: Đã ghi snapshot vào bảng chord_set_history (CR4)
+  ✅ PASS: Bản snapshot lịch sử lưu chính xác 3 hợp âm của bản HD cũ
+  ✅ PASS: Rollback HD về snapshot thành công
+  ✅ PASS: Sau khi rollback, HD.json khôi phục chuẩn xác 3 hợp âm cũ
+  ✅ PASS: Hợp âm ô nhịp 1 được khôi phục về F
+
+[7/8] Kiểm tra Từ Chối Đề Xuất Có Lý Do (ReviewService::reject)...
+  ✅ PASS: Từ chối không có ghi chú lý do bị chặn lại
+  ✅ PASS: Từ chối đề xuất thành công khi có lý do
+  ✅ PASS: review_requests.status = rejected
+  ✅ PASS: review_note được lưu lại trong DB
+  ✅ PASS: user_chord_sets.review_status = rejected
+  ✅ PASS: Đã gửi thông báo từ chối kèm lý do tới tác giả
+
+[8/8] Kiểm tra Tác Giả Rút Đề Xuất & Chặn Đường Tắt (Anti-Bypass)...
+  ✅ PASS: Người khác không thể rút đề xuất của tác giả
+  ✅ PASS: Chính tác giả rút đề xuất thành công
+  ✅ PASS: review_requests.status = withdrawn
+  ✅ PASS: Anti-Bypass Guard: Viewer gọi toggleRecommend nhận 403 Forbidden
+
+=======================================================
+🎉 TẤT CẢ 45 KIỂM THỬ ĐÃ PASS HOÀN TOÀN!
+
+SUITE_COMPLETE total=45
+EXIT=0
+
+ISOLATED: php tests/chord_set_guard_regression.php
+========================================================
+   SheetApp2 — Chord Set Guard Regression Suite (F3)    
+========================================================
+
+  [PASS] ChordCanvas.switchSet chặn tuyệt đối không cho __create_new_set__ hoặc pseudo-names trở thành active set (Fix F3)
+  [PASS] ChordCanvas có hàm handleSelectChange xử lý chuyên biệt các tùy chọn tạo mới/mở cổng mà không kích hoạt switchSet rác
+  [PASS] Toolbar selector liên kết tới ChordCanvas.handleSelectChange qua đúng 1 đường dây JS (không còn onchange inline trùng lặp)
+  [PASS] ChordSetService::saveSet từ chối lưu vào "default", "TLH" và bất kỳ tên nào bắt đầu bằng "__"
+  [PASS] ChordSetController từ chối mọi yêu cầu xóa bộ default, TLH, HD với HTTP 403 Forbidden
+  [PASS] ChordCanvas.deleteSet tự động fallback sang bộ "HD" khi bộ cá nhân đang chọn bị xóa
+
+--------------------------------------------------------
+Tổng kết kiểm thử Chord Set Guard:
+  - Tổng số kiểm tra: 6
+  - Số kiểm tra thất bại: 0
+  - Trạng thái: ✅ TẤT CẢ KIỂM TRA CHORD SET GUARD ĐỀU ĐẠT (PASS)
+--------------------------------------------------------
+
+
+SUITE_COMPLETE total=6
+EXIT=0
+
+ISOLATED: php tests/core_rules_regression.php
+========================================================
+   SheetApp2 — Core Rules Automated Regression Suite   
+========================================================
+
+--- Kiểm tra CORE RULE 1: Bộ Hợp Âm HD là Mặc Định ---
+  [PASS] CR1-a: Mở bài có HD > 0 hợp âm: loadSong mặc định chọn HD và _injectChords tiêm hợp âm HD vào bản nhạc
+  [PASS] CR1-b: Mở bài có HD rỗng: _injectChords bảo vệ không tiêm map rỗng, trả về XML gốc TLH chuẩn mực
+
+--- Kiểm tra CORE RULE 2: Tông Gốc = 0 Luôn Luôn ---
+  [PASS] CR2-a: Dịch +3 rồi chuyển bài từ thư viện: transposeOverride là null -> currentTranspose luôn reset về 0 (loại bỏ hoàn toàn lastTranspose)
+  [PASS] CR2-b: Mở bài từ setlist có transpose = +2: SetlistUI truyền item.transpose_key (+2) làm transposeOverride vào SongLoader.load
+
+--- Kiểm tra CORE RULE 3: Khóa TLH và HD ---
+  [PASS] CR3-a: Bộ TLH và HD bị khóa bất biến: Service & Controller từ chối xóa (HTTP 403), UI ẩn hoàn toàn nút xóa kể cả với Admin
+  [PASS] CR3-b: Xóa bộ cá nhân đang chọn: ChordCanvas.deleteSet tự động fallback sang bộ "HD" thay vì default
+
+--- Kiểm tra CORE RULE 4: Đồng Bộ Tông & Tempo Trong Setlist ---
+  [PASS] CR4-a: Bấm phát bài trong Setlist: Metronome nhận trực tiếp item.bpm đã lưu và áp dụng nhịp/phách ghi đè tempo XML gốc
+  [PASS] CR4-b: Lưu vào setlist & cập nhật Lưu Tập: DB lưu trữ toàn vẹn chord_profile, transpose_key và bpm
+  [PASS] CR4-c: Tài khoản không phải admin (Ban Hát): nút Lưu Tập hiển thị đầy đủ và API update_item cho phép chủ setlist cập nhật
+
+--------------------------------------------------------
+Tổng kết kiểm thử Core Rules:
+  - Tổng số test kịch bản: 9/9
+  - Số test thất bại: 0
+  - Trạng thái: ✅ TẤT CẢ 9 KỊCH BẢN CORE RULES ĐẠT CHUẨN (PASS)
+--------------------------------------------------------
+
+
+SUITE_COMPLETE total=9
+EXIT=0

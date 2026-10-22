@@ -1,0 +1,21 @@
+RED php tests/e2e_isolation_boundary_regression.php (disposable root)
+✅ [Playwright E2E] Snapshot CSDL & storage đã được sao lưu an toàn tại test-results/snapshot/
+[FAIL:B] Global setup refuses a root without isolated-copy marker
+[FAIL:B] Rejected setup writes no snapshot directory
+✅ [Playwright E2E] Đã khôi phục hoàn toàn CSDL thật từ snapshot.
+[FAIL:B] Global teardown refuses a root without isolated-copy marker
+[FAIL:B] Teardown never overwrites application DB with an old snapshot
+SUITE_COMPLETE total=4
+EXIT=1
+
+GREEN php tests/e2e_isolation_boundary_regression.php
+[PASS:B] Global setup refuses a root without isolated-copy marker
+[PASS:B] Rejected setup writes no snapshot directory
+[PASS:B] Global teardown refuses a root without isolated-copy marker
+[PASS:B] Teardown never overwrites application DB with an old snapshot
+SUITE_COMPLETE total=4
+EXIT=0
+
+SOURCE SESSION GUARD: SHEETAPP_E2E=1 php tools/create_test_session.php admin admin
+Test sessions require a verified isolated copy and matching E2E server URL.
+EXIT=1 (expected 1)

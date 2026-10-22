@@ -1,0 +1,41 @@
+RED php tests/manager_song_visibility_regression.php
+[FAIL:B] Guest search excludes private song: 
+[FAIL:B] Guest search excludes private song: Thánh
+[FAIL:B] Guest cannot read private song detail
+[PASS:B] Ban hat retains permitted internal song access
+[FAIL:B] Ban hat cannot read admin-only detail
+[PASS:B] Admin retains admin-only access
+SUITE_COMPLETE total=6
+EXIT=1
+
+GREEN php tests/manager_song_visibility_regression.php
+[PASS:B] Guest search excludes private song: 
+[PASS:B] Guest search excludes private song: Thánh
+[PASS:B] Guest cannot read private song detail
+[PASS:B] Ban hat retains permitted internal song access
+[PASS:B] Ban hat cannot read admin-only detail
+[PASS:B] Admin retains admin-only access
+SUITE_COMPLETE total=6
+EXIT=0
+
+RED version catalog: php tests/manager_song_visibility_regression.php
+[PASS:B] Guest search excludes private song: 
+[PASS:B] Guest search excludes private song: Thánh
+[PASS:B] Guest cannot read private song detail
+[PASS:B] Ban hat retains permitted internal song access
+[PASS:B] Ban hat cannot read admin-only detail
+[PASS:B] Admin retains admin-only access
+[FAIL:B] Guest version catalog excludes private song metadata
+SUITE_COMPLETE total=7
+EXIT=1
+
+GREEN version catalog: php tests/manager_song_visibility_regression.php
+[PASS:B] Guest search excludes private song: 
+[PASS:B] Guest search excludes private song: Thánh
+[PASS:B] Guest cannot read private song detail
+[PASS:B] Ban hat retains permitted internal song access
+[PASS:B] Ban hat cannot read admin-only detail
+[PASS:B] Admin retains admin-only access
+[PASS:B] Guest version catalog excludes private song metadata
+SUITE_COMPLETE total=7
+EXIT=0

@@ -1,0 +1,45 @@
+=== KIỂM THỬ HỒI QUY EPIC 4.3: CHORDPRO EXPORTER BACKEND ===
+
+[1/6] Kiểm tra Transpose Parity (PHP TransposeHelper vs JS TransposeEngine)...
+  ✅ PASS: Node.js thực thi và trả về kết quả cho 84 hợp âm mẫu
+  ✅ PASS: 100% khớp tuyệt đối giữa PHP và JS (756/756 phép chuyển giọng đạt chuẩn)
+
+[2/6] Kiểm tra xuất ChordPro & Metadata Directives...
+  ✅ PASS: Directives chứa đúng {title}
+  ✅ PASS: Directives chứa đúng {key: G}
+  ✅ PASS: Directives chứa đúng {composer}
+  ✅ PASS: Chứa khối {start_of_verse: Lời 1}
+  ✅ PASS: Chứa khối {end_of_verse}
+
+[3/6] Kiểm tra trích xuất lời và nối âm tiết...
+  ✅ PASS: Bóc tách đúng từ ngữ và loại bỏ số đếm dư thừa (1.Cúi -> Cúi)
+  ✅ PASS: Bóc tách câu kết thúc đầy đủ
+  ✅ PASS: Âm tiết ghép begin-middle-end được nối dấu gạch nối chính xác (Giê-hô-va / Áp-ra-ham)
+  ✅ PASS: Hợp âm inline được gắn chính xác trước từng âm tiết (ví dụ: [Gm]Giê-[D7]hô-)
+
+[4/6] Kiểm tra Core Rule 1 (HD profile & TLH fallback)...
+  ✅ PASS: Bộ HD được ưu tiên nạp đè lên vị trí tùy biến
+  ✅ PASS: Bộ HD tuân thủ Core Rule 1: không trộn hợp âm TLH ([D7]) từ MusicXML
+  ✅ PASS: Bộ TLH nạp đầy đủ hợp âm gốc từ MusicXML (chứa [D7])
+
+[5/6] Kiểm tra Transpose động (+2 bán âm G -> A)...
+  ✅ PASS: Key chuyển từ G sang A
+  ✅ PASS: Hợp âm G chuyển thành A
+  ✅ PASS: Hợp âm D7 chuyển thành E7
+  ✅ PASS: Không còn hợp âm D7 chưa dịch giọng
+
+[6/6] Kiểm tra API HTTP route=export&format=chordpro...
+  ✅ PASS: HTTP export kết nối được tới server kiểm thử cô lập
+  ✅ PASS: API trả về HTTP 200
+  ✅ PASS: Header Content-Type là text/plain
+  ✅ PASS: Header Content-Disposition có tên file .chordpro
+  ✅ PASS: Nội dung trả về là văn bản ChordPro hợp lệ
+  ✅ PASS: Dịch giọng +1 bán âm (G -> G#) qua HTTP query params thành công
+  ✅ PASS: API JSON trả về HTTP 200
+  ✅ PASS: JSON trả về trường content chứa văn bản ChordPro
+  ✅ PASS: Thiếu tham số song_id trả về HTTP 400 Bad Request
+
+----------------------------------------------------
+🎉 KẾT QUẢ: TẤT CẢ KIỂM TRA CHORDPRO EXPORTER ĐỀU ĐẠT (PASS)!
+
+SUITE_COMPLETE total=27

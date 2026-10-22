@@ -1,0 +1,46 @@
+RED php tests/log_rotation_regression.php
+[PASS:B] Audit append succeeds
+[PASS:B] Audit log rotates at size limit
+[PASS:B] Rotation preserves previous audit content
+[PASS:B] New audit file contains the new JSON entry
+[PASS:B] Append client record first
+[PASS:B] Append client record second
+[PASS:B] Append client record third
+[PASS:B] Append client record fourth
+[PASS:B] Append client record fifth
+[PASS:B] Latest client record is active
+[PASS:B] Newest archive contains previous record
+[PASS:B] Second archive contains preceding record
+[PASS:B] Archive count stays bounded
+[PASS:B] Unwritable destination reports failure
+[FAIL:B] Unavailable sidecar lock falls back to locked append
+[FAIL:B] Fallback retains the audit entry
+[FAIL:B] Failed rotation continues appending to current log
+[FAIL:B] Failed rotation does not drop new log entry
+SUITE_COMPLETE total=18
+EXIT=1
+
+GREEN php tests/log_rotation_regression.php
+[PASS:B] Audit append succeeds
+[PASS:B] Audit log rotates at size limit
+[PASS:B] Rotation preserves previous audit content
+[PASS:B] New audit file contains the new JSON entry
+[PASS:B] Append client record first
+[PASS:B] Append client record second
+[PASS:B] Append client record third
+[PASS:B] Append client record fourth
+[PASS:B] Append client record fifth
+[PASS:B] Latest client record is active
+[PASS:B] Newest archive contains previous record
+[PASS:B] Second archive contains preceding record
+[PASS:B] Archive count stays bounded
+SheetApp log: sidecar lock unavailable; using locked append
+[PASS:B] Unwritable destination reports failure
+SheetApp log: sidecar lock unavailable; using locked append
+[PASS:B] Unavailable sidecar lock falls back to locked append
+[PASS:B] Fallback retains the audit entry
+SheetApp log: rotation failed; retaining current log and appending
+[PASS:B] Failed rotation continues appending to current log
+[PASS:B] Failed rotation does not drop new log entry
+SUITE_COMPLETE total=18
+EXIT=0

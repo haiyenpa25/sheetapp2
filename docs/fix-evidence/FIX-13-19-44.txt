@@ -1,0 +1,27 @@
+RED php tests/data_repair_dry_run_regression.php
+[FAIL:B] Read-only repair plan succeeds on fixture
+[FAIL:B] Plan identifies owner by matching username
+[FAIL:B] Plan lists exact cleanup candidates
+[PASS:B] Dry-run leaves database bytes unchanged
+SUITE_COMPLETE total=4
+EXIT=1
+
+GREEN php tests/data_repair_dry_run_regression.php
+[PASS:B] Read-only repair plan succeeds on fixture
+[PASS:B] Plan identifies owner by matching username
+[PASS:B] Plan lists exact cleanup candidates
+[PASS:B] Dry-run leaves database bytes unchanged
+SUITE_COMPLETE total=4
+EXIT=0
+
+Fixture-only apply verification: php tests/data_repair_dry_run_regression.php
+[PASS:B] Read-only repair plan succeeds on fixture
+[PASS:B] Plan identifies owner by matching username
+[PASS:B] Plan lists exact cleanup candidates
+[PASS:B] Dry-run leaves database bytes unchanged
+[PASS:B] Approved apply succeeds only on disposable fixture
+[PASS:B] Apply creates a verified pre-change backup
+[PASS:B] Apply deletes exactly fixture cleanup candidates
+[PASS:B] Apply installs the unique chord code index
+SUITE_COMPLETE total=8
+EXIT=0

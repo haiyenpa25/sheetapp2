@@ -1,0 +1,11 @@
+[PASS:B] Missing table is absent
+[PASS:B] New table is found case-insensitively
+[PASS:B] Existing column is found case-insensitively
+[PASS:B] Missing column is absent
+[PASS:B] DDL invalidates cached column metadata
+[PASS:B] Connection switch cannot reuse another DB metadata
+[PASS:B] Original connection still has correct metadata
+[PASS:B] Dropped table invalidates metadata
+[PASS:B] Dropped table has no stale columns
+[PASS:B] Invalid identifier returns absent
+SUITE_COMPLETE total=10

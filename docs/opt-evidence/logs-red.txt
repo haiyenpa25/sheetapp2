@@ -1,0 +1,16 @@
+[PASS:B] Audit append succeeds
+[FAIL:B] Audit log rotates at size limit
+C:\xampp\php\php.exe : PHP Warning:  
+file_get_contents(C:\Users\CNS-MS~1\AppData\Local\Temp/sheetapp_log_rotation_b95d76a6ecd8b6bd/audit.log.1): Failed to 
+open stream: No such file or directory in C:\xampp\htdocs\sheetapp2\tests\log_rotation_regression.php on line 28
+At line:2 char:1
++ C:\xampp\php\php.exe tests/log_rotation_regression.php *> "$env:TEMP\ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (PHP Warning:  f....php on line 28:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+Warning: file_get_contents(C:\Users\CNS-MS~1\AppData\Local\Temp/sheetapp_log_rotation_b95d76a6ecd8b6bd/audit.log.1): Failed to open stream: No such file or directory in C:\xampp\htdocs\sheetapp2\tests\log_rotation_regression.php on line 28
+[FAIL:B] Rotation preserves previous audit content
+[FAIL:B] New audit file contains the new JSON entry
+SUITE_COMPLETE total=4

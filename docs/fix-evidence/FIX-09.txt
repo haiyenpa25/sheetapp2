@@ -1,0 +1,33 @@
+RED php tests/tool_cache_invalidation_regression.php
+[PASS:B] manage_tempos.php succeeds on fixture DB
+[PASS:B] Tempo CLI updates fixture row
+[PASS:B] Tempo CLI invalidates fixture cache and ETag
+[PASS:B] index_lyrics.php succeeds on fixture DB
+[PASS:B] Lyrics CLI indexes managed XML into fixture DB
+[PASS:B] Lyrics CLI invalidates fixture cache and ETag
+[PASS:B] check_song_spelling.php succeeds on fixture DB
+[PASS:B] Spelling CLI updates fixture title
+[PASS:B] Spelling CLI invalidates fixture cache and ETag
+[FAIL:B] Spelling FTS update uses song_id when rowid differs
+[PASS:B] manage_song_labels.php succeeds on fixture DB
+[FAIL:B] Labels FTS update uses song_id when rowid differs
+[FAIL:B] FTS season also matches the correct song
+SUITE_COMPLETE total=13
+EXIT=1
+
+GREEN php tests/tool_cache_invalidation_regression.php
+[PASS:B] manage_tempos.php succeeds on fixture DB
+[PASS:B] Tempo CLI updates fixture row
+[PASS:B] Tempo CLI invalidates fixture cache and ETag
+[PASS:B] index_lyrics.php succeeds on fixture DB
+[PASS:B] Lyrics CLI indexes managed XML into fixture DB
+[PASS:B] Lyrics CLI invalidates fixture cache and ETag
+[PASS:B] check_song_spelling.php succeeds on fixture DB
+[PASS:B] Spelling CLI updates fixture title
+[PASS:B] Spelling CLI invalidates fixture cache and ETag
+[PASS:B] Spelling FTS update uses song_id when rowid differs
+[PASS:B] manage_song_labels.php succeeds on fixture DB
+[PASS:B] Labels FTS update uses song_id when rowid differs
+[PASS:B] FTS season also matches the correct song
+SUITE_COMPLETE total=13
+EXIT=0

@@ -1,0 +1,84 @@
+RED php tests/pointer_tap_regression.php
+[FAIL:B] PointerTap helper exists
+SUITE_COMPLETE total=1
+EXIT=1
+
+GREEN php tests/pointer_tap_regression.php
+[PASS:B] Pointer down never opens chord popup
+[PASS:B] Scrolling gesture does not open popup or synthetic click
+[PASS:B] Stationary pointer release opens popup exactly once
+[PASS:B] Cancelled gesture never opens popup
+[PASS:B] Keyboard click remains accessible
+SUITE_COMPLETE total=5
+EXIT=0
+
+RED dot integration: php tests/pointer_tap_regression.php
+[PASS:B] Pointer down never opens chord popup
+[PASS:B] Scrolling gesture does not open popup or synthetic click
+[PASS:B] Stationary pointer release opens popup exactly once
+[PASS:B] Cancelled gesture never opens popup
+[PASS:B] Keyboard click remains accessible
+[FAIL:B] assets/js/actual chord dot waits for release
+[PASS:B] assets/js/actual chord dot opens on stationary release
+[FAIL:B] old/assets/js/actual chord dot waits for release
+[PASS:B] old/assets/js/actual chord dot opens on stationary release
+SUITE_COMPLETE total=9
+EXIT=1
+
+GREEN dot integration: php tests/pointer_tap_regression.php
+[PASS:B] Pointer down never opens chord popup
+[PASS:B] Scrolling gesture does not open popup or synthetic click
+[PASS:B] Stationary pointer release opens popup exactly once
+[PASS:B] Cancelled gesture never opens popup
+[PASS:B] Keyboard click remains accessible
+[PASS:B] assets/js/actual chord dot waits for release
+[PASS:B] assets/js/actual chord dot opens on stationary release
+[PASS:B] old/assets/js/actual chord dot waits for release
+[PASS:B] old/assets/js/actual chord dot opens on stationary release
+SUITE_COMPLETE total=9
+EXIT=0
+
+RED pinch cancellation: php tests/pointer_tap_regression.php
+[PASS:B] Pointer down never opens chord popup
+[PASS:B] Scrolling gesture does not open popup or synthetic click
+[PASS:B] Stationary pointer release opens popup exactly once
+[PASS:B] Cancelled gesture never opens popup
+[PASS:B] Keyboard click remains accessible
+[PASS:B] assets/js/actual chord dot waits for release
+[PASS:B] assets/js/actual chord dot opens on stationary release
+[FAIL:B] assets/js/touchcancel clears temporary pinch scale
+[PASS:B] old/assets/js/actual chord dot waits for release
+[PASS:B] old/assets/js/actual chord dot opens on stationary release
+[FAIL:B] old/assets/js/touchcancel clears temporary pinch scale
+SUITE_COMPLETE total=11
+EXIT=1
+
+GREEN pinch cancellation: php tests/pointer_tap_regression.php
+[PASS:B] Pointer down never opens chord popup
+[PASS:B] Scrolling gesture does not open popup or synthetic click
+[PASS:B] Stationary pointer release opens popup exactly once
+[PASS:B] Cancelled gesture never opens popup
+[PASS:B] Keyboard click remains accessible
+[PASS:B] assets/js/actual chord dot waits for release
+[PASS:B] assets/js/actual chord dot opens on stationary release
+[FAIL:B] assets/js/touchcancel clears temporary pinch scale
+[PASS:B] old/assets/js/actual chord dot waits for release
+[PASS:B] old/assets/js/actual chord dot opens on stationary release
+[PASS:B] old/assets/js/touchcancel clears temporary pinch scale
+SUITE_COMPLETE total=11
+EXIT=1
+
+GREEN both pinch handlers: php tests/pointer_tap_regression.php
+[PASS:B] Pointer down never opens chord popup
+[PASS:B] Scrolling gesture does not open popup or synthetic click
+[PASS:B] Stationary pointer release opens popup exactly once
+[PASS:B] Cancelled gesture never opens popup
+[PASS:B] Keyboard click remains accessible
+[PASS:B] assets/js/actual chord dot waits for release
+[PASS:B] assets/js/actual chord dot opens on stationary release
+[PASS:B] assets/js/touchcancel clears temporary pinch scale
+[PASS:B] old/assets/js/actual chord dot waits for release
+[PASS:B] old/assets/js/actual chord dot opens on stationary release
+[PASS:B] old/assets/js/touchcancel clears temporary pinch scale
+SUITE_COMPLETE total=11
+EXIT=0

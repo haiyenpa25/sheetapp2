@@ -1,0 +1,8 @@
+[PASS:B] Writer stores ETag beside public cache
+[PASS:B] Snapshot ETag matches the exact response body
+[PASS:B] Repeated request reuses stored ETag
+[PASS:B] Legacy cache gets ETag without changing body
+[PASS:B] Changed catalog receives a new ETag
+[PASS:B] Replacement body and ETag stay consistent
+[PASS:B] Invalidation removes both cache and ETag
+SUITE_COMPLETE total=7

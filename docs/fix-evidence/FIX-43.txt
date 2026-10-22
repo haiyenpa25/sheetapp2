@@ -1,0 +1,81 @@
+RED isolated copy: php tests/backup_restore_drill_regression.php using environment secret
+=== KIỂM THỬ HỒI QUY: DIỄN TẬP SAO LƯU MÃ HÓA & PHỤC HỒI OFF-SITE (CHECKPOINT G3.9) ===
+
+[1/4] Tạo bản sao lưu toàn diện được mã hóa OpenSSL AES-256-CBC...
+  ✅ PASS: create_encrypted_backup.php thực thi thành công với exit code 0
+  ✅ PASS: Tệp sao lưu mã hóa C:\Users\CNS-MS~1\AppData\Local\Temp/sheetapp_backup_drill_20261021_121526_326371/test_backup.enc đã được tạo
+  ✅ PASS: Kích thước tệp sao lưu hợp lệ (> 1000 bytes, thực tế: 3688014 bytes)
+  ❌ FAIL: Tệp sao lưu mang header mã hóa OpenSSL tiêu chuẩn ('Salted__')
+
+[2/4] Kiểm tra phòng vệ: Thử giải mã với mật mã không hợp lệ...
+  ❌ FAIL: Giải mã với mật mã sai bị từ chối với exit code lỗi (exit 0)
+  ❌ FAIL: Báo lỗi chính xác 'Giải mã thất bại' mà không làm rò rỉ dữ liệu
+
+[3/4] Diễn tập phục hồi cơ sở dữ liệu với mật mã hợp lệ...
+  ✅ PASS: restore_encrypted_backup.php giải mã thành công với exit code 0
+  ✅ PASS: PRAGMA integrity_check đạt 'ok'
+  ✅ PASS: Checksum SHA-256 đối chiếu khớp hoàn toàn với manifest
+  ✅ PASS: Tệp cơ sở dữ liệu app.sqlite đã được phục hồi
+  ✅ PASS: Tệp manifest.json đã được giải nén
+
+[4/4] Kiểm chứng lược đồ và dữ liệu trên bản sao lưu đã phục hồi...
+  ✅ PASS: Bảng 'users' tồn tại nguyên vẹn trong bản sao lưu đã phục hồi
+  ✅ PASS: Bảng 'songs' tồn tại nguyên vẹn trong bản sao lưu đã phục hồi
+  ✅ PASS: Bảng 'user_chord_sets' tồn tại nguyên vẹn trong bản sao lưu đã phục hồi
+  ✅ PASS: Bảng 'song_versions' tồn tại nguyên vẹn trong bản sao lưu đã phục hồi
+  ✅ PASS: Bảng 'review_requests' tồn tại nguyên vẹn trong bản sao lưu đã phục hồi
+  ✅ PASS: Bảng 'chord_set_history' tồn tại nguyên vẹn trong bản sao lưu đã phục hồi
+  ✅ PASS: Bảng 'practice_assignments' tồn tại nguyên vẹn trong bản sao lưu đã phục hồi
+  ✅ PASS: Bảng 'practice_assignment_targets' tồn tại nguyên vẹn trong bản sao lưu đã phục hồi
+  ✅ PASS: Bảng 'notification_preferences' tồn tại nguyên vẹn trong bản sao lưu đã phục hồi
+  ✅ PASS: Bảng 'notification_deliveries' tồn tại nguyên vẹn trong bản sao lưu đã phục hồi
+  ✅ PASS: Bảng 'domain_events' tồn tại nguyên vẹn trong bản sao lưu đã phục hồi
+  ✅ PASS: Số lượng người dùng hợp lệ trong bản sao lưu: 5
+  ✅ PASS: Số lượng bài hát hợp lệ trong bản sao lưu: 1731
+
+--------------------------------------------------------
+Kết quả kiểm thử Diễn tập Sao lưu / Phục hồi: 21 checks PASS, 3 checks FAIL
+--------------------------------------------------------
+EXIT=1
+
+GREEN php tests/backup_restore_drill_regression.php (memory-generated DB and temporary backup dir)
+=== KIỂM THỬ HỒI QUY: DIỄN TẬP SAO LƯU MÃ HÓA & PHỤC HỒI OFF-SITE (CHECKPOINT G3.9) ===
+
+[1/4] Tạo bản sao lưu toàn diện được mã hóa OpenSSL AES-256-CBC...
+  ✅ PASS: create_encrypted_backup.php thực thi thành công với exit code 0
+  ✅ PASS: Tệp sao lưu mã hóa C:\Users\CNS-MS~1\AppData\Local\Temp/sheetapp_backup_drill_20261021_121545_26d004/test_backup.enc đã được tạo
+  ✅ PASS: Kích thước tệp sao lưu hợp lệ (> 1000 bytes, thực tế: 18336 bytes)
+  ✅ PASS: Tệp sao lưu mang header mã hóa OpenSSL tiêu chuẩn ('Salted__')
+
+[2/4] Kiểm tra phòng vệ: Thử giải mã với mật mã không hợp lệ...
+  ✅ PASS: Giải mã với mật mã sai bị từ chối với exit code lỗi (exit 1)
+  ✅ PASS: Báo lỗi chính xác 'Giải mã thất bại' mà không làm rò rỉ dữ liệu
+
+[3/4] Diễn tập phục hồi cơ sở dữ liệu với mật mã hợp lệ...
+  ✅ PASS: restore_encrypted_backup.php giải mã thành công với exit code 0
+  ✅ PASS: PRAGMA integrity_check đạt 'ok'
+  ✅ PASS: Checksum SHA-256 đối chiếu khớp hoàn toàn với manifest
+  ✅ PASS: Tệp cơ sở dữ liệu app.sqlite đã được phục hồi
+  ✅ PASS: Tệp manifest.json đã được giải nén
+
+[4/4] Kiểm chứng lược đồ và dữ liệu trên bản sao lưu đã phục hồi...
+  ✅ PASS: Bảng 'users' tồn tại nguyên vẹn trong bản sao lưu đã phục hồi
+  ✅ PASS: Bảng 'songs' tồn tại nguyên vẹn trong bản sao lưu đã phục hồi
+  ✅ PASS: Bảng 'user_chord_sets' tồn tại nguyên vẹn trong bản sao lưu đã phục hồi
+  ✅ PASS: Bảng 'song_versions' tồn tại nguyên vẹn trong bản sao lưu đã phục hồi
+  ✅ PASS: Bảng 'review_requests' tồn tại nguyên vẹn trong bản sao lưu đã phục hồi
+  ✅ PASS: Bảng 'chord_set_history' tồn tại nguyên vẹn trong bản sao lưu đã phục hồi
+  ✅ PASS: Bảng 'practice_assignments' tồn tại nguyên vẹn trong bản sao lưu đã phục hồi
+  ✅ PASS: Bảng 'practice_assignment_targets' tồn tại nguyên vẹn trong bản sao lưu đã phục hồi
+  ✅ PASS: Bảng 'notification_preferences' tồn tại nguyên vẹn trong bản sao lưu đã phục hồi
+  ✅ PASS: Bảng 'notification_deliveries' tồn tại nguyên vẹn trong bản sao lưu đã phục hồi
+  ✅ PASS: Bảng 'domain_events' tồn tại nguyên vẹn trong bản sao lưu đã phục hồi
+  ✅ PASS: Số lượng người dùng hợp lệ trong bản sao lưu: 3
+  ✅ PASS: Số lượng bài hát hợp lệ trong bản sao lưu: 2
+
+--------------------------------------------------------
+Kết quả kiểm thử Diễn tập Sao lưu / Phục hồi: 24 checks PASS, 0 checks FAIL
+--------------------------------------------------------
+
+SUITE_COMPLETE total=24
+EXIT=0

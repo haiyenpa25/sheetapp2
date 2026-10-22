@@ -1,0 +1,117 @@
+=== R3-4: Labels Migration & Dry-Run Regression Suite ===
+
+-- 1. CLI --dry-run Contract & Output Format --
+  [PASS] CLI: --dry-run in tiêu đề báo cáo
+  [PASS] CLI: --dry-run chỉ đọc dữ liệu fixture tổng hợp
+  [PASS] CLI: --dry-run ghi nhận 903 bài được phủ nhãn
+  [PASS] CLI: --dry-run kiểm tra integrity_check = ok
+  [PASS] CLI: --dry-run in bảng mẫu đối chiếu 20 bài
+  [PASS] CLI: --dry-run khẳng định không sửa đổi DB
+  [PASS] An toàn: CSDL giữ nguyên 100% sau khi chạy --dry-run
+
+-- 2. Migration Execution & Coverage (Test DB) --
+  [PASS] Migration: Đã cập nhật thành công 903 bài hát trên test DB
+  [PASS] Cache: --seed xoá cache danh sách bài của đúng DB vừa ghi
+  [PASS] Phụ lục A: Xoá triệt để nhãn Thường Niên (0 bài mang Thường Niên)
+  [PASS] Phụ lục B.2: 100% bài hát (903/903) được gán chủ đề chuẩn mục lục (thực tế: 903)
+  [PASS] Mục tiêu R3-4: 403 bài (501–903) trước đây trống nay đã được điền đủ 100%
+  [PASS] Tính toàn vẹn CSDL: integrity_check = ok
+
+-- 3. Verification of Key Hymns against Appendix B.3 --
+  [PASS] Bài 1 tồn tại trong CSDL
+  [PASS] Bài 1 ('R34 fixture 1'): Theme khớp mục lục B.2 'Thờ phượng'
+  [PASS] Bài 38 tồn tại trong CSDL
+  [PASS] Bài 38 ('R34 fixture 38'): Theme khớp mục lục B.2 'Thờ phượng'
+  [PASS] Bài 39 tồn tại trong CSDL
+  [PASS] Bài 39 ('R34 fixture 39'): Theme khớp mục lục B.2 'Đức Chúa Trời'
+  [PASS] Bài 52 tồn tại trong CSDL
+  [PASS] Bài 52 ('R34 fixture 52'): Theme khớp mục lục B.2 'Đức Chúa Trời'
+  [PASS] Bài 53 tồn tại trong CSDL
+  [PASS] Bài 53 ('R34 fixture 53'): Theme khớp mục lục B.2 'Chúa Jêsus Christ'
+  [PASS] Bài 53 ('R34 fixture 53'): Season khớp B.1/B.3 'Lễ Giáng Sinh'
+  [PASS] Bài 76 tồn tại trong CSDL
+  [PASS] Bài 76 ('R34 fixture 76'): Theme khớp mục lục B.2 'Chúa Jêsus Christ'
+  [PASS] Bài 76 ('R34 fixture 76'): Season khớp B.1/B.3 'NULL'
+  [PASS] Bài 88 tồn tại trong CSDL
+  [PASS] Bài 88 ('R34 fixture 88'): Theme khớp mục lục B.2 'Chúa Jêsus Christ'
+  [PASS] Bài 88 ('R34 fixture 88'): Season khớp B.1/B.3 'Lễ Thương Khó'
+  [PASS] Bài 103 tồn tại trong CSDL
+  [PASS] Bài 103 ('R34 fixture 103'): Theme khớp mục lục B.2 'Chúa Jêsus Christ'
+  [PASS] Bài 103 ('R34 fixture 103'): Season khớp B.1/B.3 'Lễ Phục Sinh'
+  [PASS] Bài 113 tồn tại trong CSDL
+  [PASS] Bài 113 ('R34 fixture 113'): Theme khớp mục lục B.2 'Chúa Jêsus Christ'
+  [PASS] Bài 113 ('R34 fixture 113'): Season khớp B.1/B.3 'Lễ Thăng Thiên'
+  [PASS] Bài 119 tồn tại trong CSDL
+  [PASS] Bài 119 ('R34 fixture 119'): Theme khớp mục lục B.2 'Chúa Jêsus Christ'
+  [PASS] Bài 119 ('R34 fixture 119'): Season khớp B.1/B.3 'NULL'
+  [PASS] Bài 135 tồn tại trong CSDL
+  [PASS] Bài 135 ('R34 fixture 135'): Theme khớp mục lục B.2 'Đức Thánh Linh'
+  [PASS] Bài 135 ('R34 fixture 135'): Season khớp B.1/B.3 'Lễ Đức Thánh Linh Giáng Lâm'
+  [PASS] Bài 145 tồn tại trong CSDL
+  [PASS] Bài 145 ('R34 fixture 145'): Theme khớp mục lục B.2 'Hội Thánh'
+  [PASS] Bài 150 tồn tại trong CSDL
+  [PASS] Bài 150 ('R34 fixture 150'): Theme khớp mục lục B.2 'Kinh Thánh'
+  [PASS] Bài 156 tồn tại trong CSDL
+  [PASS] Bài 156 ('R34 fixture 156'): Theme khớp mục lục B.2 'Tin Lành'
+  [PASS] Bài 206 tồn tại trong CSDL
+  [PASS] Bài 206 ('R34 fixture 206'): Theme khớp mục lục B.2 'Đời tín đồ'
+  [PASS] Bài 335 tồn tại trong CSDL
+  [PASS] Bài 335 ('R34 fixture 335'): Theme khớp mục lục B.2 'Thiên đàng'
+  [PASS] Bài 349 tồn tại trong CSDL
+  [PASS] Bài 349 ('R34 fixture 349'): Theme khớp mục lục B.2 'Truyền giảng'
+  [PASS] Bài 349 ('R34 fixture 349'): Season khớp B.1/B.3 'Buổi Truyền Giảng'
+  [PASS] Bài 360 tồn tại trong CSDL
+  [PASS] Bài 360 ('R34 fixture 360'): Theme khớp mục lục B.2 'Truyền giảng'
+  [PASS] Bài 360 ('R34 fixture 360'): Season khớp B.1/B.3 'Buổi Truyền Giảng'
+  [PASS] Bài 363 tồn tại trong CSDL
+  [PASS] Bài 363 ('R34 fixture 363'): Theme khớp mục lục B.2 'Thiếu nhi'
+  [PASS] Bài 374 tồn tại trong CSDL
+  [PASS] Bài 374 ('R34 fixture 374'): Theme khớp mục lục B.2 'Thanh niên'
+  [PASS] Bài 383 tồn tại trong CSDL
+  [PASS] Bài 383 ('R34 fixture 383'): Theme khớp mục lục B.2 'Đơn ca – Song ca'
+  [PASS] Bài 393 tồn tại trong CSDL
+  [PASS] Bài 393 ('R34 fixture 393'): Season khớp B.1/B.3 'Lễ Dâng Con'
+  [PASS] Bài 397 tồn tại trong CSDL
+  [PASS] Bài 397 ('R34 fixture 397'): Season khớp B.1/B.3 'Lễ Báp-têm'
+  [PASS] Bài 399 tồn tại trong CSDL
+  [PASS] Bài 399 ('R34 fixture 399'): Season khớp B.1/B.3 'Lễ Tiệc Thánh'
+  [PASS] Bài 401 tồn tại trong CSDL
+  [PASS] Bài 401 ('R34 fixture 401'): Season khớp B.1/B.3 'Hôn Lễ'
+  [PASS] Bài 404 tồn tại trong CSDL
+  [PASS] Bài 404 ('R34 fixture 404'): Season khớp B.1/B.3 'Tang Lễ'
+  [PASS] Bài 405 tồn tại trong CSDL
+  [PASS] Bài 405 ('R34 fixture 405'): Season khớp B.1/B.3 'Năm Mới'
+  [PASS] Bài 407 tồn tại trong CSDL
+  [PASS] Bài 407 ('R34 fixture 407'): Season khớp B.1/B.3 'Tiễn Biệt'
+  [PASS] Bài 409 tồn tại trong CSDL
+  [PASS] Bài 409 ('R34 fixture 409'): Season khớp B.1/B.3 'Lễ Tấn Phong Mục Sư'
+  [PASS] Bài 413 tồn tại trong CSDL
+  [PASS] Bài 413 ('R34 fixture 413'): Theme khớp mục lục B.2 'Hợp ca'
+  [PASS] Bài 432 tồn tại trong CSDL
+  [PASS] Bài 432 ('R34 fixture 432'): Theme khớp mục lục B.2 'Kinh tiết ca & Đoản ca'
+  [PASS] Bài 439 tồn tại trong CSDL
+  [PASS] Bài 439 ('R34 fixture 439'): Theme khớp mục lục B.2 'Kinh tiết ca & Đoản ca'
+  [PASS] Bài 456 tồn tại trong CSDL
+  [PASS] Bài 456 ('R34 fixture 456'): Theme khớp mục lục B.2 'Thi Thiên'
+  [PASS] Bài 510 tồn tại trong CSDL
+  [PASS] Bài 510 ('R34 fixture 510'): Theme khớp mục lục B.2 'Thờ phượng'
+  [PASS] Bài 903 tồn tại trong CSDL
+  [PASS] Bài 903 ('R34 fixture 903'): Theme khớp mục lục B.2 'Hợp ca'
+
+-- 4. Auto Backup Mechanism --
+  [PASS] Backup: CLI --backup tạo file thành công
+  [PASS] Backup: File sao lưu nằm trong --backup-dir
+  [PASS] Backup: bản VACUUM INTO đọc được (903 bài)
+  [PASS] Backup: integrity_check của bản sao lưu = ok
+  [PASS] An toàn: storage/backups thật không thêm file (71 → 71)
+
+-- 5. Line Budget Disciplines (< 600 lines) --
+  [PASS] Line Budget: tools/manage_song_labels.php có 366 dòng (< 600 dòng)
+
+----------------------------------------------------
+Tổng số kiểm tra: 98 (Behavioral: 97, Static: 1)
+Số kiểm tra đạt: 98
+Số kiểm tra lỗi: 0
+🎉 KẾT QUẢ: TẤT CẢ KIỂM TRA R3-4 ĐỀU ĐẠT (PASS 100%)!
+
+SUITE_COMPLETE total=98

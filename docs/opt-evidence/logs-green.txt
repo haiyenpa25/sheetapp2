@@ -1,0 +1,15 @@
+[PASS:B] Audit append succeeds
+[PASS:B] Audit log rotates at size limit
+[PASS:B] Rotation preserves previous audit content
+[PASS:B] New audit file contains the new JSON entry
+[PASS:B] Append client record first
+[PASS:B] Append client record second
+[PASS:B] Append client record third
+[PASS:B] Append client record fourth
+[PASS:B] Append client record fifth
+[PASS:B] Latest client record is active
+[PASS:B] Newest archive contains previous record
+[PASS:B] Second archive contains preceding record
+[PASS:B] Archive count stays bounded
+[PASS:B] Unwritable destination reports failure
+SUITE_COMPLETE total=14

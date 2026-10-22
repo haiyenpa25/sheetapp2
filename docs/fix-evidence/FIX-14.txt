@@ -1,0 +1,11 @@
+RED php tests/version_filename_regression.php (temporary storage root)
+[FAIL:B] Deleting an earlier DB version cannot overwrite later XML
+[FAIL:B] New version has a distinct filename
+SUITE_COMPLETE total=2
+EXIT=1
+
+GREEN php tests/version_filename_regression.php
+[PASS:B] Deleting an earlier DB version cannot overwrite later XML
+[PASS:B] New version has a distinct filename
+SUITE_COMPLETE total=2
+EXIT=0

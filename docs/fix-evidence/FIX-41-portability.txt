@@ -1,0 +1,52 @@
+Batch 1: checked files 0..4
+Batch 2: checked files 5..9
+Batch 3: checked files 10..14
+Batch 4: checked files 15..19
+Batch 5: checked files 20..24
+Batch 6: checked files 25..29
+Batch 7: checked files 30..34
+Batch 8: checked files 35..39
+Batch 9: checked files 40..44
+Changed session call sites in 41 specs:
+editor-cache-sync.spec.js
+leader-role.spec.js
+library-l0-window-exports.spec.js
+library-l01-modules.spec.js
+library-l3-follow-leader.spec.js
+library-l3-leader-cues.spec.js
+library-l3-song-sections.spec.js
+library-l6-bulk-labels.spec.js
+library-mobile-hd-tlh-switch.spec.js
+library-r0-2-chord-clone-confirm.spec.js
+library-r0-3-tab-outside-save.spec.js
+library-r0-4-undo-stack-song-switch.spec.js
+library-r0-6-selector-dedup-and-escape.spec.js
+library-r0-7-toolbar-controls-reachable.spec.js
+library-r2-1-note-cursor.spec.js
+library-r2-10-polyphonic-mapping.spec.js
+library-r2-2-chord-palette.spec.js
+library-r2-3-debounced-save.spec.js
+library-r2-4-copy-measures.spec.js
+library-r2-5-mobile-palette.spec.js
+library-r2-6-band-mode-chord-edit.spec.js
+library-r2-7-pencil-and-dot-position.spec.js
+library-r2-8-active-set-display.spec.js
+library-r2-9-propose-hd-review.spec.js
+library-r6-interactions.spec.js
+library-r7-responsive.spec.js
+library-tv-instrument-http.spec.js
+library-tv0-import.spec.js
+library-tv4-categories.spec.js
+library-tv4-contract.spec.js
+library-tv4-csrf.spec.js
+library-tv4-public-programs.spec.js
+library-tv4-xml-owner.spec.js
+library-tv4-xml-path.spec.js
+liturgical-usage.spec.js
+manager-tabs.spec.js
+manager-users.spec.js
+notification-preferences.spec.js
+notifications-flow.spec.js
+practice-assignments.spec.js
+review-workflow.spec.js
+Additional 4 session specs and 5 direct PHP spec calls use helper/env. All changed files node --check PASS.

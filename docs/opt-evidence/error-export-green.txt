@@ -1,0 +1,42 @@
+[PASS:B] /api/index.php?route=client_log: rejects cross-origin write
+[PASS:B] /api/index.php?route=client_log: rejects missing origin
+[PASS:B] /api/index.php?route=client_log: only POST is accepted
+[PASS:B] /api/index.php?route=client_log: body is capped at 8 KiB
+[PASS:B] /api/index.php?route=client_log: rejects malformed JSON
+[PASS:B] /api/index.php?route=client_log: rejects non-string log fields
+[PASS:B] /api/log_error.php: rejects cross-origin write
+[PASS:B] /api/log_error.php: rejects missing origin
+[PASS:B] /api/log_error.php: only POST is accepted
+[PASS:B] /api/log_error.php: body is capped at 8 KiB
+[PASS:B] /api/log_error.php: rejects malformed JSON
+[PASS:B] /api/log_error.php: rejects non-string log fields
+[PASS:B] Rejected requests do not write log entries
+[PASS:B] Accepted same-origin record 1
+[PASS:B] Accepted same-origin record 2
+[PASS:B] Accepted same-origin record 3
+[PASS:B] Accepted same-origin record 4
+[PASS:B] Accepted same-origin record 5
+[PASS:B] Accepted same-origin record 6
+[PASS:B] Accepted same-origin record 7
+[PASS:B] Accepted same-origin record 8
+[PASS:B] Accepted same-origin record 9
+[PASS:B] Accepted same-origin record 10
+[PASS:B] Shared IP quota rejects request 11
+[PASS:B] Only the ten accepted records reach isolated log
+[PASS:B] Registration attempt 1 validates input
+[PASS:B] Registration attempt 2 validates input
+[PASS:B] Registration attempt 3 validates input
+[PASS:B] Registration attempt 4 validates input
+[PASS:B] Registration attempt 5 validates input
+[PASS:B] Registration attempt 6 validates input
+[PASS:B] Registration attempt 7 validates input
+[PASS:B] Registration attempt 8 validates input
+[PASS:B] Registration attempt 9 validates input
+[PASS:B] Registration attempt 10 validates input
+[PASS:B] Registration quota follows IP even when username changes
+[PASS:B] profile: internal DB failure returns safe 500
+[PASS:B] hd: internal DB failure returns safe 500
+[PASS:B] plan: internal DB failure returns safe 500
+[PASS:B] assignment: internal DB failure returns safe 500
+[PASS:B] ChordPro refuses existing XML outside managed roots
+SUITE_COMPLETE total=41

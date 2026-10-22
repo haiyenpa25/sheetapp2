@@ -1,0 +1,29 @@
+RED php tests/follower_xml_regression.php
+[FAIL:B] Follower uses actual catalog XML path
+[FAIL:B] Follower passes supplied preloaded XML to loader
+[FAIL:B] Follower resolves metadata from API when absent in library
+SUITE_COMPLETE total=3
+EXIT=1
+
+GREEN php tests/follower_xml_regression.php
+[PASS:B] Follower uses actual catalog XML path
+[PASS:B] Follower passes supplied preloaded XML to loader
+[PASS:B] Follower resolves metadata from API when absent in library
+SUITE_COMPLETE total=3
+EXIT=0
+
+Additional preload RED
+[PASS:B] Follower uses actual catalog XML path
+[PASS:B] Follower passes supplied preloaded XML to loader
+[PASS:B] Follower resolves metadata from API when absent in library
+[FAIL:B] Performance setlist preload also uses real catalog XML metadata
+SUITE_COMPLETE total=4
+EXIT=1
+
+Additional preload GREEN
+[PASS:B] Follower uses actual catalog XML path
+[PASS:B] Follower passes supplied preloaded XML to loader
+[PASS:B] Follower resolves metadata from API when absent in library
+[PASS:B] Performance setlist preload also uses real catalog XML metadata
+SUITE_COMPLETE total=4
+EXIT=0

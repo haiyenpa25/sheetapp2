@@ -1,0 +1,854 @@
+{
+    "mode": "read-only",
+    "database_sha256": "a91268b27df548845c67b8f375c2d13b5899ffa4716ba99a00d59e4bc157cac9",
+    "ownership": [],
+    "legacy_owner_review": [
+        {
+            "id": 5,
+            "user_id": 1,
+            "set_username": "banhat",
+            "actual_owner_username": "banhat",
+            "set_name": "Hoài_Dinh"
+        },
+        {
+            "id": 6,
+            "user_id": 1,
+            "set_username": "banhat",
+            "actual_owner_username": "banhat",
+            "set_name": "NAM"
+        },
+        {
+            "id": 8,
+            "user_id": 1,
+            "set_username": "banhat",
+            "actual_owner_username": "banhat",
+            "set_name": "nam_guitar____i___u_Slow_Rock_Capo_3"
+        }
+    ],
+    "duplicate_chord_codes": [],
+    "proposed_unique_index": "CREATE UNIQUE INDEX users_chord_code_unique ON users(UPPER(TRIM(chord_code))) WHERE TRIM(COALESCE(chord_code,'')) <> ''",
+    "candidate_window": {
+        "from": "2026-09-26",
+        "before": "2026-10-01"
+    },
+    "events": [
+        {
+            "id": 2,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "57",
+            "created_at": "2026-09-26 05:22:13"
+        },
+        {
+            "id": 4,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "58",
+            "created_at": "2026-09-26 05:25:23"
+        },
+        {
+            "id": 5,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "3",
+            "created_at": "2026-09-26 05:26:46"
+        },
+        {
+            "id": 7,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "4",
+            "created_at": "2026-09-26 05:27:23"
+        },
+        {
+            "id": 9,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "5",
+            "created_at": "2026-09-26 05:27:37"
+        },
+        {
+            "id": 11,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "6",
+            "created_at": "2026-09-26 05:28:36"
+        },
+        {
+            "id": 13,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "7",
+            "created_at": "2026-09-26 05:28:43"
+        },
+        {
+            "id": 15,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "8",
+            "created_at": "2026-09-26 05:29:33"
+        },
+        {
+            "id": 17,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "9",
+            "created_at": "2026-09-26 05:29:42"
+        },
+        {
+            "id": 19,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "10",
+            "created_at": "2026-09-26 05:30:50"
+        },
+        {
+            "id": 21,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "11",
+            "created_at": "2026-09-26 05:30:58"
+        },
+        {
+            "id": 23,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "12",
+            "created_at": "2026-09-26 05:31:56"
+        },
+        {
+            "id": 25,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "13",
+            "created_at": "2026-09-26 05:31:59"
+        },
+        {
+            "id": 28,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "71",
+            "created_at": "2026-09-26 05:33:14"
+        },
+        {
+            "id": 38,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "72",
+            "created_at": "2026-09-26 05:50:40"
+        },
+        {
+            "id": 40,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "73",
+            "created_at": "2026-09-26 05:54:38"
+        },
+        {
+            "id": 42,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "74",
+            "created_at": "2026-09-26 06:23:48"
+        },
+        {
+            "id": 44,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "75",
+            "created_at": "2026-09-26 06:26:37"
+        },
+        {
+            "id": 46,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "76",
+            "created_at": "2026-09-26 06:45:20"
+        },
+        {
+            "id": 48,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "77",
+            "created_at": "2026-09-26 07:46:19"
+        },
+        {
+            "id": 50,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "78",
+            "created_at": "2026-09-26 07:56:51"
+        },
+        {
+            "id": 52,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "79",
+            "created_at": "2026-09-26 08:05:03"
+        },
+        {
+            "id": 54,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "80",
+            "created_at": "2026-09-26 08:10:12"
+        },
+        {
+            "id": 55,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "24",
+            "created_at": "2026-09-26 08:11:44"
+        },
+        {
+            "id": 60,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "25",
+            "created_at": "2026-09-26 08:13:13"
+        },
+        {
+            "id": 74,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "26",
+            "created_at": "2026-09-26 08:20:52"
+        },
+        {
+            "id": 79,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "27",
+            "created_at": "2026-09-26 08:22:26"
+        },
+        {
+            "id": 86,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "28",
+            "created_at": "2026-09-26 08:26:08"
+        },
+        {
+            "id": 91,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "29",
+            "created_at": "2026-09-26 08:27:37"
+        },
+        {
+            "id": 98,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "30",
+            "created_at": "2026-09-26 08:29:10"
+        },
+        {
+            "id": 102,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "31",
+            "created_at": "2026-09-26 08:29:21"
+        },
+        {
+            "id": 105,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "32",
+            "created_at": "2026-09-26 08:30:33"
+        },
+        {
+            "id": 108,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "33",
+            "created_at": "2026-09-26 08:31:36"
+        },
+        {
+            "id": 111,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "34",
+            "created_at": "2026-09-26 08:33:12"
+        },
+        {
+            "id": 114,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "35",
+            "created_at": "2026-09-26 08:34:20"
+        },
+        {
+            "id": 117,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "36",
+            "created_at": "2026-09-26 08:35:14"
+        },
+        {
+            "id": 121,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "37",
+            "created_at": "2026-09-26 08:36:40"
+        },
+        {
+            "id": 126,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "38",
+            "created_at": "2026-09-26 08:38:15"
+        },
+        {
+            "id": 130,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "39",
+            "created_at": "2026-09-26 08:40:47"
+        },
+        {
+            "id": 135,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "40",
+            "created_at": "2026-09-26 08:42:08"
+        },
+        {
+            "id": 140,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "123",
+            "created_at": "2026-09-26 08:43:58"
+        },
+        {
+            "id": 142,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "124",
+            "created_at": "2026-09-26 08:51:51"
+        },
+        {
+            "id": 144,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "125",
+            "created_at": "2026-09-26 08:56:02"
+        },
+        {
+            "id": 146,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "126",
+            "created_at": "2026-09-26 09:02:33"
+        },
+        {
+            "id": 148,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "127",
+            "created_at": "2026-09-26 09:07:58"
+        },
+        {
+            "id": 150,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "128",
+            "created_at": "2026-09-26 09:18:56"
+        },
+        {
+            "id": 152,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "129",
+            "created_at": "2026-09-26 09:21:00"
+        },
+        {
+            "id": 153,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "48",
+            "created_at": "2026-09-26 09:22:11"
+        },
+        {
+            "id": 158,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "49",
+            "created_at": "2026-09-26 09:23:02"
+        },
+        {
+            "id": 163,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "137",
+            "created_at": "2026-09-26 09:30:44"
+        },
+        {
+            "id": 165,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "138",
+            "created_at": "2026-09-26 09:32:54"
+        },
+        {
+            "id": 167,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "139",
+            "created_at": "2026-09-26 09:50:58"
+        },
+        {
+            "id": 169,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "140",
+            "created_at": "2026-09-26 11:22:25"
+        },
+        {
+            "id": 170,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "54",
+            "created_at": "2026-09-26 11:24:15"
+        },
+        {
+            "id": 175,
+            "type": "assignment.created",
+            "subject_type": "assignment",
+            "subject_id": "55",
+            "created_at": "2026-09-26 11:25:08"
+        },
+        {
+            "id": 180,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "148",
+            "created_at": "2026-09-26 11:44:50"
+        },
+        {
+            "id": 182,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "150",
+            "created_at": "2026-09-26 11:49:41"
+        },
+        {
+            "id": 184,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "151",
+            "created_at": "2026-09-26 12:07:16"
+        },
+        {
+            "id": 186,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "153",
+            "created_at": "2026-09-26 12:22:55"
+        },
+        {
+            "id": 188,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "154",
+            "created_at": "2026-09-26 12:54:43"
+        },
+        {
+            "id": 190,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "155",
+            "created_at": "2026-09-26 13:02:23"
+        },
+        {
+            "id": 192,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "156",
+            "created_at": "2026-09-26 13:09:11"
+        },
+        {
+            "id": 194,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "157",
+            "created_at": "2026-09-26 13:15:59"
+        },
+        {
+            "id": 196,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "158",
+            "created_at": "2026-09-26 13:17:31"
+        },
+        {
+            "id": 198,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "159",
+            "created_at": "2026-09-26 13:18:53"
+        },
+        {
+            "id": 200,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "160",
+            "created_at": "2026-09-26 13:19:57"
+        },
+        {
+            "id": 202,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "161",
+            "created_at": "2026-09-26 13:33:42"
+        },
+        {
+            "id": 204,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "162",
+            "created_at": "2026-09-26 13:35:36"
+        },
+        {
+            "id": 206,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "163",
+            "created_at": "2026-09-26 13:37:26"
+        },
+        {
+            "id": 208,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "164",
+            "created_at": "2026-09-26 13:42:25"
+        },
+        {
+            "id": 210,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "165",
+            "created_at": "2026-09-26 13:48:09"
+        },
+        {
+            "id": 212,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "166",
+            "created_at": "2026-09-26 13:59:54"
+        },
+        {
+            "id": 213,
+            "type": "plan.role_assigned",
+            "subject_type": "assignment",
+            "subject_id": "73",
+            "created_at": "2026-09-28 08:50:19"
+        },
+        {
+            "id": 215,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "168",
+            "created_at": "2026-09-28 08:50:28"
+        },
+        {
+            "id": 218,
+            "type": "plan.role_assigned",
+            "subject_type": "assignment",
+            "subject_id": "74",
+            "created_at": "2026-09-28 15:44:02"
+        },
+        {
+            "id": 220,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "172",
+            "created_at": "2026-09-28 15:44:05"
+        },
+        {
+            "id": 223,
+            "type": "plan.role_assigned",
+            "subject_type": "assignment",
+            "subject_id": "75",
+            "created_at": "2026-09-28 16:07:26"
+        },
+        {
+            "id": 227,
+            "type": "review.submitted",
+            "subject_type": "review_request",
+            "subject_id": "1",
+            "created_at": "2026-09-29 14:20:25"
+        },
+        {
+            "id": 228,
+            "type": "plan.published",
+            "subject_type": "test_fixture",
+            "subject_id": "9999",
+            "created_at": "2026-09-29 14:59:11"
+        },
+        {
+            "id": 229,
+            "type": "plan.published",
+            "subject_type": "setlist",
+            "subject_id": "176",
+            "created_at": "2026-09-29 14:59:11"
+        },
+        {
+            "id": 235,
+            "type": "review.submitted",
+            "subject_type": "review_request",
+            "subject_id": "2",
+            "created_at": "2026-09-30 06:31:00"
+        }
+    ],
+    "notifications": [
+        {
+            "id": 9,
+            "event_id": 5,
+            "user_id": 1,
+            "created_at": "2026-09-26 05:26:46"
+        },
+        {
+            "id": 11,
+            "event_id": 7,
+            "user_id": 1,
+            "created_at": "2026-09-26 05:27:23"
+        },
+        {
+            "id": 13,
+            "event_id": 9,
+            "user_id": 1,
+            "created_at": "2026-09-26 05:27:37"
+        },
+        {
+            "id": 15,
+            "event_id": 11,
+            "user_id": 1,
+            "created_at": "2026-09-26 05:28:36"
+        },
+        {
+            "id": 17,
+            "event_id": 13,
+            "user_id": 1,
+            "created_at": "2026-09-26 05:28:43"
+        },
+        {
+            "id": 19,
+            "event_id": 15,
+            "user_id": 1,
+            "created_at": "2026-09-26 05:29:33"
+        },
+        {
+            "id": 21,
+            "event_id": 17,
+            "user_id": 1,
+            "created_at": "2026-09-26 05:29:42"
+        },
+        {
+            "id": 23,
+            "event_id": 19,
+            "user_id": 1,
+            "created_at": "2026-09-26 05:30:50"
+        },
+        {
+            "id": 25,
+            "event_id": 21,
+            "user_id": 1,
+            "created_at": "2026-09-26 05:30:58"
+        },
+        {
+            "id": 27,
+            "event_id": 23,
+            "user_id": 1,
+            "created_at": "2026-09-26 05:31:56"
+        },
+        {
+            "id": 29,
+            "event_id": 25,
+            "user_id": 1,
+            "created_at": "2026-09-26 05:31:59"
+        },
+        {
+            "id": 71,
+            "event_id": 55,
+            "user_id": 1,
+            "created_at": "2026-09-26 08:11:44"
+        },
+        {
+            "id": 73,
+            "event_id": 60,
+            "user_id": 1,
+            "created_at": "2026-09-26 08:13:13"
+        },
+        {
+            "id": 75,
+            "event_id": 74,
+            "user_id": 1,
+            "created_at": "2026-09-26 08:20:52"
+        },
+        {
+            "id": 77,
+            "event_id": 79,
+            "user_id": 1,
+            "created_at": "2026-09-26 08:22:26"
+        },
+        {
+            "id": 79,
+            "event_id": 86,
+            "user_id": 1,
+            "created_at": "2026-09-26 08:26:08"
+        },
+        {
+            "id": 81,
+            "event_id": 91,
+            "user_id": 1,
+            "created_at": "2026-09-26 08:27:37"
+        },
+        {
+            "id": 83,
+            "event_id": 98,
+            "user_id": 1,
+            "created_at": "2026-09-26 08:29:10"
+        },
+        {
+            "id": 85,
+            "event_id": 102,
+            "user_id": 1,
+            "created_at": "2026-09-26 08:29:21"
+        },
+        {
+            "id": 87,
+            "event_id": 105,
+            "user_id": 1,
+            "created_at": "2026-09-26 08:30:33"
+        },
+        {
+            "id": 89,
+            "event_id": 108,
+            "user_id": 1,
+            "created_at": "2026-09-26 08:31:36"
+        },
+        {
+            "id": 91,
+            "event_id": 111,
+            "user_id": 1,
+            "created_at": "2026-09-26 08:33:12"
+        },
+        {
+            "id": 93,
+            "event_id": 114,
+            "user_id": 1,
+            "created_at": "2026-09-26 08:34:20"
+        },
+        {
+            "id": 95,
+            "event_id": 117,
+            "user_id": 1,
+            "created_at": "2026-09-26 08:35:14"
+        },
+        {
+            "id": 97,
+            "event_id": 121,
+            "user_id": 1,
+            "created_at": "2026-09-26 08:36:40"
+        },
+        {
+            "id": 99,
+            "event_id": 126,
+            "user_id": 1,
+            "created_at": "2026-09-26 08:38:15"
+        },
+        {
+            "id": 101,
+            "event_id": 130,
+            "user_id": 1,
+            "created_at": "2026-09-26 08:40:47"
+        },
+        {
+            "id": 103,
+            "event_id": 135,
+            "user_id": 1,
+            "created_at": "2026-09-26 08:42:08"
+        },
+        {
+            "id": 133,
+            "event_id": 153,
+            "user_id": 1,
+            "created_at": "2026-09-26 09:22:11"
+        },
+        {
+            "id": 135,
+            "event_id": 158,
+            "user_id": 1,
+            "created_at": "2026-09-26 09:23:02"
+        },
+        {
+            "id": 153,
+            "event_id": 170,
+            "user_id": 1,
+            "created_at": "2026-09-26 11:24:15"
+        },
+        {
+            "id": 155,
+            "event_id": 175,
+            "user_id": 1,
+            "created_at": "2026-09-26 11:25:08"
+        },
+        {
+            "id": 225,
+            "event_id": 213,
+            "user_id": 1,
+            "created_at": "2026-09-28 08:50:19"
+        },
+        {
+            "id": 228,
+            "event_id": 218,
+            "user_id": 1,
+            "created_at": "2026-09-28 15:44:02"
+        },
+        {
+            "id": 231,
+            "event_id": 223,
+            "user_id": 1,
+            "created_at": "2026-09-28 16:07:26"
+        },
+        {
+            "id": 234,
+            "event_id": 227,
+            "user_id": 7,
+            "created_at": "2026-09-29 14:20:25"
+        },
+        {
+            "id": 239,
+            "event_id": 235,
+            "user_id": 7,
+            "created_at": "2026-09-30 06:31:00"
+        }
+    ],
+    "deliveries": [
+        {
+            "id": 1,
+            "notification_id": 234
+        },
+        {
+            "id": 2,
+            "notification_id": 239
+        }
+    ],
+    "dependent_rows": [
+        {
+            "table": "notifications",
+            "column": "event_id",
+            "parent": "domain_events",
+            "count": 37,
+            "on_delete": "CASCADE"
+        },
+        {
+            "table": "notification_deliveries",
+            "column": "notification_id",
+            "parent": "notifications",
+            "count": 2,
+            "on_delete": "CASCADE"
+        }
+    ],
+    "plan_sha256": "88c6042ef330d0c4c56c45456b7c1d4702d9bfd96cfb5a0779fabf44b5d4d5ce"
+}

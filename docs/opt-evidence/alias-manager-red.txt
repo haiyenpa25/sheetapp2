@@ -1,0 +1,161 @@
+[PASS:B] HTTP list/ actor=0 returns JSON 200
+[PASS:B] guest: private set listed only for owner
+[PASS:B] guest: disk scan does not publish unknown sets
+[PASS:B] HTTP load/HD actor=0 returns JSON 200
+[PASS:B] guest: HD chord access follows Q4
+[PASS:B] HTTP details/HD actor=0 returns JSON 200
+[PASS:B] guest: HD metadata access follows Q4
+[PASS:B] HTTP load/TLH actor=0 returns JSON 200
+[PASS:B] guest: TLH chord access follows Q4
+[PASS:B] HTTP details/TLH actor=0 returns JSON 200
+[PASS:B] guest: TLH metadata access follows Q4
+[PASS:B] HTTP load/default actor=0 returns JSON 200
+[PASS:B] guest: default chord access follows Q4
+[PASS:B] HTTP details/default actor=0 returns JSON 200
+[PASS:B] guest: default metadata access follows Q4
+[PASS:B] HTTP load/Public actor=0 returns JSON 200
+[PASS:B] guest: Public chord access follows Q4
+[PASS:B] HTTP details/Public actor=0 returns JSON 200
+[PASS:B] guest: Public metadata access follows Q4
+[PASS:B] HTTP load/Secret actor=0 returns JSON 200
+[PASS:B] guest: Secret chord access follows Q4
+[PASS:B] guest: Secret checksum does not disclose private state
+[PASS:B] HTTP details/Secret actor=0 returns JSON 200
+[PASS:B] guest: Secret metadata access follows Q4
+[PASS:B] HTTP load/banhat__Secret actor=0 returns JSON 200
+[PASS:B] guest: banhat__Secret chord access follows Q4
+[PASS:B] guest: banhat__Secret checksum does not disclose private state
+[PASS:B] HTTP details/banhat__Secret actor=0 returns JSON 200
+[PASS:B] guest: banhat__Secret metadata access follows Q4
+[PASS:B] HTTP load/DiskOnly actor=0 returns JSON 200
+[PASS:B] guest: DiskOnly chord access follows Q4
+[PASS:B] guest: DiskOnly checksum does not disclose private state
+[PASS:B] HTTP details/DiskOnly actor=0 returns JSON 200
+[PASS:B] guest: DiskOnly metadata access follows Q4
+[PASS:B] HTTP list/ actor=2 returns JSON 200
+[PASS:B] owner: private set listed only for owner
+[PASS:B] owner: disk scan does not publish unknown sets
+[PASS:B] HTTP load/HD actor=2 returns JSON 200
+[PASS:B] owner: HD chord access follows Q4
+[PASS:B] HTTP details/HD actor=2 returns JSON 200
+[PASS:B] owner: HD metadata access follows Q4
+[PASS:B] HTTP load/TLH actor=2 returns JSON 200
+[PASS:B] owner: TLH chord access follows Q4
+[PASS:B] HTTP details/TLH actor=2 returns JSON 200
+[PASS:B] owner: TLH metadata access follows Q4
+[PASS:B] HTTP load/default actor=2 returns JSON 200
+[PASS:B] owner: default chord access follows Q4
+[PASS:B] HTTP details/default actor=2 returns JSON 200
+[PASS:B] owner: default metadata access follows Q4
+[PASS:B] HTTP load/Public actor=2 returns JSON 200
+[PASS:B] owner: Public chord access follows Q4
+[PASS:B] HTTP details/Public actor=2 returns JSON 200
+[PASS:B] owner: Public metadata access follows Q4
+[PASS:B] HTTP load/Secret actor=2 returns JSON 200
+[PASS:B] owner: Secret chord access follows Q4
+[PASS:B] HTTP details/Secret actor=2 returns JSON 200
+[PASS:B] owner: Secret metadata access follows Q4
+[PASS:B] HTTP load/banhat__Secret actor=2 returns JSON 200
+[PASS:B] owner: banhat__Secret chord access follows Q4
+[PASS:B] HTTP details/banhat__Secret actor=2 returns JSON 200
+[PASS:B] owner: banhat__Secret metadata access follows Q4
+[PASS:B] HTTP load/DiskOnly actor=2 returns JSON 200
+[PASS:B] owner: DiskOnly chord access follows Q4
+[PASS:B] owner: DiskOnly checksum does not disclose private state
+[PASS:B] HTTP details/DiskOnly actor=2 returns JSON 200
+[PASS:B] owner: DiskOnly metadata access follows Q4
+[PASS:B] HTTP list/ actor=3 returns JSON 200
+[PASS:B] other: private set listed only for owner
+[PASS:B] other: disk scan does not publish unknown sets
+[PASS:B] HTTP load/HD actor=3 returns JSON 200
+[PASS:B] other: HD chord access follows Q4
+[PASS:B] HTTP details/HD actor=3 returns JSON 200
+[PASS:B] other: HD metadata access follows Q4
+[PASS:B] HTTP load/TLH actor=3 returns JSON 200
+[PASS:B] other: TLH chord access follows Q4
+[PASS:B] HTTP details/TLH actor=3 returns JSON 200
+[PASS:B] other: TLH metadata access follows Q4
+[PASS:B] HTTP load/default actor=3 returns JSON 200
+[PASS:B] other: default chord access follows Q4
+[PASS:B] HTTP details/default actor=3 returns JSON 200
+[PASS:B] other: default metadata access follows Q4
+[PASS:B] HTTP load/Public actor=3 returns JSON 200
+[PASS:B] other: Public chord access follows Q4
+[PASS:B] HTTP details/Public actor=3 returns JSON 200
+[PASS:B] other: Public metadata access follows Q4
+[PASS:B] HTTP load/Secret actor=3 returns JSON 200
+[PASS:B] other: Secret chord access follows Q4
+[PASS:B] other: Secret checksum does not disclose private state
+[PASS:B] HTTP details/Secret actor=3 returns JSON 200
+[PASS:B] other: Secret metadata access follows Q4
+[PASS:B] HTTP load/banhat__Secret actor=3 returns JSON 200
+[PASS:B] other: banhat__Secret chord access follows Q4
+[PASS:B] other: banhat__Secret checksum does not disclose private state
+[PASS:B] HTTP details/banhat__Secret actor=3 returns JSON 200
+[PASS:B] other: banhat__Secret metadata access follows Q4
+[PASS:B] HTTP load/DiskOnly actor=3 returns JSON 200
+[PASS:B] other: DiskOnly chord access follows Q4
+[PASS:B] other: DiskOnly checksum does not disclose private state
+[PASS:B] HTTP details/DiskOnly actor=3 returns JSON 200
+[PASS:B] other: DiskOnly metadata access follows Q4
+[PASS:B] HTTP list/ actor=1 returns JSON 200
+[PASS:B] admin: private set listed only for owner
+[PASS:B] admin: disk scan does not publish unknown sets
+[PASS:B] HTTP load/HD actor=1 returns JSON 200
+[PASS:B] admin: HD chord access follows Q4
+[PASS:B] HTTP details/HD actor=1 returns JSON 200
+[PASS:B] admin: HD metadata access follows Q4
+[PASS:B] HTTP load/TLH actor=1 returns JSON 200
+[PASS:B] admin: TLH chord access follows Q4
+[PASS:B] HTTP details/TLH actor=1 returns JSON 200
+[PASS:B] admin: TLH metadata access follows Q4
+[PASS:B] HTTP load/default actor=1 returns JSON 200
+[PASS:B] admin: default chord access follows Q4
+[PASS:B] HTTP details/default actor=1 returns JSON 200
+[PASS:B] admin: default metadata access follows Q4
+[PASS:B] HTTP load/Public actor=1 returns JSON 200
+[PASS:B] admin: Public chord access follows Q4
+[PASS:B] HTTP details/Public actor=1 returns JSON 200
+[PASS:B] admin: Public metadata access follows Q4
+[PASS:B] HTTP load/Secret actor=1 returns JSON 200
+[PASS:B] admin: Secret chord access follows Q4
+[PASS:B] admin: Secret checksum does not disclose private state
+[PASS:B] HTTP details/Secret actor=1 returns JSON 200
+[PASS:B] admin: Secret metadata access follows Q4
+[PASS:B] HTTP load/banhat__Secret actor=1 returns JSON 200
+[PASS:B] admin: banhat__Secret chord access follows Q4
+[PASS:B] admin: banhat__Secret checksum does not disclose private state
+[PASS:B] HTTP details/banhat__Secret actor=1 returns JSON 200
+[PASS:B] admin: banhat__Secret metadata access follows Q4
+[PASS:B] HTTP load/DiskOnly actor=1 returns JSON 200
+[PASS:B] admin: DiskOnly chord access follows Q4
+[PASS:B] admin: DiskOnly checksum does not disclose private state
+[PASS:B] HTTP details/DiskOnly actor=1 returns JSON 200
+[PASS:B] admin: DiskOnly metadata access follows Q4
+[PASS:B] HTTP admin cannot delete qualified HD alias
+[PASS:B] HTTP admin cannot delete qualified TLH alias
+[PASS:B] HTTP admin cannot delete qualified default alias
+[PASS:B] Other user cannot delete private set
+[PASS:B] Denied DB delete preserves disk file
+[PASS:B] Anonymous service caller cannot delete private set
+[PASS:B] Owner can delete own private set
+[PASS:B] Authorized delete removes disk export
+[PASS:B] owner: service rejects HD alias deletion
+[PASS:B] owner: protected HD row and disk export survive
+[FAIL:B] owner: Manager also preserves protected HD row
+[PASS:B] admin: service rejects HD alias deletion
+[PASS:B] admin: protected HD row and disk export survive
+[FAIL:B] admin: Manager also preserves protected HD row
+[PASS:B] owner: service rejects TLH alias deletion
+[PASS:B] owner: protected TLH row and disk export survive
+[FAIL:B] owner: Manager also preserves protected TLH row
+[PASS:B] admin: service rejects TLH alias deletion
+[PASS:B] admin: protected TLH row and disk export survive
+[FAIL:B] admin: Manager also preserves protected TLH row
+[PASS:B] owner: service rejects default alias deletion
+[PASS:B] owner: protected default row and disk export survive
+[FAIL:B] owner: Manager also preserves protected default row
+[PASS:B] admin: service rejects default alias deletion
+[PASS:B] admin: protected default row and disk export survive
+[FAIL:B] admin: Manager also preserves protected default row
+SUITE_COMPLETE total=160

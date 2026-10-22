@@ -1,0 +1,64 @@
+RED php tests/chord_save_context_regression.php
+[FAIL:B] Debounced save retains song A and its original chord snapshot
+[PASS:B] Late failure from B cannot roll back C to B chords
+[FAIL:B] Loading a song seeds checksum and confirmed chord snapshot
+[FAIL:B] Preloaded song resets confirmed snapshot
+SUITE_COMPLETE total=4
+EXIT=1
+
+GREEN php tests/chord_save_context_regression.php
+[PASS:B] Debounced save retains song A and its original chord snapshot
+[PASS:B] Late failure from B cannot roll back C to B chords
+[PASS:B] Loading a song seeds checksum and confirmed chord snapshot
+[PASS:B] Preloaded song resets confirmed snapshot
+SUITE_COMPLETE total=4
+EXIT=0
+
+RED preload checksum: php tests/chord_save_context_regression.php
+[PASS:B] Debounced save retains song A and its original chord snapshot
+[PASS:B] Late failure from B cannot roll back C to B chords
+[PASS:B] Loading a song seeds checksum and confirmed chord snapshot
+[FAIL:B] Preloaded song resets checksum and confirmed snapshot
+SUITE_COMPLETE total=4
+EXIT=1
+
+GREEN preload checksum: php tests/chord_save_context_regression.php
+[PASS:B] Debounced save retains song A and its original chord snapshot
+[PASS:B] Late failure from B cannot roll back C to B chords
+[PASS:B] Loading a song seeds checksum and confirmed chord snapshot
+[PASS:B] Preloaded song resets checksum and confirmed snapshot
+SUITE_COMPLETE total=4
+EXIT=0
+
+Additional FIX-22/32/33 verification
+[PASS:B] Debounced save retains song A and its original chord snapshot
+[PASS:B] Late failure from B cannot roll back C to B chords
+[PASS:B] Loading a song seeds checksum and confirmed chord snapshot
+[PASS:B] Preloaded song resets checksum and confirmed snapshot
+[PASS:B] Null profile is normalized to HD
+TypeError: resolveOld is not a function
+    at C:\xampp\htdocs\sheetapp2\tests\js\chord_save_context.cjs:45:3
+EXIT=1
+
+Additional verification corrected async fixture
+[PASS:B] Debounced save retains song A and its original chord snapshot
+[PASS:B] Late failure from B cannot roll back C to B chords
+[PASS:B] Loading a song seeds checksum and confirmed chord snapshot
+[PASS:B] Preloaded song resets checksum and confirmed snapshot
+[PASS:B] Null profile is normalized to HD
+[PASS:B] Late network load cannot overwrite a newer preloaded set
+[PASS:B] Failed delete preserves current set and chords
+SUITE_COMPLETE total=7
+EXIT=0
+
+Protected-set frontend guard verification
+[PASS:B] Debounced save retains song A and its original chord snapshot
+[PASS:B] Late failure from B cannot roll back C to B chords
+[PASS:B] Loading a song seeds checksum and confirmed chord snapshot
+[PASS:B] Preloaded song resets checksum and confirmed snapshot
+[PASS:B] Null profile is normalized to HD
+[PASS:B] Late network load cannot overwrite a newer preloaded set
+[PASS:B] Failed delete preserves current set and chords
+[PASS:B] Frontend rejects deleting every protected set before sending HTTP, even for admin
+SUITE_COMPLETE total=8
+EXIT=0

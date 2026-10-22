@@ -1,0 +1,18 @@
+RED php tests/classic_song_load_regression.php
+[SongLoader] Error: Không thể tải file XML (Mất mạng và chưa lưu ngoại tuyến)
+    at fetchXmlText (evalmachine.<anonymous>:54:15)
+    at async Promise.all (index 0)
+    at async Object.load (evalmachine.<anonymous>:56:31)
+    at async C:\xampp\htdocs\sheetapp2\tests\js\classic_song_load.cjs:17:15
+[FAIL:B] Classic late XML A cannot replace B or render A
+[FAIL:B] Classic persists XML through OfflineVault.saveXml keyed by xmlPath
+[FAIL:B] Classic offline load uses OfflineVault.getXml
+SUITE_COMPLETE total=3
+EXIT=1
+
+GREEN php tests/classic_song_load_regression.php
+[PASS:B] Classic late XML A cannot replace B or render A
+[PASS:B] Classic persists XML through OfflineVault.saveXml keyed by xmlPath
+[PASS:B] Classic offline load uses OfflineVault.getXml
+SUITE_COMPLETE total=3
+EXIT=0

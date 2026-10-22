@@ -1,0 +1,38 @@
+RED php tests/chord_code_uniqueness_regression.php
+[FAIL:B] Explicit duplicate chord code is rejected case-insensitively
+[FAIL:B] Unique registration code generator exists
+SUITE_COMPLETE total=2
+EXIT=1
+
+GREEN php tests/chord_code_uniqueness_regression.php
+[PASS:B] Explicit duplicate chord code is rejected case-insensitively
+[PASS:B] Same username prefix generates an available code
+[PASS:B] Registration never grants a reserved standard code
+[PASS:B] Existing owner may retain own code
+SUITE_COMPLETE total=4
+EXIT=0
+
+Regression: php tests/members_manager_consolidation_regression.php
+========================================================
+   SheetApp2 — Members & Manager Consolidation Tests    
+========================================================
+
+  ✅ PASS: [1. Safe Redirect & UI Linkage] Trang /members/ chuyển hướng 302 an toàn sang /manager/#tab-users, toolbar & chord canvas trỏ đúng đích
+  ✅ PASS: [2. RBAC Enforcement] Tài khoản không phải Admin (Viewer/Banhat) bị chặn hoàn toàn khi gọi manageUser
+  ✅ PASS: [3. Anti Self-Demotion & Self-Harm] Admin không thể tự hạ quyền của chính mình, không thể tự khóa hoặc xóa tài khoản của mình
+  ✅ PASS: [4. Last Admin Protection] Cho phép điều chỉnh vai trò khi có nhiều Quản Trị Viên; bảo vệ Quản Trị Viên cuối cùng của hệ thống
+  ✅ PASS: [5. Chord Code Management & Auto-generation] Mã hợp âm cá nhân được chuẩn hóa chữ hoa, tự sinh khi để trống, cập nhật toàn vẹn qua update_profile
+  ✅ PASS: [6. Account Status & Password Reset] Chuyển đổi trạng thái active/locked chuẩn xác và đặt lại mật khẩu mã hóa an toàn
+  ✅ PASS: [7. Audit Trail Logging] Mọi hành vi nhạy cảm (tạo user, đổi quyền, sửa profile, khóa/mở khóa, đổi pass) đều được ghi nhận vào nhật ký kiểm toán
+
+--------------------------------------------------------
+Tổng kết kiểm thử Members & Manager Consolidation:
+  - Tổng số test: 7
+  - Đạt: 7
+  - Thất bại: 0
+  - Trạng thái: ✅ TẤT CẢ 7 TIÊU CHÍ ĐẠT CHUẨN (PASS)
+--------------------------------------------------------
+
+
+SUITE_COMPLETE total=7
+EXIT=0

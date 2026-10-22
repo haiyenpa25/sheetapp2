@@ -1,0 +1,7 @@
+PASS HTTP catalog GET 200, bytes=648194
+PASS ETag matches exact JSON snapshot
+PASS HTTP conditional GET 304 with empty body: "a9d6a354a2fe39126f2555c9fddf301f5d7770a6e2974ae91c65d3284d82aa08"
+PASS HTTP conditional GET 304 with empty body: W/"a9d6a354a2fe39126f2555c9fddf301f5d7770a6e2974ae91c65d3284d82aa08"
+PASS HTTP conditional GET 304 with empty body: *
+PASS HTTP HEAD 200 with same ETag and empty body
+CATALOG_HTTP_COMPLETE total=6

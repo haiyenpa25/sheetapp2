@@ -1,0 +1,21 @@
+RED php tests/async_context_guards_regression.php
+[PASS:B] assets/js/late notes do not replace the current song
+[PASS:B] old/assets/js/late notes do not replace the current song
+[PASS:B] Missing HD never relabels an arbitrary offline set as HD
+[PASS:B] Exact offline profile remains available
+[PASS:B] assets/js/late set switch cannot replace newer chords
+[PASS:B] old/assets/js/late set switch cannot replace newer chords
+[FAIL:B] Late setlist play cannot restore previous item BPM
+SUITE_COMPLETE total=7
+EXIT=1
+
+GREEN php tests/async_context_guards_regression.php
+[PASS:B] assets/js/late notes do not replace the current song
+[PASS:B] old/assets/js/late notes do not replace the current song
+[PASS:B] Missing HD never relabels an arbitrary offline set as HD
+[PASS:B] Exact offline profile remains available
+[PASS:B] assets/js/late set switch cannot replace newer chords
+[PASS:B] old/assets/js/late set switch cannot replace newer chords
+[PASS:B] Late setlist play cannot restore previous item BPM
+SUITE_COMPLETE total=7
+EXIT=0
