@@ -10,6 +10,37 @@
 
 ---
 
+## 0. Bàn giao cho người thực thi (Gemini) — đọc trước
+
+**Nhánh làm việc:** `fix/opt-review-20261021` (đã đẩy lên GitHub). Chưa gộp về `main`. Lấy về: `git fetch origin && git checkout fix/opt-review-20261021`.
+
+**Trạng thái lúc bàn giao (2026-10-22):**
+- Đã commit trên nhánh: các bản vá FIX của Phương án 2, gộp roadmap, OP-01 (runner), OP-03 (SSE 250 ms), TV2-7 (`package_version`).
+- **BUG-01…41 chưa sửa dòng nào.** Các agent sửa đã bị dừng trước khi commit. Bỏ qua các worktree trong `.claude/worktrees/agent-*` (sửa dở, chưa test). Làm lại từ đầu theo Phụ lục A.
+- Toàn bộ test suite **chưa chạy lại** sau các commit 2026-10-22; từng suite liên quan đã PASS riêng. Chạy cổng đầy đủ trước khi bắt đầu, để có mốc.
+
+**Thứ tự làm:**
+1. Chạy cổng: `php tests\run_all_tests.php --strict --js` (cần Apache XAMPP đang chạy, nếu không suite HTTP bị SKIP). Lưu output làm mốc.
+2. BUG mức **C** trước: BUG-01, 12, 13, 14, 15, 25, 26. Sau đó mức **T**, rồi **L**.
+3. Mỗi BUG: viết test tái hiện → chạy, lưu `docs/fix-evidence/r8/BUG-XX-FAIL.txt` → sửa → lưu `BUG-XX-PASS.txt`. Một commit cho mỗi BUG hoặc mỗi nhóm nhỏ cùng file.
+4. Sau khi xong toàn bộ BUG: chạy lại cổng đầy đủ, `php tools/generate_sw_manifest.php` (sinh lại `sw.js` nếu JS/CSS đổi), cập nhật cột trạng thái ở mục 3 (thêm ✅ + hash commit).
+5. Rồi mới sang Giai đoạn 2 (OP-), Giai đoạn 3 (TV).
+
+**Mẫu test có sẵn để chép:**
+- PHP service trên DB memory: `tests/offline_package_version_regression.php` (fixture `tests/fixtures/test_db_fixture.php`; in `PASS:B:` cho check hành vi và dòng cuối `SUITE_COMPLETE total=N passed=N failed=0`).
+- JS chạy mã thật trong Node VM: `tests/js/async_context_guards.cjs` + `tests/async_context_guards_regression.php`; XSS: `tests/js/reported_xss.cjs` + `tests/reported_xss_regression.php`; Classic: `tests/js/classic_song_load.cjs`.
+- Chạy một suite: `C:\xampp\php\php.exe tests\<tên>_regression.php`. Runner tự nhận mọi `tests/**/*_regression.php`.
+
+**Bẫy đã biết:**
+- `exit()` trong PHP bỏ qua `finally`: dọn file tạm bằng `register_shutdown_function`.
+- File trong repo dùng CRLF; công cụ thay chuỗi theo `\n` sẽ trượt.
+- Một test chặn file JS/PHP > 600 dòng; nhiều file đang ở 570–598 dòng.
+- Suite trong `tests/http/` gọi `http://localhost/sheetapp2` (bản checkout chính), không phải worktree.
+- Thoát HTML dùng `SafeHtml.escape(...)`; chuỗi JS trong thuộc tính inline dùng `SafeHtml.inlineJsString(...)` (`assets/js/core/SafeHtml.js`). Kiểm `SafeHtml` được nạp trước module trên trang đó.
+- Không chạy `sync.sh`/`sync.bat`. Không ghi vào `storage/` hay `storage/data/app.sqlite` trong test.
+
+---
+
 ## 1. Luật thực thi (bắt buộc)
 
 Lấy từ `docs/history/ROADMAP3.md` Phần 0 (2026-09-26), giữ nguyên.
@@ -122,7 +153,7 @@ Quyết định quyền của chủ dự án (2026-10-22): BUG-01 cần Ban Hát
 
 | ID | Việc | Nguồn | Nghiệm thu |
 |---|---|---|---|
-| OP-01 | Runner: suite không khai báo loại thì tính là static; đếm hành vi từ nhãn `PASS:B`/`PASS:S` thật, không tin số suite tự khai | OPT-19, P2-07 | Test của chính runner: suite không khai báo bị đếm static; tổng Pass + Skip + Fail = số suite |
+| OP-01 ✅ | (`dae93ca`) Runner: suite không khai báo loại thì tính là static; đếm hành vi từ nhãn `PASS:B`/`PASS:S` thật, không tin số suite tự khai | OPT-19, P2-07 | Test của chính runner: suite không khai báo bị đếm static; tổng Pass + Skip + Fail = số suite |
 | OP-02 | ~~Gom truy vấn hợp âm gói offline~~ **Bỏ** (2026-10-22): `loadSet` chỉ quét đĩa khi thiếu dòng HD; lợi rất nhỏ, dễ lệch lọc quyền | OPT-20, P2-08 | — |
 | OP-03 ✅ | SSE live sync poll 100 ms → 250 ms (`f8842c2`) | OPT-20 | 4 suite HTTP live sync PASS |
 | OP-04 | Index `songs(httlvnId)` dưới dạng migration (chạy trên DB thật cần chủ dự án duyệt, luật 8) | OPT-20 | Test migration trên DB memory; `EXPLAIN QUERY PLAN` dùng index |
@@ -231,3 +262,60 @@ Tất cả nằm trong [docs/history/](docs/history/).
 **Tài liệu vận hành còn dùng:** `docs/DATABASE_MIGRATION_RUNBOOK.md`, `docs/STAGING_AND_BACKUP_RUNBOOK.md`, `docs/LIBRARY_DATA_RELEASE.md`, `docs/INSTRUMENT_ANNOTATIONS.md`, `docs/ADR_005_TENANT_ISOLATION.md` (đã gỡ khỏi mã, chỉ tham khảo).
 
 **Quy ước:** khi roadmap này xong hoặc bị thay, `git mv` nó vào `docs/history/ROADMAP_<ngày>.md` và cập nhật bảng trên. Không dùng `docs/archive/` (bị `.gitignore`).
+
+---
+
+## Phụ lục A — Cách sửa đề xuất cho từng BUG
+
+Rút từ ba báo cáo rà soát 2026-10-22. Người thực thi phải đọc lại mã trước khi sửa; dòng số có thể lệch vài dòng. Nếu thấy lỗi không tái hiện được thì ghi "không tái hiện" kèm bằng chứng, không sửa mò.
+
+### Backend
+
+- **BUG-01** — `ManagerService::forkSong` dùng `Auth::requireBanhat()` (hoặc helper tương đương trong `api/core/Auth.php`, khớp `ChordSetController`). Ở `ChordSetService::forkSet`, nhánh fork của `ChordSetController` và đổi tên trong `ManagerService::saveUserChordSet`: từ chối nếu đã có dòng `(song_id, set_name)` (so `COLLATE NOCASE`) của **chủ khác**. Test: viewer fork → 403; banhat fork trùng tên bộ của người khác → lỗi, dữ liệu nạn nhân không đổi; chủ vẫn lưu/xoá được bộ của mình.
+- **BUG-02** — `ReviewService` submit: `review_type = 'update_hd'` chỉ hợp lệ khi `target_type === 'chord_set'`. Approve: kiểm lại `target_type` và snapshot có dạng hợp âm trước khi gọi `writeHd`; câu `UPDATE … WHERE id = $targetId` ở `ReviewActionHelper` chỉ chạy khi target là bộ hợp âm.
+- **BUG-03** — `SongService` delete: `$up = realpath(__DIR__ . '/../../storage/uploads'); if ($up !== false && str_starts_with($xmlFile, $up . DIRECTORY_SEPARATOR)) @unlink(...)`. Test: xoá bài có XML trả thành công, file thư viện gốc không bị xoá.
+- **BUG-04** — `SetlistController`: chọn `SetlistService` (đầy đủ) khi `Auth::isBanhat()` (banhat trở lên), còn khách **và viewer** dùng `SetlistPublicReadService`. `offline_package` cần banhat, hoặc chương trình `published` và trả bản không có phân công. Áp dụng cho `getAll`, `getById`, `song_usage`.
+- **BUG-05** — `ArrangementService` `save_arrangement`: khi có `id`, `SELECT id FROM arrangements WHERE id = ? AND song_id = ?`; không có thì báo lỗi, không DELETE/INSERT bước. Kiểm mọi `section_id` thuộc `song_id`.
+- **BUG-06** — `PracticeController` `leader_view`: `AuthPolicy::authorize('view_team_progress')` (leader/admin). Trong `PracticeService`, người không đồng ý chia sẻ: bỏ `user_id`, `role` và mọi chỉ số (chỉ giữ số đếm ẩn danh nếu cần).
+- **BUG-07** — `PracticeAssignmentCreationHelper` `create_from_plan`: khi bài tập đã tồn tại vẫn `INSERT OR IGNORE` targets; chỉ gửi thông báo cho target mới chèn (`rowCount() > 0`).
+- **BUG-08** — `ReviewService` diff MusicXML: đổi `file_exists($path)` sang `SongService::resolveManagedXmlPath($path)`.
+- **BUG-09** — `ManagerService` sửa hợp âm: cập nhật `checksum` cùng cách `ChordSetService` tính (đọc hàm `getChecksum`/`saveSet` để dùng lại).
+- **BUG-10** — `SetlistService` respond_assignment: kiểm `rowCount()`; bằng 0 thì trả lỗi, không ghi audit "đã cập nhật".
+- **BUG-11** — `PracticeAssignmentService` mark_done: thêm điều kiện `status NOT IN ('completed','excused')` và bài tập `status = 'active'`; chỉ phát sự kiện khi thực sự chuyển trạng thái.
+- **Không sửa:** viewer tạo/phân công chương trình — chủ dự án giữ như hiện tại.
+
+### Frontend Modern
+
+- **BUG-12** — `chord-canvas.js` `applyPreloaded`: gọi `ChordCanvasEdit.closePopup(false)` và `resetUndo()` giống luồng `loadSong`.
+- **BUG-13** — `lyric-extractor.js`: `SafeHtml.escape(title)`, `SafeHtml.escape(key)`.
+- **BUG-14** — `cue-engine.js` `showBanner`: escape `text` từ host; hai cue nội bộ đang tự `_escapeHtml` thì cho đi đường riêng. `arrangement-engine.js`: escape `sec.name`.
+- **BUG-15** — `song-preloader.js`/`song-loader.js`: không dùng cache khi `song.versionId`; đơn giản nhất là chỉ cache XML, luôn tải hợp âm mới. Nếu vẫn cache hợp âm thì xoá entry khi lưu/xoá/clone bộ, khi đăng nhập/đăng xuất, khi `saveModifiedXML`.
+- **BUG-16** — `setlist-detail.js`: nút "Lưu Tập" chỉ hiện/chạy khi `String(item.song_id) === App.getCurrentSongId()`.
+- **BUG-17** — `song-info-bar.js`: escape `timeBeats`, `timeBeatType`.
+- **BUG-18** — `guitar-lens.js`: escape tên hợp âm trong `renderChordSvg` và thuộc tính `title`.
+- **BUG-19** — `song-loader.js`: sau khi tải XML đọc lại `Store.get('currentTranspose')` thay vì giá trị chụp lúc bắt đầu; `app.js` `commitTranspose` không render khi đang có lượt tải chưa xong (dùng load token sẵn có).
+- **BUG-20** — `chord-canvas-ui.js`: hàm dựng popup trả về `dispose()` gỡ listener `pointerdown` (capture) và đặt `_saved = true`; gọi trong `_destroyPopup`.
+- **BUG-21** — `url-state.js`: đổi bài dùng `replaceState` (hoặc thêm `popstate` nạp bài theo URL). `performance/performance-engine.js`: gọi `URLState.resetForNewSong` trước khi follower nạp bài.
+- **BUG-22** — `song-loader.js` chọn phiên bản: truyền `Store.get('currentTranspose')` và `ChordCanvas.getCurrentSet()`; sau `await` kiểm songId còn đúng mới vẽ danh sách phiên bản.
+- **BUG-23** — `song-preloader.js`: lấy `xmlPath` thật từ `LibraryUI.getSongObj` hoặc `ApiService.songs.get`; thay `LibraryUI.getSongById` (không tồn tại) ở `app.js`, `performance-engine.js`.
+- **BUG-24** — `chord-canvas-edit.js` hàng đợi offline: cờ `_flushing`; gặp 409 thì hiện `showConflictModal` hoặc chuyển mục sang danh sách xử lý tay, không `break` lặp mãi.
+
+### Classic và app phụ
+
+- **BUG-25** — `old/assets/js/chord-canvas.js`: thêm `resetUndo()` (xoá `_undoStack`, `_redoStack`), gọi trong `loadSong`, `switchSet`, `clearSong` (theo `assets/js/chord-canvas-edit.js`).
+- **BUG-26** — `old/assets/js/chord-canvas-ui.js`: escape `currentSet` (~142), `existing` trong `value="…"` (~147), `name` trong hộp xác nhận xoá (~428).
+- **BUG-27** — `old/assets/js/instruments.js` ~50: `SafeHtml.escape(name)`.
+- **BUG-28** — `editor/editor.js`: tải phiên bản qua `api/index.php?route=songs&action=version_xml&version_id=…` (xem cách Modern làm sau FIX-29 trong `ApiService.js`).
+- **BUG-29** — `live-band/js/stage-room.js`, `live-band/js/projector-app.js`: nhớ `cueId` (và mốc `bandState`) đã hiện; chỉ hiện khi mới và `expiresAt` chưa qua.
+- **BUG-30** — chỉ khởi động lại đèn/nhịp khi `bpm !== _currentBpm`.
+- **BUG-31** — `live-band.js`: `song?.defaultKey || song?.key || 'C'`.
+- **BUG-32** — `live-band.js`: host chọn bài mới thì nạp với transpose 0 (Core Rule 2).
+- **BUG-33** — `live-band.js`: nạp HD qua `ApiService.chordSets.load` và tiêm vào XML như Modern; HD rỗng thì giữ TLH và nhãn ghi đúng cái đang hiện (Core Rule 1).
+- **BUG-34** — `live-band.js`: `_bindScrollObserver` chỉ gắn một lần (cờ module, gọi trong `init`).
+- **BUG-35** — `live-band/js/stage-hud.js`: trong handler `release` đặt sentinel = null; gắn handler `release` cho sentinel xin lại.
+- **BUG-36** — `assets/js/learn/learn-app.js`: đổi bài chọn HD trừ khi URL có `set`. `learn/ui/learn-score.js`: bỏ heuristic `isStubProfile`.
+- **BUG-37** — thêm load token (`const t = ++_loadToken;` và kiểm sau mỗi `await`) ở `live-band.js` `_loadSong`, `projector-app.js`, `learn-app.js` `_selectSong`, `manager/js/manager-repertoire.js` `selectSong`, `editor/editor.js` `loadSong`.
+- **BUG-38** — `editor/editor.js`: `confirm()` khi `_isDirty` lúc đổi bài/phiên bản; thêm `beforeunload` khi còn thay đổi chưa lưu.
+- **BUG-39** — nút Ghim trong `manager-community.js`, `manager-repertoire.js`, `manager-versions.js`: chỉ hiện cho `leader` và `admin`.
+- **BUG-40** — `old/assets/js/chord-canvas.js` `deleteSet`: xoá thất bại thì giữ bộ, báo lỗi, không chuyển sang HD. `old/assets/js/importer.js` ~234: dùng `SafeHtml.inlineJsString` cho tên file trong `onclick`.
+- **BUG-41** — `assets/js/learn/ui/learn-controls.js`: dựng link "Quay về" bằng `ApiService.resolveUrl` thay vì `/?song=`.
