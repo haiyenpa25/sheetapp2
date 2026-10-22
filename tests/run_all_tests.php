@@ -39,6 +39,8 @@ $isStrict = in_array('--strict', $argv, true) || in_array('--all', $argv, true);
 $runJsLint = in_array('--js', $argv, true) || in_array('--all', $argv, true);
 $runE2e = in_array('--e2e', $argv, true) || in_array('--all', $argv, true);
 
+require_once __DIR__ . '/runner_classify.php';
+
 echo "========================================================\n";
 echo "   SheetApp2 — Unified Test Runner & Quality Gate CI   \n";
 echo "   Chế độ: " . ($isStrict ? "[STRICT] " : "") . ($runJsLint ? "[JS-LINT] " : "") . ($runE2e ? "[E2E] " : "") . "\n";
@@ -50,6 +52,7 @@ $passedSuites = 0;
 $totalChecksPassed = 0;
 $totalBehavioralPassed = 0;
 $totalStaticPassed = 0;
+$totalUnlabeledPassed = 0;
 $totalChecksFailed = 0;
 
 // Giám sát thư mục storage/data/live_sync/ để phát hiện rò rỉ file
@@ -300,6 +303,7 @@ foreach ($regressionSuites as $suitePath) {
     $passCount = 0;
     $behavioralCount = 0;
     $staticCount = 0;
+    $unlabeledCount = 0;
     $failCount = 0;
     $hasWarningOrDeprecated = false;
     $hasSuiteComplete = false;
@@ -318,19 +322,12 @@ foreach ($regressionSuites as $suitePath) {
             $skipReason = trim($skm[1] ?? 'Dịch vụ phụ thuộc không khả dụng');
         }
 
-        if (preg_match('/(?:\[PASS:B\]|PASS:B)/i', $line)) {
+        $passKind = runnerClassifyPassLine($line, $isStaticSuite);
+        if ($passKind !== null) {
             $passCount++;
-            $behavioralCount++;
-        } elseif (preg_match('/(?:\[PASS:S\]|PASS:S)/i', $line)) {
-            $passCount++;
-            $staticCount++;
-        } elseif (preg_match('/(?:\[PASS\]|PASS:|✅ PASS:)/i', $line)) {
-            $passCount++;
-            if ($isStaticSuite) {
-                $staticCount++;
-            } else {
-                $behavioralCount++;
-            }
+            if ($passKind === 'B') $behavioralCount++;
+            elseif ($passKind === 'S') $staticCount++;
+            else $unlabeledCount++;
         }
 
         if (preg_match('/(?:\[FAIL\]|\[FAIL:B\]|\[FAIL:S\]|FAIL:|❌ FAIL:)/i', $line)) {
@@ -350,13 +347,14 @@ foreach ($regressionSuites as $suitePath) {
         if ($isStaticSuite) {
             $staticCount = $suiteCompleteTotal;
         } else {
-            $behavioralCount = $suiteCompleteTotal;
+            $unlabeledCount = $suiteCompleteTotal;
         }
     }
 
     $totalChecksPassed += $passCount;
     $totalBehavioralPassed += $behavioralCount;
     $totalStaticPassed += $staticCount;
+    $totalUnlabeledPassed += $unlabeledCount;
     $totalChecksFailed += $failCount;
 
     if ($isSkipped) {
@@ -519,7 +517,7 @@ if ($runE2e) {
 // ==========================================
 $duration = round(microtime(true) - $startTime, 2);
 $isAllPass = empty($failedSuites);
-$behavioralRatioPct = ($totalChecksPassed > 0) ? round(($totalBehavioralPassed / $totalChecksPassed) * 100, 1) : 0.0;
+$behavioralRatioPct = runnerBehavioralRatio(['B' => $totalBehavioralPassed, 'S' => $totalStaticPassed, 'U' => $totalUnlabeledPassed]);
 
 // Lưu tóm tắt kết quả kiểm thử vào storage/logs/test_summary.json (K5 SSOT)
 $summaryData = [
@@ -532,6 +530,7 @@ $summaryData = [
     'total_checks_passed' => $totalChecksPassed,
     'behavioral_checks_passed' => $totalBehavioralPassed,
     'static_checks_passed' => $totalStaticPassed,
+    'unlabeled_checks_passed' => $totalUnlabeledPassed,
     'behavioral_ratio_pct' => $behavioralRatioPct,
     'total_checks_failed' => $totalChecksFailed,
     'status' => $isAllPass ? 'ALL PASS' : 'FAIL'
@@ -544,7 +543,7 @@ echo "  - Thời gian thực thi: {$duration}s\n";
 echo "  - File PHP đã lint: " . count($phpFiles) . "\n";
 echo "  - Regression Suites đã chạy: {$totalSuitesCount} (Pass: {$passedSuites}, Skip: " . count($skippedSuites) . ", Fail: " . count($failedSuites) . ")\n";
 echo "  - Tổng số test checks ghi nhận: {$totalChecksPassed} passed, {$totalChecksFailed} failed\n";
-echo "  - Phân loại kiểm thử: {$totalBehavioralPassed} Behavioral (" . $behavioralRatioPct . "%), {$totalStaticPassed} Static\n";
+echo "  - Phân loại kiểm thử: {$totalBehavioralPassed} Behavioral (" . $behavioralRatioPct . "%), {$totalStaticPassed} Static, {$totalUnlabeledPassed} chưa gắn nhãn (không tính là hành vi)\n";
 
 if ($isAllPass) {
     echo "  - Trạng thái tổng thể: ✅ TẤT CẢ KIỂM TRA ĐỀU ĐẠT (PASS)\n";
