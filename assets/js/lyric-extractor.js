@@ -236,15 +236,17 @@ const LyricExtractor = (() => {
         ? `<span class="lv-trans-badge">${actualTranspose > 0 ? '+' : ''}${actualTranspose}</span>` : '';
       const safeCat = songCategory ? (window.SafeHtml ? window.SafeHtml.escape(songCategory) : songCategory) : '';
       const catSpan = safeCat ? `<span class="lv-cat-badge" style="margin-left:8px;padding:2px 8px;border-radius:999px;background:rgba(109,40,217,0.1);color:var(--accent,#6d28d9);font-size:0.76rem;font-weight:600;">📚 ${safeCat}</span>` : '';
+      const safeTitle = window.SafeHtml ? window.SafeHtml.escape(title) : title;
+      const safeKey = key ? (window.SafeHtml ? window.SafeHtml.escape(key) : key) : '';
       const modeLabel   = isInline ? '↕ Dạng Hợp Âm' : '≡ Dạng Inline';
       const modeTitle   = isInline ? 'Chuyển sang kiểu hợp âm trên lời' : 'Chuyển sang kiểu hợp âm trong dòng';
       html += `
         <header class="lv-header">
           <div class="lv-header-top">
-            <h2 class="lv-title">${title}</h2>
+            <h2 class="lv-title">${safeTitle}</h2>
             <button class="lv-mode-btn" id="lv-mode-toggle" title="${modeTitle}">${modeLabel}</button>
           </div>
-          ${(key || safeCat) ? `<p class="lv-key">${key ? `🎼 Tông <strong>${key}</strong>${trBadge}${capoBadge}` : ''}${catSpan}</p>` : ''}
+          ${(safeKey || safeCat) ? `<p class="lv-key">${safeKey ? `🎼 Tông <strong>${safeKey}</strong>${trBadge}${capoBadge}` : ''}${catSpan}</p>` : ''}
         </header>`;
     }
 
