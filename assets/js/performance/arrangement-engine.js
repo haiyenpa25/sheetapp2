@@ -253,7 +253,7 @@ const ArrangementEngine = (() => {
 
     // 3. Kích hoạt thông báo Cue Banner
     if (window.CueEngine) {
-      window.CueEngine.showBanner(`Đã chuyển đến: ${sec.name} (Ô nhịp ${sec.start_measure})`, 'jump', 2500);
+      window.CueEngine.showBanner({ prefix: 'Đã chuyển đến: ', bold: sec.name, badge: `Ô nhịp ${sec.start_measure}` }, 'jump', 2500);
     } else if (window.AppUI?.showToast) {
       window.AppUI.showToast(`Chuyển đoạn: ${sec.name}`, 'info');
     } else if (window.App?.showToast) {

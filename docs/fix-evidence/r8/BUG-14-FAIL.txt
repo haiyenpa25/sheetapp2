@@ -1,0 +1,6 @@
+[CueEngine] Initialized
+[ArrangementEngine] Initialized
+[FAIL:B] CueEngine.showBanner does not inject raw HTML tags into #cue-banner-text
+[FAIL:B] ArrangementEngine.jumpToSection escapes section name in CueBanner
+[PASS:B] CueEngine.checkMeasure preserves bold wrapper while escaping section name
+SUITE_COMPLETE total=3 passed=1 failed=2

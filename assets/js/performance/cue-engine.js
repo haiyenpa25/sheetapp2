@@ -84,12 +84,12 @@ const CueEngine = (() => {
 
     if (remainingBars === 2) {
       // 2 ô nhịp trước khi vào đoạn mới
-      const msg = `⚡ 2 ô nhịp nữa → <b>${_escapeHtml(upcomingSec.name)}</b>`;
+      const msg = { prefix: '⚡ 2 ô nhịp nữa → ', bold: upcomingSec.name };
       showBanner(msg, 'pre-cue', 2400, '⚡');
     } else if (remainingBars === 1) {
       // 1 ô nhịp trước khi vào đoạn mới (Cực kỳ quan trọng)
       const roleHint = _getRoleHint(role, upcomingSec.type);
-      const msg = `🔥 1 ô nhịp nữa → <b>${_escapeHtml(upcomingSec.name)}</b> ${roleHint ? `<span class="cue-role-hint">(${roleHint})</span>` : ''}`;
+      const msg = { prefix: '🔥 1 ô nhịp nữa → ', bold: upcomingSec.name, badge: roleHint };
       showBanner(msg, 'urgent-cue', 2600, '🔥');
     }
   }
@@ -111,7 +111,7 @@ const CueEngine = (() => {
     const textEl = document.getElementById('cue-banner-text');
 
     if (iconEl) iconEl.textContent = icon;
-    if (textEl) textEl.innerHTML = htmlMessage;
+    if (textEl) { if (htmlMessage && typeof htmlMessage === 'object') { const h = htmlMessage.badge ? ` <span class="cue-role-hint">(${_escapeHtml(htmlMessage.badge)})</span>` : ''; textEl.innerHTML = `${_escapeHtml(htmlMessage.prefix || '')}<b>${_escapeHtml(htmlMessage.bold || '')}</b>${h}`; } else { textEl.textContent = String(htmlMessage ?? ''); } }
 
     _lastCue = {
       text: htmlMessage,
