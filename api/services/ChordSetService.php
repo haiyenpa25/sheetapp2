@@ -299,6 +299,12 @@ class ChordSetService {
 
         $pdo = DB::get();
 
+        $ownerStmt = $pdo->prepare("SELECT user_id FROM user_chord_sets WHERE song_id = ? AND set_name = ? COLLATE NOCASE LIMIT 1");
+        $ownerStmt->execute([$songId, $targetName]);
+        $existingOwner = $ownerStmt->fetchColumn();
+        if ($existingOwner !== false && (int)$existingOwner !== $userId) {
+            return ['success' => false, 'conflict' => true, 'message' => 'Tên bộ hợp âm đã thuộc về thành viên khác'];
+        }
         // 1. Nạp hợp âm nguồn
         $sourceChords = self::loadSet($songId, $sourceName);
         $chordCount = count($sourceChords);

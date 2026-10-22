@@ -109,7 +109,7 @@ class ManagerController {
                         if ($res['success']) {
                             Response::ok($res['data'] ?? [], $res['message']);
                         } else {
-                            Response::error($res['message']);
+                            Response::error($res['message'], !empty($res['conflict']) ? 409 : 400);
                         }
                         return;
 
@@ -123,7 +123,7 @@ class ManagerController {
                         if ($res['success']) {
                             Response::ok($res['data'] ?? [], $res['message']);
                         } else {
-                            Response::error($res['message']);
+                            Response::error($res['message'], !empty($res['conflict']) ? 409 : 400);
                         }
                         return;
 

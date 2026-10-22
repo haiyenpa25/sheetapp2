@@ -191,7 +191,7 @@ class ManagerService {
      * BẢO VỆ BẢN GỐC MASTER TUYỆT ĐỐI KHÔNG BỊ GHI ĐÈ
      */
     public static function forkSong(array $params): array {
-        Auth::requireLogin();
+        Auth::requireBanhat();
         $pdo = DB::get();
 
         $userId   = Auth::userId();
@@ -225,6 +225,12 @@ class ManagerService {
             }
             if (ChordSetService::isReservedName($setName)) {
                 return ['success' => false, 'message' => 'Tên bộ hợp âm được bảo vệ'];
+            }
+            $ownerStmt = $pdo->prepare("SELECT user_id FROM user_chord_sets WHERE song_id = ? AND set_name = ? COLLATE NOCASE LIMIT 1");
+            $ownerStmt->execute([$songId, $setName]);
+            $existingOwner = $ownerStmt->fetchColumn();
+            if ($existingOwner !== false && (int)$existingOwner !== (int)$userId) {
+                return ['success' => false, 'conflict' => true, 'message' => 'Tên bộ hợp âm đã thuộc về thành viên khác'];
             }
 
             $instrument = trim($params['instrument_type'] ?? $userInfo['instrument'] ?? 'guitar');
@@ -322,6 +328,14 @@ class ManagerService {
         $setName     = !empty($data['set_name']) ? trim($data['set_name']) : $current['set_name'];
         if (ChordSetService::isReservedName($setName) || ChordSetService::isReservedName($current['set_name'])) {
             return ['success' => false, 'message' => 'Không thể sửa bộ hợp âm được bảo vệ qua Manager'];
+        }
+        if (strcasecmp($setName, (string)$current['set_name']) !== 0) {
+            $ownerStmt = $pdo->prepare("SELECT user_id FROM user_chord_sets WHERE song_id = ? AND set_name = ? COLLATE NOCASE AND id != ? LIMIT 1");
+            $ownerStmt->execute([$current['song_id'], $setName, $setId]);
+            $existingOwner = $ownerStmt->fetchColumn();
+            if ($existingOwner !== false && (int)$existingOwner !== (int)$current['user_id']) {
+                return ['success' => false, 'conflict' => true, 'message' => 'Tên bộ hợp âm đã thuộc về thành viên khác'];
+            }
         }
         $instrument  = !empty($data['instrument_type']) ? trim($data['instrument_type']) : $current['instrument_type'];
         $capoFret    = isset($data['capo_fret']) ? (int)$data['capo_fret'] : $current['capo_fret'];

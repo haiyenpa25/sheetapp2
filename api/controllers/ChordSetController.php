@@ -215,7 +215,7 @@ class ChordSetController {
                     if ($res['success']) {
                         Response::ok($res);
                     } else {
-                        Response::error($res['message'] ?? 'Lỗi khi fork bộ hợp âm');
+                        Response::error($res['message'] ?? 'Lỗi khi fork bộ hợp âm', !empty($res['conflict']) ? 409 : 400);
                     }
                     return;
                 }
