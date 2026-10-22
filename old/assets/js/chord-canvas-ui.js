@@ -139,12 +139,12 @@ const ChordCanvasUI = (() => {
       <div style="font-size:.65rem;font-weight:700;color:#6d28d9;text-transform:uppercase;
                   letter-spacing:.5px;margin-bottom:.35rem;display:flex;align-items:center;gap:4px;">
         ${existing ? 'Sửa' : 'Thêm'} hợp âm
-        ${!isDefault ? `<span style="opacity:.6;font-weight:400">· ${currentSet}</span>` : ''}
+        ${!isDefault ? `<span style="opacity:.6;font-weight:400">· ${window.SafeHtml ? window.SafeHtml.escape(currentSet) : currentSet}</span>` : ''}
         ${keyLabel ? `<span style="opacity:.5;font-weight:400;font-size:.6rem">· ${keyLabel}</span>` : ''}
         ${keyHint}
       </div>
       <input id="cc-pop-inp" type="text" maxlength="12" autocomplete="off"
-             placeholder="VD: Am, D7, G…" value="${existing}"
+             placeholder="VD: Am, D7, G…" value="${window.SafeHtml ? window.SafeHtml.escape(existing || '') : (existing || '')}"
              style="width:100%;box-sizing:border-box;border:1.5px solid #c4b5fd;border-radius:5px;
                     padding:.35rem .55rem;font-size:.95rem;font-weight:700;font-family:monospace;
                     color:#c00;outline:none;background:var(--bg-base,#fff);margin-bottom:.35rem;
@@ -425,7 +425,7 @@ const ChordCanvasUI = (() => {
     overlay.innerHTML = `
       <div style="background:#fff;border-radius:12px;padding:1.4rem 1.75rem;min-width:280px;box-shadow:0 20px 60px rgba(0,0,0,.2);">
         <div style="font-size:.95rem;font-weight:700;color:#b91c1c;margin-bottom:.5rem;">Xóa bộ hợp âm?</div>
-        <div style="font-size:.8rem;color:#6b7280;margin-bottom:1rem;">Xóa "<strong>${name}</strong>"? Hành động này không thể hoàn tác.</div>
+        <div style="font-size:.8rem;color:#6b7280;margin-bottom:1rem;">Xóa "<strong>${window.SafeHtml ? window.SafeHtml.escape(name) : name}</strong>"? Hành động này không thể hoàn tác.</div>
         <div style="display:flex;gap:.5rem;justify-content:flex-end;">
           <button id="cc-del-cancel" class="btn btn-ghost btn-sm">Hủy</button>
           <button id="cc-del-ok" class="btn btn-danger btn-sm">🗑 Xóa</button>
