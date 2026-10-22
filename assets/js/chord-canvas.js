@@ -544,7 +544,7 @@ const ChordCanvas = (() => {
     setCustomChords: (c) => { _customChords = c; },
     applyPreloaded: (set, chords, checksum = '') => {
       ++_chordLoadToken;
-      _clear(); _songUseFlats = null; window.ChordCanvasTranspose?.resetCache?.();
+      _clear(); window.ChordCanvasEdit?.closePopup?.(false); window.ChordCanvasEdit?.resetUndo?.(); _songUseFlats = null; window.ChordCanvasTranspose?.resetCache?.();
       _currentSet = set || 'HD'; _prevSet = _currentSet; _customChords = chords ? { ...chords } : {};
       window.ChordCanvasEdit?.setBaseChecksum?.(checksum, _customChords);
       _refreshSetDropdown(); window.SongInfoBar?.refreshChordChip?.();
