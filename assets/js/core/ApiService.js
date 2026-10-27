@@ -42,6 +42,7 @@ const ApiService = (() => {
   }
 
   const DEFAULT_TIMEOUT_MS = 12000;
+  const UPLOAD_MUTATION_TIMEOUT_MS = 120000;
 
   function _normalizeError(err, isTimeout = false, status = 0) {
     const e = err instanceof Error ? err : new Error(String(err || 'Network error'));
@@ -56,7 +57,10 @@ const ApiService = (() => {
 
   async function _fetchWithTimeoutAndRetry(finalUrl, options = {}, parseMode = 'json') {
     const method = (options.method || 'GET').toUpperCase();
-    const timeoutMs = Number(options.timeoutMs ?? (typeof window !== 'undefined' && window.__API_TIMEOUT_MS__)) || DEFAULT_TIMEOUT_MS;
+    const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+    const isMutationOrUpload = (method !== 'GET' && method !== 'HEAD') || isFormData;
+    const defaultTimeout = isMutationOrUpload ? UPLOAD_MUTATION_TIMEOUT_MS : DEFAULT_TIMEOUT_MS;
+    const timeoutMs = Number(options.timeoutMs ?? (typeof window !== 'undefined' && window.__API_TIMEOUT_MS__)) || defaultTimeout;
     const maxAttempts = (method === 'GET' && options.retry !== false) ? 2 : 1;
     const callerSignal = options.signal || null;
     const AC = (typeof AbortController !== 'undefined') ? AbortController : (typeof window !== 'undefined' && window.AbortController ? window.AbortController : null);
