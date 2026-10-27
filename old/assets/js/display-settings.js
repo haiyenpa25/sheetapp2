@@ -216,11 +216,12 @@ const DisplaySettings = (() => {
                     // Mở chế độ Lời
                     lyricContainer.classList.remove('hidden');
                     const osmd = document.getElementById('osmd-container');
-                    if(osmd) osmd.style.display = 'none';
+                    if(osmd) { osmd.classList.add('hidden'); osmd.style.display = 'none'; }
                     btnLyricView.classList.add('active');
                     if (btnText) btnText.textContent = 'Bản Nhạc';
-                    // Cập nhật URL
+                    // Cập nhật URL & lưu lựa chọn
                     window.URLState?.update?.({ v: 'lyric' });
+                    try { localStorage.setItem('sheetapp_view_mode', 'band'); } catch (_) {}
                     try {
                         _renderLyricView();
                     } catch(e) { console.error('Lỗi render LyricView', e); }
@@ -229,18 +230,15 @@ const DisplaySettings = (() => {
                     const scrollY = window.scrollY;
                     lyricContainer.classList.add('hidden');
                     const osmd = document.getElementById('osmd-container');
-                    if(osmd) osmd.style.display = 'block';
+                    if(osmd) { osmd.classList.remove('hidden'); osmd.style.display = 'block'; }
                     btnLyricView.classList.remove('active');
                     if (btnText) btnText.textContent = 'Lời Nhạc';
-                    // Cập nhật URL
+                    // Cập nhật URL & lưu lựa chọn
                     window.URLState?.update?.({ v: 'sheet' });
-                    // Re-render OSMD
-                    if (window.App?.reloadCurrentXML) {
-                        window.App.reloadCurrentXML().then(() => {
-                            window.scrollTo(0, scrollY);
-                        }).catch(() => {});
-                    } else if (window.ChordCanvas) {
+                    try { localStorage.setItem('sheetapp_view_mode', 'sheet'); } catch (_) {}
+                    if (!window.OSMDRenderer?.hasPendingRender?.() && window.ChordCanvas) {
                         window.ChordCanvas.reposition();
+                        window.scrollTo(0, scrollY);
                     }
                 }
             });

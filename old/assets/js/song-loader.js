@@ -79,6 +79,7 @@ const SongLoader = (() => {
       const zoom = settings?.userSettings?.zoomLevel || _computePreloadFitZoom();
       Store.set('currentTranspose', transpose);
       Store.set('currentZoom', zoom);
+      if (window.URLState && _isFirstLoad) { _isFirstLoad = false; await _restoreFromURL(); }
 
       // ── Render OSMD ──
       AppUI.setLoadingText('Đang vẽ bản nhạc...');
@@ -114,9 +115,9 @@ const SongLoader = (() => {
 
       AppUI.updateSessionPanel(transpose, []);
       _showLoadToast(song, transpose);
-      if (window.URLState && _isFirstLoad) {
-        _isFirstLoad = false;
-        _restoreFromURL(); // bỏ await
+      const lyricContainer = document.getElementById('lyric-view-container');
+      if (lyricContainer && !lyricContainer.classList.contains('hidden')) {
+        window.DisplaySettings?.renderLyricViewIfActive?.();
       }
       if (window.HistoryManager) HistoryManager.trackView(song);
 
@@ -331,10 +332,28 @@ const SongLoader = (() => {
     else if (urlSet && urlSet !== 'default' && urlSet !== 'HD' && ChordCanvas?.getCurrentSet?.() !== urlSet) {
       await ChordCanvas.switchSet(urlSet);
     }
-    if (state.v === 'lyric') {
+    const hasExplicitViewParam = new URLSearchParams(location.search).has('v');
+    const isMobile = window.innerWidth <= 680;
+    const savedMode = localStorage.getItem('sheetapp_view_mode');
+    const role = (localStorage.getItem('sheetapp_instrument_role') || '').toLowerCase();
+    const authRole = (window.Auth?.getUser?.()?.role || '').toLowerCase();
+    const isBanHat = role === 'vocals' || role === 'banhat' || authRole === 'banhat';
+    const defaultMode = (isMobile && isBanHat) ? 'band' : 'sheet';
+    const effectiveMode = savedMode || defaultMode;
+    const shouldOpenBand = state.v === 'lyric' || (!hasExplicitViewParam && effectiveMode === 'band');
+    const lyric = document.getElementById('lyric-view-container'), osmdEl = document.getElementById('osmd-container');
+    const btnLyric = document.getElementById('btn-lyric-view'), btnText = btnLyric?.querySelector('.btn-text');
+    if (shouldOpenBand) {
       if (state.lv === 'inline') localStorage.setItem('sheetapp_lyric_mode', 'inline');
-      const lyric = document.getElementById('lyric-view-container');
-      if (lyric?.classList.contains('hidden')) document.getElementById('btn-lyric-view')?.click();
+      lyric?.classList.remove('hidden');
+      if (osmdEl) { osmdEl.classList.add('hidden'); osmdEl.style.display = 'none'; }
+      btnLyric?.classList.add('active');
+      if (btnText) btnText.textContent = 'Bản Nhạc';
+    } else if (lyric && !lyric.classList.contains('hidden')) {
+      lyric.classList.add('hidden');
+      if (osmdEl) { osmdEl.classList.remove('hidden'); osmdEl.style.display = 'block'; }
+      btnLyric?.classList.remove('active');
+      if (btnText) btnText.textContent = 'Lời Nhạc';
     }
   }
 

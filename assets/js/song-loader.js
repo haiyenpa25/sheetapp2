@@ -115,6 +115,7 @@ const SongLoader = (() => {
 
       Store.set('currentTranspose', transpose);
       Store.set('currentZoom', zoom);
+      if (window.URLState && _isFirstLoad) { _isFirstLoad = false; await _restoreFromURL(); }
 
       // ── Render OSMD ──
       if (!isInstant) {
@@ -159,10 +160,6 @@ const SongLoader = (() => {
 
       AppUI.updateSessionPanel(transpose, []);
       _showLoadToast(song, transpose);
-      if (window.URLState && _isFirstLoad) {
-        _isFirstLoad = false;
-        _restoreFromURL(); // bỏ await
-      }
       if (window.HistoryManager) HistoryManager.trackView(song);
 
       document.getElementById('btn-print')?.removeAttribute('disabled');
@@ -450,24 +447,20 @@ const SongLoader = (() => {
     const isMobile = window.innerWidth <= 680;
     const savedMode = localStorage.getItem('sheetapp_view_mode');
     const role = (localStorage.getItem('sheetapp_instrument_role') || '').toLowerCase();
-    // Q2: Nếu người dùng đã chọn trước đó, luôn giữ lựa chọn đó. Nếu chưa chọn: mobile guitar/vocals/khách mở Lời, đàn phím mở Nhạc.
-    const defaultMode = isMobile ? (role === 'keyboard' ? 'sheet' : 'band') : 'sheet';
+    const authRole = (window.Auth?.getUser?.()?.role || '').toLowerCase();
+    // Legacy R4-4: defaultMode = isMobile ? (role === 'keyboard' ? 'sheet' : 'band') : 'sheet'
+    const isBanHat = role === 'vocals' || role === 'banhat' || authRole === 'banhat';
+    const defaultMode = (isMobile && isBanHat) ? 'band' : 'sheet';
     const effectiveMode = savedMode || defaultMode;
     const shouldOpenBand = state.v === 'lyric' || (!hasExplicitViewParam && effectiveMode === 'band');
-
+    const lyric = document.getElementById('lyric-view-container'), osmdEl = document.getElementById('osmd-container');
     if (shouldOpenBand) {
       if (state.lv === 'inline') localStorage.setItem('sheetapp_lyric_mode', 'inline');
-      const lyric = document.getElementById('lyric-view-container');
-      if (lyric?.classList.contains('hidden')) {
-        const toggleBtn = document.getElementById('btn-band-toggle') || document.getElementById('btn-toggle-view');
-        toggleBtn?.click();
-      }
-    } else {
-      const lyric = document.getElementById('lyric-view-container');
-      if (lyric && !lyric.classList.contains('hidden')) {
-        const toggleBtn = document.getElementById('btn-band-toggle') || document.getElementById('btn-toggle-view');
-        toggleBtn?.click();
-      }
+      lyric?.classList.remove('hidden');
+      osmdEl?.classList.add('hidden');
+    } else if (lyric && !lyric.classList.contains('hidden')) {
+      lyric.classList.add('hidden');
+      osmdEl?.classList.remove('hidden');
     }
   }
 

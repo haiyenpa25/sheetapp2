@@ -1,0 +1,52 @@
+[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 4 tests using 1 worker
+
+[1/4] [chromium] › e2e\m3-render-efficiency.spec.js:53:5 › M3-3 · Ði?n tho?i m?c d?nh theo Q-M2; m? L?i = 0 l?n v? OSMD, chuy?n B?n nh?c = 1 l?n › M3-3 390 lyric 0 renders then sheet 1 render + Q-M2 defaults: modern
+[2/4] [chromium] › e2e\m3-render-efficiency.spec.js:53:5 › M3-3 · Ði?n tho?i m?c d?nh theo Q-M2; m? L?i = 0 l?n v? OSMD, chuy?n B?n nh?c = 1 l?n › M3-3 390 lyric 0 renders then sheet 1 render + Q-M2 defaults: classic
+[3/4] [webkit] › e2e\m3-render-efficiency.spec.js:53:5 › M3-3 · Ði?n tho?i m?c d?nh theo Q-M2; m? L?i = 0 l?n v? OSMD, chuy?n B?n nh?c = 1 l?n › M3-3 390 lyric 0 renders then sheet 1 render + Q-M2 defaults: modern
+  1) [webkit] › e2e\m3-render-efficiency.spec.js:53:5 › M3-3 · Ði?n tho?i m?c d?nh theo Q-M2; m? L?i = 0 l?n v? OSMD, chuy?n B?n nh?c = 1 l?n › M3-3 390 lyric 0 renders then sheet 1 render + Q-M2 defaults: modern 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      74 |         renders: window.OSMDRenderer?.getRenderCount?.() ?? -1,
+      75 |       }));
+    > 76 |       expect(guestState.lyricHidden).toBe(true);
+         |                                      ^
+      77 |       expect(guestState.renders).toBe(1);
+      78 |       await guestCtx.close();
+      79 |
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m3-render-efficiency.spec.js:76:38
+
+    Error Context: test-results\m3-render-efficiency-M3-3--785e1-render-Q-M2-defaults-modern-webkit\error-context.md
+
+
+[4/4] [webkit] › e2e\m3-render-efficiency.spec.js:53:5 › M3-3 · Ði?n tho?i m?c d?nh theo Q-M2; m? L?i = 0 l?n v? OSMD, chuy?n B?n nh?c = 1 l?n › M3-3 390 lyric 0 renders then sheet 1 render + Q-M2 defaults: classic
+  2) [webkit] › e2e\m3-render-efficiency.spec.js:53:5 › M3-3 · Ði?n tho?i m?c d?nh theo Q-M2; m? L?i = 0 l?n v? OSMD, chuy?n B?n nh?c = 1 l?n › M3-3 390 lyric 0 renders then sheet 1 render + Q-M2 defaults: classic 
+
+    Test timeout of 45000ms exceeded.
+
+    Error: page.waitForFunction: Test ended.
+
+      93 |       });
+      94 |       await vocalPage.goto(BASE_URL + ui.path + '?song=thanh-ca-001', { waitUntil: 'domcontentloaded', timeout: 20000 });
+    > 95 |       await vocalPage.waitForFunction(() => {
+         |                       ^
+      96 |         const lyr = document.getElementById('lyric-view-container');
+      97 |         return lyr && !lyr.classList.contains('hidden') && lyr.textContent.trim().length > 0;
+      98 |       }, { timeout: 15000 });
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m3-render-efficiency.spec.js:95:23
+
+    Error Context: test-results\m3-render-efficiency-M3-3--8977e-ender-Q-M2-defaults-classic-webkit\error-context.md
+
+
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+  2 failed
+    [webkit] › e2e\m3-render-efficiency.spec.js:53:5 › M3-3 · Ði?n tho?i m?c d?nh theo Q-M2; m? L?i = 0 l?n v? OSMD, chuy?n B?n nh?c = 1 l?n › M3-3 390 lyric 0 renders then sheet 1 render + Q-M2 defaults: modern 
+    [webkit] › e2e\m3-render-efficiency.spec.js:53:5 › M3-3 · Ði?n tho?i m?c d?nh theo Q-M2; m? L?i = 0 l?n v? OSMD, chuy?n B?n nh?c = 1 l?n › M3-3 390 lyric 0 renders then sheet 1 render + Q-M2 defaults: classic 
+  2 skipped
+
+EXIT=1
