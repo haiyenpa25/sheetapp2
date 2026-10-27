@@ -553,7 +553,12 @@ body.dark-mode .toast-container .toast { background: #22222b; color: var(--lp-in
 
 /* ─── 5. Điện thoại (≤680px) ──────────────────────────────────────── */
 @media (max-width: 680px) {
-  .unified-toolbar { gap: 6px; }
+  .unified-toolbar {
+    gap: 6px;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-left: max(8px, env(safe-area-inset-left, 0px));
+    padding-right: max(8px, env(safe-area-inset-right, 0px));
+  }
   .unified-toolbar .song-info-pill {
     height: 34px !important;
     min-height: 34px !important;

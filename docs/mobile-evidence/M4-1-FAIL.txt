@@ -1,0 +1,31 @@
+[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 2 tests using 1 worker
+
+[1/2] [chromium] › e2e\m4-reader-layout.spec.js:8:3 › M4-1 · Viewport viewport-fit=cover & safe-area-inset trên iPhone 13 WebKit › M4-1 viewport-fit=cover on both UIs and safe-area-inset CSS rules
+[2/2] [webkit] › e2e\m4-reader-layout.spec.js:8:3 › M4-1 · Viewport viewport-fit=cover & safe-area-inset trên iPhone 13 WebKit › M4-1 viewport-fit=cover on both UIs and safe-area-inset CSS rules
+  1) [webkit] › e2e\m4-reader-layout.spec.js:8:3 › M4-1 · Viewport viewport-fit=cover & safe-area-inset trên iPhone 13 WebKit › M4-1 viewport-fit=cover on both UIs and safe-area-inset CSS rules 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      55 |     });
+      56 |
+    > 57 |     expect(modernCheck.hasViewportFitCover).toBe(true);
+         |                                             ^
+      58 |     expect(modernCheck.hasSafeAreaToolbar).toBe(true);
+      59 |     expect(modernCheck.hasSafeAreaBottom).toBe(true);
+      60 |     expect(modernCheck.barVisible).toBe(true);
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m4-reader-layout.spec.js:57:45
+
+    Error Context: test-results\m4-reader-layout-M4-1-·-Vi-371d8-d-safe-area-inset-CSS-rules-webkit\error-context.md
+
+
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+  1 failed
+    [webkit] › e2e\m4-reader-layout.spec.js:8:3 › M4-1 · Viewport viewport-fit=cover & safe-area-inset trên iPhone 13 WebKit › M4-1 viewport-fit=cover on both UIs and safe-area-inset CSS rules 
+  1 skipped
+
+EXIT=1
