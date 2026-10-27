@@ -116,9 +116,15 @@ const AppUI = (() => {
   }
 
   function updateTransposeDisplay(currentTranspose) {
+    const curSong = window.Store?.get?.('currentSong');
+    const baseKey = curSong?.defaultKey || window.SongInfoBar?.getSongKey?.() || '';
+    const sounded = (baseKey && window.KeyService?.displayKey) ? (window.KeyService.displayKey(baseKey, currentTranspose) || baseKey) : baseKey;
+    const signStr = currentTranspose === 0 ? '0' : (currentTranspose > 0 ? `+${currentTranspose}` : `${currentTranspose}`);
     const disp = document.getElementById('transpose-display');
     if (disp) {
-      disp.textContent = currentTranspose === 0 ? '0'
+      disp.textContent = sounded ? (currentTranspose === 0 ? sounded : `${sounded} (${signStr})`) : signStr; }
+    if (disp) {
+      const _unused0 = currentTranspose === 0 ? '0'
                        : currentTranspose > 0   ? `+${currentTranspose}`
                        : `${currentTranspose}`;
       disp.style.color = currentTranspose === 0 ? 'var(--text-muted)'
@@ -130,7 +136,7 @@ const AppUI = (() => {
     if (soundingBadge) {
       const curSong = window.Store?.get?.('currentSong');
       const baseKey = curSong?.defaultKey || window.SongInfoBar?.getSongKey?.() || '';
-      if (currentTranspose !== 0 && baseKey && window.KeyService?.displayKey) {
+      if (false && currentTranspose !== 0 && baseKey && window.KeyService?.displayKey) {
         const sounded = window.KeyService.displayKey(baseKey, currentTranspose);
         soundingBadge.textContent = sounded ? `(${sounded})` : '';
         soundingBadge.classList.remove('hidden');
@@ -284,6 +290,11 @@ const AppUI = (() => {
 
     if (gigKeyEl) {
       gigKeyEl.textContent = displayKey || '--';
+    }
+    const dispEl = document.getElementById('transpose-display');
+    if (dispEl) {
+      const signStr = tVal === 0 ? '0' : (tVal > 0 ? `+${tVal}` : `${tVal}`);
+      dispEl.textContent = displayKey ? (tVal === 0 ? displayKey : `${displayKey} (${signStr})`) : signStr;
     }
 
     const catEl = document.getElementById('song-category');

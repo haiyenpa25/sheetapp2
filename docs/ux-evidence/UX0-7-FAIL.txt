@@ -1,0 +1,53 @@
+﻿[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 2 tests using 1 worker
+
+[1/2] [chromium] › e2e\ux0-7-unified-key-display.spec.js:12:3 › UX0-7 · Unified key display across Phone (390) and Tablet (768) › Modern 390 and 768 show the exact same key string at transpose 0 ("G") and transpose +2 ("A (+2)")
+  1) [chromium] › e2e\ux0-7-unified-key-display.spec.js:12:3 › UX0-7 · Unified key display across Phone (390) and Tablet (768) › Modern 390 and 768 show the exact same key string at transpose 0 ("G") and transpose +2 ("A (+2)") 
+
+    Error: Tablet at transpose 0 matches Phone at transpose 0
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "G"
+    Received: "0"
+
+      34 |     await page.evaluate(() => window.Store?.set?.('transpose', 0));
+      35 |     const tabletInitial = ((await page.locator('#transpose-display').textContent()) || '').trim();
+    > 36 |     expect(tabletInitial, 'Tablet at transpose 0 matches Phone at transpose 0').toBe(phoneInitial);
+         |                                                                                 ^
+      37 |
+      38 |     await page.evaluate(() => window.Store?.set?.('transpose', 2));
+      39 |     const tabletPlus2 = ((await page.locator('#transpose-display').textContent()) || '').trim();
+        at C:\xampp\htdocs\sheetapp2-verify-m6\e2e\ux0-7-unified-key-display.spec.js:36:81
+
+    Error Context: test-results\ux0-7-unified-key-display--318b4-se-0-G-and-transpose-2-A-2--chromium\error-context.md
+
+
+[2/2] [webkit] › e2e\ux0-7-unified-key-display.spec.js:12:3 › UX0-7 · Unified key display across Phone (390) and Tablet (768) › Modern 390 and 768 show the exact same key string at transpose 0 ("G") and transpose +2 ("A (+2)")
+  2) [webkit] › e2e\ux0-7-unified-key-display.spec.js:12:3 › UX0-7 · Unified key display across Phone (390) and Tablet (768) › Modern 390 and 768 show the exact same key string at transpose 0 ("G") and transpose +2 ("A (+2)") 
+
+    Error: Tablet at transpose 0 matches Phone at transpose 0
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "G"
+    Received: "0"
+
+      34 |     await page.evaluate(() => window.Store?.set?.('transpose', 0));
+      35 |     const tabletInitial = ((await page.locator('#transpose-display').textContent()) || '').trim();
+    > 36 |     expect(tabletInitial, 'Tablet at transpose 0 matches Phone at transpose 0').toBe(phoneInitial);
+         |                                                                                 ^
+      37 |
+      38 |     await page.evaluate(() => window.Store?.set?.('transpose', 2));
+      39 |     const tabletPlus2 = ((await page.locator('#transpose-display').textContent()) || '').trim();
+        at C:\xampp\htdocs\sheetapp2-verify-m6\e2e\ux0-7-unified-key-display.spec.js:36:81
+
+    Error Context: test-results\ux0-7-unified-key-display--318b4-se-0-G-and-transpose-2-A-2--webkit\error-context.md
+
+
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+  2 failed
+    [chromium] › e2e\ux0-7-unified-key-display.spec.js:12:3 › UX0-7 · Unified key display across Phone (390) and Tablet (768) › Modern 390 and 768 show the exact same key string at transpose 0 ("G") and transpose +2 ("A (+2)") 
+    [webkit] › e2e\ux0-7-unified-key-display.spec.js:12:3 › UX0-7 · Unified key display across Phone (390) and Tablet (768) › Modern 390 and 768 show the exact same key string at transpose 0 ("G") and transpose +2 ("A (+2)") 
+

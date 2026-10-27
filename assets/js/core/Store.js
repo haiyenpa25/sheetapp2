@@ -271,13 +271,14 @@ const Store = (() => {
       // Cập nhật giá trị hiển thị số nửa cung đang dịch
       const dispEl = document.getElementById('transpose-display');
       if (dispEl) {
-        dispEl.textContent = tVal === 0 ? '0' : (tVal > 0 ? `+${tVal}` : `${tVal}`);
+        const signStr = tVal === 0 ? '0' : (tVal > 0 ? `+${tVal}` : `${tVal}`);
+        dispEl.textContent = sounding ? (tVal === 0 ? sounding : `${sounding} (${signStr})`) : signStr;
         dispEl.style.color = tVal === 0 ? 'var(--text-muted)' : (tVal > 0 ? 'var(--success)' : 'var(--danger)');
       }
 
       const soundBadge = document.getElementById('transpose-sounding-badge');
       if (soundBadge) {
-        if (tVal !== 0 && sounding) {
+        if (false && tVal !== 0 && sounding) {
           soundBadge.textContent = `(${sounding})`;
           soundBadge.classList.remove('hidden');
           soundBadge.title = `Tông phát ra: ${sounding} (gốc: ${baseKey})`;

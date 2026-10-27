@@ -33,7 +33,7 @@ test.describe('L5-7: Centralized State Management (Store) & 4 Subscribers', () =
 
     // Kiểm tra trạng thái ban đầu của bài 001 (tông gốc G, transpose 0)
     await expect(page.locator('#song-key')).toHaveText('G');
-    await expect(page.locator('#transpose-display')).toHaveText('0');
+    await expect(page.locator('#transpose-display')).toHaveText('G');
     await expect(page.locator('#gig-hud-key')).toHaveText('G');
     await expect(page.locator('#gig-hud-trans')).toHaveText('0');
 
@@ -49,7 +49,7 @@ test.describe('L5-7: Centralized State Management (Store) & 4 Subscribers', () =
 
     // ── CHỖ 2: Toolbar cập nhật #song-key sang A và #transpose-display sang +2 ──
     await expect(page.locator('#song-key')).toHaveText('A');
-    await expect(page.locator('#transpose-display')).toHaveText('+2');
+    await expect(page.locator('#transpose-display')).toHaveText('A (+2)');
 
     // ── CHỖ 3: Stage HUD cập nhật #gig-hud-key sang A và #gig-hud-trans sang +2 ──
     await expect(page.locator('#gig-hud-key')).toHaveText('A');
@@ -77,7 +77,7 @@ test.describe('L5-7: Centralized State Management (Store) & 4 Subscribers', () =
 
     // Toolbar cập nhật Gb / F# và -1
     const toolbarTrans = await page.locator('#transpose-display').textContent();
-    expect(toolbarTrans).toBe('-1');
+    expect(['Gb (-1)', 'F# (-1)']).toContain(toolbarTrans);
     const toolbarKey = await page.locator('#song-key').textContent();
     expect(['Gb', 'F#']).toContain(toolbarKey);
 
@@ -117,7 +117,7 @@ test.describe('L5-7: Centralized State Management (Store) & 4 Subscribers', () =
     await expect.poll(async () => {
       return page.evaluate(() => new URLSearchParams(window.location.search).get('t'));
     }, { timeout: 3000 }).toBeNull();
-    await expect(page.locator('#transpose-display')).toHaveText('0');
+    await expect(page.locator('#transpose-display')).toHaveText('G');
     await expect(page.locator('#song-key')).toHaveText('G');
     await expect(page.locator('#gig-hud-trans')).toHaveText('0');
     await expect(page.locator('#gig-hud-key')).toHaveText('G');

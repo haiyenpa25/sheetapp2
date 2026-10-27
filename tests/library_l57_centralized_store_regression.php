@@ -216,7 +216,7 @@ results.push({
 Store.set('transpose', 2);
 
 const urlHasT2 = global.window.location.search.includes('t=2');
-const toolbarDispT2 = elements['transpose-display'].textContent === '+2';
+const toolbarDispT2 = elements['transpose-display'].textContent === 'A (+2)';
 const toolbarKeyA = elements['song-key'].textContent === 'A';
 const hudTransT2 = elements['gig-hud-trans'].textContent === '+2';
 const hudKeyA = elements['gig-hud-key'].textContent === 'A';
@@ -243,7 +243,7 @@ results.push({ name: 'Alias 2 chiều: Chế độ Band cập nhật Gb', pass: 
 // BƯỚC 4: Reset về gốc Store.set('transpose', 0)
 Store.set('transpose', 0);
 const urlNoT = !global.window.location.search.includes('t=');
-const toolbarDisp0 = elements['transpose-display'].textContent === '0';
+const toolbarDisp0 = elements['transpose-display'].textContent === 'G';
 const toolbarKeyG = elements['song-key'].textContent === 'G';
 results.push({ name: 'Reset về gốc: URL xóa bỏ param t', pass: urlNoT });
 results.push({ name: 'Reset về gốc: Toolbar hiện 0 và tông G', pass: toolbarDisp0 && toolbarKeyG });
