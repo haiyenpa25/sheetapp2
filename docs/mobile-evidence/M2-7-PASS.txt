@@ -1,0 +1,23 @@
+CMD: C:\xampp\php\php.exe tests\m2_lookbehind_free_regression.php && C:\xampp\php\php.exe tests\library_tv13_highlight_regression.php
+EXIT=0
+PASS: M2-7: LibrarySearch.js does not use regex lookbehind (?<= or (?<!)
+PASS: M2-7: No highlight inside a Vietnamese word
+PASS: M2-7: Accent-insensitive whole word is highlighted
+PASS: M2-7: Ampersand remains an intact HTML entity
+PASS: M2-7: Does not highlight inside escaped entity
+PASS: M2-7: Escapes HTML and highlights multiword phrase
+PASS: M2-7: Jesus aliases receive one non-nested mark each
+PASS: M2-7: Overlapping phrase and token matches do not nest marks
+
+SUITE_COMPLETE total=8
+[PASS:B] No highlight inside a Vietnamese word
+[PASS:B] Accent-insensitive whole word is highlighted
+[PASS:B] Ampersand remains an intact HTML entity
+[PASS:B] Query does not highlight inside an escaped entity
+[PASS:B] Literal amp word is highlighted
+[PASS:B] Raw HTML is escaped before insertion
+[PASS:B] Multiword phrase keeps its original spelling
+[PASS:B] Jesus aliases receive one non-nested mark each
+[PASS:B] Overlapping phrase and token matches do not nest marks
+[PASS:B] Snippet selects the matching chorus rather than a partial word in a verse
+SUITE_COMPLETE total=10

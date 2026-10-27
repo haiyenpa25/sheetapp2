@@ -57,12 +57,14 @@ window.LibrarySearch = (() => {
     const map = { a: '[aáàảãạăắằẳẵặâấầẩẫậ]', e: '[eéèẻẽẹêếềểễệ]', i: '[iíìỉĩị]', o: '[oóòỏõọôốồổỗộơớờởỡợ]', u: '[uúùủũụưứừửữự]', y: '[yýỳỷỹỵ]', d: '[dđ]' };
     const parts = normalized.trim().split(/\s+/).filter(Boolean).map(word => word === 'JESUSALIAS' ? '(?:j[êe][\\s-]?sus|gi[êe][\\s-]?xu)' : [...word.toLowerCase()].map(c => map[c] || c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join(''));
     if (!parts.length) return escape(text);
-    const pattern = new RegExp('(?<![\\p{L}\\p{N}\\p{M}_])(?:' + [parts.join('[\\s-]+'), ...parts].join('|') + ')(?![\\p{L}\\p{N}\\p{M}_])', 'giu');
+    const pattern = new RegExp('(^|[^\\p{L}\\p{N}\\p{M}_])(' + [parts.join('[\\s-]+'), ...parts].join('|') + ')(?![\\p{L}\\p{N}\\p{M}_])', 'giu');
     const raw = String(text ?? '');
-    let html = '', cursor = 0;
-    for (const match of raw.matchAll(pattern)) {
-      html += escape(raw.slice(cursor, match.index)) + '<mark>' + escape(match[0]) + '</mark>';
-      cursor = match.index + match[0].length;
+    let html = '', cursor = 0, match;
+    while ((match = pattern.exec(raw)) !== null) {
+      const start = match.index + match[1].length;
+      const word = match[2];
+      html += escape(raw.slice(cursor, start)) + '<mark>' + escape(word) + '</mark>';
+      cursor = start + word.length;
     }
     return html + escape(raw.slice(cursor));
   }
