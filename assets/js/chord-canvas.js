@@ -26,6 +26,7 @@ const ChordCanvas = (() => {
     });
 
     try { _highlightMode = localStorage.getItem(HIGHLIGHT_KEY) === 'true'; } catch(e) {}
+    const hlBtn = document.getElementById('btn-menu-chord-highlight') || document.getElementById('btn-chord-highlight'); if (hlBtn) { hlBtn.classList.toggle('active', _highlightMode); hlBtn.addEventListener('click', toggleHighlight); }
 
     const container = document.getElementById('osmd-container');
     if (container) {
@@ -224,7 +225,7 @@ const ChordCanvas = (() => {
 
   function setHighlightMode(on) {
     _highlightMode = on;
-    try { localStorage.setItem(HIGHLIGHT_KEY, on ? 'true' : 'false'); } catch(e) {}
+    try { localStorage.setItem(HIGHLIGHT_KEY, on ? 'true' : 'false'); } catch(e) {} (document.getElementById('btn-menu-chord-highlight') || document.getElementById('btn-chord-highlight'))?.classList?.toggle?.('active', !!on);
     _build();
   }
 
@@ -554,7 +555,7 @@ const ChordCanvas = (() => {
       const customCount = Object.keys(_customChords || {}).length, xmlCount = Object.keys(window.ChordCanvasXML?.readXmlChords?.() || {}).length;
       return { currentSet: _currentSet, customCount, xmlCount, isFallback: (_currentSet === 'HD' && customCount === 0 && xmlCount > 0), isSparse: (_currentSet === 'HD' && customCount > 0 && xmlCount > 0 && customCount < 0.3 * xmlCount) };
     },
-    isAddMode: () => _editEnabled, isEditMode: () => _editEnabled,
+    isAddMode: () => _editEnabled, isEditMode: () => _editEnabled, isHighlightMode: () => _highlightMode,
     getNoteEls: () => _noteEls, build: _build
   };
 })();

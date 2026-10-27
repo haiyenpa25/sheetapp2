@@ -7,7 +7,7 @@ const LibraryUI = (() => {
   const listEl = () => document.getElementById('song-list'), searchEl = () => document.getElementById('search-input'), categoryEl = () => document.getElementById('category-filter');
 
   function init() {
-    window.LibraryList?.bind({ element: listEl(), getItems: () => _lastRenderedSongs, getActive: () => activeSongId, select: selectSong, renderWindow: _renderVirtualChunk });
+    window.LibraryList?.bind({ element: listEl(), getItems: () => _lastRenderedSongs, getActive: () => activeSongId, select: selectSong, renderWindow: _renderVirtualChunk }); window.LibraryData?.loadPins?.(); document.getElementById('btn-pin-current-song')?.addEventListener?.('click', () => { if (activeSongId) togglePin(activeSongId); });
     if (window.HistoryManager?.init) window.HistoryManager.init(() => { _buildRecentlyViewed(); _buildQuickFavorites(); });
     searchEl()?.addEventListener('input', () => { clearTimeout(_searchDebounce); _searchDebounce = setTimeout(_onSearch, 200); });
     searchEl()?.addEventListener('keydown', async (e) => {
@@ -104,7 +104,7 @@ const LibraryUI = (() => {
     if (loadErr && songs.length === 0) _renderLoadError();
     else render(songs.length > 0 ? _sortSongs(songs) : []);
     _updateCount(songs.length);
-    if (songs.length > 0) { _buildCategoryFilter(); _buildQuickJump(songs); _buildUpcomingSetlist(); _buildRecentlyViewed(); _buildQuickFavorites(); }
+    if (songs.length > 0) { _buildCategoryFilter(); _buildQuickJump(songs); _buildUpcomingSetlist(); _buildRecentlyViewed(); _buildQuickFavorites(); window.LibraryData?.renderPinBar?.(activeSongId, selectSong); }
     const urlSongId = window.LibraryData?.getDeepLinkSongId ? window.LibraryData.getDeepLinkSongId() : new URLSearchParams(window.location.search).get('song');
     if (urlSongId) selectSong(urlSongId, false);
   }
@@ -517,7 +517,7 @@ const LibraryUI = (() => {
     if (!songId) return;
     window.SongNavigation?.leaveSetlist();
     activeSongId = String(songId);
-    _highlightActive(activeSongId);
+    _highlightActive(activeSongId); window.LibraryData?.syncPinToolbarBtn?.(activeSongId); window.LibraryData?.renderPinBar?.(activeSongId, selectSong);
     if (updateUrl) {
       if (window.URLState?.resetForNewSong) window.URLState.resetForNewSong(songId);
       else { const u = new URL(window.location.href); u.searchParams.set('song', songId); window.history.pushState({}, '', u); }
@@ -589,9 +589,9 @@ const LibraryUI = (() => {
   const onSelect = cb => { onSelectCb = cb; }, onDelete = cb => { onDeleteCb = cb; }, getSongs = () => songs;
   const getActiveSong = () => songs.find(s => String(s.id) === String(activeSongId)) || null;
   const getSongObj = id => songs.find(s => String(s.id) === String(id)) || _lastRenderedSongs.find(s => String(s.id) === String(id)) || null;
-  const jumpByNumber = number => window.SongNavigation?.jumpNumber(number) ?? false;
+  const jumpByNumber = number => window.SongNavigation?.jumpNumber(number) ?? false, togglePin = id => window.LibraryData?.togglePin?.(id || activeSongId, activeSongId, selectSong), isPinned = id => window.LibraryData?.isPinned?.(id) ?? false;
 
-  return { init, loadSongs, render, selectSong, jumpByNumber, addSong, deleteSong, onSelect, onDelete, getSongs, getActiveSong, getSongObj };
+  return { init, loadSongs, render, selectSong, jumpByNumber, togglePin, isPinned, addSong, deleteSong, onSelect, onDelete, getSongs, getActiveSong, getSongObj };
 })();
 
 window.LibraryUI = LibraryUI;

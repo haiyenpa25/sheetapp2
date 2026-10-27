@@ -1,5 +1,7 @@
 <!-- SHEET VIEWER -->
 <div class="sheet-viewer-wrapper" id="sheet-viewer-wrapper">
+  <!-- QUICK PIN BAR (Thanh ghim nhanh bài hát buổi lễ) -->
+  <div id="quick-pin-bar" class="quick-pin-bar hidden" role="navigation" aria-label="Bài hát đã ghim nhanh"></div>
   <!-- WELCOME SCREEN -->
   <div id="welcome-screen" class="welcome-screen">
     <div class="welcome-content">

@@ -137,6 +137,7 @@ const KeyboardHandler = (() => {
         }
         break;
       case 'h': case 'H': if (xml) ChordCanvas?.toggleHighlight?.(); break; // Highlight mode
+      case 'g': case 'G': { const curSong = Store.get('currentSong'); if (curSong?.id) window.LibraryUI?.togglePin?.(curSong.id); break; }
       case 'f': case 'F':
         window.ModeManager ? window.ModeManager.togglePerformance() : AppUI?.toggleFullscreen?.();
         break;

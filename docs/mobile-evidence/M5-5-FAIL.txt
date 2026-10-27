@@ -1,0 +1,15 @@
+[FAIL:B] M5-5: Both Modern and Classic sheet_viewer.php include #quick-pin-bar
+[FAIL:B] M5-5: Both Modern and Classic keyboard-handler.js support G (togglePin) and H (toggleHighlight)
+[FAIL:B] M5-5 (Modern): LibraryUI exposes togglePin(songId) and isPinned(songId)
+[FAIL:B] M5-5 (Modern): LibraryUI.togglePin('1') pins song 1 and renders #quick-pin-bar
+[FAIL:B] M5-5 (Modern): LibraryUI.togglePin('1') again unpins song 1 and hides #quick-pin-bar
+evalmachine.<anonymous>:48
+    scrollWrapEl()?.addEventListener('scroll', () => {
+                    ^
+
+TypeError: scrollWrapEl(...)?.addEventListener is not a function
+    at Object.init (evalmachine.<anonymous>:48:21)
+    at C:\xampp\htdocs\sheetapp2\tests\js\m5_5_feature_parity.cjs:152:19
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+
+Node.js v24.21.0

@@ -144,7 +144,15 @@ select, input, label,
   width: 120px;
 }
 
-/* ---- AUTH USERNAME ---- */
+/* ---- AUTH USERNAME & QUICK PIN BAR ---- */
+.auth-username { margin-left: 4px; font-weight: 600; font-size: .8rem; }
+.quick-pin-bar { display: flex; align-items: center; gap: .35rem; padding: .3rem .75rem; background: var(--bg-surface); border-bottom: 1px solid var(--border); overflow-x: auto; white-space: nowrap; flex-shrink: 0; }
+.quick-pin-bar.hidden { display: none; }
+.pin-bar-label { font-size: .72rem; color: var(--text-muted); font-weight: 600; flex-shrink: 0; }
+.pin-chip { display: inline-flex; align-items: center; gap: .25rem; padding: .15rem .45rem; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-overlay); color: var(--text-secondary); font-size: .74rem; cursor: pointer; flex-shrink: 0; }
+.pin-chip.active { border-color: var(--accent); color: var(--accent-light, #a78bfa); background: rgba(124, 58, 237, .14); }
+.pin-chip-num { font-family: var(--font-mono); font-weight: 700; }
+.pin-chip-del { margin-left: 2px; opacity: .7; font-size: .7rem; }
 .auth-username { margin-left: 4px; font-weight: 600; font-size: .8rem; }
 
 .sidebar-search { padding: .75rem 1rem .5rem; }

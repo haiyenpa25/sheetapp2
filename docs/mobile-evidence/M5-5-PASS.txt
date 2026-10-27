@@ -1,0 +1,13 @@
+[PASS:B] M5-5: Both Modern and Classic sheet_viewer.php include #quick-pin-bar
+[PASS:B] M5-5: Both Modern and Classic keyboard-handler.js support G (togglePin) and H (toggleHighlight)
+[PASS:B] M5-5 (Modern): LibraryUI exposes togglePin(songId) and isPinned(songId)
+[PASS:B] M5-5 (Modern): LibraryUI.togglePin('1') pins song 1 and renders #quick-pin-bar
+[PASS:B] M5-5 (Modern): LibraryUI.togglePin('1') again unpins song 1 and hides #quick-pin-bar
+[PASS:B] M5-5 (Classic): LibraryUI exposes togglePin(songId) and isPinned(songId)
+[PASS:B] M5-5 (Classic): LibraryUI.togglePin('1') pins song 1 and renders #quick-pin-bar
+[PASS:B] M5-5 (Classic): LibraryUI.togglePin('1') again unpins song 1 and hides #quick-pin-bar
+[PASS:B] M5-5 (Modern): ChordCanvas exposes toggleHighlight, setHighlightMode, and isHighlightMode
+[PASS:B] M5-5 (Modern): ChordCanvas.toggleHighlight toggles highlight mode, persists state, and syncs button active class
+[PASS:B] M5-5 (Classic): ChordCanvas exposes toggleHighlight, setHighlightMode, and isHighlightMode
+[PASS:B] M5-5 (Classic): ChordCanvas.toggleHighlight toggles highlight mode, persists state, and syncs button active class
+SUITE_COMPLETE total=12 failed=0
