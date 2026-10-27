@@ -745,3 +745,53 @@ body.fullscreen-mode .osmd-container { max-width: 100%; padding: 1rem; margin-to
 .song-list[role="grid"] .library-cursor .song-item-actions button { opacity:1; }
 .song-list[role="grid"] button:focus-visible { outline:2px solid var(--accent, #6d28d9); outline-offset:1px; opacity:1; }
 .song-item-num.has-catalog-prefix { width:auto; min-width:6.5ch; flex-basis:6.5ch; flex-shrink:0; white-space:nowrap; }
+
+
+/* =============================================
+   M4-9b: Gộp toolbar + page-bar thành một hàng Lớp 1; menu ⋮ đủ mục
+   ============================================= */
+.page-bar { display: none !important; }
+.toolbar #instrument-annotations { display: none !important; }
+.toolbar { overflow-x: hidden !important; }
+.toolbar-left { display: none; }
+.toolbar-controls { width: auto !important; flex: 1 1 auto !important; min-width: 0; overflow-x: hidden !important; }
+.transpose-display { cursor: pointer; user-select: none; }
+.chord-set-select { background: #fff; border: 1px solid var(--border); color: var(--text-primary); font-size: .78rem; font-weight: 600; padding: 0 4px; height: 24px; cursor: pointer; }
+
+#main-dropdown-menu { min-width: 240px; max-width: min(320px, 92vw); padding: 6px; gap: 3px; }
+#main-dropdown-menu .classic-menu-section-title { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); padding: 4px 6px 2px; border-top: 1px solid var(--border); margin-top: 2px; }
+#main-dropdown-menu .classic-menu-section-title:first-child { border-top: none; margin-top: 0; }
+#main-dropdown-menu .classic-menu-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 3px 6px; font-size: .8rem; }
+#main-dropdown-menu .classic-menu-label { font-weight: 600; color: var(--text-secondary); white-space: nowrap; }
+#main-dropdown-menu .classic-menu-inline-group { display: flex; align-items: center; gap: 4px; width: 100%; }
+#main-dropdown-menu .classic-menu-inline-group .btn-menu-item { flex: 1 1 auto; }
+#main-dropdown-menu .btn-menu-item { display: inline-flex !important; align-items: center; justify-content: flex-start; min-height: 36px; height: auto; padding: 6px 8px; font-size: .82rem; gap: 8px; width: 100%; }
+#main-dropdown-menu .btn-menu-item > * { display: inline !important; }
+#main-dropdown-menu #btn-session-panel,
+#main-dropdown-menu #btn-print,
+#main-dropdown-menu #btn-mixer,
+#main-dropdown-menu #btn-dark-mode { display: inline-flex !important; }
+
+@media (max-width: 768px) {
+  .toolbar { padding: env(safe-area-inset-top, 0px) max(4px, env(safe-area-inset-right, 0px)) 0 max(4px, env(safe-area-inset-left, 0px)); gap: 3px; }
+  .toolbar-controls { gap: 3px; padding-right: 0; }
+  #btn-lyric-view .btn-text { display: inline !important; font-size: .72rem; margin-left: 2px; }
+  #btn-more-options .btn-text { display: none !important; }
+  #toolbar-controls .chord-set-select { width: 110px !important; min-width: 0 !important; max-width: 120px !important; padding: 0 3px; font-size: .74rem; }
+}
+
+@media (max-width: 480px) {
+  .toolbar { padding-left: 3px; padding-right: 3px; gap: 2px; }
+  .toolbar-controls { gap: 2px; }
+  .toolbar .icon-btn { min-width: 30px; width: 30px; }
+  #btn-open-sidebar { width: 32px; min-width: 32px; }
+  .transpose-controls .transpose-btn { width: 28px !important; min-width: 28px !important; }
+  .transpose-display { min-width: 22px; padding: 0 2px; font-size: .75rem; }
+  #toolbar-controls .chord-set-select { width: 72px !important; min-width: 0 !important; max-width: 74px !important; font-size: .7rem; }
+  #btn-lyric-view { padding: 0 5px; }
+  #btn-lyric-view svg { display: none; }
+  #btn-lyric-view .btn-text { display: inline !important; font-size: .72rem; margin: 0; }
+  .nav-arrows { gap: 1px; margin-right: 0; }
+  .nav-arrows .icon-btn { width: 30px; min-width: 30px; }
+  #btn-fullscreen, #btn-more-options { width: 30px; min-width: 30px; padding: 0; justify-content: center; }
+}

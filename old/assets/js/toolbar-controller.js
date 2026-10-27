@@ -20,6 +20,8 @@ const ToolbarController = (() => {
       { e.currentTarget.blur(); App?.transposeBy?.(-1); });
     document.getElementById('btn-transpose-reset')?.addEventListener('click', e =>
       { e.currentTarget.blur(); App?.resetTranspose?.(); });
+    document.getElementById('transpose-display')?.addEventListener('click', () =>
+      App?.resetTranspose?.());
 
     document.getElementById('capo-select')?.addEventListener('change', e => {
       const newCapo = parseInt(e.target.value) || 0;
@@ -43,7 +45,6 @@ const ToolbarController = (() => {
     function _openSidebar() {
       sidebar?.classList.remove('mobile-hidden');
       overlay?.classList.remove('hidden');
-      // Click overlay → đóng
       if (overlay) {
         overlay.onclick = _closeSidebar;
       }
@@ -57,14 +58,12 @@ const ToolbarController = (() => {
     function _toggle() {
       if (!sidebar) return;
       if (window.innerWidth <= 900) {
-        // Mobile/iPad: toggle ỳ nghĩa rõ ràng
         if (sidebar.classList.contains('mobile-hidden')) {
           _openSidebar();
         } else {
           _closeSidebar();
         }
       } else {
-        // Desktop: collapse narrow
         sidebar.classList.toggle('collapsed');
       }
     }
@@ -72,13 +71,11 @@ const ToolbarController = (() => {
     document.getElementById('btn-toggle-sidebar')?.addEventListener('click', _toggle);
     document.getElementById('btn-open-sidebar')?.addEventListener('click', _toggle);
 
-    // Init: mobile bắt đầu ẩn sidebar
     if (window.innerWidth <= 900) {
       sidebar?.classList.add('mobile-hidden');
       overlay?.classList.add('hidden');
     }
 
-    // Resize handler (M3-2: đồng bộ sidebar ngay để không tạo sóng layout lần 2 sau 250ms, bàn giao re-render OSMD cho ResizeObserver duy nhất)
     let _lastWasMobile = window.innerWidth <= 900;
     window.addEventListener('resize', () => {
       const isMobileNow = window.innerWidth <= 900;
@@ -99,26 +96,59 @@ const ToolbarController = (() => {
       });
     }
 
-    // Expose cho các module khác dùng
     window._closeSidebar = _closeSidebar;
   }
 
   function _bindDarkMode() {
-    const btn = document.getElementById('btn-dark-toggle');
-    const saved = localStorage.getItem('sheetapp_dark_mode') === '1';
-    if (saved) { document.body.classList.add('dark-mode'); btn?.classList.add('dark-active'); }
-    btn?.addEventListener('click', () => {
+    const btnToggle = document.getElementById('btn-dark-toggle');
+    const btnMenu   = document.getElementById('btn-dark-mode');
+    const saved = (window.SafeStorage ? window.SafeStorage.getItem('sheetapp_dark_mode') : localStorage.getItem('sheetapp_dark_mode')) === '1';
+    if (saved) {
+      document.body.classList.add('dark-mode');
+      btnToggle?.classList.add('dark-active');
+      btnMenu?.classList.add('active');
+    }
+    function toggleDark() {
       const on = document.body.classList.toggle('dark-mode');
-      btn.classList.toggle('dark-active', on);
-      localStorage.setItem('sheetapp_dark_mode', on ? '1' : '0');
+      btnToggle?.classList.toggle('dark-active', on);
+      btnMenu?.classList.toggle('active', on);
+      if (window.SafeStorage) window.SafeStorage.setItem('sheetapp_dark_mode', on ? '1' : '0');
+      else { try { localStorage.setItem('sheetapp_dark_mode', on ? '1' : '0'); } catch (_) {} }
       App?.showToast?.(on ? '🌙 Chế độ tối' : '☀️ Chế độ sáng', 'info');
-    });
+    }
+    btnToggle?.addEventListener('click', toggleDark);
+    btnMenu?.addEventListener('click', toggleDark);
   }
 
   function _bindMisc() {
     document.getElementById('btn-fullscreen')?.addEventListener('click', AppUI?.toggleFullscreen);
     document.getElementById('btn-print')?.addEventListener('click', () => window.print());
     document.getElementById('btn-session-panel')?.addEventListener('click', () => PerformanceNotes?.toggle?.());
+    document.getElementById('btn-help')?.addEventListener('click', () => window._helpModalOpen?.('guide'));
+    document.getElementById('menu-instrument-annotations')?.addEventListener('click', () => {
+      document.getElementById('btn-instrument-annotations')?.click();
+    });
+
+    // M4-9b: Menu ⋮ proxy listeners cho các công cụ hợp âm & ghim bài
+    document.getElementById('menu-chord-highlight')?.addEventListener('click', () => {
+      if (window.ChordCanvas?.toggleHighlight) window.ChordCanvas.toggleHighlight();
+      else document.getElementById('btn-chord-highlight')?.click();
+    });
+    document.getElementById('menu-chord-notation')?.addEventListener('click', () => {
+      document.getElementById('btn-chord-notation')?.click();
+    });
+    document.getElementById('menu-add-chord')?.addEventListener('click', () => {
+      if (window.ChordCanvas?.toggleAddMode) window.ChordCanvas.toggleAddMode();
+      else document.getElementById('btn-add-chord-mode-bar')?.click();
+    });
+    document.getElementById('menu-new-chord-set')?.addEventListener('click', () => {
+      window.ChordCanvas?.showNewSetModal?.();
+    });
+    document.getElementById('menu-pin-song')?.addEventListener('click', () => {
+      const curSong = window.Store?.get?.('currentSong');
+      if (curSong?.id && window.LibraryUI?.togglePin) window.LibraryUI.togglePin(curSong.id);
+      else document.getElementById('btn-pin-current-song')?.click();
+    });
 
     document.getElementById('btn-compact-mode')?.addEventListener('click', e => {
       const btn = e.currentTarget;

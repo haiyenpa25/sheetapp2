@@ -95,71 +95,13 @@
     <p id="loading-text" class="skeleton-loading-text">Đang tải sheet nhạc...</p>
   </div>
 
-  <!-- OSMD PAGE BAR -->
+  <!-- OSMD PAGE BAR (M4-9b: các điều khiển Lớp 1 đã gộp lên #toolbar; giữ các hook ẩn phục vụ JS) -->
   <div id="edge-tap-prev" class="edge-tap-zone edge-tap-left" title="Chạm mép trái: Lật trang trước (PageUp)"></div>
   <div id="edge-tap-next" class="edge-tap-zone edge-tap-right" title="Chạm mép phải: Lật trang sau (PageDown)"></div>
-  <div id="page-bar" class="page-bar hidden">
+  <div id="page-bar" class="page-bar hidden" style="display:none">
 
-    <!-- ① Transpose -->
-    <div class="pb-group" role="group" aria-label="Điều chỉnh tông">
-      <div class="transpose-controls">
-        <button id="btn-transpose-down" class="icon-btn transpose-btn" title="Hạ 1 cung (←)" disabled>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-        <span id="transpose-display" class="transpose-display">0</span>
-        <button id="btn-transpose-up" class="icon-btn transpose-btn" title="Tăng 1 cung (→)" disabled>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
-        </button>
-      </div>
-      <button id="btn-transpose-reset" class="btn btn-ghost btn-xs pb-reset-btn"
-              title="Về tông gốc của bài (phím 0)" disabled>↺ Gốc</button>
-      <!-- Capo dropdown -->
-      <div id="capo-wrap" class="capo-wrap hidden">
-        <label for="capo-select" class="capo-label">Capo</label>
-        <select id="capo-select" class="capo-select" title="Chọn ngăn khẹp Capo">
-          <option value="0">0</option>
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-          <option value="5">5</option>
-          <option value="6">6</option>
-          <option value="7">7</option>
-        </select>
-        <span id="capo-hint" class="capo-hint"></span>
-      </div>
-      <span id="capo-badge" class="capo-badge hidden" title="Đề xuất Capo tự động" style="display:none">Capo 0</span>
-    </div>
-
-    <!-- ② Zoom -->
-    <div class="pb-group pb-sep" role="group" aria-label="Thu phóng">
-      <div class="zoom-select-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="zoom-icon-sm"><circle cx="11" cy="11" r="8"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-        <select id="zoom-slider" class="zoom-select" disabled title="Chọn mức phóng to">
-          <option value="10">10%</option><option value="15">15%</option>
-          <option value="20">20%</option><option value="25">25%</option>
-          <option value="30">30%</option><option value="35">35%</option>
-          <option value="40">40%</option><option value="45">45%</option>
-          <option value="50">50%</option><option value="60">60%</option>
-          <option value="70">70%</option><option value="80">80%</option>
-          <option value="90">90%</option><option value="100" selected>100%</option>
-          <option value="110">110%</option><option value="120">120%</option>
-          <option value="130">130%</option><option value="140">140%</option>
-          <option value="150">150%</option><option value="160">160%</option>
-          <option value="170">170%</option><option value="180">180%</option>
-          <option value="190">190%</option><option value="200">200%</option>
-        </select>
-        <span id="zoom-value-label" style="display:none">100%</span>
-      </div>
-    </div>
-
-    <!-- ③ Hợp Âm -->
+    <!-- ③ Hợp Âm (hook nội bộ cho ChordCanvas & menu ⋮) -->
     <div class="pb-group pb-group--chord pb-sep" id="chord-set-bar" role="group" aria-label="Quản lý hợp âm">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="pb-chord-icon" aria-hidden="true"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
-      <select id="chord-set-selector" class="chord-set-select" disabled onchange="ChordCanvas.switchSet(this.value)">
-        <option value="default">TLH (gốc)</option>
-      </select>
-      <span id="chord-set-count" class="chord-set-count" style="font-size:.7rem;color:var(--text-muted,#9ca3af);white-space:nowrap;"></span>
       <button id="btn-new-chord-set" class="btn btn-xs btn-ghost pb-btn-icon-text"
               title="Tạo bộ hợp âm mới" onclick="ChordCanvas.showNewSetModal()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -200,7 +142,6 @@
       </button>
     </div>
 
-    <!-- Spacer đẩy Nav sang phải -->
     <!-- ⑤ Nhật Ký Biểu Diễn & Ghim Nhanh -->
     <button id="btn-perf-notes" class="btn btn-xs btn-ghost pb-btn-icon-text"
             title="Nhật ký — tông, BPM, ghi chú biểu diễn" disabled>
@@ -259,6 +200,3 @@
     <div id="lyric-view-container" class="lyric-view-container hidden"></div>
   </div>
 </div>
-
-
-

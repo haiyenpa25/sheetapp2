@@ -2,12 +2,12 @@ const { test, expect, devices } = require('@playwright/test');
 
 const BASE_URL = process.env.SHEETAPP_E2E_BASE_URL || 'http://127.0.0.1:8922/sheetapp2/';
 
-test.describe('M4-6 Â· Gig HUD co vá»«a 360â€“1024; nÃºt ThoÃ¡t á»Ÿ gÃ³c trÃªn tÃ¡ch khá»i cá»¥m Ä‘iá»u khiá»ƒn; thÃªm â—€ â–¶ vÃ  zoom á»Ÿ Ä‘iá»‡n thoáº¡i', () => {
+test.describe('M4-6 · Gig HUD co vừa 360–1024; nút Thoát ở góc trên tách khỏi cụm điều khiển; thêm ◀ ▶ và zoom ở điện thoại', () => {
   test('M4-6 768 portrait HUD & exit fit inside viewport; 390 exit separated at top corner + nav & zoom visible', async ({ browser }, testInfo) => {
-    test.skip(testInfo.project.name !== 'webkit', 'M4-6 nghiá»‡m thu trÃªn WebKit');
+    test.skip(testInfo.project.name !== 'webkit', 'M4-6 nghiệm thu trên WebKit');
     test.setTimeout(60000);
 
-    // 1. 768x1024 dá»c
+    // 1. 768x1024 dọc
     const ctx768 = await browser.newContext({
       viewport: { width: 768, height: 1024 },
       isMobile: true,
@@ -45,7 +45,7 @@ test.describe('M4-6 Â· Gig HUD co vá»«a 360â€“1024; nÃºt ThoÃ¡t á
     expect(audit768.exitRight).toBeLessThanOrEqual(768);
     await ctx768.close();
 
-    // 2. 390x844 Ä‘iá»‡n thoáº¡i
+    // 2. 390x844 điện thoại
     const ctx390 = await browser.newContext({
       ...devices['iPhone 13'],
       baseURL: BASE_URL,
@@ -234,9 +234,95 @@ test.describe('M4-8 · Tên bài: bỏ max-width 90/110px cứng, tối đa 2 d�
       expect(info.titleAttr, `vp=${vp.width} #song-title has full title attribute`).toBe(longTitle);
       expect(info.pillWidth, `vp=${vp.width} .song-info-pill not clamped to 110px`).toBeGreaterThan(140);
       expect(info.titleWidth, `vp=${vp.width} #song-title readable width > 120px`).toBeGreaterThan(120);
-      // end loop body
 
       await context.close();
     }
+  });
+});
+
+test.describe('M4-9b · Classic: gộp toolbar + page-bar thành một hàng Lớp 1; hiện lại nút Lời; ⋮ có đủ mục và listener', () => {
+  test('M4-9b Classic 390: toolbar scrollWidth <= clientWidth; Layer 1 controls visible immediately; ⋮ menu has items & listeners', async ({ browser }, testInfo) => {
+    test.skip(testInfo.project.name !== 'webkit', 'M4-9b nghiệm thu trên WebKit');
+    test.setTimeout(60000);
+
+    const context = await browser.newContext({
+      ...devices['iPhone 13'],
+      baseURL: BASE_URL,
+      serviceWorkers: 'block',
+    });
+    const page = await context.newPage();
+    await page.addInitScript(() => {
+      try {
+        sessionStorage.setItem('sheetapp_guest_chosen', '1');
+        localStorage.setItem('sheetapp_guest_toast_shown', '1');
+      } catch (_) {}
+    });
+
+    await page.goto(BASE_URL + 'old/?song=thanh-ca-001&v=sheet', { waitUntil: 'domcontentloaded', timeout: 20000 });
+    await page.locator('#osmd-container svg').first().waitFor({ state: 'visible', timeout: 15000 });
+
+    const audit = await page.evaluate(() => {
+      const tb = document.getElementById('toolbar');
+      const layer1Ids = [
+        'btn-transpose-down',
+        'transpose-display',
+        'btn-transpose-up',
+        'chord-set-selector',
+        'btn-lyric-view',
+        'btn-prev-song',
+        'btn-next-song',
+        'btn-fullscreen',
+        'btn-more-options',
+      ];
+      const controls = layer1Ids.map(id => {
+        const el = document.getElementById(id);
+        if (!el) return { id, visible: false, left: -1, right: -1 };
+        const s = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        const visible = s.display !== 'none' && s.visibility !== 'hidden' && r.width > 0 && r.height > 0;
+        return { id, visible, left: Math.round(r.left), right: Math.round(r.right) };
+      });
+      return {
+        scrollWidth: tb ? tb.scrollWidth : 9999,
+        clientWidth: tb ? tb.clientWidth : 0,
+        controls,
+      };
+    });
+
+    expect(audit.scrollWidth, `toolbar scrollWidth (${audit.scrollWidth}) <= clientWidth (${audit.clientWidth})`).toBeLessThanOrEqual(audit.clientWidth);
+    for (const c of audit.controls) {
+      expect(c.visible, `${c.id} should be visible on Layer 1`).toBe(true);
+      expect(c.left, `${c.id} left (${c.left}) >= 0`).toBeGreaterThanOrEqual(0);
+      expect(c.right, `${c.id} right (${c.right}) <= 390`).toBeLessThanOrEqual(390);
+    }
+
+    await page.locator('#btn-lyric-view').click();
+    await expect(page.locator('#lyric-view-container')).toBeVisible();
+    await page.locator('#btn-lyric-view').click();
+    await expect(page.locator('#osmd-container')).toBeVisible();
+
+    await page.locator('#btn-more-options').click();
+    const menu = page.locator('#main-dropdown-menu');
+    await expect(menu).toBeVisible();
+
+    const menuAudit = await page.evaluate(() => {
+      const m = document.getElementById('main-dropdown-menu');
+      if (!m) return { visibleItems: 0 };
+      const items = Array.from(m.querySelectorAll('button, a, select')).filter(el => {
+        const s = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        return s.display !== 'none' && s.visibility !== 'hidden' && r.width > 0 && r.height > 0;
+      });
+      return {
+        visibleItems: items.length,
+        ids: items.map(i => i.id).filter(Boolean),
+      };
+    });
+    expect(menuAudit.visibleItems).toBeGreaterThanOrEqual(8);
+
+    await page.locator('#btn-dark-mode').click();
+    await expect(page.locator('body')).toHaveClass(/dark-mode/);
+
+    await context.close();
   });
 });
