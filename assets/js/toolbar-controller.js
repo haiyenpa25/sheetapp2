@@ -448,7 +448,7 @@ const ToolbarController = (() => {
     });
 
     const _syncZoomVal = () => {
-      const v = (document.getElementById('zoom-slider')?.value || '100') + '%';
+      const v = Math.round((window.Store?.get?.('currentZoom') || 1.0) * 100) + '%';
       const lbl = document.getElementById('menu-zoom-val');
       if (lbl) lbl.textContent = v;
     };

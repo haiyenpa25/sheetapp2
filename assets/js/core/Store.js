@@ -328,6 +328,8 @@ const Store = (() => {
       }
       const zoomLabel = document.getElementById('zoom-value-label');
       if (zoomLabel) zoomLabel.textContent = `${zoomPct}%`;
+      const menuZoomLabel = document.getElementById('menu-zoom-val');
+      if (menuZoomLabel) menuZoomLabel.textContent = `${zoomPct}%`;
     }
 
     if (key === 'set') {
