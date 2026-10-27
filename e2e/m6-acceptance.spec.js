@@ -12,7 +12,7 @@ const BASE_URL = MARKER.baseURL.replace(/\/$/, '') + '/';
 const EVIDENCE_DIR = path.join(SOURCE_ROOT, 'docs', 'mobile-evidence');
 const M0_REPORT_PATH = path.join(EVIDENCE_DIR, 'M0-baseline.md');
 const M6_RAW_JSON_PATH = path.join(ROOT, '..', 'm6-acceptance-raw.json');
-const M6_REPORT_MD_PATH = path.join(EVIDENCE_DIR, 'M6-acceptance.md');
+const M6_REPORT_MD_PATH = path.join(ROOT, 'docs', 'mobile-evidence', 'M6-acceptance.md');
 const LARGEST_SONG = { id: 'thanh-ca-903', title: 'THÀNH THÁNH', xmlPath: 'storage/Thanh ca/903 THÀNH THÁNH.xml', xmlSizeBytes: 564674 };
 
 const DEVICE_PROFILES = [
@@ -69,7 +69,7 @@ function readM6Store() {
 
 function writeM6Store(store) {
   fs.mkdirSync(path.dirname(M6_RAW_JSON_PATH), { recursive: true });
-  fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
+  fs.mkdirSync(path.dirname(M6_REPORT_MD_PATH), { recursive: true });
   fs.writeFileSync(M6_RAW_JSON_PATH, JSON.stringify(store, null, 2).replace(/\r?\n/g, '\r\n'), 'utf8');
   renderM6MarkdownReport(store);
 }
@@ -190,13 +190,13 @@ async function runSingleColdLoad(browser, browserName, dev, ui, cond, runIdx) {
     });
   }
 
-  const requests = [], sizePromises = [], consoleErrorMessages = [], failedRequestUrls = [];
+  const requests = [], sizePromises = [], consoleErrorMessages = [], pageErrorMessages = [], failedRequestUrls = [];
   page.on('request', req => requests.push(req));
   page.on('requestfinished', req => { sizePromises.push(req.sizes().then(s => (s ? s.responseHeadersSize + s.responseBodySize : 0)).catch(() => 0)); });
   page.on('requestfailed', req => failedRequestUrls.push(`${req.url()} (${req.failure()?.errorText || 'failed'})`));
   page.on('response', res => { if (res.status() >= 400) failedRequestUrls.push(`${req.url()} (HTTP ${res.status()})`); });
   page.on('console', msg => { if (msg.type() === 'error') consoleErrorMessages.push(msg.text()); });
-  page.on('pageerror', err => consoleErrorMessages.push(`pageerror: ${err.message}`));
+  page.on('pageerror', err => { pageErrorMessages.push(err.message); consoleErrorMessages.push(`pageerror: ${err.message}`); });
 
   const svgWaitTimeout = cond.key === 'slow4g' ? 45000 : 7000;
   const startedAt = Date.now();
@@ -250,7 +250,7 @@ async function runSingleColdLoad(browser, browserName, dev, ui, cond, runIdx) {
 
   const broken = !listOk || !titleOk || !svgOk;
   await context.close();
-  return { run: runIdx, listItems: state.items, listOk, titleText: state.titleText, titleOk, svgOk, svgMs, requests: requests.length, bytes: totalBytes, consoleErrors: consoleErrorMessages.length, failedRequests: failedRequestUrls.length, abortedByRoute, initialBroken, hasRetryUi, retrySucceeded, broken, throttleMode };
+  return { run: runIdx, listItems: state.items, listOk, titleText: state.titleText, titleOk, svgOk, svgMs, requests: requests.length, bytes: totalBytes, pageErrors: pageErrorMessages.length, consoleErrors: consoleErrorMessages.length, errorDetails: consoleErrorMessages, failedRequests: failedRequestUrls.length, abortedByRoute, initialBroken, hasRetryUi, retrySucceeded, broken, throttleMode };
 }
 
 async function measureRapidSwitch5(browser, dev, ui) {
@@ -430,6 +430,8 @@ test.describe('M6-1 · Đo nghiệm thu tải trang & khôi phục lỗi so vớ
             expect(r.titleOk, `${ui.key} ${dev.key} ${cond.key} run ${r.run} titleOk`).toBe(true);
             expect(r.svgOk, `${ui.key} ${dev.key} ${cond.key} run ${r.run} svgOk`).toBe(true);
             expect(r.broken, `${ui.key} ${dev.key} ${cond.key} run ${r.run} broken`).toBe(false);
+            expect(r.pageErrors, `${ui.key} ${dev.key} ${cond.key} run ${r.run} pageErrors`).toBe(0);
+            if (cond.key !== 'drop10pct') expect(r.consoleErrors, `${ui.key} ${dev.key} ${cond.key} run ${r.run} consoleErrors: ${(r.errorDetails || []).join(' | ')}`).toBe(0);
           }
         }
       });
@@ -463,6 +465,9 @@ test.describe('M6-2 · Đổi nhanh 5 bài, xoay máy 3 lần với bài lớn n
         expect(secondLoadSw.secondLoadListOk).toBe(true);
         expect(secondLoadSw.secondLoadTitleOk).toBe(true);
         expect(secondLoadSw.secondLoadSvgOk).toBe(true);
+        expect(rapidSwitch5.consoleErrors, `${ui.key} ${dev.key} rapidSwitch5 consoleErrors`).toBe(0);
+        expect(rotateLargestXml3.consoleErrors, `${ui.key} ${dev.key} rotateLargestXml3 consoleErrors`).toBe(0);
+        expect(secondLoadSw.consoleErrors, `${ui.key} ${dev.key} secondLoadSw consoleErrors`).toBe(0);
       });
     }
   }
