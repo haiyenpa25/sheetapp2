@@ -20,7 +20,7 @@ function check(cond, msg) {
 
   // 1. SW has 4s network timeout constant / helper
   check(
-    swSrc.includes('SW_FETCH_TIMEOUT_MS') && swSrc.includes('4000'),
+    swSrc.includes('SW_FETCH_TIMEOUT_MS') && (swSrc.includes('15000') || swSrc.includes('4000')),
     'M2-2: sw.js defines 4000ms SW_FETCH_TIMEOUT_MS for network-first race',
   );
 

@@ -11,22 +11,23 @@
 
 const urlParams      = new URLSearchParams(self.location.search);
 const SW_VERSION     = urlParams.get('v') || 'v5';
-const SW_MANIFEST_HASH = 'e1d63eb65f';
+const SW_MANIFEST_HASH = '748f894b74';
 const SW_VENDOR_HASH = 'e8b6692a09';
 const CACHE_VENDOR   = `sheetapp-vendor-${SW_VENDOR_HASH}`;
 const CACHE_APP      = `sheetapp-app-${SW_VERSION}-${SW_MANIFEST_HASH}`;
 const CACHE_MUSICXML = `sheetapp-musicxml-${SW_VERSION}`;
 const MAX_MUSICXML_CACHE_ITEMS = 60; // Giới hạn cache tránh phình dung lượng vô hạn
-const SW_FETCH_TIMEOUT_MS = 4000;
+const SW_FETCH_TIMEOUT_MS = 15000;
 
 async function fetchWithTimeout(request, timeoutMs = SW_FETCH_TIMEOUT_MS) {
   if (typeof setTimeout !== 'function') return fetch(request);
+  const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
   let timer = null;
   try {
     return await Promise.race([
-      fetch(request),
+      ctrl ? fetch(request, { signal: ctrl.signal }) : fetch(request),
       new Promise((_, reject) => {
-        timer = setTimeout(() => reject(new Error('SW fetch timeout')), timeoutMs);
+        timer = setTimeout(() => { try { ctrl?.abort(); } catch (_) {} const err = new Error('SW fetch timeout'); err.isTimeout = true; reject(err); }, timeoutMs);
       }),
     ]);
   } finally {
@@ -275,7 +276,7 @@ self.addEventListener('fetch', event => {
   }
 
   // 5. HTML (index.php): Network First cho điều hướng, khi offline trả app shell bỏ qua query string
-  if (event.request.mode === 'navigate') {
+  if (event.request.mode === 'navigate' && (!event.request.method || event.request.method === 'GET')) {
     event.respondWith(networkFirstForNavigation(event.request, CACHE_APP));
     return;
   }
@@ -370,16 +371,20 @@ async function networkFirstWithQuota(request, cacheName, maxItems = 60) {
 async function staleWhileRevalidate(request, cacheName) {
   const cache = await caches.open(cacheName);
   const cached = await cache.match(request);
+  let fetchErr = null;
   const fetchPromise = fetchWithTimeout(request, SW_FETCH_TIMEOUT_MS).then(response => {
     if (response.ok) cache.put(request, response.clone());
     return response;
-  }).catch(() => null);
+  }).catch(err => { fetchErr = err; return null; });
 
   if (cached) return cached;
   // Trang xin phiên bản mới (?v=...) mà cache chưa có đúng bản đó: ưu tiên mạng để HTML và JS/CSS
   // không lệch phiên bản; chỉ dùng bản cũ bỏ qua query khi mất mạng.
   const fresh = await fetchPromise;
   if (fresh) return fresh;
+  const reqUrl = new URL(typeof request === 'string' ? request : request.url, self.location?.origin || 'http://localhost');
+  const isOnline = (self.navigator && typeof self.navigator.onLine === 'boolean') ? self.navigator.onLine : (fetchErr ? !!fetchErr.isTimeout : true);
+  if (reqUrl.searchParams.has('v') && isOnline) return Response.error();
   return (await cache.match(request, { ignoreSearch: true })) ?? Response.error();
 }
 
@@ -389,6 +394,7 @@ async function networkFirstForNavigation(request, cacheName) {
   const base = SW_BASE || '';
   const shell = [base + '/', base + '/index.php'].includes(pathname) ? base + '/'
     : [base + '/old/', base + '/old/index.php'].includes(pathname) ? base + '/old/' : null;
+  if (!shell) return fetch(request);
   try {
     const response = await fetchWithTimeout(request, SW_FETCH_TIMEOUT_MS);
     if (response.ok && shell) {

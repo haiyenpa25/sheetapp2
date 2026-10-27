@@ -1,0 +1,7 @@
+﻿[FAIL:B] Slow 8s network still receives network response (timeout=4000ms, got=CACHED_XML)
+[FAIL:B] Timed-out fetch aborts via AbortController (aborted=0) and returns cached XML
+[FAIL:B] Navigation to /manager/ (no shell) calls fetch(request) directly without SW timeout race
+[FAIL:B] When ONLINE, versioned asset ?v=200 never falls back to stale ?v=100 (got=OLD_V100)
+[PASS:B] When OFFLINE, staleWhileRevalidate falls back to cached asset via ignoreSearch
+SUITE_COMPLETE total=5
+

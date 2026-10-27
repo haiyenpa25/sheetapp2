@@ -1,0 +1,7 @@
+﻿[PASS:B] Slow 8s network still receives network response (timeout=15000ms, got=NETWORK:http://localhost/sheetapp2/storage/song-001.xml)
+[PASS:B] Timed-out fetch aborts via AbortController (aborted=1) and returns cached XML
+[PASS:B] Navigation to /manager/ (no shell) calls fetch(request) directly without SW timeout race
+[PASS:B] When ONLINE, versioned asset ?v=200 never falls back to stale ?v=100 (got=ERROR_RESPONSE)
+[PASS:B] When OFFLINE, staleWhileRevalidate falls back to cached asset via ignoreSearch
+SUITE_COMPLETE total=5
+
