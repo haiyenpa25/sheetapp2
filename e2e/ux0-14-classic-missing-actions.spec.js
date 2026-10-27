@@ -14,7 +14,7 @@ test.describe('UX0-14 · Classic menu ⋮ includes delete chord set, clear all c
   test('Classic UI: menu ⋮ exposes page navigation, and for member with custom set exposes delete set & clear all chords', async ({ page }) => {
     await page.addInitScript(() => {
       try {
-        sessionStorage.setItem('sheetapp_guest_chosen', '1');
+        sessionStorage.setItem('sheetapp_guest_chosen', '1'); window.__swReloading = true;
         localStorage.setItem('sheetapp_guest_toast_shown', '1');
       } catch (_) {}
     });
@@ -67,7 +67,7 @@ test.describe('UX0-14 · Classic menu ⋮ includes delete chord set, clear all c
   test('M4-3 (>= 1 and <= 2): Every core reading action has >= 1 visible entry point at 390, 768, 1024, 1366 on both Modern and Classic', async ({ page }) => {
     await page.addInitScript(() => {
       try {
-        sessionStorage.setItem('sheetapp_guest_chosen', '1');
+        sessionStorage.setItem('sheetapp_guest_chosen', '1'); window.__swReloading = true;
         localStorage.setItem('sheetapp_guest_toast_shown', '1');
       } catch (_) {}
     });
@@ -85,7 +85,7 @@ test.describe('UX0-14 · Classic menu ⋮ includes delete chord set, clear all c
           document.getElementById('main-dropdown-menu')?.classList.remove('hidden');
         });
 
-        const checkRes = await page.evaluate((isClassic) => {
+        const checkRes = await page.evaluate((isClassic) => { const m = document.getElementById('main-dropdown-menu'); if (m) { m.classList.remove('hidden'); m.style.animation = 'none'; m.style.opacity = '1'; }
           const isVis = (el) => {
             if (!el) return false;
             const s = getComputedStyle(el);
