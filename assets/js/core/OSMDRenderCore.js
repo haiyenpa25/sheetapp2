@@ -41,15 +41,24 @@ const OSMDRenderCore = (() => {
 
   function reportRenderError(err) {
     try {
-      window.ErrorReporter?.report?.('osmd.render', err);
+      window.ErrorReporter?.report?.({
+        type: 'render_error',
+        source: 'OSMDRenderCore',
+        message: err?.message || String(err || ''),
+        stack: err?.stack || '',
+      });
       const song = window.Store?.get?.('currentSong');
-      window.AppUI?.showLoadError?.(song, {
-        message: 'Không vẽ được bản nhạc',
-        onRetry: () => {
+      window.AppUI?.showLoadError?.(
+        song,
+        'Không vẽ được bản nhạc',
+        () => {
           const cur = window.Store?.get?.('currentSong') || song;
           if (cur) window.SongLoader?.load?.(cur, window.Store?.get?.('currentTranspose') ?? 0);
         },
-      });
+        () => {
+          window.LyricView?.switchMode?.('lyric');
+        }
+      );
     } catch (_) {}
   }
 

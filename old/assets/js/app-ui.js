@@ -267,7 +267,7 @@ const AppUI = (() => {
     if (el) el.classList.add('hidden');
   }
 
-  function showLoadError(song, message, onRetry, onViewLyric) {
+  function showLoadError(song, message, onRetry, onViewLyric) { if (message && typeof message === 'object') { onViewLyric = message.onViewLyric; onRetry = message.onRetry; message = message.message; }
     document.getElementById('welcome-screen')?.classList.add('hidden');
     document.getElementById('loading-screen')?.classList.add('hidden');
     document.getElementById('sheet-area')?.classList.add('hidden');
