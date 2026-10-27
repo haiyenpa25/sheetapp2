@@ -1,0 +1,16 @@
+Running 6 tests using 1 worker
+
+  x  1 [chromium] › e2e\m6-acceptance.spec.js:625:7 › M6-1 · Đo nghiệm thu tải trang & khôi phục lỗi so với M0-1 › M6-1 acceptance: pixel7 - modern (1.8m)
+  x  2 [chromium] › e2e\m6-acceptance.spec.js:625:7 › M6-1 · Đo nghiệm thu tải trang & khôi phục lỗi so với M0-1 › M6-1 acceptance: pixel7 - classic (2.1m)
+
+  1) [chromium] › e2e\m6-acceptance.spec.js:625:7 › M6-1 acceptance: pixel7 - modern
+    Error: modern pixel7 drop10pct run 2 hasRetryUi
+    Expected: true
+    Received: false
+
+  2) [chromium] › e2e\m6-acceptance.spec.js:625:7 › M6-1 acceptance: pixel7 - classic
+    Error: classic pixel7 drop10pct run 2 hasRetryUi
+    Expected: true
+    Received: false
+
+  2 failed

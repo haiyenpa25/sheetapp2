@@ -518,7 +518,7 @@ const AppUI = (() => {
     panel.classList.remove('hidden');
     panel.querySelector('#btn-sheet-retry')?.addEventListener('click', () => {
       hideLoadError();
-      if (typeof onRetry === 'function') onRetry();
+      if (typeof window !== 'undefined' && Array.isArray(window.__failedScripts) && window.__failedScripts.length > 0) { window.location?.reload?.(); return; } if (typeof onRetry === 'function') onRetry();
     });
     panel.querySelector('#btn-sheet-view-lyric')?.addEventListener('click', () => {
       hideLoadError();

@@ -210,7 +210,7 @@ const LibraryData = (() => {
   }
 
   function retryLoad(reloadFn) {
-    window.ApiService?.songs?.invalidateCache?.();
+    window.ApiService?.songs?.invalidateCache?.(); if (typeof window !== 'undefined' && Array.isArray(window.__failedScripts) && window.__failedScripts.length > 0) { window.location?.reload?.(); return; }
     if (typeof reloadFn === 'function') return reloadFn();
   }
 

@@ -1,0 +1,12 @@
+[PASS:B] M6: docs/mobile-evidence/M6-acceptance.md exists
+[PASS:B] M6: M6-acceptance.md contains raw JSON measurement block
+[PASS:B] M6: Raw JSON block parses with m0_1, m0_2, and section5
+[PASS:B] M6-1: All 18 combinations (2 UIs x 3 devices x 3 conditions) recorded
+[PASS:B] M6-1: 0 broken runs across all 90 runs (0 white screens, 0 lost song titles)
+[PASS:B] M6-1: 100% of initially broken runs under 10% request drop showed Retry UI and recovered on retry
+[PASS:B] M6-2: All 6 UI x device stress & SW combinations recorded
+[PASS:B] M6-2: 0 unresponsive taps in 5-song rapid switch across all UIs and devices
+[PASS:B] M6-2: Initial OSMD render = 1 and rotation renders <= 3 (<= 1 per rotation) on largest XML
+[PASS:B] M6-2: Service Worker controller active on both Modern and Classic on second load
+[PASS:B] M6: Both index.php and old/index.php track script load errors and mount recovery watchdog banner
+SUITE_COMPLETE total=11 passed=11 failed=0
