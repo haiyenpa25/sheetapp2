@@ -193,6 +193,7 @@ echo jsTag('core/Store.js',    false);
 echo jsTag('core/ApiService.js', false);
 echo jsTag('core/ErrorReporter.js', false);
 echo jsTag('core/BootRunner.js', false);
+echo jsTag('core/SongLoaderCore.js', false);
 echo jsTag('core/ServiceWorkerManager.js', false);
 
 // ── 2. Renderers & Engines (defer OK) ──

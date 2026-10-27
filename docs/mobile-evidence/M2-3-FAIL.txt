@@ -1,0 +1,20 @@
+CMD: C:\xampp\php\php.exe tests/m2_song_loader_core_regression.php
+EXIT=1
+[FAIL:B] M2-3: SongLoaderCore exposes loadXml(song, options) returning {xml, source}
+[FAIL:B] M2-3: SongLoaderCore.loadXml returns {xml, source: "network"} on network success
+[FAIL:B] M2-3: SongLoaderCore.loadXml falls back to OfflineVault and returns {xml, source: "offline"}
+[SongLoader] TypeError: window.getComputedStyle is not a function
+    at _computePreloadFitZoom (evalmachine.<anonymous>:327:28)
+    at Object.load (evalmachine.<anonymous>:113:20)
+    at async C:\xampp\htdocs\sheetapp2\tests\js\m2_song_loader_core.cjs:210:5
+[PASS:B] M2-3 (Modern): Switching A -> B aborts in-flight XML request for A
+[FAIL:B] M2-3 (Modern): Rapid switch A -> B renders ONLY song B; late XML A is ignored -> rendered=[]
+[PASS:B] M2-3 (Modern): Store retains song B metadata and XML after late A response
+[SongLoader] TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+    at _syncZoomUI (evalmachine.<anonymous>:219:26)
+    at Object.load (evalmachine.<anonymous>:84:7)
+    at async C:\xampp\htdocs\sheetapp2\tests\js\m2_song_loader_core.cjs:210:5
+[FAIL:B] M2-3 (Classic): Switching A -> B aborts in-flight XML request for A -> aSignalAborted=false
+[PASS:B] M2-3 (Classic): Rapid switch A -> B renders ONLY song B; late XML A is ignored
+[PASS:B] M2-3 (Classic): Store retains song B metadata and XML after late A response
+SUITE_COMPLETE total=9

@@ -16,14 +16,12 @@ const SongLoader = (() => {
     if (!song?.xmlPath) { AppUI.showToast('Bài hát chưa có file sheet nhạc', 'error'); return; }
 
     const loadToken = ++_currentLoadToken; _inFlightLoadToken = loadToken;
+    if (_currentAbortController) { try { _currentAbortController.abort(); } catch (e) {} }
+    _currentAbortController = window.SongLoaderCore?.beginLoad ? (window.SongLoaderCore.beginLoad().controller || new AbortController()) : new AbortController();
+    const abortSignal = _currentAbortController.signal;
     profileOverride = profileOverride || 'HD';
     await window.ChordCanvasEdit?.flushSave?.();
     if (loadToken !== _currentLoadToken) return;
-    if (_currentAbortController) {
-      try { _currentAbortController.abort(); } catch (e) {}
-    }
-    _currentAbortController = new AbortController();
-    const abortSignal = _currentAbortController.signal;
 
     Store.set('currentSong', song);
     Store.set('currentTranspose', transposeOverride ?? 0);
@@ -72,7 +70,7 @@ const SongLoader = (() => {
           ? window.ApiService.resolveUrl(xmlSource)
           : (xmlSource || '');
         const fetchXml = async () => {
-          if (typeof options.xml === 'string' && options.xml) return new Response(options.xml);
+          if (window.SongLoaderCore?.loadXml) { const cr = await window.SongLoaderCore.loadXml(song, { token: loadToken, signal: abortSignal, xml: options.xml }); return { text: async () => cr.xml, source: cr.source }; } if (typeof options.xml === 'string' && options.xml) return new Response(options.xml);
           try {
             // INTENTIONAL EXCEPTION: Static MusicXML asset fetch
             const r = window.ApiService?.fetchXml ? await window.ApiService.fetchXml(xmlUrl, { signal: abortSignal, rawResponse: true }) : await fetch(xmlUrl, { signal: abortSignal });
@@ -154,7 +152,7 @@ const SongLoader = (() => {
 
       // Task 2.8 (F13 fix): Không gọi lại refreshSetDropdown() ở đây vì ChordCanvas.loadSong() đã tự nạp.
       // Chỉ đồng bộ lại chord chip trên thanh thông tin bài hát.
-      setTimeout(() => SongInfoBar?.refreshChordChip?.(), 200);
+      setTimeout(() => window.SongInfoBar?.refreshChordChip?.(), 200);
 
       AppUI.updateSessionPanel(transpose, []);
       _showLoadToast(song, transpose);

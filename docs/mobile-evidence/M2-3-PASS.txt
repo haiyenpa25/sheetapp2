@@ -1,0 +1,16 @@
+CMD: C:\xampp\php\php.exe tests/m2_song_loader_core_regression.php
+EXIT=0
+[PASS:B] M2-3: SongLoaderCore exposes loadXml(song, options) returning {xml, source}
+[PASS:B] M2-3: SongLoaderCore.loadXml returns {xml, source: "network"} on network success
+[PASS:B] M2-3: SongLoaderCore.loadXml falls back to OfflineVault and returns {xml, source: "offline"}
+[SongLoader] TypeError: document.querySelectorAll is not a function
+    at _syncSidebarNavLinks (evalmachine.<anonymous>:579:14)
+    at Object.load (evalmachine.<anonymous>:166:7)
+    at async C:\xampp\htdocs\sheetapp2\tests\js\m2_song_loader_core.cjs:215:5
+[PASS:B] M2-3 (Modern): Switching A -> B aborts in-flight XML request for A
+[PASS:B] M2-3 (Modern): Rapid switch A -> B renders ONLY song B; late XML A is ignored
+[PASS:B] M2-3 (Modern): Store retains song B metadata and XML after late A response
+[PASS:B] M2-3 (Classic): Switching A -> B aborts in-flight XML request for A
+[PASS:B] M2-3 (Classic): Rapid switch A -> B renders ONLY song B; late XML A is ignored
+[PASS:B] M2-3 (Classic): Store retains song B metadata and XML after late A response
+SUITE_COMPLETE total=9

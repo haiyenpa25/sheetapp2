@@ -9,11 +9,15 @@ const SongLoader = (() => {
   let _isFirstLoad = true;
   let _autoFitRetryCount = 0; // Module-scoped, không dùng window.*
   let _currentLoadToken = 0;
+  let _currentAbortController = null;
 
   /* ── Load bài hát hoàn chỉnh ── */
-  async function load(song, transposeOverride = null, profileOverride = 'HD') {
+  async function load(song, transposeOverride = null, profileOverride = 'HD', options = {}) {
     if (!song?.xmlPath) { AppUI.showToast('Bài hát chưa có file sheet nhạc', 'error'); return; }
     const token = ++_currentLoadToken;
+    if (_currentAbortController) { try { _currentAbortController.abort(); } catch (e) {} }
+    _currentAbortController = window.SongLoaderCore?.beginLoad ? (window.SongLoaderCore.beginLoad().controller || new AbortController()) : new AbortController();
+    const abortSignal = _currentAbortController.signal;
 
     Store.set('currentSong', song);
     Store.set('currentTranspose', transposeOverride ?? 0);
@@ -42,6 +46,7 @@ const SongLoader = (() => {
       AppUI.setLoadingText('Đang tải dữ liệu...');
       const xmlFetchUrl = window.ApiService?.resolveUrl ? window.ApiService.resolveUrl(song.xmlPath) : (song.xmlPath.startsWith('storage/') ? `../${song.xmlPath}` : song.xmlPath);
       const fetchXmlText = async () => {
+        if (window.SongLoaderCore?.loadXml) { const cr = await window.SongLoaderCore.loadXml(song, { token, signal: abortSignal, xml: options?.xml }); return cr.xml; }
         try {
           // INTENTIONAL EXCEPTION: Static MusicXML asset fetch
           const res = window.ApiService?.fetchXml ? await window.ApiService.fetchXml(xmlFetchUrl, { rawResponse: true }) : await fetch(xmlFetchUrl);
@@ -77,6 +82,7 @@ const SongLoader = (() => {
       // (nếu #sheet-area đang hidden, OSMD sẽ tính width=0 → trắng trang)
       document.getElementById('sheet-area')?.classList.remove('hidden');
 
+      if (token !== _currentLoadToken) return;
       await OSMDRenderer.load(processedXml, transpose);
       if (token !== _currentLoadToken) return;
 
@@ -102,7 +108,7 @@ const SongLoader = (() => {
       if (window.ChordCanvas?.refreshSetDropdown) {
         setTimeout(() => {
           ChordCanvas.refreshSetDropdown();
-          setTimeout(() => SongInfoBar?.refreshChordChip?.(), 100);
+          setTimeout(() => window.SongInfoBar?.refreshChordChip?.(), 100);
         }, 150);
       }
 
@@ -118,7 +124,7 @@ const SongLoader = (() => {
       EventBus.emit('song:loaded', { song, xml });
 
     } catch (err) {
-      if (token !== _currentLoadToken) return;
+      if (err?.name === 'AbortError' || token !== _currentLoadToken) return;
       console.error('[SongLoader]', err);
       AppUI.showToast(`Lỗi: ${err.message}`, 'error');
       AppUI.showWelcome();
