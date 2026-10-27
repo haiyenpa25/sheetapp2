@@ -2455,3 +2455,12 @@ body.dark-mode #main-dropdown-menu .icon-btn-xs {
     padding: 4px 0 calc(8px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
+
+
+/* UX0-17: Trên điện thoại (<= 680px), đặt #setlist-program-bar ngay phía trên #mobile-thumb-bar để nút ◀ ▶ không bị che */
+@media (max-width: 680px) {
+  #setlist-program-bar {
+    bottom: calc(56px + env(safe-area-inset-bottom, 0px)) !important;
+    z-index: 1000 !important;
+  }
+}
