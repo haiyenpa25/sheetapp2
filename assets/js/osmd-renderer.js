@@ -62,8 +62,10 @@ const OSMDRenderer = (() => {
       if (isLoaded || _pendingRender) {
         _pendingRender = false;
         _renderToken++; _renderCount++;
-        await osmd.render();
-        await _ensureCompactLyricsReadable();
+        try {
+          await osmd.render();
+          await _ensureCompactLyricsReadable();
+        } catch (err) { window.OSMDRenderCore?.reportRenderError?.(err); return; }
         window.ChordCanvasDots?.clearGeomCache?.();
         _titleCompacted = false; _compactTitleSVG(); _tagChordSymbols();
         if (window.ChordCanvas) window.ChordCanvas.reposition();
@@ -73,7 +75,7 @@ const OSMDRenderer = (() => {
           _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} });
         }
       }
-    }, 400));
+    }, window.OSMDRenderCore?.RESIZE_DEBOUNCE_MS || 250));
     resizeObserver.observe(container);
 
     // Pinch-to-Zoom (Multi-touch) using GPU scale transform for buttery 60fps feeling on iPad/Mobile
@@ -203,7 +205,7 @@ const OSMDRenderer = (() => {
       return osmd;
     } catch (err) {
       if (token !== _renderToken) return osmd;
-      console.error('[OSMD] Lỗi khi load:', err);
+      console.error('[OSMD] Lỗi khi load:', err); window.OSMDRenderCore?.reportRenderError?.(err);
       throw err;
     }
   }
@@ -261,7 +263,7 @@ const OSMDRenderer = (() => {
       return osmd;
     } catch (err) {
       if (token !== _renderToken) return osmd;
-      console.error('[OSMD] Lỗi reload:', err);
+      console.error('[OSMD] Lỗi reload:', err); window.OSMDRenderCore?.reportRenderError?.(err);
       throw err;
     }
   }

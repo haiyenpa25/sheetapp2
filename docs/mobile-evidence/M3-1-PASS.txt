@@ -1,0 +1,9 @@
+CMD: C:\xampp\php\php.exe tests\m3_osmd_render_core_regression.php
+EXIT=0
+PASS: M3-1: assets/js/core/OSMDRenderCore.js exists
+PASS: M3-1: OSMDRenderCore exposes canRender, scheduleResize, enqueueRender
+PASS: M3-1: 10 resize events within 200ms coalesce into exactly 1 render (actual=1)
+PASS: M3-1: OSMDRenderCore skips render when container width is 0 and marks pending
+PASS: M3-1: OSMDRenderCore catches render failure and reports to AppUI.showLoadError panel + ErrorReporter
+
+SUITE_COMPLETE total=5

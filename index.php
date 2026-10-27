@@ -208,6 +208,7 @@ echo jsTag('core/TapTempo.js',     false);
 echo jsTag('core/AudioUnlocker.js',false);
 echo jsTag('core/MidiEngine.js',   false);
 echo jsTag('core/SongLoaderCore.js', false);
+echo jsTag('core/OSMDRenderCore.js', false);
 echo jsTag('core/ErrorReporter.js', false);
 echo jsTag('core/BootRunner.js', false);
 echo jsTag('core/ServiceWorkerManager.js', false);

@@ -16,9 +16,20 @@ const OSMDRenderer = (() => {
   let _isCompactMode = false;
   let _titleCompacted = false; // flag tránh compact title nhiều lần
 
-  let _initOptions = {};
+  let _initOptions = {}, _renderToken = 0, _renderCount = 0, _pendingRender = false;
   const OSMD_LOCAL_SRC = 'assets/js/vendor/opensheetmusicdisplay.min.js';
   const OSMD_CDN_SRC = 'https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.6/build/opensheetmusicdisplay.min.js';
+
+  function _canRender() {
+    if (window.OSMDRenderCore?.canRender) return window.OSMDRenderCore.canRender(containerId);
+    if (!containerId) return false;
+    const c = document.getElementById(containerId);
+    if (!c || c.clientWidth <= 0) return false;
+    if (c.closest?.('.hidden') || c.classList?.contains?.('hidden')) return false;
+    const style = window.getComputedStyle ? window.getComputedStyle(c) : null;
+    if (style && (style.display === 'none' || style.visibility === 'hidden')) return false;
+    return true;
+  }
 
   function _createInstanceSync() {
     if (osmd) return osmd;
@@ -58,23 +69,24 @@ const OSMDRenderer = (() => {
     // Resize observer để auto-reflow khi container thay đổi kích thước
     let lastWidth = container.clientWidth;
     const resizeObserver = new ResizeObserver(_debounce(async () => {
-      if (isLoaded) {
-          const currentWidth = container.clientWidth;
-          // iPad/iPhone address bar co giãn thay đổi height nhưng giữ nguyên width.
-          // Chỉ kích hoạt render lại khi chiều rộng thực tế thay đổi > 8px (tránh giật lag khi cuộn).
-          if (currentWidth > 0 && Math.abs(currentWidth - lastWidth) < 8) {
-              return;
-          }
-          lastWidth = currentWidth;
-
-          if (window.ChordCanvas?.isPopupOpen?.()) return; // KHÔNG re-render nếu đang nhập popup hợp âm (tránh mất focus)
-          await osmd.render();
-          _titleCompacted = false; // reset để compact lại sau resize
-          _compactTitleSVG();
-          if (window.ChordCanvas) window.ChordCanvas.reposition();
-          if (window.ChordOverlay) window.ChordOverlay.onOSMDRendered();
+      if (!_canRender() || !osmd) return;
+      const currentWidth = container.clientWidth;
+      if (!_pendingRender && Math.abs(currentWidth - lastWidth) < 8) return;
+      lastWidth = currentWidth;
+      if (window.ChordCanvas?.isPopupOpen?.()) return;
+      if (isLoaded || _pendingRender) {
+        _pendingRender = false;
+        _renderToken++; _renderCount++;
+        try { await osmd.render(); } catch (err) { window.OSMDRenderCore?.reportRenderError?.(err); return; }
+        _titleCompacted = false; _compactTitleSVG();
+        if (window.ChordCanvas) window.ChordCanvas.reposition();
+        if (window.ChordOverlay) window.ChordOverlay.onOSMDRendered();
+        if (!isLoaded) {
+          isLoaded = true;
+          _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} });
+        }
       }
-    }, 400));
+    }, window.OSMDRenderCore?.RESIZE_DEBOUNCE_MS || 250));
     resizeObserver.observe(container);
 
     // Pinch-to-Zoom (Multi-touch) using GPU scale transform for buttery 60fps feeling on iPad/Mobile
@@ -287,29 +299,32 @@ const OSMDRenderer = (() => {
     currentXmlString = xmlString; // Luôn giữ bản gốc
     isLoaded = false;
 
+    const token = ++_renderToken;
     try {
       const processedXml = preprocessXML(xmlString);
       await osmd.load(processedXml);
+      if (token !== _renderToken) return osmd;
       osmd.zoom = currentZoom;
       _applyCompactMode();
-      
-      if (osmd.Sheet && opensheetmusicdisplay.TransposeCalculator) {
-          osmd.TransposeCalculator = new opensheetmusicdisplay.TransposeCalculator();
-          osmd.Sheet.Transpose = transposeValue;
-          osmd.updateGraphic();
+      if (transposeValue !== 0 && osmd.Sheet && opensheetmusicdisplay.TransposeCalculator) {
+        osmd.TransposeCalculator = new opensheetmusicdisplay.TransposeCalculator();
+        osmd.Sheet.Transpose = transposeValue;
+        osmd.updateGraphic?.();
       }
-
       refreshRules();
-      _forceLayoutRecalc();
+      if (!_canRender()) { _pendingRender = true; return osmd; }
+      _pendingRender = false; _renderCount++;
       await osmd.render();
-      _forceLayoutRecalc(); // lần 2: sau render để clip SVG nếu vẫn rộng
-      _titleCompacted = false;
-      _compactTitleSVG();
+      if (token !== _renderToken) return osmd;
+      _forceLayoutRecalc();
+      _titleCompacted = false; _compactTitleSVG();
       isLoaded = true;
       _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} });
       return osmd;
     } catch (err) {
+      if (token !== _renderToken) return osmd;
       console.error('[OSMD] Lỗi khi load:', err);
+      window.OSMDRenderCore?.reportRenderError?.(err);
       throw err;
     }
   }
@@ -353,20 +368,39 @@ const OSMDRenderer = (() => {
    * Thay đổi mức zoom — nhận decimal (0.1 → 2.5), App.setZoom đã convert từ percent
    */
   async function setZoom(level) {
-    // level là decimal: 0.1 = 10%, 1.0 = 100%, 2.0 = 200%
     currentZoom = Math.max(0.1, Math.min(2.5, level));
-    if (osmd && isLoaded) {
+    if (osmd && (isLoaded || _pendingRender)) {
       osmd.zoom = currentZoom;
+      if (!_canRender()) { _pendingRender = true; return; }
+      _pendingRender = false;
+      const token = ++_renderToken;
       refreshRules();
       _forceLayoutRecalc();
+      _renderCount++;
       await osmd.render();
+      if (token !== _renderToken) return;
       _forceLayoutRecalc();
-      _titleCompacted = false;
-      _compactTitleSVG();
+      _titleCompacted = false; _compactTitleSVG();
       if (window.ChordCanvas) window.ChordCanvas.reposition();
       if (window.ChordOverlay) window.ChordOverlay.onOSMDRendered();
       _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} });
     }
+  }
+
+  async function renderPending() {
+    if (!_pendingRender || !_canRender() || !osmd) return false;
+    _pendingRender = false;
+    _renderToken++; _renderCount++;
+    await osmd.render();
+    _forceLayoutRecalc();
+    _titleCompacted = false; _compactTitleSVG();
+    if (window.ChordCanvas) window.ChordCanvas.reposition();
+    if (window.ChordOverlay) window.ChordOverlay.onOSMDRendered();
+    if (!isLoaded) {
+      isLoaded = true;
+      _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} });
+    }
+    return true;
   }
 
   /** Set zoom level mà không trigger render (dùng trước load()) */
@@ -477,104 +511,38 @@ const OSMDRenderer = (() => {
     _titleCompacted = true;
   }
 
-  function setCompactMode(val) {
-      _isCompactMode = !!val;
-      if (isLoaded && osmd && currentXmlString) {
-          reload(currentXmlString);
-      }
-  }
-
+  function setCompactMode(val) { _isCompactMode = !!val; if (isLoaded && osmd && currentXmlString) reload(currentXmlString); }
   function getCompactMode() { return _isCompactMode; }
 
-  /**
-   * Ẩn/hiện chữ Điệp Khúc, Coda, D.C., Fine... trong SVG khi compact mode bật.
-   * Các text này xuất phát từ <rehearsal> hoặc <direction><words> trong MusicXML.
-   */
+  /** Ẩn/hiện chữ Điệp Khúc, Coda, D.C., Fine... trong SVG khi compact mode bật. */
   function _hideRepeatLabels(hide) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    const svg = container.querySelector('svg');
+    const svg = document.getElementById(containerId)?.querySelector('svg');
     if (!svg) return;
-
     const REPEAT_PATTERN = /^(đi[eệ]p\s*kh[úu]c|coda|d\.?c\.?|da\s*capo|fine|segno|d\.?s\.?|chorus|refrain)/i;
-
-    svg.querySelectorAll('text').forEach(t => {
-      const txt = t.textContent.trim();
-      if (REPEAT_PATTERN.test(txt)) {
-        t.style.display = hide ? 'none' : '';
-      }
-    });
+    svg.querySelectorAll('text').forEach(t => { if (REPEAT_PATTERN.test(t.textContent.trim())) t.style.display = hide ? 'none' : ''; });
   }
 
   function _applyCompactMode() {
-      if (!osmd || !osmd.Sheet) return;  // BUG-11 fix: capital S (OSMD API)
-      
-      let compactPrefs = { hideBass: true, hideVoices: true, hideText: true };
-      if (window.DisplaySettings) compactPrefs = DisplaySettings.getCompactPrefs();
-      
-      // Nếu không bật Gọn nhẹ thì bật lại Text
-      if (!_isCompactMode) {
-          osmd.setOptions({
-              drawComposer: true,
-              drawCredits: true,
-              drawSubtitle: true,
-              drawLyricist: true
-          });
-          return;
+    if (!osmd || !osmd.Sheet) return;
+    let compactPrefs = { hideBass: true, hideVoices: true, hideText: true };
+    if (window.DisplaySettings) compactPrefs = DisplaySettings.getCompactPrefs();
+    if (!_isCompactMode) { osmd.setOptions({ drawComposer: true, drawCredits: true, drawSubtitle: true, drawLyricist: true }); return; }
+    osmd.Sheet.Instruments.forEach((ins, insIndex) => {
+      if (!ins.Staves) return;
+      if (compactPrefs.hideBass) {
+        if (ins.Staves.length >= 2) for (let i = 1; i < ins.Staves.length; i++) ins.Staves[i].Visible = false;
+        if (insIndex > 0) { ins.Visible = false; ins.Staves.forEach(st => st.Visible = false); }
       }
-
-      // KHI ĐANG BẬT GỌN NHẸ -> Đọc cấu hình
-      osmd.Sheet.Instruments.forEach((ins, insIndex) => {  // BUG fix: capital Sheet (OSMD API)
-          if (ins.Staves) {
-              if (compactPrefs.hideBass) {
-                  if (ins.Staves.length >= 2) {
-                      for (let i = 1; i < ins.Staves.length; i++) {
-                          ins.Staves[i].Visible = false;
-                      }
-                  }
-                  if (insIndex > 0) {
-                      ins.Visible = false; 
-                      ins.Staves.forEach(st => st.Visible = false);
-                  }
-              }
-              
-              if (compactPrefs.hideVoices && insIndex === 0) {
-                  if (ins.Voices) {
-                      ins.Voices.forEach(voice => {
-                          if (voice.VoiceId > 1) {
-                              voice.Visible = false;
-                          }
-                      });
-                  }
-              }
-          }
-      });
-
-      // Ẩn văn bản theo cấu hình
-      if (compactPrefs.hideText) {
-          osmd.setOptions({
-              drawComposer: false,
-              drawCredits: false,
-              drawSubtitle: false,
-              drawLyricist: false
-          });
-      } else {
-          osmd.setOptions({
-              drawComposer: true,
-              drawCredits: true,
-              drawSubtitle: true,
-              drawLyricist: true
-          });
+      if (compactPrefs.hideVoices && insIndex === 0 && ins.Voices) {
+        ins.Voices.forEach(voice => { if (voice.VoiceId > 1) voice.Visible = false; });
       }
-
-      // Title visibility
-      osmd.setOptions({ drawTitle: !compactPrefs.hideTitle });
-
-      // Ẩn/hiện chữ Điệp Khúc/Coda sau khi OSMD render xong SVG
-      setTimeout(() => _hideRepeatLabels(_isCompactMode), 400);
+    });
+    const showTxt = !compactPrefs.hideText;
+    osmd.setOptions({ drawComposer: showTxt, drawCredits: showTxt, drawSubtitle: showTxt, drawLyricist: showTxt, drawTitle: !compactPrefs.hideTitle });
+    setTimeout(() => _hideRepeatLabels(_isCompactMode), 400);
   }
 
-  return { init, load, reload, setZoom, setZoomSilent, getInstance, getIsLoaded, getCurrentXml, getCurrentZoom, onReady, destroy, setCompactMode, getCompactMode, refreshRules };
+  return { init, load, reload, setZoom, setZoomSilent, getInstance, getIsLoaded, getCurrentXml, getCurrentZoom, onReady, destroy, setCompactMode, getCompactMode, refreshRules, getRenderToken: () => _renderToken, getRenderCount: () => _renderCount, resetRenderCount: () => { _renderCount = 0; }, canRender: _canRender, renderPending, hasPendingRender: () => _pendingRender };
 })();
 
 window.OSMDRenderer = OSMDRenderer;
