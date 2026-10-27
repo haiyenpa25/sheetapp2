@@ -1,0 +1,40 @@
+﻿[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 2 tests using 1 worker
+
+[1/2] [chromium] › e2e\m4-stage2-layout.spec.js:120:3 › M4-7 Â· VÃ¹ng cháº¡m láº­t trang mÃ©p trÃ¡i/pháº£i trÃªn báº£n nháº¡c (cáº£ hai giao diá»‡n), khÃ´ng xung Ä‘á»™t cháº¡m vÃ o ná»‘t (dÃ¹ng PointerTap) › M4-7 Modern & Classic: tap note in middle does not turn page; tap right edge turns to next page
+[2/2] [webkit] › e2e\m4-stage2-layout.spec.js:120:3 › M4-7 Â· VÃ¹ng cháº¡m láº­t trang mÃ©p trÃ¡i/pháº£i trÃªn báº£n nháº¡c (cáº£ hai giao diá»‡n), khÃ´ng xung Ä‘á»™t cháº¡m vÃ o ná»‘t (dÃ¹ng PointerTap) › M4-7 Modern & Classic: tap note in middle does not turn page; tap right edge turns to next page
+  1) [webkit] › e2e\m4-stage2-layout.spec.js:120:3 › M4-7 Â· VÃ¹ng cháº¡m láº­t trang mÃ©p trÃ¡i/pháº£i trÃªn báº£n nháº¡c (cáº£ hai giao diá»‡n), khÃ´ng xung Ä‘á»™t cháº¡m vÃ o ná»‘t (dÃ¹ng PointerTap) › M4-7 Modern & Classic: tap note in middle does not turn page; tap right edge turns to next page 
+
+    Error: ?song=thanh-ca-001&v=sheet #edge-tap-next visible
+
+    expect(locator).toBeVisible() failed
+
+    Locator:  locator('#edge-tap-next')
+    Expected: visible
+    Received: hidden
+    Timeout:  10000ms
+
+    Call log:
+      - ?song=thanh-ca-001&v=sheet #edge-tap-next visible locator('#edge-tap-next') with timeout 10000ms
+      - waiting for locator('#edge-tap-next')
+        22 × locator resolved to <div id="edge-tap-next" class="edge-tap-zone edge-tap-right" title="Chạm mép phải: Lật trang sau (PageDown)"></div>
+           - unexpected value "hidden"
+
+
+      172 |       // Cháº¡m mÃ©p pháº£i (#edge-tap-next) -> sang trang 2
+      173 |       const nextEdge = page.locator('#edge-tap-next');
+    > 174 |       await expect(nextEdge, `${uiPath} #edge-tap-next visible`).toBeVisible();
+          |                                                                  ^
+      175 |       await nextEdge.tap();
+      176 |       await page.waitForTimeout(150);
+      177 |
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m4-stage2-layout.spec.js:174:66
+
+    Error Context: test-results\m4-stage2-layout-M4-7-Â·-V-e6636-ght-edge-turns-to-next-page-webkit\error-context.md
+
+
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+  1 failed
+    [webkit] › e2e\m4-stage2-layout.spec.js:120:3 › M4-7 Â· VÃ¹ng cháº¡m láº­t trang mÃ©p trÃ¡i/pháº£i trÃªn báº£n nháº¡c (cáº£ hai giao diá»‡n), khÃ´ng xung Ä‘á»™t cháº¡m vÃ o ná»‘t (dÃ¹ng PointerTap) › M4-7 Modern & Classic: tap note in middle does not turn page; tap right edge turns to next page 
+  1 skipped

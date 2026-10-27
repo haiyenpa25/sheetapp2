@@ -96,6 +96,8 @@
   </div>
 
   <!-- OSMD PAGE BAR -->
+  <div id="edge-tap-prev" class="edge-tap-zone edge-tap-left" title="Chạm mép trái: Lật trang trước (PageUp)"></div>
+  <div id="edge-tap-next" class="edge-tap-zone edge-tap-right" title="Chạm mép phải: Lật trang sau (PageDown)"></div>
   <div id="page-bar" class="page-bar hidden">
 
     <!-- ① Transpose -->

@@ -408,7 +408,7 @@ const AppUI = (() => {
     });
 
     // Hands-free Edge-Tap page navigation
-    document.getElementById('edge-tap-prev')?.addEventListener('click', (e) => {
+    document.getElementById('edge-tap-prev')?.addEventListener('click', (e) => { if (window.PointerTap) return;
       e.stopPropagation();
       if (window.PageNav?.goToPrev) {
         window.PageNav.goToPrev();
@@ -418,7 +418,7 @@ const AppUI = (() => {
       }
     });
 
-    document.getElementById('edge-tap-next')?.addEventListener('click', (e) => {
+    document.getElementById('edge-tap-next')?.addEventListener('click', (e) => { if (window.PointerTap) return;
       e.stopPropagation();
       if (window.PageNav?.goToNext) {
         window.PageNav.goToNext();

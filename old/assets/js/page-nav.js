@@ -35,6 +35,27 @@ const PageNav = (() => {
 
     // Scroll listener → cập nhật trang hiện tại (Throttled via rAF)
     wrapper()?.addEventListener('scroll', _onScrollThrottled, { passive: true });
+    _bindEdgeTapZones();
+  }
+
+  function _bindEdgeTapZones() {
+    if (!document.getElementById('page-nav-edge-tap-style') && document.head) {
+      const st = document.createElement('style');
+      st.id = 'page-nav-edge-tap-style';
+      st.textContent = 'body:not(.sheet-only-mode) .sheet-viewer-wrapper:has(#sheet-area:not(.hidden)) .edge-tap-zone { display: block; position: fixed; top: 68px; bottom: 84px; width: 44px; z-index: 5; cursor: pointer; touch-action: manipulation; opacity: 0; } .edge-tap-left { left: 0; } .edge-tap-right { right: 0; }';
+      document.head.appendChild(st);
+    }
+    const bindTap = window.PointerTap?.bind || ((el, fn) => el.addEventListener('click', fn));
+    const prevZone = document.getElementById('edge-tap-prev');
+    const nextZone = document.getElementById('edge-tap-next');
+    if (prevZone && !prevZone.dataset.boundPageNav) {
+      prevZone.dataset.boundPageNav = '1';
+      bindTap(prevZone, () => goToPrev());
+    }
+    if (nextZone && !nextZone.dataset.boundPageNav) {
+      nextZone.dataset.boundPageNav = '1';
+      bindTap(nextZone, () => goToNext());
+    }
   }
 
   /**
@@ -71,8 +92,11 @@ const PageNav = (() => {
     if (n < 1) n = 1;
     if (n > totalPages) n = totalPages;
     currentPage = n;
-    const target = pageOffsets[n - 1] || 0;
-    wrapEl.scrollTo({ top: target, behavior: 'smooth' });
+    // target computed below
+    if (pageOffsets.length <= 1) computePages();
+    currentPage = Math.min(Math.max(1, n), totalPages);
+    const target = pageOffsets[currentPage - 1] || 0;
+    wrapEl.scrollTop = target;
     _updateIndicator();
   }
 
