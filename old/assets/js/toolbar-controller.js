@@ -5,12 +5,17 @@
 const ToolbarController = (() => {
   'use strict';
 
+  function _safeBind(name, fn) {
+    if (typeof window !== 'undefined' && window.BootRunner?.safeInit) { window.BootRunner.safeInit(name, fn); return; }
+    try { fn(); } catch (err) { console.error('[ToolbarController] ' + name + ' failed:', err); }
+  }
+
   function init() {
-    _bindTranspose();
-    _bindZoom();
-    _bindSidebar();
-    _bindDarkMode();
-    _bindMisc();
+    _safeBind('ToolbarController._bindTranspose', _bindTranspose);
+    _safeBind('ToolbarController._bindZoom', _bindZoom);
+    _safeBind('ToolbarController._bindSidebar', _bindSidebar);
+    _safeBind('ToolbarController._bindDarkMode', _bindDarkMode);
+    _safeBind('ToolbarController._bindMisc', _bindMisc);
   }
 
   function _bindTranspose() {
@@ -102,7 +107,7 @@ const ToolbarController = (() => {
   function _bindDarkMode() {
     const btnToggle = document.getElementById('btn-dark-toggle');
     const btnMenu   = document.getElementById('btn-dark-mode');
-    const saved = (window.SafeStorage ? window.SafeStorage.getItem('sheetapp_dark_mode') : localStorage.getItem('sheetapp_dark_mode')) === '1';
+    const saved = (window.SafeStorage ? window.SafeStorage.get('sheetapp_dark_mode') : localStorage.getItem('sheetapp_dark_mode')) === '1';
     if (saved) {
       document.body.classList.add('dark-mode');
       btnToggle?.classList.add('dark-active');
@@ -112,7 +117,7 @@ const ToolbarController = (() => {
       const on = document.body.classList.toggle('dark-mode');
       btnToggle?.classList.toggle('dark-active', on);
       btnMenu?.classList.toggle('active', on);
-      if (window.SafeStorage) window.SafeStorage.setItem('sheetapp_dark_mode', on ? '1' : '0');
+      if (window.SafeStorage) window.SafeStorage.set('sheetapp_dark_mode', on ? '1' : '0');
       else { try { localStorage.setItem('sheetapp_dark_mode', on ? '1' : '0'); } catch (_) {} }
       App?.showToast?.(on ? '🌙 Chế độ tối' : '☀️ Chế độ sáng', 'info');
     }
@@ -121,7 +126,8 @@ const ToolbarController = (() => {
   }
 
   function _bindMisc() {
-    document.getElementById('btn-fullscreen')?.addEventListener('click', AppUI?.toggleFullscreen);
+    document.getElementById('btn-fullscreen')?.addEventListener('click', () => AppUI?.toggleFullscreen?.());
+    document.getElementById('btn-switch-new-ui')?.addEventListener('click', e => { if (window.URLState?.interfaceUrl) { e.preventDefault(); window.location.href = window.URLState.interfaceUrl(false); } });
     document.getElementById('btn-print')?.addEventListener('click', () => window.print());
     document.getElementById('btn-session-panel')?.addEventListener('click', () => PerformanceNotes?.toggle?.());
     document.getElementById('btn-help')?.addEventListener('click', () => window._helpModalOpen?.('guide'));

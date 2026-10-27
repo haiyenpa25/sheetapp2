@@ -21,16 +21,9 @@ const ToolbarController = (() => {
     }
   }
 
+  function _sb(n, fn) { if (window.BootRunner?.safeInit) window.BootRunner.safeInit(n, fn); else try { fn(); } catch (e) { console.error(e); } }
   function init() {
-    _bindTranspose();
-    _bindZoom();
-    _bindSidebar();
-    _bindDarkMode();
-    _bindMisc();
-    _bindMoreOptionsMenu();
-    _bindCompactWidthObserver();
-    _bindViewSwitch();
-    _bindToolbarTempo();
+    [['Transpose',_bindTranspose],['Zoom',_bindZoom],['Sidebar',_bindSidebar],['DarkMode',_bindDarkMode],['Misc',_bindMisc],['MoreMenu',_bindMoreOptionsMenu],['CompactWidth',_bindCompactWidthObserver],['ViewSwitch',_bindViewSwitch],['Tempo',_bindToolbarTempo]].forEach(([n, fn]) => _sb('ToolbarController._bind' + n, fn));
   }
 
   // R0-7 (ROADMAP5): @container mainarea (định nghĩa trên .main-content) chỉ áp dụng cho
@@ -257,12 +250,12 @@ const ToolbarController = (() => {
 
   function _bindDarkMode() {
     const btn = document.getElementById('btn-dark-toggle');
-    const saved = localStorage.getItem('sheetapp_dark_mode') === '1';
+    const saved = (window.SafeStorage ? window.SafeStorage.get('sheetapp_dark_mode') : localStorage.getItem('sheetapp_dark_mode')) === '1';
     if (saved) { document.body.classList.add('dark-mode'); btn?.classList.add('dark-active'); }
     btn?.addEventListener('click', () => {
       const on = document.body.classList.toggle('dark-mode');
       btn.classList.toggle('dark-active', on);
-      localStorage.setItem('sheetapp_dark_mode', on ? '1' : '0');
+      if (window.SafeStorage) window.SafeStorage.set('sheetapp_dark_mode', on ? '1' : '0'); else localStorage.setItem('sheetapp_dark_mode', on ? '1' : '0');
       App?.showToast?.(on ? '🌙 Chế độ tối' : '☀️ Chế độ sáng', 'info');
     });
   }
