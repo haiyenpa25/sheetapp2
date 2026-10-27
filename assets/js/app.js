@@ -78,8 +78,8 @@ const App = (() => {
     _safeInit('SetlistUI', () => window.SetlistUI?.init?.());
     _safeInit('Importer', () => window.Importer?.init?.());
     _safeInit('DisplaySettings', () => window.DisplaySettings?.init?.());
-    _safeInit('StageLens', () => window.StageLens?.init?.());
-    _safeInit('GuitarLens', () => window.GuitarLens?.init?.());
+    _safeInit('StageLens', () => window.StageLens && window.StageLens.init());
+    _safeInit('GuitarLens', () => window.GuitarLens && window.GuitarLens.init());
     _safeInit('BassLens', () => window.BassLens?.init?.());
     _safeInit('DrumsLens', () => window.DrumsLens?.init?.());
     _safeInit('VocalsLens', () => window.VocalsLens?.init?.());
@@ -95,15 +95,15 @@ const App = (() => {
     _safeInit('FollowLeader', () => window.FollowLeader?.init?.());
 
     _safeInit('ToolbarController', () => window.ToolbarController?.init?.());
-    _safeInit('MobileController', () => window.MobileController?.init?.());
+    _safeInit('MobileController', () => window.MobileController && window.MobileController.init());
     _safeInit('KeyboardHandler', () => window.KeyboardHandler?.init?.());
     _safeInit('ServiceWorkerManager', () => {
       if (window.ServiceWorkerManager) {
-        window.ServiceWorkerManager.register?.();
+        window.ServiceWorkerManager.register();
       } else if (window.ScriptLoader && typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
         const loadSw = () => {
           window.ScriptLoader.load('assets/js/core/ServiceWorkerManager.js').then(() => {
-            window.ServiceWorkerManager?.register?.();
+            if (window.ServiceWorkerManager) window.ServiceWorkerManager.register();
           });
         };
         if (document.readyState === 'complete') {
@@ -146,7 +146,7 @@ const App = (() => {
     window.URLState?.update?.({ t: newVal });
     window.EventBus?.emit?.('transpose:changed', { value: newVal });
     clearTimeout(_transposeTimer);
-    _transposeTimer = setTimeout(() => window.SongLoader?.commitTranspose?.(), 100);
+    const SongLoader = window.SongLoader; _transposeTimer = setTimeout(() => SongLoader.commitTranspose(), 100);
   }
 
   async function resetTranspose() {
@@ -231,7 +231,7 @@ const App = (() => {
       return window.SongLoader?.load?.(song, t);
     },
     loadSongWithProfile: (song, profile, t, options) => {
-      return options ? window.SongLoader?.load?.(song, t, profile, options) : window.SongLoader?.load?.(song, t, profile);
+      return options ? window.SongLoader?.load?.(song, t, profile, options) : window.SongLoader.load(song, t, profile);
     },
     loadSongXmlDirect: async (songId, xml, transpose = 0, profile = 'HD') => {
       let song = window.LibraryUI?.getSongObj?.(songId) || window.LibraryUI?.getSongById?.(songId);
@@ -240,7 +240,7 @@ const App = (() => {
         song = result?.data || result;
       }
       if (!song?.xmlPath) throw new Error('Không tìm thấy bản nhạc của ca trưởng');
-      return window.SongLoader?.load?.(song, transpose, profile, { instant: true, xml });
+      const sl = window.SongLoader || (typeof SongLoader !== 'undefined' ? SongLoader : null); return sl?.load?.(song, transpose, profile, { instant: true, xml });
     },
     transposeBy, resetTranspose, setTransposeDirect, setZoom, navigateNext, navigatePrev,
     toggleSidebar:       ()    => window.ToolbarController?.toggleSidebar?.(),

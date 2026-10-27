@@ -131,3 +131,75 @@ test.describe('M1-4 · Chặn OSMD local → danh sách vẫn hiện, mở bài 
     }
   }
 });
+
+test.describe('M1-5 · ErrorReporter dùng chung, hiện toast có nút Tải lại (tối đa 1 lần / 30s) và ghi client_log', () => {
+  for (const dev of DEVICE_PROFILES) {
+    for (const ui of UIS) {
+      test(`M1-5 error toast & client_log: ${dev.key} - ${ui.key}`, async ({ browser }, testInfo) => {
+        test.skip(testInfo.project.name !== dev.project, `Chạy ${dev.key} trên ${dev.project}`);
+        test.setTimeout(30000);
+
+        const context = await browser.newContext({
+          ...dev.descriptor,
+          baseURL: BASE_URL,
+          serviceWorkers: 'block',
+        });
+        const page = await context.newPage();
+
+        await page.addInitScript(() => {
+          try {
+            sessionStorage.setItem('sheetapp_guest_chosen', '1');
+            localStorage.setItem('sheetapp_guest_toast_shown', '1');
+          } catch (_) {}
+        });
+
+        const clientLogs = [];
+        await page.route('**/api/index.php?route=client_log*', async route => {
+          const postData = route.request().postData() || '{}';
+          try {
+            clientLogs.push(JSON.parse(postData));
+          } catch (_) {
+            clientLogs.push({ raw: postData });
+          }
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({ success: true }),
+          });
+        });
+
+        await page.goto(BASE_URL + ui.path, { waitUntil: 'domcontentloaded', timeout: 20000 });
+        await page.locator('#song-list .song-item').first().waitFor({ state: 'attached', timeout: 10000 });
+
+        const hasReporter = await page.evaluate(() => Boolean(window.ErrorReporter && typeof window.ErrorReporter.report === 'function'));
+        expect(hasReporter).toBe(true);
+
+        // Ném lỗi giả trong handler
+        await page.evaluate(() => {
+          setTimeout(() => {
+            throw new Error('M1-5 simulated handler error');
+          }, 10);
+        });
+
+        const toast = page.locator('#error-reporter-toast');
+        await toast.waitFor({ state: 'visible', timeout: 5000 });
+        const toastText = (await toast.textContent()) || '';
+        expect(toastText).toContain('Tải lại');
+
+        await expect.poll(() => clientLogs.some(item => JSON.stringify(item).includes('M1-5 simulated handler error')), { timeout: 5000 }).toBe(true);
+
+        // Kiểm tra rate-limit tối đa 1 lần mỗi 30 giây
+        await page.evaluate(() => {
+          document.getElementById('error-reporter-toast')?.remove();
+          Promise.reject(new Error('M1-5 second error within 30s'));
+        });
+        await page.waitForTimeout(300);
+        const toastStillAbsent = await page.evaluate(() => !document.getElementById('error-reporter-toast'));
+        expect(toastStillAbsent).toBe(true);
+        await expect.poll(() => clientLogs.some(item => JSON.stringify(item).includes('M1-5 second error within 30s')), { timeout: 5000 }).toBe(true);
+
+        await context.close();
+      });
+    }
+  }
+});

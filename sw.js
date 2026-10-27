@@ -11,7 +11,7 @@
 
 const urlParams      = new URLSearchParams(self.location.search);
 const SW_VERSION     = urlParams.get('v') || 'v5';
-const SW_MANIFEST_HASH = 'cf5a6d56b0';
+const SW_MANIFEST_HASH = 'fa7b1e1186';
 const SW_VENDOR_HASH = 'e8b6692a09';
 const CACHE_VENDOR   = `sheetapp-vendor-${SW_VENDOR_HASH}`;
 const CACHE_APP      = `sheetapp-app-${SW_VERSION}-${SW_MANIFEST_HASH}`;
@@ -63,6 +63,7 @@ const PRECACHE_APP = [
   '/assets/js/core/MidiEngine.js',
   '/assets/js/core/SongLoaderCore.js',
   '/assets/js/core/ErrorReporter.js',
+  '/assets/js/core/BootRunner.js',
   '/assets/js/core/ServiceWorkerManager.js',
   '/assets/js/core/OfflineSetlistManager.js',
   '/assets/js/osmd-svg-text.js',

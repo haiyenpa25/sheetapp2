@@ -50,7 +50,7 @@ const SongLoader = (() => {
             window.OfflineVault?.saveXml?.(song.xmlPath, text);
             return text;
           }
-        } catch (_) {}
+        } catch (err) { console.warn('[SongLoader] fetchXmlText failed, trying OfflineVault:', err); }
         const cachedXml = await window.OfflineVault?.getXml?.(song.xmlPath);
         if (cachedXml) return cachedXml;
         throw new Error('Không thể tải file XML (Mất mạng và chưa lưu ngoại tuyến)');

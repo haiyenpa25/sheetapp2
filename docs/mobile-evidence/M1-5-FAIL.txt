@@ -1,0 +1,33 @@
+CMD: npx playwright test e2e/m1-boot-resilience.spec.js -g "M1-5" --max-failures=1 --reporter=line
+EXIT=1
+[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 12 tests using 1 worker
+
+[1/12] [chromium] › e2e\m1-boot-resilience.spec.js:138:7 › M1-5 · ErrorReporter dùng chung, hiện toast có nút Tải lại (tối đa 1 lần / 30s) và ghi client_log › M1-5 error toast & client_log: pixel7 - modern
+  1) [chromium] › e2e\m1-boot-resilience.spec.js:138:7 › M1-5 · ErrorReporter dùng chung, hiện toast có nút Tải lại (tối đa 1 lần / 30s) và ghi client_log › M1-5 error toast & client_log: pixel7 - modern 
+
+    TimeoutError: locator.waitFor: Timeout 5000ms exceeded.
+    Call log:
+      - waiting for locator('#error-reporter-toast') to be visible
+
+
+      183 |
+      184 |         const toast = page.locator('#error-reporter-toast');
+    > 185 |         await toast.waitFor({ state: 'visible', timeout: 5000 });
+          |                     ^
+      186 |         const toastText = (await toast.textContent()) || '';
+      187 |         expect(toastText).toContain('Tải lại');
+      188 |
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m1-boot-resilience.spec.js:185:21
+
+    Error Context: test-results\m1-boot-resilience-M1-5-·--11d2c--client-log-pixel7---modern-chromium\error-context.md
+
+
+Testing stopped early after 1 maximum allowed failures.
+
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+  1 failed
+    [chromium] › e2e\m1-boot-resilience.spec.js:138:7 › M1-5 · ErrorReporter dùng chung, hiện toast có nút Tải lại (tối đa 1 lần / 30s) và ghi client_log › M1-5 error toast & client_log: pixel7 - modern 
+  11 did not run
+  1 error was not a part of any test, see above for details

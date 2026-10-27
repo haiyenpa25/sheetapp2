@@ -130,7 +130,7 @@ const ChordCanvas = (() => {
             _customChords[`${measureIdx}_${noteIdx}`] = chord;
           });
         }
-      } catch(e) {}
+      } catch (e) { console.warn('[ChordCanvas] loadSong failed:', e); window.ErrorReporter?.report?.({ type: 'caught_error', source: 'old/chord-canvas.js:loadSong', message: e?.message || String(e) }); }
     }
 
     setTimeout(_refreshSetDropdown, 300);
@@ -380,7 +380,7 @@ const ChordCanvas = (() => {
           if (r.success && r.chords) {
             r.chords.forEach(({ measureIdx, noteIdx, chord }) => { _customChords[`${measureIdx}_${noteIdx}`] = chord; });
           }
-        } catch(e) {}
+        } catch (e) { console.warn('[ChordCanvas] loadSong failed:', e); window.ErrorReporter?.report?.({ type: 'caught_error', source: 'old/chord-canvas.js:loadSong', message: e?.message || String(e) }); }
       }
     }
     if (name === 'default' || _prevSet === 'default') {
@@ -458,7 +458,7 @@ const ChordCanvas = (() => {
         if (r?.success && Array.isArray(r.sets)) {
           sets = ['default', 'HD', ...r.sets.filter(s => s !== 'HD' && s !== 'default')];
         }
-      } catch(e) {}
+      } catch (e) { console.warn('[ChordCanvas] loadSong failed:', e); window.ErrorReporter?.report?.({ type: 'caught_error', source: 'old/chord-canvas.js:loadSong', message: e?.message || String(e) }); }
     }
     if (songId !== window.App?.getCurrentSongId?.()) return;
     if (_currentSet && !sets.includes(_currentSet)) sets.push(_currentSet);

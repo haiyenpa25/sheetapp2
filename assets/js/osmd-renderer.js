@@ -8,8 +8,8 @@ const OSMDRenderer = (() => {
 
   let osmd = null, containerId = null, currentXmlString = null, currentZoom = 1.0;
   let isLoaded = false, _onReadyCallbacks = [], _isCompactMode = false, _titleCompacted = false;
-  let _compactVisibility = null, _compactBassHidden = false;
-  let _renderToken = 0, _renderCount = 0, _lastContainerWidth = 0, _pendingRender = false, _initOptions = {};
+  let _compactVisibility = null, _compactBassHidden = false; let _renderToken = 0;
+  let _renderCount = 0, _lastContainerWidth = 0, _pendingRender = false, _initOptions = {};
   const OSMD_LOCAL_SRC = 'assets/js/vendor/opensheetmusicdisplay.min.js', OSMD_CDN_SRC = 'https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.6/build/opensheetmusicdisplay.min.js';
   function _createInstanceSync() {
     if (osmd) return osmd;
