@@ -33,6 +33,7 @@ test('nút bộ hợp âm điện thoại chỉ đổi HD và TLH, luôn hiện 
   const button = page.locator('#btn-mobile-chordset');
   for (const [set, label] of [['default', 'TLH'], ['HD', /^HD/], ['default', 'TLH'], ['HD', /^HD/]]) {
     await button.tap();
+    await page.locator(`#mobile-chordset-sheet .mobile-chordset-option[data-set-value="${set}"]`).tap();
     await expect.poll(() => page.evaluate(() => window.ChordCanvas?.getCurrentSet?.())).toBe(set);
     await expect(page.locator('#mobile-chordset-label')).toHaveText(label);
   }
