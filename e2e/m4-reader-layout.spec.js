@@ -267,3 +267,78 @@ test.describe('M4-2c · Modern Lớp 1 tablet: một hàng điều khiển, sele
     }
   });
 });
+
+test.describe('M4-3 · Modern: gỡ nút trùng theo bảng phân bổ (không hành động nào > 2 nút cùng hiện)', () => {
+  test('M4-3 action duplicate count <= 2 across 390, 768, 1366 (sheet & lyrics, menu open)', async ({ browser }, testInfo) => {
+    test.skip(testInfo.project.name !== 'webkit', 'M4-3 nghiệm thu trên WebKit');
+    test.setTimeout(60000);
+
+    for (const vp of [{ width: 390, height: 844 }, { width: 768, height: 1024 }, { width: 1366, height: 768 }]) {
+      const context = await browser.newContext({
+        viewport: vp,
+        isMobile: vp.width < 1100,
+        hasTouch: vp.width < 1100,
+        baseURL: BASE_URL,
+        serviceWorkers: 'block',
+      });
+      const page = await context.newPage();
+      await page.addInitScript(() => {
+        try {
+          sessionStorage.setItem('sheetapp_guest_chosen', '1');
+          localStorage.setItem('sheetapp_guest_toast_shown', '1');
+        } catch (_) {}
+      });
+
+      await page.goto(BASE_URL + '?song=thanh-ca-001&v=lyrics', { waitUntil: 'domcontentloaded', timeout: 20000 });
+      await page.waitForTimeout(400);
+
+      // Mở thử thanh chương trình và menu ⋯ để kiểm tra mức hiển thị tối đa trên cùng một màn hình
+      await page.evaluate(() => {
+        const spBar = document.getElementById('setlist-program-bar');
+        if (spBar) spBar.classList.remove('hidden');
+        const lcBar = document.getElementById('lc-setlist-nav');
+        if (lcBar) lcBar.classList.remove('hidden');
+      });
+      await page.locator('#btn-more-options').click();
+      await page.waitForTimeout(200);
+
+      const counts = await page.evaluate(() => {
+        const isVis = (el) => {
+          if (!el) return false;
+          const s = getComputedStyle(el);
+          if (s.display === 'none' || s.visibility === 'hidden' || parseFloat(s.opacity) === 0) return false;
+          if (el.closest('.hidden') || el.closest('.d-none')) return false;
+          const r = el.getBoundingClientRect();
+          return r.width > 0 && r.height > 0;
+        };
+        const groups = {
+          prev_song: ['#btn-prev-song', '#btn-mobile-prev-song', '#btn-sp-prev', '#btn-gig-sp-prev', '#btn-lc-prev'],
+          next_song: ['#btn-next-song', '#btn-mobile-next-song', '#btn-sp-next', '#btn-gig-sp-next', '#btn-lc-next'],
+          zoom_out: ['#btn-zoom-out', '#btn-menu-zoom-out', '#btn-gig-zoom-out'],
+          zoom_in: ['#btn-zoom-in', '#btn-menu-zoom-in', '#btn-gig-zoom-in'],
+          lock_zoom: ['#btn-lock-zoom', '#btn-menu-lock-zoom', '#btn-gig-lock-zoom'],
+          view_toggle: ['#view-switch', '#btn-band-toggle', '#btn-mobile-view-toggle', '#btn-gig-view-toggle'],
+          chord_edit: ['#btn-add-chord-mode-bar', '#btn-mobile-edit', '#btn-menu-add-chord-mode', '#btn-menu-chord-edit', '#btn-section-edit', '.lv-edit-chordpro-btn', '.lv-edit-btn'],
+          auth_login: ['#btn-auth', '#shell-btn-login', '#btn-toolbar-auth', '#btn-menu-auth'],
+          transpose_reset: ['#transpose-display', '#mobile-transpose-display', '#btn-transpose-reset', '#btn-menu-transpose-reset', '#btn-gig-trans-reset'],
+        };
+        const over2 = [];
+        for (const [action, selectors] of Object.entries(groups)) {
+          const matched = [];
+          for (const sel of selectors) {
+            for (const el of document.querySelectorAll(sel)) {
+              if (isVis(el)) matched.push(el.id || sel);
+            }
+          }
+          if (matched.length > 2) {
+            over2.push({ action, count: matched.length, matched });
+          }
+        }
+        return { vp: window.innerWidth, over2 };
+      });
+
+      expect(counts.over2, `vp=${vp.width} no action should have > 2 visible buttons`).toEqual([]);
+      await context.close();
+    }
+  });
+});

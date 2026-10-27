@@ -2181,3 +2181,25 @@ body.dark-mode .sidebar .song-item.active .song-item-num { color: #bfdbfe; }
 .song-list[role="grid"] .library-cursor .song-item-actions button { opacity:1; }
 .song-list[role="grid"] button:focus-visible { outline:2px solid var(--accent, #6d28d9); outline-offset:1px; opacity:1; }
 .song-item-num.has-catalog-prefix { width:auto; min-width:6.5ch; flex-basis:6.5ch; flex-shrink:0; white-space:nowrap; }
+
+/* M4-3: Gỡ nút trùng theo bảng phân bổ (không hành động nào > 2 nút cùng hiện trên một màn hình) */
+.lv-verse ~ .lv-verse .lv-edit-chordpro-btn,
+#btn-toolbar-auth,
+#btn-lock-zoom,
+#btn-gig-lock-zoom,
+.unified-toolbar #btn-mobile-edit { display: none !important; }
+body:has(#setlist-program-bar:not(.hidden)) #toolbar #nav-arrows,
+body:has(#setlist-program-bar:not(.hidden)) #mobile-thumb-bar .mobile-nav-group { display: none !important; }
+@media (max-width: 680px) {
+  .unified-toolbar #nav-arrows,
+  .unified-toolbar #view-switch,
+  .unified-toolbar #btn-add-chord-mode-bar,
+  .unified-toolbar #toolbar-zoom-pill { display: none !important; }
+}
+@media (min-width: 681px) and (max-width: 1100px) {
+  #main-dropdown-menu .tools-zoom-row { display: none !important; }
+  #main-dropdown-menu #btn-menu-lock-zoom { display: inline-flex !important; }
+}
+@media (min-width: 1301px) {
+  #main-dropdown-menu #btn-menu-transpose-reset { display: none !important; }
+}

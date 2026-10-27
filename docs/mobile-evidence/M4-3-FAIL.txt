@@ -1,0 +1,46 @@
+[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 2 tests using 1 worker
+
+[1/2] [chromium] › e2e\m4-reader-layout.spec.js:272:3 › M4-3 · Modern: gỡ nút trùng theo bảng phân bổ (không hành động nào > 2 nút cùng hiện) › M4-3 action duplicate count <= 2 across 390, 768, 1366 (sheet & lyrics, menu open)
+[2/2] [webkit] › e2e\m4-reader-layout.spec.js:272:3 › M4-3 · Modern: gỡ nút trùng theo bảng phân bổ (không hành động nào > 2 nút cùng hiện) › M4-3 action duplicate count <= 2 across 390, 768, 1366 (sheet & lyrics, menu open)
+  1) [webkit] › e2e\m4-reader-layout.spec.js:272:3 › M4-3 · Modern: gỡ nút trùng theo bảng phân bổ (không hành động nào > 2 nút cùng hiện) › M4-3 action duplicate count <= 2 across 390, 768, 1366 (sheet & lyrics, menu open) 
+
+    Error: vp=1366 no action should have > 2 visible buttons
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 11
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "action": "transpose_reset",
+    +     "count": 3,
+    +     "matched": Array [
+    +       "transpose-display",
+    +       "btn-transpose-reset",
+    +       "btn-menu-transpose-reset",
+    +     ],
+    +   },
+    + ]
+
+      338 |       });
+      339 |
+    > 340 |       expect(counts.over2, `vp=${vp.width} no action should have > 2 visible buttons`).toEqual([]);
+          |                                                                                        ^
+      341 |       await context.close();
+      342 |     }
+      343 |   });
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m4-reader-layout.spec.js:340:88
+
+    Error Context: test-results\m4-reader-layout-M4-3-·-Mo-15600-366-sheet-lyrics-menu-open--webkit\error-context.md
+
+
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+  1 failed
+    [webkit] › e2e\m4-reader-layout.spec.js:272:3 › M4-3 · Modern: gỡ nút trùng theo bảng phân bổ (không hành động nào > 2 nút cùng hiện) › M4-3 action duplicate count <= 2 across 390, 768, 1366 (sheet & lyrics, menu open) 
+  1 skipped
+
+EXIT=1
