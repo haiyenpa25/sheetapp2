@@ -1,0 +1,21 @@
+CMD: npx playwright test e2e/mobile-load-baseline.spec.js -g "M0-2" --reporter=line
+EXIT=0
+[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 12 tests using 1 worker
+
+[1/12] [chromium] › e2e\mobile-load-baseline.spec.js:593:7 › M0-2 · Đổi nhanh 5 bài, xoay máy 3 lần với bài lớn nhất, tải lần hai qua SW › M0-2 stress & sw: pixel7 - modern
+[2/12] [chromium] › e2e\mobile-load-baseline.spec.js:593:7 › M0-2 · Đổi nhanh 5 bài, xoay máy 3 lần với bài lớn nhất, tải lần hai qua SW › M0-2 stress & sw: pixel7 - classic
+[3/12] [chromium] › e2e\mobile-load-baseline.spec.js:593:7 › M0-2 · Đổi nhanh 5 bài, xoay máy 3 lần với bài lớn nhất, tải lần hai qua SW › M0-2 stress & sw: iphone13 - modern
+[4/12] [chromium] › e2e\mobile-load-baseline.spec.js:593:7 › M0-2 · Đổi nhanh 5 bài, xoay máy 3 lần với bài lớn nhất, tải lần hai qua SW › M0-2 stress & sw: iphone13 - classic
+[5/12] [chromium] › e2e\mobile-load-baseline.spec.js:593:7 › M0-2 · Đổi nhanh 5 bài, xoay máy 3 lần với bài lớn nhất, tải lần hai qua SW › M0-2 stress & sw: ipadmini - modern
+[6/12] [chromium] › e2e\mobile-load-baseline.spec.js:593:7 › M0-2 · Đổi nhanh 5 bài, xoay máy 3 lần với bài lớn nhất, tải lần hai qua SW › M0-2 stress & sw: ipadmini - classic
+[7/12] [webkit] › e2e\mobile-load-baseline.spec.js:593:7 › M0-2 · Đổi nhanh 5 bài, xoay máy 3 lần với bài lớn nhất, tải lần hai qua SW › M0-2 stress & sw: pixel7 - modern
+[8/12] [webkit] › e2e\mobile-load-baseline.spec.js:593:7 › M0-2 · Đổi nhanh 5 bài, xoay máy 3 lần với bài lớn nhất, tải lần hai qua SW › M0-2 stress & sw: pixel7 - classic
+[9/12] [webkit] › e2e\mobile-load-baseline.spec.js:593:7 › M0-2 · Đổi nhanh 5 bài, xoay máy 3 lần với bài lớn nhất, tải lần hai qua SW › M0-2 stress & sw: iphone13 - modern
+[10/12] [webkit] › e2e\mobile-load-baseline.spec.js:593:7 › M0-2 · Đổi nhanh 5 bài, xoay máy 3 lần với bài lớn nhất, tải lần hai qua SW › M0-2 stress & sw: iphone13 - classic
+[11/12] [webkit] › e2e\mobile-load-baseline.spec.js:593:7 › M0-2 · Đổi nhanh 5 bài, xoay máy 3 lần với bài lớn nhất, tải lần hai qua SW › M0-2 stress & sw: ipadmini - modern
+[12/12] [webkit] › e2e\mobile-load-baseline.spec.js:593:7 › M0-2 · Đổi nhanh 5 bài, xoay máy 3 lần với bài lớn nhất, tải lần hai qua SW › M0-2 stress & sw: ipadmini - classic
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+  6 skipped
+  6 passed (1.8m)
