@@ -16,7 +16,7 @@ const ScriptLoader = (() => {
    * @param {string} src - Đường dẫn file JS (ví dụ: 'assets/js/admin-ui.js')
    * @returns {Promise<boolean>}
    */
-  function load(src) {
+  function load(src, options = {}) {
     if (!src) return Promise.resolve(false);
     if (_loaded.has(src)) return Promise.resolve(true);
     if (_inFlight.has(src)) return _inFlight.get(src);
@@ -29,7 +29,7 @@ const ScriptLoader = (() => {
 
     const promise = new Promise((resolve, reject) => {
       const existing = document.querySelector(`script[src*="${src}"]`);
-      if (existing) {
+      if (existing && options.forceReload) { existing.remove(); } else if (existing) {
         _loaded.add(src);
         _inFlight.delete(src);
         resolve(true);
@@ -67,6 +67,14 @@ const ScriptLoader = (() => {
       await load(s);
     }
     return true;
+  }
+
+  function loadWithFallback(local, cdn) {
+    if (!local && !cdn) return Promise.resolve(false);
+    return load(local, { forceReload: true }).catch(err => {
+      if (!cdn) throw err;
+      return load(cdn, { forceReload: true });
+    });
   }
 
   function isLoaded(src) {
@@ -263,6 +271,7 @@ const ScriptLoader = (() => {
 
   return {
     load,
+    loadWithFallback,
     loadSequence,
     isLoaded,
     loadAudio,

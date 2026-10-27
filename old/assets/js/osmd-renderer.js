@@ -16,6 +16,36 @@ const OSMDRenderer = (() => {
   let _isCompactMode = false;
   let _titleCompacted = false; // flag tránh compact title nhiều lần
 
+  let _initOptions = {};
+  const OSMD_LOCAL_SRC = 'assets/js/vendor/opensheetmusicdisplay.min.js';
+  const OSMD_CDN_SRC = 'https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.6/build/opensheetmusicdisplay.min.js';
+
+  function _createInstanceSync() {
+    if (osmd) return osmd;
+    if (!containerId || typeof opensheetmusicdisplay === 'undefined' || !opensheetmusicdisplay.OpenSheetMusicDisplay) return null;
+    const container = document.getElementById(containerId);
+    if (!container) return null;
+    osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay(container, {
+      autoResize: true, backend: 'svg', drawTitle: true, drawSubtitle: true, drawComposer: true, drawCredits: true, coloringEnabled: true, pageFormat: 'Endless',
+      engravingRules: {
+        ChordSymbolFontFamily: "OSMDChordFont, sans-serif", ChordSymbolTextHeight: 2.6, ChordSymbolYOffset: 1.2, DefaultColorChordSymbol: '#dc2626',
+        StaffLineWidth: 0.1, StemWidth: 0.15, TupletNumberTextHeight: 1.5, TitleTopDistance: 1.5, SheetTitleHeight: 2.0, SheetComposerHeight: 1.5, SheetAuthorHeight: 1.5
+      },
+      ..._initOptions
+    });
+    if (osmd.rules) { refreshRules(); osmd.rules.ChordSymbolFontFamily = "OSMDChordFont, sans-serif"; }
+    return osmd;
+  }
+
+  async function _ensureInstance() {
+    if (osmd) return osmd;
+    if ((typeof opensheetmusicdisplay === 'undefined' || !opensheetmusicdisplay.OpenSheetMusicDisplay) && window.ScriptLoader?.loadWithFallback) {
+      await window.ScriptLoader.loadWithFallback(OSMD_LOCAL_SRC, OSMD_CDN_SRC);
+    }
+    const inst = _createInstanceSync();
+    if (!inst) throw new Error('OSMD chưa được khởi tạo. Gọi init() trước.');
+    return inst;
+  }
   /**
    * Khởi tạo OSMD vào một container DOM.
    */
@@ -24,40 +54,7 @@ const OSMDRenderer = (() => {
     const container = document.getElementById(id);
     if (!container) throw new Error(`Container #${id} không tồn tại`);
 
-    osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay(container, {
-      autoResize: true,
-      backend: 'svg',
-      drawTitle: true,
-      drawSubtitle: true,
-      drawComposer: true,
-      drawCredits: true,
-      coloringEnabled: true,
-      pageFormat: 'Endless',  // Scroll vertically, no page breaks
-      engravingRules: {
-        // Chord symbols — size to hơn, cao hơn
-        ChordSymbolFontFamily: "OSMDChordFont, sans-serif",
-        ChordSymbolTextHeight: 2.6,
-        ChordSymbolYOffset: 1.2,
-        DefaultColorChordSymbol: '#dc2626',
-        // Sheet layout
-        StaffLineWidth: 0.1,
-        StemWidth: 0.15,
-        TupletNumberTextHeight: 1.5,
-        // Title tự điều chỉnh đẹp hơn
-        TitleTopDistance: 1.5,        // Giảm khoảng trống phía trên
-        SheetTitleHeight: 2.0,        // Cỡ chữ title vừa phải (OSMD default ~4.0)
-        SheetComposerHeight: 1.5,     // Nhạc sĩ nhỏ gọn hơn
-        SheetAuthorHeight: 1.5,
-      },
-      ...options
-    });
-
-    // Force specific rules onto the rules object as some versions ignore constructor config
-    if (osmd.rules) {
-        refreshRules();
-        osmd.rules.ChordSymbolFontFamily = "OSMDChordFont, sans-serif";
-    }
-
+    _initOptions = options; osmd = null; isLoaded = false;
     // Resize observer để auto-reflow khi container thay đổi kích thước
     let lastWidth = container.clientWidth;
     const resizeObserver = new ResizeObserver(_debounce(async () => {
@@ -285,7 +282,8 @@ const OSMDRenderer = (() => {
    * @param {number} transposeValue - Số nửa cung để dịch (Mặc định: 0)
    */
   async function load(xmlString, transposeValue = 0) {
-    if (!osmd) throw new Error('OSMD chưa được khởi tạo. Gọi init() trước.');
+    if (!containerId) throw new Error('OSMD chưa được khởi tạo. Gọi init() trước.');
+    await _ensureInstance();
     currentXmlString = xmlString; // Luôn giữ bản gốc
     isLoaded = false;
 
@@ -383,9 +381,7 @@ const OSMDRenderer = (() => {
   /**
    * Trả về instance OSMD để truy cập trực tiếp API nếu cần.
    */
-  function getInstance() {
-    return osmd;
-  }
+  function getInstance() { return osmd || _createInstanceSync(); }
 
   function getIsLoaded() { return isLoaded; }
 

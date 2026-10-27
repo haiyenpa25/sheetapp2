@@ -154,16 +154,16 @@ echo cssTag('library-polish.css'); // lớp hoàn thiện giao diện — luôn 
   để đạt ngân sách "<= 30 script" (L5-5) đã làm mất đăng nhập, Band, setlist,
   metronome, dịch hợp âm... nên đã được khôi phục. Chỉ tối ưu lại bằng bundling
   hoặc lazy-load có trigger + E2E đầy đủ, không bằng cách bỏ module. -->
-<!-- OSMD from local vendor (fallback CDN) -->
-<script src="<?= $baseHref ?>assets/js/vendor/opensheetmusicdisplay.min.js" onerror="
-  var s=document.createElement('script');
-  s.src='https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.6/build/opensheetmusicdisplay.min.js';
-  document.head.appendChild(s);"></script>
+<!-- OSMD & Tonal loaded via jsTag with ?v= and ScriptLoader.loadWithFallback -->
+
+
+
+
 <!-- SATB/Tone tải khi bấm phát; Tonal dùng cho dịch hợp âm. -->
-<script src="<?= $baseHref ?>assets/js/vendor/tonal.min.js" defer onerror="
-  var s=document.createElement('script');
-  s.src='https://cdn.jsdelivr.net/npm/tonal/browser/tonal.min.js';
-  document.head.appendChild(s);"></script>
+
+
+
+
 
 <?php
 if (!function_exists('jsTag')) {
@@ -186,6 +186,8 @@ echo "<script>
   window.__FEATURES__ = " . json_encode(FeatureFlags::all(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) . ";
 </script>\n";
 
+echo jsTag('vendor/opensheetmusicdisplay.min.js');
+echo jsTag('vendor/tonal.min.js');
 echo jsTag('vendor/idb-keyval.min.js', false);
 echo jsTag('core/OfflineVault.js', false);
 echo jsTag('core/ScriptLoader.js', false);

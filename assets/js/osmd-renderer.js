@@ -9,12 +9,27 @@ const OSMDRenderer = (() => {
   let osmd = null, containerId = null, currentXmlString = null, currentZoom = 1.0;
   let isLoaded = false, _onReadyCallbacks = [], _isCompactMode = false, _titleCompacted = false;
   let _compactVisibility = null, _compactBassHidden = false;
-  let _renderToken = 0;
-  let _renderCount = 0, _lastContainerWidth = 0, _pendingRender = false;
-
+  let _renderToken = 0, _renderCount = 0, _lastContainerWidth = 0, _pendingRender = false, _initOptions = {};
+  const OSMD_LOCAL_SRC = 'assets/js/vendor/opensheetmusicdisplay.min.js', OSMD_CDN_SRC = 'https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.6/build/opensheetmusicdisplay.min.js';
+  function _createInstanceSync() {
+    if (osmd) return osmd;
+    const container = containerId ? document.getElementById(containerId) : null;
+    if (!container || typeof opensheetmusicdisplay === 'undefined' || !opensheetmusicdisplay.OpenSheetMusicDisplay) return null;
+    osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay(container, {
+      autoResize: false, backend: 'svg', drawTitle: true, drawSubtitle: true, drawComposer: true, drawCredits: true, coloringEnabled: true, pageFormat: 'Endless',
+      engravingRules: { ChordSymbolFontFamily: 'OSMDChordFont, sans-serif', ChordSymbolTextHeight: 2.85, ChordSymbolYOffset: 1.2, DefaultColorChordSymbol: '#dc2626', StaffLineWidth: 0.1, StemWidth: 0.15, TupletNumberTextHeight: 1.5, TitleTopDistance: 1.5, SheetTitleHeight: 2.0, SheetComposerHeight: 1.5, SheetAuthorHeight: 1.5 },
+      ..._initOptions
+    });
+    if (osmd.rules) { refreshRules(); osmd.rules.ChordSymbolFontFamily = 'OSMDChordFont, sans-serif'; }
+    return osmd;
+  }
+  async function _ensureInstance() {
+    if (!osmd && (typeof opensheetmusicdisplay === 'undefined' || !opensheetmusicdisplay.OpenSheetMusicDisplay) && window.ScriptLoader?.loadWithFallback) await window.ScriptLoader.loadWithFallback(OSMD_LOCAL_SRC, OSMD_CDN_SRC);
+    const inst = _createInstanceSync(); if (!inst) throw new Error('OSMD chưa được khởi tạo. Gọi init() trước.'); return inst;
+  }
   /** L5-5: Kiểm tra container có đang hiển thị và có bề rộng hợp lệ để render OSMD hay không */
   function _canRender() {
-    if (!osmd || !containerId) return false;
+    if (!containerId) return false;
     const c = document.getElementById(containerId);
     if (!c || c.clientWidth <= 0) return false;
     if (c.closest('.hidden') || c.classList.contains('hidden')) return false;
@@ -31,33 +46,12 @@ const OSMDRenderer = (() => {
     const container = document.getElementById(id);
     if (!container) throw new Error(`Container #${id} không tồn tại`);
 
-    osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay(container, {
-      autoResize: false, // L5-1: Tắt autoResize nội bộ của OSMD, giao ResizeObserver duy nhất làm chủ
-      backend: 'svg',
-      drawTitle: true,
-      drawSubtitle: true,
-      drawComposer: true,
-      drawCredits: true,
-      coloringEnabled: true,
-      pageFormat: 'Endless',  // Scroll vertically, no page breaks
-      engravingRules: {
-        ChordSymbolFontFamily: "OSMDChordFont, sans-serif",
-        ChordSymbolTextHeight: 2.85, ChordSymbolYOffset: 1.2, DefaultColorChordSymbol: '#dc2626',
-        StaffLineWidth: 0.1, StemWidth: 0.15, TupletNumberTextHeight: 1.5,
-        TitleTopDistance: 1.5, SheetTitleHeight: 2.0, SheetComposerHeight: 1.5, SheetAuthorHeight: 1.5
-      },
-      ...options
-    });
-
-    if (osmd.rules) {
-        refreshRules();
-        osmd.rules.ChordSymbolFontFamily = "OSMDChordFont, sans-serif";
-    }
-
+    _initOptions = options; osmd = null; isLoaded = false;
     // L5-1 + L5-5: ResizeObserver làm chủ layout, chặn đứng render khi khung ẩn
     _lastContainerWidth = container.clientWidth;
     const resizeObserver = new ResizeObserver(_debounce(async () => {
       if (!_canRender()) return; // L5-5: Tuyệt đối không render khi khung ẩn
+      if (!osmd) return;
       const currentWidth = container.clientWidth;
       if (!_pendingRender && Math.abs(currentWidth - _lastContainerWidth) < 8) {
           return;
@@ -168,7 +162,8 @@ const OSMDRenderer = (() => {
    * @param {number} transposeValue - Số nửa cung để dịch (Mặc định: 0)
    */
   async function load(xmlInput, transposeValue = 0) {
-    if (!osmd) throw new Error('OSMD chưa được khởi tạo. Gọi init() trước.');
+    if (!containerId) throw new Error('OSMD chưa được khởi tạo. Gọi init() trước.');
+    await _ensureInstance();
     const token = ++_renderToken;
     let processedInput = xmlInput;
     if (typeof xmlInput === 'string') {
@@ -360,7 +355,7 @@ const OSMDRenderer = (() => {
   }
 
   function getCurrentZoom() { return currentZoom; }
-  function getInstance() { return osmd; }
+  function getInstance() { return osmd || _createInstanceSync(); }
   function getIsLoaded() { return isLoaded; }
   function getCurrentXml() { return currentXmlString; }
   function onReady(cb) { _onReadyCallbacks.push(cb); }

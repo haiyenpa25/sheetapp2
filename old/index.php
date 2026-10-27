@@ -70,10 +70,10 @@ echo '  <link rel="stylesheet" href="../assets/css/instrument-annotations.css?v=
     }
   </script>
   <!-- SATB/Tone tải khi bấm phát; Tonal dùng cho dịch hợp âm. -->
-  <script src="../assets/js/vendor/tonal.min.js" defer onerror="
-    var s=document.createElement('script');
-    s.src='https://cdn.jsdelivr.net/npm/tonal/browser/tonal.min.js';
-    document.head.appendChild(s);"></script>
+
+  
+
+  
 </head>
 <body>
 
@@ -159,11 +159,11 @@ echo '  <link rel="stylesheet" href="../assets/css/instrument-annotations.css?v=
 
 
 <!-- ===== SCRIPTS ===== -->
-<!-- OSMD from local vendor (fallback CDN) -->
-<script src="../assets/js/vendor/opensheetmusicdisplay.min.js" onerror="
-  var s=document.createElement('script');
-  s.src='https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.6/build/opensheetmusicdisplay.min.js';
-  document.head.appendChild(s);"></script>
+<!-- OSMD loaded via jsTag with ?v= and ScriptLoader.loadWithFallback -->
+
+
+
+
 
 <?php
 function jsTag(string $file, bool $defer = true): string {
@@ -181,6 +181,8 @@ function jsTag(string $file, bool $defer = true): string {
 }
 
 // ── 1. CORE Infrastructure (không defer — cần sớm nhất) ──
+echo jsTag('vendor/opensheetmusicdisplay.min.js');
+echo jsTag('vendor/tonal.min.js');
 echo jsTag('core/ScriptLoader.js', false);
 echo jsTag('core/SafeHtml.js', false);
 echo jsTag('core/PointerTap.js', false);

@@ -1,0 +1,21 @@
+CMD: npx playwright test e2e/m1-boot-resilience.spec.js -g "M1-4" --reporter=line
+EXIT=0
+[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 12 tests using 1 worker
+
+[1/12] [chromium] › e2e\m1-boot-resilience.spec.js:60:7 › M1-4 · Chặn OSMD local → danh sách vẫn hiện, mở bài nạp CDN qua loadWithFallback và vẽ được › M1-4 lazy OSMD + CDN fallback: pixel7 - modern
+[2/12] [chromium] › e2e\m1-boot-resilience.spec.js:60:7 › M1-4 · Chặn OSMD local → danh sách vẫn hiện, mở bài nạp CDN qua loadWithFallback và vẽ được › M1-4 lazy OSMD + CDN fallback: pixel7 - classic
+[3/12] [chromium] › e2e\m1-boot-resilience.spec.js:60:7 › M1-4 · Chặn OSMD local → danh sách vẫn hiện, mở bài nạp CDN qua loadWithFallback và vẽ được › M1-4 lazy OSMD + CDN fallback: iphone13 - modern
+[4/12] [chromium] › e2e\m1-boot-resilience.spec.js:60:7 › M1-4 · Chặn OSMD local → danh sách vẫn hiện, mở bài nạp CDN qua loadWithFallback và vẽ được › M1-4 lazy OSMD + CDN fallback: iphone13 - classic
+[5/12] [chromium] › e2e\m1-boot-resilience.spec.js:60:7 › M1-4 · Chặn OSMD local → danh sách vẫn hiện, mở bài nạp CDN qua loadWithFallback và vẽ được › M1-4 lazy OSMD + CDN fallback: ipadmini - modern
+[6/12] [chromium] › e2e\m1-boot-resilience.spec.js:60:7 › M1-4 · Chặn OSMD local → danh sách vẫn hiện, mở bài nạp CDN qua loadWithFallback và vẽ được › M1-4 lazy OSMD + CDN fallback: ipadmini - classic
+[7/12] [webkit] › e2e\m1-boot-resilience.spec.js:60:7 › M1-4 · Chặn OSMD local → danh sách vẫn hiện, mở bài nạp CDN qua loadWithFallback và vẽ được › M1-4 lazy OSMD + CDN fallback: pixel7 - modern
+[8/12] [webkit] › e2e\m1-boot-resilience.spec.js:60:7 › M1-4 · Chặn OSMD local → danh sách vẫn hiện, mở bài nạp CDN qua loadWithFallback và vẽ được › M1-4 lazy OSMD + CDN fallback: pixel7 - classic
+[9/12] [webkit] › e2e\m1-boot-resilience.spec.js:60:7 › M1-4 · Chặn OSMD local → danh sách vẫn hiện, mở bài nạp CDN qua loadWithFallback và vẽ được › M1-4 lazy OSMD + CDN fallback: iphone13 - modern
+[10/12] [webkit] › e2e\m1-boot-resilience.spec.js:60:7 › M1-4 · Chặn OSMD local → danh sách vẫn hiện, mở bài nạp CDN qua loadWithFallback và vẽ được › M1-4 lazy OSMD + CDN fallback: iphone13 - classic
+[11/12] [webkit] › e2e\m1-boot-resilience.spec.js:60:7 › M1-4 · Chặn OSMD local → danh sách vẫn hiện, mở bài nạp CDN qua loadWithFallback và vẽ được › M1-4 lazy OSMD + CDN fallback: ipadmini - modern
+[12/12] [webkit] › e2e\m1-boot-resilience.spec.js:60:7 › M1-4 · Chặn OSMD local → danh sách vẫn hiện, mở bài nạp CDN qua loadWithFallback và vẽ được › M1-4 lazy OSMD + CDN fallback: ipadmini - classic
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+  6 skipped
+  6 passed (11.8s)
