@@ -1,0 +1,7 @@
+[PASS:B] M5-2: old/assets/js/song-loader.js delegates token/abort/fetch/offline to SongLoaderCore without duplicate fetch fallback
+[PASS:B] M5-2: old/assets/js/osmd-renderer.js delegates enqueueRender, scheduleResize, and pending state to OSMDRenderCore
+[PASS:B] M5-2: Classic SongLoader.load invokes SongLoaderCore.beginLoad and SongLoaderCore.loadXml
+[PASS:B] M5-2: Classic OSMDRenderer.load, reload, and setZoom all route through OSMDRenderCore.enqueueRender
+[PASS:B] M5-2: Classic OSMDRenderer shares pending render state with OSMDRenderCore and flushes via renderPending()
+[PASS:B] M5-2: Classic OSMDRenderer ResizeObserver delegates to OSMDRenderCore.scheduleResize
+SUITE_COMPLETE total=6 failed=0

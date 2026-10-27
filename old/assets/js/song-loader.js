@@ -1,24 +1,20 @@
 /**
  * song-loader.js — Song Loading & XML Management
  * Tách từ app.js: chịu trách nhiệm load/reload/save bài hát.
- * Phụ thuộc: Store, EventBus, ApiService, OSMDRenderer, AppUI, ChordCanvas
+ * Phụ thuộc: Store, EventBus, ApiService, OSMDRenderer, AppUI, ChordCanvas, SongLoaderCore
  */
 const SongLoader = (() => {
   'use strict';
 
   let _isFirstLoad = true;
   let _autoFitRetryCount = 0; // Module-scoped, không dùng window.*
-  let _currentLoadToken = 0;
-  let _currentAbortController = null;
 
   /* ── Load bài hát hoàn chỉnh ── */
   async function load(song, transposeOverride = null, profileOverride = 'HD', options = {}) {
     if (!song?.xmlPath) { AppUI.showToast('Bài hát chưa có file sheet nhạc', 'error'); return; }
-    const token = ++_currentLoadToken;
-    if (_currentAbortController) { try { _currentAbortController.abort(); } catch (e) {} }
-    const _mkAbort = () => (typeof AbortController !== 'undefined' ? new AbortController() : null);
-    _currentAbortController = window.SongLoaderCore?.beginLoad ? (window.SongLoaderCore.beginLoad().controller || _mkAbort()) : _mkAbort();
-    const abortSignal = _currentAbortController ? _currentAbortController.signal : undefined;
+    const session = window.SongLoaderCore.beginLoad();
+    const token = session.token;
+    const abortSignal = session.signal || undefined;
 
     Store.set('currentSong', song);
     Store.set('currentTranspose', transposeOverride ?? 0);
@@ -46,21 +42,9 @@ const SongLoader = (() => {
       // FIX BUG-2: ChordCanvas.loadSong() phải hoàn thành TRƯỚC _injectChords() bên dưới.
       // Đặt cùng Promise.all → 3 request song song, _customChords sẵn sàng khi cần.
       AppUI.setLoadingText('Đang tải dữ liệu...');
-      const xmlFetchUrl = window.ApiService?.resolveUrl ? window.ApiService.resolveUrl(song.xmlPath) : (song.xmlPath.startsWith('storage/') ? `../${song.xmlPath}` : song.xmlPath);
       const fetchXmlText = async () => {
-        if (window.SongLoaderCore?.loadXml) { const cr = await window.SongLoaderCore.loadXml(song, { token, signal: abortSignal, xml: options?.xml }); return cr.xml; }
-        try {
-          // INTENTIONAL EXCEPTION: Static MusicXML asset fetch
-          const res = window.ApiService?.fetchXml ? await window.ApiService.fetchXml(xmlFetchUrl, { rawResponse: true }) : await fetch(xmlFetchUrl);
-          if (res.ok) {
-            const text = await res.text();
-            window.OfflineVault?.saveXml?.(song.xmlPath, text);
-            return text;
-          }
-        } catch (err) { console.warn('[SongLoader] fetchXmlText failed, trying OfflineVault:', err); }
-        const cachedXml = await window.OfflineVault?.getXml?.(song.xmlPath);
-        if (cachedXml) return cachedXml;
-        throw new Error('Không thể tải file XML (Mất mạng và chưa lưu ngoại tuyến)');
+        const cr = await window.SongLoaderCore.loadXml(song, { token, signal: abortSignal, xml: options?.xml });
+        return cr.xml;
       };
       const [xmlSettled, sessionsSettled] = await Promise.allSettled([
         fetchXmlText(),
@@ -70,7 +54,7 @@ const SongLoader = (() => {
       if (xmlSettled.status === 'rejected') throw xmlSettled.reason;
       const xml = xmlSettled.value;
       const settings = sessionsSettled.status === 'fulfilled' ? (sessionsSettled.value || {}) : {};
-      if (token !== _currentLoadToken) return;
+      if (!window.SongLoaderCore.isCurrentToken(token)) return;
       Store.set('originalXml', xml);
 
       const transpose = transposeOverride ?? 0;
@@ -86,9 +70,9 @@ const SongLoader = (() => {
       const processedXml = _injectChords(xml);
       OSMDRenderer.setZoomSilent(zoom);
 
-      if (token !== _currentLoadToken) return;
+      if (!window.SongLoaderCore.isCurrentToken(token)) return;
       await OSMDRenderer.load(processedXml, transpose);
-      if (token !== _currentLoadToken) return;
+      if (!window.SongLoaderCore.isCurrentToken(token)) return;
 
       // ── Post-render tasks ──
       _syncZoomUI(zoom);
@@ -125,7 +109,7 @@ const SongLoader = (() => {
       EventBus.emit('song:loaded', { song, xml });
 
     } catch (err) {
-      if (err?.name === 'AbortError' || token !== _currentLoadToken) return;
+      if (err?.name === 'AbortError' || !window.SongLoaderCore.isCurrentToken(token)) return;
       console.error('[SongLoader]', err);
       AppUI.showToast(`Lỗi: ${err.message}`, 'error');
       if (AppUI.showLoadError) AppUI.showLoadError(song, err.message, () => load(song, transposeOverride, profileOverride, options), () => document.getElementById('btn-lyric-view')?.click());
@@ -223,7 +207,7 @@ const SongLoader = (() => {
     const pct    = Math.round(zoom * 100);
     const slider = document.getElementById('zoom-slider');
     if (slider) {
-      if (slider.tagName.toLowerCase() === 'select') {
+      if (slider.tagName?.toLowerCase?.() === 'select') {
         const best = Array.from(slider.options).reduce((a,b) =>
           Math.abs(parseInt(b.value)-pct) < Math.abs(parseInt(a.value)-pct) ? b : a);
         slider.value = best.value;

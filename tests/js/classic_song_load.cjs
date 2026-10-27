@@ -9,6 +9,7 @@ const globals={Store:{set:(k,v)=>state[k]=v,get:k=>state[k]},ApiService:{session
 const w={...globals,innerWidth:1000};
 const ctx=vm.createContext({...globals,window:w,document:{getElementById:()=>null,querySelector:()=>null,querySelectorAll:()=>[],addEventListener(){}},console,setTimeout(){},
  fetch:url=>{if(offline)return Promise.reject(new Error('offline'));if(url.includes('A.xml'))return new Promise(r=>resolveA=r);return Promise.resolve({ok:true,text:async()=>'<B/>'});}});
+vm.runInContext(fs.readFileSync(path.resolve(__dirname,'../../assets/js/core/SongLoaderCore.js'),'utf8'),ctx);
 vm.runInContext(fs.readFileSync(path.resolve(__dirname,'../../old/assets/js/song-loader.js'),'utf8'),ctx);
 (async()=>{
  const a=w.SongLoader.load({id:'A',xmlPath:'storage/A.xml'});await w.SongLoader.load({id:'B',xmlPath:'storage/B.xml'});resolveA({ok:true,text:async()=>'<A/>'});await a;

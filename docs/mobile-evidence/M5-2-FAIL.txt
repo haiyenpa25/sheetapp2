@@ -1,0 +1,12 @@
+[FAIL:B] M5-2: old/assets/js/song-loader.js delegates token/abort/fetch/offline to SongLoaderCore without duplicate fetch fallback
+[FAIL:B] M5-2: old/assets/js/osmd-renderer.js delegates enqueueRender, scheduleResize, and pending state to OSMDRenderCore
+[SongLoader] TypeError: Cannot read properties of undefined (reading 'toLowerCase')
+    at _syncZoomUI (evalmachine.<anonymous>:226:26)
+    at Object.load (evalmachine.<anonymous>:94:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async C:\xampp\htdocs\sheetapp2\tests\js\m5_2_classic_core_delegation.cjs:121:5
+[PASS:B] M5-2: Classic SongLoader.load invokes SongLoaderCore.beginLoad and SongLoaderCore.loadXml
+[FAIL:B] M5-2: Classic OSMDRenderer.load, reload, and setZoom all route through OSMDRenderCore.enqueueRender -> enqueueCalls=0, osmdRenderCalls=3, renderCount=2
+[FAIL:B] M5-2: Classic OSMDRenderer shares pending render state with OSMDRenderCore and flushes via renderPending() -> pendingWhenHidden=false, flushed=true, enqueueCalls=0
+[FAIL:B] M5-2: Classic OSMDRenderer ResizeObserver delegates to OSMDRenderCore.scheduleResize -> scheduleResizeCalls=0, osmdRenderCalls=4
+SUITE_COMPLETE total=6 failed=5

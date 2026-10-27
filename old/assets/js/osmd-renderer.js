@@ -16,19 +16,12 @@ const OSMDRenderer = (() => {
   let _isCompactMode = false;
   let _titleCompacted = false; // flag tránh compact title nhiều lần
 
-  let _initOptions = {}, _renderToken = 0, _renderCount = 0, _pendingRender = false, _lastContainerWidth = 0, _lastViewportWidth = 0;
+  let _initOptions = {}, _renderCount = 0, _lastContainerWidth = 0, _lastViewportWidth = 0;
   const OSMD_LOCAL_SRC = 'assets/js/vendor/opensheetmusicdisplay.min.js';
   const OSMD_CDN_SRC = 'https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.6/build/opensheetmusicdisplay.min.js';
 
   function _canRender() {
-    if (window.OSMDRenderCore?.canRender) return window.OSMDRenderCore.canRender(containerId);
-    if (!containerId) return false;
-    const c = document.getElementById(containerId);
-    if (!c || c.clientWidth <= 0) return false;
-    if (c.closest?.('.hidden') || c.classList?.contains?.('hidden')) return false;
-    const style = window.getComputedStyle ? window.getComputedStyle(c) : null;
-    if (style && (style.display === 'none' || style.visibility === 'hidden')) return false;
-    return true;
+    return window.OSMDRenderCore ? window.OSMDRenderCore.canRender(containerId) : false;
   }
 
   function _createInstanceSync() {
@@ -66,19 +59,20 @@ const OSMDRenderer = (() => {
     if (!container) throw new Error(`Container #${id} không tồn tại`);
 
     _initOptions = options; osmd = null; isLoaded = false;
-    // Resize observer để auto-reflow khi container thay đổi kích thước
+    // Resize observer để auto-reflow khi container thay đổi kích thước qua OSMDRenderCore
     _lastContainerWidth = container.clientWidth; _lastViewportWidth = window.innerWidth;
-    const onResize = _debounce(async () => {
-      if (!_canRender() || !osmd) return;
+    const onResize = () => {
+      if (!osmd) return;
+      const pending = window.OSMDRenderCore.hasPendingRender();
+      if (!isLoaded && !pending) return;
       const currentWidth = container.clientWidth, vpWidth = window.innerWidth;
-      if (!_pendingRender && Math.abs(currentWidth - _lastContainerWidth) < 8 && Math.abs(vpWidth - _lastViewportWidth) < 8) return;
-      _lastContainerWidth = currentWidth; _lastViewportWidth = vpWidth;
-      if (window.ChordCanvas?.isPopupOpen?.()) return;
-      if (isLoaded || _pendingRender) {
-        _pendingRender = false;
-        _renderToken++; _renderCount++;
+      if (!pending && Math.abs(currentWidth - _lastContainerWidth) < 8 && Math.abs(vpWidth - _lastViewportWidth) < 8) return;
+      window.OSMDRenderCore.scheduleResize(containerId, async () => {
+        if (!osmd || window.ChordCanvas?.isPopupOpen?.()) return;
+        _lastContainerWidth = container.clientWidth; _lastViewportWidth = window.innerWidth;
         const svg = container.querySelector('svg'); if (svg) svg.style.maxWidth = '';
-        try { await osmd.render(); } catch (err) { window.OSMDRenderCore?.reportRenderError?.(err); return; }
+        _renderCount++;
+        await osmd.render();
         _forceLayoutRecalc();
         _titleCompacted = false; _compactTitleSVG();
         if (window.ChordCanvas) window.ChordCanvas.reposition();
@@ -87,8 +81,8 @@ const OSMDRenderer = (() => {
           isLoaded = true;
           _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} });
         }
-      }
-    }, window.OSMDRenderCore?.RESIZE_DEBOUNCE_MS || 250);
+      }, window.OSMDRenderCore.RESIZE_DEBOUNCE_MS);
+    };
     new ResizeObserver(onResize).observe(container);
     window.addEventListener('resize', onResize, { passive: true });
 
@@ -302,11 +296,11 @@ const OSMDRenderer = (() => {
     currentXmlString = xmlString; // Luôn giữ bản gốc
     isLoaded = false;
 
-    const token = ++_renderToken;
+    const token = window.OSMDRenderCore.nextToken();
     try {
       const processedXml = preprocessXML(xmlString);
       await osmd.load(processedXml);
-      if (token !== _renderToken) return osmd;
+      if (token !== window.OSMDRenderCore.getToken()) return osmd;
       osmd.zoom = currentZoom;
       _applyCompactMode();
       if (transposeValue !== 0 && osmd.Sheet && opensheetmusicdisplay.TransposeCalculator) {
@@ -315,10 +309,11 @@ const OSMDRenderer = (() => {
         osmd.updateGraphic?.();
       }
       refreshRules();
-      if (!_canRender()) { _pendingRender = true; return osmd; }
-      _pendingRender = false; _renderCount++;
-      await osmd.render();
-      if (token !== _renderToken) return osmd;
+      const res = await window.OSMDRenderCore.enqueueRender(containerId, async () => {
+        _renderCount++;
+        await osmd.render();
+      }, { token, rethrow: true });
+      if (!res.rendered || token !== window.OSMDRenderCore.getToken()) return osmd;
       _forceLayoutRecalc();
       const cEl = document.getElementById(containerId); if (cEl) { _lastContainerWidth = cEl.clientWidth; _lastViewportWidth = window.innerWidth; }
       _titleCompacted = false; _compactTitleSVG();
@@ -326,9 +321,9 @@ const OSMDRenderer = (() => {
       _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} });
       return osmd;
     } catch (err) {
-      if (token !== _renderToken) return osmd;
+      if (token !== window.OSMDRenderCore.getToken()) return osmd;
       console.error('[OSMD] Lỗi khi load:', err);
-      window.OSMDRenderCore?.reportRenderError?.(err);
+      window.OSMDRenderCore.reportRenderError(err);
       throw err;
     }
   }
@@ -341,9 +336,11 @@ const OSMDRenderer = (() => {
   async function reload(xmlString, transposeValue = 0) {
     if (!osmd) throw new Error('OSMD chưa init');
     if (xmlString) currentXmlString = xmlString;
+    const token = window.OSMDRenderCore.nextToken();
     try {
       const processedXml = preprocessXML(currentXmlString);
       await osmd.load(processedXml);
+      if (token !== window.OSMDRenderCore.getToken()) return osmd;
       osmd.zoom = currentZoom;
       if (window.InstrumentMixer?.restoreState) window.InstrumentMixer.restoreState();
       _applyCompactMode();
@@ -351,19 +348,26 @@ const OSMDRenderer = (() => {
       if (osmd.Sheet && opensheetmusicdisplay.TransposeCalculator) {
           osmd.TransposeCalculator = new opensheetmusicdisplay.TransposeCalculator();
           osmd.Sheet.Transpose = transposeValue;
-          osmd.updateGraphic();
+          osmd.updateGraphic?.();
       }
 
       refreshRules();
       _forceLayoutRecalc();
-      await osmd.render();
+      const res = await window.OSMDRenderCore.enqueueRender(containerId, async () => {
+        _renderCount++;
+        await osmd.render();
+      }, { token, rethrow: true });
+      if (!res.rendered || token !== window.OSMDRenderCore.getToken()) return osmd;
       _forceLayoutRecalc();
+      const cEl = document.getElementById(containerId); if (cEl) { _lastContainerWidth = cEl.clientWidth; _lastViewportWidth = window.innerWidth; }
       _titleCompacted = false;
       _compactTitleSVG();
       _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} }); // Gọi lại để ChordCanvas rebuild
       return osmd;
     } catch (err) {
+      if (token !== window.OSMDRenderCore.getToken()) return osmd;
       console.error('[OSMD] Lỗi reload:', err);
+      window.OSMDRenderCore.reportRenderError(err);
       throw err;
     }
   }
@@ -373,16 +377,16 @@ const OSMDRenderer = (() => {
    */
   async function setZoom(level) {
     currentZoom = Math.max(0.1, Math.min(2.5, level));
-    if (osmd && (isLoaded || _pendingRender)) {
+    if (osmd && (isLoaded || window.OSMDRenderCore.hasPendingRender())) {
       osmd.zoom = currentZoom;
-      if (!_canRender()) { _pendingRender = true; return; }
-      _pendingRender = false;
-      const token = ++_renderToken;
+      const token = window.OSMDRenderCore.nextToken();
       refreshRules();
       _forceLayoutRecalc();
-      _renderCount++;
-      await osmd.render();
-      if (token !== _renderToken) return;
+      const res = await window.OSMDRenderCore.enqueueRender(containerId, async () => {
+        _renderCount++;
+        await osmd.render();
+      }, { token });
+      if (!res.rendered || token !== window.OSMDRenderCore.getToken()) return;
       _forceLayoutRecalc();
       const cEl = document.getElementById(containerId); if (cEl) { _lastContainerWidth = cEl.clientWidth; _lastViewportWidth = window.innerWidth; }
       _titleCompacted = false; _compactTitleSVG();
@@ -393,10 +397,13 @@ const OSMDRenderer = (() => {
   }
 
   async function renderPending() {
-    if (!_pendingRender || !_canRender() || !osmd) return false;
-    _pendingRender = false;
-    _renderToken++; _renderCount++;
-    await osmd.render();
+    if (!window.OSMDRenderCore.hasPendingRender() || !_canRender() || !osmd) return false;
+    const token = window.OSMDRenderCore.nextToken();
+    const res = await window.OSMDRenderCore.enqueueRender(containerId, async () => {
+      _renderCount++;
+      await osmd.render();
+    }, { token });
+    if (!res.rendered) return false;
     _forceLayoutRecalc();
     _titleCompacted = false; _compactTitleSVG();
     if (window.ChordCanvas) window.ChordCanvas.reposition();
@@ -437,11 +444,6 @@ const OSMDRenderer = (() => {
     osmd = null;
     isLoaded = false;
     currentXmlString = null;
-  }
-
-  function _debounce(fn, ms) {
-    let t;
-    return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
   }
 
   /**
@@ -547,7 +549,7 @@ const OSMDRenderer = (() => {
     setTimeout(() => _hideRepeatLabels(_isCompactMode), 400);
   }
 
-  return { init, load, reload, setZoom, setZoomSilent, getInstance, getIsLoaded, getCurrentXml, getCurrentZoom, onReady, destroy, setCompactMode, getCompactMode, refreshRules, getRenderToken: () => _renderToken, getRenderCount: () => _renderCount, resetRenderCount: () => { _renderCount = 0; }, canRender: _canRender, renderPending, hasPendingRender: () => _pendingRender };
+  return { init, load, reload, setZoom, setZoomSilent, getInstance, getIsLoaded, getCurrentXml, getCurrentZoom, onReady, destroy, setCompactMode, getCompactMode, refreshRules, getRenderToken: () => window.OSMDRenderCore.getToken(), getRenderCount: () => _renderCount, resetRenderCount: () => { _renderCount = 0; }, canRender: _canRender, renderPending, hasPendingRender: () => window.OSMDRenderCore.hasPendingRender() };
 })();
 
 window.OSMDRenderer = OSMDRenderer;
