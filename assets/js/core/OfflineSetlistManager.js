@@ -24,8 +24,14 @@ const OfflineSetlistManager = (() => {
   }
 
   function _getIndex() {
+    const vaultIdx = window.OfflineVault?.getPackageIndex?.();
+    if (Array.isArray(vaultIdx)) return vaultIdx;
+    if (window.SafeStorage) {
+      const idx = window.SafeStorage.getJson(INDEX_KEY, null);
+      if (Array.isArray(idx)) return idx;
+    }
     try {
-      const raw = localStorage.getItem(INDEX_KEY);
+      const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(INDEX_KEY) : null;
       return raw ? JSON.parse(raw) : [];
     } catch (e) {
       return [];
@@ -33,42 +39,54 @@ const OfflineSetlistManager = (() => {
   }
 
   function _saveIndex(list) {
-    try {
-      localStorage.setItem(INDEX_KEY, JSON.stringify(list));
-    } catch (e) {
-      console.warn('[OfflineSetlistManager] Failed to save index:', e);
+    window.OfflineVault?.savePackageIndex?.(list);
+    if (window.SafeStorage) {
+      window.SafeStorage.setJson(INDEX_KEY, list);
+      return;
     }
+    try {
+      if (typeof localStorage !== 'undefined') localStorage.setItem(INDEX_KEY, JSON.stringify(list));
+    } catch (e) {}
   }
 
   function _getPkg(setlistId) {
+    const vaultPkg = window.OfflineVault?.getPackage?.(setlistId);
+    if (vaultPkg) return vaultPkg;
+    if (window.SafeStorage) {
+      const pkg = window.SafeStorage.getJson(PKG_PREFIX + setlistId, null);
+      if (pkg) return pkg;
+    }
     try {
-      const raw = localStorage.getItem(PKG_PREFIX + setlistId);
+      const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(PKG_PREFIX + setlistId) : null;
       return raw ? JSON.parse(raw) : null;
     } catch (e) {
       return null;
     }
   }
 
-  function _savePkg(setlistId, data) {
-    try {
-      localStorage.setItem(PKG_PREFIX + setlistId, JSON.stringify(data));
-      // Cập nhật index
-      const index = _getIndex().filter(item => String(item.id) !== String(setlistId));
-      index.unshift({
-        id: setlistId,
-        title: data.setlist?.title || 'Chương trình',
-        scheduled_date: data.setlist?.scheduled_date || '',
-        item_count: data.total_songs || 0,
-        package_version: data.package_version || '',
-        is_ready: Boolean(data.is_ready),
-        saved_at: data.saved_at || new Date().toISOString()
-      });
-      _saveIndex(index);
-      return true;
-    } catch (e) {
-      console.error('[OfflineSetlistManager] Failed to save package to localStorage:', e);
-      return false;
+  async function _savePkg(setlistId, data) {
+    if (window.OfflineVault?.savePackage) {
+      await window.OfflineVault.savePackage(setlistId, data);
     }
+    if (window.SafeStorage) {
+      window.SafeStorage.setJson(PKG_PREFIX + setlistId, data);
+    } else {
+      try {
+        if (typeof localStorage !== 'undefined') localStorage.setItem(PKG_PREFIX + setlistId, JSON.stringify(data));
+      } catch (e) {}
+    }
+    const index = _getIndex().filter(item => String(item.id) !== String(setlistId));
+    index.unshift({
+      id: setlistId,
+      title: data.setlist?.title || 'Chương trình',
+      scheduled_date: data.setlist?.scheduled_date || '',
+      item_count: data.total_songs || 0,
+      package_version: data.package_version || '',
+      is_ready: Boolean(data.is_ready),
+      saved_at: data.saved_at || new Date().toISOString()
+    });
+    _saveIndex(index);
+    return true;
   }
 
   /**
@@ -163,7 +181,7 @@ const OfflineSetlistManager = (() => {
       saved_at: new Date().toISOString()
     };
 
-    _savePkg(setlistId, savedData);
+    await _savePkg(setlistId, savedData);
 
     if (onProgress) {
       onProgress({
@@ -237,7 +255,7 @@ const OfflineSetlistManager = (() => {
     if (pkg.is_ready !== isReady || pkg.cached_count !== verifiedCount) {
       pkg.is_ready = isReady;
       pkg.cached_count = verifiedCount;
-      _savePkg(setlistId, pkg);
+      await _savePkg(setlistId, pkg);
     }
 
     return {
@@ -274,7 +292,9 @@ const OfflineSetlistManager = (() => {
    */
   function removePackage(setlistId) {
     try {
-      localStorage.removeItem(PKG_PREFIX + setlistId);
+      window.OfflineVault?.removePackage?.(setlistId);
+      if (window.SafeStorage) window.SafeStorage.remove(PKG_PREFIX + setlistId);
+      else if (typeof localStorage !== 'undefined') localStorage.removeItem(PKG_PREFIX + setlistId);
       const index = _getIndex().filter(item => String(item.id) !== String(setlistId));
       _saveIndex(index);
       if (typeof window !== 'undefined' && 'caches' in window) {
@@ -359,6 +379,7 @@ const OfflineSetlistManager = (() => {
    * Tự động kiểm tra lại tính sẵn sàng offline của các gói khi mở app (Ticket L3-9)
    */
   async function checkOnStartup() {
+    await window.OfflineVault?.hydratePackages?.();
     const list = listPackages();
     if (!list || list.length === 0) return null;
 

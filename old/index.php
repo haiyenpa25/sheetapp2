@@ -185,6 +185,7 @@ echo jsTag('vendor/opensheetmusicdisplay.min.js');
 echo jsTag('vendor/tonal.min.js');
 echo jsTag('core/ScriptLoader.js', false);
 echo jsTag('core/SafeHtml.js', false);
+echo jsTag('core/SafeStorage.js', false);
 echo jsTag('core/PointerTap.js', false);
 echo jsTag('vendor/idb-keyval.min.js', false);
 echo jsTag('core/OfflineVault.js', false);

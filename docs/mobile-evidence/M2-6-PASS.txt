@@ -1,0 +1,15 @@
+CMD: C:\xampp\php\php.exe tests\m2_safe_storage_regression.php
+EXIT=0
+PASS: M2-6: assets/js/core/SafeStorage.js exists
+PASS: M2-6: SafeStorage exposes get/set/remove/getJson/setJson
+PASS: M2-6: SafeStorage.get returns in-memory fallback when localStorage throws
+PASS: M2-6: SafeStorage.getJson/setJson works when localStorage throws QuotaExceededError
+PASS: M2-6: SafeStorage.remove clears fallback value without throwing
+PASS: M2-6: SafeStorage never throws on SecurityError or QuotaExceededError
+PASS: M2-6: OfflineVault._memXml is bounded to LRU 10 songs (actual size=10)
+PASS: M2-6: OfflineVault._memXml evicts oldest songs and keeps newest 10 songs
+PASS: M2-6: OfflineSetlistManager.downloadPackage succeeds even when localStorage throws QuotaExceededError
+PASS: M2-6: getOfflineSetlist reads package stored via OfflineVault
+PASS: M2-6: Offline package is persisted to IndexedDB via OfflineVault
+
+SUITE_COMPLETE total=11
