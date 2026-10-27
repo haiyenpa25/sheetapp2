@@ -854,3 +854,15 @@ body.fullscreen-mode .osmd-container { max-width: 100%; padding: 1rem; margin-to
     height: 44px !important;
   }
 }
+
+
+/* UX0-4: Classic ẩn mục theo quyền (canEditChords) đối với khách và viewer */
+#main-dropdown-menu .btn-menu-item.hidden,
+body:not(.has-member-access) #menu-add-chord,
+body:not(.has-member-access) #menu-new-chord-set,
+body:not(.has-member-access) #main-dropdown-menu #btn-session-panel,
+body:not(.has-member-access) #btn-session-panel,
+#main-dropdown-menu #btn-session-panel.hidden,
+body:not(.has-member-access) .lv-edit-chordpro-btn {
+  display: none !important;
+}

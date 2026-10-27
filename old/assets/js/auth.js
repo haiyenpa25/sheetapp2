@@ -118,7 +118,13 @@ const Auth = (() => {
     const loggedIn      = isLoggedIn();
 
     // Thêm hợp âm — cần quyền Ban Hát trở lên
+    document.body.classList.toggle('has-member-access', canEditChords);
     document.getElementById('btn-add-chord-mode')?.classList.toggle('hidden', !canEditChords);
+    document.getElementById('btn-add-chord-mode-bar')?.classList.toggle('hidden', !canEditChords);
+    document.getElementById('menu-add-chord')?.classList.toggle('hidden', !canEditChords);
+    document.getElementById('menu-new-chord-set')?.classList.toggle('hidden', !canEditChords);
+    document.getElementById('btn-session-panel')?.classList.toggle('hidden', !canEditChords);
+    document.querySelectorAll('.lv-edit-chordpro-btn').forEach(el => el.classList.toggle('hidden', !canEditChords));
     document.getElementById('btn-add-chord-mode-bar')?.classList.toggle('hidden', !canEditChords);
     // Nổi bật hợp âm — TấT CẢ người dùng đều được dùng (chỉ xem, không sửa)
     document.getElementById('btn-chord-highlight')?.classList.remove('hidden');
@@ -206,12 +212,13 @@ const Auth = (() => {
 
   /** Ban Hát hoặc Admin đều có quyền chỉnh sửa hợp âm */
   function _canEditChords() {
-    return _role === 'banhat' || _role === 'admin';
+    return ['bannhac', 'banhat', 'leader', 'admin'].includes(_role);
   }
 
   return {
     init, checkSession, isAdmin, isLoggedIn,
     isBanhat: () => _canEditChords(),
+    canEditChords: () => _canEditChords(),
     getUser: () => _currentUser,
     getRole: () => _role
   };

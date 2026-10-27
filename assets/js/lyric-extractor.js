@@ -261,7 +261,7 @@ const LyricExtractor = (() => {
             <span class="lv-verse-pill ${view.isChorus ? 'lv-pill-chorus' : 'lv-pill-verse'}">
               ${labelIcon ? `<span class="lv-pill-icon">${labelIcon}</span>` : ''}${window.SafeHtml ? window.SafeHtml.escape(view.label) : view.label}
             </span>
-            <button type="button" class="lv-edit-chordpro-btn" data-verse-num="${safeNum}" title="Gõ hoặc sửa hợp âm dạng [G]Lời">✎ Gõ ChordPro</button>
+            <button type="button" class="lv-edit-chordpro-btn${(window.Auth?.canEditChords?.() || window.Auth?.isBanhat?.()) ? '' : ' hidden'}" data-verse-num="${safeNum}" title="Gõ hoặc sửa hợp âm dạng [G]Lời">✎ Gõ ChordPro</button>
           </div>`;
 
       if (isInline) {
