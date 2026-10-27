@@ -795,3 +795,62 @@ body.fullscreen-mode .osmd-container { max-width: 100%; padding: 1rem; margin-to
   .nav-arrows .icon-btn { width: 30px; min-width: 30px; }
   #btn-fullscreen, #btn-more-options { width: 30px; min-width: 30px; padding: 0; justify-content: center; }
 }
+
+
+/* =============================================
+   M4-10b: Classic mọi select/nút Lớp 1 cao >= 36px (44px trên điện thoại); 0 điều khiển < 24px ở 1024
+   ============================================= */
+#toolbar { min-height: 44px; height: auto; }
+#toolbar #btn-open-sidebar,
+#toolbar .transpose-controls,
+#toolbar .transpose-btn,
+#toolbar #transpose-display,
+#toolbar #btn-transpose-reset,
+#toolbar #chord-set-selector,
+#toolbar #btn-lyric-view,
+#toolbar .nav-arrows .icon-btn,
+#toolbar #btn-fullscreen,
+#toolbar #btn-more-options,
+#main-dropdown-menu .zoom-select-wrap,
+#main-dropdown-menu #zoom-slider,
+#main-dropdown-menu #capo-wrap,
+#main-dropdown-menu #capo-select,
+#main-dropdown-menu .select-toolbar,
+.filter-row-compact select {
+  min-height: 36px !important;
+  height: 36px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+#btn-song-info-toggle,
+.sidebar-auth-btn,
+.sidebar-tab,
+.cat-flat-btn,
+.search-box,
+.btn-lyric-mode,
+.quick-jump-btn {
+  min-height: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  #toolbar #btn-transpose-reset { display: none !important; }
+}
+@media (max-width: 680px) {
+  #toolbar { min-height: 48px; }
+  #toolbar #btn-open-sidebar,
+  #toolbar .transpose-controls,
+  #toolbar .transpose-btn,
+  #toolbar #transpose-display,
+  #toolbar #chord-set-selector,
+  #toolbar #btn-lyric-view,
+  #toolbar .nav-arrows .icon-btn,
+  #toolbar #btn-fullscreen,
+  #toolbar #btn-more-options {
+    min-height: 44px !important;
+    height: 44px !important;
+  }
+}

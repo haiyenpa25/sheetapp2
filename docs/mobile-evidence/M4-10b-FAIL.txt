@@ -1,0 +1,84 @@
+[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 1 test using 1 worker
+
+  x  1 [webkit] › e2e\m4-stage2-layout.spec.js:332:3 › M4-10b · Classic: mọi select/nút Lớp 1 cao >= 36px (mục tiêu 44px trên điện thoại) › M4-10b Classic 390/768/1024: 0 Layer 1 controls < 36px (and >= 44px on 390 phone) (2.3s)
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+
+
+  1) [webkit] › e2e\m4-stage2-layout.spec.js:332:3 › M4-10b · Classic: mọi select/nút Lớp 1 cao >= 36px (mục tiêu 44px trên điện thoại) › M4-10b Classic 390/768/1024: 0 Layer 1 controls < 36px (and >= 44px on 390 phone) 
+
+    Error: vp=390 Layer 1 controls < 36px: [{"id":"btn-open-sidebar","height":24,"width":32},{"id":"btn-transpose-down","height":32,"width":28},{"id":"transpose-display","height":13,"width":22},{"id":"btn-transpose-up","height":32,"width":28},{"id":"chord-set-selector","height":24,"width":72},{"id":"btn-lyric-view","height":24,"width":25},{"id":"btn-prev-song","height":28,"width":30},{"id":"btn-next-song","height":28,"width":30},{"id":"btn-fullscreen","height":24,"width":30},{"id":"btn-more-options","height":24,"width":30}]
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  -  1
+    + Received  + 52
+
+    - Array []
+    + Array [
+    +   Object {
+    +     "height": 24,
+    +     "id": "btn-open-sidebar",
+    +     "width": 32,
+    +   },
+    +   Object {
+    +     "height": 32,
+    +     "id": "btn-transpose-down",
+    +     "width": 28,
+    +   },
+    +   Object {
+    +     "height": 13,
+    +     "id": "transpose-display",
+    +     "width": 22,
+    +   },
+    +   Object {
+    +     "height": 32,
+    +     "id": "btn-transpose-up",
+    +     "width": 28,
+    +   },
+    +   Object {
+    +     "height": 24,
+    +     "id": "chord-set-selector",
+    +     "width": 72,
+    +   },
+    +   Object {
+    +     "height": 24,
+    +     "id": "btn-lyric-view",
+    +     "width": 25,
+    +   },
+    +   Object {
+    +     "height": 28,
+    +     "id": "btn-prev-song",
+    +     "width": 30,
+    +   },
+    +   Object {
+    +     "height": 28,
+    +     "id": "btn-next-song",
+    +     "width": 30,
+    +   },
+    +   Object {
+    +     "height": 24,
+    +     "id": "btn-fullscreen",
+    +     "width": 30,
+    +   },
+    +   Object {
+    +     "height": 24,
+    +     "id": "btn-more-options",
+    +     "width": 30,
+    +   },
+    + ]
+
+      372 |       });
+      373 |
+    > 374 |       expect(audit.under36, `vp=${vp.width} Layer 1 controls < 36px: ${JSON.stringify(audit.under36)}`).toEqual([]);
+          |                                                                                                         ^
+      375 |       if (vp.width <= 480) {
+      376 |         expect(audit.under44, `vp=${vp.width} phone Layer 1 controls < 44px: ${JSON.stringify(audit.under44)}`).toEqual([]);
+      377 |       }
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m4-stage2-layout.spec.js:374:105
+
+    Error Context: test-results\m4-stage2-layout-M4-10b-·--cfd96-36px-and-44px-on-390-phone--webkit\error-context.md
+
+  1 failed
+    [webkit] › e2e\m4-stage2-layout.spec.js:332:3 › M4-10b · Classic: mọi select/nút Lớp 1 cao >= 36px (mục tiêu 44px trên điện thoại) › M4-10b Classic 390/768/1024: 0 Layer 1 controls < 36px (and >= 44px on 390 phone) 

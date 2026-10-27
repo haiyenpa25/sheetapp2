@@ -326,3 +326,57 @@ test.describe('M4-9b · Classic: gộp toolbar + page-bar thành một hàng L�
     await context.close();
   });
 });
+
+
+test.describe('M4-10b · Classic: mọi select/nút Lớp 1 cao >= 36px (mục tiêu 44px trên điện thoại)', () => {
+  test('M4-10b Classic 390/768/1024: 0 Layer 1 controls < 36px (and >= 44px on 390 phone)', async ({ browser }, testInfo) => {
+    test.skip(testInfo.project.name !== 'webkit', 'M4-10b nghiệm thu trên WebKit');
+    test.setTimeout(60000);
+
+    for (const vp of [{ width: 390, height: 844 }, { width: 768, height: 1024 }, { width: 1024, height: 768 }]) {
+      const context = await browser.newContext({
+        viewport: vp,
+        isMobile: vp.width < 1024,
+        hasTouch: true,
+        baseURL: BASE_URL,
+        serviceWorkers: 'block',
+      });
+      const page = await context.newPage();
+      await page.addInitScript(() => {
+        try {
+          sessionStorage.setItem('sheetapp_guest_chosen', '1');
+          localStorage.setItem('sheetapp_guest_toast_shown', '1');
+        } catch (_) {}
+      });
+
+      await page.goto(BASE_URL + 'old/?song=thanh-ca-001&v=sheet', { waitUntil: 'domcontentloaded', timeout: 20000 });
+      await page.locator('#osmd-container svg').first().waitFor({ state: 'visible', timeout: 15000 });
+
+      const audit = await page.evaluate(() => {
+        const tb = document.getElementById('toolbar');
+        const els = Array.from(tb.querySelectorAll('button, select, a, #transpose-display')).filter(el => {
+          if (el.closest('#main-dropdown-menu, #audio-settings-panel, #compact-settings-panel')) return false;
+          const s = getComputedStyle(el);
+          const r = el.getBoundingClientRect();
+          return s.display !== 'none' && s.visibility !== 'hidden' && r.width > 0 && r.height > 0;
+        });
+        const items = els.map(el => {
+          const r = el.getBoundingClientRect();
+          return { id: el.id || el.className, height: Math.round(r.height), width: Math.round(r.width) };
+        });
+        return {
+          items,
+          under36: items.filter(i => i.height < 36),
+          under44: items.filter(i => i.height < 44),
+        };
+      });
+
+      expect(audit.under36, `vp=${vp.width} Layer 1 controls < 36px: ${JSON.stringify(audit.under36)}`).toEqual([]);
+      if (vp.width <= 480) {
+        expect(audit.under44, `vp=${vp.width} phone Layer 1 controls < 44px: ${JSON.stringify(audit.under44)}`).toEqual([]);
+      }
+
+      await context.close();
+    }
+  });
+});
