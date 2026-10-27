@@ -11,6 +11,7 @@ const classicOsmdRendererCode = fs.readFileSync(path.join(root, 'old/assets/js/o
 let total = 0;
 let failed = 0;
 
+function checkStatic(condition, message) { total++; if (condition) console.log(`[PASS:S] ${message}`); else { failed++; console.log(`[FAIL:S] ${message}`); } }
 function check(condition, message, details = '') {
   total++;
   if (condition) {
@@ -23,7 +24,7 @@ function check(condition, message, details = '') {
 
 (async () => {
   // 1. Source delegation checks: Classic song-loader delegates to SongLoaderCore without duplicate inline fetch/OfflineVault fallback
-  check(
+  checkStatic(
     !classicSongLoaderCode.includes('window.OfflineVault?.getXml') &&
       !classicSongLoaderCode.includes('await fetch(xmlFetchUrl)') &&
       classicSongLoaderCode.includes('SongLoaderCore.beginLoad') &&
@@ -33,7 +34,7 @@ function check(condition, message, details = '') {
   );
 
   // 2. Source delegation checks: Classic osmd-renderer delegates render queue & resize to OSMDRenderCore
-  check(
+  checkStatic(
     classicOsmdRendererCode.includes('OSMDRenderCore.enqueueRender') &&
       classicOsmdRendererCode.includes('OSMDRenderCore.scheduleResize') &&
       classicOsmdRendererCode.includes('OSMDRenderCore.hasPendingRender') &&

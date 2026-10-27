@@ -16,10 +16,10 @@ function check(bool $cond, string $label): void {
     global $passed, $failed;
     if ($cond) {
         $passed++;
-        echo "[PASS:B] {$label}\n";
+        echo "[PASS:S] {$label}\n";
     } else {
         $failed++;
-        fwrite(STDERR, "[FAIL:B] {$label}\n");
+        fwrite(STDERR, "[FAIL:S] {$label}\n");
     }
 }
 

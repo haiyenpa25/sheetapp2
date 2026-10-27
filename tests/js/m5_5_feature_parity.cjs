@@ -18,6 +18,7 @@ const classicChordCode = fs.readFileSync(path.join(root, 'old/assets/js/chord-ca
 let total = 0;
 let failed = 0;
 
+function checkStatic(condition, message) { total++; if (condition) console.log(`[PASS:S] ${message}`); else { failed++; console.log(`[FAIL:S] ${message}`); } }
 function check(condition, message, details = '') {
   total++;
   if (condition) {
@@ -30,13 +31,13 @@ function check(condition, message, details = '') {
 
 (async () => {
   // 1. Both UIs include #quick-pin-bar in sheet_viewer.php
-  check(
+  checkStatic(
     modernSheetViewer.includes('id="quick-pin-bar"') && classicSheetViewer.includes('id="quick-pin-bar"'),
     'M5-5: Both Modern and Classic sheet_viewer.php include #quick-pin-bar'
   );
 
   // 2. Both UIs bind keyboard shortcuts G (togglePin) and H (toggleHighlight)
-  check(
+  checkStatic(
     modernKeyHandler.includes('togglePin') &&
       classicKeyHandler.includes('togglePin') &&
       modernKeyHandler.includes('toggleHighlight') &&

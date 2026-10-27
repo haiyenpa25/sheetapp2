@@ -1,0 +1,52 @@
+﻿[PASS:B] M6: docs/mobile-evidence/M6-acceptance.md exists
+[PASS:B] M6: M6-acceptance.md contains raw JSON measurement block
+[PASS:B] M6: Raw JSON block parses with m0_1, m0_2, and section5
+[PASS:B] M6-1: All 18 combinations (2 UIs x 3 devices x 3 conditions) recorded
+[PASS:B] M6-1: 0 broken runs across all 90 runs (0 white screens, 0 lost song titles)
+[PASS:B] M6-1: 100% of initially broken runs under 10% request drop showed Retry UI and recovered on retry
+[PASS:B] M6-2: All 6 UI x device stress & SW combinations recorded
+[PASS:B] M6-2: 0 unresponsive taps in 5-song rapid switch across all UIs and devices
+[PASS:B] M6-2: Initial OSMD render = 1 and rotation renders <= 3 (<= 1 per rotation) on largest XML
+[PASS:B] M6-2: Service Worker controller active on both Modern and Classic on second load
+[PASS:B] M6: Both index.php and old/index.php track script load errors and mount recovery watchdog banner
+SUITE_COMPLETE total=11 passed=11 failed=0
+
+tests\js\m5_2_classic_core_delegation.cjs:32:    'M5-2: old/assets/js/song-loader.js delegates 
+token/abort/fetch/offline to SongLoaderCore without duplicate fetch fallback'
+tests\js\m5_2_classic_core_delegation.cjs:41:    'M5-2: old/assets/js/osmd-renderer.js delegates enqueueRender, 
+scheduleResize, and pending state to OSMDRenderCore'
+tests\js\m5_2_classic_core_delegation.cjs:125:      'M5-2: Classic SongLoader.load invokes SongLoaderCore.beginLoad 
+and SongLoaderCore.loadXml',
+tests\js\m5_2_classic_core_delegation.cjs:226:      'M5-2: Classic OSMDRenderer.load, reload, and setZoom all route 
+through OSMDRenderCore.enqueueRender',
+tests\js\m5_2_classic_core_delegation.cjs:239:      'M5-2: Classic OSMDRenderer shares pending render state with 
+OSMDRenderCore and flushes via renderPending()',
+tests\js\m5_2_classic_core_delegation.cjs:250:      'M5-2: Classic OSMDRenderer ResizeObserver delegates to 
+OSMDRenderCore.scheduleResize',
+tests\js\m5_3_library_data.cjs:28:  check(hasCoreFile, 'M5-3: assets/js/core/LibraryData.js exists');
+tests\js\m5_3_library_data.cjs:33:    'M5-3: Both index.php and old/index.php load core/LibraryData.js'
+tests\js\m5_3_library_data.cjs:42:    'M5-3: Modern assets/js/library-ui.js delegates fetchList, getDeepLinkSongId, 
+resolveSong, and renderLoadError to LibraryData'
+tests\js\m5_3_library_data.cjs:50:    'M5-3: Classic old/assets/js/library-ui.js delegates fetchList, 
+getDeepLinkSongId, resolveSong, and renderLoadError to LibraryData'
+tests\js\m5_3_library_data.cjs:108:      'M5-3: LibraryData.fetchList marks error state when ApiService.songs.list 
+fails and offline fallback is empty'
+tests\js\m5_3_library_data.cjs:136:      'M5-3: LibraryData.renderLoadError renders retry UI and binds 
+#btn-retry-song-list'
+tests\js\m5_3_library_data.cjs:142:      'M5-3: Clicking retry invalidates songs cache and reloads song list 
+successfully',
+tests\js\m5_3_library_data.cjs:158:      'M5-3: LibraryData resolves deep link ?song=999 via ApiService.songs.get and 
+upserts into shared catalog'
+tests\js\m5_4_chord_canvas_core.cjs:28:  check(hasCoreFile, 'M5-4: assets/js/core/ChordCanvasCore.js exists');
+tests\js\m5_4_chord_canvas_core.cjs:33:    'M5-4: Both index.php and old/index.php load core/ChordCanvasCore.js'
+tests\js\m5_4_chord_canvas_core.cjs:41:    'M5-4: Modern chord-canvas.js and chord-canvas-edit.js delegate load, 
+token, undo/redo, and serialization to ChordCanvasCore'
+tests\js\m5_4_chord_canvas_core.cjs:49:    'M5-4: Classic old/assets/js/chord-canvas.js delegates load, token, 
+undo/redo, and save to ChordCanvasCore'
+tests\js\m5_5_feature_parity.cjs:35:    'M5-5: Both Modern and Classic sheet_viewer.php include #quick-pin-bar'
+tests\js\m5_5_feature_parity.cjs:44:    'M5-5: Both Modern and Classic keyboard-handler.js support G (togglePin) and H 
+(toggleHighlight)'
+tests\js\m1_boot_runner.cjs:165:    `M1-3: app.js is the only top-level assets/js/*.js file with DOMContentLoaded 
+(found: ${dclFiles.join(', ')})`
+
+

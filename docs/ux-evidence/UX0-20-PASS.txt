@@ -1,0 +1,70 @@
+﻿[PASS:S] M6: docs/mobile-evidence/M6-acceptance.md exists
+[PASS:S] M6: M6-acceptance.md contains raw JSON measurement block
+[PASS:S] M6: Raw JSON block parses with m0_1, m0_2, and section5
+[PASS:S] M6-1: All 18 combinations (2 UIs x 3 devices x 3 conditions) recorded
+[PASS:S] M6-1: 0 broken runs across all 90 runs (0 white screens, 0 lost song titles)
+[PASS:S] M6-1: 100% of initially broken runs under 10% request drop showed Retry UI and recovered on retry
+[PASS:S] M6-2: All 6 UI x device stress & SW combinations recorded
+[PASS:S] M6-2: 0 unresponsive taps in 5-song rapid switch across all UIs and devices
+[PASS:S] M6-2: Initial OSMD render = 1 and rotation renders <= 3 (<= 1 per rotation) on largest XML
+[PASS:S] M6-2: Service Worker controller active on both Modern and Classic on second load
+[PASS:S] M6: Both index.php and old/index.php track script load errors and mount recovery watchdog banner
+SUITE_COMPLETE total=11 passed=11 failed=0
+[PASS:S] M5-2: old/assets/js/song-loader.js delegates token/abort/fetch/offline to SongLoaderCore without duplicate fetch fallback
+[PASS:S] M5-2: old/assets/js/osmd-renderer.js delegates enqueueRender, scheduleResize, and pending state to OSMDRenderCore
+[PASS:B] M5-2: Classic SongLoader.load invokes SongLoaderCore.beginLoad and SongLoaderCore.loadXml
+[PASS:B] M5-2: Classic OSMDRenderer.load, reload, and setZoom all route through OSMDRenderCore.enqueueRender
+[PASS:B] M5-2: Classic OSMDRenderer shares pending render state with OSMDRenderCore and flushes via renderPending()
+[PASS:B] M5-2: Classic OSMDRenderer ResizeObserver delegates to OSMDRenderCore.scheduleResize
+SUITE_COMPLETE total=6 failed=0
+[PASS:S] M5-3: assets/js/core/LibraryData.js exists
+[PASS:S] M5-3: Both index.php and old/index.php load core/LibraryData.js
+[PASS:S] M5-3: Modern assets/js/library-ui.js delegates fetchList, getDeepLinkSongId, resolveSong, and renderLoadError to LibraryData
+[PASS:S] M5-3: Classic old/assets/js/library-ui.js delegates fetchList, getDeepLinkSongId, resolveSong, and renderLoadError to LibraryData
+[PASS:B] M5-3: LibraryData.fetchList marks error state when ApiService.songs.list fails and offline fallback is empty
+[PASS:B] M5-3: LibraryData.renderLoadError renders retry UI and binds #btn-retry-song-list
+[PASS:B] M5-3: Clicking retry invalidates songs cache and reloads song list successfully
+[PASS:B] M5-3: LibraryData resolves deep link ?song=999 via ApiService.songs.get and upserts into shared catalog
+SUITE_COMPLETE total=8 failed=0
+[PASS:S] M5-4: assets/js/core/ChordCanvasCore.js exists
+[PASS:S] M5-4: Both index.php and old/index.php load core/ChordCanvasCore.js
+[PASS:S] M5-4: Modern chord-canvas.js and chord-canvas-edit.js delegate load, token, undo/redo, and serialization to ChordCanvasCore
+[PASS:S] M5-4: Classic old/assets/js/chord-canvas.js delegates load, token, undo/redo, and save to ChordCanvasCore
+[PASS:B] M5-4 (Modern): Shared ChordCanvasCore token guard prevents late set response from overwriting newer set
+[PASS:B] M5-4 (Modern): Shared ChordCanvasCore resets undo stack on loadSong so undo() never leaks song-a chords onto song-b
+[PASS:B] M5-4 (Modern): Saving chord updates customChords['1_2']
+[PASS:B] M5-4 (Modern): Undo removes chord '1_2' via ChordCanvasCore.popUndo
+[PASS:B] M5-4 (Modern): Redo restores chord '1_2' via ChordCanvasCore.popRedo
+[PASS:B] M5-4 (Classic): Shared ChordCanvasCore token guard prevents late set response from overwriting newer set
+[PASS:B] M5-4 (Classic): Shared ChordCanvasCore resets undo stack on loadSong so undo() never leaks song-a chords onto song-b
+[PASS:B] M5-4 (Classic): Saving chord updates customChords['1_2']
+[PASS:B] M5-4 (Classic): Undo removes chord '1_2' via ChordCanvasCore.popUndo
+[PASS:B] M5-4 (Classic): Redo restores chord '1_2' via ChordCanvasCore.popRedo
+SUITE_COMPLETE total=14 failed=0
+[PASS:S] M5-5: Both Modern and Classic sheet_viewer.php include #quick-pin-bar
+[PASS:S] M5-5: Both Modern and Classic keyboard-handler.js support G (togglePin) and H (toggleHighlight)
+[PASS:B] M5-5 (Modern): LibraryUI exposes togglePin(songId) and isPinned(songId)
+[PASS:B] M5-5 (Modern): LibraryUI.togglePin('1') pins song 1 and renders #quick-pin-bar
+[PASS:B] M5-5 (Modern): LibraryUI.togglePin('1') again unpins song 1 and hides #quick-pin-bar
+[PASS:B] M5-5 (Classic): LibraryUI exposes togglePin(songId) and isPinned(songId)
+[PASS:B] M5-5 (Classic): LibraryUI.togglePin('1') pins song 1 and renders #quick-pin-bar
+[PASS:B] M5-5 (Classic): LibraryUI.togglePin('1') again unpins song 1 and hides #quick-pin-bar
+[PASS:B] M5-5 (Modern): ChordCanvas exposes toggleHighlight, setHighlightMode, and isHighlightMode
+[PASS:B] M5-5 (Modern): ChordCanvas.toggleHighlight toggles highlight mode, persists state, and syncs button active class
+[PASS:B] M5-5 (Classic): ChordCanvas exposes toggleHighlight, setHighlightMode, and isHighlightMode
+[PASS:B] M5-5 (Classic): ChordCanvas.toggleHighlight toggles highlight mode, persists state, and syncs button active class
+SUITE_COMPLETE total=12 failed=0
+[PASS:B] BootRunner.js exists in assets/js/core/BootRunner.js
+[PASS:B] assets/js/app.js binds LibraryUI.onSelect BEFORE LibraryUI.init
+[PASS:B] assets/js/app.js continues to LibraryUI.init after ChordCanvas.init throws
+[PASS:B] assets/js/app.js initializes ToolbarController and KeyboardHandler after earlier failure
+[PASS:B] assets/js/app.js reports module init failure to ErrorReporter
+[PASS:B] assets/js/app.js tapping a song still invokes SongLoader.load
+[PASS:B] M1-3: Modern app.js initializes all 6 consolidated modules via BootRunner in exact preserved order
+[PASS:B] old/assets/js/app.js binds LibraryUI.onSelect BEFORE LibraryUI.init
+[PASS:B] old/assets/js/app.js continues to LibraryUI.init after ChordCanvas.init throws
+[PASS:B] old/assets/js/app.js initializes ToolbarController and KeyboardHandler after earlier failure
+[PASS:B] old/assets/js/app.js reports module init failure to ErrorReporter
+[PASS:B] old/assets/js/app.js tapping a song still invokes SongLoader.load
+[PASS:S] M1-3: app.js is the only top-level assets/js/*.js file with DOMContentLoaded (found: app.js)
+SUITE_COMPLETE total=13

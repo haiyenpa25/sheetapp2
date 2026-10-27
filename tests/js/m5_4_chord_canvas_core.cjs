@@ -13,6 +13,7 @@ const oldIndexPhpCode = fs.readFileSync(path.join(root, 'old/index.php'), 'utf8'
 let total = 0;
 let failed = 0;
 
+function checkStatic(condition, message) { total++; if (condition) console.log(`[PASS:S] ${message}`); else { failed++; console.log(`[FAIL:S] ${message}`); } }
 function check(condition, message, details = '') {
   total++;
   if (condition) {
@@ -25,15 +26,15 @@ function check(condition, message, details = '') {
 
 (async () => {
   const hasCoreFile = fs.existsSync(corePath);
-  check(hasCoreFile, 'M5-4: assets/js/core/ChordCanvasCore.js exists');
+  checkStatic(hasCoreFile, 'M5-4: assets/js/core/ChordCanvasCore.js exists');
 
-  check(
+  checkStatic(
     indexPhpCode.includes("jsTag('core/ChordCanvasCore.js'") &&
       oldIndexPhpCode.includes("jsTag('core/ChordCanvasCore.js'"),
     'M5-4: Both index.php and old/index.php load core/ChordCanvasCore.js'
   );
 
-  check(
+  checkStatic(
     modernCanvasCode.includes('ChordCanvasCore.loadChordSet') &&
       modernEditCode.includes('ChordCanvasCore.pushUndo') &&
       modernEditCode.includes('ChordCanvasCore.popUndo') &&
@@ -41,7 +42,7 @@ function check(condition, message, details = '') {
     'M5-4: Modern chord-canvas.js and chord-canvas-edit.js delegate load, token, undo/redo, and serialization to ChordCanvasCore'
   );
 
-  check(
+  checkStatic(
     classicCanvasCode.includes('ChordCanvasCore.loadChordSet') &&
       classicCanvasCode.includes('ChordCanvasCore.pushUndo') &&
       classicCanvasCode.includes('ChordCanvasCore.popUndo') &&

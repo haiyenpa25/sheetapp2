@@ -6,6 +6,7 @@ const root = path.resolve(__dirname, '../..');
 let total = 0;
 let failed = 0;
 
+function checkStatic(ok, msg) { total++; if (!ok) failed++; console.log(`${ok ? '[PASS:S]' : '[FAIL:S]'} ${msg}`); }
 function check(ok, msg) {
   total++;
   if (!ok) failed++;
@@ -160,7 +161,7 @@ function runInVm(file, win, doc) {
   const dclFiles = fs.readdirSync(jsDir)
     .filter(f => f.endsWith('.js'))
     .filter(f => fs.readFileSync(path.join(jsDir, f), 'utf8').includes('DOMContentLoaded'));
-  check(
+  checkStatic(
     dclFiles.length === 1 && dclFiles[0] === 'app.js',
     `M1-3: app.js is the only top-level assets/js/*.js file with DOMContentLoaded (found: ${dclFiles.join(', ')})`
   );

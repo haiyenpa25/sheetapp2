@@ -12,6 +12,7 @@ const oldIndexPhpCode = fs.readFileSync(path.join(root, 'old/index.php'), 'utf8'
 let total = 0;
 let failed = 0;
 
+function checkStatic(condition, message) { total++; if (condition) console.log(`[PASS:S] ${message}`); else { failed++; console.log(`[FAIL:S] ${message}`); } }
 function check(condition, message, details = '') {
   total++;
   if (condition) {
@@ -25,16 +26,16 @@ function check(condition, message, details = '') {
 (async () => {
   // 1. Existence & HTML script wiring
   const hasCoreFile = fs.existsSync(libraryDataPath);
-  check(hasCoreFile, 'M5-3: assets/js/core/LibraryData.js exists');
+  checkStatic(hasCoreFile, 'M5-3: assets/js/core/LibraryData.js exists');
 
-  check(
+  checkStatic(
     indexPhpCode.includes("jsTag('core/LibraryData.js'") &&
       oldIndexPhpCode.includes("jsTag('core/LibraryData.js'"),
     'M5-3: Both index.php and old/index.php load core/LibraryData.js'
   );
 
   // 2. Both library-ui.js files delegate list fetch, deep link, and retry/error UI to LibraryData
-  check(
+  checkStatic(
     modernLibUiCode.includes('LibraryData.fetchList') &&
       modernLibUiCode.includes('LibraryData.getDeepLinkSongId') &&
       modernLibUiCode.includes('LibraryData.resolveSong') &&
@@ -42,7 +43,7 @@ function check(condition, message, details = '') {
     'M5-3: Modern assets/js/library-ui.js delegates fetchList, getDeepLinkSongId, resolveSong, and renderLoadError to LibraryData'
   );
 
-  check(
+  checkStatic(
     classicLibUiCode.includes('LibraryData.fetchList') &&
       classicLibUiCode.includes('LibraryData.getDeepLinkSongId') &&
       classicLibUiCode.includes('LibraryData.resolveSong') &&
