@@ -224,8 +224,8 @@ Mục tiêu: lỗi sửa một lần có hiệu lực ở cả hai giao diện. 
 
 ### M6 — Nghiệm thu (1–2 ngày)
 
-- Chạy lại spec M0 và so với mốc: **0 trang trắng, 0 lần mất tên bài, 0 lần chạm bài không mở** ở cả hai giao diện, mọi thiết bị, mọi điều kiện. Với điều kiện chặn 10% request: mỗi lần hỏng đều có panel/banner "Thử lại", và thử lại thành công.
-- `php tests\run_all_tests.php --strict --js` PASS; Playwright Chromium + WebKit PASS.
+- ✅ `4c73e85` Chạy lại spec M0 và so với mốc: **0 trang trắng, 0 lần mất tên bài, 0 lần chạm bài không mở** ở cả hai giao diện, mọi thiết bị, mọi điều kiện. Với điều kiện chặn 10% request: mỗi lần hỏng đều có panel/banner "Thử lại", và thử lại thành công.
+- ✅ `4c73e85` `php tests\run_all_tests.php --strict --js` PASS; Playwright Chromium + WebKit PASS. (Biên bản: `docs/mobile-evidence/M6-acceptance.md`)
 - Thử trên máy thật: một iPhone (Safari), một Android (Chrome), một iPad dọc, mạng wifi yếu thật. Ghi biên bản vào `docs/mobile-evidence/M6-acceptance.md`.
 
 ---
