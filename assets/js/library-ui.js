@@ -146,7 +146,7 @@ const LibraryUI = (() => {
     if (activeSongId) _highlightActive(activeSongId, false);
   }
 
-  function render(list, opts = {}) {
+  function render(list, opts = {}) { if (Array.isArray(list) && list.length > 0 && !(window.__failedScripts?.length > 0)) document.getElementById('boot-watchdog-banner')?.remove?.();
     if (!opts.searchPage) window.LibrarySearch?.cancel();
     _lastRenderedSongs = Array.isArray(list) ? list : [];
     const el = listEl();

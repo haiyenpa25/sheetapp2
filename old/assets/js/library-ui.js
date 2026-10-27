@@ -235,7 +235,7 @@ const LibraryUI = (() => {
 
     const wrap = scrollWrapEl();
     if (wrap && !activeSongId) wrap.scrollTop = 0;
-    _renderVirtualSlice(true);
+    _renderVirtualSlice(true); if (_vList.length > 0 && !(window.__failedScripts?.length > 0)) document.getElementById('boot-watchdog-banner')?.remove?.();
     if (activeSongId) _highlightActive(activeSongId);
   }
 
@@ -536,7 +536,7 @@ const LibraryUI = (() => {
         const viewH = wrap.clientHeight || 700;
         if (itemTop < wrap.scrollTop || itemTop + ROW_HEIGHT > wrap.scrollTop + viewH) {
           wrap.scrollTop = Math.max(0, itemTop - Math.floor(viewH / 2));
-          _renderVirtualSlice(true);
+          _renderVirtualSlice(true); if (_vList.length > 0 && !(window.__failedScripts?.length > 0)) document.getElementById('boot-watchdog-banner')?.remove?.();
         }
       }
     }
