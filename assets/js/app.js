@@ -52,6 +52,8 @@ const App = (() => {
       });
     });
 
+    _safeInit('LeaderNotesBanner', () => window.LeaderNotesBanner?.init?.());
+    _safeInit('LiturgyCard', () => window.LiturgyCard?.init?.());
     _safeInit('SongNavigation', () => window.SongNavigation?.init?.());
     _safeInit('OSMDRenderer', () => {
       window.OSMDRenderer?.init?.('osmd-container');
@@ -90,6 +92,7 @@ const App = (() => {
     _safeInit('LiveSession', () => window.LiveSession?.init?.());
     _safeInit('PerformanceEngine', () => window.PerformanceEngine?.init?.());
     _safeInit('LiveSync', () => window.LiveSync?.init?.());
+    _safeInit('FollowLeader', () => window.FollowLeader?.init?.());
 
     _safeInit('ToolbarController', () => window.ToolbarController?.init?.());
     _safeInit('MobileController', () => window.MobileController?.init?.());
@@ -111,6 +114,12 @@ const App = (() => {
       }
     });
     _safeInit('OfflineSetlistManager', () => window.OfflineSetlistManager?.checkOnStartup?.());
+    if (window.FAB) {
+      _safeInit('FAB', () => window.FAB?.init?.());
+    } else {
+      document.addEventListener('DOMContentLoaded', () => _safeInit('FAB', () => window.FAB?.init?.()));
+    }
+    _safeInit('AdminUI', () => window.AdminUI?.init?.());
     window.BootRunner?.markReady?.();
   }
 

@@ -1,0 +1,31 @@
+CMD: php tests\m1_boot_runner_regression.php
+EXIT=0
+[PASS:B] BootRunner.js exists in assets/js/core/BootRunner.js
+[PASS:B] assets/js/app.js binds LibraryUI.onSelect BEFORE LibraryUI.init
+[PASS:B] assets/js/app.js continues to LibraryUI.init after ChordCanvas.init throws
+[PASS:B] assets/js/app.js initializes ToolbarController and KeyboardHandler after earlier failure
+[PASS:B] assets/js/app.js reports module init failure to ErrorReporter
+[PASS:B] assets/js/app.js tapping a song still invokes SongLoader.load
+[PASS:B] M1-3: Modern app.js initializes all 6 consolidated modules via BootRunner in exact preserved order
+[PASS:B] old/assets/js/app.js binds LibraryUI.onSelect BEFORE LibraryUI.init
+[PASS:B] old/assets/js/app.js continues to LibraryUI.init after ChordCanvas.init throws
+[PASS:B] old/assets/js/app.js initializes ToolbarController and KeyboardHandler after earlier failure
+[PASS:B] old/assets/js/app.js reports module init failure to ErrorReporter
+[PASS:B] old/assets/js/app.js tapping a song still invokes SongLoader.load
+[PASS:B] M1-3: app.js is the only top-level assets/js/*.js file with DOMContentLoaded (found: app.js)
+SUITE_COMPLETE total=13
+
+CMD: npx playwright test e2e/main-page.spec.js --project=chromium --reporter=line
+EXIT=0
+[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 1 test using 1 worker
+
+[1/1] [chromium] › e2e\main-page.spec.js:12:3 › E2E-01: Kiểm tra trang chính và hiển thị bản nhạc OSMD › Mở trang chủ, chọn bài hát, render SVG thành công và console sạch
+[chromium] › e2e\main-page.spec.js:12:3 › E2E-01: Kiểm tra trang chính và hiển thị bản nhạc OSMD › Mở trang chủ, chọn bài hát, render SVG thành công và console sạch
+Đang chọn bài hát: TC 001HỠI THÁNH VƯƠNG, KÍP NGỰ LAIGThánh CaThờ phượng☆
+
+[SVGs in #osmd-container] [{"idx":0,"tag":"svg","widthAttr":"965","heightAttr":"1544.312585528421","styleWidth":"100%","rectW":904,"rectH":1446.6875,"childCount":514}]
+
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+  1 passed (2.1s)

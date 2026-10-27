@@ -131,11 +131,4 @@ const LeaderNotesBanner = (() => {
 
 if (typeof window !== 'undefined') {
   window.LeaderNotesBanner = LeaderNotesBanner;
-  if (typeof document !== 'undefined') {
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', LeaderNotesBanner.init);
-    } else {
-      LeaderNotesBanner.init();
-    }
-  }
 }

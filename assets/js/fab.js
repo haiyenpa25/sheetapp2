@@ -230,13 +230,6 @@ const FAB = (() => {
     document.getElementById(id)?.classList.toggle('fab-item-active', !!active);
   }
 
-  // DOM đã sẵn sàng (script ở cuối body) — gọi init() ngay
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init(); // DOM đã ready
-  }
-
   return { init, updateItemState, close: _close };
 })();
 

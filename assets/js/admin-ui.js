@@ -397,6 +397,3 @@ const AdminUI = (() => {
 
 window.AdminUI = AdminUI;
 
-document.addEventListener('DOMContentLoaded', () => {
-    AdminUI.init();
-});

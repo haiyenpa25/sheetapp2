@@ -69,6 +69,12 @@ function runInVm(file, win, doc) {
           reportedErrors.push(err);
         },
       },
+      LeaderNotesBanner: { init() { initOrder.push('LeaderNotesBanner.init'); } },
+      LiturgyCard: { init() { initOrder.push('LiturgyCard.init'); } },
+      LiveSync: { init() { initOrder.push('LiveSync.init'); } },
+      FollowLeader: { init() { initOrder.push('FollowLeader.init'); } },
+      FAB: { init() { initOrder.push('FAB.init'); } },
+      AdminUI: { init() { initOrder.push('AdminUI.init'); } },
       OSMDRenderer: {
         init() { initOrder.push('OSMDRenderer.init'); },
         onReady() {},
@@ -79,8 +85,6 @@ function runInVm(file, win, doc) {
           throw new Error('Simulated ChordCanvas init crash');
         },
       },
-      // Intentionally omit AnnotationCanvas / SheetAudioPlayer / AutoScroller on window
-      // to verify app.js accesses modules safely via window.X without ReferenceError
       PageNav: {
         init() { initOrder.push('PageNav.init'); },
       },
@@ -141,7 +145,25 @@ function runInVm(file, win, doc) {
       selectHandler({ id: 'thanh-ca-001', title: 'Test Song' });
     }
     check(loadedSongs.length === 1 && loadedSongs[0].id === 'thanh-ca-001', `${prefix}app.js tapping a song still invokes SongLoader.load`);
+
+    if (prefix === 'assets/js/') {
+      const m13Modules = ['LeaderNotesBanner.init', 'LiturgyCard.init', 'LiveSync.init', 'FollowLeader.init', 'FAB.init', 'AdminUI.init'];
+      const indices = m13Modules.map(m => initOrder.indexOf(m));
+      const allCalled = indices.every(idx => idx !== -1);
+      const strictlyOrdered = allCalled && indices.every((val, i) => i === 0 || val > indices[i - 1]);
+      check(strictlyOrdered, 'M1-3: Modern app.js initializes all 6 consolidated modules via BootRunner in exact preserved order');
+    }
   }
+
+  // M1-3 grep check: in assets/js/*.js, only app.js registers DOMContentLoaded
+  const jsDir = path.join(root, 'assets/js');
+  const dclFiles = fs.readdirSync(jsDir)
+    .filter(f => f.endsWith('.js'))
+    .filter(f => fs.readFileSync(path.join(jsDir, f), 'utf8').includes('DOMContentLoaded'));
+  check(
+    dclFiles.length === 1 && dclFiles[0] === 'app.js',
+    `M1-3: app.js is the only top-level assets/js/*.js file with DOMContentLoaded (found: ${dclFiles.join(', ')})`
+  );
 
   console.log(`SUITE_COMPLETE total=${total}`);
   process.exitCode = failed ? 1 : 0;

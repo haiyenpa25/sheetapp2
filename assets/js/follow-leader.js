@@ -542,11 +542,4 @@ const FollowLeader = (() => {
   };
 })();
 
-// Khởi chạy khi DOM sẵn sàng
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => FollowLeader.init());
-} else {
-  FollowLeader.init();
-}
-
 window.FollowLeader = FollowLeader;

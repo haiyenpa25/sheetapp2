@@ -97,15 +97,6 @@ const LiveSync = (() => {
     }
   }
 
-  // Khởi tạo listener khi DOM sẵn sàng
-  if (typeof document !== 'undefined') {
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
-    } else {
-      init();
-    }
-  }
-
   return {
     init,
     ensureLoaded,
