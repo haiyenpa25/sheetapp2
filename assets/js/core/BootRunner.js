@@ -137,6 +137,7 @@ const BootRunner = (() => {
   }
 
   function markReady() {
+    if (_failures.some(f => f && (f.name === 'LibraryUI' || f.name === 'LibraryUI.onSelect' || f.name === 'SongLoader'))) return;
     _isReady = true;
     if (_watchdogTimer !== null && typeof clearTimeout === 'function') {
       clearTimeout(_watchdogTimer);

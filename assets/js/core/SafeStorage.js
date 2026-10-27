@@ -37,7 +37,12 @@ const SafeStorage = (() => {
         st.setItem(k, v);
         return true;
       }
-    } catch (_) {}
+    } catch (_) {
+      try {
+        const st = _storage();
+        if (st) st.removeItem(k);
+      } catch (__) {}
+    }
     return false;
   }
 

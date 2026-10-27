@@ -108,8 +108,8 @@ const ApiService = (() => {
           throw _normalizeError(err, false, res.status);
         }
         if (parseMode === 'raw') return res;
-        if (parseMode === 'text') return res.text();
-        return res.json();
+        if (parseMode === 'text') return await res.text();
+        return await res.json();
       } catch (err) {
         if (callerSignal?.aborted || callerAborted) {
           const abortErr = err instanceof Error ? err : new Error('Aborted');

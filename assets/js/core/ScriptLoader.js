@@ -120,7 +120,7 @@ const ScriptLoader = (() => {
     ]);
   }
 
-  async function loadLiveSync() {
+  async function loadLiveSync() { const res = await loadSequence(['assets/js/live-sync.js', 'assets/js/follow-leader.js']); window.LiveSync?.init?.(); window.FollowLeader?.init?.(); return res; if (false)
     return loadSequence([
       'assets/js/live-sync.js',
       'assets/js/follow-leader.js'

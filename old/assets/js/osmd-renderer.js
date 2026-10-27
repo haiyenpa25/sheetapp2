@@ -74,7 +74,7 @@ const OSMDRenderer = (() => {
         _renderCount++;
         await osmd.render();
         _forceLayoutRecalc();
-        _titleCompacted = false; _compactTitleSVG();
+        _titleCompacted = false; isLoaded = true; _compactTitleSVG();
         if (window.ChordCanvas) window.ChordCanvas.reposition();
         if (window.ChordOverlay) window.ChordOverlay.onOSMDRendered();
         if (!isLoaded) {
@@ -316,7 +316,7 @@ const OSMDRenderer = (() => {
       if (!res.rendered || token !== window.OSMDRenderCore.getToken()) return osmd;
       _forceLayoutRecalc();
       const cEl = document.getElementById(containerId); if (cEl) { _lastContainerWidth = cEl.clientWidth; _lastViewportWidth = window.innerWidth; }
-      _titleCompacted = false; _compactTitleSVG();
+      _titleCompacted = false; isLoaded = true; _compactTitleSVG();
       isLoaded = true;
       _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} });
       return osmd;
@@ -334,7 +334,7 @@ const OSMDRenderer = (() => {
    * @param {number} transposeValue - Số nửa cung để dịch
    */
   async function reload(xmlString, transposeValue = 0) {
-    if (!osmd) throw new Error('OSMD chưa init');
+    await _ensureInstance();
     if (xmlString) currentXmlString = xmlString;
     const token = window.OSMDRenderCore.nextToken();
     try {
@@ -360,7 +360,7 @@ const OSMDRenderer = (() => {
       if (!res.rendered || token !== window.OSMDRenderCore.getToken()) return osmd;
       _forceLayoutRecalc();
       const cEl = document.getElementById(containerId); if (cEl) { _lastContainerWidth = cEl.clientWidth; _lastViewportWidth = window.innerWidth; }
-      _titleCompacted = false;
+      _titleCompacted = false; isLoaded = true;
       _compactTitleSVG();
       _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} }); // Gọi lại để ChordCanvas rebuild
       return osmd;
@@ -389,7 +389,7 @@ const OSMDRenderer = (() => {
       if (!res.rendered || token !== window.OSMDRenderCore.getToken()) return;
       _forceLayoutRecalc();
       const cEl = document.getElementById(containerId); if (cEl) { _lastContainerWidth = cEl.clientWidth; _lastViewportWidth = window.innerWidth; }
-      _titleCompacted = false; _compactTitleSVG();
+      _titleCompacted = false; isLoaded = true; _compactTitleSVG();
       if (window.ChordCanvas) window.ChordCanvas.reposition();
       if (window.ChordOverlay) window.ChordOverlay.onOSMDRendered();
       _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} });

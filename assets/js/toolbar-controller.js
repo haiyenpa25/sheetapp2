@@ -325,7 +325,7 @@ const ToolbarController = (() => {
 
     const _handleFollowLeaderClick = async (e) => {
       e?.preventDefault?.();
-      if (!window.FollowLeader && window.ScriptLoader?.loadLiveSync) await window.ScriptLoader.loadLiveSync();
+      if (!window.FollowLeader && window.ScriptLoader?.loadLiveSync) { await window.ScriptLoader.loadLiveSync(); window.LiveSync?.init?.(); window.FollowLeader?.init?.(); }
       window.FollowLeader?.openModal?.();
     };
     ['btn-follow-leader', 'btn-menu-follow-leader'].forEach(id => document.getElementById(id)?.addEventListener('click', _handleFollowLeaderClick));
