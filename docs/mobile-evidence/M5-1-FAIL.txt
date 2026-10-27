@@ -1,0 +1,11 @@
+[FAIL:B] assets/js/core/AppRules.js exists
+[FAIL:B] window.AppRules is defined
+[PASS:B] Modern (assets/js/app.js) allows transpose +9 semitones under unified ±12 limit
+[PASS:B] Modern (assets/js/app.js) reaches +12 semitones
+[PASS:B] Modern (assets/js/app.js) blocks +13 semitones at ±12 limit
+[PASS:B] Modern (assets/js/app.js) resetTranspose returns to 0 (Core Rule 2)
+[FAIL:B] Classic (old/assets/js/app.js) allows transpose +9 semitones under unified ±12 limit
+[FAIL:B] Classic (old/assets/js/app.js) reaches +12 semitones
+[FAIL:B] Classic (old/assets/js/app.js) blocks +13 semitones at ±12 limit
+[PASS:B] Classic (old/assets/js/app.js) resetTranspose returns to 0 (Core Rule 2)
+SUITE_COMPLETE total=10 passed=5 failed=5

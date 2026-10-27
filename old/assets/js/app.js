@@ -102,13 +102,13 @@ const App = (() => {
     const xml = window.Store?.get?.('originalXml');
     if (!xml) return;
     const newVal = (window.Store?.get?.('currentTranspose') || 0) + delta;
-    if (Math.abs(newVal) > 8) { window.AppUI?.showToast?.('Giới hạn ±8 tông', 'warning'); return; }
+    const maxT = window.AppRules?.MAX_TRANSPOSE ?? 12; if (Math.abs(newVal) > maxT) { window.AppUI?.showToast?.('Giới hạn ±' + maxT + ' nửa cung', 'warning'); return; }
     window.Store?.set?.('currentTranspose', newVal);
     window.AppUI?.updateTransposeDisplay?.(newVal);
     window.AppUI?.updateSongInfo?.(window.Store?.get?.('currentSong'), newVal);
     window.URLState?.update?.({ t: newVal });
     clearTimeout(_transposeTimer);
-    _transposeTimer = setTimeout(() => window.SongLoader?.commitTranspose?.(), 400);
+    _transposeTimer = setTimeout(() => window.SongLoader?.commitTranspose?.(), window.AppRules?.TRANSPOSE_DEBOUNCE_MS ?? 100);
   }
 
   async function resetTranspose() {

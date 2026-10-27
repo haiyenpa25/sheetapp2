@@ -1,0 +1,15 @@
+[PASS:B] assets/js/core/AppRules.js exists
+[PASS:B] window.AppRules is defined
+[PASS:B] AppRules defines ±12 transpose bounds (Q-M4)
+[PASS:B] AppRules defines Core Rule 1 HD/default chord set names
+[PASS:B] AppRules.isLockedChordSet enforces Core Rule 3 lock on HD & default
+[PASS:B] AppRules.isTransposeValid validates ±12 range
+[PASS:B] Modern (assets/js/app.js) allows transpose +9 semitones under unified ±12 limit
+[PASS:B] Modern (assets/js/app.js) reaches +12 semitones
+[PASS:B] Modern (assets/js/app.js) blocks +13 semitones at ±12 limit
+[PASS:B] Modern (assets/js/app.js) resetTranspose returns to 0 (Core Rule 2)
+[PASS:B] Classic (old/assets/js/app.js) allows transpose +9 semitones under unified ±12 limit
+[PASS:B] Classic (old/assets/js/app.js) reaches +12 semitones
+[PASS:B] Classic (old/assets/js/app.js) blocks +13 semitones at ±12 limit
+[PASS:B] Classic (old/assets/js/app.js) resetTranspose returns to 0 (Core Rule 2)
+SUITE_COMPLETE total=14 passed=14 failed=0

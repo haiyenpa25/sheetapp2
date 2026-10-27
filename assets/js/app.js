@@ -139,14 +139,14 @@ const App = (() => {
     const xml = window.Store?.get?.('originalXml');
     if (!xml) return;
     const newVal = (window.Store?.get?.('currentTranspose') || 0) + delta;
-    if (Math.abs(newVal) > 12) { window.AppUI?.showToast?.('Giới hạn ±12 nửa cung', 'warning'); return; }
+    const maxT = window.AppRules?.MAX_TRANSPOSE ?? 12; if (Math.abs(newVal) > maxT) { window.AppUI?.showToast?.('Giới hạn ±' + maxT + ' nửa cung', 'warning'); return; }
     window.Store?.set?.('currentTranspose', newVal);
     window.AppUI?.updateTransposeDisplay?.(newVal);
     window.AppUI?.updateSongInfo?.(window.Store?.get?.('currentSong'), newVal);
     window.URLState?.update?.({ t: newVal });
     window.EventBus?.emit?.('transpose:changed', { value: newVal });
     clearTimeout(_transposeTimer);
-    const SongLoader = window.SongLoader; _transposeTimer = setTimeout(() => SongLoader.commitTranspose(), 100);
+    const SongLoader = window.SongLoader; _transposeTimer = setTimeout(() => SongLoader.commitTranspose(), window.AppRules?.TRANSPOSE_DEBOUNCE_MS ?? 100);
   }
 
   async function resetTranspose() {
@@ -204,7 +204,7 @@ const App = (() => {
 
   function setTransposeDirect(val) {
     const num = parseInt(val, 10) || 0;
-    if (Math.abs(num) > 12) return;
+    if (Math.abs(num) > (window.AppRules?.MAX_TRANSPOSE ?? 12)) return;
     if (window.Store?.get?.('currentTranspose') === num) return;
     window.Store?.set?.('currentTranspose', num);
     window.AppUI?.updateTransposeDisplay?.(num);
