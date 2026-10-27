@@ -127,10 +127,10 @@ const ChordCanvas = (() => {
   }
 
   async function loadSong(songId, initialSet = 'HD') {
-    const token = ++_chordLoadToken;
+    const token = (_chordLoadToken = window.ChordCanvasCore?.nextToken ? window.ChordCanvasCore.nextToken() : ++_chordLoadToken);
     initialSet = initialSet || 'HD';
     await window.ChordCanvasEdit?.flushSave?.();
-    if (token !== _chordLoadToken) return;
+    if (window.ChordCanvasCore?.isCurrentToken ? !window.ChordCanvasCore.isCurrentToken(token) : token !== _chordLoadToken) return;
     window.ChordCanvasEdit?.closePopup?.();
     _clear();
     window.ChordCanvasEdit?.resetUndo?.(); // R0-4: tránh Ctrl+Z ghi nhầm sang bài mới
@@ -141,10 +141,10 @@ const ChordCanvas = (() => {
     _customChords = {};
     window.ChordCanvasEdit?.setBaseChecksum?.('', _customChords);
 
-    if (initialSet !== 'default') {
+    if (window.ChordCanvasCore?.loadChordSet) { const cr = await window.ChordCanvasCore.loadChordSet(songId, initialSet, { token }); if (cr.stale) return; _customChords = cr.chords; window.ChordCanvasEdit?.setBaseChecksum?.(cr.checksum, _customChords); } else if (initialSet !== 'default') {
       try {
         const r = await window.ApiService.chordSets.load(songId, initialSet);
-        if (token !== _chordLoadToken) return;
+        if (window.ChordCanvasCore?.isCurrentToken ? !window.ChordCanvasCore.isCurrentToken(token) : token !== _chordLoadToken) return;
         if (r && r.success && r.chords) {
           r.chords.forEach(({ measureIdx, noteIdx, chord }) => { _customChords[`${measureIdx}_${noteIdx}`] = chord; });
         } else {
@@ -152,7 +152,7 @@ const ChordCanvas = (() => {
         }
         window.ChordCanvasEdit?.setBaseChecksum?.(r?.checksum || '', _customChords);
       } catch(e) {
-        if (token !== _chordLoadToken) return;
+        if (window.ChordCanvasCore?.isCurrentToken ? !window.ChordCanvasCore.isCurrentToken(token) : token !== _chordLoadToken) return;
         _loadOfflineChords(songId, initialSet);
       }
     }
@@ -329,7 +329,7 @@ const ChordCanvas = (() => {
       if (sel) sel.value = _currentSet;
       return;
     }
-    const token = ++_chordLoadToken;
+    const token = (_chordLoadToken = window.ChordCanvasCore?.nextToken ? window.ChordCanvasCore.nextToken() : ++_chordLoadToken);
     const songId = window.App?.getCurrentSongId?.();
     await window.ChordCanvasEdit?.flushSave?.();
     if (token !== _chordLoadToken || songId !== window.App?.getCurrentSongId?.()) return;
@@ -337,7 +337,7 @@ const ChordCanvas = (() => {
     _currentSet   = name;
     _customChords = {};
     window.ChordCanvasEdit?.setBaseChecksum?.('', _customChords);
-    if (name !== 'default') {
+    if (window.ChordCanvasCore?.loadChordSet) { const cr = await window.ChordCanvasCore.loadChordSet(songId, name, { token, verifySongId: true, useOfflineFallback: false }); if (cr.stale) return; _customChords = cr.chords; window.ChordCanvasEdit?.setBaseChecksum?.(cr.checksum, _customChords); } else if (name !== 'default') {
       if (songId) {
         try {
           const r = await window.ApiService.chordSets.load(songId, name);
@@ -543,7 +543,7 @@ const ChordCanvas = (() => {
     getCustomChords: () => _customChords,
     setCustomChords: (c) => { _customChords = c; },
     applyPreloaded: (set, chords, checksum = '') => {
-      ++_chordLoadToken;
+      _chordLoadToken = window.ChordCanvasCore?.nextToken ? window.ChordCanvasCore.nextToken() : ++_chordLoadToken;
       _clear(); window.ChordCanvasEdit?.closePopup?.(false); window.ChordCanvasEdit?.resetUndo?.(); _songUseFlats = null; window.ChordCanvasTranspose?.resetCache?.();
       _currentSet = set || 'HD'; _prevSet = _currentSet; _customChords = chords ? { ...chords } : {};
       window.ChordCanvasEdit?.setBaseChecksum?.(checksum, _customChords);

@@ -114,12 +114,12 @@ const ChordCanvas = (() => {
   }
 
   async function loadSong(songId, initialSet = 'HD') {
-    const token = ++_chordLoadToken;
+    const token = (_chordLoadToken = window.ChordCanvasCore?.nextToken ? window.ChordCanvasCore.nextToken() : ++_chordLoadToken);
     _clear();
     setAddMode(false);
     resetUndo(); _currentSet   = initialSet || 'HD';
     _customChords = {};
-    _songUseFlats = null;
+    _songUseFlats = null; if (window.ChordCanvasCore?.loadChordSet && songId) { const cr = await window.ChordCanvasCore.loadChordSet(songId, _currentSet, { token, useOfflineFallback: false }); if (cr.stale) return; _customChords = cr.chords; } else
 
     if (songId) {
       try {
@@ -136,7 +136,7 @@ const ChordCanvas = (() => {
     setTimeout(_refreshSetDropdown, 300);
   }
 
-  function clearSong() { ++_chordLoadToken; _clear(); resetUndo(); setAddMode(false); }
+  function clearSong() { _chordLoadToken = window.ChordCanvasCore?.nextToken ? window.ChordCanvasCore.nextToken() : ++_chordLoadToken; _clear(); resetUndo(); setAddMode(false); }
 
   function setAddMode(on) {
     _editEnabled = !!on;
@@ -290,16 +290,16 @@ const ChordCanvas = (() => {
     }
   }
 
-  function _closePopup() { _popup?.remove(); _popup = null; } function resetUndo() { _undoStack = []; _redoStack = []; }
+  function _closePopup() { _popup?.remove(); _popup = null; } function resetUndo() { if (window.ChordCanvasCore) window.ChordCanvasCore.resetUndo(); _undoStack = []; _redoStack = []; }
 
-  function _pushUndo() {
+  function _pushUndo() { if (window.ChordCanvasCore?.pushUndo) { window.ChordCanvasCore.pushUndo(_currentSet, _customChords); return; }
     _undoStack.push({ set: _currentSet, chords: { ..._customChords } });
     if (_undoStack.length > 20) _undoStack.shift();
     _redoStack = [];
   }
 
   async function undo() {
-    if (!_undoStack.length) { window.App?.showToast?.('Không có hành động để hoàn tác', 'info'); return; }
+    if (window.ChordCanvasCore?.popUndo) { const prev = window.ChordCanvasCore.popUndo(_currentSet, _customChords); if (!prev) { window.App?.showToast?.('Không có hành động để hoàn tác', 'info'); return; } _currentSet = prev.set; _customChords = prev.chords; if (_currentSet !== 'default') await _saveCustomSet(); setTimeout(() => requestAnimationFrame(_build), 80); window.App?.showToast?.('↩ Đã hoàn tác', 'info'); return; } if (!_undoStack.length) { window.App?.showToast?.('Không có hành động để hoàn tác', 'info'); return; }
     _redoStack.push({ set: _currentSet, chords: { ..._customChords } });
     const prev = _undoStack.pop();
     _currentSet   = prev.set;
@@ -310,7 +310,7 @@ const ChordCanvas = (() => {
   }
 
   async function redo() {
-    if (!_redoStack.length) { window.App?.showToast?.('Không có hành động để làm lại', 'info'); return; }
+    if (window.ChordCanvasCore?.popRedo) { const next = window.ChordCanvasCore.popRedo(_currentSet, _customChords); if (!next) { window.App?.showToast?.('Không có hành động để làm lại', 'info'); return; } _currentSet = next.set; _customChords = next.chords; if (_currentSet !== 'default') await _saveCustomSet(); setTimeout(() => requestAnimationFrame(_build), 80); window.App?.showToast?.('↪ Đã làm lại', 'info'); return; } if (!_redoStack.length) { window.App?.showToast?.('Không có hành động để làm lại', 'info'); return; }
     _undoStack.push({ set: _currentSet, chords: { ..._customChords } });
     const next = _redoStack.pop();
     _currentSet   = next.set;
@@ -367,12 +367,12 @@ const ChordCanvas = (() => {
   }
 
   async function switchSet(name) {
-    const token = ++_chordLoadToken;
+    const token = (_chordLoadToken = window.ChordCanvasCore?.nextToken ? window.ChordCanvasCore.nextToken() : ++_chordLoadToken);
     const songId = window.App?.getCurrentSongId?.();
     _closePopup();
     resetUndo(); _currentSet   = name;
     _customChords = {};
-    if (name !== 'default') {
+    if (window.ChordCanvasCore?.loadChordSet) { const cr = await window.ChordCanvasCore.loadChordSet(songId, name, { token, verifySongId: true, useOfflineFallback: false }); if (cr.stale) return; _customChords = cr.chords; } else if (name !== 'default') {
       if (songId) {
         try {
           const r = await window.ApiService.chordSets.load(songId, name);

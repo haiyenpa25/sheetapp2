@@ -1,0 +1,15 @@
+[PASS:B] M5-4: assets/js/core/ChordCanvasCore.js exists
+[PASS:B] M5-4: Both index.php and old/index.php load core/ChordCanvasCore.js
+[PASS:B] M5-4: Modern chord-canvas.js and chord-canvas-edit.js delegate load, token, undo/redo, and serialization to ChordCanvasCore
+[PASS:B] M5-4: Classic old/assets/js/chord-canvas.js delegates load, token, undo/redo, and save to ChordCanvasCore
+[PASS:B] M5-4 (Modern): Shared ChordCanvasCore token guard prevents late set response from overwriting newer set
+[PASS:B] M5-4 (Modern): Shared ChordCanvasCore resets undo stack on loadSong so undo() never leaks song-a chords onto song-b
+[PASS:B] M5-4 (Modern): Saving chord updates customChords['1_2']
+[PASS:B] M5-4 (Modern): Undo removes chord '1_2' via ChordCanvasCore.popUndo
+[PASS:B] M5-4 (Modern): Redo restores chord '1_2' via ChordCanvasCore.popRedo
+[PASS:B] M5-4 (Classic): Shared ChordCanvasCore token guard prevents late set response from overwriting newer set
+[PASS:B] M5-4 (Classic): Shared ChordCanvasCore resets undo stack on loadSong so undo() never leaks song-a chords onto song-b
+[PASS:B] M5-4 (Classic): Saving chord updates customChords['1_2']
+[PASS:B] M5-4 (Classic): Undo removes chord '1_2' via ChordCanvasCore.popUndo
+[PASS:B] M5-4 (Classic): Redo restores chord '1_2' via ChordCanvasCore.popRedo
+SUITE_COMPLETE total=14 failed=0

@@ -221,6 +221,7 @@ echo jsTag('setlist-ui.js');
 echo jsTag('importer.js');
 echo jsTag('admin-ui.js');
 echo jsTag('display-settings.js');
+echo jsTag('core/ChordCanvasCore.js');
 echo jsTag('chord-canvas-xml.js');
 echo jsTag('chord-canvas-ui.js');
 echo jsTag('chord-canvas-dots.js');

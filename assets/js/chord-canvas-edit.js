@@ -40,7 +40,7 @@ const ChordCanvasEdit = (() => {
   function _destroyPopup() { _clearNoteCursor(); _popup?.dispose?.(); _popup?.remove(); _popup = null; }
   function _closePopup(rebuild = true) { _destroyPopup(); if (rebuild) _getApp()?.build?.(); }
 
-  function _pushUndo() {
+  function _pushUndo() { const a = _getApp(); if (window.ChordCanvasCore?.pushUndo) { window.ChordCanvasCore.pushUndo(a.getCurrentSet(), a.getCustomChords()); return; }
     const app = _getApp();
     _undoStack.push({ set: app.getCurrentSet(), chords: { ...app.getCustomChords() } });
     if (_undoStack.length > 20) _undoStack.shift();
@@ -51,7 +51,7 @@ const ChordCanvasEdit = (() => {
   // undo/redo sống sót qua lần chuyển bài/bộ hợp âm, nên Ctrl+Z sau khi đã chuyển
   // sang bài/bộ khác sẽ pop lại state của bài/bộ CŨ rồi lưu (saveCustomSet) dùng
   // songId của bài MỚI đang xem — ghi nhầm dữ liệu bài cũ đè lên bài mới.
-  function resetUndo() {
+  function resetUndo() { if (window.ChordCanvasCore) window.ChordCanvasCore.resetUndo();
     _undoStack = [];
     _redoStack = [];
   }
@@ -170,7 +170,7 @@ const ChordCanvasEdit = (() => {
 
   async function undo() {
     const app = _getApp();
-    if (!_undoStack.length) { window.App?.showToast?.('Không có hành động để hoàn tác', 'info'); return; }
+    if (window.ChordCanvasCore?.popUndo) { const prev = window.ChordCanvasCore.popUndo(app.getCurrentSet(), app.getCustomChords()); if (!prev) { window.App?.showToast?.('Không có hành động để hoàn tác', 'info'); return; } app.setCurrentSet(prev.set); app.setCustomChords(prev.chords); if (app.getCurrentSet() !== 'default') scheduleSave(1500); _getApp()?.updateSetUI?.(); setTimeout(() => requestAnimationFrame(() => app.build()), 80); window.App?.showToast?.('↩ Đã hoàn tác', 'info'); return; } if (!_undoStack.length) { window.App?.showToast?.('Không có hành động để hoàn tác', 'info'); return; }
     _redoStack.push({ set: app.getCurrentSet(), chords: { ...app.getCustomChords() } });
     const prev = _undoStack.pop();
     app.setCurrentSet(prev.set); app.setCustomChords(prev.chords);
@@ -182,7 +182,7 @@ const ChordCanvasEdit = (() => {
 
   async function redo() {
     const app = _getApp();
-    if (!_redoStack.length) { window.App?.showToast?.('Không có hành động để làm lại', 'info'); return; }
+    if (window.ChordCanvasCore?.popRedo) { const next = window.ChordCanvasCore.popRedo(app.getCurrentSet(), app.getCustomChords()); if (!next) { window.App?.showToast?.('Không có hành động để làm lại', 'info'); return; } app.setCurrentSet(next.set); app.setCustomChords(next.chords); if (app.getCurrentSet() !== 'default') scheduleSave(1500); _getApp()?.updateSetUI?.(); setTimeout(() => requestAnimationFrame(() => app.build()), 80); window.App?.showToast?.('↪ Đã làm lại', 'info'); return; } if (!_redoStack.length) { window.App?.showToast?.('Không có hành động để làm lại', 'info'); return; }
     _undoStack.push({ set: app.getCurrentSet(), chords: { ...app.getCustomChords() } });
     const next = _redoStack.pop();
     app.setCurrentSet(next.set); app.setCustomChords(next.chords);
