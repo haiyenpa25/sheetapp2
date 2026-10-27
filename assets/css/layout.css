@@ -1729,11 +1729,10 @@ body.sheet-only-mode .gig-floating-hud {
     font-size: 0.82rem;
     flex: 1 1 auto;
     min-width: 80px;
-    max-width: none !important;
+    max-width: none;
   }
-  #toolbar .instrument-annotations > button { min-width: 64px !important; padding: 0 6px !important; font-size: 12px !important; }
   .song-info-pill .song-cat-pill {
-    display: none !important;
+    display: none;
   }
   .chord-set-select {
     max-width: 90px;
@@ -1992,11 +1991,10 @@ body.toolbar-controls-compact .menu-section-compact-only {
     font-size: 0.82rem;
     flex: 1 1 auto;
     min-width: 80px;
-    max-width: none !important;
+    max-width: none;
   }
-  #toolbar .instrument-annotations > button { min-width: 64px !important; padding: 0 6px !important; font-size: 12px !important; }
   .song-info-pill .song-cat-pill {
-    display: none !important;
+    display: none;
   }
   .song-info-pill .song-key-badge {
     font-size: 0.7rem;

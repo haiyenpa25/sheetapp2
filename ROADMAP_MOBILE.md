@@ -198,17 +198,17 @@ Ticket có đuôi "a" là Modern, "b" là Classic. Không có đuôi là chung.
 
 | ID | Việc | Nghiệm thu | Sửa |
 |---|---|---|---|
-| M4-1 | Viewport `viewport-fit=cover` ở cả hai `index.php`; thanh dưới, HUD, toolbar dùng `env(safe-area-inset-*)` | Ảnh iPhone 13 WebKit: thanh dưới nằm trên vùng Home | U14 |
-| M4-2a | Modern Lớp 1 điện thoại: thanh dưới 6 ô theo mục 3; bộ hợp âm mở sheet chọn đủ danh sách thay cho đảo HD↔TLH | E2E 390: chọn được bộ khác HD/TLH; mọi ô ≥ 44×44 | U3 |
-| M4-2c | Modern Lớp 1 tablet: một hàng, select bộ hợp âm ≥ 160px, zoom − % + ra ngoài menu | E2E 768/1024: 0 điều khiển Lớp 1 < 44px; không chữ nào bị cắt | U4 |
-| M4-3 | Modern: gỡ nút trùng theo bảng phân bổ (mỗi hành động 1 chỗ chính + tối đa 1 trong menu + phím tắt). **Bảng phân bổ cần chủ dự án duyệt (Q-M3)** trước khi gỡ | Script đếm: không hành động nào có > 2 nút cùng hiện trên một màn hình | U8, TV3-1 |
-| M4-4 | Modern menu ⋯: 4 nhóm có tiêu đề, mọi mục có chữ, "Đổi giao diện" và "Đăng nhập" ở nhóm cuối cố định | E2E 390: menu không quá 2 màn cuộn; mỗi mục có tên truy cập | U5 |
-| M4-5 | Ẩn hẳn mục không đủ quyền (U6), dựa trên **một** hàm quyền dùng chung (`auth.js`); sửa `setlist-ui.js:74,194` và `chord-canvas.js:512` | E2E khách và viewer: không thấy các mục ở U6; banhat vẫn thấy | U6 |
-| M4-6 | Gig HUD co vừa 360–1024; nút Thoát ở góc trên tách khỏi cụm điều khiển; thêm ◀ ▶ và zoom ở điện thoại | E2E 768 dọc: `#btn-gig-exit` nằm trong khung; 390: Thoát không kề nút khác | U1, U2 |
-| M4-7 | Vùng chạm lật trang mép trái/phải trên bản nhạc (cả hai giao diện), không xung đột chạm vào nốt (dùng `PointerTap`) | E2E: chạm mép phải → trang sau; chạm nốt ở giữa → không lật | U7 |
-| M4-8 | Tên bài: bỏ `max-width` 90/110px cứng, tối đa 2 dòng hoặc rút gọn có `title` | Ảnh 360/390/768: tên dài đọc được ít nhất 2 từ đầu, có `title` đầy đủ | U9 |
-| M4-9b | Classic: gộp toolbar + page-bar thành một hàng Lớp 1 (Tông, Bộ hợp âm, Lời, ◀ ▶, Toàn màn hình), phần còn lại vào ⋮; hiện lại nút Lời; ⋮ có đủ mục và listener | E2E Classic 390: toolbar không cuộn ngang (`scrollWidth ≤ clientWidth`); ◀ ▶ và Lời thấy ngay | U10, U12, U13 |
-| M4-10b | Classic: mọi select/nút Lớp 1 cao ≥ 36px (mục tiêu 44px trên điện thoại) | Script đo 390/768/1024: 0 điều khiển Lớp 1 < 36px | U11 |
+| M4-1 ✅ `d8a6678` | Viewport `viewport-fit=cover` ở cả hai `index.php`; thanh dưới, HUD, toolbar dùng `env(safe-area-inset-*)` | Ảnh iPhone 13 WebKit: thanh dưới nằm trên vùng Home | U14 |
+| M4-2a ✅ `27419b1` | Modern Lớp 1 điện thoại: thanh dưới 6 ô theo mục 3; bộ hợp âm mở sheet chọn đủ danh sách thay cho đảo HD↔TLH | E2E 390: chọn được bộ khác HD/TLH; mọi ô ≥ 44×44 | U3 |
+| M4-2c ✅ `343db79` | Modern Lớp 1 tablet: một hàng, select bộ hợp âm ≥ 160px, zoom − % + ra ngoài menu | E2E 768/1024: 0 điều khiển Lớp 1 < 44px; không chữ nào bị cắt | U4 |
+| M4-3 ✅ `05c19b7` | Modern: gỡ nút trùng theo bảng phân bổ (mỗi hành động 1 chỗ chính + tối đa 1 trong menu + phím tắt). **Bảng phân bổ cần chủ dự án duyệt (Q-M3)** trước khi gỡ | Script đếm: không hành động nào có > 2 nút cùng hiện trên một màn hình | U8, TV3-1 |
+| M4-4 ✅ `a0a6716` | Modern menu ⋯: 4 nhóm có tiêu đề, mọi mục có chữ, "Đổi giao diện" và "Đăng nhập" ở nhóm cuối cố định | E2E 390: menu không quá 2 màn cuộn; mỗi mục có tên truy cập | U5 |
+| M4-5 ✅ `069798f` | Ẩn hẳn mục không đủ quyền (U6), dựa trên **một** hàm quyền dùng chung (`auth.js`); sửa `setlist-ui.js:74,194` và `chord-canvas.js:512` | E2E khách và viewer: không thấy các mục ở U6; banhat vẫn thấy | U6 |
+| M4-6 ✅ `e251977` | Gig HUD co vừa 360–1024; nút Thoát ở góc trên tách khỏi cụm điều khiển; thêm ◀ ▶ và zoom ở điện thoại | E2E 768 dọc: `#btn-gig-exit` nằm trong khung; 390: Thoát không kề nút khác | U1, U2 |
+| M4-7 ✅ `25af271` | Vùng chạm lật trang mép trái/phải trên bản nhạc (cả hai giao diện), không xung đột chạm vào nốt (dùng `PointerTap`) | E2E: chạm mép phải → trang sau; chạm nốt ở giữa → không lật | U7 |
+| M4-8 ✅ `f9eff5f` | Tên bài: bỏ `max-width` 90/110px cứng, tối đa 2 dòng hoặc rút gọn có `title` | Ảnh 360/390/768: tên dài đọc được ít nhất 2 từ đầu, có `title` đầy đủ | U9 |
+| M4-9b ✅ `301360b` | Classic: gộp toolbar + page-bar thành một hàng Lớp 1 (Tông, Bộ hợp âm, Lời, ◀ ▶, Toàn màn hình), phần còn lại vào ⋮; hiện lại nút Lời; ⋮ có đủ mục và listener | E2E Classic 390: toolbar không cuộn ngang (`scrollWidth ≤ clientWidth`); ◀ ▶ và Lời thấy ngay | U10, U12, U13 |
+| M4-10b ✅ `441cc7c` | Classic: mọi select/nút Lớp 1 cao ≥ 36px (mục tiêu 44px trên điện thoại) | Script đo 390/768/1024: 0 điều khiển Lớp 1 < 36px | U11 |
 
 ### M5 — Một lõi, hai giao diện (theo đợt, liên tục) 🟡
 

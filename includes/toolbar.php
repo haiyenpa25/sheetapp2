@@ -238,7 +238,7 @@
           <span id="menu-instrument-role-label">Góc nhìn: Guitar</span>
         </button>
 
-        <button id="btn-chord-highlight" class="btn btn-ghost btn-sm btn-menu-item" title="Bật/Tắt nổi bật hợp âm (Phím H)" onclick="window.ChordCanvas?.toggleHighlight?.()">
+        <button id="btn-menu-chord-highlight" class="btn btn-ghost btn-sm btn-menu-item" title="Bật/Tắt nổi bật hợp âm (Phím H)" onclick="window.ChordCanvas?.toggleHighlight?.()">
           <?= icon('eye') ?>
           <span>Nổi bật hợp âm</span>
         </button>
