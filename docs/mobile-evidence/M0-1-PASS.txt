@@ -1,0 +1,23 @@
+CMD: npx playwright test e2e/mobile-load-baseline.spec.js --reporter=line
+EXIT=0
+[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 12 tests using 1 worker
+
+[1/12] [chromium] › e2e\mobile-load-baseline.spec.js:246:7 › M0-1 · Đo mốc tải trang trên điện thoại và tablet › M0-1 baseline: pixel7 - modern
+[2/12] [chromium] › e2e\mobile-load-baseline.spec.js:246:7 › M0-1 · Đo mốc tải trang trên điện thoại và tablet › M0-1 baseline: pixel7 - classic
+[3/12] [chromium] › e2e\mobile-load-baseline.spec.js:246:7 › M0-1 · Đo mốc tải trang trên điện thoại và tablet › M0-1 baseline: iphone13 - modern
+[4/12] [chromium] › e2e\mobile-load-baseline.spec.js:246:7 › M0-1 · Đo mốc tải trang trên điện thoại và tablet › M0-1 baseline: iphone13 - classic
+[5/12] [chromium] › e2e\mobile-load-baseline.spec.js:246:7 › M0-1 · Đo mốc tải trang trên điện thoại và tablet › M0-1 baseline: ipadmini - modern
+[6/12] [chromium] › e2e\mobile-load-baseline.spec.js:246:7 › M0-1 · Đo mốc tải trang trên điện thoại và tablet › M0-1 baseline: ipadmini - classic
+[7/12] [webkit] › e2e\mobile-load-baseline.spec.js:246:7 › M0-1 · Đo mốc tải trang trên điện thoại và tablet › M0-1 baseline: pixel7 - modern
+[8/12] [webkit] › e2e\mobile-load-baseline.spec.js:246:7 › M0-1 · Đo mốc tải trang trên điện thoại và tablet › M0-1 baseline: pixel7 - classic
+[9/12] [webkit] › e2e\mobile-load-baseline.spec.js:246:7 › M0-1 · Đo mốc tải trang trên điện thoại và tablet › M0-1 baseline: iphone13 - modern
+[10/12] [webkit] › e2e\mobile-load-baseline.spec.js:246:7 › M0-1 · Đo mốc tải trang trên điện thoại và tablet › M0-1 baseline: iphone13 - classic
+[11/12] [webkit] › e2e\mobile-load-baseline.spec.js:246:7 › M0-1 · Đo mốc tải trang trên điện thoại và tablet › M0-1 baseline: ipadmini - modern
+[12/12] [webkit] › e2e\mobile-load-baseline.spec.js:246:7 › M0-1 · Đo mốc tải trang trên điện thoại và tablet › M0-1 baseline: ipadmini - classic
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+  Slow test file: [webkit] › e2e\mobile-load-baseline.spec.js (5.2m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  6 skipped
+  6 passed (7.9m)
