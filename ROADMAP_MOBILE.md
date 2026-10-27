@@ -216,11 +216,11 @@ Mục tiêu: lỗi sửa một lần có hiệu lực ở cả hai giao diện. 
 
 | ID | Việc | Ghi chú |
 |---|---|---|
-| M5-1 | Hằng số nghiệp vụ dùng chung `assets/js/core/AppRules.js`: giới hạn dịch giọng, debounce, tên bộ HD/TLH/default. Thống nhất ±12 / ±8 theo **Q-M4** | Core Rule không đổi |
-| M5-2 | Classic dùng `SongLoaderCore` (M2-3) và `OSMDRenderCore` (M3-1) thay cho `old/assets/js/song-loader.js` và phần vẽ của `old/assets/js/osmd-renderer.js` | Giữ hàm public cũ làm lớp mỏng nếu module khác gọi |
-| M5-3 | Dữ liệu thư viện dùng chung (`assets/js/core/LibraryData.js`): danh sách, deep link, thử lại; hai `library-ui.js` chỉ còn phần hiển thị | |
-| M5-4 | Hợp âm: tách phần logic (tải/lưu/undo/token) của `chord-canvas*.js` thành core dùng chung; phần vẽ chấm/popup giữ riêng | Nhiều lỗi BUG-12/25 nằm ở đây |
-| M5-5 | Đưa tính năng chỉ có ở một bên sang bên kia theo **Q-M5** | Mỗi tính năng 1 ticket |
+| M5-1 ✅ `9709462` | Hằng số nghiệp vụ dùng chung `assets/js/core/AppRules.js`: giới hạn dịch giọng, debounce, tên bộ HD/TLH/default. Thống nhất ±12 / ±8 theo **Q-M4** | Core Rule không đổi |
+| M5-2 ✅ `e5c43ac` | Classic dùng `SongLoaderCore` (M2-3) và `OSMDRenderCore` (M3-1) thay cho `old/assets/js/song-loader.js` và phần vẽ của `old/assets/js/osmd-renderer.js` | Giữ hàm public cũ làm lớp mỏng nếu module khác gọi |
+| M5-3 ✅ `84752da` | Dữ liệu thư viện dùng chung (`assets/js/core/LibraryData.js`): danh sách, deep link, thử lại; hai `library-ui.js` chỉ còn phần hiển thị | |
+| M5-4 ✅ `f29d2cd` | Hợp âm: tách phần logic (tải/lưu/undo/token) của `chord-canvas*.js` thành core dùng chung; phần vẽ chấm/popup giữ riêng | Nhiều lỗi BUG-12/25 nằm ở đây |
+| M5-5 ✅ `61b380a` | Đưa tính năng chỉ có ở một bên sang bên kia theo **Q-M5** | Mỗi tính năng 1 ticket |
 
 ### M6 — Nghiệm thu (1–2 ngày)
 

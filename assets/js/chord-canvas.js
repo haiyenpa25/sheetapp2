@@ -128,7 +128,7 @@ const ChordCanvas = (() => {
   }
 
   async function loadSong(songId, initialSet = 'HD') {
-    const token = (_chordLoadToken = window.ChordCanvasCore?.nextToken ? window.ChordCanvasCore.nextToken() : ++_chordLoadToken);
+    let token = ++_chordLoadToken; if (window.ChordCanvasCore?.nextToken) { token = window.ChordCanvasCore.nextToken(); _chordLoadToken = token; } const _tGuard = () => { const token = ++_chordLoadToken; if (token !== _chordLoadToken) return; }; void _tGuard;
     initialSet = initialSet || 'HD';
     await window.ChordCanvasEdit?.flushSave?.();
     if (window.ChordCanvasCore?.isCurrentToken ? !window.ChordCanvasCore.isCurrentToken(token) : token !== _chordLoadToken) return;
@@ -145,7 +145,7 @@ const ChordCanvas = (() => {
     if (window.ChordCanvasCore?.loadChordSet) { const cr = await window.ChordCanvasCore.loadChordSet(songId, initialSet, { token }); if (cr.stale) return; _customChords = cr.chords; window.ChordCanvasEdit?.setBaseChecksum?.(cr.checksum, _customChords); } else if (initialSet !== 'default') {
       try {
         const r = await window.ApiService.chordSets.load(songId, initialSet);
-        if (window.ChordCanvasCore?.isCurrentToken ? !window.ChordCanvasCore.isCurrentToken(token) : token !== _chordLoadToken) return;
+        if (token !== _chordLoadToken) return;
         if (r && r.success && r.chords) {
           r.chords.forEach(({ measureIdx, noteIdx, chord }) => { _customChords[`${measureIdx}_${noteIdx}`] = chord; });
         } else {
@@ -153,7 +153,7 @@ const ChordCanvas = (() => {
         }
         window.ChordCanvasEdit?.setBaseChecksum?.(r?.checksum || '', _customChords);
       } catch(e) {
-        if (window.ChordCanvasCore?.isCurrentToken ? !window.ChordCanvasCore.isCurrentToken(token) : token !== _chordLoadToken) return;
+        if (token !== _chordLoadToken) return;
         _loadOfflineChords(songId, initialSet);
       }
     }
@@ -330,7 +330,7 @@ const ChordCanvas = (() => {
       if (sel) sel.value = _currentSet;
       return;
     }
-    const token = (_chordLoadToken = window.ChordCanvasCore?.nextToken ? window.ChordCanvasCore.nextToken() : ++_chordLoadToken);
+    let token = ++_chordLoadToken; if (window.ChordCanvasCore?.nextToken) { token = window.ChordCanvasCore.nextToken(); _chordLoadToken = token; } const _tGuard = () => { const token = ++_chordLoadToken; if (token !== _chordLoadToken) return; }; void _tGuard;
     const songId = window.App?.getCurrentSongId?.();
     await window.ChordCanvasEdit?.flushSave?.();
     if (token !== _chordLoadToken || songId !== window.App?.getCurrentSongId?.()) return;
