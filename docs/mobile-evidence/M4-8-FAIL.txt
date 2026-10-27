@@ -1,0 +1,31 @@
+﻿[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 2 tests using 1 worker
+
+[1/2] [chromium] › e2e\m4-stage2-layout.spec.js:191:3 › M4-8 · Tên bài: bỏ max-width 90/110px cứng, tối đa 2 dòng hoặc rút gọn có title đầy đủ › M4-8 360/390/768 long song title has full title attribute and readable width (> 130px, not clamped to 90/110px)
+[2/2] [webkit] › e2e\m4-stage2-layout.spec.js:191:3 › M4-8 · Tên bài: bỏ max-width 90/110px cứng, tối đa 2 dòng hoặc rút gọn có title đầy đủ › M4-8 360/390/768 long song title has full title attribute and readable width (> 130px, not clamped to 90/110px)
+  1) [webkit] › e2e\m4-stage2-layout.spec.js:191:3 › M4-8 · Tên bài: bỏ max-width 90/110px cứng, tối đa 2 dòng hoặc rút gọn có title đầy đủ › M4-8 360/390/768 long song title has full title attribute and readable width (> 130px, not clamped to 90/110px) 
+
+    Error: vp=360 #song-title has full title attribute
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: "Thánh Chúa Chí Cao Quyền Năng Vĩnh Hằng"
+    Received: ""
+
+      232 |       });
+      233 |
+    > 234 |       expect(info.titleAttr, `vp=${vp.width} #song-title has full title attribute`).toBe(longTitle);
+          |                                                                                     ^
+      235 |       expect(info.pillWidth, `vp=${vp.width} .song-info-pill not clamped to 110px`).toBeGreaterThan(140);
+      236 |       expect(info.titleWidth, `vp=${vp.width} #song-title readable width > 120px`).toBeGreaterThan(120);
+      237 |       // end loop body
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m4-stage2-layout.spec.js:234:85
+
+    Error Context: test-results\m4-stage2-layout-M4-8-·-Tê-d83f2-px-not-clamped-to-90-110px--webkit\error-context.md
+
+
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+  1 failed
+    [webkit] › e2e\m4-stage2-layout.spec.js:191:3 › M4-8 · Tên bài: bỏ max-width 90/110px cứng, tối đa 2 dòng hoặc rút gọn có title đầy đủ › M4-8 360/390/768 long song title has full title attribute and readable width (> 130px, not clamped to 90/110px) 
+  1 skipped

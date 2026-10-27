@@ -182,6 +182,7 @@ const AppUI = (() => {
            titleEl.style.color = '';
        }
        titleEl.textContent = prefix + song.title;
+       titleEl.title = prefix + song.title;
     }
     
     if (keyEl) {

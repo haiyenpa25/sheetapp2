@@ -160,7 +160,7 @@ body.library-sidebar-open #app-shell-navbar .shell-brand { display: none; }
   .unified-toolbar #btn-new-chord-set.hidden { display: none !important; }
   @media (max-width: 1024px) {
     .unified-toolbar { --lp-gap: 4px; }
-    .unified-toolbar #song-info { display: none; }
+    .unified-toolbar #song-info { display: inline-flex; max-width: clamp(200px, 44vw, 360px); }
     .unified-toolbar #chord-set-selector { max-width: 75px; }
     .unified-toolbar .btn-view-mode span { display: inline; }
     .unified-toolbar .btn-view-mode { width: auto; white-space: nowrap; }

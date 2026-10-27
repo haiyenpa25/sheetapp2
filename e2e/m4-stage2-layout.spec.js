@@ -116,9 +116,9 @@ test.describe('M4-6 Â· Gig HUD co vá»«a 360â€“1024; nÃºt ThoÃ¡t á
   });
 });
 
-test.describe('M4-7 Â· VÃ¹ng cháº¡m láº­t trang mÃ©p trÃ¡i/pháº£i trÃªn báº£n nháº¡c (cáº£ hai giao diá»‡n), khÃ´ng xung Ä‘á»™t cháº¡m vÃ o ná»‘t (dÃ¹ng PointerTap)', () => {
+test.describe('M4-7 · Vùng chạm lật trang mép trái/phải trên bản nhạc (cả hai giao diện), không xung đột chạm vào nốt (dùng PointerTap)', () => {
   test('M4-7 Modern & Classic: tap note in middle does not turn page; tap right edge turns to next page', async ({ browser }, testInfo) => {
-    test.skip(testInfo.project.name !== 'webkit', 'M4-7 nghiá»‡m thu trÃªn WebKit');
+    test.skip(testInfo.project.name !== 'webkit', 'M4-7 nghiệm thu trên WebKit');
     test.setTimeout(60000);
 
     for (const uiPath of ['?song=thanh-ca-001&v=sheet', 'old/?song=thanh-ca-001']) {
@@ -148,7 +148,7 @@ test.describe('M4-7 Â· VÃ¹ng cháº¡m láº­t trang mÃ©p trÃ¡i/pháº�
       }));
       expect(beforeTapNote.total, `${uiPath} should have >= 2 pages`).toBeGreaterThanOrEqual(2);
 
-      // Cháº¡m ná»‘t nháº¡c á»Ÿ giá»¯a mÃ n hÃ¬nh -> khÃ´ng Ä‘Æ°á»£c láº­t trang
+      // Chạm nốt nhạc ở giữa màn hình -> không được lật trang
       const noteBox = await page.evaluate(() => {
         const notes = Array.from(document.querySelectorAll('#osmd-container svg .vf-stavenote, #osmd-container svg path'));
         const midNote = notes.find(el => {
@@ -169,7 +169,7 @@ test.describe('M4-7 Â· VÃ¹ng cháº¡m láº­t trang mÃ©p trÃ¡i/pháº�
       expect(afterTapNote.page, `${uiPath} tap note should stay on page 1`).toBe(1);
       expect(afterTapNote.scrollTop, `${uiPath} tap note should not scroll`).toBe(0);
 
-      // Cháº¡m mÃ©p pháº£i (#edge-tap-next) -> sang trang 2
+      // Chạm mép phải (#edge-tap-next) -> sang trang 2
       const nextEdge = page.locator('#edge-tap-next');
       await expect(nextEdge, `${uiPath} #edge-tap-next visible`).toBeVisible();
       await nextEdge.tap();
@@ -181,6 +181,60 @@ test.describe('M4-7 Â· VÃ¹ng cháº¡m láº­t trang mÃ©p trÃ¡i/pháº�
       }));
       expect(afterRightEdge.page, `${uiPath} tap right edge should advance to page 2`).toBe(2);
       expect(afterRightEdge.scrollTop, `${uiPath} tap right edge should scroll down`).toBeGreaterThan(0);
+
+      await context.close();
+    }
+  });
+});
+
+test.describe('M4-8 · Tên bài: bỏ max-width 90/110px cứng, tối đa 2 dòng hoặc rút gọn có title đầy đủ', () => {
+  test('M4-8 360/390/768 long song title has full title attribute and readable width (> 130px, not clamped to 90/110px)', async ({ browser }, testInfo) => {
+    test.skip(testInfo.project.name !== 'webkit', 'M4-8 nghiệm thu trên WebKit');
+    test.setTimeout(60000);
+    const path = require('path');
+
+    const longTitle = 'Thánh Chúa Chí Cao Quyền Năng Vĩnh Hằng';
+    for (const vp of [{ width: 360, height: 800 }, { width: 390, height: 844 }, { width: 768, height: 1024 }]) {
+      const context = await browser.newContext({
+        viewport: vp,
+        isMobile: true,
+        hasTouch: true,
+        baseURL: BASE_URL,
+        serviceWorkers: 'block',
+      });
+      const page = await context.newPage();
+      await page.addInitScript(() => {
+        try {
+          sessionStorage.setItem('sheetapp_guest_chosen', '1');
+          localStorage.setItem('sheetapp_guest_toast_shown', '1');
+        } catch (_) {}
+      });
+
+      await page.goto(BASE_URL + '?song=thanh-ca-001', { waitUntil: 'domcontentloaded', timeout: 20000 });
+      await page.locator('#osmd-container svg, .lv-verse').first().waitFor({ state: 'attached', timeout: 15000 });
+
+      const info = await page.evaluate((t) => {
+        window.AppUI?.updateSongInfo?.({ title: t, defaultKey: 'G', category: 'Thánh ca' }, 0);
+        const titleEl = document.getElementById('song-title');
+        const pillEl = document.querySelector('.song-info-pill');
+        const tr = titleEl ? titleEl.getBoundingClientRect() : { width: 0 };
+        const pr = pillEl ? pillEl.getBoundingClientRect() : { width: 0 };
+        return {
+          titleAttr: titleEl?.getAttribute('title') || '',
+          titleWidth: Math.round(tr.width),
+          pillWidth: Math.round(pr.width || tr.width),
+        };
+      }, longTitle);
+
+      await page.screenshot({
+        path: path.join('c:/xampp/htdocs/sheetapp2/docs/mobile-evidence', `M4-8-title-${vp.width}.png`),
+        clip: { x: 0, y: 0, width: vp.width, height: 110 },
+      });
+
+      expect(info.titleAttr, `vp=${vp.width} #song-title has full title attribute`).toBe(longTitle);
+      expect(info.pillWidth, `vp=${vp.width} .song-info-pill not clamped to 110px`).toBeGreaterThan(140);
+      expect(info.titleWidth, `vp=${vp.width} #song-title readable width > 120px`).toBeGreaterThan(120);
+      // end loop body
 
       await context.close();
     }

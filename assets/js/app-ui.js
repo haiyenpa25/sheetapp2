@@ -252,7 +252,9 @@ const AppUI = (() => {
     }
 
     const fullTitle = prefix + (song.title || '');
-    if (titleEl) titleEl.textContent = fullTitle;
+    if (titleEl) { titleEl.textContent = fullTitle; titleEl.title = fullTitle; }
+    document.querySelector('.song-info-pill')?.setAttribute('title', fullTitle);
+    if (gigTitleEl) gigTitleEl.title = fullTitle;
     if (gigTitleEl) gigTitleEl.textContent = fullTitle;
 
     // Calculate effective key
