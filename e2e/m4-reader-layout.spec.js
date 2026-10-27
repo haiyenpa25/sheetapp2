@@ -342,3 +342,80 @@ test.describe('M4-3 · Modern: gỡ nút trùng theo bảng phân bổ (không h
     }
   });
 });
+
+test.describe('M4-4 · Modern menu ⋯: 4 nhóm có tiêu đề, mọi mục có chữ, Đổi giao diện & Đăng nhập ở nhóm cuối cố định', () => {
+  test('M4-4 390 menu <= 2 scroll screens, all items have text & accessible name, sticky footer has old-ui & login', async ({ browser }, testInfo) => {
+    test.skip(testInfo.project.name !== 'webkit', 'M4-4 nghiệm thu trên 390 (iPhone 13 WebKit)');
+    test.setTimeout(40000);
+
+    const context = await browser.newContext({
+      ...devices['iPhone 13'],
+      baseURL: BASE_URL,
+      serviceWorkers: 'block',
+    });
+    const page = await context.newPage();
+    await page.addInitScript(() => {
+      try {
+        sessionStorage.setItem('sheetapp_guest_chosen', '1');
+        localStorage.setItem('sheetapp_guest_toast_shown', '1');
+      } catch (_) {}
+    });
+
+    await page.goto(BASE_URL + '?song=thanh-ca-001', { waitUntil: 'domcontentloaded', timeout: 20000 });
+    await page.locator('#osmd-container svg').first().waitFor({ state: 'attached', timeout: 15000 });
+
+    await page.locator('#btn-more-options').click();
+    await page.locator('#main-dropdown-menu').waitFor({ state: 'visible', timeout: 5000 });
+
+    const menuAudit = await page.evaluate(() => {
+      const menu = document.getElementById('main-dropdown-menu');
+      const isVis = (el) => {
+        if (!el) return false;
+        const s = getComputedStyle(el);
+        if (s.display === 'none' || s.visibility === 'hidden') return false;
+        if (el.closest('.hidden') || el.closest('.d-none')) return false;
+        const r = el.getBoundingClientRect();
+        return r.width > 0 && r.height > 0;
+      };
+
+      const compactText = document.querySelector('#btn-compact-mode .btn-text');
+      const compactTextVisible = isVis(compactText);
+
+      const footer = menu.querySelector('.menu-sticky-footer');
+      const footerSticky = footer ? getComputedStyle(footer).position === 'sticky' : false;
+      const hasOldUiInFooter = !!(footer && footer.querySelector('#btn-menu-old-ui'));
+      const hasLoginInFooter = !!(footer && footer.querySelector('#btn-menu-login'));
+
+      const visibleHeaders = Array.from(menu.querySelectorAll('.menu-section-header')).filter(isVis).map(h => h.textContent.trim());
+
+      const items = Array.from(menu.querySelectorAll('button, a, select')).filter(isVis);
+      const nameless = [];
+      for (const el of items) {
+        const name = (el.innerText || el.getAttribute('aria-label') || el.getAttribute('title') || '').trim();
+        if (!name) nameless.push(el.id || el.className);
+      }
+
+      return {
+        scrollHeight: menu.scrollHeight,
+        clientHeight: menu.clientHeight,
+        ratio: menu.scrollHeight / Math.max(1, menu.clientHeight),
+        compactTextVisible,
+        footerSticky,
+        hasOldUiInFooter,
+        hasLoginInFooter,
+        visibleHeaders,
+        nameless,
+      };
+    });
+
+    expect(menuAudit.compactTextVisible).toBe(true);
+    expect(menuAudit.footerSticky).toBe(true);
+    expect(menuAudit.hasOldUiInFooter).toBe(true);
+    expect(menuAudit.hasLoginInFooter).toBe(true);
+    expect(menuAudit.visibleHeaders.length).toBe(4);
+    expect(menuAudit.nameless).toEqual([]);
+    expect(menuAudit.ratio).toBeLessThanOrEqual(2);
+
+    await context.close();
+  });
+});

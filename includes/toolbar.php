@@ -197,10 +197,10 @@
         <div class="tools-row tools-zoom-row menu-section-compact-only" role="group" aria-label="Thu phóng bản nhạc">
           <span class="tools-row-label"><?= icon('search') ?> Thu phóng</span>
           <div class="tools-zoom-controls">
-            <button id="btn-menu-zoom-out" class="icon-btn-xs" title="Thu nhỏ">−</button>
+            <button id="btn-menu-zoom-out" class="icon-btn-xs" title="Thu nhỏ" aria-label="Thu nhỏ">−</button>
             <span id="menu-zoom-val" class="menu-zoom-val">100%</span>
-            <button id="btn-menu-zoom-in" class="icon-btn-xs" title="Phóng to">+</button>
-            <button id="btn-menu-lock-zoom" class="icon-btn-xs" title="Khóa tỷ lệ zoom"><?= icon('unlock') ?></button>
+            <button id="btn-menu-zoom-in" class="icon-btn-xs" title="Phóng to" aria-label="Phóng to">+</button>
+            <button id="btn-menu-lock-zoom" class="icon-btn-xs" title="Khóa tỷ lệ zoom" aria-label="Khóa tỷ lệ zoom"><?= icon('unlock') ?> <span class="sr-only">Khóa zoom</span></button>
           </div>
         </div>
 
@@ -238,6 +238,11 @@
           <span id="menu-instrument-role-label">Góc nhìn: Guitar</span>
         </button>
 
+        <button id="btn-chord-highlight" class="btn btn-ghost btn-sm btn-menu-item" title="Bật/Tắt nổi bật hợp âm (Phím H)" onclick="window.ChordCanvas?.toggleHighlight?.()">
+          <?= icon('eye') ?>
+          <span>Nổi bật hợp âm</span>
+        </button>
+
         <button id="btn-dark-toggle" class="btn btn-ghost btn-sm btn-menu-item" title="Đổi chế độ Sáng / Tối (D)">
           <?= icon('moon') ?>
           <span>Chế độ Sáng / Tối</span>
@@ -256,8 +261,8 @@
             <?= icon('pause') ?>
             <span class="btn-text">Dừng</span>
           </button>
-          <button id="btn-audio-settings" class="icon-btn-xs" disabled title="Tùy chỉnh bè phát"><?= icon('settings') ?></button>
-          <button id="btn-menu-satb-bar" class="icon-btn-xs" title="Mở thanh tập bè SATB nổi"><?= icon('music') ?></button>
+          <button id="btn-audio-settings" class="icon-btn-xs" disabled title="Tùy chỉnh bè phát" aria-label="Tùy chỉnh bè phát"><?= icon('settings') ?> <span>Bè</span></button>
+          <button id="btn-menu-satb-bar" class="icon-btn-xs" title="Mở thanh tập bè SATB nổi" aria-label="Mở thanh tập bè SATB nổi"><?= icon('music') ?> <span>SATB</span></button>
         </div>
 
         <div id="audio-settings-panel" class="audio-settings-panel hidden">
@@ -330,9 +335,14 @@
           <span>Theo người hướng dẫn</span>
         </button>
 
+        <button id="btn-pin-current-song" class="btn btn-ghost btn-sm btn-menu-item" title="Ghim / Yêu thích bài hát đang mở" onclick="(function(){ var s = window.SongLoader?.getCurrentSong?.() || window.Store?.get?.('currentSong'); if (s && window.HistoryManager?.toggleFavorite) { var on = window.HistoryManager.toggleFavorite(s); window.AppUI?.showToast?.(on ? 'Đã ghim bài hát' : 'Đã bỏ ghim bài hát', 'info'); } })()">
+          <?= icon('bookmark') ?>
+          <span>Ghim bài hát</span>
+        </button>
+
 
         <!-- NHÓM 4: SOẠN (Edit) -->
-        <div class="menu-section-header" role="presentation">SOẠN</div>
+        <div class="menu-section-header menu-section-edit" role="presentation">SOẠN</div>
 
         <button id="btn-menu-add-chord-mode" class="btn btn-ghost btn-sm btn-menu-item" title="Soạn / Điền hợp âm trực tiếp trên sheet (phím C)">
           <?= icon('pencil') ?>
@@ -394,17 +404,25 @@
           <span>Ban nhạc & Thành viên</span>
         </a>
 
-        <a href="<?= $bHref ?>old/" id="btn-menu-old-ui" class="btn btn-ghost btn-sm btn-menu-item"
-           onclick="if (window.URLState) { event.preventDefault(); window.location.href = URLState.interfaceUrl(true); }"
-           title="Chuyển sang Giao diện Cũ (SheetApp v1 đơn giản)">
-          <?= icon('layout') ?>
-          <span>Giao diện Cũ (Đơn giản)</span>
-        </a>
+        <div class="menu-sticky-footer" role="group" aria-label="Nhóm cuối cố định">
+          <a href="<?= $bHref ?>old/" id="btn-menu-old-ui" class="btn btn-ghost btn-sm btn-menu-item"
+             onclick="if (window.URLState) { event.preventDefault(); window.location.href = URLState.interfaceUrl(true); }"
+             title="Chuyển sang Giao diện Cũ (SheetApp v1 đơn giản)">
+            <?= icon('layout') ?>
+            <span>Đổi giao diện</span>
+          </a>
 
-        <button id="btn-help" class="btn btn-ghost btn-sm btn-menu-item" title="Hướng dẫn sử dụng (?)">
-          <?= icon('help-circle') ?>
-          <span>Hướng dẫn sử dụng</span>
-        </button>
+          <button id="btn-help" class="btn btn-ghost btn-sm btn-menu-item" title="Hướng dẫn sử dụng (?)">
+            <?= icon('help-circle') ?>
+            <span>Hướng dẫn</span>
+          </button>
+
+          <button id="btn-menu-login" type="button" class="btn btn-ghost btn-sm btn-menu-item" title="Đăng nhập / Tài khoản"
+                  onclick="document.getElementById('main-dropdown-menu')?.classList.add('hidden'); document.getElementById('main-dropdown-backdrop')?.classList.add('hidden'); (document.getElementById('shell-btn-login') || document.getElementById('btn-auth'))?.click();">
+            <?= icon('user') ?>
+            <span id="menu-login-label">Đăng nhập</span>
+          </button>
+        </div>
       </div>
     </div>
 </header>

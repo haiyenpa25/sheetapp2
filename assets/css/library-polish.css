@@ -2203,3 +2203,73 @@ body:has(#setlist-program-bar:not(.hidden)) #mobile-thumb-bar .mobile-nav-group 
 @media (min-width: 1301px) {
   #main-dropdown-menu #btn-menu-transpose-reset { display: none !important; }
 }
+
+/* M4-4: Menu ⋯ 4 nhóm có tiêu đề, mọi mục có chữ, nhóm cuối cố định (<= 2 màn cuộn) */
+#main-dropdown-menu .btn-text { display: inline !important; }
+#main-dropdown-menu:has(#btn-menu-add-chord-mode.hidden) .menu-section-edit { display: none !important; }
+#main-dropdown-menu .menu-sticky-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  background: var(--lp-surface, #ffffff);
+  border-top: 1px solid var(--lp-border, #e2e8f0);
+  padding: 4px 0 0;
+  margin-top: 4px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+}
+[data-theme="dark"] #main-dropdown-menu .menu-sticky-footer,
+body.dark-mode #main-dropdown-menu .menu-sticky-footer {
+  background: #18181b;
+  border-top-color: #27272a;
+}
+#main-dropdown-menu .menu-sticky-footer .btn-menu-item {
+  justify-content: center;
+  padding: 6px 4px !important;
+  font-size: 12px !important;
+  min-height: 44px !important;
+  text-align: center;
+  white-space: nowrap;
+}
+#main-dropdown-menu .menu-sticky-footer .btn-menu-item .icon {
+  margin-right: 4px !important;
+  width: 14px !important;
+  height: 14px !important;
+}
+@media (max-width: 680px) {
+  #main-dropdown-menu {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    align-content: start !important;
+    gap: 2px 6px !important;
+    height: 76vh !important;
+    max-height: 76vh !important;
+    padding: 6px 10px calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  #main-dropdown-menu.hidden { display: none !important; }
+  #main-dropdown-menu .sheet-drag-handle,
+  #main-dropdown-menu .menu-section-header,
+  #main-dropdown-menu .tools-row,
+  #main-dropdown-menu .menu-audio-actions,
+  #main-dropdown-menu .compact-settings-panel,
+  #main-dropdown-menu .audio-settings-panel,
+  #main-dropdown-menu .menu-sticky-footer {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+  }
+  #main-dropdown-menu > .btn-menu-item {
+    width: 100% !important;
+    min-height: 44px !important;
+    padding: 6px 8px !important;
+    font-size: 12.5px !important;
+  }
+  #main-dropdown-menu .menu-section-header {
+    padding: 6px 4px 2px !important;
+  }
+  #main-dropdown-menu .tools-row {
+    min-height: 44px !important;
+    padding: 4px 8px !important;
+    font-size: 13px !important;
+  }
+}
