@@ -125,13 +125,17 @@
 
       <button id="btn-gig-view-toggle" class="btn-gig-action btn-gig-view" type="button" aria-label="Đổi dạng xem" title="Đổi Bản nhạc / Lời &amp; Hợp âm">Nhạc</button>
       <button id="btn-gig-chordset" class="btn-gig-action btn-gig-chordset" type="button" aria-label="Đổi bộ hợp âm" title="Đổi bộ hợp âm">HD</button>
+      <div class="gig-hud-segment gig-hud-nav-segment" title="Chuyển bài">
+        <button id="btn-gig-prev-song" class="btn-gig-action btn-gig-step" type="button" aria-label="Bài trước" title="Bài trước">◀</button>
+        <button id="btn-gig-next-song" class="btn-gig-action btn-gig-step" type="button" aria-label="Bài tiếp theo" title="Bài tiếp theo">▶</button>
+      </div>
       <button id="btn-gig-tools" class="btn-gig-action btn-gig-tools" type="button" aria-label="Mở Công cụ" title="Mở Công cụ"><?= icon('more-horizontal') ?></button>
       
       <!-- Nút Chuyển Khổ trong Biểu Diễn (Ticket L1-6) -->
       <button id="btn-gig-verse" class="btn-gig-action btn-gig-verse hidden" title="Chuyển khổ hát (Phím V)">Khổ 1/1</button>
 
       <!-- Bật/tắt tự cuộn -->
-      <button id="btn-gig-scroll-toggle" class="btn-gig-action btn-gig-scroll" title="Bật/Tắt cuộn (Space)"><?= icon('chevron-down') ?> <span>Cuộn</span></button>
+      <button id="btn-gig-scroll-toggle" class="btn-gig-action btn-gig-scroll" type="button" aria-label="Bật/Tắt cuộn" title="Bật/Tắt cuộn (Space)"><?= icon('chevron-down') ?> <span>Cuộn</span></button>
 
       <!-- Cụm Thu Phóng & Khóa Zoom (GIG MODE) -->
       <div class="gig-hud-zoom-wrap" title="Thu phóng & Khóa tỷ lệ trong Toàn Màn Hình">
@@ -142,11 +146,12 @@
       </div>
 
       <!-- Thoát Toàn Màn Hình -->
-      <button id="btn-gig-exit" class="btn-gig-action btn-gig-exit" title="Thoát Toàn Màn Hình (Esc)"><span>Thoát</span> <?= icon('x') ?></button>
+      <!-- Thoát Toàn Màn Hình đã tách lên góc trên (M4-6) -->
     </div>
   </div>
   <button id="gig-hud-reveal" class="gig-hud-reveal" type="button" aria-label="Hiện thanh điều khiển biểu diễn" title="Hiện thanh điều khiển">
-    <?= icon('chevron-up') ?> <span>Điều khiển</span>
+    <?= icon('chevron-up') ?> <span>Điều khiển</span></button>
+  <button id="btn-gig-exit" class="btn-gig-action btn-gig-exit" type="button" aria-label="Thoát Toàn Màn Hình" title="Thoát Toàn Màn Hình (Esc)"><span>Thoát</span> <?= icon('x') ?>
   </button>
 
   <!-- Floating Chord Edit Hint (ngoài page-bar) -->

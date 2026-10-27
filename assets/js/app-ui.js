@@ -398,6 +398,14 @@ const AppUI = (() => {
       e.stopPropagation();
       document.getElementById('btn-auto-scroll')?.click();
     });
+    document.getElementById('btn-gig-prev-song')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.getElementById('btn-prev-song')?.click();
+    });
+    document.getElementById('btn-gig-next-song')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.getElementById('btn-next-song')?.click();
+    });
 
     // Hands-free Edge-Tap page navigation
     document.getElementById('edge-tap-prev')?.addEventListener('click', (e) => {

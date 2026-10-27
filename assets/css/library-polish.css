@@ -2285,3 +2285,63 @@ body:not(.has-member-access) #main-dropdown-menu a[href$="manager/"],
 body:not(.has-member-access) #main-dropdown-menu a[data-target="/manager/#tab-users"] {
   display: none !important;
 }
+
+/* M4-6: Gig HUD co vừa 360–1024; nút Thoát ở góc trên tách khỏi cụm điều khiển; thêm ◀ ▶ và zoom ở điện thoại */
+#btn-gig-exit {
+  display: none !important;
+}
+body.sheet-only-mode #btn-gig-exit {
+  display: inline-flex !important;
+  position: fixed !important;
+  top: max(12px, env(safe-area-inset-top, 12px)) !important;
+  right: max(12px, env(safe-area-inset-right, 12px)) !important;
+  left: auto !important;
+  bottom: auto !important;
+  z-index: calc(var(--z-hud, 100) + 5) !important;
+  min-width: 44px !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  padding: 0 14px !important;
+  border-radius: 99px !important;
+  background: rgba(239, 68, 68, 0.28) !important;
+  border: 1px solid rgba(239, 68, 68, 0.48) !important;
+  color: #fecaca !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45) !important;
+}
+body.sheet-only-mode .gig-floating-hud {
+  max-width: calc(100vw - 16px) !important;
+  box-sizing: border-box !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  border-radius: 20px !important;
+}
+body.sheet-only-mode .gig-hud-actions {
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+}
+#gig-floating-hud:has(#gig-hud-setlist-row:not(.hidden)) .gig-hud-nav-segment {
+  display: none !important;
+}
+body.sheet-only-mode .btn-gig-action.btn-gig-scroll span {
+  display: inline !important;
+}
+@media (max-width: 680px) {
+  body.sheet-only-mode .gig-hud-zoom-wrap {
+    display: inline-flex !important;
+    order: 6;
+    padding: 1px 3px !important;
+    gap: 1px !important;
+  }
+  body.sheet-only-mode .gig-hud-nav-segment {
+    display: inline-flex !important;
+    order: 4;
+  }
+  body.sheet-only-mode .gig-hud-zoom-val,
+  body.sheet-only-mode .gig-hud-trans-label {
+    font-size: 11px !important;
+    padding: 0 3px !important;
+    min-width: 0 !important;
+  }
+}

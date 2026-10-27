@@ -1,0 +1,29 @@
+﻿[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 2 tests using 1 worker
+
+[1/2] [chromium] › e2e\m4-stage2-layout.spec.js:6:3 › M4-6 · Gig HUD co vừa 360–1024; nút Thoát ở góc trên tách khỏi cụm điều khiển; thêm ◀ ▶ và zoom ở điện thoại › M4-6 768 portrait HUD & exit fit inside viewport; 390 exit separated at top corner + nav & zoom visible
+[2/2] [webkit] › e2e\m4-stage2-layout.spec.js:6:3 › M4-6 · Gig HUD co vừa 360–1024; nút Thoát ở góc trên tách khỏi cụm điều khiển; thêm ◀ ▶ và zoom ở điện thoại › M4-6 768 portrait HUD & exit fit inside viewport; 390 exit separated at top corner + nav & zoom visible
+  1) [webkit] › e2e\m4-stage2-layout.spec.js:6:3 › M4-6 · Gig HUD co vừa 360–1024; nút Thoát ở góc trên tách khỏi cụm điều khiển; thêm ◀ ▶ và zoom ở điện thoại › M4-6 768 portrait HUD & exit fit inside viewport; 390 exit separated at top corner + nav & zoom visible 
+
+    Error: expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 0
+    Received:    -63
+
+      40 |       };
+      41 |     });
+    > 42 |     expect(audit768.hudLeft).toBeGreaterThanOrEqual(0);
+         |                              ^
+      43 |     expect(audit768.hudRight).toBeLessThanOrEqual(768);
+      44 |     expect(audit768.exitLeft).toBeGreaterThanOrEqual(0);
+      45 |     expect(audit768.exitRight).toBeLessThanOrEqual(768);
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m4-stage2-layout.spec.js:42:30
+
+    Error Context: test-results\m4-stage2-layout-M4-6-·-Gi-d816e-top-corner-nav-zoom-visible-webkit\error-context.md
+
+
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+  1 failed
+    [webkit] › e2e\m4-stage2-layout.spec.js:6:3 › M4-6 · Gig HUD co vừa 360–1024; nút Thoát ở góc trên tách khỏi cụm điều khiển; thêm ◀ ▶ và zoom ở điện thoại › M4-6 768 portrait HUD & exit fit inside viewport; 390 exit separated at top corner + nav & zoom visible 
+  1 skipped
