@@ -40,25 +40,106 @@ const ApiService = (() => {
     return m ? decodeURIComponent(m[1]) : '';
   }
 
+  const DEFAULT_TIMEOUT_MS = 12000;
+
+  function _normalizeError(err, isTimeout = false, status = 0) {
+    const e = err instanceof Error ? err : new Error(String(err || 'Network error'));
+    const code = typeof e.status === 'number' ? e.status : (typeof status === 'number' ? status : 0);
+    const timedOut = Boolean(isTimeout || e.timeout);
+    const navOffline = typeof navigator !== 'undefined' && navigator && navigator.onLine === false;
+    e.status = code;
+    e.timeout = timedOut;
+    e.offline = Boolean(!timedOut && code === 0 && (navOffline || e.name !== 'AbortError'));
+    return e;
+  }
+
+  async function _fetchWithTimeoutAndRetry(finalUrl, options = {}, parseMode = 'json') {
+    const method = (options.method || 'GET').toUpperCase();
+    const timeoutMs = Number(options.timeoutMs ?? (typeof window !== 'undefined' && window.__API_TIMEOUT_MS__)) || DEFAULT_TIMEOUT_MS;
+    const maxAttempts = (method === 'GET' && options.retry !== false) ? 2 : 1;
+    const callerSignal = options.signal || null;
+    const AC = (typeof AbortController !== 'undefined') ? AbortController : (typeof window !== 'undefined' && window.AbortController ? window.AbortController : null);
+    const setTimer = (typeof setTimeout === 'function') ? setTimeout : (typeof window !== 'undefined' && typeof window.setTimeout === 'function' ? window.setTimeout : null);
+    const clearTimer = (typeof clearTimeout === 'function') ? clearTimeout : (typeof window !== 'undefined' && typeof window.clearTimeout === 'function' ? window.clearTimeout : null);
+
+    let lastErr = null;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      if (callerSignal?.aborted) {
+        const abortErr = new Error('The operation was aborted');
+        abortErr.name = 'AbortError';
+        throw _normalizeError(abortErr, false, 0);
+      }
+      const controller = AC ? new AC() : null;
+      let timedOut = false, callerAborted = false, timerId = null;
+      const onCallerAbort = () => { callerAborted = true; try { controller?.abort(); } catch (_) {} };
+      if (callerSignal && typeof callerSignal.addEventListener === 'function') {
+        callerSignal.addEventListener('abort', onCallerAbort, { once: true });
+      }
+      const fetchOpts = Object.assign({}, options);
+      delete fetchOpts.timeoutMs; delete fetchOpts.retry; delete fetchOpts.rawResponse;
+      if (controller) fetchOpts.signal = controller.signal;
+
+      try {
+        const fetchPromise = fetch(finalUrl, fetchOpts);
+        const res = setTimer ? await new Promise((resolve, reject) => {
+          timerId = setTimer(() => {
+            timedOut = true;
+            try { controller?.abort(); } catch (_) {}
+            const tErr = new Error(`Request timeout (${timeoutMs}ms)`);
+            tErr.name = 'TimeoutError';
+            reject(_normalizeError(tErr, true, 0));
+          }, timeoutMs);
+          fetchPromise.then(resolve, reject);
+        }) : await fetchPromise;
+
+        if (!res.ok) {
+          let data = null;
+          if (parseMode === 'json' && typeof res.json === 'function') {
+            try { data = await res.json(); } catch (_) {}
+          }
+          const err = new Error((data && data.error) ? data.error : `HTTP ${res.status}`);
+          err.status = res.status;
+          err.data = data;
+          throw _normalizeError(err, false, res.status);
+        }
+        if (parseMode === 'raw') return res;
+        if (parseMode === 'text') return res.text();
+        return res.json();
+      } catch (err) {
+        if (callerSignal?.aborted || callerAborted) {
+          const abortErr = err instanceof Error ? err : new Error('Aborted');
+          abortErr.name = 'AbortError';
+          throw _normalizeError(abortErr, false, 0);
+        }
+        lastErr = _normalizeError(err, timedOut, err?.status || 0);
+        const shouldRetry = attempt < maxAttempts && (lastErr.timeout || lastErr.status === 0 || lastErr.status >= 500);
+        if (!shouldRetry) throw lastErr;
+      } finally {
+        if (timerId !== null && clearTimer) clearTimer(timerId);
+        if (callerSignal && typeof callerSignal.removeEventListener === 'function') {
+          callerSignal.removeEventListener('abort', onCallerAbort);
+        }
+      }
+    }
+    throw lastErr;
+  }
+
   async function _request(url, options = {}) {
     const finalUrl = resolveUrl(url);
     const method = (options.method || 'GET').toUpperCase();
+    const reqOpts = Object.assign({}, options);
     if (method !== 'GET' && method !== 'HEAD') {
       const token = _csrfToken();
       if (token) {
-        options.headers = Object.assign({}, options.headers || {}, { 'X-CSRF-Token': token });
+        reqOpts.headers = Object.assign({}, reqOpts.headers || {}, { 'X-CSRF-Token': token });
       }
     }
-    const res = await fetch(finalUrl, options);
-    if (!res.ok) {
-      let data = null;
-      try { data = await res.json(); } catch (_) {}
-      const err = new Error((data && data.error) ? data.error : `HTTP ${res.status}`);
-      err.status = res.status;
-      err.data = data;
-      throw err;
-    }
-    return res.json();
+    return _fetchWithTimeoutAndRetry(finalUrl, reqOpts, 'json');
+  }
+
+  async function fetchXml(url, options = {}) {
+    const finalUrl = resolveUrl(url);
+    return _fetchWithTimeoutAndRetry(finalUrl, options, options.rawResponse ? 'raw' : 'text');
   }
 
   function _json(method, url, body) {
@@ -451,6 +532,9 @@ const ApiService = (() => {
   };
 
   return {
+    DEFAULT_TIMEOUT_MS,
+    _request,
+    fetchXml,
     resolveUrl,
     getBaseUrl: _getBaseUrl,
     songs, chordSets, sessions, annotations, setlists, servicePlans: setlists, categories, saveXml, omr, importer, practice, manager, users, auth, liveSync, arrangements, notifications, practiceAssignments, export: exportService, reviews, notificationPreferences, errors, reportError: errors.report

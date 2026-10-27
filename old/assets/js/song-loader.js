@@ -44,7 +44,7 @@ const SongLoader = (() => {
       const fetchXmlText = async () => {
         try {
           // INTENTIONAL EXCEPTION: Static MusicXML asset fetch
-          const res = await fetch(xmlFetchUrl);
+          const res = window.ApiService?.fetchXml ? await window.ApiService.fetchXml(xmlFetchUrl, { rawResponse: true }) : await fetch(xmlFetchUrl);
           if (res.ok) {
             const text = await res.text();
             window.OfflineVault?.saveXml?.(song.xmlPath, text);

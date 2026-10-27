@@ -75,7 +75,7 @@ const SongLoader = (() => {
           if (typeof options.xml === 'string' && options.xml) return new Response(options.xml);
           try {
             // INTENTIONAL EXCEPTION: Static MusicXML asset fetch
-            const r = await fetch(xmlUrl, { signal: abortSignal });
+            const r = window.ApiService?.fetchXml ? await window.ApiService.fetchXml(xmlUrl, { signal: abortSignal, rawResponse: true }) : await fetch(xmlUrl, { signal: abortSignal });
             if (r.ok) return r;
           } catch (e) { console.warn('[SongLoader] fetchXml failed, trying cache:', e); }
           if (!song.versionId && typeof caches !== 'undefined') {

@@ -1,0 +1,11 @@
+CMD: C:\xampp\php\php.exe tests/m2_api_timeout_retry_regression.php
+EXIT=1
+[FAIL:B] M2-1: ApiService exposes DEFAULT_TIMEOUT_MS = 12000 -> got undefined
+[FAIL:B] M2-1: Hanging request aborts via AbortController and rejects after timeout -> caught=true, signalAborted=false
+[FAIL:B] M2-1: Timeout error has unified shape {offline: false, timeout: true, status: 0} -> got {}
+[FAIL:B] M2-1: GET request failing on attempt 1 retries once and succeeds on attempt 2 -> calls=0, err=win.ApiService._request is not a function
+[FAIL:B] M2-1: GET request returning HTTP 502 on attempt 1 retries once and succeeds on attempt 2 -> calls=0, res=null
+[FAIL:B] M2-1: POST request does not retry and rejects with {offline: false, timeout: false, status: 500} -> calls=0, err={}
+[FAIL:B] M2-1: Offline network failure rejects with {offline: true, timeout: false, status: 0} -> got {}
+[FAIL:B] M2-1: XML fetch retries once on transient error and resolves XML -> xmlCalls=1, hasXml=false
+SUITE_COMPLETE total=8

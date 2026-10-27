@@ -72,10 +72,12 @@
     const shouldLoadCustomChords = chordSet && chordSet !== 'default' && chordSet.toUpperCase() !== 'TLH';
     
     // INTENTIONAL EXCEPTION: Static MusicXML asset fetch
-    const xmlPromise = fetch(xmlUrl, fetchOpts).then(async (res) => {
-      if (!res.ok) throw new Error(`Không thể tải XML: HTTP ${res.status}`);
-      return res.text();
-    });
+    const xmlPromise = (window.ApiService && typeof window.ApiService.fetchXml === 'function')
+      ? window.ApiService.fetchXml(xmlUrl, fetchOpts) // INTENTIONAL EXCEPTION: Static MusicXML asset fetch
+      : fetch(xmlUrl, fetchOpts).then(async (res) => {
+          if (!res.ok) throw new Error(`Không thể tải XML: HTTP ${res.status}`);
+          return res.text();
+        });
 
     const chordsPromise = (shouldLoadCustomChords && songId && window.ApiService?.chordSets?.load)
       ? window.ApiService.chordSets.load(songId, chordSet).catch(() => null)
