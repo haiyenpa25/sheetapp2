@@ -187,10 +187,10 @@ Thứ tự bắt buộc: M0 → M1 → M2 → M3 → M4 → M5 → M6. Mỗi tic
 
 | ID | Việc | Nghiệm thu | Sửa |
 |---|---|---|---|
-| M3-1 | `assets/js/core/OSMDRenderCore.js` dùng chung: một hàng đợi vẽ duy nhất, token, debounce resize/xoay (đề xuất 250 ms), bỏ qua khi bề rộng 0 hoặc khung đang ẩn, `try/catch` báo lỗi vào panel M2-4 | Test VM: 10 sự kiện resize trong 200 ms → 1 lần vẽ | L5 |
-| M3-2 | Classic: `autoResize: false`; bỏ vẽ trong handler `resize`/`orientationchange` của `toolbar-controller.js`; tính zoom vừa khung **trước** lần vẽ đầu như Modern | E2E Classic: mở bài → đúng 1 lần vẽ; xoay máy → đúng 1 lần | L5 |
-| M3-3 | Điện thoại mặc định chế độ theo **Q-M2**. Nếu mở Lời: không vẽ OSMD cho tới khi người dùng chuyển sang Bản nhạc; khung nhạc ẩn thì không giữ lệnh vẽ treo | E2E 390: mở bài ở chế độ Lời → 0 lần vẽ OSMD; chuyển Bản nhạc → 1 lần | L7 |
-| M3-4 | Đo bộ nhớ khi mở bài XML lớn nhất (Chromium `performance.memory`) trước/sau M3-1..3 | Số liệu trong `docs/mobile-evidence/M3-memory.md` | |
+| M3-1 ✅ `7125ff0` | `assets/js/core/OSMDRenderCore.js` dùng chung: một hàng đợi vẽ duy nhất, token, debounce resize/xoay (đề xuất 250 ms), bỏ qua khi bề rộng 0 hoặc khung đang ẩn, `try/catch` báo lỗi vào panel M2-4 | Test VM: 10 sự kiện resize trong 200 ms → 1 lần vẽ | L5 |
+| M3-2 ✅ `e864207` | Classic: `autoResize: false`; bỏ vẽ trong handler `resize`/`orientationchange` của `toolbar-controller.js`; tính zoom vừa khung **trước** lần vẽ đầu như Modern | E2E Classic: mở bài → đúng 1 lần vẽ; xoay máy → đúng 1 lần | L5 |
+| M3-3 ✅ `596711b` | Điện thoại mặc định chế độ theo **Q-M2**. Nếu mở Lời: không vẽ OSMD cho tới khi người dùng chuyển sang Bản nhạc; khung nhạc ẩn thì không giữ lệnh vẽ treo | E2E 390: mở bài ở chế độ Lời → 0 lần vẽ OSMD; chuyển Bản nhạc → 1 lần | L7 |
+| M3-4 ✅ `911b40c` | Đo bộ nhớ khi mở bài XML lớn nhất (Chromium `performance.memory`) trước/sau M3-1..3 | Số liệu trong `docs/mobile-evidence/M3-memory.md` | |
 
 ### M4 — Màn đọc theo 3 lớp (4–6 ngày, mỗi ticket ≤ 5 file) 🟠
 
