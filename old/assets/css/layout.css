@@ -866,3 +866,22 @@ body:not(.has-member-access) #btn-session-panel,
 body:not(.has-member-access) .lv-edit-chordpro-btn {
   display: none !important;
 }
+
+
+/* UX0-6: Menu ⋮ Classic trên điện thoại cuộn được đầy đủ, không cắt mục cuối ("✨ Giao Diện Mới") */
+#main-dropdown-menu {
+  max-height: calc(100dvh - 58px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+}
+@media (max-width: 680px) {
+  #main-dropdown-menu {
+    position: fixed;
+    top: 50px;
+    right: 8px;
+    max-height: calc(100dvh - 58px);
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+}

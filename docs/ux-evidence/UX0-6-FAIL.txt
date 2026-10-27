@@ -1,0 +1,56 @@
+﻿[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 4 tests using 1 worker
+
+[1/4] [chromium] › e2e\ux0-6-menu-mobile.spec.js:12:3 › UX0-6 · Mobile menu ⋯ layout at 390x844 (Modern & Classic) › Modern 390x844: zoom buttons >= 36px without text wrap, audio buttons spaced, #btn-menu-transpose-reset not covered by sticky footer
+  1) [chromium] › e2e\ux0-6-menu-mobile.spec.js:12:3 › UX0-6 · Mobile menu ⋯ layout at 390x844 (Modern & Classic) › Modern 390x844: zoom buttons >= 36px without text wrap, audio buttons spaced, #btn-menu-transpose-reset not covered by sticky footer 
+
+    Error: Zoom - button height >= 36px
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 36
+    Received:    19.330535888671875
+
+      64 |     });
+      65 |
+    > 66 |     expect(metrics.zoomOut?.height, 'Zoom - button height >= 36px').toBeGreaterThanOrEqual(36);
+         |                                                                     ^
+      67 |     expect(metrics.zoomIn?.height, 'Zoom + button height >= 36px').toBeGreaterThanOrEqual(36);
+      68 |     expect(metrics.lockZoom?.height, 'Lock zoom button height >= 36px').toBeGreaterThanOrEqual(36);
+      69 |     expect(metrics.lockZoom?.height, 'Lock zoom button does not wrap onto multiple tall lines').toBeLessThanOrEqual(48);
+        at C:\xampp\htdocs\sheetapp2-verify-m6\e2e\ux0-6-menu-mobile.spec.js:66:69
+
+    Error Context: test-results\ux0-6-menu-mobile-UX0-6-·--b8d58-ot-covered-by-sticky-footer-chromium\error-context.md
+
+
+[2/4] [chromium] › e2e\ux0-6-menu-mobile.spec.js:79:3 › UX0-6 · Mobile menu ⋯ layout at 390x844 (Modern & Classic) › Classic 390x844: #main-dropdown-menu scrolls so #btn-switch-new-ui is fully within viewport and clickable
+[3/4] [webkit] › e2e\ux0-6-menu-mobile.spec.js:12:3 › UX0-6 · Mobile menu ⋯ layout at 390x844 (Modern & Classic) › Modern 390x844: zoom buttons >= 36px without text wrap, audio buttons spaced, #btn-menu-transpose-reset not covered by sticky footer
+  2) [webkit] › e2e\ux0-6-menu-mobile.spec.js:12:3 › UX0-6 · Mobile menu ⋯ layout at 390x844 (Modern & Classic) › Modern 390x844: zoom buttons >= 36px without text wrap, audio buttons spaced, #btn-menu-transpose-reset not covered by sticky footer 
+
+    Error: Zoom - button height >= 36px
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 36
+    Received:    19.526824951171875
+
+      64 |     });
+      65 |
+    > 66 |     expect(metrics.zoomOut?.height, 'Zoom - button height >= 36px').toBeGreaterThanOrEqual(36);
+         |                                                                     ^
+      67 |     expect(metrics.zoomIn?.height, 'Zoom + button height >= 36px').toBeGreaterThanOrEqual(36);
+      68 |     expect(metrics.lockZoom?.height, 'Lock zoom button height >= 36px').toBeGreaterThanOrEqual(36);
+      69 |     expect(metrics.lockZoom?.height, 'Lock zoom button does not wrap onto multiple tall lines').toBeLessThanOrEqual(48);
+        at C:\xampp\htdocs\sheetapp2-verify-m6\e2e\ux0-6-menu-mobile.spec.js:66:69
+
+    Error Context: test-results\ux0-6-menu-mobile-UX0-6-·--b8d58-ot-covered-by-sticky-footer-webkit\error-context.md
+
+
+[4/4] [webkit] › e2e\ux0-6-menu-mobile.spec.js:79:3 › UX0-6 · Mobile menu ⋯ layout at 390x844 (Modern & Classic) › Classic 390x844: #main-dropdown-menu scrolls so #btn-switch-new-ui is fully within viewport and clickable
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+  2 failed
+    [chromium] › e2e\ux0-6-menu-mobile.spec.js:12:3 › UX0-6 · Mobile menu ⋯ layout at 390x844 (Modern & Classic) › Modern 390x844: zoom buttons >= 36px without text wrap, audio buttons spaced, #btn-menu-transpose-reset not covered by sticky footer 
+    [webkit] › e2e\ux0-6-menu-mobile.spec.js:12:3 › UX0-6 · Mobile menu ⋯ layout at 390x844 (Modern & Classic) › Modern 390x844: zoom buttons >= 36px without text wrap, audio buttons spaced, #btn-menu-transpose-reset not covered by sticky footer 
+  2 passed (7.8s)
+

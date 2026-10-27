@@ -2370,3 +2370,86 @@ body.sheet-only-mode .btn-gig-action.btn-gig-scroll span {
     justify-content: center !important;
   }
 }
+
+
+/* UX0-6: Menu ⋯ điện thoại — nút zoom −/+ và Khóa zoom >= 36px không xuống dòng, nút Bè/SATB tách rời, footer không che Về tông gốc */
+#main-dropdown-menu .sr-only {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: nowrap;
+}
+#main-dropdown-menu .icon-btn-xs {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 36px;
+  min-height: 36px;
+  min-width: 38px; min-height: 38px; height: 38px;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: 1px solid var(--lp-border, #cbd5e1);
+  background: var(--lp-surface, #ffffff);
+  color: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+[data-theme="dark"] #main-dropdown-menu .icon-btn-xs,
+body.dark-mode #main-dropdown-menu .icon-btn-xs {
+  background: #27272a;
+  border-color: #3f3f46;
+  color: #f4f4f5;
+}
+#main-dropdown-menu .icon-btn-xs .icon {
+  width: 15px;
+  height: 15px;
+  margin: 0 !important;
+  flex-shrink: 0;
+}
+#main-dropdown-menu .menu-zoom-val {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+#main-dropdown-menu .menu-audio-actions {
+  display: flex !important;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px !important;
+  padding: 4px 8px !important;
+}
+#main-dropdown-menu .menu-audio-actions #btn-play-audio,
+#main-dropdown-menu .menu-audio-actions #btn-stop-audio {
+  flex: 1 1 auto;
+  min-height: 36px !important;
+  width: auto !important;
+}
+@media (max-width: 680px) {
+  #main-dropdown-menu {
+    height: auto !important;
+    max-height: 86vh !important;
+    scroll-padding-bottom: 64px !important;
+    padding: 6px 10px 0 !important;
+  }
+  #main-dropdown-menu > .btn-menu-item,
+  #main-dropdown-menu .tools-row {
+    min-height: 40px !important;
+    padding: 4px 8px !important;
+  }
+  #main-dropdown-menu .menu-sticky-footer {
+    padding: 4px 0 calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}

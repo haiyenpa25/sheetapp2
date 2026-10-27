@@ -1,0 +1,11 @@
+﻿[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 4 tests using 1 worker
+
+[1/4] [chromium] › e2e\ux0-6-menu-mobile.spec.js:12:3 › UX0-6 · Mobile menu ⋯ layout at 390x844 (Modern & Classic) › Modern 390x844: zoom buttons >= 36px without text wrap, audio buttons spaced, #btn-menu-transpose-reset not covered by sticky footer
+[2/4] [chromium] › e2e\ux0-6-menu-mobile.spec.js:76:3 › UX0-6 · Mobile menu ⋯ layout at 390x844 (Modern & Classic) › Classic 390x844: #main-dropdown-menu scrolls so #btn-switch-new-ui is fully within viewport and clickable even with all member items shown
+[3/4] [webkit] › e2e\ux0-6-menu-mobile.spec.js:12:3 › UX0-6 · Mobile menu ⋯ layout at 390x844 (Modern & Classic) › Modern 390x844: zoom buttons >= 36px without text wrap, audio buttons spaced, #btn-menu-transpose-reset not covered by sticky footer
+[4/4] [webkit] › e2e\ux0-6-menu-mobile.spec.js:76:3 › UX0-6 · Mobile menu ⋯ layout at 390x844 (Modern & Classic) › Classic 390x844: #main-dropdown-menu scrolls so #btn-switch-new-ui is fully within viewport and clickable even with all member items shown
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+  4 passed (5.8s)
+
