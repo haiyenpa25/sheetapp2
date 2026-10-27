@@ -1,0 +1,16 @@
+CMD: php tests\m1_boot_runner_regression.php
+EXIT=1
+[FAIL:B] BootRunner.js exists in assets/js/core/BootRunner.js
+[FAIL:B] assets/js/app.js threw uncaught error during boot: OSMDRenderer is not defined
+[FAIL:B] assets/js/app.js binds LibraryUI.onSelect BEFORE LibraryUI.init
+[FAIL:B] assets/js/app.js continues to LibraryUI.init after ChordCanvas.init throws
+[FAIL:B] assets/js/app.js initializes ToolbarController and KeyboardHandler after earlier failure
+[FAIL:B] assets/js/app.js reports module init failure to ErrorReporter
+[FAIL:B] assets/js/app.js tapping a song still invokes SongLoader.load
+[FAIL:B] old/assets/js/app.js threw uncaught error during boot: OSMDRenderer is not defined
+[FAIL:B] old/assets/js/app.js binds LibraryUI.onSelect BEFORE LibraryUI.init
+[FAIL:B] old/assets/js/app.js continues to LibraryUI.init after ChordCanvas.init throws
+[FAIL:B] old/assets/js/app.js initializes ToolbarController and KeyboardHandler after earlier failure
+[FAIL:B] old/assets/js/app.js reports module init failure to ErrorReporter
+[FAIL:B] old/assets/js/app.js tapping a song still invokes SongLoader.load
+SUITE_COMPLETE total=13

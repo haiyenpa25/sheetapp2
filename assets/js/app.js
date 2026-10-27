@@ -7,85 +7,110 @@
 const App = (() => {
   'use strict';
 
+  function _safeInit(name, fn) {
+    if (window.BootRunner && typeof window.BootRunner.safeInit === 'function') {
+      return window.BootRunner.safeInit(name, fn);
+    }
+    try {
+      fn();
+      return true;
+    } catch (err) {
+      window.ErrorReporter?.report?.({
+        type: 'boot_error',
+        module: name,
+        message: err?.message || String(err),
+        stack: err?.stack || '',
+      });
+      return false;
+    }
+  }
+
   /* ── INIT ── */
   function init() {
-    window.SongNavigation?.init();
-    OSMDRenderer.init('osmd-container');
-    OSMDRenderer.onReady(() => {
-      ChordCanvas?.onOSMDRendered?.();
-      window.AnnotationCanvas?.onOSMDRendered?.();
-      AppUI.enableControls(true);
-      window.PageNav?.computePages?.();
-      window.ScriptLoader?.prefetchIdle?.();
+    // M1-1: Gắn onSelect đầu tiên để chạm bài luôn mở bài kể cả khi module sau lỗi
+    _safeInit('LibraryUI.onSelect', () => {
+      window.LibraryUI?.onSelect?.(song => window.SongLoader?.load?.(song));
     });
-
-    // Init các modules có mặt
-    ChordCanvas?.init?.();
-    if (window.InstrumentMixer) InstrumentMixer.init();
-    if (window.AnnotationCanvas) AnnotationCanvas.init();
-    if (window.SheetAudioPlayer) SheetAudioPlayer.init();
-    if (window.AutoScroller) AutoScroller.init();
-    if (window.PageNav) PageNav.init();
-    if (window.Auth) window.Auth.init();
-    LibraryUI?.init?.();
-    if (window.SetlistUI) SetlistUI.init();
-    if (window.Importer) Importer.init();
-    if (window.DisplaySettings) DisplaySettings.init();
-    if (window.StageLens) window.StageLens.init();
-    if (window.GuitarLens) window.GuitarLens.init();
-    if (window.BassLens) window.BassLens.init();
-    if (window.DrumsLens) window.DrumsLens.init();
-    if (window.VocalsLens) window.VocalsLens.init();
-    if (window.HarmonicNumeral) window.HarmonicNumeral.init();
-    if (window.PerformanceNotes) PerformanceNotes.init();
-    if (window.SongInfoBar) SongInfoBar.init();
-    if (window.Metronome) Metronome.init();
-    if (window.ArrangementEngine) window.ArrangementEngine.init();
-    if (window.CueEngine) window.CueEngine.init();
-    if (window.LiveSession) LiveSession.init();
-    if (window.PerformanceEngine) window.PerformanceEngine.init();
-    if (window.LiveSync) window.LiveSync.init();
-
-    ToolbarController?.init?.();
-    if (window.MobileController) window.MobileController.init();
-    KeyboardHandler?.init?.();
-    if (window.ServiceWorkerManager) {
-      ServiceWorkerManager.register();
-    } else if (window.ScriptLoader && 'serviceWorker' in navigator) {
-      const loadSw = () => {
-        window.ScriptLoader.load('assets/js/core/ServiceWorkerManager.js').then(() => {
-          window.ServiceWorkerManager?.register?.();
-        });
-      };
-      if (document.readyState === 'complete') {
-        setTimeout(loadSw, 1200);
-      } else {
-        window.addEventListener('load', () => setTimeout(loadSw, 1200));
-      }
-    }
-    if (window.OfflineSetlistManager?.checkOnStartup) window.OfflineSetlistManager.checkOnStartup();
-
-    // Library callbacks
-    LibraryUI?.onSelect?.(song => SongLoader.load(song));
-    LibraryUI?.onDelete?.(songId => {
-      if (Store.get('currentSong')?.id === songId) {
-        AppUI.showWelcome();
-        Store.reset();
-        ChordCanvas?.clearSong?.();
-        window.AnnotationCanvas?.clearSong?.();
-        window.SheetAudioPlayer?.stop?.();
-        if (window.Metronome) Metronome.stop();
-        window.PageNav?.reset?.();
-        EventBus.emit('song:cleared');
-      }
-    });
-
-    if (window.Importer) {
-      Importer.onSuccess(song => {
-        LibraryUI?.addSong?.(song);
-        AppUI.showToast(`🎵 "${song.title}" đã thêm vào thư viện!`, 'success');
+    _safeInit('LibraryUI.onDelete', () => {
+      window.LibraryUI?.onDelete?.(songId => {
+        if (window.Store?.get?.('currentSong')?.id === songId) {
+          window.AppUI?.showWelcome?.();
+          window.Store?.reset?.();
+          window.ChordCanvas?.clearSong?.();
+          window.AnnotationCanvas?.clearSong?.();
+          window.SheetAudioPlayer?.stop?.();
+          window.Metronome?.stop?.();
+          window.PageNav?.reset?.();
+          window.EventBus?.emit?.('song:cleared');
+        }
       });
-    }
+    });
+    _safeInit('Importer.onSuccess', () => {
+      window.Importer?.onSuccess?.(song => {
+        window.LibraryUI?.addSong?.(song);
+        window.AppUI?.showToast?.(`🎵 "${song.title}" đã thêm vào thư viện!`, 'success');
+      });
+    });
+
+    _safeInit('SongNavigation', () => window.SongNavigation?.init?.());
+    _safeInit('OSMDRenderer', () => {
+      window.OSMDRenderer?.init?.('osmd-container');
+      window.OSMDRenderer?.onReady?.(() => {
+        window.ChordCanvas?.onOSMDRendered?.();
+        window.AnnotationCanvas?.onOSMDRendered?.();
+        window.AppUI?.enableControls?.(true);
+        window.PageNav?.computePages?.();
+        window.ScriptLoader?.prefetchIdle?.();
+      });
+    });
+
+    // Init các modules có mặt qua window.X
+    _safeInit('ChordCanvas', () => window.ChordCanvas?.init?.());
+    _safeInit('InstrumentMixer', () => window.InstrumentMixer?.init?.());
+    _safeInit('AnnotationCanvas', () => window.AnnotationCanvas?.init?.());
+    _safeInit('SheetAudioPlayer', () => window.SheetAudioPlayer?.init?.());
+    _safeInit('AutoScroller', () => window.AutoScroller?.init?.());
+    _safeInit('PageNav', () => window.PageNav?.init?.());
+    _safeInit('Auth', () => window.Auth?.init?.());
+    _safeInit('LibraryUI', () => window.LibraryUI?.init?.());
+    _safeInit('SetlistUI', () => window.SetlistUI?.init?.());
+    _safeInit('Importer', () => window.Importer?.init?.());
+    _safeInit('DisplaySettings', () => window.DisplaySettings?.init?.());
+    _safeInit('StageLens', () => window.StageLens?.init?.());
+    _safeInit('GuitarLens', () => window.GuitarLens?.init?.());
+    _safeInit('BassLens', () => window.BassLens?.init?.());
+    _safeInit('DrumsLens', () => window.DrumsLens?.init?.());
+    _safeInit('VocalsLens', () => window.VocalsLens?.init?.());
+    _safeInit('HarmonicNumeral', () => window.HarmonicNumeral?.init?.());
+    _safeInit('PerformanceNotes', () => window.PerformanceNotes?.init?.());
+    _safeInit('SongInfoBar', () => window.SongInfoBar?.init?.());
+    _safeInit('Metronome', () => window.Metronome?.init?.());
+    _safeInit('ArrangementEngine', () => window.ArrangementEngine?.init?.());
+    _safeInit('CueEngine', () => window.CueEngine?.init?.());
+    _safeInit('LiveSession', () => window.LiveSession?.init?.());
+    _safeInit('PerformanceEngine', () => window.PerformanceEngine?.init?.());
+    _safeInit('LiveSync', () => window.LiveSync?.init?.());
+
+    _safeInit('ToolbarController', () => window.ToolbarController?.init?.());
+    _safeInit('MobileController', () => window.MobileController?.init?.());
+    _safeInit('KeyboardHandler', () => window.KeyboardHandler?.init?.());
+    _safeInit('ServiceWorkerManager', () => {
+      if (window.ServiceWorkerManager) {
+        window.ServiceWorkerManager.register?.();
+      } else if (window.ScriptLoader && typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+        const loadSw = () => {
+          window.ScriptLoader.load('assets/js/core/ServiceWorkerManager.js').then(() => {
+            window.ServiceWorkerManager?.register?.();
+          });
+        };
+        if (document.readyState === 'complete') {
+          setTimeout(loadSw, 1200);
+        } else {
+          window.addEventListener('load', () => setTimeout(loadSw, 1200));
+        }
+      }
+    });
+    _safeInit('OfflineSetlistManager', () => window.OfflineSetlistManager?.checkOnStartup?.());
   }
 
   /* ── NAVIGATION ── */
@@ -101,40 +126,36 @@ const App = (() => {
   let _transposeTimer = null;
 
   function transposeBy(delta) {
-    const xml = Store.get('originalXml');
+    const xml = window.Store?.get?.('originalXml');
     if (!xml) return;
-    const newVal = Store.get('currentTranspose') + delta;
-    if (Math.abs(newVal) > 12) { AppUI.showToast('Giới hạn ±12 nửa cung', 'warning'); return; }
-    Store.set('currentTranspose', newVal);
-    AppUI.updateTransposeDisplay(newVal);
-    AppUI.updateSongInfo(Store.get('currentSong'), newVal);
+    const newVal = (window.Store?.get?.('currentTranspose') || 0) + delta;
+    if (Math.abs(newVal) > 12) { window.AppUI?.showToast?.('Giới hạn ±12 nửa cung', 'warning'); return; }
+    window.Store?.set?.('currentTranspose', newVal);
+    window.AppUI?.updateTransposeDisplay?.(newVal);
+    window.AppUI?.updateSongInfo?.(window.Store?.get?.('currentSong'), newVal);
     window.URLState?.update?.({ t: newVal });
-    if (typeof EventBus !== 'undefined') {
-      EventBus.emit('transpose:changed', { value: newVal });
-    }
+    window.EventBus?.emit?.('transpose:changed', { value: newVal });
     clearTimeout(_transposeTimer);
-    _transposeTimer = setTimeout(() => SongLoader.commitTranspose(), 100);
+    _transposeTimer = setTimeout(() => window.SongLoader?.commitTranspose?.(), 100);
   }
 
   async function resetTranspose() {
-    if (Store.get('currentTranspose') === 0) return;
+    if (window.Store?.get?.('currentTranspose') === 0) return;
     clearTimeout(_transposeTimer);
-    Store.set('currentTranspose', 0);
-    AppUI.updateTransposeDisplay(0);
-    AppUI.updateSongInfo(Store.get('currentSong'), 0);
+    window.Store?.set?.('currentTranspose', 0);
+    window.AppUI?.updateTransposeDisplay?.(0);
+    window.AppUI?.updateSongInfo?.(window.Store?.get?.('currentSong'), 0);
     window.URLState?.update?.({ t: 0 });
-    if (typeof EventBus !== 'undefined') {
-      EventBus.emit('transpose:changed', { value: 0 });
-    }
-    await SongLoader.commitTranspose();
-    SessionTracker?.setTranspose?.(0);
+    window.EventBus?.emit?.('transpose:changed', { value: 0 });
+    await window.SongLoader?.commitTranspose?.();
+    window.SessionTracker?.setTranspose?.(0);
   }
 
   /* ── ZOOM ── */
   async function setZoom(percent) {
     const zoom = percent / 100;
-    const prevZoom = Store.get('currentZoom');
-    Store.set('currentZoom', zoom);
+    const prevZoom = window.Store?.get?.('currentZoom');
+    window.Store?.set?.('currentZoom', zoom);
 
     if (localStorage.getItem('sheetapp_zoom_locked') === 'true') {
       localStorage.setItem('sheetapp_locked_zoom_val', String(percent));
@@ -143,8 +164,8 @@ const App = (() => {
     const slider = document.getElementById('zoom-slider');
     if (slider) {
       if (slider.tagName.toLowerCase() === 'select') {
-        const best = Array.from(slider.options).reduce((a,b) =>
-          Math.abs(parseInt(b.value)-percent) < Math.abs(parseInt(a.value)-percent) ? b : a);
+        const best = Array.from(slider.options).reduce((a, b) =>
+          Math.abs(parseInt(b.value) - percent) < Math.abs(parseInt(a.value) - percent) ? b : a);
         slider.value = best.value;
       } else { slider.value = percent; }
     }
@@ -160,11 +181,9 @@ const App = (() => {
       return;
     }
 
-    await OSMDRenderer.setZoom(zoom);
-    SessionTracker?.setZoom?.(zoom);
-    // INTENTIONAL: Không gọi thủ công onOSMDRendered nữa vì OSMDRenderer.setZoom đã tự kích hoạt thông qua onReady callback.
+    await window.OSMDRenderer?.setZoom?.(zoom);
+    window.SessionTracker?.setZoom?.(zoom);
   }
-
 
   /* ── Measure Progress (Sprint E1) ── */
   function updateMeasureProgress(current, total) {
@@ -176,16 +195,14 @@ const App = (() => {
   function setTransposeDirect(val) {
     const num = parseInt(val, 10) || 0;
     if (Math.abs(num) > 12) return;
-    if (Store.get('currentTranspose') === num) return;
-    Store.set('currentTranspose', num);
-    AppUI.updateTransposeDisplay(num);
-    AppUI.updateSongInfo(Store.get('currentSong'), num);
+    if (window.Store?.get?.('currentTranspose') === num) return;
+    window.Store?.set?.('currentTranspose', num);
+    window.AppUI?.updateTransposeDisplay?.(num);
+    window.AppUI?.updateSongInfo?.(window.Store?.get?.('currentSong'), num);
     window.URLState?.update?.({ t: num });
-    if (typeof EventBus !== 'undefined') {
-      EventBus.emit('transpose:changed', { value: num });
-    }
+    window.EventBus?.emit?.('transpose:changed', { value: num });
     clearTimeout(_transposeTimer);
-    _transposeTimer = setTimeout(() => SongLoader.commitTranspose(), 250);
+    _transposeTimer = setTimeout(() => window.SongLoader?.commitTranspose?.(), 250);
   }
 
   // Boot
@@ -201,10 +218,10 @@ const App = (() => {
       window.LeaderNotesBanner?.hide?.();
       window.VerseManager?.clearSelectedVerses?.();
       window.LiturgyCard?.hide?.();
-      return SongLoader.load(song, t);
+      return window.SongLoader?.load?.(song, t);
     },
     loadSongWithProfile: (song, profile, t, options) => {
-      return options ? SongLoader.load(song, t, profile, options) : SongLoader.load(song, t, profile);
+      return options ? window.SongLoader?.load?.(song, t, profile, options) : window.SongLoader?.load?.(song, t, profile);
     },
     loadSongXmlDirect: async (songId, xml, transpose = 0, profile = 'HD') => {
       let song = window.LibraryUI?.getSongObj?.(songId) || window.LibraryUI?.getSongById?.(songId);
@@ -213,19 +230,19 @@ const App = (() => {
         song = result?.data || result;
       }
       if (!song?.xmlPath) throw new Error('Không tìm thấy bản nhạc của ca trưởng');
-      return SongLoader.load(song, transpose, profile, { instant: true, xml });
+      return window.SongLoader?.load?.(song, transpose, profile, { instant: true, xml });
     },
     transposeBy, resetTranspose, setTransposeDirect, setZoom, navigateNext, navigatePrev,
-    toggleSidebar:       ()    => ToolbarController?.toggleSidebar?.(),
-    saveModifiedXML:     (xml) => SongLoader.saveModifiedXML(xml),
-    reloadCurrentXML:    ()    => SongLoader.commitTranspose(),
-    getCurrentTranspose: ()    => Store.get('currentTranspose'),
-    getCurrentSongId:    ()    => Store.get('currentSong')?.id ?? null,
-    getCurrentZoom:      ()    => Store.get('currentZoom'),
-    getOriginalXml:      ()    => Store.get('originalXml'),
-    showToast:           (m,t) => AppUI.showToast(m, t),
-    showLoading:         (t)   => AppUI.showLoading(t),
-    hideLoading:         ()    => AppUI.hideLoading(),
+    toggleSidebar:       ()    => window.ToolbarController?.toggleSidebar?.(),
+    saveModifiedXML:     (xml) => window.SongLoader?.saveModifiedXML?.(xml),
+    reloadCurrentXML:    ()    => window.SongLoader?.commitTranspose?.(),
+    getCurrentTranspose: ()    => window.Store?.get?.('currentTranspose'),
+    getCurrentSongId:    ()    => window.Store?.get?.('currentSong')?.id ?? null,
+    getCurrentZoom:      ()    => window.Store?.get?.('currentZoom'),
+    getOriginalXml:      ()    => window.Store?.get?.('originalXml'),
+    showToast:           (m, t) => window.AppUI?.showToast?.(m, t),
+    showLoading:         (t)   => window.AppUI?.showLoading?.(t),
+    hideLoading:         ()    => window.AppUI?.hideLoading?.(),
     updateMeasureProgress,
   };
 })();

@@ -1,0 +1,14 @@
+CMD: php tests\m1_boot_runner_regression.php
+EXIT=0
+[PASS:B] BootRunner.js exists in assets/js/core/BootRunner.js
+[PASS:B] assets/js/app.js binds LibraryUI.onSelect BEFORE LibraryUI.init
+[PASS:B] assets/js/app.js continues to LibraryUI.init after ChordCanvas.init throws
+[PASS:B] assets/js/app.js initializes ToolbarController and KeyboardHandler after earlier failure
+[PASS:B] assets/js/app.js reports module init failure to ErrorReporter
+[PASS:B] assets/js/app.js tapping a song still invokes SongLoader.load
+[PASS:B] old/assets/js/app.js binds LibraryUI.onSelect BEFORE LibraryUI.init
+[PASS:B] old/assets/js/app.js continues to LibraryUI.init after ChordCanvas.init throws
+[PASS:B] old/assets/js/app.js initializes ToolbarController and KeyboardHandler after earlier failure
+[PASS:B] old/assets/js/app.js reports module init failure to ErrorReporter
+[PASS:B] old/assets/js/app.js tapping a song still invokes SongLoader.load
+SUITE_COMPLETE total=11
