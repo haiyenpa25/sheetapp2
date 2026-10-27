@@ -1,0 +1,21 @@
+CMD: npx playwright test e2e/m2-load-resilience.spec.js -g "M2-5" --reporter=line
+EXIT=0
+[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 12 tests using 1 worker
+
+[1/12] [chromium] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: pixel7 - modern
+[2/12] [chromium] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: pixel7 - classic
+[3/12] [chromium] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: iphone13 - modern
+[4/12] [chromium] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: iphone13 - classic
+[5/12] [chromium] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: ipadmini - modern
+[6/12] [chromium] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: ipadmini - classic
+[7/12] [webkit] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: pixel7 - modern
+[8/12] [webkit] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: pixel7 - classic
+[9/12] [webkit] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: iphone13 - modern
+[10/12] [webkit] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: iphone13 - classic
+[11/12] [webkit] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: ipadmini - modern
+[12/12] [webkit] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: ipadmini - classic
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+  6 skipped
+  6 passed (20.0s)

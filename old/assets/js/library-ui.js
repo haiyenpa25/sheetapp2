@@ -189,6 +189,14 @@ const LibraryUI = (() => {
   }
 
   // ── Load / Render ─────────────────────────────────────────────
+  function _renderLoadError() {
+    const el = listEl(); if (!el) return;
+    _vList = []; _vStart = -1; _vEnd = -1;
+    el.style.paddingTop = '0px'; el.style.paddingBottom = '0px';
+    el.innerHTML = `<div class="empty-state" id="library-load-error"><p>Không tải được danh sách · Thử lại</p><button type="button" class="btn btn-sm btn-primary" id="btn-retry-song-list" style="margin-top:6px;">Thử lại</button></div>`;
+    el.querySelector('#btn-retry-song-list')?.addEventListener('click', () => { window.ApiService?.songs?.invalidateCache?.(); loadSongs(); });
+  }
+
   async function loadSongs() {
     try {
       const resp = await ApiService.songs.list();
@@ -201,12 +209,12 @@ const LibraryUI = (() => {
       _buildQuickJump(songs);
       _buildRecentlyViewed();
       _renderPinBar();
-      const urlSongId = new URLSearchParams(window.location.search).get('song');
-      if (urlSongId) selectSong(urlSongId, false);
     } catch (err) {
       console.error('[Library] Lỗi tải danh sách:', err);
-      songs = []; render([]);
+      songs = []; _renderLoadError(); _updateCount(0);
     }
+    const urlSongId = new URLSearchParams(window.location.search).get('song');
+    if (urlSongId) selectSong(urlSongId, false);
   }
 
   function render(list, opts = {}) {
@@ -487,8 +495,18 @@ const LibraryUI = (() => {
         window.history.pushState({}, '', url);
       }
     }
-    const song = songs.find(s => String(s.id) === String(songId));
-    if (song && onSelectCb) onSelectCb(song);
+    const song = songs.find(s => String(s.id) === String(songId)) || _vList.find(s => String(s.id) === String(songId));
+    if (song) {
+      if (!songs.some(s => String(s.id) === String(song.id))) songs.push(song);
+      if (onSelectCb) onSelectCb(song);
+    } else if (window.ApiService?.songs?.get) {
+      window.ApiService.songs.get(songId).then(s => {
+        if (s && s.id && String(activeSongId) === String(songId)) {
+          if (!songs.some(x => String(x.id) === String(s.id))) songs.push(s);
+          if (onSelectCb) onSelectCb(s);
+        }
+      }).catch(e => window.ErrorReporter?.report?.('old.library.selectSong.get', e));
+    }
   }
 
   function jumpByNumber(num) {

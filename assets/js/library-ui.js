@@ -81,16 +81,26 @@ const LibraryUI = (() => {
   }
 
   // ── Load / Render ─────────────────────────────────────────────
+  function _renderLoadError() {
+    const el = listEl(); if (!el) return;
+    _virtualSongs = null;
+    el.innerHTML = `<div class="empty-state" id="library-load-error"><span class="empty-icon">⚠️</span><p>Không tải được danh sách · Thử lại</p><button type="button" class="btn btn-sm btn-primary" id="btn-retry-song-list" style="margin-top:6px;">Thử lại</button></div>`;
+    el.querySelector('#btn-retry-song-list')?.addEventListener('click', () => { window.ApiService?.songs?.invalidateCache?.(); loadSongs(); });
+  }
+
   async function loadSongs() {
+    let loadErr = false;
     try {
       songs = await ApiService.songs.list();
       if (!Array.isArray(songs)) songs = [];
     } catch (err) {
+      loadErr = true;
       console.error('[Library] Lỗi tải danh sách (có thể đang ngoại tuyến):', err);
       songs = window.OfflineSetlistManager?.getAllOfflineSongs?.() || [];
     }
     songs.sort((a, b) => (a.httlvnId || 0) - (b.httlvnId || 0));
-    render(songs.length > 0 ? _sortSongs(songs) : []);
+    if (loadErr && songs.length === 0) _renderLoadError();
+    else render(songs.length > 0 ? _sortSongs(songs) : []);
     _updateCount(songs.length);
     if (songs.length > 0) { _buildCategoryFilter(); _buildQuickJump(songs); _buildUpcomingSetlist(); _buildRecentlyViewed(); _buildQuickFavorites(); }
     const urlSongId = new URLSearchParams(window.location.search).get('song');
@@ -103,10 +113,7 @@ const LibraryUI = (() => {
   function _getItemH() {
     if (_measuredItemH > 20) return _measuredItemH;
     const sample = listEl()?.querySelector('.song-item');
-    if (sample && sample.offsetHeight > 20) {
-      _measuredItemH = sample.getBoundingClientRect().height + (parseFloat(window.getComputedStyle(listEl()).rowGap) || 0);
-      return _measuredItemH;
-    }
+    if (sample && sample.offsetHeight > 20) return (_measuredItemH = sample.getBoundingClientRect().height + (parseFloat(window.getComputedStyle(listEl()).rowGap) || 0));
     return window.innerWidth >= 1024 ? 40 : 42;
   }
 
@@ -124,20 +131,10 @@ const LibraryUI = (() => {
     const end = Math.min(total, Math.ceil((st + vh) / itemH) + V_BUFFER);
     const topPad = start * itemH, bottomPad = Math.max(0, (total - end) * itemH);
     const frag = document.createDocumentFragment();
-    if (topPad > 0) {
-      const topDiv = document.createElement('div');
-      topDiv.className = 'virtual-spacer';
-      topDiv.style.height = `${Math.max(0, topPad - gap)}px`;
-      frag.appendChild(topDiv);
-    }
+    if (topPad > 0) { const topDiv = document.createElement('div'); topDiv.className = 'virtual-spacer'; topDiv.style.height = `${Math.max(0, topPad - gap)}px`; frag.appendChild(topDiv); }
     const canAdmin = window.Auth?.isAdmin?.() ?? false, canEdit = window.Auth?.isBanhat?.() ?? false;
     for (let i = start; i < end; i++) frag.appendChild(_createSongItem(_virtualSongs[i], canAdmin, canEdit));
-    if (bottomPad > 0) {
-      const botDiv = document.createElement('div');
-      botDiv.className = 'virtual-spacer';
-      botDiv.style.height = `${Math.max(0, bottomPad - gap)}px`;
-      frag.appendChild(botDiv);
-    }
+    if (bottomPad > 0) { const botDiv = document.createElement('div'); botDiv.className = 'virtual-spacer'; botDiv.style.height = `${Math.max(0, bottomPad - gap)}px`; frag.appendChild(botDiv); }
     el.innerHTML = '';
     el.appendChild(frag);
     if (!_measuredItemH) {
@@ -523,31 +520,33 @@ const LibraryUI = (() => {
       if (window.URLState?.resetForNewSong) window.URLState.resetForNewSong(songId);
       else { const u = new URL(window.location.href); u.searchParams.set('song', songId); window.history.pushState({}, '', u); }
     }
-    let song = songs.find(s => String(s.id) === String(songId)) || _lastRenderedSongs.find(s => String(s.id) === String(songId));
-    if (!song && window.OfflineSetlistManager?.getOfflineSong) song = window.OfflineSetlistManager.getOfflineSong(songId);
-    if (song && !songs.some(s => String(s.id) === String(song.id))) songs.push(song);
-    if (song && onSelectCb) onSelectCb(song);
+    let song = songs.find(s => String(s.id) === String(songId)) || _lastRenderedSongs.find(s => String(s.id) === String(songId)) || window.OfflineSetlistManager?.getOfflineSong?.(songId);
+    if (song) {
+      if (!songs.some(s => String(s.id) === String(song.id))) songs.push(song);
+      if (onSelectCb) onSelectCb(song);
+    } else if (window.ApiService?.songs?.get) {
+      window.ApiService.songs.get(songId).then(s => {
+        if (s && s.id && String(activeSongId) === String(songId)) {
+          if (!songs.some(x => String(x.id) === String(s.id))) songs.push(s);
+          if (onSelectCb) onSelectCb(s);
+        }
+      }).catch(e => window.ErrorReporter?.report?.('library.selectSong.get', e));
+    }
   }
 
   function _highlightActive(id, autoScroll = true) {
-    const el = listEl();
-    if (!el) return;
+    const el = listEl(); if (!el) return;
     el.querySelectorAll('.song-item.active').forEach(i => i.classList.remove('active'));
     let active = el.querySelector(`.song-item[data-id="${CSS.escape(String(id))}"]`);
     if (!active && autoScroll && _virtualSongs) {
-      const idx = _virtualSongs.findIndex(s => String(s.id) === String(id));
-      const container = el.closest('.song-list-container');
+      const idx = _virtualSongs.findIndex(s => String(s.id) === String(id)), container = el.closest('.song-list-container');
       if (idx !== -1 && container) {
         const listTop = el.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
         container.scrollTop = Math.max(0, listTop + idx * _getItemH() - (container.clientHeight || 600) / 2);
-        _renderVirtualChunk();
-        active = el.querySelector(`.song-item[data-id="${CSS.escape(String(id))}"]`);
+        _renderVirtualChunk(); active = el.querySelector(`.song-item[data-id="${CSS.escape(String(id))}"]`);
       }
     }
-    if (active) {
-      active.classList.add('active');
-      if (autoScroll) active.scrollIntoView({ behavior: 'instant', block: 'nearest' });
-    }
+    if (active) { active.classList.add('active'); if (autoScroll) active.scrollIntoView({ behavior: 'instant', block: 'nearest' }); }
   }
 
   // ── CRUD ─────────────────────────────────────────────────────

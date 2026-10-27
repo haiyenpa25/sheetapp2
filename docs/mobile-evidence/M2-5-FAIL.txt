@@ -1,0 +1,237 @@
+CMD: npx playwright test e2e/m2-load-resilience.spec.js -g "M2-5" --reporter=line
+EXIT=1
+[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 12 tests using 1 worker
+
+[1/12] [chromium] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: pixel7 - modern
+  1) [chromium] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: pixel7 - modern 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('#song-list')
+    Expected substring: "Không tải được danh sách · Thử lại"
+    Received string:    "🎶Không tìm thấy bài hátThử từ khóa khác"
+    Timeout: 10000ms
+
+    Call log:
+      - Expect "toContainText" locator('#song-list') with timeout 10000ms
+      - waiting for locator('#song-list')
+        - locator resolved to <div role="grid" tabindex="-1" id="song-list" class="song-list" aria-rowcount="0" aria-label="Danh sách bài hát">…</div>
+        - unexpected value "
+            
+              
+              Chưa có bài hát nào
+              Nhấn "Thêm Bài Hát" để nhập bài
+            
+          "
+        22 × locator resolved to <div role="grid" tabindex="-1" id="song-list" class="song-list" aria-rowcount="0" aria-label="Danh sách bài hát">…</div>
+           - unexpected value "🎶Không tìm thấy bài hátThử từ khóa khác"
+
+
+      166 |         await page.goto(BASE_URL + ui.path, { waitUntil: 'domcontentloaded', timeout: 20000 });
+      167 |         const songList = page.locator('#song-list');
+    > 168 |         await expect(songList).toContainText('Không tải được danh sách · Thử lại', { timeout: 10000 });
+          |                                ^
+      169 |         const listText = (await songList.textContent()) || '';
+      170 |         expect(listText).not.toContain('Không tìm thấy bài hát');
+      171 |
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m2-load-resilience.spec.js:168:32
+
+    Error Context: test-results\m2-load-resilience-M2-5-·--7fdfd-ror-message-pixel7---modern-chromium\error-context.md
+
+
+[2/12] [chromium] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: pixel7 - classic
+  2) [chromium] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: pixel7 - classic 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('#song-list')
+    Expected substring: "Không tải được danh sách · Thử lại"
+    Received string:    "Không tìm thấy bài hátThử từ khóa hoặc bộ lọc khác"
+    Timeout: 10000ms
+
+    Call log:
+      - Expect "toContainText" locator('#song-list') with timeout 10000ms
+      - waiting for locator('#song-list')
+        - locator resolved to <div role="grid" tabindex="-1" id="song-list" class="song-list" aria-rowcount="0" aria-label="Danh sách bài hát">…</div>
+        - unexpected value "
+            
+              Đang tải danh mục...
+            
+          "
+        22 × locator resolved to <div role="grid" tabindex="-1" id="song-list" class="song-list" aria-rowcount="0" aria-label="Danh sách bài hát">…</div>
+           - unexpected value "Không tìm thấy bài hátThử từ khóa hoặc bộ lọc khác"
+
+
+      166 |         await page.goto(BASE_URL + ui.path, { waitUntil: 'domcontentloaded', timeout: 20000 });
+      167 |         const songList = page.locator('#song-list');
+    > 168 |         await expect(songList).toContainText('Không tải được danh sách · Thử lại', { timeout: 10000 });
+          |                                ^
+      169 |         const listText = (await songList.textContent()) || '';
+      170 |         expect(listText).not.toContain('Không tìm thấy bài hát');
+      171 |
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m2-load-resilience.spec.js:168:32
+
+    Error Context: test-results\m2-load-resilience-M2-5-·--8bffb-or-message-pixel7---classic-chromium\error-context.md
+
+
+[3/12] [chromium] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: iphone13 - modern
+[4/12] [chromium] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: iphone13 - classic
+[5/12] [chromium] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: ipadmini - modern
+[6/12] [chromium] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: ipadmini - classic
+[7/12] [webkit] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: pixel7 - modern
+[8/12] [webkit] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: pixel7 - classic
+[9/12] [webkit] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: iphone13 - modern
+  3) [webkit] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: iphone13 - modern 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('#song-list')
+    Expected substring: "Không tải được danh sách · Thử lại"
+    Received string:    "🎶Không tìm thấy bài hátThử từ khóa khác"
+    Timeout: 10000ms
+
+    Call log:
+      - Expect "toContainText" locator('#song-list') with timeout 10000ms
+      - waiting for locator('#song-list')
+        - locator resolved to <div role="grid" tabindex="-1" id="song-list" class="song-list" aria-rowcount="0" aria-label="Danh sách bài hát">…</div>
+        - unexpected value "
+            
+              
+              Chưa có bài hát nào
+              Nhấn "Thêm Bài Hát" để nhập bài
+            
+          "
+        22 × locator resolved to <div role="grid" tabindex="-1" id="song-list" class="song-list" aria-rowcount="0" aria-label="Danh sách bài hát">…</div>
+           - unexpected value "🎶Không tìm thấy bài hátThử từ khóa khác"
+
+
+      166 |         await page.goto(BASE_URL + ui.path, { waitUntil: 'domcontentloaded', timeout: 20000 });
+      167 |         const songList = page.locator('#song-list');
+    > 168 |         await expect(songList).toContainText('Không tải được danh sách · Thử lại', { timeout: 10000 });
+          |                                ^
+      169 |         const listText = (await songList.textContent()) || '';
+      170 |         expect(listText).not.toContain('Không tìm thấy bài hát');
+      171 |
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m2-load-resilience.spec.js:168:32
+
+    Error Context: test-results\m2-load-resilience-M2-5-·--4ce67-r-message-iphone13---modern-webkit\error-context.md
+
+
+[10/12] [webkit] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: iphone13 - classic
+  4) [webkit] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: iphone13 - classic 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('#song-list')
+    Expected substring: "Không tải được danh sách · Thử lại"
+    Received string:    "Không tìm thấy bài hátThử từ khóa hoặc bộ lọc khác"
+    Timeout: 10000ms
+
+    Call log:
+      - Expect "toContainText" locator('#song-list') with timeout 10000ms
+      - waiting for locator('#song-list')
+        - locator resolved to <div role="grid" tabindex="-1" id="song-list" class="song-list" aria-rowcount="0" aria-label="Danh sách bài hát">…</div>
+        - unexpected value "
+            
+              Đang tải danh mục...
+            
+          "
+        22 × locator resolved to <div role="grid" tabindex="-1" id="song-list" class="song-list" aria-rowcount="0" aria-label="Danh sách bài hát">…</div>
+           - unexpected value "Không tìm thấy bài hátThử từ khóa hoặc bộ lọc khác"
+
+
+      166 |         await page.goto(BASE_URL + ui.path, { waitUntil: 'domcontentloaded', timeout: 20000 });
+      167 |         const songList = page.locator('#song-list');
+    > 168 |         await expect(songList).toContainText('Không tải được danh sách · Thử lại', { timeout: 10000 });
+          |                                ^
+      169 |         const listText = (await songList.textContent()) || '';
+      170 |         expect(listText).not.toContain('Không tìm thấy bài hát');
+      171 |
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m2-load-resilience.spec.js:168:32
+
+    Error Context: test-results\m2-load-resilience-M2-5-·--4a170--message-iphone13---classic-webkit\error-context.md
+
+
+[11/12] [webkit] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: ipadmini - modern
+  5) [webkit] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: ipadmini - modern 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('#song-list')
+    Expected substring: "Không tải được danh sách · Thử lại"
+    Received string:    "🎶Không tìm thấy bài hátThử từ khóa khác"
+    Timeout: 10000ms
+
+    Call log:
+      - Expect "toContainText" locator('#song-list') with timeout 10000ms
+      - waiting for locator('#song-list')
+        - locator resolved to <div role="grid" tabindex="-1" id="song-list" class="song-list" aria-rowcount="0" aria-label="Danh sách bài hát">…</div>
+        - unexpected value "
+            
+              
+              Chưa có bài hát nào
+              Nhấn "Thêm Bài Hát" để nhập bài
+            
+          "
+        22 × locator resolved to <div role="grid" tabindex="-1" id="song-list" class="song-list" aria-rowcount="0" aria-label="Danh sách bài hát">…</div>
+           - unexpected value "🎶Không tìm thấy bài hátThử từ khóa khác"
+
+
+      166 |         await page.goto(BASE_URL + ui.path, { waitUntil: 'domcontentloaded', timeout: 20000 });
+      167 |         const songList = page.locator('#song-list');
+    > 168 |         await expect(songList).toContainText('Không tải được danh sách · Thử lại', { timeout: 10000 });
+          |                                ^
+      169 |         const listText = (await songList.textContent()) || '';
+      170 |         expect(listText).not.toContain('Không tìm thấy bài hát');
+      171 |
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m2-load-resilience.spec.js:168:32
+
+    Error Context: test-results\m2-load-resilience-M2-5-·--f79ae-r-message-ipadmini---modern-webkit\error-context.md
+
+
+[12/12] [webkit] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: ipadmini - classic
+  6) [webkit] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: ipadmini - classic 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('#song-list')
+    Expected substring: "Không tải được danh sách · Thử lại"
+    Received string:    "Không tìm thấy bài hátThử từ khóa hoặc bộ lọc khác"
+    Timeout: 10000ms
+
+    Call log:
+      - Expect "toContainText" locator('#song-list') with timeout 10000ms
+      - waiting for locator('#song-list')
+        - locator resolved to <div role="grid" tabindex="-1" id="song-list" class="song-list" aria-rowcount="0" aria-label="Danh sách bài hát">…</div>
+        - unexpected value "
+            
+              Đang tải danh mục...
+            
+          "
+        22 × locator resolved to <div role="grid" tabindex="-1" id="song-list" class="song-list" aria-rowcount="0" aria-label="Danh sách bài hát">…</div>
+           - unexpected value "Không tìm thấy bài hátThử từ khóa hoặc bộ lọc khác"
+
+
+      166 |         await page.goto(BASE_URL + ui.path, { waitUntil: 'domcontentloaded', timeout: 20000 });
+      167 |         const songList = page.locator('#song-list');
+    > 168 |         await expect(songList).toContainText('Không tải được danh sách · Thử lại', { timeout: 10000 });
+          |                                ^
+      169 |         const listText = (await songList.textContent()) || '';
+      170 |         expect(listText).not.toContain('Không tìm thấy bài hát');
+      171 |
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m2-load-resilience.spec.js:168:32
+
+    Error Context: test-results\m2-load-resilience-M2-5-·--f873f--message-ipadmini---classic-webkit\error-context.md
+
+
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+  6 failed
+    [chromium] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: pixel7 - modern 
+    [chromium] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: pixel7 - classic 
+    [webkit] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: iphone13 - modern 
+    [webkit] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: iphone13 - classic 
+    [webkit] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: ipadmini - modern 
+    [webkit] › e2e\m2-load-resilience.spec.js:114:7 › M2-5 · Deep link ?song= gọi ApiService.songs.get khi ngoài danh sách; danh sách lỗi hiện Không tải được danh sách · Thử lại › M2-5 deep link & list error message: ipadmini - classic 
+  6 skipped
