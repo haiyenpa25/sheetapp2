@@ -29,7 +29,7 @@ foreach ($files as $file) {
     gzipCheck(strlen($compressed) < strlen($source) / 2, "sidecar cuts transport by more than half: {$file}");
 }
 $base = getenv('SHEETAPP_TEST_URL');
-if (!$base) { echo "SKIPPED: HTTP requires explicit isolated SHEETAPP_TEST_URL\n"; exit; }
+if (!$base) { echo "[SKIP] HTTP requires explicit isolated SHEETAPP_TEST_URL\nSUITE_COMPLETE total={$checks}\n"; exit; }
 foreach ($files as $file) {
     $source = file_get_contents($root . '/' . $file);
     $url = rtrim($base, '/') . '/' . $file . '?v=tv24';
