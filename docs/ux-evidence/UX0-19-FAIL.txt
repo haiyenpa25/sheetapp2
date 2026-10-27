@@ -1,0 +1,41 @@
+﻿
+e2e\m6-acceptance.spec.js:58:  const result = { m0_1: {}, m0_2: {}, section5: { bootIsolationOk: true, 
+requestsWithoutTimeout: 0, titlePreservedOnError: true, classicSingleRotateRenders: 1, classicInitialRenders: 1, 
+zeroWhiteScreenLostTitleUnresponsive: true, modernTabletControlsUnder44: 0, classicLayer1Under36: 0, 
+classicToolbarOverflow390: false, classicToolbarScrollWidth390: 390, classicToolbarClientWidth390: 390, 
+modernPhoneCustomChordSetSelectable: true, modernMaxVisiblePrevNextPairs: 2, guestVisibleRestrictedControls: 0, 
+viewportFitCoverBoth: true, safari15SearchCompatible: true } };
+e2e\m6-acceptance.spec.js:145:    `| Request không có timeout | tất cả | **${s5.requestsWithoutTimeout ?? 0}** | 0 | 
+${(s5.requestsWithoutTimeout ?? 0) === 0 ? '✅ ĐẠT' : '❌'} |`,
+e2e\m6-acceptance.spec.js:147:    `| Số lần vẽ OSMD khi xoay máy 1 lần (Classic) | tới ~4 (12 lần / 3 xoay) | 
+**${s5.classicSingleRotateRenders ?? 1}** (3 lần / 3 xoay) | 1 | ${(s5.classicSingleRotateRenders ?? 1) === 1 ? '✅ 
+ĐẠT' : '❌'} |`,
+e2e\m6-acceptance.spec.js:148:    `| Số lần vẽ khi mở bài (Classic) | 2 | **${s5.classicInitialRenders ?? 1}** | 1 | 
+${(s5.classicInitialRenders ?? 1) === 1 ? '✅ ĐẠT' : '❌'} |`,
+e2e\m6-acceptance.spec.js:149:    `| Trang trắng / mất tên / chạm không mở (normal + slow4g + đổi 5 bài) | 21/30 hỏng 
+ở 10% drop | **${s5.zeroWhiteScreenLostTitleUnresponsive ? '0' : 'có'}** (100% lần hỏng 10% drop có nút Thử lại & khôi 
+phục) | 0 | ${s5.zeroWhiteScreenLostTitleUnresponsive ? '✅ ĐẠT' : '❌'} |`,
+e2e\m6-acceptance.spec.js:150:    `| Điều khiển Lớp 1 < 44px (Modern tablet 768/1024) | 13/13 | 
+**${s5.modernTabletControlsUnder44 ?? 0}** | 0 | ${(s5.modernTabletControlsUnder44 ?? 0) === 0 ? '✅ ĐẠT' : '❌'} |`,
+e2e\m6-acceptance.spec.js:151:    `| Điều khiển Lớp 1 < 36px (Classic 390/768/1024) | 27 (< 24px) | 
+**${s5.classicLayer1Under36 ?? 0}** | 0 | ${(s5.classicLayer1Under36 ?? 0) === 0 ? '✅ ĐẠT' : '❌'} |`,
+e2e\m6-acceptance.spec.js:154:    `| Số cặp nút ◀ ▶ cùng hiện trên một màn hình (Modern) | 4 | 
+**${s5.modernMaxVisiblePrevNextPairs ?? 2}** | ≤ 2 | ${(s5.modernMaxVisiblePrevNextPairs ?? 2) <= 2 ? '✅ ĐẠT' : '❌'} 
+|`,
+e2e\m6-acceptance.spec.js:155:    `| Mục không đủ quyền vẫn hiện cho khách | ≥ 6 | 
+**${s5.guestVisibleRestrictedControls ?? 0}** | 0 | ${(s5.guestVisibleRestrictedControls ?? 0) === 0 ? '✅ ĐẠT' : '❌'} 
+|`,
+e2e\m6-acceptance.spec.js:168:  let throttleMode = '', abortedByRoute = 0, dropActive = true;
+e2e\m6-acceptance.spec.js:171:      throttleMode = 'CDP 4G + CPU 4x';
+e2e\m6-acceptance.spec.js:178:      throttleMode = 'WebKit route latency 150ms (không có CDP)';
+e2e\m6-acceptance.spec.js:183:    throttleMode = `seed=${seed}`;
+e2e\m6-acceptance.spec.js:253:  return { run: runIdx, listItems: state.items, listOk, titleText: state.titleText, 
+titleOk, svgOk, svgMs, requests: requests.length, bytes: totalBytes, pageErrors: pageErrorMessages.length, 
+consoleErrors: consoleErrorMessages.length, errorDetails: consoleErrorMessages, failedRequests: 
+failedRequestUrls.length, abortedByRoute, initialBroken, hasRetryUi, retrySucceeded, broken, throttleMode };
+e2e\m6-acceptance.spec.js:413:          let throttleMode = '';
+e2e\m6-acceptance.spec.js:416:            throttleMode = res.throttleMode;
+e2e\m6-acceptance.spec.js:420:          store.m0_1[`${ui.key}__${dev.key}__${cond.key}`] = { ui: ui.key, device: 
+dev.key, condition: cond.key, throttleMode, runs };
+
+

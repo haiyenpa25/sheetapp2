@@ -1,0 +1,34 @@
+[E2E] npx playwright test e2e/m6-acceptance.spec.js --reporter=list
+  ok  1 [chromium] › e2e\m6-acceptance.spec.js:533:7 › M6-1 · Đo nghiệm thu tải trang & khôi phục lỗi so với M0-1 › M6-1 acceptance: pixel7 - modern (1.8m)
+  ok  2 [chromium] › e2e\m6-acceptance.spec.js:533:7 › M6-1 · Đo nghiệm thu tải trang & khôi phục lỗi so với M0-1 › M6-1 acceptance: pixel7 - classic (1.7m)
+  ok  7 [chromium] › e2e\m6-acceptance.spec.js:570:7 › M6-2 · Đổi nhanh 5 bài, xoay máy 3 lần với bài lớn nhất, tải lần hai qua SW › M6-2 stress & sw: pixel7 - modern (12.9s)
+  ok  8 [chromium] › e2e\m6-acceptance.spec.js:570:7 › M6-2 · Đổi nhanh 5 bài, xoay máy 3 lần với bài lớn nhất, tải lần hai qua SW › M6-2 stress & sw: pixel7 - classic (14.2s)
+  ok 13 [chromium] › e2e\m6-acceptance.spec.js:602:3 › M6-3 · Đo trực tiếp các chỉ số Mục 5 (section5) từ DOM & runtime thực tế › M6-3 direct section5 measurements across Modern & Classic (17.5s)
+  ok 16 [webkit] › e2e\m6-acceptance.spec.js:533:7 › M6-1 · Đo nghiệm thu tải trang & khôi phục lỗi so với M0-1 › M6-1 acceptance: iphone13 - modern (1.2m)
+  ok 17 [webkit] › e2e\m6-acceptance.spec.js:533:7 › M6-1 · Đo nghiệm thu tải trang & khôi phục lỗi so với M0-1 › M6-1 acceptance: iphone13 - classic (1.3m)
+  ok 18 [webkit] › e2e\m6-acceptance.spec.js:533:7 › M6-1 · Đo nghiệm thu tải trang & khôi phục lỗi so với M0-1 › M6-1 acceptance: ipadmini - modern (1.7m)
+  ok 19 [webkit] › e2e\m6-acceptance.spec.js:533:7 › M6-1 · Đo nghiệm thu tải trang & khôi phục lỗi so với M0-1 › M6-1 acceptance: ipadmini - classic (1.5m)
+  ok 22 [webkit] › e2e\m6-acceptance.spec.js:570:7 › M6-2 · Đổi nhanh 5 bài, xoay máy 3 lần với bài lớn nhất, tải lần hai qua SW › M6-2 stress & sw: iphone13 - modern (24.2s)
+  ok 23 [webkit] › e2e\m6-acceptance.spec.js:570:7 › M6-2 · Đổi nhanh 5 bài, xoay máy 3 lần với bài lớn nhất, tải lần hai qua SW › M6-2 stress & sw: iphone13 - classic (28.4s)
+  ok 24 [webkit] › e2e\m6-acceptance.spec.js:570:7 › M6-2 · Đổi nhanh 5 bài, xoay máy 3 lần với bài lớn nhất, tải lần hai qua SW › M6-2 stress & sw: ipadmini - modern (32.3s)
+  ok 25 [webkit] › e2e\m6-acceptance.spec.js:570:7 › M6-2 · Đổi nhanh 5 bài, xoay máy 3 lần với bài lớn nhất, tải lần hai qua SW › M6-2 stress & sw: ipadmini - classic (29.2s)
+  13 skipped
+  13 passed (11.8m)
+
+[M6-acceptance.md Section 3 — Generated purely from measured JSON + M0-baseline.md + ROADMAP_MOBILE.md]
+| Chỉ số | Trước (M0) | Sau (M6) | Đích | Trạng thái |
+|---|---|---|---|---|
+| Một module lỗi lúc khởi động làm hỏng mở bài | có (L1) | **không** (Modern: cô lập, Classic: cô lập) | không | ✅ ĐẠT |
+| Request không có timeout | tất cả | **0** (GET=12000ms, POST=120000ms, XML=12000ms, SW=15000ms) | 0 | ✅ ĐẠT |
+| Lỗi tải/vẽ làm mất tên bài | có (L4) | **không** (Modern: "HỠI THÁNH VƯƠNG, KÍP NGỰ LAI", Classic: "HỠI THÁNH VƯƠNG, KÍP NGỰ LAI") | không | ✅ ĐẠT |
+| Số lần vẽ OSMD khi xoay máy (Classic) | [12, 3, 3] lần / 3 xoay (Pixel 7: 12, iPhone 13: 3, iPad Mini: 3) | **[2, 1, 1] lần / 3 xoay** (Pixel 7: 2, iPhone 13: 1, iPad Mini: 1; tối đa ≤ 1 lần/xoay) | ≤ 1 lần/xoay (≤ 3 / 3 xoay) | ✅ ĐẠT |
+| Số lần vẽ khi mở bài (Classic) | [2, 2, 2] (Pixel 7: 2, iPhone 13: 2, iPad Mini: 2) | **[1, 1, 1]** (Pixel 7: 1, iPhone 13: 1, iPad Mini: 1) | 1 | ✅ ĐẠT |
+| Trang trắng / mất tên / chạm không mở (normal + slow4g + đổi 5 bài + 10% drop) | 0/60 hỏng (normal+slow4g); 25/30 hỏng ở 10% drop | **0/60** hỏng (normal+slow4g), **0/6** lỗi đổi 5 bài; 10% drop: **22/22** khôi phục → **0/30** hỏng sau thử lại | 0 | ✅ ĐẠT |
+| Điều khiển Lớp 1 < 44px (Modern tablet 768/1024) | 13/13 | **0** (768px: 0/17, 1024px: 0/17) | 0 | ✅ ĐẠT |
+| Điều khiển Lớp 1 < 36px (Classic 390/768/1024) | 27 (< 24px) | **0** (< 36px: 390=0, 768=0, 1024=0; < 24px: 0) | 0 | ✅ ĐẠT |
+| Toolbar Classic cuộn ngang ở 390 | có (672px) | **không** (390px ≤ 390px) | không | ✅ ĐẠT |
+| Chọn bộ hợp âm bất kỳ trên điện thoại (Modern 390) | không | **có** (chọn bộ "Ban Nhạc A") | có | ✅ ĐẠT |
+| Số cặp nút ◀ ▶ cùng hiện trên một màn hình (Modern) | 4 | **1** (390px: 1, 768px: 1, 1366px: 1) | ≤ 2 | ✅ ĐẠT |
+| Mục không đủ quyền vẫn hiện cho khách | ≥ 6 | **0** (Modern: 0, Classic: 0) | 0 | ✅ ĐẠT |
+| `viewport-fit=cover` ở cả hai `index.php` | không | **có** (Modern: có, Classic: có) | có | ✅ ĐẠT |
+| Tìm kiếm trên Safari < 16.4 (không dùng `\p{L}` / lookbehind trực tiếp) | vỡ | **chạy** (lookbehind=không, kết quả lọc=1) | chạy | ✅ ĐẠT |
