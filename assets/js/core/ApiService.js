@@ -30,6 +30,7 @@ const ApiService = (() => {
       return url;
     }
     const base = _getBaseUrl();
+    if (base && (url === base || url.startsWith(base + '/'))) return url;
     const cleanUrl = url.replace(/^\/+/, '');
     return base ? `${base}/${cleanUrl}` : `/${cleanUrl}`;
   }

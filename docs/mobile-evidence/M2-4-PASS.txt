@@ -1,0 +1,21 @@
+CMD: npx playwright test e2e/m2-load-resilience.spec.js -g "M2-4" --reporter=line
+EXIT=0
+[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 12 tests using 1 worker
+
+[1/12] [chromium] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: pixel7 - modern
+[2/12] [chromium] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: pixel7 - classic
+[3/12] [chromium] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: iphone13 - modern
+[4/12] [chromium] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: iphone13 - classic
+[5/12] [chromium] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: ipadmini - modern
+[6/12] [chromium] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: ipadmini - classic
+[7/12] [webkit] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: pixel7 - modern
+[8/12] [webkit] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: pixel7 - classic
+[9/12] [webkit] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: iphone13 - modern
+[10/12] [webkit] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: iphone13 - classic
+[11/12] [webkit] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: ipadmini - modern
+[12/12] [webkit] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: ipadmini - classic
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+  6 skipped
+  6 passed (16.9s)

@@ -31,6 +31,7 @@ const AppUI = (() => {
   }
 
   function showWelcome() {
+    hideLoadError();
     document.getElementById('welcome-screen')?.classList.remove('hidden');
     document.getElementById('loading-screen')?.classList.add('hidden');
     document.getElementById('sheet-area')?.classList.add('hidden');
@@ -54,6 +55,7 @@ const AppUI = (() => {
   }
 
   function showLoading(text) {
+    hideLoadError();
     document.getElementById('welcome-screen')?.classList.add('hidden');
     document.getElementById('sheet-area')?.classList.add('hidden');
     document.getElementById('page-bar')?.classList.add('hidden');
@@ -75,6 +77,7 @@ const AppUI = (() => {
   }
 
   function showOSMD() {
+    hideLoadError();
     document.getElementById('loading-screen')?.classList.add('hidden');
     document.getElementById('welcome-screen')?.classList.add('hidden');
     document.getElementById('sheet-area')?.classList.remove('hidden');
@@ -480,7 +483,40 @@ const AppUI = (() => {
     }).join('');
   }
 
-  return { showToast, showWelcome, showLoading, hideLoading, setLoadingText, showOSMD, enableControls, updateTransposeDisplay, updateCapoBadge, updateSongInfo, toggleFullscreen, updateSessionPanel };
+  function hideLoadError() {
+    const el = document.getElementById('sheet-load-error');
+    if (el) el.classList.add('hidden');
+  }
+
+  function showLoadError(song, message, onRetry, onViewLyric) {
+    document.getElementById('welcome-screen')?.classList.add('hidden');
+    document.getElementById('loading-screen')?.classList.add('hidden');
+    document.getElementById('sheet-area')?.classList.add('hidden');
+    if (song) updateSongInfo(song, window.Store?.get?.('currentTranspose') || 0);
+    const host = document.querySelector('.sheet-viewer-wrapper') || document.body;
+    let panel = document.getElementById('sheet-load-error');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'sheet-load-error';
+      panel.setAttribute('role', 'alert');
+      panel.style.cssText = 'margin:24px auto;max-width:440px;padding:20px;border-radius:12px;background:var(--bg-secondary,#1e293b);border:1px solid var(--border-color,#334155);text-align:center;color:var(--text-primary,#f8fafc);';
+      host.appendChild(panel);
+    }
+    const safeTitle = escapeHtml(song?.title || 'Bài hát');
+    const safeMsg = escapeHtml(message || 'Không thể tải hoặc vẽ bản nhạc');
+    panel.innerHTML = `<div style="font-weight:700;font-size:16px;margin-bottom:6px;">${safeTitle}</div><div style="font-size:13px;opacity:0.85;margin-bottom:16px;">${safeMsg}</div><div style="display:flex;gap:10px;justify-content:center;"><button type="button" id="btn-sheet-retry" style="min-height:44px;padding:8px 16px;border-radius:8px;border:none;background:var(--accent,#3b82f6);color:#fff;font-weight:600;cursor:pointer;">Thử lại</button><button type="button" id="btn-sheet-view-lyric" style="min-height:44px;padding:8px 16px;border-radius:8px;border:1px solid var(--border-color,#475569);background:transparent;color:inherit;font-weight:600;cursor:pointer;">Xem lời</button></div>`;
+    panel.classList.remove('hidden');
+    panel.querySelector('#btn-sheet-retry')?.addEventListener('click', () => {
+      hideLoadError();
+      if (typeof onRetry === 'function') onRetry();
+    });
+    panel.querySelector('#btn-sheet-view-lyric')?.addEventListener('click', () => {
+      hideLoadError();
+      if (typeof onViewLyric === 'function') onViewLyric();
+    });
+  }
+
+  return { showToast, showWelcome, showLoadError, hideLoadError, showLoading, hideLoading, setLoadingText, showOSMD, enableControls, updateTransposeDisplay, updateCapoBadge, updateSongInfo, toggleFullscreen, updateSessionPanel };
 })();
 
 window.AppUI = AppUI;

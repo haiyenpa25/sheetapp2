@@ -21,6 +21,7 @@ const SongLoader = (() => {
 
     Store.set('currentSong', song);
     Store.set('currentTranspose', transposeOverride ?? 0);
+    AppUI.updateSongInfo(song, transposeOverride ?? 0); AppUI.updateTransposeDisplay(transposeOverride ?? 0);
     Store.set('capoLevel', 0);
     _autoFitRetryCount = 0; // BUG-12 fix: reset retry budget cho mỗi bài mới
 
@@ -60,11 +61,14 @@ const SongLoader = (() => {
         if (cachedXml) return cachedXml;
         throw new Error('Không thể tải file XML (Mất mạng và chưa lưu ngoại tuyến)');
       };
-      const [xml, settings] = await Promise.all([
+      const [xmlSettled, sessionsSettled] = await Promise.allSettled([
         fetchXmlText(),
-        ApiService.sessions.load(song.id).catch(() => ({})),
+        ApiService.sessions.load(song.id),
         ChordCanvas.loadSong(song.id, profileOverride)  // đảm bảo chords ready trước render
       ]);
+      if (xmlSettled.status === 'rejected') throw xmlSettled.reason;
+      const xml = xmlSettled.value;
+      const settings = sessionsSettled.status === 'fulfilled' ? (sessionsSettled.value || {}) : {};
       if (token !== _currentLoadToken) return;
       Store.set('originalXml', xml);
 
@@ -127,7 +131,7 @@ const SongLoader = (() => {
       if (err?.name === 'AbortError' || token !== _currentLoadToken) return;
       console.error('[SongLoader]', err);
       AppUI.showToast(`Lỗi: ${err.message}`, 'error');
-      AppUI.showWelcome();
+      if (AppUI.showLoadError) AppUI.showLoadError(song, err.message, () => load(song, transposeOverride, profileOverride, options), () => document.getElementById('btn-lyric-view')?.click());
     }
   }
 

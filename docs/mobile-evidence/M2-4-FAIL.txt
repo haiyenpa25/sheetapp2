@@ -1,0 +1,183 @@
+CMD: npx playwright test e2e/m2-load-resilience.spec.js -g "M2-4" --reporter=line
+EXIT=1
+[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 12 tests using 1 worker
+
+[1/12] [chromium] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: pixel7 - modern
+  1) [chromium] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: pixel7 - modern 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('#sheet-load-error')
+    Expected: visible
+    Timeout: 6000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('#sheet-load-error') with timeout 6000ms
+      - waiting for locator('#sheet-load-error')
+
+
+      75 |
+      76 |         const errorPanel = page.locator('#sheet-load-error');
+    > 77 |         await expect(errorPanel).toBeVisible({ timeout: 6000 });
+         |                                  ^
+      78 |         await expect(errorPanel.locator('#btn-sheet-retry')).toContainText('Thử lại');
+      79 |         await expect(errorPanel.locator('#btn-sheet-view-lyric')).toContainText('Xem lời');
+      80 |
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m2-load-resilience.spec.js:77:34
+
+    Error Context: test-results\m2-load-resilience-M2-4-·--17021--resilience-pixel7---modern-chromium\error-context.md
+
+
+[2/12] [chromium] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: pixel7 - classic
+  2) [chromium] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: pixel7 - classic 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('#sheet-load-error')
+    Expected: visible
+    Timeout: 6000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('#sheet-load-error') with timeout 6000ms
+      - waiting for locator('#sheet-load-error')
+
+
+      75 |
+      76 |         const errorPanel = page.locator('#sheet-load-error');
+    > 77 |         await expect(errorPanel).toBeVisible({ timeout: 6000 });
+         |                                  ^
+      78 |         await expect(errorPanel.locator('#btn-sheet-retry')).toContainText('Thử lại');
+      79 |         await expect(errorPanel.locator('#btn-sheet-view-lyric')).toContainText('Xem lời');
+      80 |
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m2-load-resilience.spec.js:77:34
+
+    Error Context: test-results\m2-load-resilience-M2-4-·--a9749-resilience-pixel7---classic-chromium\error-context.md
+
+
+[3/12] [chromium] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: iphone13 - modern
+[4/12] [chromium] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: iphone13 - classic
+[5/12] [chromium] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: ipadmini - modern
+[6/12] [chromium] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: ipadmini - classic
+[7/12] [webkit] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: pixel7 - modern
+[8/12] [webkit] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: pixel7 - classic
+[9/12] [webkit] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: iphone13 - modern
+  3) [webkit] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: iphone13 - modern 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('#sheet-load-error')
+    Expected: visible
+    Timeout: 6000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('#sheet-load-error') with timeout 6000ms
+      - waiting for locator('#sheet-load-error')
+
+
+      75 |
+      76 |         const errorPanel = page.locator('#sheet-load-error');
+    > 77 |         await expect(errorPanel).toBeVisible({ timeout: 6000 });
+         |                                  ^
+      78 |         await expect(errorPanel.locator('#btn-sheet-retry')).toContainText('Thử lại');
+      79 |         await expect(errorPanel.locator('#btn-sheet-view-lyric')).toContainText('Xem lời');
+      80 |
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m2-load-resilience.spec.js:77:34
+
+    Error Context: test-results\m2-load-resilience-M2-4-·--0a22a-esilience-iphone13---modern-webkit\error-context.md
+
+
+[10/12] [webkit] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: iphone13 - classic
+  4) [webkit] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: iphone13 - classic 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('#sheet-load-error')
+    Expected: visible
+    Timeout: 6000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('#sheet-load-error') with timeout 6000ms
+      - waiting for locator('#sheet-load-error')
+
+
+      75 |
+      76 |         const errorPanel = page.locator('#sheet-load-error');
+    > 77 |         await expect(errorPanel).toBeVisible({ timeout: 6000 });
+         |                                  ^
+      78 |         await expect(errorPanel.locator('#btn-sheet-retry')).toContainText('Thử lại');
+      79 |         await expect(errorPanel.locator('#btn-sheet-view-lyric')).toContainText('Xem lời');
+      80 |
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m2-load-resilience.spec.js:77:34
+
+    Error Context: test-results\m2-load-resilience-M2-4-·--9797e-silience-iphone13---classic-webkit\error-context.md
+
+
+[11/12] [webkit] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: ipadmini - modern
+  5) [webkit] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: ipadmini - modern 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('#sheet-load-error')
+    Expected: visible
+    Timeout: 6000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('#sheet-load-error') with timeout 6000ms
+      - waiting for locator('#sheet-load-error')
+
+
+      75 |
+      76 |         const errorPanel = page.locator('#sheet-load-error');
+    > 77 |         await expect(errorPanel).toBeVisible({ timeout: 6000 });
+         |                                  ^
+      78 |         await expect(errorPanel.locator('#btn-sheet-retry')).toContainText('Thử lại');
+      79 |         await expect(errorPanel.locator('#btn-sheet-view-lyric')).toContainText('Xem lời');
+      80 |
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m2-load-resilience.spec.js:77:34
+
+    Error Context: test-results\m2-load-resilience-M2-4-·--c8f82-esilience-ipadmini---modern-webkit\error-context.md
+
+
+[12/12] [webkit] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: ipadmini - classic
+  6) [webkit] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: ipadmini - classic 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('#sheet-load-error')
+    Expected: visible
+    Timeout: 6000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('#sheet-load-error') with timeout 6000ms
+      - waiting for locator('#sheet-load-error')
+
+
+      75 |
+      76 |         const errorPanel = page.locator('#sheet-load-error');
+    > 77 |         await expect(errorPanel).toBeVisible({ timeout: 6000 });
+         |                                  ^
+      78 |         await expect(errorPanel.locator('#btn-sheet-retry')).toContainText('Thử lại');
+      79 |         await expect(errorPanel.locator('#btn-sheet-view-lyric')).toContainText('Xem lời');
+      80 |
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m2-load-resilience.spec.js:77:34
+
+    Error Context: test-results\m2-load-resilience-M2-4-·--f39ab-silience-ipadmini---classic-webkit\error-context.md
+
+
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+  6 failed
+    [chromium] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: pixel7 - modern 
+    [chromium] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: pixel7 - classic 
+    [webkit] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: iphone13 - modern 
+    [webkit] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: iphone13 - classic 
+    [webkit] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: ipadmini - modern 
+    [webkit] › e2e\m2-load-resilience.spec.js:35:7 › M2-4 · Tên bài gán ngay, panel lỗi tại chỗ (Thử lại, Xem lời), và Promise.allSettled cho chord_sets › M2-4 load error panel & chord_sets resilience: ipadmini - classic 
+  6 skipped

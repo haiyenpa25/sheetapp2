@@ -25,6 +25,7 @@ const SongLoader = (() => {
 
     Store.set('currentSong', song);
     Store.set('currentTranspose', transposeOverride ?? 0);
+    AppUI.updateSongInfo(song, transposeOverride ?? 0); AppUI.updateTransposeDisplay(transposeOverride ?? 0);
     Store.set('capoLevel', 0);
     _autoFitRetryCount = 0; // BUG-12 fix: reset retry budget cho mỗi bài mới
 
@@ -83,12 +84,14 @@ const SongLoader = (() => {
           throw new Error('Không thể nạp file XML (Mất mạng và chưa lưu ngoại tuyến)');
         };
 
-        const [res, loadedSettings] = await Promise.all([
+        const [xmlSettled, sessionsSettled] = await Promise.allSettled([
           fetchXml(),
-          ApiService.sessions.load(song.id).catch(() => ({})),
+          ApiService.sessions.load(song.id),
           ChordCanvas.loadSong(song.id, profileOverride)  // đảm bảo chords ready trước render
         ]);
-        settings = loadedSettings;
+        if (xmlSettled.status === 'rejected') throw xmlSettled.reason;
+        const res = xmlSettled.value;
+        settings = sessionsSettled.status === 'fulfilled' ? (sessionsSettled.value || {}) : {};
         if (loadToken !== _currentLoadToken) return;
 
         xml = await res.text();
@@ -184,7 +187,7 @@ const SongLoader = (() => {
       }
       console.error('[SongLoader]', err);
       AppUI.showToast(`Lỗi: ${err.message}`, 'error');
-      AppUI.showWelcome();
+      if (AppUI.showLoadError) AppUI.showLoadError(song, err.message, () => load(song, transposeOverride, profileOverride, options), () => document.getElementById('btn-lyric-view')?.click());
     }
   }
 
