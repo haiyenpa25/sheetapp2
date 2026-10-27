@@ -1,0 +1,70 @@
+﻿[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 4 tests using 1 worker
+
+[1/4] [chromium] › e2e\ux0-13-lock-zoom.spec.js:16:5 › UX0-13 · Lock zoom is visible and clickable at 768 and 1366 › Modern tablet-768: #btn-menu-lock-zoom is visible in menu ⋯ and toggles zoom lock on click
+  1) [chromium] › e2e\ux0-13-lock-zoom.spec.js:16:5 › UX0-13 · Lock zoom is visible and clickable at 768 and 1366 › Modern tablet-768: #btn-menu-lock-zoom is visible in menu ⋯ and toggles zoom lock on click 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator:  locator('#btn-menu-lock-zoom')
+    Expected: visible
+    Received: hidden
+    Timeout:  10000ms
+
+    Call log:
+      - Expect "toBeVisible" locator('#btn-menu-lock-zoom') with timeout 10000ms
+      - waiting for locator('#btn-menu-lock-zoom')
+        22 × locator resolved to <button class="icon-btn-xs" id="btn-menu-lock-zoom" title="Khóa tỷ lệ zoom" aria-label="Khóa tỷ lệ zoom">…</button>
+           - unexpected value "hidden"
+
+
+      31 |
+      32 |       const lockBtn = page.locator('#btn-menu-lock-zoom');
+    > 33 |       await expect(lockBtn).toBeVisible();
+         |                             ^
+      34 |
+      35 |       const beforeLock = await page.evaluate(() => localStorage.getItem('sheetapp_zoom_locked'));
+      36 |       await lockBtn.click();
+        at C:\xampp\htdocs\sheetapp2-verify-m6\e2e\ux0-13-lock-zoom.spec.js:33:29
+
+    Error Context: test-results\ux0-13-lock-zoom-UX0-13-·--47071--toggles-zoom-lock-on-click-chromium\error-context.md
+
+
+[2/4] [chromium] › e2e\ux0-13-lock-zoom.spec.js:16:5 › UX0-13 · Lock zoom is visible and clickable at 768 and 1366 › Modern desktop-1366: #btn-menu-lock-zoom is visible in menu ⋯ and toggles zoom lock on click
+[3/4] [webkit] › e2e\ux0-13-lock-zoom.spec.js:16:5 › UX0-13 · Lock zoom is visible and clickable at 768 and 1366 › Modern tablet-768: #btn-menu-lock-zoom is visible in menu ⋯ and toggles zoom lock on click
+  2) [webkit] › e2e\ux0-13-lock-zoom.spec.js:16:5 › UX0-13 · Lock zoom is visible and clickable at 768 and 1366 › Modern tablet-768: #btn-menu-lock-zoom is visible in menu ⋯ and toggles zoom lock on click 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator:  locator('#btn-menu-lock-zoom')
+    Expected: visible
+    Received: hidden
+    Timeout:  10000ms
+
+    Call log:
+      - Expect "toBeVisible" locator('#btn-menu-lock-zoom') with timeout 10000ms
+      - waiting for locator('#btn-menu-lock-zoom')
+        22 × locator resolved to <button class="icon-btn-xs" id="btn-menu-lock-zoom" title="Khóa tỷ lệ zoom" aria-label="Khóa tỷ lệ zoom">…</button>
+           - unexpected value "hidden"
+
+
+      31 |
+      32 |       const lockBtn = page.locator('#btn-menu-lock-zoom');
+    > 33 |       await expect(lockBtn).toBeVisible();
+         |                             ^
+      34 |
+      35 |       const beforeLock = await page.evaluate(() => localStorage.getItem('sheetapp_zoom_locked'));
+      36 |       await lockBtn.click();
+        at C:\xampp\htdocs\sheetapp2-verify-m6\e2e\ux0-13-lock-zoom.spec.js:33:29
+
+    Error Context: test-results\ux0-13-lock-zoom-UX0-13-·--47071--toggles-zoom-lock-on-click-webkit\error-context.md
+
+
+[4/4] [webkit] › e2e\ux0-13-lock-zoom.spec.js:16:5 › UX0-13 · Lock zoom is visible and clickable at 768 and 1366 › Modern desktop-1366: #btn-menu-lock-zoom is visible in menu ⋯ and toggles zoom lock on click
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+  2 failed
+    [chromium] › e2e\ux0-13-lock-zoom.spec.js:16:5 › UX0-13 · Lock zoom is visible and clickable at 768 and 1366 › Modern tablet-768: #btn-menu-lock-zoom is visible in menu ⋯ and toggles zoom lock on click 
+    [webkit] › e2e\ux0-13-lock-zoom.spec.js:16:5 › UX0-13 · Lock zoom is visible and clickable at 768 and 1366 › Modern tablet-768: #btn-menu-lock-zoom is visible in menu ⋯ and toggles zoom lock on click 
+  2 passed (30.1s)
+
