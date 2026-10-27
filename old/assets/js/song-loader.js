@@ -16,8 +16,9 @@ const SongLoader = (() => {
     if (!song?.xmlPath) { AppUI.showToast('Bài hát chưa có file sheet nhạc', 'error'); return; }
     const token = ++_currentLoadToken;
     if (_currentAbortController) { try { _currentAbortController.abort(); } catch (e) {} }
-    _currentAbortController = window.SongLoaderCore?.beginLoad ? (window.SongLoaderCore.beginLoad().controller || new AbortController()) : new AbortController();
-    const abortSignal = _currentAbortController.signal;
+    const _mkAbort = () => (typeof AbortController !== 'undefined' ? new AbortController() : null);
+    _currentAbortController = window.SongLoaderCore?.beginLoad ? (window.SongLoaderCore.beginLoad().controller || _mkAbort()) : _mkAbort();
+    const abortSignal = _currentAbortController ? _currentAbortController.signal : undefined;
 
     Store.set('currentSong', song);
     Store.set('currentTranspose', transposeOverride ?? 0);
