@@ -2273,3 +2273,15 @@ body.dark-mode #main-dropdown-menu .menu-sticky-footer {
     font-size: 13px !important;
   }
 }
+
+/* M4-5: Ẩn hẳn mục không đủ quyền (U6) đối với khách và viewer */
+body:not(.has-member-access) .lv-edit-chordpro-btn,
+body:not(.has-member-access) #btn-create-setlist,
+body:not(.has-member-access) #btn-new-chord-set,
+body:not(.has-member-access) #btn-toolbar-editor,
+body:not(.has-member-access) #btn-menu-session-panel,
+body:not(.has-member-access) #btn-open-session-from-popover,
+body:not(.has-member-access) #main-dropdown-menu a[href$="manager/"],
+body:not(.has-member-access) #main-dropdown-menu a[data-target="/manager/#tab-users"] {
+  display: none !important;
+}

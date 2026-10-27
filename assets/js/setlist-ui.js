@@ -71,7 +71,7 @@ const SetlistUI = (() => {
     document.getElementById('tab-content-library')?.classList.add('hidden');
     document.getElementById('tab-content-setlist')?.classList.remove('hidden');
     document.getElementById('btn-admin-console')?.classList.add('hidden');
-    document.getElementById('btn-create-setlist')?.classList.remove('hidden');
+    document.getElementById('btn-create-setlist')?.classList.toggle('hidden', !window.Auth?.canUseMemberTools?.());
     document.querySelector('.sidebar-search')?.classList.add('hidden');
     document.querySelector('.quick-jump')?.classList.add('hidden');
 
@@ -191,7 +191,7 @@ const SetlistUI = (() => {
         } else if (t.dataset.tab === 'setlist') {
           document.getElementById('tab-content-setlist')?.classList.remove('hidden');
           document.getElementById('btn-admin-console')?.classList.add('hidden');
-          document.getElementById('btn-create-setlist')?.classList.remove('hidden');
+          document.getElementById('btn-create-setlist')?.classList.toggle('hidden', !window.Auth?.canUseMemberTools?.());
           document.querySelector('.sidebar-search')?.classList.add('hidden');
           document.querySelector('.quick-jump')?.classList.add('hidden');
           fetchSetlists();

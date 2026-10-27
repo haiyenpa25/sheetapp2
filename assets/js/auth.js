@@ -236,7 +236,13 @@ const Auth = (() => {
     // Tạo bộ hợp âm mới — CHỈ hiển thị khi đã đăng nhập có quyền sửa hợp âm
     document.getElementById('btn-new-chord-set')?.classList.toggle('hidden', !canEditChords);
     // Nút tạo Setlist — Leader + Admin
-    document.getElementById('btn-create-setlist')?.classList.toggle('hidden', !isLead);
+    const isSetlistTab = !document.getElementById('tab-content-setlist')?.classList.contains('hidden');
+    document.body.classList.toggle('has-member-access', canEditChords);
+    document.getElementById('btn-create-setlist')?.classList.toggle('hidden', !(canEditChords && isSetlistTab));
+    document.getElementById('btn-toolbar-editor')?.classList.toggle('hidden', !canEditChords);
+    document.getElementById('btn-menu-session-panel')?.classList.toggle('hidden', !canEditChords);
+    document.getElementById('btn-open-session-from-popover')?.classList.toggle('hidden', !canEditChords);
+    document.querySelectorAll('#main-dropdown-menu a[href$="manager/"], #main-dropdown-menu a[data-target="/manager/#tab-users"], .lv-edit-chordpro-btn').forEach(el => el.classList.toggle('hidden', !canEditChords));
     
     // Ghi chú — Admin only
     document.getElementById('btn-add-annotate-mode')?.classList.toggle('hidden', !canEdit);
@@ -488,6 +494,7 @@ const Auth = (() => {
     init, checkSession, login: doLogin, logout: doLogout, isAdmin, isLeader, isLoggedIn, openModal, closeModal, chooseGuestMode,
     isBannhac: () => _role === 'bannhac' || _role === 'leader' || _role === 'admin',
     isBanhat: () => _canEditChords(),
+    canUseMemberTools: () => _canEditChords(),
     userId: () => _userId,
     getUserId: () => _userId,
     getUser: () => _currentUser,

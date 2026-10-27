@@ -1,0 +1,47 @@
+﻿[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 2 tests using 1 worker
+
+[1/2] [chromium] › e2e\m4-reader-layout.spec.js:424:3 › M4-5 · Ẩn hẳn mục không đủ quyền (U6) cho khách và viewer; banhat vẫn thấy › M4-5 guest and viewer do not see U6 items; banhat sees them
+[2/2] [webkit] › e2e\m4-reader-layout.spec.js:424:3 › M4-5 · Ẩn hẳn mục không đủ quyền (U6) cho khách và viewer; banhat vẫn thấy › M4-5 guest and viewer do not see U6 items; banhat sees them
+  1) [webkit] › e2e\m4-reader-layout.spec.js:424:3 › M4-5 · Ẩn hẳn mục không đủ quyền (U6) cho khách và viewer; banhat vẫn thấy › M4-5 guest and viewer do not see U6 items; banhat sees them 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 6
+    + Received  + 6
+
+      Object {
+    -   "chordProEdit": false,
+    -   "createSetlist": false,
+    +   "chordProEdit": true,
+    +   "createSetlist": true,
+        "menuAddChord": false,
+        "menuCreateSet": false,
+    -   "menuEditor": false,
+    -   "menuManager": false,
+    -   "menuMembers": false,
+    -   "menuSession": false,
+    +   "menuEditor": true,
+    +   "menuManager": true,
+    +   "menuMembers": true,
+    +   "menuSession": true,
+        "newChordSet": false,
+      }
+
+      495 |
+      496 |     const guestRes = await checkRoleVisibility({ loggedIn: false });
+    > 497 |     expect(guestRes).toEqual({
+          |                      ^
+      498 |       createSetlist: false,
+      499 |       newChordSet: false,
+      500 |       chordProEdit: false,
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m4-reader-layout.spec.js:497:22
+
+    Error Context: test-results\m4-reader-layout-M4-5-·-Ẩn-d6430-e-U6-items-banhat-sees-them-webkit\error-context.md
+
+
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+  1 failed
+    [webkit] › e2e\m4-reader-layout.spec.js:424:3 › M4-5 · Ẩn hẳn mục không đủ quyền (U6) cho khách và viewer; banhat vẫn thấy › M4-5 guest and viewer do not see U6 items; banhat sees them 
+  1 skipped

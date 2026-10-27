@@ -482,7 +482,7 @@ const ChordCanvas = (() => {
 
     const myChordCode = (window.Auth?.getChordCode?.() || '').toUpperCase();
     const isLoggedIn  = window.Auth?.isLoggedIn?.() ?? false;
-    const canCreate   = window.Auth?.isBanhat?.() ?? false;
+    const canCreate   = window.Auth?.canUseMemberTools?.() ?? window.Auth?.isBanhat?.() ?? false;
 
     const KNOWN_CODES = { 'HD': 'Hoài Dinh (HD)', 'NAM': 'Hoàng Nam (NAM)', 'LAN': 'Hà Lan (LAN)', 'BH': 'Ban Hát (BH)', 'ADMIN': 'Admin (ADMIN)' };
     const esc = s => window.SafeHtml ? window.SafeHtml.escape(s) : s;
@@ -509,7 +509,7 @@ const ChordCanvas = (() => {
       selector.addEventListener('change', (e) => handleSelectChange(e.target.value));
     }
 
-    document.getElementById('btn-new-chord-set')?.classList.toggle('hidden', !isLoggedIn);
+    document.getElementById('btn-new-chord-set')?.classList.toggle('hidden', !canCreate);
     document.getElementById('btn-propose-hd')?.classList.toggle('hidden', !(_currentSet !== 'default' && _currentSet !== 'HD' && canCreate));
   }
 

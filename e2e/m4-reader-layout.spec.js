@@ -419,3 +419,114 @@ test.describe('M4-4 · Modern menu ⋯: 4 nhóm có tiêu đề, mọi mục có
     await context.close();
   });
 });
+
+test.describe('M4-5 · Ẩn hẳn mục không đủ quyền (U6) cho khách và viewer; banhat vẫn thấy', () => {
+  test('M4-5 guest and viewer do not see U6 items; banhat sees them', async ({ browser }, testInfo) => {
+    test.skip(testInfo.project.name !== 'webkit', 'M4-5 nghiệm thu trên WebKit');
+    test.setTimeout(60000);
+
+    const checkRoleVisibility = async (authPayload) => {
+      const context = await browser.newContext({
+        viewport: { width: 1024, height: 768 },
+        baseURL: BASE_URL,
+        serviceWorkers: 'block',
+      });
+      const page = await context.newPage();
+      await page.addInitScript(() => {
+        try {
+          sessionStorage.setItem('sheetapp_guest_chosen', '1');
+          localStorage.setItem('sheetapp_guest_toast_shown', '1');
+        } catch (_) {}
+      });
+
+      await page.route('**/*route=auth*action=me*', async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(authPayload),
+        });
+      });
+
+      await page.goto(BASE_URL + '?song=thanh-ca-001', { waitUntil: 'domcontentloaded', timeout: 20000 });
+      await page.locator('#osmd-container svg, .lv-verse').first().waitFor({ state: 'attached', timeout: 15000 });
+      await page.evaluate(() => document.getElementById('btn-band-toggle')?.click());
+      await page.locator('.lv-verse').first().waitFor({ state: 'attached', timeout: 5000 });
+
+      // Mở sidebar (nếu đang đóng) và chuyển sang tab Chương trình
+      await page.evaluate(() => {
+        const sb = document.getElementById('sidebar');
+        if (sb && sb.classList.contains('mobile-hidden')) {
+          document.getElementById('btn-open-sidebar')?.click();
+        }
+        document.querySelector('.sidebar-tab[data-tab="setlist"]')?.click();
+      });
+      await page.waitForTimeout(200);
+
+      // Mở menu ⋯
+      await page.locator('#btn-more-options').click();
+      await page.waitForTimeout(150);
+
+      const res = await page.evaluate(() => {
+        const isVis = (sel) => {
+          const el = document.querySelector(sel);
+          if (!el) return false;
+          const s = getComputedStyle(el);
+          if (s.display === 'none' || s.visibility === 'hidden') return false;
+          if (el.closest('.hidden') || el.closest('.d-none')) return false;
+          const r = el.getBoundingClientRect();
+          return r.width > 0 && r.height > 0;
+        };
+        return {
+          createSetlist: isVis('#btn-create-setlist'),
+          newChordSet: isVis('#btn-new-chord-set'),
+          chordProEdit: isVis('.lv-edit-chordpro-btn'),
+          menuEditor: isVis('#btn-toolbar-editor'),
+          menuSession: isVis('#btn-menu-session-panel'),
+          menuCreateSet: isVis('#btn-menu-create-chordset'),
+          menuAddChord: isVis('#btn-menu-add-chord-mode'),
+          menuManager: isVis('#main-dropdown-menu a[href$="manager/"]'),
+          menuMembers: isVis('#main-dropdown-menu a[data-target="/manager/#tab-users"]'),
+        };
+      });
+
+      await context.close();
+      return res;
+    };
+
+    const guestRes = await checkRoleVisibility({ loggedIn: false });
+    expect(guestRes).toEqual({
+      createSetlist: false,
+      newChordSet: false,
+      chordProEdit: false,
+      menuEditor: false,
+      menuSession: false,
+      menuCreateSet: false,
+      menuAddChord: false,
+      menuManager: false,
+      menuMembers: false,
+    });
+
+    const viewerRes = await checkRoleVisibility({ loggedIn: true, user_id: 9, username: 'viewer1', role: 'viewer', chord_code: '' });
+    expect(viewerRes).toEqual({
+      createSetlist: false,
+      newChordSet: false,
+      chordProEdit: false,
+      menuEditor: false,
+      menuSession: false,
+      menuCreateSet: false,
+      menuAddChord: false,
+      menuManager: false,
+      menuMembers: false,
+    });
+
+    const banhatRes = await checkRoleVisibility({ loggedIn: true, user_id: 5, username: 'banhat1', role: 'banhat', chord_code: 'BH' });
+    expect(banhatRes.createSetlist).toBe(true);
+    expect(banhatRes.chordProEdit).toBe(true);
+    expect(banhatRes.menuEditor).toBe(true);
+    expect(banhatRes.menuSession).toBe(true);
+    expect(banhatRes.menuCreateSet).toBe(true);
+    expect(banhatRes.menuAddChord).toBe(true);
+    expect(banhatRes.menuManager).toBe(true);
+    expect(banhatRes.menuMembers).toBe(true);
+  });
+});
