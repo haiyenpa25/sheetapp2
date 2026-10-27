@@ -2345,3 +2345,28 @@ body.sheet-only-mode .btn-gig-action.btn-gig-scroll span {
     min-width: 0 !important;
   }
 }
+
+
+/* UX0-3: Gig HUD ở 768 và 1180 xếp thành các hàng không chồng; dải đoạn bài nằm dưới hàng điều khiển */
+@media (min-width: 681px) {
+  body.sheet-only-mode .gig-floating-hud {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 6px 12px !important;
+    bottom: max(12px, env(safe-area-inset-bottom, 12px)) !important;
+  }
+  body.sheet-only-mode:has(#section-jump-bar-container:not(.hidden):not(.hud-faded)) .gig-floating-hud {
+    bottom: calc(54px + env(safe-area-inset-bottom, 10px)) !important;
+  }
+  body.sheet-only-mode .section-jump-bar-container:not(.hidden) {
+    bottom: max(10px, env(safe-area-inset-bottom, 10px)) !important;
+  }
+  body.sheet-only-mode .gig-hud-info {
+    border-right: none !important;
+  }
+  body.sheet-only-mode .gig-hud-actions {
+    flex-wrap: nowrap !important;
+    justify-content: center !important;
+  }
+}
