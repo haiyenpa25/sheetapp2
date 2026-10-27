@@ -192,6 +192,7 @@ test.describe('M4-8 · Tên bài: bỏ max-width 90/110px cứng, tối đa 2 d�
     test.skip(testInfo.project.name !== 'webkit', 'M4-8 nghiệm thu trên WebKit');
     test.setTimeout(60000);
     const path = require('path');
+    const ROOT = path.resolve(__dirname, '..');
 
     const longTitle = 'Thánh Chúa Chí Cao Quyền Năng Vĩnh Hằng';
     for (const vp of [{ width: 360, height: 800 }, { width: 390, height: 844 }, { width: 768, height: 1024 }]) {

@@ -2464,3 +2464,29 @@ body.dark-mode #main-dropdown-menu .icon-btn-xs {
     z-index: 1000 !important;
   }
 }
+
+
+/* UX0-22: Ở điện thoại hẹp (<= 430px), thu gọn đệm/khoảng cách cạnh #song-title để #song-title luôn rộng > 120px ở 360px */
+@media (max-width: 430px) {
+  .unified-toolbar {
+    gap: 3px !important;
+    padding-left: max(4px, env(safe-area-inset-left, 0px)) !important;
+    padding-right: max(4px, env(safe-area-inset-right, 0px)) !important;
+  }
+  .unified-toolbar .toolbar-left {
+    gap: 2px !important;
+  }
+  .unified-toolbar .song-info-pill {
+    padding: 0 6px !important;
+    gap: 4px !important;
+  }
+  .unified-toolbar .song-key-badge {
+    padding: 1px 4px !important;
+    font-size: 11px !important;
+  }
+  #toolbar .instrument-annotations > button {
+    min-width: 56px !important;
+    padding: 0 4px !important;
+    font-size: 11.5px !important;
+  }
+}
