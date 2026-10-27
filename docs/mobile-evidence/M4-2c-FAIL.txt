@@ -1,0 +1,33 @@
+[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 2 tests using 1 worker
+
+[1/2] [chromium] › e2e\m4-reader-layout.spec.js:184:3 › M4-2c · Modern Lớp 1 tablet: một hàng điều khiển, select bộ hợp âm ≥ 160px, zoom − % + ngoài menu, mọi điều khiển ≥ 44px › M4-2c 768 & 1024 zero Layer-1 controls < 44px, chord-set >= 160px, zoom outside menu, no text cut
+[2/2] [webkit] › e2e\m4-reader-layout.spec.js:184:3 › M4-2c · Modern Lớp 1 tablet: một hàng điều khiển, select bộ hợp âm ≥ 160px, zoom − % + ngoài menu, mọi điều khiển ≥ 44px › M4-2c 768 & 1024 zero Layer-1 controls < 44px, chord-set >= 160px, zoom outside menu, no text cut
+  1) [webkit] › e2e\m4-reader-layout.spec.js:184:3 › M4-2c · Modern Lớp 1 tablet: một hàng điều khiển, select bộ hợp âm ≥ 160px, zoom − % + ngoài menu, mọi điều khiển ≥ 44px › M4-2c 768 & 1024 zero Layer-1 controls < 44px, chord-set >= 160px, zoom outside menu, no text cut 
+
+    Error: width=768 chord-set-selector >= 160px
+
+    expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 160
+    Received:    100
+
+      256 |       });
+      257 |
+    > 258 |       expect(audit.chordSetWidth, `width=${vp.width} chord-set-selector >= 160px`).toBeGreaterThanOrEqual(160);
+          |                                                                                    ^
+      259 |       expect(audit.chordSetHeight, `width=${vp.width} chord-set-selector >= 44px`).toBeGreaterThanOrEqual(44);
+      260 |       expect(audit.zoomOutsideVisible, `width=${vp.width} zoom - % + visible outside menu`).toBe(true);
+      261 |       expect(audit.singleBandRow, `width=${vp.width} band controls on a single row`).toBe(true);
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m4-reader-layout.spec.js:258:84
+
+    Error Context: test-results\m4-reader-layout-M4-2c-·-M-94bdf-om-outside-menu-no-text-cut-webkit\error-context.md
+
+
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+  1 failed
+    [webkit] › e2e\m4-reader-layout.spec.js:184:3 › M4-2c · Modern Lớp 1 tablet: một hàng điều khiển, select bộ hợp âm ≥ 160px, zoom − % + ngoài menu, mọi điều khiển ≥ 44px › M4-2c 768 & 1024 zero Layer-1 controls < 44px, chord-set >= 160px, zoom outside menu, no text cut 
+  1 skipped
+
+EXIT=1

@@ -179,3 +179,91 @@ test.describe('M4-2a · Modern Lớp 1 điện thoại: thanh dưới đủ 6 ô
   });
 });
 
+
+test.describe('M4-2c · Modern Lớp 1 tablet: một hàng điều khiển, select bộ hợp âm ≥ 160px, zoom − % + ngoài menu, mọi điều khiển ≥ 44px', () => {
+  test('M4-2c 768 & 1024 zero Layer-1 controls < 44px, chord-set >= 160px, zoom outside menu, no text cut', async ({ browser }, testInfo) => {
+    test.skip(testInfo.project.name !== 'webkit', 'M4-2c nghiệm thu trên iPad Mini WebKit (768 và 1024)');
+    test.setTimeout(50000);
+
+    for (const vp of [{ width: 768, height: 1024 }, { width: 1024, height: 768 }]) {
+      const context = await browser.newContext({
+        ...devices['iPad Mini'],
+        viewport: vp,
+        baseURL: BASE_URL,
+        serviceWorkers: 'block',
+      });
+      const page = await context.newPage();
+      await page.addInitScript(() => {
+        try {
+          sessionStorage.setItem('sheetapp_guest_chosen', '1');
+          localStorage.setItem('sheetapp_guest_toast_shown', '1');
+        } catch (_) {}
+      });
+
+      await page.goto(BASE_URL + '?song=thanh-ca-001&v=sheet', { waitUntil: 'domcontentloaded', timeout: 20000 });
+      await page.locator('#osmd-container svg').first().waitFor({ state: 'attached', timeout: 15000 });
+
+      const audit = await page.evaluate(() => {
+        const tb = document.getElementById('toolbar');
+        const controlsRow = document.getElementById('toolbar-controls');
+        const csEl = document.getElementById('chord-set-selector');
+        const zoomOut = document.getElementById('btn-zoom-out');
+        const zoomSelect = document.getElementById('zoom-slider');
+        const zoomIn = document.getElementById('btn-zoom-in');
+
+        const isVis = (el) => {
+          if (!el) return false;
+          const s = getComputedStyle(el);
+          if (s.display === 'none' || s.visibility === 'hidden') return false;
+          if (el.closest('.hidden') || el.closest('.d-none')) return false;
+          const r = el.getBoundingClientRect();
+          return r.width > 0 && r.height > 0;
+        };
+
+        const csRect = csEl && isVis(csEl) ? csEl.getBoundingClientRect() : null;
+        const zoomOutsideVisible = isVis(zoomOut) && isVis(zoomSelect) && isVis(zoomIn);
+
+        const visibleControls = Array.from(tb.querySelectorAll('button, select, #transpose-display')).filter(isVis);
+        const under44 = [];
+        const clipped = [];
+        const outside = [];
+
+        for (const el of visibleControls) {
+          const r = el.getBoundingClientRect();
+          const w = Math.round(r.width);
+          const h = Math.round(r.height);
+          const id = el.id || el.className;
+          if (w < 44 || h < 44) under44.push({ id, w, h });
+          if (el.scrollWidth > el.clientWidth + 1) clipped.push({ id, sw: el.scrollWidth, cw: el.clientWidth });
+          if (r.left < -1 || r.right > window.innerWidth + 1) outside.push({ id, left: Math.round(r.left), right: Math.round(r.right) });
+        }
+
+        const rowPills = Array.from(controlsRow ? controlsRow.children : []).filter(isVis);
+        const rowTops = rowPills.map(el => Math.round(el.getBoundingClientRect().top));
+        const singleBandRow = rowTops.length > 0 && (Math.max(...rowTops) - Math.min(...rowTops) <= 8);
+
+        return {
+          vp: window.innerWidth,
+          chordSetWidth: csRect ? Math.round(csRect.width) : 0,
+          chordSetHeight: csRect ? Math.round(csRect.height) : 0,
+          zoomOutsideVisible,
+          singleBandRow,
+          under44,
+          clipped,
+          outside,
+          totalControls: visibleControls.length,
+        };
+      });
+
+      expect(audit.chordSetWidth, `width=${vp.width} chord-set-selector >= 160px`).toBeGreaterThanOrEqual(160);
+      expect(audit.chordSetHeight, `width=${vp.width} chord-set-selector >= 44px`).toBeGreaterThanOrEqual(44);
+      expect(audit.zoomOutsideVisible, `width=${vp.width} zoom - % + visible outside menu`).toBe(true);
+      expect(audit.singleBandRow, `width=${vp.width} band controls on a single row`).toBe(true);
+      expect(audit.under44, `width=${vp.width} 0 Layer-1 controls < 44px`).toEqual([]);
+      expect(audit.clipped, `width=${vp.width} no text clipped`).toEqual([]);
+      expect(audit.outside, `width=${vp.width} no control outside viewport`).toEqual([]);
+
+      await context.close();
+    }
+  });
+});

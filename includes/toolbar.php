@@ -109,18 +109,20 @@
       <span class="chord-edit-text">Soạn</span>
     </button>
 
+    <!-- Nhóm 6b: Thu phóng bản nhạc − % + trên Lớp 1 Tablet (M4-2c) -->
+    <div class="band-pill zoom-pill" id="toolbar-zoom-pill" role="group" aria-label="Thu phóng bản nhạc">
+      <button id="btn-zoom-out" class="icon-btn-pill" title="Thu nhỏ (−)"><?= icon('minus', 'icon-xs') ?></button>
+      <select id="zoom-slider" class="select-zoom-pill" disabled aria-label="Chọn tỷ lệ thu phóng">
+        <option value="50">50%</option><option value="65">65%</option><option value="80">80%</option><option value="90">90%</option>
+        <option value="100" selected>100%</option><option value="115">115%</option><option value="130">130%</option>
+        <option value="150">150%</option><option value="175">175%</option><option value="200">200%</option>
+      </select>
+      <button id="btn-zoom-in" class="icon-btn-pill" title="Phóng to (+)"><?= icon('plus', 'icon-xs') ?></button>
+      <button id="btn-lock-zoom" class="icon-btn-pill btn-lock-zoom" title="Khóa tỷ lệ zoom"><span class="lock-icon"><?= icon('unlock') ?></span></button>
+    </div>
+
     <!-- Secondary / Compact Controls (Ẩn trên thanh laptop 48px, truy cập qua Bảng Công Cụ ⋯) -->
     <div class="toolbar-secondary-controls d-none">
-      <div class="band-pill zoom-pill" role="group" aria-label="Thu phóng bản nhạc">
-        <button id="btn-zoom-out" class="icon-btn-pill" title="Thu nhỏ (−)"><?= icon('minus', 'icon-xs') ?></button>
-        <select id="zoom-slider" class="select-zoom-pill" disabled aria-label="Chọn tỷ lệ thu phóng">
-          <option value="50">50%</option><option value="65">65%</option><option value="80">80%</option><option value="90">90%</option>
-          <option value="100" selected>100%</option><option value="115">115%</option><option value="130">130%</option>
-          <option value="150">150%</option><option value="175">175%</option><option value="200">200%</option>
-        </select>
-        <button id="btn-zoom-in" class="icon-btn-pill" title="Phóng to (+)"><?= icon('plus', 'icon-xs') ?></button>
-        <button id="btn-lock-zoom" class="icon-btn-pill btn-lock-zoom" title="Khóa tỷ lệ zoom"><span class="lock-icon"><?= icon('unlock') ?></span></button>
-      </div>
 
       <button id="btn-chord-preset" class="band-pill btn-chord-preset" title="Preset hiển thị hợp âm"><span class="preset-icon">Aa</span><span id="chord-preset-label" class="preset-label">Chuẩn</span></button>
       <button id="btn-chord-notation" class="band-pill btn-chord-notation" title="Chế độ hợp âm"><span><?= icon('type') ?></span> <span id="chord-notation-label" class="chord-notation-label">C</span></button>
