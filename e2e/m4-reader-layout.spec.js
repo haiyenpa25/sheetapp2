@@ -330,7 +330,7 @@ test.describe('M4-3 · Modern: gỡ nút trùng theo bảng phân bổ (không h
               if (isVis(el)) matched.push(el.id || sel);
             }
           }
-          if (matched.length > 2) {
+          if (matched.length > 2 || (matched.length < 1 && !['chord_edit', 'auth_login'].includes(action))) {
             over2.push({ action, count: matched.length, matched });
           }
         }

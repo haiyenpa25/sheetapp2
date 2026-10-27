@@ -165,7 +165,7 @@ const PageNav = (() => {
     });
   }
 
-  function _updateIndicator() {
+  function _updateIndicator() { const menuInd = document.getElementById('menu-page-indicator'); if (menuInd) menuInd.textContent = `${currentPage} / ${Math.max(1, totalPages)}`; const menuPrev = document.getElementById('menu-btn-page-prev'); const menuNext = document.getElementById('menu-btn-page-next'); if (menuPrev) menuPrev.disabled = currentPage <= 1; if (menuNext) menuNext.disabled = currentPage >= totalPages;
     const el = indicator();
     if (!el) return;
     if (totalPages <= 1) {

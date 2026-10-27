@@ -1,0 +1,121 @@
+﻿[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 4 tests using 1 worker
+
+[1/4] [chromium] › e2e\ux0-14-classic-missing-actions.spec.js:12:3 › UX0-14 · Classic menu ⋮ includes delete chord set, clear all chords, and page navigation + M4-3 >= 1 check › Classic UI: menu ⋮ exposes page navigation, and for member with custom set exposes delete set & clear all chords
+  1) [chromium] › e2e\ux0-14-classic-missing-actions.spec.js:12:3 › UX0-14 · Classic menu ⋮ includes delete chord set, clear all chords, and page navigation + M4-3 >= 1 check › Classic UI: menu ⋮ exposes page navigation, and for member with custom set exposes delete set & clear all chords 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('#menu-page-nav')
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('#menu-page-nav') with timeout 10000ms
+      - waiting for locator('#menu-page-nav')
+
+
+      44 |     await expect(page.locator('#main-dropdown-menu')).toBeVisible();
+      45 |
+    > 46 |     await expect(page.locator('#menu-page-nav')).toBeVisible();
+         |                                                  ^
+      47 |     await expect(page.locator('#menu-btn-page-prev')).toBeVisible();
+      48 |     await expect(page.locator('#menu-page-indicator')).toBeVisible();
+      49 |     await expect(page.locator('#menu-btn-page-next')).toBeVisible();
+        at C:\xampp\htdocs\sheetapp2-verify-m6\e2e\ux0-14-classic-missing-actions.spec.js:46:50
+
+    Error Context: test-results\ux0-14-classic-missing-act-6a283-delete-set-clear-all-chords-chromium\error-context.md
+
+
+[2/4] [chromium] › e2e\ux0-14-classic-missing-actions.spec.js:65:3 › UX0-14 · Classic menu ⋮ includes delete chord set, clear all chords, and page navigation + M4-3 >= 1 check › M4-3 (>= 1 and <= 2): Every core reading action has >= 1 visible entry point at 390, 768, 1024, 1366 on both Modern and Classic
+  2) [chromium] › e2e\ux0-14-classic-missing-actions.spec.js:65:3 › UX0-14 · Classic menu ⋮ includes delete chord set, clear all chords, and page navigation + M4-3 >= 1 check › M4-3 (>= 1 and <= 2): Every core reading action has >= 1 visible entry point at 390, 768, 1024, 1366 on both Modern and Classic 
+
+    Error: Classic @ 390px: every core action has >= 1 visible button
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "zoom",
+    +   "page_nav",
+    + ]
+
+      126 |         }, ui.isClassic);
+      127 |
+    > 128 |         expect(checkRes.under1, `${ui.name} @ ${width}px: every core action has >= 1 visible button`).toEqual([]);
+          |                                                                                                       ^
+      129 |         expect(checkRes.over2, `${ui.name} @ ${width}px: no core action has > 2 visible buttons`).toEqual([]);
+      130 |       }
+      131 |     }
+        at C:\xampp\htdocs\sheetapp2-verify-m6\e2e\ux0-14-classic-missing-actions.spec.js:128:103
+
+    Error Context: test-results\ux0-14-classic-missing-act-e422e--on-both-Modern-and-Classic-chromium\error-context.md
+
+
+[3/4] [webkit] › e2e\ux0-14-classic-missing-actions.spec.js:12:3 › UX0-14 · Classic menu ⋮ includes delete chord set, clear all chords, and page navigation + M4-3 >= 1 check › Classic UI: menu ⋮ exposes page navigation, and for member with custom set exposes delete set & clear all chords
+  3) [webkit] › e2e\ux0-14-classic-missing-actions.spec.js:12:3 › UX0-14 · Classic menu ⋮ includes delete chord set, clear all chords, and page navigation + M4-3 >= 1 check › Classic UI: menu ⋮ exposes page navigation, and for member with custom set exposes delete set & clear all chords 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('#menu-page-nav')
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('#menu-page-nav') with timeout 10000ms
+      - waiting for locator('#menu-page-nav')
+
+
+      44 |     await expect(page.locator('#main-dropdown-menu')).toBeVisible();
+      45 |
+    > 46 |     await expect(page.locator('#menu-page-nav')).toBeVisible();
+         |                                                  ^
+      47 |     await expect(page.locator('#menu-btn-page-prev')).toBeVisible();
+      48 |     await expect(page.locator('#menu-page-indicator')).toBeVisible();
+      49 |     await expect(page.locator('#menu-btn-page-next')).toBeVisible();
+        at C:\xampp\htdocs\sheetapp2-verify-m6\e2e\ux0-14-classic-missing-actions.spec.js:46:50
+
+    Error Context: test-results\ux0-14-classic-missing-act-6a283-delete-set-clear-all-chords-webkit\error-context.md
+
+
+[4/4] [webkit] › e2e\ux0-14-classic-missing-actions.spec.js:65:3 › UX0-14 · Classic menu ⋮ includes delete chord set, clear all chords, and page navigation + M4-3 >= 1 check › M4-3 (>= 1 and <= 2): Every core reading action has >= 1 visible entry point at 390, 768, 1024, 1366 on both Modern and Classic
+  4) [webkit] › e2e\ux0-14-classic-missing-actions.spec.js:65:3 › UX0-14 · Classic menu ⋮ includes delete chord set, clear all chords, and page navigation + M4-3 >= 1 check › M4-3 (>= 1 and <= 2): Every core reading action has >= 1 visible entry point at 390, 768, 1024, 1366 on both Modern and Classic 
+
+    Error: Classic @ 390px: every core action has >= 1 visible button
+
+    expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 4
+
+    - Array []
+    + Array [
+    +   "zoom",
+    +   "page_nav",
+    + ]
+
+      126 |         }, ui.isClassic);
+      127 |
+    > 128 |         expect(checkRes.under1, `${ui.name} @ ${width}px: every core action has >= 1 visible button`).toEqual([]);
+          |                                                                                                       ^
+      129 |         expect(checkRes.over2, `${ui.name} @ ${width}px: no core action has > 2 visible buttons`).toEqual([]);
+      130 |       }
+      131 |     }
+        at C:\xampp\htdocs\sheetapp2-verify-m6\e2e\ux0-14-classic-missing-actions.spec.js:128:103
+
+    Error Context: test-results\ux0-14-classic-missing-act-e422e--on-both-Modern-and-Classic-webkit\error-context.md
+
+
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+  4 failed
+    [chromium] › e2e\ux0-14-classic-missing-actions.spec.js:12:3 › UX0-14 · Classic menu ⋮ includes delete chord set, clear all chords, and page navigation + M4-3 >= 1 check › Classic UI: menu ⋮ exposes page navigation, and for member with custom set exposes delete set & clear all chords 
+    [chromium] › e2e\ux0-14-classic-missing-actions.spec.js:65:3 › UX0-14 · Classic menu ⋮ includes delete chord set, clear all chords, and page navigation + M4-3 >= 1 check › M4-3 (>= 1 and <= 2): Every core reading action has >= 1 visible entry point at 390, 768, 1024, 1366 on both Modern and Classic 
+    [webkit] › e2e\ux0-14-classic-missing-actions.spec.js:12:3 › UX0-14 · Classic menu ⋮ includes delete chord set, clear all chords, and page navigation + M4-3 >= 1 check › Classic UI: menu ⋮ exposes page navigation, and for member with custom set exposes delete set & clear all chords 
+    [webkit] › e2e\ux0-14-classic-missing-actions.spec.js:65:3 › UX0-14 · Classic menu ⋮ includes delete chord set, clear all chords, and page navigation + M4-3 >= 1 check › M4-3 (>= 1 and <= 2): Every core reading action has >= 1 visible entry point at 390, 768, 1024, 1366 on both Modern and Classic 
+

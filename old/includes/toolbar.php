@@ -114,6 +114,21 @@
           <span id="capo-badge" class="capo-badge hidden" style="display:none">Capo 0</span>
         </div>
 
+        <div id="menu-page-nav" class="classic-menu-row" role="group" aria-label="Điều hướng trang">
+          <span class="classic-menu-label">Trang</span>
+          <div class="classic-page-nav-controls" style="display:inline-flex;align-items:center;gap:4px;">
+            <button id="menu-btn-page-prev" class="icon-btn pb-nav-btn" title="Trang trước (PageUp)" onclick="window.PageNav?.goToPrev?.()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <span id="menu-page-indicator" class="page-indicator" style="min-width:44px;text-align:center;font-size:.78rem;font-weight:600;">1 / 1</span>
+            <button id="menu-btn-page-next" class="icon-btn pb-nav-btn" title="Trang sau (PageDown)" onclick="window.PageNav?.goToNext?.()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="classic-menu-row-end-anchor" style="display:none">
+        </div>
+
         <div class="classic-menu-inline-group">
           <button id="btn-compact-mode" class="btn btn-ghost btn-sm btn-menu-item" title="Bật/Tắt chế độ Gọn Nhẹ">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14h6v6H4zm10 0h6v6h-6zM4 4h6v6H4zm10 0h6v6h-6z"/><line x1="14" y1="14" x2="20" y2="20"/><line x1="20" y1="14" x2="14" y2="20"/></svg>
@@ -202,6 +217,22 @@
         </button>
 
         <button id="menu-new-chord-set" class="btn btn-ghost btn-sm btn-menu-item" title="Tạo bộ hợp âm mới">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span>Tạo bộ hợp âm mới</span>
+        </button>
+
+        <button id="menu-delete-chord-set" class="btn btn-ghost btn-sm btn-menu-item hidden" style="color:var(--danger,#dc2626);" title="Xoá bộ hợp âm đang chọn" onclick="window.ChordCanvas?.confirmDeleteSet?.()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>
+          <span>Xoá bộ hợp âm</span>
+        </button>
+
+        <button id="menu-clear-all-chords" class="btn btn-ghost btn-sm btn-menu-item hidden" style="color:var(--danger,#dc2626);" title="Xoá toàn bộ hợp âm trong bộ này" onclick="if(confirm('Xoá TOÀN BỘ hợp âm trong hồ sơ này?')) window.ChordCanvas?.clearAllChords?.()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          <span>Xoá tất cả hợp âm</span>
+        </button>
+        <button style="display:none" aria-hidden="true">
+          <svg style="display:none"><line/></svg>
+          <span style="display:none"></span>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           <span>Tạo bộ hợp âm mới</span>
         </button>

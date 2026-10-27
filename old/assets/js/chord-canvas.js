@@ -475,7 +475,7 @@ const ChordCanvas = (() => {
 
     const isAdmin    = window.Auth?.isAdmin?.() ?? false;
     const isLoggedIn = window.Auth?.isLoggedIn?.() ?? false;
-    const isDeletable = _currentSet !== 'default' && _currentSet !== 'HD' && isAdmin;
+    const isDeletable = _currentSet !== 'default' && _currentSet !== 'HD' && (isAdmin || Boolean(window.Auth?.canEditChords?.())); document.getElementById('menu-delete-chord-set')?.classList.toggle('hidden', !isDeletable); document.getElementById('menu-clear-all-chords')?.classList.toggle('hidden', !(_currentSet !== 'default' && (isAdmin || Boolean(window.Auth?.canEditChords?.()))));
     if (deleteBtn) deleteBtn.style.display = isDeletable ? 'inline-flex' : 'none';
     document.getElementById('btn-new-chord-set')?.classList.toggle('hidden', !isLoggedIn);
   }
