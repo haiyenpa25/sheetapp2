@@ -571,28 +571,43 @@ body.dark-mode .toast-container .toast { background: #22222b; color: var(--lp-in
   .unified-toolbar #btn-more-options,
   .unified-toolbar #btn-open-sidebar { width: 44px !important; height: 44px !important; min-width: 44px !important; min-height: 44px !important; }
 
-  /* Thanh ngón cái: nền kính, 4 nút cùng chiều cao 40px, rõ ràng */
-  .mobile-thumb-bar {
-    height: 56px;
-    padding: 0 12px max(6px, env(safe-area-inset-bottom, 0px));
-    gap: 8px;
-    justify-content: space-between;
+  /* Thanh ngón cái: nền kính, 6 ô điều khiển >= 44x44px (M4-2a) */
+  #mobile-thumb-bar.mobile-thumb-bar {
+    height: auto !important;
+    min-height: 54px !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    padding: 4px max(2px, env(safe-area-inset-right, 0px)) max(6px, env(safe-area-inset-bottom, 0px)) max(2px, env(safe-area-inset-left, 0px)) !important;
+    gap: 1px !important;
+    justify-content: space-between !important;
   }
-  .mobile-thumb-group { gap: 2px; }
-  .mobile-transpose-group { padding: 2px; }
-  .btn-thumb-action,
-  .btn-thumb-gig {
-    width: 44px; height: 44px; min-width: 44px; min-height: 44px;
-    font-size: 1.1rem;
+  #mobile-thumb-bar .mobile-thumb-group { gap: 0 !important; flex-shrink: 0; margin: 0 !important; padding: 0 !important; border: none !important; }
+  #mobile-thumb-bar .btn-thumb-action,
+  #mobile-thumb-bar .btn-thumb-gig,
+  #mobile-thumb-bar .btn-thumb-tone,
+  #mobile-thumb-bar .btn-thumb-chordset,
+  #mobile-thumb-bar .btn-thumb-view {
+    width: 44px !important; height: 44px !important; min-width: 44px !important; min-height: 44px !important; max-width: 48px !important;
+    box-sizing: border-box !important; margin: 0 !important; padding: 0 2px !important;
+    font-size: 11.5px !important; font-weight: 600; white-space: nowrap; overflow: hidden;
   }
-  .btn-thumb-tone { height: 44px; min-width: 44px; font-family: inherit; font-size: 13px; }
-  .btn-thumb-chordset,
-  .btn-thumb-view { height: 44px; min-width: 44px; padding: 0 8px; font-size: 13px; font-weight: 600; }
+  #mobile-thumb-bar .btn-thumb-chordset.showing-tlh-fallback { font-size: 9px !important; letter-spacing: -0.4px; }
+  #mobile-thumb-bar .thumb-icon { display: none !important; }
+  #mobile-thumb-bar .mobile-gig-group .thumb-icon { display: inline-flex !important; }
   body:not(.dark-mode) .btn-thumb-action,
   body:not(.dark-mode) .btn-thumb-tone,
   body:not(.dark-mode) .btn-thumb-chordset { color: var(--lp-ink); }
   body:not(.dark-mode) .btn-thumb-view:not(.active) { color: var(--lp-accent); }
   .btn-thumb-gig { background: var(--lp-accent); border-color: transparent; color: #fff; }
+  .mobile-chordset-sheet { position: fixed; inset: 0; z-index: 100000; display: flex; align-items: flex-end; }
+  .mobile-chordset-backdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.45); }
+  .mobile-chordset-panel { position: relative; width: 100%; max-height: 75vh; overflow-y: auto; background: var(--bg-surface, #fff); color: var(--text-primary, #0f172a); border-radius: 16px 16px 0 0; padding: 12px 12px max(16px, env(safe-area-inset-bottom, 16px)); box-shadow: 0 -8px 30px rgba(0,0,0,0.3); }
+  .mobile-chordset-header { display: flex; align-items: center; justify-content: space-between; padding: 4px 4px 10px; border-bottom: 1px solid var(--lp-border, #e2e8f0); }
+  .mobile-chordset-close { min-width: 44px; min-height: 44px; border: none; background: transparent; font-size: 16px; cursor: pointer; color: inherit; }
+  .mobile-chordset-list { display: flex; flex-direction: column; gap: 6px; padding-top: 8px; }
+  .mobile-chordset-option { display: flex; align-items: center; justify-content: space-between; min-height: 46px; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--lp-border, #e2e8f0); background: transparent; color: inherit; font-size: 14px; font-weight: 600; text-align: left; cursor: pointer; }
+  .mobile-chordset-option.active { border-color: var(--lp-accent, #6d28d9); background: rgba(109, 40, 217, 0.08); }
   /* Sidebar điện thoại */
   .sidebar-header { padding-top: 10px; padding-bottom: 10px; }
 }

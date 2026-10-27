@@ -1,0 +1,31 @@
+[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 2 tests using 1 worker
+
+[1/2] [chromium] � e2e\m4-reader-layout.spec.js:100:3 � M4-2a � Modern L?p 1 di?n tho?i: thanh du?i d? 6 � = 44�44 + sheet ch?n b? h?p �m � M4-2a 390 bottom bar 6 controls >=44x44 and chordset sheet selects non-HD/TLH set
+[2/2] [webkit] � e2e\m4-reader-layout.spec.js:100:3 � M4-2a � Modern L?p 1 di?n tho?i: thanh du?i d? 6 � = 44�44 + sheet ch?n b? h?p �m � M4-2a 390 bottom bar 6 controls >=44x44 and chordset sheet selects non-HD/TLH set
+  1) [webkit] � e2e\m4-reader-layout.spec.js:100:3 � M4-2a � Modern L?p 1 di?n tho?i: thanh du?i d? 6 � = 44�44 + sheet ch?n b? h?p �m � M4-2a 390 bottom bar 6 controls >=44x44 and chordset sheet selects non-HD/TLH set 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      159 |     });
+      160 |
+    > 161 |     expect(barCheck.allExist).toBe(true);
+          |                               ^
+      162 |     expect(barCheck.allAtLeast44).toBe(true);
+      163 |     expect(barCheck.allInsideViewport).toBe(true);
+      164 |
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m4-reader-layout.spec.js:161:31
+
+    Error Context: test-results\m4-reader-layout-M4-2a-�-M-d17b4-heet-selects-non-HD-TLH-set-webkit\error-context.md
+
+
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+  1 failed
+    [webkit] � e2e\m4-reader-layout.spec.js:100:3 � M4-2a � Modern L?p 1 di?n tho?i: thanh du?i d? 6 � = 44�44 + sheet ch?n b? h?p �m � M4-2a 390 bottom bar 6 controls >=44x44 and chordset sheet selects non-HD/TLH set 
+  1 skipped
+
+EXIT=1

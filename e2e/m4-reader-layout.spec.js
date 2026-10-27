@@ -95,3 +95,87 @@ test.describe('M4-1 · Viewport viewport-fit=cover & safe-area-inset trên iPhon
     await context.close();
   });
 });
+
+test.describe('M4-2a · Modern Lớp 1 điện thoại: thanh dưới đủ 6 ô ≥ 44×44 + sheet chọn bộ hợp âm', () => {
+  test('M4-2a 390 bottom bar 6 controls >=44x44 and chordset sheet selects non-HD/TLH set', async ({ browser }, testInfo) => {
+    test.skip(testInfo.project.name !== 'webkit', 'M4-2a nghiệm thu trên 390 (iPhone 13 WebKit)');
+    test.setTimeout(40000);
+
+    const context = await browser.newContext({
+      ...devices['iPhone 13'],
+      baseURL: BASE_URL,
+      serviceWorkers: 'block',
+    });
+    const page = await context.newPage();
+    await page.addInitScript(() => {
+      try {
+        sessionStorage.setItem('sheetapp_guest_chosen', '1');
+        localStorage.setItem('sheetapp_guest_toast_shown', '1');
+      } catch (_) {}
+    });
+
+    // Giả lập API danh sách bộ hợp âm có thêm bộ NAM ngoài HD và default
+    await page.route('**/*route=chord_sets*action=list*', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ success: true, sets: ['HD', 'default', 'NAM'] }),
+      });
+    });
+    await page.route('**/*route=chord_sets*action=load*set=NAM*', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ success: true, chords: { '0_0': 'C', '1_0': 'G7' } }),
+      });
+    });
+
+    await page.goto(BASE_URL + '?song=thanh-ca-001', { waitUntil: 'domcontentloaded', timeout: 20000 });
+    await page.locator('#osmd-container svg').first().waitFor({ state: 'attached', timeout: 15000 });
+
+    const barCheck = await page.evaluate(() => {
+      const ids = [
+        'btn-mobile-transpose-down',
+        'mobile-transpose-display',
+        'btn-mobile-transpose-up',
+        'btn-mobile-chordset',
+        'btn-mobile-view-toggle',
+        'btn-mobile-prev-song',
+        'btn-mobile-next-song',
+        'btn-mobile-gig',
+      ];
+      const rects = ids.map(id => {
+        const el = document.getElementById(id);
+        if (!el) return { id, missing: true, w: 0, h: 0, left: -1, right: 9999 };
+        const r = el.getBoundingClientRect();
+        return { id, missing: false, w: Math.round(r.width), h: Math.round(r.height), left: Math.round(r.left), right: Math.round(r.right) };
+      });
+      return {
+        allExist: rects.every(r => !r.missing),
+        allAtLeast44: rects.every(r => r.w >= 44 && r.h >= 44),
+        outside: rects.filter(r => r.left < 0 || r.right > window.innerWidth + 1),
+        rects,
+      };
+    });
+
+    expect(barCheck.allExist).toBe(true);
+    expect(barCheck.allAtLeast44).toBe(true);
+    expect(barCheck.outside).toEqual([]);
+
+    // Chạm nút Bộ hợp âm -> mở sheet chọn bộ hợp âm
+    await page.locator('#btn-mobile-chordset').click();
+    await page.locator('#mobile-chordset-sheet .mobile-chordset-option[data-set-value="NAM"]').waitFor({ state: 'visible', timeout: 5000 });
+
+    const optRect = await page.locator('#mobile-chordset-sheet .mobile-chordset-option[data-set-value="NAM"]').boundingBox();
+    expect(optRect && optRect.height >= 44).toBe(true);
+
+    await page.locator('#mobile-chordset-sheet .mobile-chordset-option[data-set-value="NAM"]').click();
+    await page.waitForTimeout(250);
+
+    const activeSet = await page.evaluate(() => window.ChordCanvas?.getCurrentSet?.());
+    expect(activeSet).toBe('NAM');
+
+    await context.close();
+  });
+});
+

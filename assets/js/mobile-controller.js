@@ -48,28 +48,30 @@ const MobileController = (() => {
       sync();
     });
 
-    // 2. Chuyển đổi bộ hợp âm ngón cái (HD ↔ TLH)
+    // 2. M4-2a: Mở sheet chọn đầy đủ danh sách bộ hợp âm thay cho chỉ đảo HD ↔ TLH
     document.getElementById('btn-mobile-chordset')?.addEventListener('click', async (e) => {
       e.currentTarget.blur();
       if (window.ChordCanvas?.isAddMode?.()) {
         window.App?.showToast?.('Chạm Soạn để hoàn tất trước khi đổi bộ hợp âm', 'info');
         return;
       }
-      const curSet = window.ChordCanvas?.getCurrentSet?.() || 'HD';
-      const selector = document.getElementById('chord-set-selector');
-      const nextSet = curSet === 'HD' ? 'default' : 'HD';
-
-      if (window.ChordCanvas?.switchSet) {
-        await window.ChordCanvas.switchSet(nextSet);
-      } else if (selector) {
-        selector.value = nextSet;
-        selector.dispatchEvent(new Event('change'));
-      }
-      sync();
+      await _openChordSetSheet();
     });
 
     document.getElementById('btn-gig-chordset')?.addEventListener('click', () => {
       document.getElementById('btn-mobile-chordset')?.click();
+    });
+
+    // 2b. M4-2a: Chuyển bài trước / sau trên thanh dưới
+    document.getElementById('btn-mobile-prev-song')?.addEventListener('click', (e) => {
+      e.currentTarget.blur();
+      if (window.App?.navigatePrev) window.App.navigatePrev();
+      else document.getElementById('btn-prev-song')?.click();
+    });
+    document.getElementById('btn-mobile-next-song')?.addEventListener('click', (e) => {
+      e.currentTarget.blur();
+      if (window.App?.navigateNext) window.App.navigateNext();
+      else document.getElementById('btn-next-song')?.click();
     });
 
     // 3. Chuyển chế độ Band ↔ Bản Nhạc
@@ -200,13 +202,13 @@ const MobileController = (() => {
 
     if (isBandActive) {
       icon.innerHTML = '<svg class="icon icon-xs" aria-hidden="true"><use href="#icon-file-text"/></svg>';
-      label.textContent = 'Lời & HÂ';
+      label.textContent = window.innerWidth <= 430 ? 'Lời' : 'Lời & HÂ';
       btn.classList.add('active');
       btn.title = 'Đang xem Lời & Hợp âm · Chạm để xem Bản Nhạc';
       btn.setAttribute('aria-label', 'Đang xem Lời và hợp âm. Chạm để xem Bản nhạc');
     } else {
       icon.innerHTML = '<svg class="icon icon-xs" aria-hidden="true"><use href="#icon-music"/></svg>';
-      label.textContent = 'Bản Nhạc';
+      label.textContent = window.innerWidth <= 430 ? 'Nhạc' : 'Bản Nhạc';
       btn.classList.remove('active');
       btn.title = 'Đang xem Bản Nhạc · Chạm để xem Lời & Hợp âm';
       btn.setAttribute('aria-label', 'Đang xem Bản nhạc. Chạm để xem Lời và hợp âm');
@@ -216,6 +218,68 @@ const MobileController = (() => {
       gigView.textContent = isBandActive ? 'Lời' : 'Nhạc';
       gigView.setAttribute('aria-label', btn.getAttribute('aria-label'));
     }
+  }
+
+  async function _openChordSetSheet() {
+    const selector = document.getElementById('chord-set-selector');
+    if (window.ChordCanvas?.refreshSetDropdown) {
+      try { await window.ChordCanvas.refreshSetDropdown(true); } catch (_) {}
+    } else if (selector) {
+      selector.dispatchEvent(new Event('focus'));
+    }
+    const curSet = window.ChordCanvas?.getCurrentSet?.() || selector?.value || 'HD';
+    const rawOpts = selector ? Array.from(selector.options) : [];
+    const options = rawOpts.length > 0
+      ? rawOpts.map(o => ({ value: o.value, label: o.textContent || o.value }))
+      : [
+          { value: 'HD', label: '⭐ HD (Hoài Dinh)' },
+          { value: 'default', label: 'TLH (Gốc) 🔒' },
+        ];
+
+    document.getElementById('mobile-chordset-sheet')?.remove();
+    const esc = s => window.SafeHtml?.escape ? window.SafeHtml.escape(s) : String(s);
+    const sheet = document.createElement('div');
+    sheet.id = 'mobile-chordset-sheet';
+    sheet.className = 'mobile-chordset-sheet';
+    sheet.setAttribute('role', 'dialog');
+    sheet.setAttribute('aria-modal', 'true');
+    sheet.setAttribute('aria-label', 'Chọn bộ hợp âm');
+    sheet.innerHTML = `
+      <div class="mobile-chordset-backdrop"></div>
+      <div class="mobile-chordset-panel">
+        <div class="mobile-chordset-header">
+          <strong>Chọn bộ hợp âm</strong>
+          <button type="button" class="mobile-chordset-close" aria-label="Đóng">✕</button>
+        </div>
+        <div class="mobile-chordset-list">
+          ${options.map(o => `
+            <button type="button" class="mobile-chordset-option${o.value === curSet ? ' active' : ''}" data-set-value="${esc(o.value)}">
+              <span>${esc(o.label)}</span>
+              ${o.value === curSet ? '<span aria-hidden="true">✓</span>' : ''}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    `;
+    document.body.appendChild(sheet);
+    const close = () => sheet.remove();
+    sheet.querySelector('.mobile-chordset-backdrop')?.addEventListener('click', close);
+    sheet.querySelector('.mobile-chordset-close')?.addEventListener('click', close);
+    sheet.querySelectorAll('.mobile-chordset-option').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const val = btn.getAttribute('data-set-value') || 'HD';
+        close();
+        if (val.startsWith('__')) {
+          window.ChordCanvas?.handleSelectChange?.(val);
+        } else if (window.ChordCanvas?.switchSet) {
+          await window.ChordCanvas.switchSet(val);
+        } else if (selector) {
+          selector.value = val;
+          selector.dispatchEvent(new Event('change'));
+        }
+        sync();
+      });
+    });
   }
 
   function _syncEditDisplay() {

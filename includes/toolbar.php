@@ -425,8 +425,13 @@
   <div class="mobile-thumb-group mobile-view-group" role="group" aria-label="Chế độ xem">
     <button id="btn-mobile-view-toggle" class="btn-thumb-view" title="Chuyển chế độ Lời &amp; Hợp âm ↔ Bản Nhạc" aria-label="Đổi dạng xem">
       <span id="mobile-view-icon" class="thumb-icon"><?= icon('music') ?></span>
-      <span id="mobile-view-label" class="thumb-label">Bản Nhạc</span>
+      <span id="mobile-view-label" class="thumb-label">Nhạc</span>
     </button>
+  </div>
+
+  <div class="mobile-thumb-group mobile-nav-group" role="group" aria-label="Chuyển bài">
+    <button id="btn-mobile-prev-song" class="btn-thumb-action" title="Bài trước" aria-label="Bài trước"><?= icon('chevron-left') ?></button>
+    <button id="btn-mobile-next-song" class="btn-thumb-action" title="Bài tiếp theo" aria-label="Bài tiếp theo"><?= icon('chevron-right') ?></button>
   </div>
 
   <div class="mobile-thumb-group mobile-gig-group" role="group" aria-label="Toàn màn hình">
