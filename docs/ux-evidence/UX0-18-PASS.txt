@@ -1,0 +1,22 @@
+﻿Matches for SOURCE_ROOT or hardcoded source path: 0
+
+e2e\m6-acceptance.spec.js:12:const EVIDENCE_DIR = path.join(ROOT, 'docs', 'mobile-evidence');
+e2e\m6-acceptance.spec.js:13:const M0_REPORT_PATH = path.join(EVIDENCE_DIR, 'M0-baseline.md');
+e2e\m6-acceptance.spec.js:14:const M6_RAW_JSON_PATH = path.join(EVIDENCE_DIR, 'm6-acceptance-raw.json');
+e2e\m6-acceptance.spec.js:59:  if (fs.existsSync(M6_RAW_JSON_PATH)) {
+e2e\m6-acceptance.spec.js:61:      const parsed = JSON.parse(fs.readFileSync(M6_RAW_JSON_PATH, 'utf8'));
+e2e\m6-acceptance.spec.js:71:  fs.mkdirSync(path.dirname(M6_RAW_JSON_PATH), { recursive: true });
+e2e\m6-acceptance.spec.js:73:  fs.writeFileSync(M6_RAW_JSON_PATH, JSON.stringify(store, null, 2).replace(/\r?\n/g, 
+'\r\n'), 'utf8');
+e2e\mobile-load-baseline.spec.js:11:const EVIDENCE_DIR = path.join(ROOT, 'docs', 'mobile-evidence');
+e2e\mobile-load-baseline.spec.js:12:const RAW_JSON_PATH = path.join(EVIDENCE_DIR, 'm0-baseline-raw.json');
+e2e\mobile-load-baseline.spec.js:13:const REPORT_MD_PATH = path.join(EVIDENCE_DIR, 'M0-baseline.md');
+e2e\mobile-load-baseline.spec.js:68:  if (fs.existsSync(RAW_JSON_PATH)) {
+e2e\mobile-load-baseline.spec.js:70:      const parsed = JSON.parse(fs.readFileSync(RAW_JSON_PATH, 'utf8'));
+e2e\mobile-load-baseline.spec.js:79:  fs.mkdirSync(path.dirname(RAW_JSON_PATH), { recursive: true });
+e2e\mobile-load-baseline.spec.js:80:  fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
+e2e\mobile-load-baseline.spec.js:82:  fs.writeFileSync(RAW_JSON_PATH, jsonText, 'utf8');
+e2e\m4-stage2-layout.spec.js:230:        path: path.join(ROOT, 'docs', 'mobile-evidence', 
+`M4-8-title-${vp.width}.png`),
+
+

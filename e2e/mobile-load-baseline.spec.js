@@ -6,10 +6,10 @@ const assertIsolatedRoot = require('./assert-isolated-root');
 
 const ROOT = path.resolve(__dirname, '..');
 const MARKER = assertIsolatedRoot(ROOT);
-const SOURCE_ROOT = MARKER.sourceRoot;
+// UX0-18: All evidence paths stay strictly inside ROOT (isolated workspace)
 const BASE_URL = MARKER.baseURL.replace(/\/$/, '') + '/';
-const EVIDENCE_DIR = path.join(SOURCE_ROOT, 'docs', 'mobile-evidence');
-const RAW_JSON_PATH = path.join(ROOT, '..', 'm0-baseline-raw.json');
+const EVIDENCE_DIR = path.join(ROOT, 'docs', 'mobile-evidence');
+const RAW_JSON_PATH = path.join(EVIDENCE_DIR, 'm0-baseline-raw.json');
 const REPORT_MD_PATH = path.join(EVIDENCE_DIR, 'M0-baseline.md');
 
 const LARGEST_SONG = {

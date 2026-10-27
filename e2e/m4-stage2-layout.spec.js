@@ -227,7 +227,7 @@ test.describe('M4-8 · Tên bài: bỏ max-width 90/110px cứng, tối đa 2 d�
       }, longTitle);
 
       await page.screenshot({
-        path: path.join('c:/xampp/htdocs/sheetapp2/docs/mobile-evidence', `M4-8-title-${vp.width}.png`),
+        path: path.join(ROOT, 'docs', 'mobile-evidence', `M4-8-title-${vp.width}.png`),
         clip: { x: 0, y: 0, width: vp.width, height: 110 },
       });
 
