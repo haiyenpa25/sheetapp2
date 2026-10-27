@@ -1,0 +1,11 @@
+CMD: C:\xampp\php\php.exe tests\m2_sw_resilience_regression.php
+EXIT=0
+PASS: M2-2: sw.js defines 4000ms SW_FETCH_TIMEOUT_MS for network-first race
+PASS: M2-2: networkFirstWithQuota races hanging network against timeout and returns cached XML
+PASS: M2-2: staleWhileRevalidate fetches matching ?v=200 from network instead of serving stale ?v=100
+PASS: M2-2 (Q-M1): ServiceWorkerManager.register() registers SW on Classic (/old/)
+PASS: M2-2: ServiceWorkerManager attaches controllerchange listener
+PASS: M2-2: controllerchange reloads page at most once when idle
+PASS: M2-2: controllerchange does NOT reload while playing
+
+SUITE_COMPLETE total=7

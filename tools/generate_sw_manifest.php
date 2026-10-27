@@ -69,9 +69,27 @@ function onDemandAssets(string $root, array $loaderFiles): array {
     return $out;
 }
 
+function startupAssetsClassic(string $oldIndexSrc, string $root): array {
+    $out = [];
+    $pattern = '/cssTag\(\s*\'([^\']+)\'|jsTag\(\s*\'([^\']+)\'/';
+    preg_match_all($pattern, $oldIndexSrc, $m, PREG_SET_ORDER);
+    foreach ($m as $hit) {
+        if (!empty($hit[1])) {
+            $out[] = 'old/assets/css/' . $hit[1];
+        } elseif (!empty($hit[2])) {
+            $localRel = 'old/assets/js/' . $hit[2];
+            $out[] = is_file($root . '/' . $localRel) ? $localRel : ('assets/js/' . $hit[2]);
+        }
+    }
+    return $out;
+}
+
 $indexSrc = (string) file_get_contents($root . '/index.php');
+$oldIndexPath = $root . '/old/index.php';
+$oldScripted = is_file($oldIndexPath) ? startupAssetsClassic((string) file_get_contents($oldIndexPath), $root) : [];
 $scripted = array_merge(
     startupAssets($indexSrc),
+    $oldScripted,
     onDemandAssets($root, ['assets/js/core/ScriptLoader.js', 'assets/js/live-sync.js'])
 );
 
@@ -79,6 +97,9 @@ $vendorScripts = [];
 $appAssets = [
     '', 'index.php', 'manifest.json', 'favicon.svg', 'favicon.ico', 'assets/img/icon-192.png',
 ];
+if (is_file($oldIndexPath)) {
+    $appAssets[] = 'old/index.php';
+}
 foreach ($scripted as $rel) {
     if (!is_file($root . '/' . $rel)) {
         logLine("  [CẢNH BÁO] Bỏ qua file không tồn tại: {$rel}");
@@ -146,8 +167,12 @@ $appLines = [
     "  (SW_BASE ? `\${SW_BASE}/` : '/'),",
     "  (SW_BASE ? `\${SW_BASE}/index.php` : '/index.php'),",
 ];
+if (in_array('old/index.php', $appAssets, true)) {
+    $appLines[] = "  (SW_BASE ? `\${SW_BASE}/old/` : '/old/'),";
+    $appLines[] = "  (SW_BASE ? `\${SW_BASE}/old/index.php` : '/old/index.php'),";
+}
 foreach ($appAssets as $a) {
-    if ($a === '' || $a === 'index.php') continue;
+    if ($a === '' || $a === 'index.php' || $a === 'old/index.php') continue;
     $appLines[] = "  '/{$a}',";
 }
 

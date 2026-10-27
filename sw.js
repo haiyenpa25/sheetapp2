@@ -11,12 +11,28 @@
 
 const urlParams      = new URLSearchParams(self.location.search);
 const SW_VERSION     = urlParams.get('v') || 'v5';
-const SW_MANIFEST_HASH = 'e45e261eda';
+const SW_MANIFEST_HASH = '985ad99d5d';
 const SW_VENDOR_HASH = 'e8b6692a09';
 const CACHE_VENDOR   = `sheetapp-vendor-${SW_VENDOR_HASH}`;
 const CACHE_APP      = `sheetapp-app-${SW_VERSION}-${SW_MANIFEST_HASH}`;
 const CACHE_MUSICXML = `sheetapp-musicxml-${SW_VERSION}`;
 const MAX_MUSICXML_CACHE_ITEMS = 60; // Giới hạn cache tránh phình dung lượng vô hạn
+const SW_FETCH_TIMEOUT_MS = 4000;
+
+async function fetchWithTimeout(request, timeoutMs = SW_FETCH_TIMEOUT_MS) {
+  if (typeof setTimeout !== 'function') return fetch(request);
+  let timer = null;
+  try {
+    return await Promise.race([
+      fetch(request),
+      new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error('SW fetch timeout')), timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timer && typeof clearTimeout === 'function') clearTimeout(timer);
+  }
+}
 
 const SW_BASE = self.location.pathname.replace(/\/sw\.js$/, '');
 
@@ -32,6 +48,8 @@ const PRECACHE_VENDOR = [
 const PRECACHE_APP = [
   (SW_BASE ? `${SW_BASE}/` : '/'),
   (SW_BASE ? `${SW_BASE}/index.php` : '/index.php'),
+  (SW_BASE ? `${SW_BASE}/old/` : '/old/'),
+  (SW_BASE ? `${SW_BASE}/old/index.php` : '/old/index.php'),
   '/manifest.json',
   '/favicon.svg',
   '/favicon.ico',
@@ -130,6 +148,32 @@ const PRECACHE_APP = [
   '/assets/js/mobile-controller.js',
   '/assets/js/app.js',
   '/assets/js/fab.js',
+  '/old/assets/css/base.css',
+  '/old/assets/css/layout.css',
+  '/old/assets/css/sheet.css',
+  '/old/assets/css/components.css',
+  '/old/assets/js/osmd-renderer.js',
+  '/old/assets/js/auth.js',
+  '/old/assets/js/library-ui.js',
+  '/old/assets/js/setlist-ui.js',
+  '/old/assets/js/importer.js',
+  '/old/assets/js/admin-ui.js',
+  '/old/assets/js/display-settings.js',
+  '/old/assets/js/chord-canvas-xml.js',
+  '/old/assets/js/chord-canvas-ui.js',
+  '/old/assets/js/chord-canvas-dots.js',
+  '/old/assets/js/chord-canvas.js',
+  '/old/assets/js/performance-notes.js',
+  '/old/assets/js/instruments.js',
+  '/old/assets/js/metronome.js',
+  '/old/assets/js/auto-scroller.js',
+  '/old/assets/js/page-nav.js',
+  '/old/assets/js/app-ui.js',
+  '/old/assets/js/song-info-bar.js',
+  '/old/assets/js/song-loader.js',
+  '/old/assets/js/keyboard-handler.js',
+  '/old/assets/js/toolbar-controller.js',
+  '/old/assets/js/app.js',
   '/assets/js/performance/transport-clock.js',
   '/assets/js/performance/count-in-engine.js',
   '/assets/js/performance/musical-position.js',
@@ -238,7 +282,7 @@ self.addEventListener('fetch', event => {
 /** Network First cho API danh sách bài hát: lấy mới khi online, trả cache khi offline */
 async function networkFirstForApiSongs(request, cacheName) {
   try {
-    const response = await fetch(request);
+    const response = await fetchWithTimeout(request, SW_FETCH_TIMEOUT_MS);
     if (response.ok && response.headers.get('X-SheetApp-Catalog-Scope') === 'public') {
       const cache = await caches.open(cacheName);
       await cache.put(request, response.clone()).catch(() => {});
@@ -275,7 +319,7 @@ async function cacheFirst(request, cacheName) {
     cached = await cache.match(request, { ignoreSearch: true });
   }
   if (cached) return cached;
-  const response = await fetch(request);
+  const response = await fetchWithTimeout(request, SW_FETCH_TIMEOUT_MS);
   if (response.ok) {
     cache.put(request, response.clone());
   }
@@ -285,7 +329,7 @@ async function cacheFirst(request, cacheName) {
 /** Network First có kiểm soát quota cho file MusicXML thường; khi offline fallback tìm cả trong cache gói ngoại tuyến */
 async function networkFirstWithQuota(request, cacheName, maxItems = 60) {
   try {
-    const response = await fetch(request);
+    const response = await fetchWithTimeout(request, SW_FETCH_TIMEOUT_MS);
     if (response.ok) {
       const cache = await caches.open(cacheName);
       await cache.put(request, response.clone());
@@ -322,7 +366,7 @@ async function networkFirstWithQuota(request, cacheName, maxItems = 60) {
 async function staleWhileRevalidate(request, cacheName) {
   const cache = await caches.open(cacheName);
   const cached = await cache.match(request);
-  const fetchPromise = fetch(request).then(response => {
+  const fetchPromise = fetchWithTimeout(request, SW_FETCH_TIMEOUT_MS).then(response => {
     if (response.ok) cache.put(request, response.clone());
     return response;
   }).catch(() => null);
@@ -342,7 +386,7 @@ async function networkFirstForNavigation(request, cacheName) {
   const shell = [base + '/', base + '/index.php'].includes(pathname) ? base + '/'
     : [base + '/old/', base + '/old/index.php'].includes(pathname) ? base + '/old/' : null;
   try {
-    const response = await fetch(request);
+    const response = await fetchWithTimeout(request, SW_FETCH_TIMEOUT_MS);
     if (response.ok && shell) {
       const cache = await caches.open(cacheName);
       await cache.put(request, response.clone()).catch(() => {});
