@@ -158,8 +158,8 @@ Thứ tự bắt buộc: M0 → M1 → M2 → M3 → M4 → M5 → M6. Mỗi tic
 
 | ID | Việc | Nghiệm thu | Thay cho |
 |---|---|---|---|
-| M0-1 | Script `e2e/mobile-load-baseline.spec.js`: 2 giao diện × 3 thiết bị × 3 điều kiện (bình thường; Chromium 4G chậm qua CDP: latency 150 ms, 1,6 Mbps xuống, 750 kbps lên, CPU chậm 4×; chặn ngẫu nhiên 10% request JS/CSS/API bằng `page.route` với seed cố định). Mỗi tổ hợp 5 lần, cache lạnh. Ghi: danh sách có hiện, tên bài đúng, có SVG và thời gian tới SVG, số request/byte, lỗi console, request lỗi | Bảng kết quả vào `docs/mobile-evidence/M0-baseline.md`, **đếm số lần hỏng** chứ không chỉ trung bình. Spec chưa bắt FAIL theo ngưỡng; chỉ ghi số | TV2-1 |
-| M0-2 | Thêm vào cùng spec: đổi nhanh 5 bài liên tiếp bằng chạm; xoay máy 3 lần với bài lớn nhất (theo kích thước file XML); lần tải thứ hai qua SW | Số liệu thô trong cùng file | |
+| M0-1 ✅ `5f58219` | Script `e2e/mobile-load-baseline.spec.js`: 2 giao diện × 3 thiết bị × 3 điều kiện (bình thường; Chromium 4G chậm qua CDP: latency 150 ms, 1,6 Mbps xuống, 750 kbps lên, CPU chậm 4×; chặn ngẫu nhiên 10% request JS/CSS/API bằng `page.route` với seed cố định). Mỗi tổ hợp 5 lần, cache lạnh. Ghi: danh sách có hiện, tên bài đúng, có SVG và thời gian tới SVG, số request/byte, lỗi console, request lỗi | Bảng kết quả vào `docs/mobile-evidence/M0-baseline.md`, **đếm số lần hỏng** chứ không chỉ trung bình. Spec chưa bắt FAIL theo ngưỡng; chỉ ghi số | TV2-1 |
+| M0-2 ✅ `748608a` | Thêm vào cùng spec: đổi nhanh 5 bài liên tiếp bằng chạm; xoay máy 3 lần với bài lớn nhất (theo kích thước file XML); lần tải thứ hai qua SW | Số liệu thô trong cùng file | |
 
 ### M1 — Khởi động an toàn, không bao giờ trắng trang (2–3 ngày) 🔴
 
