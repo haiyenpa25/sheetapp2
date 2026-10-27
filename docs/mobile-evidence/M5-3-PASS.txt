@@ -1,0 +1,20 @@
+[PASS:B] M5-3: assets/js/core/LibraryData.js exists
+[PASS:B] M5-3: Both index.php and old/index.php load core/LibraryData.js
+[PASS:B] M5-3: Modern assets/js/library-ui.js delegates fetchList, getDeepLinkSongId, resolveSong, and renderLoadError to LibraryData
+[PASS:B] M5-3: Classic old/assets/js/library-ui.js delegates fetchList, getDeepLinkSongId, resolveSong, and renderLoadError to LibraryData
+[LibraryData] Lỗi tải danh sách: Error: Network error
+    at Object.list (C:\xampp\htdocs\sheetapp2\tests\js\m5_3_library_data.cjs:72:39)
+    at Object.fetchList (evalmachine.<anonymous>:18:50)
+    at C:\xampp\htdocs\sheetapp2\tests\js\m5_3_library_data.cjs:105:33
+    at Object.<anonymous> (C:\xampp\htdocs\sheetapp2\tests\js\m5_3_library_data.cjs:164:3)
+    at Module._compile (node:internal/modules/cjs/loader:1929:14)
+    at Object..js (node:internal/modules/cjs/loader:2060:10)
+    at Module.load (node:internal/modules/cjs/loader:1651:32)
+    at Module._load (node:internal/modules/cjs/loader:1443:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+[PASS:B] M5-3: LibraryData.fetchList marks error state when ApiService.songs.list fails and offline fallback is empty
+[PASS:B] M5-3: LibraryData.renderLoadError renders retry UI and binds #btn-retry-song-list
+[PASS:B] M5-3: Clicking retry invalidates songs cache and reloads song list successfully
+[PASS:B] M5-3: LibraryData resolves deep link ?song=999 via ApiService.songs.get and upserts into shared catalog
+SUITE_COMPLETE total=8 failed=0

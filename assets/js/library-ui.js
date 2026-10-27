@@ -84,6 +84,7 @@ const LibraryUI = (() => {
   function _renderLoadError() {
     const el = listEl(); if (!el) return;
     _virtualSongs = null;
+    if (window.LibraryData?.renderLoadError) { window.LibraryData.renderLoadError(el, loadSongs, { icon: '⚠️' }); return; }
     el.innerHTML = `<div class="empty-state" id="library-load-error"><span class="empty-icon">⚠️</span><p>Không tải được danh sách · Thử lại</p><button type="button" class="btn btn-sm btn-primary" id="btn-retry-song-list" style="margin-top:6px;">Thử lại</button></div>`;
     el.querySelector('#btn-retry-song-list')?.addEventListener('click', () => { window.ApiService?.songs?.invalidateCache?.(); loadSongs(); });
   }
@@ -91,7 +92,8 @@ const LibraryUI = (() => {
   async function loadSongs() {
     let loadErr = false;
     try {
-      songs = await ApiService.songs.list();
+      songs = window.LibraryData?.fetchList ? await window.LibraryData.fetchList() : await ApiService.songs.list();
+      if (window.LibraryData?.shouldShowErrorState?.()) throw new Error('Load error');
       if (!Array.isArray(songs)) songs = [];
     } catch (err) {
       loadErr = true;
@@ -103,7 +105,7 @@ const LibraryUI = (() => {
     else render(songs.length > 0 ? _sortSongs(songs) : []);
     _updateCount(songs.length);
     if (songs.length > 0) { _buildCategoryFilter(); _buildQuickJump(songs); _buildUpcomingSetlist(); _buildRecentlyViewed(); _buildQuickFavorites(); }
-    const urlSongId = new URLSearchParams(window.location.search).get('song');
+    const urlSongId = window.LibraryData?.getDeepLinkSongId ? window.LibraryData.getDeepLinkSongId() : new URLSearchParams(window.location.search).get('song');
     if (urlSongId) selectSong(urlSongId, false);
   }
 
@@ -520,6 +522,7 @@ const LibraryUI = (() => {
       if (window.URLState?.resetForNewSong) window.URLState.resetForNewSong(songId);
       else { const u = new URL(window.location.href); u.searchParams.set('song', songId); window.history.pushState({}, '', u); }
     }
+    if (window.LibraryData?.resolveSong) { window.LibraryData.setSongs(songs); window.LibraryData.resolveSong(songId, _lastRenderedSongs, s => { if (s && s.id && String(activeSongId) === String(songId)) { if (!songs.some(x => String(x.id) === String(s.id))) songs.push(s); if (onSelectCb) onSelectCb(s); } }); return; }
     let song = songs.find(s => String(s.id) === String(songId)) || _lastRenderedSongs.find(s => String(s.id) === String(songId)) || window.OfflineSetlistManager?.getOfflineSong?.(songId);
     if (song) {
       if (!songs.some(s => String(s.id) === String(song.id))) songs.push(song);

@@ -237,6 +237,7 @@ echo jsTag('library-gestures.js');
 echo jsTag('library-list.js');
 echo jsTag('song-navigation.js');
 echo jsTag('core/LibrarySearch.js');
+echo jsTag('core/LibraryData.js');
 echo jsTag('library-ui.js');
 echo jsTag('modals/QuickNumpadModal.js');
 echo jsTag('service-plan-ui.js');
