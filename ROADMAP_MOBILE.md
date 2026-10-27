@@ -165,11 +165,11 @@ Thứ tự bắt buộc: M0 → M1 → M2 → M3 → M4 → M5 → M6. Mỗi tic
 
 | ID | Việc | Nghiệm thu | Sửa |
 |---|---|---|---|
-| M1-1 | `assets/js/core/BootRunner.js` (dùng chung): `safeInit(name, fn)` bắt lỗi từng module, ghi `ErrorReporter`, chạy tiếp. Cả hai `app.js` dùng BootRunner; **gắn `onSelect` đầu tiên**; gọi module qua `window.X` | Test VM: một module ném lỗi trong init thì các module sau vẫn init và chạm bài vẫn gọi `SongLoader.load` | L1 |
-| M1-2 | Watchdog: sau 8 giây mà App chưa báo sẵn sàng thì hiện banner "Ứng dụng chưa tải xong · Tải lại" (không phụ thuộc module nào khác) | E2E: chặn `app.js` → banner hiện trong ≤ 9 s | L1 |
-| M1-3 | Gom 7 bootstrap `DOMContentLoaded` rời của Modern vào BootRunner (giữ thứ tự hiện tại) | Grep: `app.js` là nơi duy nhất gọi init lúc khởi động; E2E Thư viện cũ vẫn PASS | L1 |
-| M1-4 | `ScriptLoader.loadWithFallback(local, cdn)` trả Promise. Khởi tạo OSMD **lười**: chỉ khi mở bài đầu tiên. Danh sách bài không phụ thuộc OSMD. Gắn `?v=` cho file vendor | E2E: chặn file OSMD local → danh sách vẫn hiện; mở bài thì dùng CDN và vẽ được | L2 |
-| M1-5 | `ErrorReporter` dùng chung cho Classic; lỗi chưa bắt (`error`, `unhandledrejection`) hiện toast có nút "Tải lại" tối đa 1 lần mỗi 30 giây; thay các `catch(e){}` trống trên đường tải bằng ghi log | E2E: ném lỗi giả trong handler → có toast, có bản ghi client_log | L11 |
+| M1-1 ✅ `9796745` | `assets/js/core/BootRunner.js` (dùng chung): `safeInit(name, fn)` bắt lỗi từng module, ghi `ErrorReporter`, chạy tiếp. Cả hai `app.js` dùng BootRunner; **gắn `onSelect` đầu tiên**; gọi module qua `window.X` | Test VM: một module ném lỗi trong init thì các module sau vẫn init và chạm bài vẫn gọi `SongLoader.load` | L1 |
+| M1-2 ✅ `4a362bd` | Watchdog: sau 8 giây mà App chưa báo sẵn sàng thì hiện banner "Ứng dụng chưa tải xong · Tải lại" (không phụ thuộc module nào khác) | E2E: chặn `app.js` → banner hiện trong ≤ 9 s | L1 |
+| M1-3 ✅ `5b5f626` | Gom 7 bootstrap `DOMContentLoaded` rời của Modern vào BootRunner (giữ thứ tự hiện tại) | Grep: `app.js` là nơi duy nhất gọi init lúc khởi động; E2E Thư viện cũ vẫn PASS | L1 |
+| M1-4 ✅ `52c2a58` | `ScriptLoader.loadWithFallback(local, cdn)` trả Promise. Khởi tạo OSMD **lười**: chỉ khi mở bài đầu tiên. Danh sách bài không phụ thuộc OSMD. Gắn `?v=` cho file vendor | E2E: chặn file OSMD local → danh sách vẫn hiện; mở bài thì dùng CDN và vẽ được | L2 |
+| M1-5 ✅ `37962a8` | `ErrorReporter` dùng chung cho Classic; lỗi chưa bắt (`error`, `unhandledrejection`) hiện toast có nút "Tải lại" tối đa 1 lần mỗi 30 giây; thay các `catch(e){}` trống trên đường tải bằng ghi log | E2E: ném lỗi giả trong handler → có toast, có bản ghi client_log | L11 |
 
 ### M2 — Tải dữ liệu và tải bài bền vững (3–4 ngày) 🔴
 
