@@ -78,70 +78,24 @@ const ToolbarController = (() => {
       overlay?.classList.add('hidden');
     }
 
-    // Resize handler
-    let _lastW = window.innerWidth;
-    window.addEventListener('resize', _debounce(() => {
-      const w = window.innerWidth;
-      if (w <= 900) {
-        // Chuyển sang mobile: ẩn sidebar nếu đang mở
-        if (!sidebar?.classList.contains('mobile-hidden')) {
-          _closeSidebar();
-        }
+    // Resize handler (M3-2: đồng bộ sidebar ngay để không tạo sóng layout lần 2 sau 250ms, bàn giao re-render OSMD cho ResizeObserver duy nhất)
+    let _lastWasMobile = window.innerWidth <= 900;
+    window.addEventListener('resize', () => {
+      const isMobileNow = window.innerWidth <= 900;
+      if (isMobileNow === _lastWasMobile) return;
+      _lastWasMobile = isMobileNow;
+      if (isMobileNow) {
+        if (!sidebar?.classList.contains('mobile-hidden')) _closeSidebar();
         sidebar?.classList.remove('collapsed');
       } else {
-        // Chuyển sang desktop: hiện sidebar
         sidebar?.classList.remove('mobile-hidden');
         overlay?.classList.add('hidden');
       }
-      const wDelta = Math.abs(w - _lastW);
-      _lastW = w;
-      if (wDelta > 100 && OSMDRenderer?.getIsLoaded?.()) {
-        setTimeout(async () => {
-          try {
-            const osmdInstance = OSMDRenderer.getInstance();
-            const svg = document.getElementById('osmd-container')?.querySelector('svg');
-            const wrapper = document.querySelector('.sheet-viewer-wrapper');
-            if (svg && wrapper && osmdInstance) {
-              const avail = wrapper.clientWidth - 24;
-              if (avail > 0 && svg.clientWidth > 0) {
-                const ratio = avail / svg.clientWidth;
-                const currentZoom = Store.get('currentZoom') || 1.0;
-                const pct = Math.round(Math.max(0.3, Math.min(2.5, ratio * currentZoom)) * 20) * 5;
-                await App.setZoom(pct);
-              }
-            } else {
-              await osmdInstance?.render?.();
-              ChordCanvas?.reposition?.();
-            }
-          } catch(e) {}
-        }, 350);
-      }
-    }, 250));
+    });
 
     if ('onorientationchange' in window) {
       window.addEventListener('orientationchange', () => {
-        // Xử lý xoay màn hình: đóng sidebar rồi re-render
         if (window.innerWidth <= 900) _closeSidebar();
-        setTimeout(async () => {
-          if (!OSMDRenderer?.getIsLoaded?.()) return;
-          try {
-            const osmdInstance = OSMDRenderer.getInstance();
-            const svg = document.getElementById('osmd-container')?.querySelector('svg');
-            const wrapper = document.querySelector('.sheet-viewer-wrapper');
-            if (svg && wrapper && osmdInstance) {
-              const avail = wrapper.clientWidth - 24;
-              if (avail > 0 && svg.clientWidth > 0) {
-                const ratio = avail / svg.clientWidth;
-                const currentZoom = Store.get('currentZoom') || 1.0;
-                const pct = Math.round(Math.max(0.3, Math.min(2.5, ratio * currentZoom)) * 20) * 5;
-                await App.setZoom(pct);
-              }
-            } else {
-              await osmdInstance?.render?.();
-              ChordCanvas?.reposition?.();
-            }
-          } catch(e) {}
-        }, 500);
       });
     }
 

@@ -74,7 +74,9 @@ const SongLoader = (() => {
       Store.set('originalXml', xml);
 
       const transpose = transposeOverride ?? 0;
-      const zoom = settings?.userSettings?.zoomLevel || 1.0;
+      // M3-2: Bắt buộc hiển thị container trước khi render để tính đúng clientWidth và fit zoom trước lần vẽ đầu
+      document.getElementById('sheet-area')?.classList.remove('hidden');
+      const zoom = settings?.userSettings?.zoomLevel || _computePreloadFitZoom();
       Store.set('currentTranspose', transpose);
       Store.set('currentZoom', zoom);
 
@@ -83,19 +85,12 @@ const SongLoader = (() => {
       const processedXml = _injectChords(xml);
       OSMDRenderer.setZoomSilent(zoom);
 
-      // Bắt buộc hiển thị container trước khi render để OSMD tính đúng clientWidth
-      // (nếu #sheet-area đang hidden, OSMD sẽ tính width=0 → trắng trang)
-      document.getElementById('sheet-area')?.classList.remove('hidden');
-
       if (token !== _currentLoadToken) return;
       await OSMDRenderer.load(processedXml, transpose);
       if (token !== _currentLoadToken) return;
 
       // ── Post-render tasks ──
       _syncZoomUI(zoom);
-      // Luôn chạy autoFitZoom sau mỗi lần load (kể cả khi đã có zoom từ session)
-      // để đảm bảo SVG được layout đúng sau khi container vừa được hiển thị
-      setTimeout(_autoFitZoom, 80);
 
       SheetAudioPlayer.setup(OSMDRenderer.getInstance());
       AppUI.updateTransposeDisplay(transpose);
@@ -235,6 +230,24 @@ const SongLoader = (() => {
     }
     const lbl = document.getElementById('zoom-value-label');
     if (lbl) lbl.textContent = pct + '%';
+  }
+
+  function _computePreloadFitZoom() {
+    const wrapper = document.querySelector('.sheet-viewer-wrapper');
+    const wrapW = wrapper?.clientWidth || (typeof window !== 'undefined' ? window.innerWidth : 1000);
+    if (!wrapW || wrapW <= 0) return 1.0;
+    const avail = wrapW - 20;
+    const container = typeof document !== 'undefined' ? document.getElementById('osmd-container') : null;
+    let padX = 56;
+    if (container && typeof window !== 'undefined' && typeof window.getComputedStyle === 'function') {
+      const style = window.getComputedStyle(container);
+      padX = (parseFloat(style.paddingLeft) || 0) + (parseFloat(style.paddingRight) || 0);
+    }
+    const contentW = Math.max(100, wrapW - padX);
+    const ratio = avail / contentW;
+    let pct = Math.round(Math.max(0.5, Math.min(2.0, ratio)) * 20) * 5;
+    if (typeof window !== 'undefined' && window.innerWidth <= 680 && pct > 75) pct = 75;
+    return pct / 100;
   }
 
   function _autoFitZoom() {

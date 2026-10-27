@@ -16,7 +16,7 @@ const OSMDRenderer = (() => {
   let _isCompactMode = false;
   let _titleCompacted = false; // flag tránh compact title nhiều lần
 
-  let _initOptions = {}, _renderToken = 0, _renderCount = 0, _pendingRender = false;
+  let _initOptions = {}, _renderToken = 0, _renderCount = 0, _pendingRender = false, _lastContainerWidth = 0, _lastViewportWidth = 0;
   const OSMD_LOCAL_SRC = 'assets/js/vendor/opensheetmusicdisplay.min.js';
   const OSMD_CDN_SRC = 'https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.6/build/opensheetmusicdisplay.min.js';
 
@@ -37,7 +37,7 @@ const OSMDRenderer = (() => {
     const container = document.getElementById(containerId);
     if (!container) return null;
     osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay(container, {
-      autoResize: true, backend: 'svg', drawTitle: true, drawSubtitle: true, drawComposer: true, drawCredits: true, coloringEnabled: true, pageFormat: 'Endless',
+      autoResize: false, backend: 'svg', drawTitle: true, drawSubtitle: true, drawComposer: true, drawCredits: true, coloringEnabled: true, pageFormat: 'Endless',
       engravingRules: {
         ChordSymbolFontFamily: "OSMDChordFont, sans-serif", ChordSymbolTextHeight: 2.6, ChordSymbolYOffset: 1.2, DefaultColorChordSymbol: '#dc2626',
         StaffLineWidth: 0.1, StemWidth: 0.15, TupletNumberTextHeight: 1.5, TitleTopDistance: 1.5, SheetTitleHeight: 2.0, SheetComposerHeight: 1.5, SheetAuthorHeight: 1.5
@@ -67,17 +67,19 @@ const OSMDRenderer = (() => {
 
     _initOptions = options; osmd = null; isLoaded = false;
     // Resize observer để auto-reflow khi container thay đổi kích thước
-    let lastWidth = container.clientWidth;
-    const resizeObserver = new ResizeObserver(_debounce(async () => {
+    _lastContainerWidth = container.clientWidth; _lastViewportWidth = window.innerWidth;
+    const onResize = _debounce(async () => {
       if (!_canRender() || !osmd) return;
-      const currentWidth = container.clientWidth;
-      if (!_pendingRender && Math.abs(currentWidth - lastWidth) < 8) return;
-      lastWidth = currentWidth;
+      const currentWidth = container.clientWidth, vpWidth = window.innerWidth;
+      if (!_pendingRender && Math.abs(currentWidth - _lastContainerWidth) < 8 && Math.abs(vpWidth - _lastViewportWidth) < 8) return;
+      _lastContainerWidth = currentWidth; _lastViewportWidth = vpWidth;
       if (window.ChordCanvas?.isPopupOpen?.()) return;
       if (isLoaded || _pendingRender) {
         _pendingRender = false;
         _renderToken++; _renderCount++;
+        const svg = container.querySelector('svg'); if (svg) svg.style.maxWidth = '';
         try { await osmd.render(); } catch (err) { window.OSMDRenderCore?.reportRenderError?.(err); return; }
+        _forceLayoutRecalc();
         _titleCompacted = false; _compactTitleSVG();
         if (window.ChordCanvas) window.ChordCanvas.reposition();
         if (window.ChordOverlay) window.ChordOverlay.onOSMDRendered();
@@ -86,8 +88,9 @@ const OSMDRenderer = (() => {
           _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} });
         }
       }
-    }, window.OSMDRenderCore?.RESIZE_DEBOUNCE_MS || 250));
-    resizeObserver.observe(container);
+    }, window.OSMDRenderCore?.RESIZE_DEBOUNCE_MS || 250);
+    new ResizeObserver(onResize).observe(container);
+    window.addEventListener('resize', onResize, { passive: true });
 
     // Pinch-to-Zoom (Multi-touch) using GPU scale transform for buttery 60fps feeling on iPad/Mobile
     let initTouchDist = 0;
@@ -317,6 +320,7 @@ const OSMDRenderer = (() => {
       await osmd.render();
       if (token !== _renderToken) return osmd;
       _forceLayoutRecalc();
+      const cEl = document.getElementById(containerId); if (cEl) { _lastContainerWidth = cEl.clientWidth; _lastViewportWidth = window.innerWidth; }
       _titleCompacted = false; _compactTitleSVG();
       isLoaded = true;
       _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} });
@@ -380,6 +384,7 @@ const OSMDRenderer = (() => {
       await osmd.render();
       if (token !== _renderToken) return;
       _forceLayoutRecalc();
+      const cEl = document.getElementById(containerId); if (cEl) { _lastContainerWidth = cEl.clientWidth; _lastViewportWidth = window.innerWidth; }
       _titleCompacted = false; _compactTitleSVG();
       if (window.ChordCanvas) window.ChordCanvas.reposition();
       if (window.ChordOverlay) window.ChordOverlay.onOSMDRendered();

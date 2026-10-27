@@ -1,0 +1,75 @@
+CMD: npx playwright test e2e/m3-render-efficiency.spec.js -g "M3-2" --reporter=line
+EXIT=1
+[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 6 tests using 1 worker
+
+[1/6] [chromium] › e2e\m3-render-efficiency.spec.js:14:5 › M3-2 · Classic mở bài vẽ đúng 1 lần, xoay máy vẽ đúng 1 lần › M3-2 classic single render on open and rotate: pixel7
+  1) [chromium] › e2e\m3-render-efficiency.spec.js:14:5 › M3-2 · Classic mở bài vẽ đúng 1 lần, xoay máy vẽ đúng 1 lần › M3-2 classic single render on open and rotate: pixel7 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 3
+
+      35 |
+      36 |       const openRenders = await page.evaluate(() => window.OSMDRenderer?.getRenderCount?.() ?? -1);
+    > 37 |       expect(openRenders).toBe(1);
+         |                           ^
+      38 |
+      39 |       await page.evaluate(() => window.OSMDRenderer?.resetRenderCount?.());
+      40 |       await page.setViewportSize(dev.rotated);
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m3-render-efficiency.spec.js:37:27
+
+    Error Context: test-results\m3-render-efficiency-M3-2--307b6-r-on-open-and-rotate-pixel7-chromium\error-context.md
+
+
+[2/6] [chromium] › e2e\m3-render-efficiency.spec.js:14:5 › M3-2 · Classic mở bài vẽ đúng 1 lần, xoay máy vẽ đúng 1 lần › M3-2 classic single render on open and rotate: iphone13
+[3/6] [chromium] › e2e\m3-render-efficiency.spec.js:14:5 › M3-2 · Classic mở bài vẽ đúng 1 lần, xoay máy vẽ đúng 1 lần › M3-2 classic single render on open and rotate: ipadmini
+[4/6] [webkit] › e2e\m3-render-efficiency.spec.js:14:5 › M3-2 · Classic mở bài vẽ đúng 1 lần, xoay máy vẽ đúng 1 lần › M3-2 classic single render on open and rotate: pixel7
+[5/6] [webkit] › e2e\m3-render-efficiency.spec.js:14:5 › M3-2 · Classic mở bài vẽ đúng 1 lần, xoay máy vẽ đúng 1 lần › M3-2 classic single render on open and rotate: iphone13
+  2) [webkit] › e2e\m3-render-efficiency.spec.js:14:5 › M3-2 · Classic mở bài vẽ đúng 1 lần, xoay máy vẽ đúng 1 lần › M3-2 classic single render on open and rotate: iphone13 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 2
+
+      35 |
+      36 |       const openRenders = await page.evaluate(() => window.OSMDRenderer?.getRenderCount?.() ?? -1);
+    > 37 |       expect(openRenders).toBe(1);
+         |                           ^
+      38 |
+      39 |       await page.evaluate(() => window.OSMDRenderer?.resetRenderCount?.());
+      40 |       await page.setViewportSize(dev.rotated);
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m3-render-efficiency.spec.js:37:27
+
+    Error Context: test-results\m3-render-efficiency-M3-2--fed54-on-open-and-rotate-iphone13-webkit\error-context.md
+
+
+[6/6] [webkit] › e2e\m3-render-efficiency.spec.js:14:5 › M3-2 · Classic mở bài vẽ đúng 1 lần, xoay máy vẽ đúng 1 lần › M3-2 classic single render on open and rotate: ipadmini
+  3) [webkit] › e2e\m3-render-efficiency.spec.js:14:5 › M3-2 · Classic mở bài vẽ đúng 1 lần, xoay máy vẽ đúng 1 lần › M3-2 classic single render on open and rotate: ipadmini 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 1
+    Received: 3
+
+      35 |
+      36 |       const openRenders = await page.evaluate(() => window.OSMDRenderer?.getRenderCount?.() ?? -1);
+    > 37 |       expect(openRenders).toBe(1);
+         |                           ^
+      38 |
+      39 |       await page.evaluate(() => window.OSMDRenderer?.resetRenderCount?.());
+      40 |       await page.setViewportSize(dev.rotated);
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m3-render-efficiency.spec.js:37:27
+
+    Error Context: test-results\m3-render-efficiency-M3-2--12ce3-on-open-and-rotate-ipadmini-webkit\error-context.md
+
+
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+  3 failed
+    [chromium] › e2e\m3-render-efficiency.spec.js:14:5 › M3-2 · Classic mở bài vẽ đúng 1 lần, xoay máy vẽ đúng 1 lần › M3-2 classic single render on open and rotate: pixel7 
+    [webkit] › e2e\m3-render-efficiency.spec.js:14:5 › M3-2 · Classic mở bài vẽ đúng 1 lần, xoay máy vẽ đúng 1 lần › M3-2 classic single render on open and rotate: iphone13 
+    [webkit] › e2e\m3-render-efficiency.spec.js:14:5 › M3-2 · Classic mở bài vẽ đúng 1 lần, xoay máy vẽ đúng 1 lần › M3-2 classic single render on open and rotate: ipadmini 
+  3 skipped
