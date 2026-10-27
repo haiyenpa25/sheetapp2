@@ -1,0 +1,16 @@
+﻿[PASS:B] Modern loadSong shows toast "Không tải được bộ hợp âm" when chord_sets.load fails
+[PASS:B] Modern executeSave blocks ApiService.chordSets.save when chord set load failed (saveCalls=0)
+[PASS:B] Modern executeSave allows ApiService.chordSets.save after subsequent loadSong succeeds (saveCalls=2)
+[PASS:B] Classic loadSong shows toast "Không tải được bộ hợp âm" when chord_sets.load fails
+[PASS:B] ChordCanvasCore.saveChordSet blocks saving failed chord set (saveCalls=0)
+SUITE_COMPLETE total=5
+
+[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 2 tests using 1 worker
+
+[1/2] [chromium] › e2e\ux0-12-chord-load-error.spec.js:12:3 › UX0-12 · Chord set load failure shows error toast and locks edit/save › Blocking chord_sets load shows "Không tải được bộ hợp âm" and disables chord edit/save button
+[2/2] [webkit] › e2e\ux0-12-chord-load-error.spec.js:12:3 › UX0-12 · Chord set load failure shows error toast and locks edit/save › Blocking chord_sets load shows "Không tải được bộ hợp âm" and disables chord edit/save button
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+  2 passed (3.4s)
+

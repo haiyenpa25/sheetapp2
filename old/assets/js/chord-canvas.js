@@ -119,7 +119,7 @@ const ChordCanvas = (() => {
     setAddMode(false);
     resetUndo(); _currentSet   = initialSet || 'HD';
     _customChords = {};
-    _songUseFlats = null; if (window.ChordCanvasCore?.loadChordSet && songId) { const cr = await window.ChordCanvasCore.loadChordSet(songId, _currentSet, { token, useOfflineFallback: false }); if (cr.stale) return; _customChords = cr.chords; } else
+    _songUseFlats = null; if (window.ChordCanvasCore?.loadChordSet && songId) { const cr = await window.ChordCanvasCore.loadChordSet(songId, _currentSet, { token, useOfflineFallback: false }); if (cr.stale) return; _customChords = cr.chords; const hasErr = !!cr.error; ['btn-add-chord-mode', 'menu-add-chord'].forEach(id => { const b = document.getElementById(id); if (b) b.disabled = hasErr; }); if (hasErr) { (window.App?.showToast || window.AppUI?.showToast)?.('Không tải được bộ hợp âm', 'error'); setAddMode(false); } } else
 
     if (songId) {
       try {
@@ -353,7 +353,7 @@ const ChordCanvas = (() => {
 
   async function _saveCustomSet() {
     const songId = window.App?.getCurrentSongId?.();
-    if (!songId || _currentSet === 'default') return;
+    if (!songId || _currentSet === 'default' || window.ChordCanvasCore?.hasLoadError?.(songId, _currentSet)) return;
     const arr = Object.entries(_customChords).map(([k, chord]) => {
       const [measureIdx, noteIdx] = k.split('_').map(Number);
       return { measureIdx, noteIdx, chord };
@@ -372,7 +372,7 @@ const ChordCanvas = (() => {
     _closePopup();
     resetUndo(); _currentSet   = name;
     _customChords = {};
-    if (window.ChordCanvasCore?.loadChordSet) { const cr = await window.ChordCanvasCore.loadChordSet(songId, name, { token, verifySongId: true, useOfflineFallback: false }); if (cr.stale) return; _customChords = cr.chords; } else if (name !== 'default') {
+    if (window.ChordCanvasCore?.loadChordSet) { const cr = await window.ChordCanvasCore.loadChordSet(songId, name, { token, verifySongId: true, useOfflineFallback: false }); if (cr.stale) return; _customChords = cr.chords; const hasErr = !!cr.error; ['btn-add-chord-mode', 'menu-add-chord'].forEach(id => { const b = document.getElementById(id); if (b) b.disabled = hasErr; }); if (hasErr) { (window.App?.showToast || window.AppUI?.showToast)?.('Không tải được bộ hợp âm', 'error'); setAddMode(false); } } else if (name !== 'default') {
       if (songId) {
         try {
           const r = await window.ApiService.chordSets.load(songId, name);

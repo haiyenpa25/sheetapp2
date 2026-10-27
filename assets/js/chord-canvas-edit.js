@@ -192,7 +192,7 @@ const ChordCanvasEdit = (() => {
     window.App?.showToast?.('↪ Đã làm lại', 'info');
   }
 
-  async function saveChord(measureIdx, noteIdx, chordInput, refreshLayout = true) {
+  async function saveChord(measureIdx, noteIdx, chordInput, refreshLayout = true) { if (_baseChecksum === '__LOAD_ERROR__' || window.ChordCanvasCore?.hasLoadError?.(window.App?.getCurrentSongId?.(), _getApp()?.getCurrentSet?.())) { (window.App?.showToast || window.AppUI?.showToast)?.('Không tải được bộ hợp âm', 'error'); return; }
     _pushUndo();
     const app = _getApp();
     const semitones = window.App?.getCurrentTranspose?.() ?? 0;
@@ -296,7 +296,7 @@ const ChordCanvasEdit = (() => {
     const app = _getApp();
     const { songId, currentSet, chordsObj } = job;
     const isCurrent = () => job.version === _contextVersion && songId === window.App?.getCurrentSongId?.() && currentSet === app.getCurrentSet();
-    if (!songId) return;
+    if (!songId || _baseChecksum === '__LOAD_ERROR__' || job.baseChecksum === '__LOAD_ERROR__' || window.ChordCanvasCore?.hasLoadError?.(songId, currentSet)) return;
     if (currentSet === 'default') {
       window.App?.showToast?.('❌ Bản TLH gốc là bất biến, không thể lưu đè!', 'error');
       return;

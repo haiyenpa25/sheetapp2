@@ -142,7 +142,7 @@ const ChordCanvas = (() => {
     _customChords = {};
     window.ChordCanvasEdit?.setBaseChecksum?.('', _customChords);
 
-    if (window.ChordCanvasCore?.loadChordSet) { const cr = await window.ChordCanvasCore.loadChordSet(songId, initialSet, { token }); if (cr.stale) return; _customChords = cr.chords; window.ChordCanvasEdit?.setBaseChecksum?.(cr.checksum, _customChords); } else if (initialSet !== 'default') {
+    if (window.ChordCanvasCore?.loadChordSet) { const cr = await window.ChordCanvasCore.loadChordSet(songId, initialSet, { token }); if (cr.stale) return; _customChords = cr.chords; const hasErr = !!cr.error; window.ChordCanvasEdit?.setBaseChecksum?.(hasErr ? '__LOAD_ERROR__' : cr.checksum, _customChords); ['btn-add-chord-mode-bar', 'btn-menu-add-chord-mode'].forEach(id => { const b = document.getElementById(id); if (b) b.disabled = hasErr; }); if (hasErr) { (window.App?.showToast || window.AppUI?.showToast)?.('Không tải được bộ hợp âm', 'error'); setAddMode(false, { skipConfirm: true }); } } else if (initialSet !== 'default') {
       try {
         const r = await window.ApiService.chordSets.load(songId, initialSet);
         if (token !== _chordLoadToken) return;
@@ -173,6 +173,7 @@ const ChordCanvas = (() => {
   // chép & ghi đè bộ cá nhân (hoặc cả HD dùng chung, nếu admin ở TLH). Giờ phải
   // chọn rõ giữa "sửa trên bản của tôi" và "sao chép, ghi đè" (xác nhận thêm 1 lần).
   function setAddMode(on, opts = {}) {
+    if (on && window.ChordCanvasCore?.hasLoadError?.(window.App?.getCurrentSongId?.(), _currentSet)) { (window.App?.showToast || window.AppUI?.showToast)?.('Không tải được bộ hợp âm', 'error'); return; }
     if (on && !opts.skipConfirm) {
       if (_pendingConfirm) return;
       const myChordCode = (window.Auth?.getChordCode?.() || '').toUpperCase();
@@ -338,7 +339,7 @@ const ChordCanvas = (() => {
     _currentSet   = name;
     _customChords = {};
     window.ChordCanvasEdit?.setBaseChecksum?.('', _customChords);
-    if (window.ChordCanvasCore?.loadChordSet) { const cr = await window.ChordCanvasCore.loadChordSet(songId, name, { token, verifySongId: true, useOfflineFallback: false }); if (cr.stale) return; _customChords = cr.chords; window.ChordCanvasEdit?.setBaseChecksum?.(cr.checksum, _customChords); } else if (name !== 'default') {
+    if (window.ChordCanvasCore?.loadChordSet) { const cr = await window.ChordCanvasCore.loadChordSet(songId, name, { token, verifySongId: true, useOfflineFallback: false }); if (cr.stale) return; _customChords = cr.chords; const hasErr = !!cr.error; window.ChordCanvasEdit?.setBaseChecksum?.(hasErr ? '__LOAD_ERROR__' : cr.checksum, _customChords); ['btn-add-chord-mode-bar', 'btn-menu-add-chord-mode'].forEach(id => { const b = document.getElementById(id); if (b) b.disabled = hasErr; }); if (hasErr) { (window.App?.showToast || window.AppUI?.showToast)?.('Không tải được bộ hợp âm', 'error'); setAddMode(false, { skipConfirm: true }); } } else if (name !== 'default') {
       if (songId) {
         try {
           const r = await window.ApiService.chordSets.load(songId, name);

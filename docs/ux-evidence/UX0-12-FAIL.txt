@@ -1,0 +1,7 @@
+﻿[FAIL:B] Modern loadSong shows toast "Không tải được bộ hợp âm" when chord_sets.load fails
+[FAIL:B] Modern executeSave blocks ApiService.chordSets.save when chord set load failed (saveCalls=2)
+[FAIL:B] Modern executeSave allows ApiService.chordSets.save after subsequent loadSong succeeds (saveCalls=4)
+[FAIL:B] Classic loadSong shows toast "Không tải được bộ hợp âm" when chord_sets.load fails
+[FAIL:B] ChordCanvasCore.saveChordSet blocks saving failed chord set (saveCalls=1)
+SUITE_COMPLETE total=5
+

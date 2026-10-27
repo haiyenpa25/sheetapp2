@@ -14,6 +14,10 @@ const ChordCanvasCore = (() => {
   let _loadToken = 0;
   let _undoStack = [];
   let _redoStack = [];
+  const _loadFailedSets = new Set();
+  function _setKey(songId, setName) { return `${songId || ''}::${setName || 'HD'}`; }
+  function hasLoadError(songId, setName = 'HD') { return _loadFailedSets.has(_setKey(songId, setName)); }
+  function clearLoadError(songId, setName = 'HD') { _loadFailedSets.delete(_setKey(songId, setName)); }
 
   function nextToken() {
     return ++_loadToken;
@@ -81,6 +85,8 @@ const ChordCanvasCore = (() => {
       if (token !== _loadToken || (options.verifySongId && songId !== window.App?.getCurrentSongId?.())) {
         return { stale: true, set: targetSet, chords: {}, checksum: '' };
       }
+      if (!r || r.success === false) throw new Error(r?.message || r?.error || 'Không tải được bộ hợp âm');
+      clearLoadError(songId, targetSet);
       const chords = {};
       if (r && r.success && Array.isArray(r.chords)) {
         r.chords.forEach(({ measureIdx, noteIdx, chord }) => {
@@ -95,6 +101,7 @@ const ChordCanvasCore = (() => {
         return { stale: true, set: targetSet, chords: {}, checksum: '' };
       }
       const chords = options.useOfflineFallback !== false ? _readOfflineChordsMap(songId, targetSet) : {};
+      _loadFailedSets.add(_setKey(songId, targetSet));
       return { stale: false, set: targetSet, chords, checksum: '', error: err };
     }
   }
@@ -110,6 +117,7 @@ const ChordCanvasCore = (() => {
     if (!songId || !setName || setName === 'default') {
       return { success: false, message: 'Bộ TLH là bản gốc, không thể lưu đè' };
     }
+    if (hasLoadError(songId, setName)) return { success: false, blockedByLoadError: true, message: 'Không tải được bộ hợp âm' };
     const arr = serializeChords(chordsObj);
     return window.ApiService.chordSets.save(songId, setName, arr, checksum);
   }
@@ -125,6 +133,8 @@ const ChordCanvasCore = (() => {
     popRedo,
     canUndo,
     canRedo,
+    hasLoadError,
+    clearLoadError,
     loadChordSet,
     serializeChords,
     saveChordSet,
