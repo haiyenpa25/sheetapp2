@@ -1,0 +1,33 @@
+CMD: npx playwright test e2e/m1-boot-resilience.spec.js -g "M1-2" --max-failures=1 --reporter=line
+EXIT=1
+[E2E] Isolated copy verified; no snapshot of application DB is needed.
+
+Running 12 tests using 1 worker
+
+[1/12] [chromium] › e2e\m1-boot-resilience.spec.js:24:7 › M1-2 · Watchdog hiển thị banner khi chặn app.js › M1-2 watchdog banner <= 9s: pixel7 - modern
+  1) [chromium] › e2e\m1-boot-resilience.spec.js:24:7 › M1-2 · Watchdog hiển thị banner khi chặn app.js › M1-2 watchdog banner <= 9s: pixel7 - modern 
+
+    TimeoutError: locator.waitFor: Timeout 9000ms exceeded.
+    Call log:
+      - waiting for locator('#boot-watchdog-banner') to be visible
+
+
+      39 |
+      40 |         const banner = page.locator('#boot-watchdog-banner');
+    > 41 |         await banner.waitFor({ state: 'visible', timeout: 9000 });
+         |                      ^
+      42 |         const elapsedMs = Date.now() - t0;
+      43 |
+      44 |         const text = (await banner.textContent()) || '';
+        at C:\Users\CNS-MSI-004\AppData\Local\Temp\sheetapp-opt-review-20261021\sheetapp2\e2e\m1-boot-resilience.spec.js:41:22
+
+    Error Context: test-results\m1-boot-resilience-M1-2-·--f11fa-g-banner-9s-pixel7---modern-chromium\error-context.md
+
+
+Testing stopped early after 1 maximum allowed failures.
+
+[E2E] Isolated copy retained for review; application DB is never restored from a snapshot.
+  1 failed
+    [chromium] › e2e\m1-boot-resilience.spec.js:24:7 › M1-2 · Watchdog hiển thị banner khi chặn app.js › M1-2 watchdog banner <= 9s: pixel7 - modern 
+  11 did not run
+  1 error was not a part of any test, see above for details

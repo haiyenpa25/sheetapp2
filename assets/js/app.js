@@ -111,6 +111,7 @@ const App = (() => {
       }
     });
     _safeInit('OfflineSetlistManager', () => window.OfflineSetlistManager?.checkOnStartup?.());
+    window.BootRunner?.markReady?.();
   }
 
   /* ── NAVIGATION ── */

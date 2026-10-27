@@ -83,6 +83,7 @@ const App = (() => {
     _safeInit('ToolbarController', () => window.ToolbarController?.init?.());
     _safeInit('KeyboardHandler', () => window.KeyboardHandler?.init?.());
     _safeInit('ServiceWorkerManager', () => window.ServiceWorkerManager?.register?.());
+    window.BootRunner?.markReady?.();
   }
 
   /* ── NAVIGATION ── */
