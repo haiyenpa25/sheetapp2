@@ -47,6 +47,7 @@ echo cssTag('layout.css');
 echo cssTag('sheet.css');
 echo cssTag('components.css');
 echo '  <link rel="stylesheet" href="../assets/css/instrument-annotations.css?v=' . filemtime(__DIR__ . '/../assets/css/instrument-annotations.css') . '">' . "\n";
+echo cssTag('control-deck.css'); // Dải điều khiển luôn hiện (10 điều khiển) — luôn nạp sau cùng
 
 ?>
   <!-- ── Thư viện âm thanh và OSMD (local vendor, fallback CDN) ── -->
@@ -187,6 +188,7 @@ echo jsTag('core/ScriptLoader.js', false);
 echo jsTag('core/SafeHtml.js', false);
 echo jsTag('core/SafeStorage.js', false);
 echo jsTag('core/AppRules.js', false);
+echo jsTag('core/ControlDeck.js', false);
 echo jsTag('core/PointerTap.js', false);
 echo jsTag('vendor/idb-keyval.min.js', false);
 echo jsTag('core/OfflineVault.js', false);

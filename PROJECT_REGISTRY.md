@@ -147,6 +147,7 @@ SheetApp/
 │       │   ├── Store.js      # Centralized state (currentSong, transpose, zoom)
 │       │   └── ServiceWorkerManager.js # PWA offline caching & service worker lifecycle
 │       │
+│       ├── core/ControlDeck.js # Nút proxy (data-deck-target) phản chiếu trạng thái điều khiển gốc; ẩn theo quyền (Soạn)
 │       ├── app.js            # App bootstrap + init sequence
 │       ├── app-ui.js         # UI state: toolbar, FAB, fullscreen
 │       ├── song-loader.js    # Load bài: fetch XML, init modules

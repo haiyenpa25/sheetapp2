@@ -166,6 +166,7 @@ const Auth = (() => {
 
     // Nút import/admin chỉ admin mới có
     document.getElementById('btn-admin-console')?.classList.toggle('hidden', !canEdit);
+    document.getElementById('btn-menu-manager')?.classList.toggle('hidden', !canEdit);
     document.getElementById('btn-omr-upload')?.classList.toggle('hidden', !canEdit);
 
     // Setlist add button — banhat + admin (matches library-ui.js canEdit logic)

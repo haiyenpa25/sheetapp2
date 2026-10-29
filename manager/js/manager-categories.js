@@ -69,6 +69,8 @@
     const grid = document.getElementById('mgr-categories-grid');
     if (!grid) return;
     const admin = _isAdmin();
+    const addBtn = document.getElementById('btn-add-category-modal');
+    if (addBtn) addBtn.hidden = !admin;
     grid.innerHTML = categories.map(c => {
       const id = Number(c.id);
       return `
@@ -168,10 +170,10 @@
         window.ManagerRepertoire?.loadRepertoire?.();
         app.loadStats?.();
       } else {
-        app.showToast?.(res.message || 'Lỗi', 'error');
+        app.showToast?.(res.error || res.message || 'Lỗi', 'error');
       }
     } catch (err) {
-      app.showToast?.('Lỗi mạng', 'error');
+      app.showToast?.(err?.message || 'Lỗi mạng', 'error');
     }
   }
 
@@ -185,10 +187,10 @@
         await loadCategories();
         app.loadStats?.();
       } else {
-        app.showToast?.(res.message || 'Lỗi', 'error');
+        app.showToast?.(res.error || res.message || 'Lỗi', 'error');
       }
     } catch (err) {
-      app.showToast?.('Lỗi mạng', 'error');
+      app.showToast?.(err?.message || 'Lỗi mạng', 'error');
     }
   }
 
@@ -237,6 +239,8 @@
       fd.append('file', file);
       fd.append('category_id', String(c.id));
       fd.append('visibility', _vis(c));
+      const typedTitle = (document.getElementById('upload-song-title')?.value || '').trim();
+      if (typedTitle && files.length === 1) fd.append('title', typedTitle);
       try {
         const res = await window.ApiService.importer.upload(fd);
         if (res?.success === false) throw new Error(res.error || res.message || 'Lỗi');

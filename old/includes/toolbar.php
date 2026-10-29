@@ -70,6 +70,19 @@
       <span>♩ BPM</span>
     </button>
 
+    <!-- ③c DẢI ĐIỀU KHIỂN LUÔN HIỆN: Ký hiệu · Gọn nhẹ · Cuộn · Soạn (nút ủy quyền → ControlDeck bấm nút gốc trong menu ⋮) -->
+    <button type="button" id="btn-toolbar-notation" class="deck-btn" title="Hệ ký hiệu hợp âm: Chuẩn / La Mã / Nashville" aria-label="Hệ ký hiệu hợp âm" data-deck-target="#btn-chord-notation" data-deck-label="#chord-notation-label"><span class="deck-glyph" aria-hidden="true">Aa</span><span data-deck-text>C</span></button>
+    <button type="button" id="btn-toolbar-compact" class="deck-btn" title="Chế độ Gọn nhẹ" aria-label="Chế độ gọn nhẹ" aria-pressed="false" data-deck-target="#btn-compact-mode" data-deck-toggle>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 14h6v6H4zm10 0h6v6h-6zM4 4h6v6H4zm10 0h6v6h-6z"/></svg><span>Gọn</span>
+    </button>
+    <button type="button" id="btn-toolbar-scroll" class="deck-btn" title="Bật/Tắt cuộn tự động" aria-label="Cuộn tự động" aria-pressed="false" data-deck-target="#btn-auto-scroll" data-deck-toggle>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg><span>Cuộn</span>
+    </button>
+    <!-- Chỉ hiện khi đã đăng nhập và tài khoản được sửa hợp âm (ControlDeck phản chiếu cờ ẩn của #menu-add-chord) -->
+    <button type="button" id="btn-toolbar-edit" class="deck-btn deck-hidden" title="Soạn hợp âm trên bản nhạc (phím C)" aria-label="Soạn hợp âm" aria-pressed="false" data-deck-target="#menu-add-chord" data-deck-toggle>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg><span>Soạn</span>
+    </button>
+
     <div class="toolbar-spacer" style="flex:1 1 auto;min-width:2px;"></div>
 
     <!-- ④ BÀI TRƯỚC / SAU (Lớp 1) -->
@@ -262,6 +275,13 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           <span>Hướng dẫn sử dụng</span>
         </button>
+
+        <?php $mgrHref = ($baseHref ?? '../') . 'manager/'; ?>
+        <a id="btn-menu-manager" href="<?= $mgrHref ?>#tab-categories" target="_blank" class="btn btn-ghost btn-sm btn-menu-item hidden"
+           title="Quản lý danh mục, thêm bài hát (XML), kho nhạc & thành viên">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          <span>Quản lý danh mục &amp; thêm bài</span>
+        </a>
 
         <a id="btn-switch-new-ui" href="<?= $baseHref ?? '../' ?>" class="btn btn-primary btn-sm btn-menu-item"
            onclick="if (window.URLState) { event.preventDefault(); window.location.href = URLState.interfaceUrl(false); }"

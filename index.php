@@ -51,7 +51,8 @@ echo cssTag('components.css');
 echo cssTag('instrument-annotations.css');
 echo cssTag('fab.css');
 echo cssTag('app-shell.css');
-echo cssTag('library-polish.css'); // lớp hoàn thiện giao diện — luôn nạp sau cùng
+echo cssTag('library-polish.css'); // lớp hoàn thiện giao diện
+echo cssTag('control-deck.css');   // Dải điều khiển luôn hiện (10 điều khiển) — luôn nạp sau cùng
 
 ?>
 </head>
@@ -196,6 +197,7 @@ echo jsTag('core/SafeHtml.js',     false);
 echo jsTag('core/SafeStorage.js',  false);
 echo jsTag('core/AppRules.js',     false);
 echo jsTag('core/PointerTap.js',   false);
+echo jsTag('core/ControlDeck.js',  false);
 echo jsTag('core/KeyService.js',   false);
 echo jsTag('core/ApiService.js',   false);
 echo jsTag('core/EventBus.js',     false);

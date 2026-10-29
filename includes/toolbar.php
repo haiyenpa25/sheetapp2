@@ -103,6 +103,9 @@
       <button id="btn-band-toggle" class="btn-band-toggle hidden" aria-hidden="true" tabindex="-1"></button>
     </div>
 
+    <!-- Điểm ngắt hàng của Dải điều khiển: chỉ có tác dụng khi màn hình hẹp (control-deck.css) -->
+    <span class="deck-break" aria-hidden="true"></span>
+
     <!-- Nhóm 6: Nút Soạn Hợp Âm (Ticket R1-2) -->
     <button id="btn-add-chord-mode-bar" class="band-pill btn-chord-edit-pill btn-chord-edit" title="Soạn hợp âm trên sheet (phím C)" disabled>
       <?= icon('pencil', 'icon-xs chord-edit-icon') ?>
@@ -121,12 +124,20 @@
       <button id="btn-lock-zoom" class="icon-btn-pill btn-lock-zoom" title="Khóa tỷ lệ zoom"><span class="lock-icon"><?= icon('unlock') ?></span></button>
     </div>
 
+    <!-- Nhóm 7: Ký hiệu hợp âm · Gọn nhẹ · Cuộn — LUÔN HIỆN trên Dải điều khiển (control-deck.css), không giấu vào menu ⋮ -->
+    <button id="btn-chord-notation" class="band-pill btn-chord-notation" title="Hệ ký hiệu hợp âm (chữ cái, số La Mã…)"><span><?= icon('type') ?></span> <span id="chord-notation-label" class="chord-notation-label">C</span></button>
+    <button type="button" id="btn-toolbar-compact" class="band-pill btn-toolbar-compact" title="Chế độ Gọn nhẹ (bớt chi tiết trên bản nhạc)" aria-label="Chế độ gọn nhẹ" aria-pressed="false" data-deck-target="#btn-compact-mode" data-deck-toggle>
+      <?= icon('layout', 'icon-xs') ?><span class="deck-text">Gọn</span>
+    </button>
+    <div class="band-pill scroll-pill">
+      <button id="btn-auto-scroll" class="btn-pill-scroll" disabled><?= icon('scroll', 'icon-xs') ?><span class="btn-text">Cuộn</span></button>
+      <select id="scroll-speed" class="select-scroll-speed" disabled aria-label="Tốc độ cuộn"><option value="1" selected>1×</option><option value="2">2×</option><option value="3">3×</option><option value="4">4×</option></select>
+    </div>
+
     <!-- Secondary / Compact Controls (Ẩn trên thanh laptop 48px, truy cập qua Bảng Công Cụ ⋯) -->
     <div class="toolbar-secondary-controls d-none">
 
       <button id="btn-chord-preset" class="band-pill btn-chord-preset" title="Preset hiển thị hợp âm"><span class="preset-icon">Aa</span><span id="chord-preset-label" class="preset-label">Chuẩn</span></button>
-      <button id="btn-chord-notation" class="band-pill btn-chord-notation" title="Chế độ hợp âm"><span><?= icon('type') ?></span> <span id="chord-notation-label" class="chord-notation-label">C</span></button>
-
       <div class="band-pill verse-pill hidden" id="verse-pill" role="group" aria-label="Chọn khổ hát">
         <button id="btn-verse-mode" class="btn-verse-mode"><span class="verse-icon"><?= icon('book-open') ?></span><span id="verse-mode-label" class="verse-mode-label">Tất cả khổ</span></button>
         <div id="verse-nav-controls" class="verse-nav-controls hidden">
@@ -138,10 +149,6 @@
 
       <button id="btn-instrument-role" class="band-pill btn-instrument-role" title="Góc nhìn nhạc cụ"><span id="instrument-role-icon" class="role-icon"><?= icon('guitar') ?></span><span id="instrument-role-label" class="role-label">Guitar</span></button>
 
-      <div class="band-pill scroll-pill">
-        <button id="btn-auto-scroll" class="btn-pill-scroll" disabled><?= icon('scroll', 'icon-xs') ?><span class="btn-text">Cuộn</span></button>
-        <select id="scroll-speed" class="select-scroll-speed" disabled aria-label="Tốc độ cuộn"><option value="1" selected>1×</option><option value="2">2×</option><option value="3">3×</option><option value="4">4×</option></select>
-      </div>
     </div>
   </div>
 
@@ -394,9 +401,9 @@
         </button>
 
         <?php $bHref = $baseHref ?? '/'; ?>
-        <a href="<?= $bHref ?>manager/" target="_blank" class="btn btn-ghost btn-sm btn-menu-item" title="Cổng quản lý kho nhạc & hợp âm">
+        <a href="<?= $bHref ?>manager/#tab-categories" target="_blank" class="btn btn-ghost btn-sm btn-menu-item" title="Quản lý danh mục, thêm bài hát (XML) & kho nhạc">
           <?= icon('folder') ?>
-          <span>Quản lý kho nhạc</span>
+          <span>Quản lý danh mục &amp; thêm bài</span>
         </a>
 
         <a href="<?= $bHref ?>manager/#tab-users" data-target="/manager/#tab-users" target="_blank" class="btn btn-ghost btn-sm btn-menu-item" title="Quản lý thành viên ban nhạc & bộ hợp âm">
@@ -433,6 +440,7 @@
     <button id="btn-mobile-transpose-down" class="btn-thumb-action" title="Hạ 1 nửa cung" aria-label="Hạ tông">−</button>
     <button id="mobile-transpose-display" class="btn-thumb-tone" title="Tông hiện tại (chạm để về tông gốc)">--</button>
     <button id="btn-mobile-transpose-up" class="btn-thumb-action" title="Tăng 1 nửa cung" aria-label="Tăng tông">+</button>
+    <button id="btn-mobile-transpose-reset" class="btn-thumb-text" title="Về tông gốc của bài" aria-label="Về tông gốc" data-deck-target="#btn-transpose-reset">Gốc</button>
   </div>
 
   <div class="mobile-thumb-group mobile-zoom-group" role="group" aria-label="Thu phóng và khóa">
@@ -464,6 +472,17 @@
       <span id="mobile-view-icon" class="thumb-icon"><?= icon('music') ?></span>
       <span id="mobile-view-label" class="thumb-label">Nhạc</span>
     </button>
+  </div>
+
+  <span class="mobile-thumb-break" aria-hidden="true"></span>
+
+  <!-- Hàng 2: Ký hiệu · Gọn nhẹ · Cuộn (nút ủy quyền → ControlDeck bấm nút gốc trong menu ⋮) -->
+  <div class="mobile-thumb-group mobile-tools-group" role="group" aria-label="Ký hiệu, gọn nhẹ, cuộn">
+    <button id="btn-mobile-notation" class="btn-thumb-action btn-thumb-notation" title="Hệ ký hiệu hợp âm (chữ cái, số La Mã…)" aria-label="Hệ ký hiệu hợp âm" data-deck-target="#btn-chord-notation" data-deck-label="#chord-notation-label">
+      <?= icon('type', 'icon-xs') ?><span class="thumb-label" data-deck-text>C</span>
+    </button>
+    <button id="btn-mobile-compact" class="btn-thumb-action" title="Chế độ Gọn nhẹ" aria-label="Chế độ gọn nhẹ" aria-pressed="false" data-deck-target="#btn-compact-mode" data-deck-toggle><?= icon('layout', 'icon-xs') ?></button>
+    <button id="btn-mobile-scroll" class="btn-thumb-action" title="Bật/Tắt cuộn tự động" aria-label="Cuộn tự động" aria-pressed="false" data-deck-target="#btn-auto-scroll" data-deck-toggle><?= icon('scroll', 'icon-xs') ?></button>
   </div>
 
   <div class="mobile-thumb-group mobile-nav-group" role="group" aria-label="Chuyển bài">

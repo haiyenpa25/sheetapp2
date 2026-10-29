@@ -60,7 +60,7 @@ check(
     'toolbar.php link Manager Users dùng baseHref'
 );
 check(
-    strpos($toolbarContent, 'href="<?= $bHref ?>manager/"') !== false,
+    strpos($toolbarContent, 'href="<?= $bHref ?>manager/#tab-categories"') !== false,
     'toolbar_link_manager_base',
     'toolbar.php link Manager dùng baseHref'
 );

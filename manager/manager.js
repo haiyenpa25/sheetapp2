@@ -8,7 +8,7 @@
 const ManagerApp = (() => {
   // Application State (Shared across modules)
   const state = {
-    activeTab: 'tab-repertoire',
+    activeTab: 'tab-categories',
     currentUser: { logged_in: false, user_id: null, username: '', role: 'viewer', display_name: '', instrument: 'Guitar' },
     selectedSong: null,
     stats: {},
@@ -100,6 +100,16 @@ const ManagerApp = (() => {
     if (tabTarget && document.getElementById(tabTarget)) {
       switchTab(tabTarget);
     }
+
+    const advToggle = document.getElementById('mgr-adv-toggle');
+    const advBox = document.getElementById('mgr-tabs-adv');
+    const setAdv = (open) => {
+      if (!advBox || !advToggle) return;
+      advBox.hidden = !open;
+      advToggle.setAttribute('aria-expanded', String(open));
+    };
+    advToggle?.addEventListener('click', () => setAdv(advBox.hidden));
+    if (tabTarget && advBox?.querySelector(`[data-tab="${tabTarget}"]`)) setAdv(true);
 
     window.addEventListener('hashchange', () => {
       const hash = window.location.hash.replace('#', '');

@@ -1,0 +1,56 @@
+/**
+ * old/assets/css/control-deck.css — Dải điều khiển LUÔN HIỆN (giao diện Classic /old/)
+ *
+ * 10 điều khiển bắt buộc ở mọi cỡ màn hình, không giấu vào menu "Tuỳ Chọn":
+ *   Tông · Gốc · Hợp âm (HD/TLH) · Zoom + Khóa · Lời/Sheet · BPM · Ký hiệu · Gọn nhẹ · Cuộn · Soạn hợp âm
+ *   (Soạn chỉ hiện khi đăng nhập và tài khoản được sửa — ControlDeck.js phản chiếu cờ ẩn theo quyền).
+ * Thanh công cụ tự XUỐNG DÒNG (không cắt ngang, không cuộn ngang). NẠP SAU CÙNG vì CSS cũ ẩn nhiều nút bằng !important.
+ */
+
+.deck-hidden { display: none !important; }
+
+.deck-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px; flex-shrink: 0;
+  height: 30px; min-width: 32px; padding: 0 9px; box-sizing: border-box;
+  border: 1px solid var(--border, #e2e8f0); border-radius: 6px;
+  background: var(--bg-surface, #fff); color: var(--text-primary, #0f172a);
+  font-size: .78rem; font-weight: 600; line-height: 1; white-space: nowrap; cursor: pointer; touch-action: manipulation;
+}
+.deck-btn svg { width: 15px; height: 15px; flex: none; }
+.deck-btn .deck-glyph { font-weight: 800; font-size: .74rem; opacity: .65; }
+.deck-btn:hover:not(:disabled) { background: #f1f5f9; }
+.deck-btn.active { background: #ede9fe; border-color: var(--accent, #6d28d9); color: var(--accent, #6d28d9); }
+.deck-btn:disabled { opacity: .45; cursor: default; }
+body.dark-mode .deck-btn { background: var(--bg-surface, #1e1e2a); }
+body.dark-mode .deck-btn:hover:not(:disabled) { background: #2a2a3a; }
+body.dark-mode .deck-btn.active { background: #2d1f52; }
+
+/* ── Thanh công cụ: xuống dòng thay vì cắt ngang ───────────────────────────── */
+body #toolbar#toolbar {
+  height: auto !important; min-height: var(--toolbar-h, 36px) !important; overflow: visible !important;
+  padding-top: 4px !important; padding-bottom: 4px !important; align-items: flex-start !important;
+}
+body #toolbar#toolbar > .toolbar-controls {
+  flex-wrap: wrap !important; overflow: visible !important; row-gap: 4px !important; align-items: center !important;
+}
+/* Không điều khiển nào trong 10 cái được ẩn bởi các luật cũ (≤ 768px / ≤ 680px) */
+body #toolbar#toolbar #btn-transpose-reset,
+body #toolbar#toolbar #toolbar-zoom-pill,
+body #toolbar#toolbar #btn-lock-zoom,
+body #toolbar#toolbar #btn-lyric-view,
+body #toolbar#toolbar #btn-toolbar-metronome { display: inline-flex !important; align-items: center; }
+body #toolbar#toolbar #btn-lyric-view .btn-text,
+body #toolbar#toolbar #btn-toolbar-metronome > * { display: inline !important; }
+body #toolbar#toolbar #toolbar-zoom-pill { gap: 2px; }
+
+/* ── iPad & điện thoại: nút cảm ứng ≥ 36px, vẫn xếp gọn ───────────────────── */
+@media (max-width: 1024px) {
+  .deck-btn { height: 36px; min-width: 36px; }
+  body #toolbar#toolbar .icon-btn,
+  body #toolbar#toolbar #btn-lyric-view,
+  body #toolbar#toolbar #btn-toolbar-metronome { min-height: 36px; }
+}
+@media (max-width: 480px) {
+  .deck-btn { padding: 0 7px; }
+  body #toolbar#toolbar { gap: 3px !important; }
+}

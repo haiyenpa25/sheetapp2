@@ -11,7 +11,7 @@
 
 const urlParams      = new URLSearchParams(self.location.search);
 const SW_VERSION     = urlParams.get('v') || 'v5';
-const SW_MANIFEST_HASH = '56f08f33c7';
+const SW_MANIFEST_HASH = '07ae63cb08';
 const SW_VENDOR_HASH = 'e8b6692a09';
 const CACHE_VENDOR   = `sheetapp-vendor-${SW_VENDOR_HASH}`;
 const CACHE_APP      = `sheetapp-app-${SW_VERSION}-${SW_MANIFEST_HASH}`;
@@ -63,6 +63,7 @@ const PRECACHE_APP = [
   '/assets/css/fab.css',
   '/assets/css/app-shell.css',
   '/assets/css/library-polish.css',
+  '/assets/css/control-deck.css',
   '/assets/js/core/OfflineVault.js',
   '/assets/js/core/ScriptLoader.js',
   '/assets/js/core/FeatureFlags.js',
@@ -70,6 +71,7 @@ const PRECACHE_APP = [
   '/assets/js/core/SafeStorage.js',
   '/assets/js/core/AppRules.js',
   '/assets/js/core/PointerTap.js',
+  '/assets/js/core/ControlDeck.js',
   '/assets/js/core/KeyService.js',
   '/assets/js/core/ApiService.js',
   '/assets/js/core/EventBus.js',
@@ -157,6 +159,7 @@ const PRECACHE_APP = [
   '/old/assets/css/layout.css',
   '/old/assets/css/sheet.css',
   '/old/assets/css/components.css',
+  '/old/assets/css/control-deck.css',
   '/old/assets/js/osmd-renderer.js',
   '/old/assets/js/auth.js',
   '/old/assets/js/library-ui.js',

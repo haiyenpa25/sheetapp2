@@ -428,6 +428,10 @@
             <label class="mgr-label">File MusicXML (chọn được nhiều file)</label>
             <input type="file" id="upload-song-files" class="mgr-input" accept=".xml,.musicxml,.mxl" multiple>
           </div>
+          <div class="mgr-form-group">
+            <label class="mgr-label">Tên bài (không bắt buộc — chỉ áp dụng khi chọn 1 file)</label>
+            <input type="text" id="upload-song-title" class="mgr-input" placeholder="Để trống: lấy tên trong file, nếu không có thì lấy tên file">
+          </div>
           <div id="upload-song-results" class="upload-results"></div>
           <div class="mgr-modal-actions">
             <button type="button" class="mgr-btn mgr-btn-ghost" data-close="modal-upload-song">Đóng</button>

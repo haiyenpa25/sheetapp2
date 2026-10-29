@@ -1,5 +1,5 @@
     <!-- ================= TAB 4: QUẢN LÝ THỂ LOẠI (CATEGORIES) ================= -->
-    <section id="tab-categories" class="mgr-tab-pane">
+    <section id="tab-categories" class="mgr-tab-pane active">
       <div class="mgr-section-header">
         <div>
           <h3>📂 Cây Thể Loại Âm Nhạc Thờ Phượng</h3>

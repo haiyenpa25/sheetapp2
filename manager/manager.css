@@ -1531,3 +1531,8 @@ body.manager-body {
 .upload-row { padding: 4px 0; word-break: break-word; }
 .upload-ok { color: #4ade80; }
 .upload-fail { color: #f87171; }
+
+/* Tab phụ gom vào "Nâng cao" để màn hình chính chỉ còn Danh mục & Kho bài */
+.mgr-tabs-adv { display: contents; }
+.mgr-tabs-adv[hidden] { display: none; }
+#btn-add-category-modal[hidden] { display: none !important; }

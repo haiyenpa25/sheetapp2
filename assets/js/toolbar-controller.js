@@ -100,7 +100,8 @@ const ToolbarController = (() => {
     [document.getElementById('btn-lock-zoom'), document.getElementById('btn-gig-lock-zoom')].forEach(btn => {
       if (!btn) return;
       btn.classList.toggle('locked', isLocked);
-      btn.innerHTML = `<svg class="lucide-icon" width="16" height="16" aria-hidden="true"><use href="assets/icons/lucide.svg#${iconName}"/></svg>`;
+      // Sprite được nhúng sẵn trong trang với id "icon-<tên>"; tham chiếu file ngoài "lucide.svg#<tên>" không tồn tại → icon trống.
+      btn.innerHTML = `<svg class="icon icon-xs" width="16" height="16" aria-hidden="true"><use href="#icon-${iconName}"/></svg>`;
       btn.title = title;
     });
   }

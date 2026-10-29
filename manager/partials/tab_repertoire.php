@@ -1,5 +1,5 @@
     <!-- ================= TAB 1: KHO BÀI HÁT & THỂ LOẠI (REPERTOIRE) ================= -->
-    <section id="tab-repertoire" class="mgr-tab-pane active">
+    <section id="tab-repertoire" class="mgr-tab-pane">
       <!-- Filter Bar -->
       <div class="mgr-pane-filter-bar">
         <div class="mgr-category-pills" id="mgr-cat-pills">

@@ -157,6 +157,17 @@ class ImportService {
         return self::storeImportedSong($content, $meta);
     }
 
+    private static function titleFromMusicXml(string $xml): string {
+        $placeholders = ['untitled score', 'untitled', 'title', 'subtitle', 'composer / arranger'];
+        foreach (['work-title', 'movement-title'] as $tag) {
+            if (preg_match('#<' . $tag . '>\s*([^<]+?)\s*</' . $tag . '>#u', $xml, $m)) {
+                $t = trim(html_entity_decode($m[1], ENT_QUOTES | ENT_XML1, 'UTF-8'));
+                if ($t !== '' && !in_array(mb_strtolower($t), $placeholders, true)) return mb_substr($t, 0, 200);
+            }
+        }
+        return '';
+    }
+
     public static function upload(array $file, string|array $titleOrOptions = '', array $options = []): array {
         if (is_array($titleOrOptions)) {
             $options = $titleOrOptions;
@@ -167,10 +178,6 @@ class ImportService {
         if (!$title && !empty($options['title'])) {
             $title = trim((string)$options['title']);
         }
-        if (!$title) {
-            $title = pathinfo($file['name'], PATHINFO_FILENAME);
-        }
-
         if ($file['error'] !== UPLOAD_ERR_OK) { throw new Exception('Lỗi upload: ' . $file['error']); }
         if (($file['size'] ?? 0) <= 0 || ($file['size'] ?? 0) > 10485760) {
             throw new Exception('File tải lên phải có dung lượng từ 1 byte đến 10 MB');
@@ -183,6 +190,10 @@ class ImportService {
 
         $content = file_get_contents($file['tmp_name']);
         if (!_isValidMusicXML($content, $ext)) { throw new Exception('File không hợp lệ — không phải MusicXML'); }
+
+        // Tên bài: ưu tiên tên người nhập, rồi tên trong file (bỏ tên mặc định của phần mềm soạn nhạc), cuối cùng là tên file.
+        if (!$title && $ext !== 'mxl') $title = self::titleFromMusicXml($content);
+        if (!$title) $title = pathinfo($file['name'], PATHINFO_FILENAME);
 
         $meta = array_merge($options, [
             'title'  => $title,
