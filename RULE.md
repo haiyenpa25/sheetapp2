@@ -99,3 +99,13 @@
 2. HD rỗng → hiện **bản nhạc sạch** (không rơi về TLH). Chỉ đổi hành vi này qua cờ `AppRules.HD_EMPTY_SHOWS_TLH`, tuyệt đối không thêm fallback ngầm ở nơi khác.
 3. Bộ HD của bài được khởi tạo từ hợp âm TLH trong MusicXML bằng `tools/clone_tlh_to_hd.php` (dry-run → sao lưu → ghi qua `ChordSetService::writeHd`, có lịch sử); bài XML không có hợp âm thì HD để rỗng.
 4. Bộ `HD` và `default` (TLH) vẫn không xoá được và không ghi đè bằng thao tác sao chép (xem §2).
+
+---
+
+## 7. Quy tắc Danh mục riêng & Bài có bản quyền (cập nhật 2026-10-29)
+
+1. Danh mục có quyền xem `visibility`: `public` | `private` (nội bộ — ban nhạc trở lên đã đăng nhập) | `admin_only`. Bài trong danh mục không công khai **bị ép theo danh mục**; đổi quyền danh mục áp dụng đồng loạt cho mọi bài (có xác nhận).
+2. XML của bài không công khai chỉ nằm ở `storage/private/xml/` (Apache chặn trực tiếp, Git bỏ qua); `xmlPath` là URL API `songs&action=xml&id=` có kiểm quyền. **Tuyệt đối không** đặt XML bản quyền vào `storage/Thanh ca/` hay `storage/users/*/imported/` (tải trực tiếp được) và không `git add -f` các đường dẫn đã bị ignore.
+3. Bài không công khai có mã bắt đầu `pv-`; `.gitignore` loại `storage/private/`, `storage/data/chord_sets/pv-*/`, `storage/data/annotations/pv-*`. Không đưa bài có bản quyền lên repo công khai.
+4. Mọi route làm việc theo mã bài đi qua `SongAccessGuard` (gọi trong `api/index.php`); route mới theo mã bài **phải** thêm vào `SongAccessGuard::ROUTES`. Không đọc bài bằng SQL trực tiếp mà bỏ qua `SongService::getById` / `visibilitySqlClause`; không đổi `songs.category_id` bằng `UPDATE` trực tiếp (dùng `SongService::update` để ép quyền).
+5. Mã mới phải chạy đúng khi web **chưa chạy migration** (kiểm bằng `DB::hasColumn`, như `SongService::categoryVisibility`). Chi tiết và quy trình cập nhật web: `docs/PRIVATE_CATALOG.md`.

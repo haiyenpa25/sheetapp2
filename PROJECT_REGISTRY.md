@@ -362,7 +362,7 @@ SheetApp/
 | `user_chord_sets` | `id, song_id, user_id, username, set_name, chords_json, is_public, checksum` | HD/TLH/default được bảo vệ cả khi gọi bằng alias |
 | `setlists` | `id, title, created_by, scheduled_date, status, leader_user_id` | Header chương trình |
 | `setlist_items` | `id, setlist_id, song_id, display_order, chord_profile, transpose_key, bpm, beats_per_measure, selected_verses` | Tông và tempo tập |
-| `categories` | `id, name, sort_order` | Danh mục bài |
+| `categories` | `id, name, slug, icon, description, display_order, visibility` | Danh mục bài; `visibility`: public/private/admin_only (migration 017) |
 | `users` | `id, username, password_hash, role, email, quiet_hours_start, quiet_hours_end` | `role: 'admin'\|'leader'\|'bannhac'\|'banhat'\|'viewer'` |
 | `omr_workspace` | `id, original_filename, status, musicxml_path, created_at` | OMR processing queue |
 | `domain_events` | `id, type, actor_user_id, subject_type, subject_id, payload_json` | Event log nội bộ phục vụ fan-out |
@@ -447,6 +447,13 @@ Ghi chú nằm trong `storage/data/annotations/*.json`; settings/notes theo user
 
 > Chỉ giữ 5 mục mới nhất. Nhật ký đầy đủ: `docs/history/CHANGELOG_2026.md`. Khi thêm mục mới, đưa mục cũ nhất ở đây sang file đó.
 
+## 2026-10-29 (b) — Danh mục riêng, thêm bài XML, chốt chặn quyền xem theo mã bài
+
+- Danh mục có quyền xem (`categories.visibility`: public/private/admin_only, migration 017 — **chạy `php tools/migrate.php` trên web**; trước đó mã vẫn chạy, coi mọi danh mục là công khai). Trang Quản lý → Quản Lý Thể Loại: nhãn quyền, đổi quyền đồng loạt (có xác nhận), nút "Thêm bài (XML)". Module mới `manager/js/manager-categories.js` (chuyển từ `manager-repertoire.js`).
+- Bài vào danh mục không công khai: ép riêng tư, mã `pv-…`, XML ở `storage/private/xml/` (`PrivateSongXmlService`, Apache chặn, Git bỏ qua), `xmlPath` là URL API `songs&action=xml&id=` kiểm quyền (404 cho người không được xem). `.gitignore` loại XML riêng và hợp âm/ghi chú `pv-*`.
+- Vá rò rỉ có sẵn: **không controller nào kiểm quyền xem bài theo mã** → thêm `api/core/SongAccessGuard.php` (hợp âm, ghi chú, xuất ChordPro, bản phối, tập luyện, phiên, đánh giá, chương trình); `ManagerRepertoireHelper` hết lộ danh mục riêng/đổi danh mục bỏ qua ép quyền; danh sách công khai, bộ nhớ đệm, chương trình cho viewer loại bài/danh mục không công khai; kiểm trùng tên danh mục tiếng Việt (SQLite `LOWER()` chỉ hạ ASCII).
+- Test: `tests/private_catalog_regression.php` (41 check), `e2e/private-catalog.spec.js` (Chromium + WebKit, bản sao cô lập), kiểm Apache 403 cho `storage/private/`. Bộ test strict: 242/244 (còn `library_tv2_gzip`, `liturgical_export_and_usage` lỗi sẵn). Hướng dẫn: `docs/PRIVATE_CATALOG.md`.
+
 ## 2026-10-29 — Tài khoản bannhac, chương trình chỉ cho người đăng nhập, HD mặc định, kiểm chồng lấn hợp âm
 
 - Tài khoản: `tools/create_band_user.php` (CLI, dry-run mặc định, mật khẩu lấy từ biến môi trường `SHEETAPP_USER_PASSWORD`, sao lưu trước khi ghi). Đã tạo `bannhac` (role `bannhac`, chord_code `BN`) trên CSDL local; CSDL web chạy cùng lệnh.
@@ -482,14 +489,3 @@ Ghi chú nằm trong `storage/data/annotations/*.json`; settings/notes theo user
 - `ROADMAPS.md` là chỉ mục duy nhất (luật thực thi chép từ ROADMAP3 Phần 0); roadmap/báo cáo đã xong chuyển vào `docs/history/`. Kế hoạch toàn hệ thống: `PHUONG_AN_TOI_UU_HE_THONG.md` (OPT-01…26).
 - Test/tool không còn ghi vào storage thật: backup r34, `audit.log`, mail giả; runner chặn rò rỉ bằng cổng K2. Tool dọn backup `tools/prune_backups.php` (dry-run mặc định). `sync.sh`/`sync.bat` không còn commit/push.
 - Nhật ký cũ tách sang `docs/history/CHANGELOG_2026.md`.
-
-## 2026-10-20 — Rà soát hiển thị Modern/Classic trên điện thoại, iPad, máy tính (server sheet.hyb.io.vn)
-
-- Quyền: 398 file thuộc root (gồm `songs_cache.json`, 81 object `.git`) đã trả về `sheet5566`; mọi lệnh kiểm thử chạy bằng `sheet5566`.
-- Cache danh sách bài: `SongService::cachePath()` chỉ dùng `storage/data/songs_cache.json` khi kết nối là DB production; DB bản sao/test/in-memory ghi cache riêng trong thư mục tạm. Trước đó test/CLI với DB khác ghi đè cache thật (khách thấy 1.731 bài/7 danh mục trong khi DB có 903).
-- Service Worker: precache thêm `?swv=<hash>` để vượt cache Cloudflare; asset có `?v=` mà cache không khớp thì lấy mạng trước (chỉ dùng bản cũ khi offline); trang đăng ký `sw.js?...&r=<filemtime>`. Khắc phục lỗi trộn HTML mới + JS/CSS cũ (vd. `URLState.interfaceUrl is not a function`). Server là OpenLiteSpeed: `Header set` trong `.htaccess` không có hiệu lực.
-- Modern điện thoại: ô tên bài co theo flex, không đè nút ⋯ (360–430px); ẩn nhãn danh mục khi ≤ 430px.
-- Classic: HD rỗng hiện TLH (Core Rule 1); hợp âm đầu bài không bị nhận nhầm là tiêu đề; điện thoại tự co zoom ≤ 75% như Modern; export `window.ChordCanvasUI/AppUI/PageNav/AdminUI` (thiếu `ChordCanvasUI` làm mọi ngưỡng căn hợp âm luôn tính như zoom 100%).
-- Căn hợp âm HD (cả hai): cộng dồn đoạn dòng kẻ cùng hàng để không sót hệ có ô nhịp ngắn; Classic lọc nốt theo hệ gần nhất và bỏ lọc theo viewport.
-- Kiểm chứng (Chromium headless): 5.000+ lượt đặt hợp âm HD qua 50–200% hai giao diện, máy tính và điện thoại; 10 tổ hợp thiết bị không tràn ngang/chồng lấn/lỗi console. PHP suite: không có suite FAIL mới so với HEAD trên cùng server (19 suite FAIL sẵn do môi trường CLI/HTTP, cũng FAIL ở HEAD). DB nguồn giữ nguyên checksum. Chưa commit.
-- Còn mở: điện thoại zoom ≥ 125% làm OSMD nén nốt chồng nhau (cả hai giao diện) — chờ chủ dự án chọn hướng.
