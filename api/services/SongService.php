@@ -10,12 +10,17 @@ require_once __DIR__ . '/../core/DB.php';
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/SongSearchHelper.php';
 require_once __DIR__ . '/SongVersionHelper.php';
+require_once __DIR__ . '/PrivateSongXmlService.php';
 
 class SongService {
 
     /** Resolve an existing MusicXML file strictly below a managed XML root. */
     public static function resolveManagedXmlPath(string $path): ?string {
         if ($path === '') return null;
+
+        // Bài không công khai: XML nằm ở vùng riêng tư, đường dẫn lưu trong CSDL là URL API (xem PrivateSongXmlService).
+        $privateId = PrivateSongXmlService::songIdFromApiPath($path);
+        if ($privateId !== null) return PrivateSongXmlService::filePath($privateId);
 
         $candidate = realpath($path);
         if ($candidate === false) {
@@ -32,6 +37,25 @@ class SongService {
             if ($candidate === $root || str_starts_with($candidate, $prefix)) return $candidate;
         }
         return null;
+    }
+
+    private const VISIBILITY_RANK = ['public' => 0, 'private' => 1, 'internal' => 1, 'admin_only' => 2];
+
+    /** Quyền xem của danh mục; cột chưa có (web chưa chạy migration 017) hoặc danh mục không tồn tại → 'public'. */
+    public static function categoryVisibility(int $categoryId): string {
+        if (!DB::hasColumn('categories', 'visibility')) return 'public';
+        $vis = DB::run('SELECT visibility FROM categories WHERE id = ?', [$categoryId])->fetchColumn();
+        if ($vis === false || $vis === null) return 'public';
+        $vis = strtolower(trim((string)$vis));
+        return isset(self::VISIBILITY_RANK[$vis]) ? $vis : 'private'; // giá trị lạ → đóng (an toàn)
+    }
+
+    /** Bài trong danh mục không công khai không được lỏng hơn danh mục. */
+    public static function clampToCategory(array $visInfo, int $categoryId): array {
+        $catVis = self::categoryVisibility($categoryId);
+        $songRank = self::VISIBILITY_RANK[$visInfo['visibility']] ?? 0;
+        if (self::VISIBILITY_RANK[$catVis] > $songRank) return ['visibility' => $catVis, 'is_public' => 0];
+        return $visInfo;
     }
 
     public static function cachePath(): string {
@@ -151,10 +175,23 @@ class SongService {
         if (Auth::isAdmin()) {
             return '1=1';
         }
-        if (Auth::isBanhat()) {
-            return "COALESCE({$prefix}visibility, 'public') != 'admin_only'";
+        // Lớp phòng thủ thứ hai: bài thuộc danh mục không công khai cũng bị ẩn (bỏ qua nếu web chưa chạy migration 017).
+        $categoryGuard = '';
+        if (DB::hasColumn('categories', 'visibility')) {
+            $allowed = Auth::isBanhat() ? "('public','private')" : "('public')";
+            $categoryGuard = " AND COALESCE((SELECT cv.visibility FROM categories cv WHERE cv.id = {$prefix}category_id), 'public') IN {$allowed}";
         }
-        return "(COALESCE({$prefix}is_public, 1) = 1 AND COALESCE({$prefix}visibility, 'public') = 'public')";
+        if (Auth::isBanhat()) {
+            return "(COALESCE({$prefix}visibility, 'public') != 'admin_only'" . $categoryGuard . ')';
+        }
+        return "(COALESCE({$prefix}is_public, 1) = 1 AND COALESCE({$prefix}visibility, 'public') = 'public'" . $categoryGuard . ')';
+    }
+
+    /** Người xem hiện tại có được thấy danh mục này không (public → ai cũng; private → ban nhạc trở lên; admin_only → admin). */
+    public static function viewerMayViewCategory(int $categoryId): bool {
+        $vis = self::categoryVisibility($categoryId);
+        if ($vis === 'public') return true;
+        return $vis === 'admin_only' ? Auth::isAdmin() : Auth::isBanhat();
     }
 
     public static function normalizeVisibility(array $data, ?string $defaultVisibility = 'public'): array {
@@ -198,7 +235,10 @@ class SongService {
         $generation ??= self::cacheGeneration($cacheFile);
         if ($generation === null) return;
         if ($publicSongs === null) {
-            $sql = "SELECT s.id, s.title, s.httlvnId, s.xmlPath, s.defaultKey, s.category_id, s.liturgical_season, s.theme, s.composer, s.tags, s.tempo, COALESCE(s.visibility, 'public') as visibility, COALESCE(s.is_public, 1) as is_public, s.created_by, c.name as category FROM songs s LEFT JOIN categories c ON s.category_id = c.id WHERE (COALESCE(s.is_public, 1) = 1 AND COALESCE(s.visibility, 'public') = 'public') ORDER BY COALESCE(c.display_order, s.category_id, 1) ASC, COALESCE(s.httlvnId, 999999) ASC, s.title ASC";
+            // Bộ nhớ đệm công khai: loại cả bài thuộc danh mục không công khai (bỏ qua nếu chưa có migration 017).
+            $publicCategoryGuard = DB::hasColumn('categories', 'visibility')
+                ? " AND COALESCE((SELECT cv.visibility FROM categories cv WHERE cv.id = s.category_id), 'public') = 'public'" : '';
+            $sql = "SELECT s.id, s.title, s.httlvnId, s.xmlPath, s.defaultKey, s.category_id, s.liturgical_season, s.theme, s.composer, s.tags, s.tempo, COALESCE(s.visibility, 'public') as visibility, COALESCE(s.is_public, 1) as is_public, s.created_by, c.name as category FROM songs s LEFT JOIN categories c ON s.category_id = c.id WHERE (COALESCE(s.is_public, 1) = 1 AND COALESCE(s.visibility, 'public') = 'public'{$publicCategoryGuard}) ORDER BY COALESCE(c.display_order, s.category_id, 1) ASC, COALESCE(s.httlvnId, 999999) ASC, s.title ASC";
             $publicSongs = DB::run($sql)->fetchAll();
         }
         $jsonPayload = json_encode($publicSongs, JSON_UNESCAPED_UNICODE);
@@ -238,7 +278,7 @@ class SongService {
                 $song = DB::run($sql, [$num])->fetch();
             }
         }
-        if ($song && !Auth::canViewSong($song)) {
+        if ($song && (!Auth::canViewSong($song) || !self::viewerMayViewCategory((int)($song['category_id'] ?? 1)))) {
             return null;
         }
         return $song ?: null;
@@ -271,7 +311,7 @@ class SongService {
         $season = trim($data['liturgical_season'] ?? '');
         $composer = trim($data['composer'] ?? '');
         $tags = trim($data['tags'] ?? '');
-        $visInfo = self::normalizeVisibility($data, 'public');
+        $visInfo = self::clampToCategory(self::normalizeVisibility($data, 'public'), $category_id);
         $createdBy = isset($data['created_by']) ? (int)$data['created_by'] : Auth::userId();
 
         $sql = "INSERT INTO songs (id, title, httlvnId, xmlPath, defaultKey, category_id, lyrics_text, theme, liturgical_season, composer, tags, visibility, is_public, created_by) 
@@ -304,6 +344,14 @@ class SongService {
         // Hỗ trợ alias categoryId -> category_id
         if (array_key_exists('categoryId', $data) && !array_key_exists('category_id', $data)) {
             $data['category_id'] = $data['categoryId'] !== null && $data['categoryId'] !== '' ? (int)$data['categoryId'] : 1;
+        }
+
+        // Đổi danh mục: quyền bài không được lỏng hơn danh mục mới.
+        if (array_key_exists('category_id', $data)) {
+            $want = $data['visibility'] ?? DB::run('SELECT visibility FROM songs WHERE id=?', [$id])->fetchColumn() ?: 'public';
+            $clamped = self::clampToCategory(self::normalizeVisibility(['visibility' => $want]), (int)$data['category_id']);
+            $data['visibility'] = $clamped['visibility'];
+            $data['is_public'] = $clamped['is_public'];
         }
 
         // Đồng bộ visibility & is_public nếu một trong hai được truyền vào

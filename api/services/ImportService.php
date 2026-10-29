@@ -50,7 +50,33 @@ class ImportService {
         throw new RuntimeException('Không thể tạo tên file MusicXML riêng');
     }
 
+    /** Bài không công khai (theo lựa chọn hoặc theo danh mục): XML vào vùng riêng tư, CSDL lưu URL API có kiểm quyền. */
+    private static function storePrivateSong(string $content, array $metadata): array {
+        if (($metadata['ext'] ?? 'xml') !== 'xml') {
+            throw new Exception('Bài riêng tư chỉ nhận file .xml hoặc .musicxml (không nhận .mxl)');
+        }
+        $key = _detectKey($content);
+        $song = _saveSong(DB::pdo(), $metadata['title'], 'pending', $key, $metadata['source'], $metadata);
+        try {
+            PrivateSongXmlService::store((string)$song['id'], $content);
+            $song['xmlPath'] = PrivateSongXmlService::apiPath((string)$song['id']);
+            DB::run('UPDATE songs SET xmlPath = ? WHERE id = ?', [$song['xmlPath'], $song['id']]);
+        } catch (Throwable $error) {
+            DB::run('DELETE FROM songs WHERE id = ?', [$song['id']]);
+            PrivateSongXmlService::remove((string)$song['id']);
+            throw $error;
+        }
+        self::finalizeImportedSong($song);
+        return ['success' => true, 'title' => $metadata['title'], 'key' => $key,
+            'visibility' => $song['visibility'], 'is_public' => $song['is_public'], 'song' => $song];
+    }
+
     private static function storeImportedSong(string $content, array $metadata): array {
+        $categoryId = !empty($metadata['category_id']) ? (int)$metadata['category_id'] : 1;
+        $effective = SongService::clampToCategory(SongService::normalizeVisibility($metadata, 'public'), $categoryId);
+        if ($effective['visibility'] !== 'public') {
+            return self::storePrivateSong($content, $metadata);
+        }
         $dir = self::resolveImportDir();
         [$filename, $path, $handle] = self::reserveImportFile($dir, $metadata);
         try {

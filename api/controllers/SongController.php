@@ -22,6 +22,17 @@ class SongController {
                         if ($method !== 'HEAD') echo $xml;
                         return;
                     }
+                    if ($action === 'xml') {
+                        // Phát MusicXML của bài sau khi kiểm quyền xem; không tồn tại và không được xem đều trả 404 (không lộ bài riêng tư).
+                        $song = SongService::getById(trim((string)($_GET['id'] ?? '')));
+                        $file = $song ? SongService::resolveManagedXmlPath((string)($song['xmlPath'] ?? '')) : null;
+                        if ($file === null || !is_file($file)) { Response::notFound('Không tìm thấy bản nhạc'); return; }
+                        header('Content-Type: application/xml; charset=utf-8');
+                        header('Cache-Control: private, no-store');
+                        header('X-Content-Type-Options: nosniff');
+                        if ($method !== 'HEAD') readfile($file);
+                        return;
+                    }
                     if ($action === 'get_versions' || $action === 'versions') {
                         $songId = $_GET['song_id'] ?? '';
                         if (!$songId) {

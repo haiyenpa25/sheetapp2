@@ -1519,3 +1519,15 @@ body.manager-body {
   border: 1px solid rgba(6, 182, 212, 0.25);
 }
 
+
+/* ── Danh mục: nhãn quyền xem, nút hành động, kết quả tải bài (manager-categories.js) ── */
+.vis-badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: .72rem; font-weight: 600; line-height: 1.6; white-space: nowrap; }
+.vis-public  { background: #dcfce7; color: #166534; }
+.vis-private { background: #fef3c7; color: #92400e; }
+.vis-admin   { background: #fee2e2; color: #991b1b; }
+.cat-card-actions { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; margin-top: auto; padding-top: .5rem; border-top: 1px solid var(--border); }
+.cat-card-actions .mgr-btn { min-height: 32px; touch-action: manipulation; }
+.upload-results { max-height: 200px; overflow: auto; font-size: .85rem; }
+.upload-row { padding: 4px 0; word-break: break-word; }
+.upload-ok { color: #4ade80; }
+.upload-fail { color: #f87171; }

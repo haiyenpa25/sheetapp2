@@ -76,6 +76,7 @@ $instrument = $_SESSION['instrument'] ?? 'Guitar';
   <script src="../assets/js/core/ApiService.js"></script>
   <script src="../assets/js/core/SafeHtml.js"></script>
   <script src="js/manager-repertoire.js?v=2.2.0"></script>
+  <script src="js/manager-categories.js?v=2.3.0"></script>
   <script src="js/manager-community.js?v=2.2.0"></script>
   <script src="js/manager-versions.js?v=2.2.0"></script>
   <script src="js/manager-users.js?v=2.2.0"></script>

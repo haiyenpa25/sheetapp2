@@ -156,7 +156,13 @@ function _generateFilename(string $title, string $ext, string $directory): strin
 }
 
 function _saveSong($pdo, string $title, string $xmlPath, string $key, string $source, array $options = []): array {
+    $categoryId = !empty($options['category_id']) ? (int)$options['category_id'] : (!empty($options['categoryId']) ? (int)$options['categoryId'] : 1);
+    // Bài trong danh mục không công khai không được lỏng hơn danh mục; bài không công khai mang tiền tố 'pv-'.
+    $visInfo = class_exists('SongService')
+        ? SongService::clampToCategory(SongService::normalizeVisibility($options, 'public'), $categoryId)
+        : ['visibility' => 'public', 'is_public' => 1];
     $id = _slugify($title) ?: 'song-' . time();
+    if ($visInfo['visibility'] !== 'public' && class_exists('PrivateSongXmlService')) $id = PrivateSongXmlService::ID_PREFIX . $id;
     $baseId  = $id;
     $counter = 1;
     while (true) {
@@ -167,11 +173,7 @@ function _saveSong($pdo, string $title, string $xmlPath, string $key, string $so
     }
 
     $httlvnId = !empty($options['httlvnId']) ? (int)$options['httlvnId'] : null;
-    $categoryId = !empty($options['category_id']) ? (int)$options['category_id'] : (!empty($options['categoryId']) ? (int)$options['categoryId'] : 1);
     $composer = trim((string)($options['composer'] ?? ''));
-    $visInfo = class_exists('SongService')
-        ? SongService::normalizeVisibility($options, 'public')
-        : ['visibility' => 'public', 'is_public' => 1];
     $createdBy = isset($options['created_by']) ? (int)$options['created_by'] : (class_exists('Auth') ? Auth::userId() : null);
 
     $stmt = $pdo->prepare("

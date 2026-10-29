@@ -20,7 +20,9 @@ class SetlistPublicReadService {
             i.custom_title, i.duration_minutes, i.selected_verses,
             so.title AS song_title, so.defaultKey, so.httlvnId
             FROM setlist_items i LEFT JOIN songs so ON so.id=i.song_id
-            WHERE i.setlist_id=? ORDER BY i.display_order, i.id", [$id])->fetchAll(PDO::FETCH_ASSOC);
+            WHERE i.setlist_id=?
+              AND (i.song_id IS NULL OR so.id IS NULL OR (COALESCE(so.is_public, 1) = 1 AND COALESCE(so.visibility, 'public') = 'public'))
+            ORDER BY i.display_order, i.id", [$id])->fetchAll(PDO::FETCH_ASSOC);
         return $plan;
     }
 

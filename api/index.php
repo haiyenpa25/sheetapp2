@@ -39,6 +39,10 @@ if (!RequestSecurity::isAllowedRequest($_SERVER, $method, FeatureFlags::isEnable
     exit;
 }
 
+// Mọi route làm việc theo mã bài chỉ chạy tiếp nếu người dùng được xem bài đó (bài riêng tư → 404).
+require_once __DIR__ . '/core/SongAccessGuard.php';
+SongAccessGuard::enforce($route);
+
 try {
     switch ($route) {
         case 'client_log':

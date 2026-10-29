@@ -25,7 +25,7 @@ class CategoryController {
                         Response::error('Missing name'); 
                         return; 
                     }
-                    $result = CategoryService::create($body['name']);
+                    $result = CategoryService::create((string)$body['name'], (string)($body['visibility'] ?? 'public'));
                     Response::ok($result);
                     break;
 
@@ -33,11 +33,15 @@ class CategoryController {
                     Auth::requireAdmin();
                     $id   = $_GET['id'] ?? null;
                     $body = json_decode(file_get_contents('php://input'), true) ?? [];
-                    if (!$id || empty($body['name'])) { 
-                        Response::error('Missing id or name'); 
-                        return; 
+                    if (!$id || (empty($body['name']) && empty($body['visibility']))) {
+                        Response::error('Missing id, name or visibility');
+                        return;
                     }
-                    $result = CategoryService::update((int)$id, $body['name']);
+                    $result = CategoryService::update(
+                        (int)$id,
+                        isset($body['name']) ? (string)$body['name'] : null,
+                        isset($body['visibility']) ? (string)$body['visibility'] : null
+                    );
                     Response::ok($result);
                     break;
 

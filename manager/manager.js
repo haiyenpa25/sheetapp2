@@ -60,6 +60,7 @@ const ManagerApp = (() => {
       loadMyContributions: () => window.ManagerUsers?.loadMyContributions?.()
     };
     window.ManagerRepertoire?.init(ctx);
+    window.ManagerCategories?.init(ctx);
     window.ManagerCommunity?.init(ctx);
     window.ManagerVersions?.init(ctx);
     window.ManagerUsers?.init(ctx);
@@ -111,7 +112,7 @@ const ManagerApp = (() => {
   async function _loadInitialData() {
     await Promise.all([
       loadStats(),
-      window.ManagerRepertoire?.loadCategories?.(),
+      window.ManagerCategories?.loadCategories?.(),
       window.ManagerRepertoire?.loadRepertoire?.(),
       window.ManagerCommunity?.loadCommunityChords?.(),
       window.ManagerVersions?.loadVersions?.(),
@@ -382,15 +383,10 @@ const ManagerApp = (() => {
     document.getElementById('form-create-user')?.addEventListener('submit', (e) => window.ManagerUsers?.handleCreateUserSubmit?.(e));
     document.getElementById('form-edit-user')?.addEventListener('submit', (e) => window.ManagerUsers?.handleEditUserSubmit?.(e));
 
-    document.getElementById('btn-add-category-modal')?.addEventListener('click', () => {
-      document.getElementById('cat-modal-title').textContent = '📂 Thêm Thể Loại Mới';
-      document.getElementById('cat-edit-id').value = '';
-      document.getElementById('cat-edit-name').value = '';
-      document.getElementById('cat-edit-desc').value = '';
-      document.getElementById('cat-edit-icon').value = '🎵';
-      openModal('modal-category');
-    });
-    document.getElementById('form-manage-category')?.addEventListener('submit', (e) => window.ManagerRepertoire?.handleCategorySubmit?.(e));
+    document.getElementById('btn-add-category-modal')?.addEventListener('click', () => window.ManagerCategories?.newCategory?.());
+    document.getElementById('cat-edit-visibility')?.addEventListener('change', () => window.ManagerCategories?.fillVisibilityNote?.());
+    document.getElementById('form-manage-category')?.addEventListener('submit', (e) => window.ManagerCategories?.handleCategorySubmit?.(e));
+    document.getElementById('form-upload-song')?.addEventListener('submit', (e) => window.ManagerCategories?.handleUploadSubmit?.(e));
 
     // Tab 3 MusicXML Versions triggers
     document.getElementById('btn-tab-create-version')?.addEventListener('click', () => {
@@ -512,9 +508,10 @@ const ManagerApp = (() => {
     loadVersions: () => window.ManagerVersions?.loadVersions?.(),
     deleteVersion: (vId, name) => window.ManagerVersions?.deleteVersion?.(vId, name),
     toggleVersionRecommend: (vId) => window.ManagerVersions?.toggleVersionRecommend?.(vId),
-    filterByCategory: (catId) => window.ManagerRepertoire?.filterByCategory?.(catId),
-    editCategory: (id, name, icon, desc) => window.ManagerRepertoire?.editCategory?.(id, name, icon, desc),
-    deleteCategory: (id) => window.ManagerRepertoire?.deleteCategory?.(id),
+    filterByCategory: (catId) => window.ManagerCategories?.filterByCategory?.(catId),
+    editCategory: (id) => window.ManagerCategories?.editCategory?.(id),
+    deleteCategory: (id) => window.ManagerCategories?.deleteCategory?.(id),
+    openUploadSongs: (catId) => window.ManagerCategories?.openUpload?.(catId),
     updateUserRole: (uId, role) => window.ManagerUsers?.updateUserRole?.(uId, role),
     resetUserPass: (uId, uName) => window.ManagerUsers?.resetUserPass?.(uId, uName),
     toggleUserStatus: (uId, uName) => window.ManagerUsers?.toggleUserStatus?.(uId, uName),

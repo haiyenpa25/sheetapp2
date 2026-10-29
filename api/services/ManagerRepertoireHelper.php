@@ -128,14 +128,8 @@ class ManagerRepertoireHelper {
         $pdo = DB::get();
 
         if ($action === 'list') {
-            return $pdo->query("
-                SELECT c.id, c.name, c.slug, c.icon, c.description, c.display_order,
-                       COUNT(s.id) as song_count
-                FROM categories c
-                LEFT JOIN songs s ON c.id = s.category_id
-                GROUP BY c.id
-                ORDER BY c.display_order ASC, c.id ASC
-            ")->fetchAll(PDO::FETCH_ASSOC);
+            // Chỉ trả danh mục người xem được thấy (kèm quyền xem và số bài được thấy) — không lộ danh mục riêng.
+            return CategoryService::getAll();
         }
 
         Auth::requireAdmin();
@@ -148,11 +142,14 @@ class ManagerRepertoireHelper {
                 $order = (int)($data['display_order'] ?? 10);
                 if (!$name) return ['success' => false, 'message' => 'Tên danh mục không được để trống'];
 
-                $slug = preg_replace('/[^a-z0-9\-]/', '', strtolower(str_replace(' ', '-', $name))) ?: 'cat-' . time();
-                $ins = $pdo->prepare("INSERT INTO categories (name, slug, icon, description, display_order) VALUES (?, ?, ?, ?, ?)");
-                $ins->execute([$name, $slug, $icon, $desc, $order]);
-                SongService::invalidateCache();
-                return ['success' => true, 'message' => "Đã thêm danh mục '{$name}'!"];
+                try {
+                    $cat = CategoryService::create($name, (string)($data['visibility'] ?? 'public'));
+                } catch (InvalidArgumentException $e) {
+                    return ['success' => false, 'message' => $e->getMessage()];
+                }
+                $pdo->prepare("UPDATE categories SET icon = ?, description = ?, display_order = ? WHERE id = ?")
+                    ->execute([$icon, $desc, $order, $cat['id']]);
+                return ['success' => true, 'message' => "Đã thêm danh mục '{$name}'!", 'category' => $cat];
 
             case 'update':
                 $id = (int)($data['id'] ?? 0);
@@ -162,10 +159,16 @@ class ManagerRepertoireHelper {
                 $order = (int)($data['display_order'] ?? 0);
                 if (!$id || !$name) return ['success' => false, 'message' => 'Thiếu dữ liệu'];
 
-                $upd = $pdo->prepare("UPDATE categories SET name = ?, icon = ?, description = ?, display_order = ? WHERE id = ?");
-                $upd->execute([$name, $icon, $desc, $order, $id]);
+                try {
+                    $res = CategoryService::update($id, $name, isset($data['visibility']) ? (string)$data['visibility'] : null);
+                } catch (InvalidArgumentException $e) {
+                    return ['success' => false, 'message' => $e->getMessage()];
+                }
+                $pdo->prepare("UPDATE categories SET icon = ?, description = ?, display_order = ? WHERE id = ?")
+                    ->execute([$icon, $desc, $order, $id]);
                 SongService::invalidateCache();
-                return ['success' => true, 'message' => "Đã cập nhật danh mục '{$name}'!"];
+                $note = $res['songs_changed'] > 0 ? " Đã áp dụng quyền xem mới cho {$res['songs_changed']} bài." : '';
+                return ['success' => true, 'message' => "Đã cập nhật danh mục '{$name}'!" . $note, 'songs_changed' => $res['songs_changed']];
 
             case 'delete':
                 $id = (int)($data['id'] ?? 0);
@@ -301,9 +304,10 @@ class ManagerRepertoireHelper {
             return ['success' => false, 'message' => 'Thể loại không tồn tại'];
         }
 
-        $upd = $pdo->prepare("UPDATE songs SET category_id = ? WHERE id = ?");
-        $upd->execute([$categoryId, $songId]);
-        SongService::invalidateCache();
+        // Phải đi qua SongService::update để quyền của bài được ép theo quyền danh mục mới.
+        if (!SongService::getById($songId)) return ['success' => false, 'message' => 'Không tìm thấy bài hát'];
+        $res = SongService::update($songId, ['category_id' => $categoryId]);
+        if (empty($res['success'])) return ['success' => false, 'message' => $res['message'] ?? 'Không thể cập nhật thể loại'];
 
         return ['success' => true, 'message' => 'Đã cập nhật thể loại bài hát thành công!'];
     }

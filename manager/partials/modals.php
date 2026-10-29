@@ -392,9 +392,46 @@
             <label class="mgr-label">Mô tả ngắn</label>
             <input type="text" id="cat-edit-desc" class="mgr-input" placeholder="Mô tả nội dung của danh mục...">
           </div>
+          <div class="mgr-form-group">
+            <label class="mgr-label">Ai được xem danh mục này?</label>
+            <select id="cat-edit-visibility" class="mgr-input">
+              <option value="public">🌐 Công khai — ai cũng xem được</option>
+              <option value="private">🔒 Nội bộ — chỉ ban nhạc trở lên (đã đăng nhập)</option>
+              <option value="admin_only">🛡️ Chỉ admin</option>
+            </select>
+            <small id="cat-visibility-note" class="text-muted"></small>
+          </div>
           <div class="mgr-modal-actions">
             <button type="button" class="mgr-btn mgr-btn-ghost" data-close="modal-category">Hủy Bỏ</button>
             <button type="submit" class="mgr-btn mgr-btn-primary">Lưu Danh Mục</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5b. MODAL THÊM BÀI (MusicXML) VÀO DANH MỤC -->
+  <div class="mgr-modal-overlay hidden" id="modal-upload-song">
+    <div class="mgr-modal-box" style="max-width: 520px;">
+      <div class="mgr-modal-header">
+        <h3 class="mgr-modal-title">➕ Thêm bài (MusicXML)</h3>
+        <button class="mgr-modal-close" data-close="modal-upload-song">✕</button>
+      </div>
+      <div class="mgr-modal-body">
+        <form id="form-upload-song" class="mgr-form">
+          <div class="mgr-form-group">
+            <label class="mgr-label">Danh mục</label>
+            <div id="upload-song-category"></div>
+            <small id="upload-song-note" class="text-muted"></small>
+          </div>
+          <div class="mgr-form-group">
+            <label class="mgr-label">File MusicXML (chọn được nhiều file)</label>
+            <input type="file" id="upload-song-files" class="mgr-input" accept=".xml,.musicxml,.mxl" multiple>
+          </div>
+          <div id="upload-song-results" class="upload-results"></div>
+          <div class="mgr-modal-actions">
+            <button type="button" class="mgr-btn mgr-btn-ghost" data-close="modal-upload-song">Đóng</button>
+            <button type="submit" id="btn-upload-song-submit" class="mgr-btn mgr-btn-primary">Tải lên</button>
           </div>
         </form>
       </div>
