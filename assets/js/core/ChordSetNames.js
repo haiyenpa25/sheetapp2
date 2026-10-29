@@ -15,12 +15,12 @@ const ChordSetNames = (() => {
   function describe(status = readStatus()) {
     if (status.currentSet === TLH) return 'TLH (gốc)';
     if (status.customCount > 0) return `${status.currentSet} · ${status.customCount} hợp âm`;
-    return `${status.currentSet} (chưa có)` + (status.currentSet === HD && status.xmlCount > 0 ? ' · đang hiện TLH' : '');
+    return `${status.currentSet} (chưa có)` + (window.AppRules?.HD_EMPTY_SHOWS_TLH === true && status.currentSet === HD && status.xmlCount > 0 ? ' · đang hiện TLH' : '');
   }
 
   function short(status = readStatus()) {
     if (status.currentSet === TLH) return 'TLH';
-    if (status.currentSet === HD) return status.customCount === 0 && status.xmlCount > 0 ? 'HD→TLH' : HD;
+    if (status.currentSet === HD) return window.AppRules?.HD_EMPTY_SHOWS_TLH === true && status.customCount === 0 && status.xmlCount > 0 ? 'HD→TLH' : HD;
     return status.currentSet.length > 4 ? status.currentSet.slice(0, 3) + '…' : status.currentSet;
   }
 

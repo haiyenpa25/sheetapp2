@@ -28,10 +28,21 @@ var KeyService = (typeof window !== 'undefined' ? window.KeyService : null) || (
   // Tên nốt sang Fifths (để nhận biết tông thăng hay tông giáng)
   const KEY_TO_FIFTHS = {
     'C': 0, 'G': 1, 'D': 2, 'A': 3, 'E': 4, 'B': 5, 'F#': 6, 'C#': 7,
-    'F': -1, 'Bb': -2, 'Eb': -3, 'Ab': -4, 'Db': -5, 'Gb': -6, 'Cb': -7,
+    'F': -1, 'Bb': -2, 'A#': -2, 'Eb': -3, 'D#': -3, 'Ab': -4, 'G#': -4, 'Db': -5, 'Gb': -6, 'Cb': -7,
     'Am': 0, 'Em': 1, 'Bm': 2, 'F#m': 3, 'C#m': 4, 'G#m': 5, 'D#m': 6, 'A#m': 7,
     'Dm': -1, 'Gm': -2, 'Cm': -3, 'Fm': -4, 'Bbm': -5, 'Ebm': -6, 'Abm': -7
   };
+
+  const _SEMITONE_FIFTHS_OFFSET = [0, -5, 2, -3, 4, -1, 6, 1, -4, 3, -2, 5];
+
+  function calcTransposedFifths(origFifths, semitones) {
+    if (typeof origFifths !== 'number' || isNaN(origFifths)) return 0;
+    const norm = ((semitones % 12) + 12) % 12;
+    let newF = origFifths + _SEMITONE_FIFTHS_OFFSET[norm];
+    while (newF > 6) newF -= 12;
+    while (newF < -6) newF += 12;
+    return newF;
+  }
 
   // Chroma index (0-11)
   const NOTE_TO_CHROMA = {
@@ -120,6 +131,11 @@ var KeyService = (typeof window !== 'undefined' ? window.KeyService : null) || (
 
     const s = parseInt(semis, 10) || 0;
     if (s === 0) {
+      if (!origKeyInfo.isMinor) {
+        if (origKeyInfo.root === 'A#') return 'Bb';
+        if (origKeyInfo.root === 'G#') return 'Ab';
+        if (origKeyInfo.root === 'D#') return 'Eb';
+      }
       return origKeyInfo.cleanKey;
     }
 
@@ -169,13 +185,28 @@ var KeyService = (typeof window !== 'undefined' ? window.KeyService : null) || (
     return displayKey(keyStr, 0);
   }
 
+  function getFifths(keyStr) {
+    const parsed = parseKey(keyStr);
+    return parsed ? parsed.fifths : 0;
+  }
+
+  function isMinorKey(keyStr) {
+    const parsed = parseKey(keyStr);
+    return parsed ? parsed.isMinor : false;
+  }
+
   return {
     displayKey,
     parseKey,
     fifthsToKey,
     normalizeKey,
+    calcTransposedFifths,
+    getFifths,
+    isMinorKey,
     FIFTHS_TO_KEY_MAJOR,
     FIFTHS_TO_KEY_MINOR,
+    FIFTHS_MAJOR: FIFTHS_TO_KEY_MAJOR,
+    FIFTHS_MINOR: FIFTHS_TO_KEY_MINOR,
     KEY_TO_FIFTHS
   };
 })();

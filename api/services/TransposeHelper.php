@@ -42,32 +42,96 @@ class TransposeHelper {
         $suffix = $m[2] ?? '';
         $bass   = $m[4] ?? null;
 
-        if ($useFlats === null) {
-            $useFlats = self::hasFlat($chord);
-        }
-
-        $arr = $useFlats ? self::NOTES_FLAT : self::NOTES_SHARP;
-
-        $idx = array_search($root, self::NOTES_SHARP, true);
-        if ($idx === false) {
-            $idx = array_search($root, self::NOTES_FLAT, true);
-        }
-        if ($idx === false) {
+        $idx = self::noteChroma($root);
+        if ($idx === -1) {
             return $chord;
         }
 
-        $newRoot = $arr[(($idx + $semitones) % 12 + 12) % 12];
+        $isMinorOrDim = self::isMinorOrDimSuffix($suffix);
+        $newRoot = self::resolveRootSpell((($idx + $semitones) % 12 + 12) % 12, $isMinorOrDim, $useFlats, $root);
         $result = $newRoot . $suffix;
 
         if ($bass !== null) {
-            $bi = array_search($bass, self::NOTES_SHARP, true);
-            if ($bi === false) {
-                $bi = array_search($bass, self::NOTES_FLAT, true);
-            }
-            $newBass = ($bi !== false) ? $arr[(($bi + $semitones) % 12 + 12) % 12] : $bass;
+            $bi = self::noteChroma($bass);
+            $newBass = ($bi !== -1)
+                ? self::resolveBassSpell((($bi + $semitones) % 12 + 12) % 12, $newRoot, $isMinorOrDim, $useFlats)
+                : $bass;
             $result .= '/' . $newBass;
         }
 
         return $result;
+    }
+
+    private static function isMinorOrDimSuffix(string $suffix): bool {
+        return preg_match('/^(m(?!aj)|min|dim|ø|°|-)/iu', $suffix) === 1;
+    }
+
+    private static function noteChroma(string $note): int {
+        if ($note === '') {
+            return -1;
+        }
+        $clean = strtoupper($note[0]) . ($note[1] ?? '');
+        $idx = array_search($clean, self::NOTES_SHARP, true);
+        if ($idx === false) {
+            $idx = array_search($clean, self::NOTES_FLAT, true);
+        }
+        if ($idx !== false) {
+            return (int)$idx;
+        }
+        return ['Cb' => 11, 'B#' => 0, 'Fb' => 4, 'E#' => 5][$clean] ?? -1;
+    }
+
+    /**
+     * Chọn tên gốc hợp âm chuẩn Thánh Ca (RULE.md §1.1): hợp âm trưởng ở bậc 3/8/10 luôn là Eb/Ab/Bb;
+     * hợp âm thứ/dim theo dấu hoá của tông.
+     */
+    private static function resolveRootSpell(int $chroma, bool $isMinorOrDim, ?bool $useFlats, string $origRoot): string {
+        $origHasFlat  = str_contains($origRoot, 'b') || $origRoot === 'F';
+        $origHasSharp = str_contains($origRoot, '#');
+
+        if (!$isMinorOrDim) {
+            if ($chroma === 3) return 'Eb';
+            if ($chroma === 8) return 'Ab';
+            if ($chroma === 10) return 'Bb';
+            if ($chroma === 1) {
+                if ($useFlats === true) return 'Db';
+                if ($useFlats === false) return 'C#';
+                return $origHasFlat ? 'Db' : (in_array($origRoot, ['D', 'B'], true) ? 'C#' : 'Db');
+            }
+            if ($chroma === 6) {
+                if ($useFlats === true) return 'Gb';
+                if ($useFlats === false) return 'F#';
+                return $origHasFlat ? 'Gb' : 'F#';
+            }
+            return self::NOTES_FLAT[$chroma];
+        }
+
+        switch ($chroma) {
+            case 1:  return ($useFlats === true && $origHasFlat) ? 'Db' : 'C#';
+            case 3:  return ($useFlats === true || ($useFlats === null && $origHasFlat)) ? 'Eb' : 'D#';
+            case 6:  return ($useFlats === true && $origHasFlat) ? 'Gb' : 'F#';
+            case 8:  return ($useFlats === true || ($useFlats === null && $origHasFlat)) ? 'Ab' : 'G#';
+            case 10: return ($useFlats === false || ($useFlats === null && $origHasSharp)) ? 'A#' : 'Bb';
+            default: return self::NOTES_FLAT[$chroma];
+        }
+    }
+
+    private static function resolveBassSpell(int $chroma, string $newRoot, bool $isMinorOrDim, ?bool $useFlats): string {
+        if (
+            str_contains($newRoot, 'b') || $newRoot === 'F'
+            || ($isMinorOrDim && in_array($newRoot, ['C', 'F', 'G', 'D', 'Bb', 'Eb', 'Ab'], true))
+        ) {
+            return self::NOTES_FLAT[$chroma];
+        }
+        if (
+            str_contains($newRoot, '#')
+            || (!$isMinorOrDim && in_array($newRoot, ['G', 'D', 'A', 'E', 'B'], true))
+            || ($isMinorOrDim && in_array($newRoot, ['E', 'B'], true))
+        ) {
+            return self::NOTES_SHARP[$chroma];
+        }
+        if ($useFlats === true) return self::NOTES_FLAT[$chroma];
+        if ($useFlats === false) return self::NOTES_SHARP[$chroma];
+        return in_array($chroma, [3, 8, 10], true) ? self::NOTES_FLAT[$chroma] : self::NOTES_SHARP[$chroma];
     }
 }

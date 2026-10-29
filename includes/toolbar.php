@@ -427,7 +427,7 @@
     </div>
 </header>
 
-<!-- MOBILE BOTTOM THUMB BAR (Ticket L1-8: Thanh điều khiển cạnh dưới cho ngón cái) -->
+<!-- MOBILE BOTTOM THUMB BAR (Ticket L1-8 & R9 UI-2: Thanh điều khiển cạnh dưới cho điện thoại) -->
 <nav class="mobile-thumb-bar" id="mobile-thumb-bar" aria-label="Thanh điều khiển nhanh cho điện thoại">
   <div class="mobile-thumb-group mobile-transpose-group" role="group" aria-label="Dịch giọng">
     <button id="btn-mobile-transpose-down" class="btn-thumb-action" title="Hạ 1 nửa cung" aria-label="Hạ tông">−</button>
@@ -435,10 +435,27 @@
     <button id="btn-mobile-transpose-up" class="btn-thumb-action" title="Tăng 1 nửa cung" aria-label="Tăng tông">+</button>
   </div>
 
+  <div class="mobile-thumb-group mobile-zoom-group" role="group" aria-label="Thu phóng và khóa">
+    <select id="mobile-zoom-select" class="mobile-zoom-select" title="Chọn mức phóng to (Zoom)" aria-label="Chọn mức phóng to">
+      <option value="50">50%</option><option value="60">60%</option><option value="70">70%</option>
+      <option value="80">80%</option><option value="90">90%</option><option value="100" selected>100%</option>
+      <option value="110">110%</option><option value="120">120%</option><option value="130">130%</option>
+      <option value="140">140%</option><option value="150">150%</option><option value="175">175%</option><option value="200">200%</option>
+    </select>
+    <button id="btn-mobile-lock-zoom" class="btn-thumb-action" title="Khóa tỷ lệ phóng to (giữ nguyên khi đổi bài)" aria-label="Khóa thu phóng" aria-pressed="false"><?= icon('unlock') ?></button>
+  </div>
+
   <div class="mobile-thumb-group mobile-chordset-group" role="group" aria-label="Bộ hợp âm">
     <button id="btn-mobile-chordset" class="btn-thumb-chordset" title="Chọn bản phối hợp âm" aria-label="Bộ hợp âm: HD. Chạm để đổi">
       <span class="thumb-icon"><?= icon('guitar') ?></span>
       <span id="mobile-chordset-label" class="thumb-label">HD</span>
+    </button>
+  </div>
+
+  <div class="mobile-thumb-group mobile-tempo-group" role="group" aria-label="Nhịp độ BPM">
+    <button id="btn-mobile-tempo" class="btn-thumb-tempo" title="Nhịp độ (BPM) &amp; Đếm nhịp" aria-label="Nhịp độ BPM">
+      <span class="thumb-icon">♩</span>
+      <span id="mobile-bpm-val" class="thumb-label">90</span>
     </button>
   </div>
 

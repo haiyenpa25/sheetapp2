@@ -96,6 +96,28 @@ const MobileController = (() => {
       document.getElementById('btn-fullscreen')?.click();
     });
 
+    // 5. R9 UI-2: Zoom + Khóa Zoom & Tempo ngoài mặt trước điện thoại
+    document.getElementById('mobile-zoom-select')?.addEventListener('change', (e) => {
+      const pct = parseInt(e.target.value, 10) || 100;
+      if (window.App?.setZoom) window.App.setZoom(pct);
+      else {
+        const zs = document.getElementById('zoom-slider');
+        if (zs) { zs.value = String(pct); zs.dispatchEvent(new Event('change')); }
+      }
+      setTimeout(sync, 40);
+    });
+    document.getElementById('btn-mobile-lock-zoom')?.addEventListener('click', (e) => {
+      e.currentTarget.blur();
+      document.getElementById('btn-lock-zoom')?.click();
+      setTimeout(sync, 40);
+    });
+    document.getElementById('btn-mobile-tempo')?.addEventListener('click', (e) => {
+      e.currentTarget.blur();
+      const tempoBtn = document.getElementById('si-tempo-pill') || document.getElementById('btn-menu-metronome');
+      tempoBtn?.click();
+      setTimeout(sync, 60);
+    });
+
     document.getElementById('btn-mobile-edit')?.addEventListener('click', (e) => {
       e.currentTarget.blur();
       if (!window.Auth?.isBanhat?.()) return;
@@ -135,6 +157,30 @@ const MobileController = (() => {
     _syncChordSetDisplay();
     _syncViewToggleDisplay();
     _syncEditDisplay();
+    _syncZoomAndTempoDisplay();
+  }
+
+  function _syncZoomAndTempoDisplay() {
+    const zSel = document.getElementById('mobile-zoom-select');
+    if (zSel) {
+      const mainZ = document.getElementById('zoom-slider');
+      const curPct = mainZ?.value ? parseInt(mainZ.value, 10) : Math.round((window.Store?.get?.('currentZoom') || window.App?.getCurrentZoom?.() || 1) * 100);
+      if (curPct && Array.from(zSel.options).length) {
+        const best = Array.from(zSel.options).reduce((a, b) => Math.abs(parseInt(b.value, 10) - curPct) < Math.abs(parseInt(a.value, 10) - curPct) ? b : a);
+        zSel.value = best.value;
+      }
+    }
+    const lockBtn = document.getElementById('btn-mobile-lock-zoom');
+    if (lockBtn) {
+      const locked = (window.SafeStorage ? window.SafeStorage.get('sheetapp_zoom_locked') : localStorage.getItem('sheetapp_zoom_locked')) === '1'
+        || Boolean(document.getElementById('btn-lock-zoom')?.classList.contains('active'));
+      lockBtn.classList.toggle('active', locked);
+      lockBtn.setAttribute('aria-pressed', String(locked));
+      lockBtn.innerHTML = `<svg class="icon icon-xs" aria-hidden="true"><use href="#icon-${locked ? 'lock' : 'unlock'}"/></svg>`;
+    }
+    const bpmVal = document.getElementById('mobile-bpm-val');
+    const siBpm = document.getElementById('si-bpm-val');
+    if (bpmVal && siBpm?.textContent) bpmVal.textContent = siBpm.textContent.trim();
   }
 
   function _syncTransposeDisplay() {

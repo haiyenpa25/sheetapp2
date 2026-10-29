@@ -160,9 +160,10 @@
           </button>
           <h3 id="setlist-detail-title" class="setlist-detail-title">Chương trình</h3>
           <div class="d-flex items-center gap-1">
+            <button id="btn-share-setlist" class="icon-btn-xs" title="Copy link chương trình (người nhận cần đăng nhập để xem)"><?= icon('share-2') ?></button>
             <button id="btn-print-setlist" class="icon-btn-xs" title="In Tập Chương Trình A4"><?= icon('printer') ?></button>
             <button id="btn-copy-setlist-slide" class="icon-btn-xs" title="Copy Danh Sách Cho Slide Màn Hình"><?= icon('copy') ?></button>
-            <button id="btn-play-setlist" class="btn btn-sm btn-primary">Phát</button>
+            <button id="btn-play-setlist" class="btn btn-sm btn-primary" title="Vào đánh theo thứ tự chương trình">Phát</button>
           </div>
         </div>
 

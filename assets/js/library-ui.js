@@ -128,9 +128,10 @@ const LibraryUI = (() => {
     const itemH = _getItemH();
     const gap = parseFloat(window.getComputedStyle(el).rowGap) || 0;
     const listTop = container === el ? 0 : el.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
-    const st = Math.max(0, container.scrollTop - listTop), vh = container.clientHeight || 600, total = _virtualSongs.length;
-    const start = Math.max(0, Math.floor(st / itemH) - V_BUFFER);
-    const end = Math.min(total, Math.ceil((st + vh) / itemH) + V_BUFFER);
+    const st = Math.max(0, container.scrollTop - listTop), vh = Math.max(container.clientHeight || 0, 320), total = _virtualSongs.length;
+    const rawStart = Math.max(0, Math.floor(st / itemH) - V_BUFFER);
+    const start = rawStart >= total ? Math.max(0, total - Math.ceil(vh / itemH) - V_BUFFER) : rawStart;
+    const end = Math.min(total, Math.max(start + 1, Math.ceil((st + vh) / itemH) + V_BUFFER));
     const topPad = start * itemH, bottomPad = Math.max(0, (total - end) * itemH);
     const frag = document.createDocumentFragment();
     if (topPad > 0) { const topDiv = document.createElement('div'); topDiv.className = 'virtual-spacer'; topDiv.style.height = `${Math.max(0, topPad - gap)}px`; frag.appendChild(topDiv); }
@@ -168,15 +169,13 @@ const LibraryUI = (() => {
 
     // Ticket L2-2: Ảo hoá danh sách khi danh sách lớn (> 35 bài)
     if (list.length > 35 && !(isSearch && hasLyricMatches)) {
+      const prevLen = _virtualSongs ? _virtualSongs.length : -1;
       _virtualSongs = list;
       const container = el.closest('.song-list-container') || el;
+      if (container && !opts.appendPage && (isSearch || prevLen !== list.length)) { container.scrollTop = 0; _measuredItemH = 0; }
       if (container && !_vScrollBound) {
         _vScrollBound = true;
-        const onScroll = () => {
-          if (!_virtualSongs) return;
-          cancelAnimationFrame(_virtualRaf);
-          _virtualRaf = requestAnimationFrame(_renderVirtualChunk);
-        };
+        const onScroll = () => { if (!_virtualSongs) return; cancelAnimationFrame(_virtualRaf); _virtualRaf = requestAnimationFrame(_renderVirtualChunk); };
         container.addEventListener('scroll', onScroll, { passive: true });
         if (el !== container) el.addEventListener('scroll', onScroll, { passive: true });
       }
@@ -323,7 +322,7 @@ const LibraryUI = (() => {
     if ((q || season || theme) && window.LibrarySearch) {
       try {
         const categoryId = catSongs.find(s => s.category === cat)?.category_id;
-        const handled = await window.LibrarySearch.run(q, { season, theme, category: cat, category_id: cat ? categoryId : null, mode: _searchMode, sort: mode }, render, _updateCount);
+        const handled = await window.LibrarySearch.run(q, { season, theme, category: cat, category_id: cat ? categoryId : null, mode: _searchMode, sort: mode, allowLocalFallback: songs.length > 0 }, render, _updateCount);
         if (seq !== _searchSeq) return;
         if (handled) return;
       } catch (err) { /* fallback local */ }

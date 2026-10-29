@@ -5,6 +5,8 @@ const ChordCanvasDots = (() => {
   'use strict';
   const DOT_CLASS = 'cc-note-dot', BTN_CLASS = 'cc-dot-btn';
   const STAFF_LINE_MIN_WIDTH = 100, CHORD_GAP_RATIO = 0.35;
+  const DOT_GAP_PX = 2, DOT_MAX_SHIFT_PX = 36; // chấm "+" chỉ được dời tối đa ngần này để vẫn gần nốt gốc
+  const MIN_CHORD_FONT_PX = 12; // RULE.md §3.2: chữ hợp âm tối thiểu 12px kể cả khi zoom nhỏ
 
   function alignDOMChords() {
     const container = document.getElementById('osmd-container');
@@ -113,31 +115,40 @@ const ChordCanvasDots = (() => {
         }
       }
       badges.sort((a, b) => (parseFloat(a.style.left) || 0) - (parseFloat(b.style.left) || 0));
-      let prevRight = -Infinity;
-      badges.forEach(badge => {
-        let curLeft = parseFloat(badge.style.left) || 0;
-        let curW = badge.offsetWidth || Math.round((badge.textContent.trim().length * 11 + 10) * scale);
-        let badgeY = fixedY;
-        const bLeft = curLeft - curW / 2, bRight = curLeft + curW / 2;
+      const isDot = badge => badge.classList.contains('cc-dot-btn');
+      const widthOf = badge => badge.offsetWidth || Math.round((badge.textContent.trim().length * 11 + 10) * scale);
+      const rowY = (left, w) => {
+        const bLeft = left - w / 2, bRight = left + w / 2;
         const overlappingNotes = sysNotes.filter(nr => !(nr.right < bLeft || nr.left > bRight));
-        if (overlappingNotes.length) {
-          const localMinTop = Math.min(...overlappingNotes.map(nr => nr.top));
-          const clearance = Math.max(4, Math.round(6 * scale));
-          if (badgeY + badgeH > localMinTop - clearance) badgeY = Math.round(localMinTop - badgeH - clearance);
-        }
-        badge.style.top = badgeY + 'px';
-        if (badge.classList.contains('cc-dot-btn')) {
-          prevRight = Math.max(prevRight, curLeft + Math.round(8 * scale));
-        } else {
-          const halfW = curW / 2;
-          if (curLeft < prevRight || (curLeft - halfW < prevRight + horizPad)) {
-            const newCenter = prevRight + horizPad + halfW;
-            badge.style.left = newCenter + 'px';
-            prevRight = newCenter + halfW;
-          } else {
-            prevRight = curLeft + halfW;
-          }
-        }
+        if (!overlappingNotes.length) return fixedY;
+        const localMinTop = Math.min(...overlappingNotes.map(nr => nr.top));
+        const clearance = Math.max(4, Math.round(6 * scale));
+        let badgeY = fixedY; if (badgeY + badgeH > localMinTop - clearance) badgeY = Math.round(localMinTop - badgeH - clearance);
+        return badgeY;
+      };
+      // Lượt 1: chỉ xếp chữ hợp âm — vị trí chữ không phụ thuộc chấm "+" (bật/tắt chế độ sửa không làm chữ xê dịch).
+      let prevRight = -Infinity;
+      const chordSpans = [];
+      badges.filter(b => !isDot(b)).forEach(badge => {
+        const curLeft = parseFloat(badge.style.left) || 0, curW = widthOf(badge), halfW = curW / 2;
+        badge.style.top = rowY(curLeft, curW) + 'px';
+        const center = (curLeft < prevRight || curLeft - halfW < prevRight + horizPad) ? prevRight + horizPad + halfW : curLeft;
+        if (center !== curLeft) badge.style.left = center + 'px';
+        prevRight = center + halfW;
+        chordSpans.push({ left: center - halfW, right: center + halfW });
+      });
+
+      // Lượt 2: chấm "+" nhường chữ — dời sang khe trống kề bên (không quá xa nốt gốc), hết chỗ thì ẩn ở mức zoom này.
+      const maxShift = Math.max(18, Math.round(DOT_MAX_SHIFT_PX * scale));
+      const hitSpan = (x, half) => chordSpans.find(s => x + half > s.left - DOT_GAP_PX && x - half < s.right + DOT_GAP_PX);
+      badges.filter(isDot).forEach(dot => {
+        const curW = widthOf(dot), half = Math.max(Math.round(8 * scale), Math.round(curW / 2)), origX = parseFloat(dot.style.left) || 0;
+        dot.style.top = rowY(origX, curW) + 'px'; dot.style.visibility = ''; dot.style.pointerEvents = '';
+        const blocker = hitSpan(origX, half);
+        if (!blocker) return;
+        const target = [blocker.right + DOT_GAP_PX + half, blocker.left - DOT_GAP_PX - half].find(x => !hitSpan(x, half) && Math.abs(x - origX) <= maxShift);
+        if (target === undefined) { dot.style.visibility = 'hidden'; dot.style.pointerEvents = 'none'; return; }
+        dot.style.left = target + 'px';
       });
     }
   }
@@ -362,7 +373,7 @@ const ChordCanvasDots = (() => {
     const dotSize = ChordCanvasUI.getDotSize(scale);
     const preset = window.DisplaySettings?.getChordPreset?.() || 'standard';
     const presetMultiplier = (preset === 'stage' ? 1.55 : (preset === 'high_contrast' ? 1.25 : 1.0));
-    const fSize   = Math.max(11, Math.min(34, Math.round(18 * scale * presetMultiplier)));
+    const fSize   = Math.max(MIN_CHORD_FONT_PX, Math.min(34, Math.round(18 * scale * presetMultiplier)));
 
     const noteTop = rect.top - cRect.top;
     const rawStaffTop = _getStaffTop(measureIdx);

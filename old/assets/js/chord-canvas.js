@@ -116,8 +116,11 @@ const ChordCanvas = (() => {
   async function loadSong(songId, initialSet = 'HD') {
     const token = (_chordLoadToken = window.ChordCanvasCore?.nextToken ? window.ChordCanvasCore.nextToken() : ++_chordLoadToken);
     _clear();
-    setAddMode(false);
-    resetUndo(); _currentSet   = initialSet || 'HD';
+    const nextSet = initialSet || 'HD';
+    const myCode = (window.Auth?.getChordCode?.() || '').toUpperCase();
+    const canDirect = Boolean(window.Auth?.isBanhat?.()) && nextSet !== 'default' && (window.Auth?.isAdmin?.() || (!!myCode && nextSet.toUpperCase() === myCode));
+    if (_editEnabled && !canDirect) setAddMode(false);
+    resetUndo(); _currentSet   = nextSet;
     _customChords = {};
     _songUseFlats = null; if (window.ChordCanvasCore?.loadChordSet && songId) { const cr = await window.ChordCanvasCore.loadChordSet(songId, _currentSet, { token, useOfflineFallback: false }); if (cr.stale) return; _customChords = cr.chords; const hasErr = !!cr.error; ['btn-add-chord-mode', 'menu-add-chord'].forEach(id => { const b = document.getElementById(id); if (b) b.disabled = hasErr; }); if (hasErr) { (window.App?.showToast || window.AppUI?.showToast)?.('Không tải được bộ hợp âm', 'error'); setAddMode(false); } } else
 
@@ -134,6 +137,7 @@ const ChordCanvas = (() => {
     }
 
     setTimeout(_refreshSetDropdown, 300);
+    if (document.querySelector('#osmd-container svg')) requestAnimationFrame(_build);
   }
 
   function clearSong() { _chordLoadToken = window.ChordCanvasCore?.nextToken ? window.ChordCanvasCore.nextToken() : ++_chordLoadToken; _clear(); resetUndo(); setAddMode(false); }
@@ -207,9 +211,9 @@ const ChordCanvas = (() => {
       }
     }
 
-    // Core Rule 1: HD chưa có hợp âm (và không đang soạn) thì hiện TLH gốc thay vì để trống
+    // Quyết định 2026-10-29: HD chưa có hợp âm thì hiện bản nhạc sạch (không fallback TLH); bật lại bằng AppRules.HD_EMPTY_SHOWS_TLH.
     const showTlh = _currentSet === 'default'
-      || (_currentSet === 'HD' && !Object.keys(_customChords || {}).length && !_editEnabled);
+      || (window.AppRules?.HD_EMPTY_SHOWS_TLH === true && _currentSet === 'HD' && !Object.keys(_customChords || {}).length && !_editEnabled);
 
     if (showTlh) {
       _styleBlockEl.textContent = '';
@@ -484,8 +488,12 @@ const ChordCanvas = (() => {
 
   function _getKeyFifths() {
     try {
+      const storeSong = window.Store?.get?.('currentSong') || window.App?.getCurrentSong?.();
+      const activeId = window.App?.getCurrentSongId?.();
+      const defKey = (!activeId || !storeSong?.id || String(storeSong.id) === String(activeId)) ? storeSong?.defaultKey : null;
+      const parsedDef = (defKey && window.KeyService?.parseKey) ? window.KeyService.parseKey(defKey) : null;
       const xml = window.OSMDRenderer?.getCurrentXml?.() || window.App?.getOriginalXml?.();
-      if (!xml) return null;
+      if (!xml) return parsedDef && typeof parsedDef.fifths === 'number' ? parsedDef.fifths : null;
       const doc    = new DOMParser().parseFromString(xml, 'text/xml');
       const fifths = parseInt(doc.querySelector('key > fifths')?.textContent ?? 'NaN');
       let flat = 0, sharp = 0;
@@ -499,6 +507,7 @@ const ChordCanvas = (() => {
         if (fifths === 0 && flat > 0 && flat > sharp) return -1;
         return fifths;
       }
+      if (parsedDef && typeof parsedDef.fifths === 'number') return parsedDef.fifths;
       return flat > sharp ? -1 : (sharp > flat ? 1 : 0);
     } catch { return null; }
   }
@@ -576,6 +585,8 @@ const ChordCanvas = (() => {
     toggleHighlight,
     setHighlightMode,
     isHighlightMode: () => _highlightMode,
+    isAddMode: () => _editEnabled,
+    isEditMode: () => _editEnabled,
     undo,
     redo, resetUndo
   };

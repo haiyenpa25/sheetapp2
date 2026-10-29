@@ -234,7 +234,7 @@ const LibraryUI = (() => {
     }
 
     const wrap = scrollWrapEl();
-    if (wrap && !activeSongId) wrap.scrollTop = 0;
+    if (wrap && !opts.appendPage && (opts.isSearch || !activeSongId || wrap.scrollTop > _vList.length * ROW_HEIGHT)) wrap.scrollTop = 0;
     _renderVirtualSlice(true); if (_vList.length > 0 && !(window.__failedScripts?.length > 0)) document.getElementById('boot-watchdog-banner')?.remove?.();
     if (activeSongId) _highlightActive(activeSongId);
   }
@@ -266,9 +266,10 @@ const LibraryUI = (() => {
 
     const wrap = scrollWrapEl();
     const scrollTop = wrap ? wrap.scrollTop : 0;
-    const viewH = (wrap && wrap.clientHeight > 0) ? wrap.clientHeight : 780;
-    const start = Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - 12);
-    const end   = Math.min(_vList.length, Math.ceil((scrollTop + viewH) / ROW_HEIGHT) + 12);
+    const viewH = Math.max((wrap && wrap.clientHeight > 0) ? wrap.clientHeight : 780, 320);
+    const rawStart = Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - 12);
+    const start = rawStart >= _vList.length ? Math.max(0, _vList.length - Math.ceil(viewH / ROW_HEIGHT) - 12) : rawStart;
+    const end   = Math.min(_vList.length, Math.max(start + 1, Math.ceil((scrollTop + viewH) / ROW_HEIGHT) + 12));
     if (!force && start === _vStart && end === _vEnd) return;
     _vStart = start; _vEnd = end;
 
@@ -330,7 +331,7 @@ const LibraryUI = (() => {
 
     if (q && window.LibrarySearch) {
       const categoryId = cat ? songs.find(s => s.category === cat)?.category_id : null;
-      const handled = await window.LibrarySearch.run(q, { category: cat, category_id: categoryId, key, mode: _searchMode }, render, _updateCount);
+      const handled = await window.LibrarySearch.run(q, { category: cat, category_id: categoryId, key, mode: _searchMode, allowLocalFallback: songs.length > 0 }, render, _updateCount);
       if (seq !== _searchSeq || handled) return;
     }
 

@@ -18,15 +18,18 @@ window.LibrarySearch = (() => {
       if (!current()) return;
       if (!response?.success || !Array.isArray(response.data)) throw new Error('Search failed');
       const firstPage = offset === 0;
+      if (firstPage && !response.data.length && query && filters?.allowLocalFallback) return false;
       const ids = new Set(rows.map(song => String(song.id)));
       rows = rows.concat(response.data.filter(song => !ids.has(String(song.id))));
       offset += response.data.length;
       total = Math.max(rows.length, Number(response.total) || 0);
       if (!response.data.length) total = rows.length;
       const scroll = document.getElementById('song-list')?.closest('.song-list-container');
+      const prevScrollTop = (!firstPage && scroll) ? scroll.scrollTop : 0;
       if (firstPage && scroll) scroll.scrollTop = 0;
-      render(rows, { searchPage: true, isSearch: !!query, emptyMsg: query ? `Không tìm thấy "${query}"` : 'Không có bài hát phù hợp' });
+      render(rows, { searchPage: true, appendPage: !firstPage, isSearch: !!query, emptyMsg: query ? `Không tìm thấy "${query}"` : 'Không có bài hát phù hợp' });
       if (firstPage && scroll) scroll.scrollTop = 0;
+      else if (!firstPage && scroll) scroll.scrollTop = prevScrollTop;
       count(offset < total ? `${rows.length}/${total}` : rows.length);
       button?.remove();
       if (offset >= total) return;
@@ -46,8 +49,9 @@ window.LibrarySearch = (() => {
         }
       });
       document.getElementById('song-list')?.after(button);
+      return true;
     }
-    try { await load(); return true; }
+    try { return (await load()) !== false; }
     catch (_) { return !current(); }
   }
   function highlight(text, query) {

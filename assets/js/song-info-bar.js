@@ -247,8 +247,8 @@ const SongInfoBar = (() => {
       chips.push(`<span class="si-chip si-tempo" id="si-tempo-chip" style="cursor:pointer;" title="Chưa có tempo · Click để đặt Tempo (BPM) / Gõ nhịp">♩ — <span style="font-size:0.75em;opacity:0.8;">✎</span></span>`);
     }
 
-    // 4. ⭐ NÚT LƯU VÀO SETLIST: ĐƯA LÊN NGAY SAU TÔNG & TEMPO ĐỂ HIỆN RÕ TRÊN MOBILE / IPAD
-    if (inSetlist) {
+    // 4. ⭐ NÚT LƯU VÀO SETLIST: ĐƯA LÊN NGAY SAU TÔNG & TEMPO ĐỂ HIỆN RÕ TRÊN MOBILE / IPAD (chỉ hiện khi có quyền sửa)
+    if (inSetlist && canEdit) {
       chips.push(`<button class="si-chip-btn si-btn-save-setlist" id="si-ni-save-setlist-btn" title="Lưu nhanh Tông và Tempo đang tập vào bài này trong Setlist">💾 Lưu vào Setlist</button>`);
     }
 
@@ -272,7 +272,7 @@ const SongInfoBar = (() => {
     const currentSet = window.ChordCanvas?.getCurrentSet?.() || 'HD';
     const chordCount = Object.keys(window.ChordCanvas?.getCustomChords?.() ?? {}).length;
     const tlhCount   = _songData?.tlhChordCount || Object.keys(window.ChordCanvasXML?.readXmlChords?.() ?? {}).length;
-    const isHdEmpty  = (currentSet === 'HD' && chordCount === 0 && tlhCount > 0);
+    const isHdEmpty  = (window.AppRules?.HD_EMPTY_SHOWS_TLH === true && currentSet === 'HD' && chordCount === 0 && tlhCount > 0);
     const isHdSparse = (currentSet === 'HD' && chordCount > 0 && tlhCount > 0 && (chordCount / tlhCount) < 0.3);
 
     if (isHdEmpty) {
@@ -347,7 +347,7 @@ const SongInfoBar = (() => {
         if (newBpm && newBpm !== curBpm) {
           window.Metronome?.setBpm?.(newBpm);
           _updateTempoChip(newBpm);
-          if (_songId && window.ApiService?.songs?.update) {
+          if (canEdit && _songId && window.ApiService?.songs?.update) {
             try {
               await window.ApiService.songs.update(_songId, { tempo: newBpm });
               if (_songData) _songData.tempo = newBpm;
@@ -489,7 +489,7 @@ const SongInfoBar = (() => {
 
   /* Nạp thông tin lịch sử sử dụng bài hát trong chương trình thờ phượng (Tránh nhân đôi chip) */
   async function _loadSongUsageChip(songId) {
-    if (!songId || !window.ApiService?.setlists?.songUsage) return;
+    if (!songId || !window.ApiService?.setlists?.songUsage || !window.Auth?.isLoggedIn?.()) return;
     try {
       if (!_usageRequests.has(songId)) _usageRequests.set(songId, window.ApiService.setlists.songUsage(songId));
       const res = await _usageRequests.get(songId);

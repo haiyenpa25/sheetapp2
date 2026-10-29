@@ -44,6 +44,32 @@
       <span class="btn-text">Lời</span>
     </button>
 
+    <!-- ③b THU PHÓNG + KHÓA ZOOM & TEMPO (R9 UI-3: Đưa ra ngoài mặt trước) -->
+    <div class="control-group layer1-zoom-group" id="toolbar-zoom-pill" role="group" aria-label="Thu phóng và khóa" style="display:inline-flex;align-items:center;gap:2px;">
+      <button id="btn-zoom-out" class="icon-btn" title="Thu nhỏ (-)" aria-label="Thu nhỏ">−</button>
+      <select id="zoom-slider" class="zoom-select" disabled title="Chọn mức phóng to">
+        <option value="10">10%</option><option value="15">15%</option>
+        <option value="20">20%</option><option value="25">25%</option>
+        <option value="30">30%</option><option value="35">35%</option>
+        <option value="40">40%</option><option value="45">45%</option>
+        <option value="50">50%</option><option value="60">60%</option>
+        <option value="70">70%</option><option value="80">80%</option>
+        <option value="90">90%</option><option value="100" selected>100%</option>
+        <option value="110">110%</option><option value="120">120%</option>
+        <option value="130">130%</option><option value="140">140%</option>
+        <option value="150">150%</option><option value="160">160%</option>
+        <option value="170">170%</option><option value="180">180%</option>
+        <option value="190">190%</option><option value="200">200%</option>
+      </select>
+      <span id="zoom-value-label" style="display:none">100%</span>
+      <button id="btn-zoom-in" class="icon-btn" title="Phóng to (+)" aria-label="Phóng to">+</button>
+      <button id="btn-lock-zoom" class="icon-btn" title="Khóa tỷ lệ phóng to (giữ nguyên khi đổi bài)" aria-label="Khóa thu phóng" aria-pressed="false">🔓</button>
+    </div>
+
+    <button id="btn-toolbar-metronome" class="btn btn-ghost btn-sm" title="Nhịp độ (BPM) &amp; Đếm nhịp (Metronome)" onclick="document.getElementById('btn-metronome')?.click()">
+      <span>♩ BPM</span>
+    </button>
+
     <div class="toolbar-spacer" style="flex:1 1 auto;min-width:2px;"></div>
 
     <!-- ④ BÀI TRƯỚC / SAU (Lớp 1) -->
@@ -72,28 +98,6 @@
 
       <div class="dropdown-menu hidden" id="main-dropdown-menu">
         <div class="classic-menu-section-title">Hiển thị</div>
-
-        <div class="classic-menu-row">
-          <span class="classic-menu-label">Thu phóng</span>
-          <div class="zoom-select-wrap">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="zoom-icon-sm"><circle cx="11" cy="11" r="8"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-            <select id="zoom-slider" class="zoom-select" disabled title="Chọn mức phóng to">
-              <option value="10">10%</option><option value="15">15%</option>
-              <option value="20">20%</option><option value="25">25%</option>
-              <option value="30">30%</option><option value="35">35%</option>
-              <option value="40">40%</option><option value="45">45%</option>
-              <option value="50">50%</option><option value="60">60%</option>
-              <option value="70">70%</option><option value="80">80%</option>
-              <option value="90">90%</option><option value="100" selected>100%</option>
-              <option value="110">110%</option><option value="120">120%</option>
-              <option value="130">130%</option><option value="140">140%</option>
-              <option value="150">150%</option><option value="160">160%</option>
-              <option value="170">170%</option><option value="180">180%</option>
-              <option value="190">190%</option><option value="200">200%</option>
-            </select>
-            <span id="zoom-value-label" style="display:none">100%</span>
-          </div>
-        </div>
 
         <div class="classic-menu-row">
           <span class="classic-menu-label">Capo</span>

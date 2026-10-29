@@ -34,6 +34,8 @@ class SetlistController {
         try {
             // ── 1. GET Requests ──────────────────────────────────────────
             if ($method === 'GET') {
+                // Chương trình chỉ dành cho người đã đăng nhập; khách (chưa đăng nhập) không thấy gì.
+                Auth::requireLogin();
                 if ($action === 'song_usage') {
                     $songId = $_GET['song_id'] ?? '';
                     if (empty($songId)) {

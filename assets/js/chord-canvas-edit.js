@@ -143,6 +143,7 @@ const ChordCanvasEdit = (() => {
   // Chỉ gọi khi người dùng đã CHỦ ĐỘNG xác nhận ghi đè (showCloneChoiceModal).
   async function cloneAndStartEditing(songId, sourceSet, targetSet) {
     if (!songId) { window.ChordCanvas?.setAddMode?.(true, { skipConfirm: true }); return; }
+    if (String(targetSet || '').toUpperCase() === 'HD') { window.App?.showToast?.('Bộ HD chuẩn không cho phép ghi đè toàn bộ bằng thao tác sao chép!', 'error'); await startEditingWithoutCloning('HD'); return; }
     AppUI?.setLoadingText?.(`Đang sao chép sang bộ hợp âm "${targetSet}"...`);
     try {
       if (sourceSet === 'default') {

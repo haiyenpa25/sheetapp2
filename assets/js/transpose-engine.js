@@ -25,15 +25,74 @@ const TransposeEngine = (() => {
     return (typeof window !== 'undefined' && window.Tonal) ? window.Tonal : ((typeof global !== 'undefined' && global.Tonal) ? global.Tonal : null);
   }
 
+  function _isMinorOrDimSuffix(suffix) {
+      return /^(m(?!aj)|min|dim|ø|°|-)/i.test(suffix || '');
+  }
+
+  function _noteChroma(noteName) {
+      if (!noteName) return -1;
+      const clean = noteName.charAt(0).toUpperCase() + (noteName.charAt(1) || '');
+      let idx = NOTES_SHARP.indexOf(clean);
+      if (idx !== -1) return idx;
+      idx = NOTES_FLAT.indexOf(clean);
+      if (idx !== -1) return idx;
+      const enh = { 'Cb': 11, 'B#': 0, 'Fb': 4, 'E#': 5 };
+      return enh[clean] ?? -1;
+  }
+
+  function _resolveRootSpell(chroma, isMinorOrDim, useFlats, origRoot = '') {
+      const c = ((chroma % 12) + 12) % 12;
+      const origHasFlat = origRoot.includes('b') || origRoot === 'F';
+      const origHasSharp = origRoot.includes('#');
+      if (!isMinorOrDim) {
+          if (c === 3) return 'Eb';
+          if (c === 8) return 'Ab';
+          if (c === 10) return 'Bb';
+          if (c === 1) {
+              if (useFlats === true) return 'Db';
+              if (useFlats === false) return 'C#';
+              return origHasFlat ? 'Db' : (['D', 'B'].includes(origRoot) ? 'C#' : 'Db');
+          }
+          if (c === 6) {
+              if (useFlats === true) return 'Gb';
+              if (useFlats === false) return 'F#';
+              return origHasFlat ? 'Gb' : 'F#';
+          }
+          return NOTES_FLAT[c];
+      } else {
+          if (c === 1) return (useFlats === true && origHasFlat) ? 'Db' : 'C#';
+          if (c === 3) return (useFlats === true || (useFlats === null && origHasFlat)) ? 'Eb' : 'D#';
+          if (c === 6) return (useFlats === true && origHasFlat) ? 'Gb' : 'F#';
+          if (c === 8) return (useFlats === true || (useFlats === null && origHasFlat)) ? 'Ab' : 'G#';
+          if (c === 10) return (useFlats === false || (useFlats === null && origHasSharp)) ? 'A#' : 'Bb';
+          return NOTES_FLAT[c];
+      }
+  }
+
+  function _resolveBassSpell(bassChroma, newRoot, isMinorOrDim, useFlats) {
+      const c = ((bassChroma % 12) + 12) % 12;
+      if (newRoot.includes('b') || newRoot === 'F' || (isMinorOrDim && ['C', 'F', 'G', 'D', 'Bb', 'Eb', 'Ab'].includes(newRoot))) {
+          return NOTES_FLAT[c];
+      }
+      if (newRoot.includes('#') || (!isMinorOrDim && ['G', 'D', 'A', 'E', 'B'].includes(newRoot)) || (isMinorOrDim && ['E', 'B'].includes(newRoot))) {
+          return NOTES_SHARP[c];
+      }
+      if (useFlats === true) return NOTES_FLAT[c];
+      if (useFlats === false) return NOTES_SHARP[c];
+      return (c === 3 || c === 8 || c === 10) ? NOTES_FLAT[c] : NOTES_SHARP[c];
+  }
+
   // Ép định dạng 1 nốt sang thăng/giáng dựa trên target config
-  function forceEnharmonic(noteName, useFlats) {
+  function forceEnharmonic(noteName, useFlats, isMinorOrDim = false, origRoot = '') {
       const tonal = _getTonal();
-      if (!tonal) return noteName;
-      const tNote = tonal.Note.get(noteName);
-      if (tNote.empty) return noteName;
-      
-      const chroma = tNote.chroma;
-      return useFlats ? NOTES_FLAT[chroma] : NOTES_SHARP[chroma];
+      let chroma = -1;
+      if (tonal) {
+          const tNote = tonal.Note.get(noteName);
+          if (!tNote.empty && typeof tNote.chroma === 'number') chroma = tNote.chroma;
+      }
+      if (chroma === -1) chroma = _noteChroma(noteName);
+      if (chroma === -1) return noteName;
+      return _resolveRootSpell(chroma, isMinorOrDim, useFlats, origRoot);
   }
 
   /**
@@ -49,11 +108,8 @@ const TransposeEngine = (() => {
   }
 
   /**
-   * Dịch giọng một hợp âm hoàn chỉnh (có tính cả bass notes như Cmaj7/G).
-   */
-  /**
    * Transpose thủ công (không cần Tonal.js) — dùng bảng chromatic nội bộ.
-   * Xử lý: chords đơn (Am, D7), slash chords (C/E), enharmonics (#/b).
+   * Xử lý: chords đơn (Am, D7), slash chords (C/E), enharmonics (#/b) chuẩn Thánh Ca.
    */
   function _manualTranspose(chordName, semitones, useFlats = null) {
       if (!chordName) return chordName;
@@ -62,18 +118,15 @@ const TransposeEngine = (() => {
       const root    = m[1];
       const suffix  = m[2] || '';
       const bass    = m[4] || null;
-      // Auto-detect nếu không truyền — giữ nguyên flat preference của user
-      if (useFlats === null) useFlats = _hasFlat(chordName);
-      const arr     = useFlats ? NOTES_FLAT : NOTES_SHARP;
-      let idx = NOTES_SHARP.indexOf(root);
-      if (idx === -1) idx = NOTES_FLAT.indexOf(root);
+      const idx     = _noteChroma(root);
       if (idx === -1) return chordName;
-      const newRoot = arr[((idx + semitones) % 12 + 12) % 12];
+      const isMinorOrDim = _isMinorOrDimSuffix(suffix);
+      const newChroma = ((idx + semitones) % 12 + 12) % 12;
+      const newRoot = _resolveRootSpell(newChroma, isMinorOrDim, useFlats, root);
       let result = newRoot + suffix;
       if (bass) {
-          let bi = NOTES_SHARP.indexOf(bass);
-          if (bi === -1) bi = NOTES_FLAT.indexOf(bass);
-          const newBass = bi !== -1 ? arr[((bi + semitones) % 12 + 12) % 12] : bass;
+          const bi = _noteChroma(bass);
+          const newBass = bi !== -1 ? _resolveBassSpell(((bi + semitones) % 12 + 12) % 12, newRoot, isMinorOrDim, useFlats) : bass;
           result += '/' + newBass;
       }
       return result;
@@ -82,11 +135,7 @@ const TransposeEngine = (() => {
   function transposeChord(chordName, semitones, useFlats = null) {
       if (!chordName || semitones === 0) return chordName;
 
-      // AUTO-DETECT: nếu không truyền useFlats, tự detect từ input chord
-      // "Bb" → useFlats=true → kết quả luôn là flat (Bb, Eb, Ab...)
-      // "C#" → useFlats=false → kết quả luôn là sharp (C#, F#, G#...)
-      if (useFlats === null) useFlats = _hasFlat(chordName);
-
+      const origRoot = chordName.match(/^([A-G][#b]?)/)?.[1] || '';
       // Nếu Tonal không load được → dùng fallback nội bộ
       const tonal = _getTonal();
       if (!tonal) {
@@ -95,19 +144,20 @@ const TransposeEngine = (() => {
 
       try {
           const interv = getInterval(semitones);
-          // Tonal.Chord.transpose sẽ tự động dịch root và bass note!
           let tr = tonal.Chord.transpose(chordName, interv);
 
-          // Phân tách Root và Bass để ép enharmonic
           const parts = tr.split('/');
           let rootNote = parts[0].match(/^[A-G][#b]*/)?.[0];
           if (!rootNote) return _manualTranspose(chordName, semitones, useFlats);
           let suffix = parts[0].substring(rootNote.length);
+          const isMinorOrDim = _isMinorOrDimSuffix(suffix);
 
-          let forcedRoot = forceEnharmonic(rootNote, useFlats);
+          let forcedRoot = forceEnharmonic(rootNote, useFlats, isMinorOrDim, origRoot);
           let res = forcedRoot + suffix;
           if (parts.length > 1) {
-             res += '/' + forceEnharmonic(parts[1], useFlats);
+             const bNote = tonal.Note.get(parts[1]);
+             const bChroma = (!bNote.empty && typeof bNote.chroma === 'number') ? bNote.chroma : _noteChroma(parts[1]);
+             res += '/' + (bChroma !== -1 ? _resolveBassSpell(bChroma, forcedRoot, isMinorOrDim, useFlats) : forceEnharmonic(parts[1], useFlats, false, origRoot));
           }
           return res;
       } catch (e) {

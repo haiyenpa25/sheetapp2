@@ -7,6 +7,7 @@ const Auth = (() => {
 
   let _currentUser = null;
   let _role = 'viewer'; // viewer | banhat | admin
+  let _chordCode = null;
 
   async function checkSession() {
     try {
@@ -14,9 +15,11 @@ const Auth = (() => {
       if (data.loggedIn) {
         _currentUser = data.username;
         _role = data.role;
+        _chordCode = data.chord_code || null;
       } else {
         _currentUser = null;
         _role = 'viewer';
+        _chordCode = null;
       }
       _updateUI();
       return _role;
@@ -33,6 +36,7 @@ const Auth = (() => {
       if (data.success) {
         _currentUser = data.username;
         _role = data.role;
+        _chordCode = data.chord_code || null;
         _updateUI();
         closeModal();
         window.App?.showToast?.('Đăng nhập thành công', 'success');
@@ -53,6 +57,7 @@ const Auth = (() => {
     await window.ApiService.auth.logout();
     _currentUser = null;
     _role = 'viewer';
+    _chordCode = null;
     _updateUI();
     closeModal();
     window.App?.showToast?.('Đã đăng xuất', 'info');
@@ -64,6 +69,12 @@ const Auth = (() => {
     // ── Sidebar auth button ──
     const btnText = document.getElementById('auth-username');
     if (btnText) btnText.textContent = _currentUser ?? 'Khách';
+
+    // Chương trình chỉ dành cho người đã đăng nhập: khách không thấy tab; đang đứng ở tab này thì quay về thư viện.
+    document.querySelector('.sidebar-tab[data-tab="setlist"]')?.classList.toggle('hidden', !_currentUser);
+    if (!_currentUser && !document.getElementById('tab-content-setlist')?.classList.contains('hidden')) {
+      document.querySelector('.sidebar-tab[data-tab="library"]')?.click();
+    }
 
     // Role badge (hiện kế tên user)
     const roleBadge = document.getElementById('auth-role-badge');
@@ -220,7 +231,8 @@ const Auth = (() => {
     isBanhat: () => _canEditChords(),
     canEditChords: () => _canEditChords(),
     getUser: () => _currentUser,
-    getRole: () => _role
+    getRole: () => _role,
+    getChordCode: () => _chordCode
   };
 })();
 

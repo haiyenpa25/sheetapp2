@@ -41,6 +41,31 @@ const ToolbarController = (() => {
     if (!el) return;
     const evt = el.tagName.toLowerCase() === 'select' ? 'change' : 'input';
     el.addEventListener(evt, e => App?.setZoom?.(parseInt(e.target.value, 10)));
+    document.getElementById('btn-zoom-out')?.addEventListener('click', () => {
+      const cur = parseInt(el.value, 10) || 100;
+      App?.setZoom?.(Math.max(10, cur - 10));
+    });
+    document.getElementById('btn-zoom-in')?.addEventListener('click', () => {
+      const cur = parseInt(el.value, 10) || 100;
+      App?.setZoom?.(Math.min(200, cur + 10));
+    });
+    const lockBtn = document.getElementById('btn-lock-zoom');
+    if (lockBtn) {
+      const syncLock = (locked) => {
+        lockBtn.classList.toggle('active', locked);
+        lockBtn.setAttribute('aria-pressed', String(locked));
+        lockBtn.textContent = locked ? '🔒' : '🔓';
+      };
+      const initLocked = (window.SafeStorage ? window.SafeStorage.get('sheetapp_zoom_locked') : localStorage.getItem('sheetapp_zoom_locked')) === '1';
+      syncLock(initLocked);
+      lockBtn.addEventListener('click', () => {
+        const next = !lockBtn.classList.contains('active');
+        syncLock(next);
+        if (window.SafeStorage) window.SafeStorage.set('sheetapp_zoom_locked', next ? '1' : '0');
+        else { try { localStorage.setItem('sheetapp_zoom_locked', next ? '1' : '0'); } catch (_) {} }
+        App?.showToast?.(next ? '🔒 Đã khóa mức phóng to' : '🔓 Đã mở khóa mức phóng to', 'info');
+      });
+    }
   }
 
   function _bindSidebar() {

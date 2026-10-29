@@ -25,6 +25,7 @@ const URLState = (() => {
     const p = new URLSearchParams(location.search);
     return {
       song:    p.get('song')    || null,
+      setlist: p.get('setlist') || p.get('program') || null,
       t:       parseInt(p.get('t') || '0', 10),
       v:       p.get('v')       || 'sheet',
       lv:      p.get('lv')      || 'stacked',
@@ -61,8 +62,10 @@ const URLState = (() => {
    * Dùng pushState để tạo history entry mới (back button đúng)
    */
   function resetForNewSong(songId) {
+    const curSetlist = new URLSearchParams(location.search).get('setlist') || new URLSearchParams(location.search).get('program');
     const url = new URL(location.origin + location.pathname);
     url.searchParams.set('song', songId);
+    if (curSetlist && window.SetlistUI?.getCurrentSetlist?.()) url.searchParams.set('setlist', curSetlist);
     if (_inPopstate) history.replaceState({ song: songId }, '', url); else history.pushState({ song: songId }, '', url);
   }
 
@@ -78,7 +81,7 @@ const URLState = (() => {
     const base = (window.__APP_BASE__ || '').replace(/\/$/, '');
     const url = new URL(`${base}/${classic ? 'old/' : ''}`, location.origin);
     const params = new URLSearchParams(location.search);
-    ['song', 't', 'v', 'lv', 'set', 'compact'].forEach(key => {
+    ['song', 'setlist', 'program', 't', 'v', 'lv', 'set', 'compact'].forEach(key => {
       if (params.has(key)) url.searchParams.set(key, params.get(key));
     });
     const activeSong = window.App?.getCurrentSongId?.();

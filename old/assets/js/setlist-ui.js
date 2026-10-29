@@ -87,7 +87,8 @@ const SetlistUI = (() => {
         
         const addContainer = document.getElementById('setlist-add-container');
         if (addContainer) {
-          addContainer.classList.remove('hidden');
+          const canEdit = Boolean(window.Auth && (window.Auth.isAdmin?.() || window.Auth.isBanhat?.()));
+          addContainer.classList.toggle('hidden', !canEdit);
         }
         
         renderSetlistItems();
@@ -111,16 +112,20 @@ const SetlistUI = (() => {
     await ensureSongsLoaded(); // Fix race condition cho danh sách đã lưu
 
     _currentSetlist.items.forEach((item, idx) => {
-      const songObj = _allSongsCache.find(s => String(s.id) === String(item.song_id)) || window.LibraryUI?.getSongObj?.(item.song_id);
-      const title = songObj ? songObj.title : 'Bài hát không tồn tại';
+      const isSong = !item.item_type || item.item_type === 'song';
+      const songObj = isSong ? (_allSongsCache.find(s => String(s.id) === String(item.song_id)) || window.LibraryUI?.getSongObj?.(item.song_id)) : null;
+      const title = isSong ? (songObj ? songObj.title : (item.song_title || 'Bài hát không tồn tại')) : `⛪ ${item.custom_title || 'Tiết mục'}`;
       
       const el = document.createElement('div');
       el.className = 'song-item';
       if (_currentIndex === idx) el.classList.add('active');
       
-      const toneBadge = item.transpose_key && item.transpose_key != 0 
-        ? `<span class="tag tag-purple">Tone: ${item.transpose_key > 0 ? '+' : ''}${parseInt(item.transpose_key)}</span>` 
-        : '';
+      const origKey = item.defaultKey || songObj?.defaultKey || songObj?.keySignature || '';
+      const semi = parseInt(item.transpose_key, 10) || 0;
+      const practicedKey = (origKey && semi !== 0 && window.KeyService?.displayKey) ? window.KeyService.displayKey(origKey, semi) : origKey;
+      const toneBadge = origKey
+        ? `<span class="tag tag-purple">Tone: ${_esc(origKey)}${semi !== 0 ? ` → ${_esc(practicedKey)} (${semi > 0 ? '+' : ''}${semi})` : ''}</span>`
+        : (semi !== 0 ? `<span class="tag tag-purple">Tone: ${semi > 0 ? '+' : ''}${semi}</span>` : '');
       const chordBadge = item.chord_profile && item.chord_profile !== 'default' 
         ? `<span class="tag">🎸 ${_esc(item.chord_profile)}</span>` 
         : '';
@@ -128,7 +133,7 @@ const SetlistUI = (() => {
         ? `<span class="tag tag-blue" title="Tempo đã lưu cho bài này">♩ ${_esc(String(item.bpm))} BPM</span>` 
         : '';
       // Fix: dùng Auth.isBanhat() (banhat + admin) thay vì canEdit() không tồn tại
-      const canSaveBpm = window.Auth && (window.Auth.isAdmin?.() || window.Auth.isBanhat?.());
+      const canSaveBpm = Boolean(window.Auth && (window.Auth.isAdmin?.() || window.Auth.isBanhat?.()));
 
       el.innerHTML = `
         <div class="song-item-info" style="flex:1;min-width:0;">
@@ -138,8 +143,8 @@ const SetlistUI = (() => {
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
-          ${canSaveBpm ? `<button class="btn-save-bpm" title="Lưu BPM máy gõ nhịp hiện tại vào bài này trong Setlist" style="background:none;border:1px solid var(--accent);border-radius:5px;color:var(--accent);font-size:.68rem;font-weight:700;padding:.15rem .4rem;cursor:pointer;white-space:nowrap;">♩ Lưu BPM</button>` : ''}
-          <button class="icon-btn-xs text-danger btn-del-item" title="Xóa khỏi list">✕</button>
+          ${canSaveBpm && isSong ? `<button class="btn-save-bpm" title="Lưu BPM máy gõ nhịp hiện tại vào bài này trong Setlist" style="background:none;border:1px solid var(--accent);border-radius:5px;color:var(--accent);font-size:.68rem;font-weight:700;padding:.15rem .4rem;cursor:pointer;white-space:nowrap;">♩ Lưu BPM</button>` : ''}
+          ${canSaveBpm ? `<button class="icon-btn-xs text-danger btn-del-item" title="Xóa khỏi list">✕</button>` : ''}
         </div>
       `;
       
@@ -214,6 +219,10 @@ const SetlistUI = (() => {
     }
 
     const item = _currentSetlist.items[_currentIndex];
+    if (item.item_type && item.item_type !== 'song' && !item.song_id) {
+      window.App?.showToast?.(`⛪ ${item.custom_title || 'Tiết mục chương trình'}`, 'info');
+      return;
+    }
     const songId = item.song_id;
     
     await ensureSongsLoaded();
@@ -508,6 +517,26 @@ const SetlistUI = (() => {
           saveBpmPanelBtn.disabled = false;
         }
       });
+    }
+    document.getElementById('btn-share-setlist')?.addEventListener('click', async () => {
+      if (!_currentSetlist?.id) return;
+      const url = new URL(window.location.origin + window.location.pathname);
+      url.searchParams.set('setlist', String(_currentSetlist.id));
+      try { await navigator.clipboard?.writeText?.(url.href); window.App?.showToast?.('🔗 Đã copy link Chương trình!', 'success'); }
+      catch (_) { window.prompt('Copy link Chương trình:', url.href); }
+    });
+    const p = new URLSearchParams(window.location.search || '');
+    const deepSetlistId = p.get('setlist') || p.get('program');
+    if (deepSetlistId) {
+      setTimeout(async () => {
+        document.querySelector('[data-tab="setlist"]')?.click();
+        await viewSetlistDetail(deepSetlistId);
+        if (_currentSetlist?.items?.length && !p.get('song')) {
+          _currentIndex = 0;
+          await renderSetlistItems();
+          await playCurrentItem();
+        }
+      }, 120);
     }
   }
 

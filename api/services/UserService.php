@@ -32,7 +32,7 @@ class UserService {
      */
     public static function findByUsername(string $username): array|false {
         return DB::run(
-            "SELECT id, username, password_hash, role, display_name, instrument, chord_code, voice_part, avatar_url, bio, status FROM users WHERE username = ?",
+            "SELECT id, username, password_hash, role, display_name, instrument, chord_code, voice_part, avatar_url, bio, status FROM users WHERE LOWER(username) = LOWER(?)",
             [$username]
         )->fetch();
     }

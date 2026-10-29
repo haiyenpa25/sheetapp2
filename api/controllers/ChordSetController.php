@@ -100,7 +100,8 @@ class ChordSetController {
 
                     // Xử lý bộ HD chuẩn mực: D12 & B4
                     if (strcasecmp($name, 'HD') === 0) {
-                        $canEditHd = Auth::isAdmin() || ($myChordCode && strcasecmp($myChordCode, 'HD') === 0);
+                        $canEditHd = Auth::isAdmin()
+                            || ($myChordCode !== '' && strcasecmp($myChordCode, 'HD') === 0);
                         if (!$canEditHd) {
                             Response::forbidden('Bạn không có quyền chỉnh sửa trực tiếp bộ hợp âm chuẩn HD. Vui lòng gửi Đề xuất (Review)!');
                             return;
@@ -175,8 +176,16 @@ class ChordSetController {
                         return;
                     }
 
-                    // Nhạc công chỉ được tạo/clone sang bộ mang mã của chính mình
-                    if (strcasecmp($target, $myChordCode) !== 0 && strcasecmp($target, $myUsername) !== 0) {
+                    if (ChordSetService::isReservedName($target)) {
+                        Response::forbidden('Không được phép ghi đè bộ hợp âm chuẩn HD/TLH bằng thao tác sao chép (Clone)!');
+                        return;
+                    }
+
+                    // Nhạc công chỉ được tạo/clone sang bộ mang mã của chính mình (hoặc Admin)
+                    $canCloneTarget = Auth::isAdmin()
+                        || ($myChordCode && strcasecmp($target, $myChordCode) === 0)
+                        || ($myUsername && strcasecmp($target, $myUsername) === 0);
+                    if (!$canCloneTarget) {
                         $ownerSet = $myChordCode ?: $myUsername;
                         Response::forbidden("Bạn chỉ có thể tạo hoặc sao chép sang bộ hợp âm cá nhân của chính mình ({$ownerSet})!");
                         return;

@@ -2,7 +2,8 @@
  * AppRules.js — Hằng số và quy tắc nghiệp vụ dùng chung (M5-1)
  *
  * Bảo toàn tuyệt đối 4 Core Rules:
- *   1. HD mặc định (`DEFAULT_CHORD_SET = 'HD'`), fallback TLH (`FALLBACK_CHORD_SET = 'default'`) khi HD rỗng.
+ *   1. HD mặc định (`DEFAULT_CHORD_SET = 'HD'`); HD rỗng thì hiện bản nhạc sạch (`HD_EMPTY_SHOWS_TLH = false`,
+ *      trước 2026-10-29 là fallback TLH `FALLBACK_CHORD_SET = 'default'`).
  *   2. Tông về 0 (`INITIAL_TRANSPOSE = 0`) khi mở bài mới (trừ khi chương trình/setlist áp tông).
  *   3. Không xoá bộ `default` (TLH) và `HD` (`LOCKED_CHORD_SETS`).
  *   4. Thống nhất giới hạn dịch giọng ±12 nửa cung theo quyết định Q-M4.
@@ -18,6 +19,9 @@
   const DEFAULT_CHORD_SET = 'HD';
   const FALLBACK_CHORD_SET = 'default';
   const LOCKED_CHORD_SETS = Object.freeze(['default', 'HD']);
+  // Quyết định 2026-10-29 (thay Core Rule 1 cũ): HD rỗng thì hiện bản nhạc SẠCH, không rơi về TLH trong XML.
+  // Đặt true để quay lại hành vi cũ (HD rỗng hiện TLH).
+  const HD_EMPTY_SHOWS_TLH = false;
 
   function isTransposeValid(val) {
     const n = Number(val);
@@ -42,6 +46,7 @@
     DEFAULT_CHORD_SET,
     FALLBACK_CHORD_SET,
     LOCKED_CHORD_SETS,
+    HD_EMPTY_SHOWS_TLH,
     isTransposeValid,
     clampTranspose,
     isLockedChordSet,

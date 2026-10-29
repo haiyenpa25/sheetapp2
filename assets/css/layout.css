@@ -1699,7 +1699,6 @@ body.sheet-only-mode .gig-floating-hud {
     overflow-x: hidden !important;
   }
   .scroll-pill,
-  .zoom-pill,
   #btn-chord-preset,
   #btn-chord-notation,
   #btn-add-chord-mode-bar,
@@ -1771,7 +1770,6 @@ body.sheet-only-mode .gig-floating-hud {
   #capo-wrap,
   #capo-badge,
   .btn-pill-reset,
-  .zoom-pill,
   .scroll-pill,
   #btn-chord-preset,
   #btn-chord-notation,
@@ -1882,7 +1880,6 @@ body.sheet-only-mode .gig-floating-hud {
 /* Container Query đồng bộ cho .main-content (áp dụng khi mở sidebar 290px trên desktop) */
 @container mainarea (max-width: 1350px) {
   .scroll-pill,
-  .zoom-pill,
   #btn-chord-preset,
   #btn-chord-notation,
   #btn-add-chord-mode-bar,
@@ -1916,7 +1913,6 @@ body.sheet-only-mode .gig-floating-hud {
    bao giờ hiện được nếu chỉ dùng @container. Quy tắc này đảm bảo nó vẫn hiện đúng, bất kể
    vị trí DOM hiện tại của menu. */
 body.toolbar-controls-compact .scroll-pill,
-body.toolbar-controls-compact .zoom-pill,
 body.toolbar-controls-compact #btn-chord-preset,
 body.toolbar-controls-compact #btn-chord-notation,
 body.toolbar-controls-compact #btn-add-chord-mode-bar,

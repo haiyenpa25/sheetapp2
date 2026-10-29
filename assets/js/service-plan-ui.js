@@ -66,6 +66,8 @@ const ServicePlanUI = (() => {
     }
 
     const myId = window.Auth?.userId?.() ?? null;
+    const canEdit = Boolean(window.Auth && (window.Auth.isAdmin?.() || window.Auth.isBanhat?.()));
+    const isLoggedIn = Boolean(window.Auth?.isLoggedIn?.());
     const isLeaderOrAdmin = Boolean(window.Auth && (window.Auth.isAdmin?.() || (myId && (sl.created_by === myId || sl.leader_user_id === myId))));
     const isDraft = (sl.status === 'draft' || !sl.status);
 
@@ -132,13 +134,16 @@ const ServicePlanUI = (() => {
             <button id="btn-sp-create-practice" class="btn btn-sm btn-ghost" style="padding:3px 8px;font-size:0.72rem;border:1px solid rgba(59,130,246,0.4);color:#60a5fa;" title="Tạo bài tập cho mọi bài hát trong chương trình và gán cho ca viên">📋 Giao Tập</button>
             <button id="btn-sp-practice-board" class="btn btn-sm btn-ghost" style="padding:3px 8px;font-size:0.72rem;border:1px solid rgba(139,92,246,0.4);color:#c084fc;" title="Xem bảng ma trận tiến độ tập luyện của ca đoàn">📊 Tiến Độ Tập</button>
           ` : ''}
-          <button id="btn-sp-assign" class="btn btn-sm btn-ghost" style="padding:3px 8px;font-size:0.72rem;border:1px solid var(--border);">👥 Phân Công (${assignments.length})</button>
+          ${canEdit ? `<button id="btn-sp-assign" class="btn btn-sm btn-ghost" style="padding:3px 8px;font-size:0.72rem;border:1px solid var(--border);">👥 Phân Công (${assignments.length})</button>` : ''}
+          <button id="btn-sp-share-link" class="btn btn-sm btn-ghost" style="padding:3px 8px;font-size:0.72rem;border:1px solid rgba(59,130,246,0.4);color:#3b82f6;" title="Copy link chương trình để gửi cho khách/nhạc công tham gia đánh không cần đăng nhập">🔗 Link Tham Gia</button>
           <button id="btn-sp-print-booklet" class="btn btn-sm btn-ghost" style="padding:3px 8px;font-size:0.72rem;border:1px solid rgba(16,185,129,0.4);color:#10b981;" title="In trọn bộ Booklet chương trình thờ phượng gồm bìa và các bài hát chuẩn A4">📖 In Booklet</button>
         </div>
       </div>
       ${themeStr}
       ${descStr}
+      ${!isLoggedIn ? `<div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);padding:5px 8px;border-radius:6px;font-size:0.72rem;color:var(--text-color);">🎸 <strong>Chế độ Khách tham gia:</strong> Bấm <strong>▶ Vào chơi</strong> hoặc chạm vào từng bài bên dưới để mở bản nhạc, đổi tông, chọn hợp âm &amp; đánh theo chương trình.</div>` : ''}
       ${myBanner}
+      ${isLoggedIn ? `
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;margin-top:2px;padding-top:4px;border-top:1px dashed var(--border);">
         <div style="display:flex;align-items:center;gap:6px;">
           ${offlineBadge}
@@ -146,7 +151,7 @@ const ServicePlanUI = (() => {
         <div style="display:flex;gap:4px;">
           ${offlineActions}
         </div>
-      </div>
+      </div>` : ''}
       <div id="sp-offline-progress-wrap" class="hidden" style="margin-top:4px;background:rgba(0,0,0,0.15);padding:6px 8px;border-radius:4px;">
         <div style="display:flex;justify-content:space-between;font-size:0.68rem;margin-bottom:2px;">
           <span id="sp-offline-status-text" style="color:var(--text-secondary);">Đang chuẩn bị tải...</span>
@@ -184,6 +189,10 @@ const ServicePlanUI = (() => {
 
     metaEl.querySelector('#btn-sp-print-booklet')?.addEventListener('click', () => {
       window.open(`print/service-booklet.php?setlist_id=${sl.id}`, '_blank');
+    });
+
+    metaEl.querySelector('#btn-sp-share-link')?.addEventListener('click', () => {
+      window.SetlistUI?.shareSetlistLink?.(sl.id);
     });
 
     metaEl.querySelector('#btn-sp-publish')?.addEventListener('click', async () => {

@@ -477,19 +477,26 @@ const ChordCanvasUI = (() => {
     const textSec = isDark ? '#94a3b8' : '#64748b', border = isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0';
     const safeSource = window.SafeHtml ? window.SafeHtml.escape(sourceLabel) : sourceLabel;
     const safeTarget = window.SafeHtml ? window.SafeHtml.escape(targetSet) : targetSet;
+    const allowOverwrite = typeof onCopyOverwrite === 'function' && String(targetSet || '').toUpperCase() !== 'HD';
+    const copyBtnHtml = allowOverwrite
+      ? `<button id="cc-clone-copy" class="btn btn-sm" style="text-align:left;padding:10px 12px;border-radius:10px;background:rgba(217,119,6,.12);border:1px solid rgba(217,119,6,.35);color:#b45309;font-weight:600;">⧉ Sao chép ${safeSource} sang ${safeTarget} (ghi đè)<div style="font-weight:400;font-size:12px;opacity:.9;margin-top:2px;">Thay thế toàn bộ hợp âm hiện có.</div></button>`
+      : '';
     const overlay = document.createElement('div');
     overlay.setAttribute('role', 'dialog'); overlay.setAttribute('aria-modal', 'true'); overlay.setAttribute('aria-labelledby', 'cc-clone-choice-title');
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:99999;padding:16px;';
-    overlay.innerHTML = `<div style="background:${bgCard};color:${textPri};border:1px solid ${border};border-radius:14px;padding:1.5rem;max-width:440px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.4);"><div id="cc-clone-choice-title" style="font-size:1rem;font-weight:700;line-height:1.2;margin-bottom:.35rem;">Bắt đầu sửa hợp âm</div><div style="font-size:12px;color:${textSec};line-height:1.5;margin-bottom:1.1rem;">Bạn đang xem bộ <strong>${safeSource}</strong> — không thể sửa trực tiếp. Bộ cá nhân của bạn là <strong style="color:#10b981;">${safeTarget}</strong>.</div><div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px;"><button id="cc-clone-edit-mine" class="btn btn-primary btn-sm" style="text-align:left;padding:10px 12px;border-radius:10px;font-weight:600;">✎ Sửa trên bản của tôi (${safeTarget})<div style="font-weight:400;font-size:12px;opacity:.85;margin-top:2px;">Giữ nguyên hợp âm đã có trong bản của bạn.</div></button><button id="cc-clone-copy" class="btn btn-sm" style="text-align:left;padding:10px 12px;border-radius:10px;background:rgba(217,119,6,.12);border:1px solid rgba(217,119,6,.35);color:#b45309;font-weight:600;">⧉ Sao chép ${safeSource} sang ${safeTarget} (ghi đè)<div style="font-weight:400;font-size:12px;opacity:.9;margin-top:2px;">Thay thế toàn bộ hợp âm hiện có.</div></button></div><div style="display:flex;justify-content:flex-end;"><button id="cc-clone-cancel" class="btn btn-ghost btn-sm">Hủy</button></div></div>`;
+    overlay.innerHTML = `<div style="background:${bgCard};color:${textPri};border:1px solid ${border};border-radius:14px;padding:1.5rem;max-width:440px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.4);"><div id="cc-clone-choice-title" style="font-size:1rem;font-weight:700;line-height:1.2;margin-bottom:.35rem;">Bắt đầu sửa hợp âm</div><div style="font-size:12px;color:${textSec};line-height:1.5;margin-bottom:1.1rem;">Bạn đang xem bộ <strong>${safeSource}</strong> — không thể sửa trực tiếp. Bộ đích là <strong style="color:#10b981;">${safeTarget}</strong>.</div><div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px;"><button id="cc-clone-edit-mine" class="btn btn-primary btn-sm" style="text-align:left;padding:10px 12px;border-radius:10px;font-weight:600;">✎ Sửa trên bản ${safeTarget}<div style="font-weight:400;font-size:12px;opacity:.85;margin-top:2px;">Giữ nguyên hợp âm đã có trong bản ${safeTarget}.</div></button>${copyBtnHtml}</div><div style="display:flex;justify-content:flex-end;"><button id="cc-clone-cancel" class="btn btn-ghost btn-sm">Hủy</button></div></div>`;
     document.body.appendChild(overlay);
     const cleanup = () => overlay.remove();
     overlay.querySelector('#cc-clone-edit-mine').onclick = () => { cleanup(); onEditMine?.(); };
     overlay.querySelector('#cc-clone-cancel').onclick = () => { cleanup(); onCancel?.(); };
-    overlay.querySelector('#cc-clone-copy').onclick = () => {
-      if (window.confirm(`Ghi đè TOÀN BỘ hợp âm hiện có trong bản "${targetSet}" bằng nội dung của "${sourceLabel}"?\n\nHành động này không thể hoàn tác.`)) {
-        cleanup(); onCopyOverwrite?.();
-      }
-    };
+    const copyBtn = overlay.querySelector('#cc-clone-copy');
+    if (copyBtn && allowOverwrite) {
+      copyBtn.onclick = () => {
+        if (window.confirm(`Ghi đè TOÀN BỘ hợp âm hiện có trong bản "${targetSet}" bằng nội dung của "${sourceLabel}"?\n\nHành động này không thể hoàn tác.`)) {
+          cleanup(); onCopyOverwrite?.();
+        }
+      };
+    }
     overlay.onclick = e => { if (e.target === overlay) { cleanup(); onCancel?.(); } };
     document.addEventListener('keydown', function escHandler(e) {
       if (e.key === 'Escape') { document.removeEventListener('keydown', escHandler); cleanup(); onCancel?.(); }

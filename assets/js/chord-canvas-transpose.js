@@ -68,12 +68,23 @@ const ChordCanvasTranspose = (() => {
   };
 
   /**
-   * Đọc <fifths> từ XML — nguồn duy nhất, đáng tin cậy nhất.
+   * Đọc <fifths> từ XML và đồng bộ với defaultKey từ Store khi XML thiếu/bằng 0.
    */
   function getKeyFifths() {
     try {
+      const storeSong = (typeof window !== 'undefined') ? (window.Store?.get?.('currentSong') || window.App?.getCurrentSong?.()) : null;
+      const activeId = (typeof window !== 'undefined') ? window.App?.getCurrentSongId?.() : null;
+      const defaultKey = (!activeId || !storeSong?.id || String(storeSong.id) === String(activeId))
+        ? storeSong?.defaultKey
+        : null;
+      const parsedDefault = (defaultKey && (typeof window !== 'undefined' ? window.KeyService : globalThis.KeyService)?.parseKey)
+        ? (typeof window !== 'undefined' ? window.KeyService : globalThis.KeyService).parseKey(defaultKey)
+        : null;
+
       const xml = window.OSMDRenderer?.getCurrentXml?.() || window.App?.getOriginalXml?.();
-      if (!xml) return null;
+      if (!xml) {
+        return parsedDefault && typeof parsedDefault.fifths === 'number' ? parsedDefault.fifths : null;
+      }
       const doc = window.XmlDocCache?.getDoc(xml) || new DOMParser().parseFromString(xml, 'text/xml');
       const fifths = parseInt(doc.querySelector('key > fifths')?.textContent ?? 'NaN');
 
@@ -90,6 +101,9 @@ const ChordCanvasTranspose = (() => {
         return fifths;
       }
 
+      if (parsedDefault && typeof parsedDefault.fifths === 'number') {
+        return parsedDefault.fifths;
+      }
       return flat > sharp ? -1 : (sharp > flat ? 1 : 0);
     } catch { return null; }
   }
@@ -148,10 +162,21 @@ const ChordCanvasTranspose = (() => {
           : (typeof DOMParser !== 'undefined' ? new DOMParser().parseFromString(xmlStr, 'text/xml') : null);
         if (doc) {
           const k = doc.querySelector('key');
-          if (k) {
-            const f = String(parseInt(k.querySelector('fifths')?.textContent ?? '0', 10));
+          if (k && k.querySelector('fifths') !== null) {
+            const fNum = parseInt(k.querySelector('fifths')?.textContent ?? '0', 10);
+            const f = String(fNum);
             mode = k.querySelector('mode')?.textContent?.toLowerCase() ?? 'major';
             origRoot = mode === 'minor' ? (_F2m[f] || 'Am') : (_F2M[f] || 'C');
+          } else {
+            const storeSong = (typeof window !== 'undefined') ? (window.Store?.get?.('currentSong') || window.App?.getCurrentSong?.()) : null;
+            const activeId = (typeof window !== 'undefined') ? window.App?.getCurrentSongId?.() : null;
+            const defKey = (!activeId || !storeSong?.id || String(storeSong.id) === String(activeId)) ? storeSong?.defaultKey : null;
+            const ks = (typeof window !== 'undefined' ? window.KeyService : globalThis.KeyService);
+            const parsed = defKey && ks?.parseKey ? ks.parseKey(defKey) : null;
+            if (parsed) {
+              origRoot = parsed.cleanKey || defKey;
+              mode = parsed.isMinor ? 'minor' : 'major';
+            }
           }
         }
       }

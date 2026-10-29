@@ -539,9 +539,12 @@ const DisplaySettings = (() => {
                 const pCapo = (window.StageLens?.getCurrentRole?.() === 'guitar' || document.body?.dataset?.stageLens === 'guitar') ? (window.GuitarLens?.getPersonalCapo?.() || 0) : 0;
                 const capo = pCapo > 0 ? pCapo : (window.Store?.get?.('capoLevel') || 0);
                 const chordShift = trOffset - capo;
+                const useFlats = chordShift !== 0 && window.ChordCanvasTranspose?.getTransposedKeyUseFlats
+                    ? window.ChordCanvasTranspose.getTransposedKeyUseFlats(chordShift)
+                    : null;
                 let transposedChords = {};
                 for (const [k, chord] of Object.entries(customChords)) {
-                    let c = (chordShift !== 0 && window.TransposeEngine) ? window.TransposeEngine.transposeChord(chord, chordShift) : chord;
+                    let c = (chordShift !== 0 && window.TransposeEngine) ? window.TransposeEngine.transposeChord(chord, chordShift, useFlats) : chord;
                     if (window.GuitarLens?.isSimplifyActive?.()) c = window.GuitarLens.simplifyChord(c);
                     transposedChords[k] = c;
                 }

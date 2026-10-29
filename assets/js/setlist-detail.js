@@ -73,7 +73,8 @@ const SetlistDetail = (() => {
     const titleEl = document.getElementById('setlist-detail-title');
     if (titleEl) titleEl.textContent = sl.title;
     window.ServicePlanUI?.renderServicePlanMeta?.(sl, { onRefresh: (sId) => viewSetlistDetail(sId) });
-    document.getElementById('setlist-add-container')?.classList.remove('hidden');
+    const canEdit = Boolean(window.Auth && (window.Auth.isAdmin?.() || window.Auth.isBanhat?.()));
+    document.getElementById('setlist-add-container')?.classList.toggle('hidden', !canEdit);
   }
 
   async function _handleEditTone(item, songObj, title, idx) {
@@ -182,46 +183,61 @@ const SetlistDetail = (() => {
     summaryEl.innerHTML = `<span>⏱️ Tổng thời lượng dự kiến: <strong style="color:var(--text-color);">${totalMin} phút</strong> (${currentSetlist.items.length} mục)</span>`;
     itemsEl.appendChild(summaryEl);
 
+    const canEdit = Boolean(window.Auth && (window.Auth.isAdmin?.() || window.Auth.isBanhat?.()));
+
     currentSetlist.items.forEach((item, idx) => {
       const isSong = !item.item_type || item.item_type === 'song';
       const typeInfo = window.LiturgyCard?.getTypeInfo?.(item.item_type) || { icon: '⛪', label: 'Tiết mục', badge: 'TIẾT MỤC' };
       const songObj = isSong ? (allSongs.find(s => String(s.id) === String(item.song_id)) || window.LibraryUI?.getSongObj?.(item.song_id)) : null;
-      const title = isSong ? (songObj ? songObj.title : 'Bài hát không tồn tại') : `${typeInfo.icon} ${item.custom_title || typeInfo.label}`;
+      const title = isSong ? (songObj ? songObj.title : (item.song_title || 'Bài hát không tồn tại')) : `${typeInfo.icon} ${item.custom_title || typeInfo.label}`;
       const el = document.createElement('div');
       el.className = 'song-item' + (currentIndex === idx ? ' active' : '');
 
       const numStr = String(idx + 1).padStart(2, '0');
       const durVal = parseInt(item.duration_minutes, 10) || 5;
-      const durBadge = `<span class="tag btn-edit-duration" style="cursor:pointer;" title="Thời lượng dự kiến (Click để đổi)">⏱️ ${durVal}' ✎</span>`;
+      const durBadge = canEdit
+        ? `<span class="tag btn-edit-duration" style="cursor:pointer;" title="Thời lượng dự kiến (Click để đổi)">⏱️ ${durVal}' ✎</span>`
+        : `<span class="tag" title="Thời lượng dự kiến">⏱️ ${durVal}'</span>`;
 
       let metaHtml = '';
       if (isSong) {
-        const origKey = songObj?.defaultKey || songObj?.keySignature || '';
-        const toneBadge = _formatToneBadge(origKey, item.transpose_key, true);
+        const origKey = item.defaultKey || songObj?.defaultKey || songObj?.keySignature || '';
+        const toneBadge = _formatToneBadge(origKey, item.transpose_key, canEdit);
         const chordBadge = item.chord_profile && item.chord_profile !== 'default' ? `<span class="tag">🎸 ${_esc(item.chord_profile)}</span>` : '';
-        const bpmBadge = item.bpm
-          ? `<span class="tag tag-blue btn-edit-bpm" style="cursor:pointer;" title="Click để đổi BPM">♩${_esc(String(item.bpm))} BPM ✎</span>`
-          : `<span class="tag btn-edit-bpm" style="cursor:pointer;opacity:0.8;" title="Click để đặt BPM">♩ BPM ✎</span>`;
+        const bpmBadge = canEdit
+          ? (item.bpm
+              ? `<span class="tag tag-blue btn-edit-bpm" style="cursor:pointer;" title="Click để đổi BPM">♩${_esc(String(item.bpm))} BPM ✎</span>`
+              : `<span class="tag btn-edit-bpm" style="cursor:pointer;opacity:0.8;" title="Click để đặt BPM">♩ BPM ✎</span>`)
+          : (item.bpm ? `<span class="tag tag-blue" title="Nhịp độ">♩${_esc(String(item.bpm))} BPM</span>` : '');
         const versesVal = item.selected_verses || item.stanzas || '';
-        const versesBadge = versesVal
-          ? `<span class="tag tag-green btn-edit-verses" style="cursor:pointer;" title="Khổ sẽ hát: ${_esc(versesVal)} (Click để sửa)">📖 Khổ: ${_esc(versesVal)} ✎</span>`
-          : `<span class="tag btn-edit-verses" style="cursor:pointer;opacity:0.8;" title="Đặt khổ sẽ hát (ví dụ: 1, 3)">📖 Khổ ✎</span>`;
+        const versesBadge = canEdit
+          ? (versesVal
+              ? `<span class="tag tag-green btn-edit-verses" style="cursor:pointer;" title="Khổ sẽ hát: ${_esc(versesVal)} (Click để sửa)">📖 Khổ: ${_esc(versesVal)} ✎</span>`
+              : `<span class="tag btn-edit-verses" style="cursor:pointer;opacity:0.8;" title="Đặt khổ sẽ hát (ví dụ: 1, 3)">📖 Khổ ✎</span>`)
+          : (versesVal ? `<span class="tag tag-green" title="Khổ sẽ hát">📖 Khổ: ${_esc(versesVal)}</span>` : '');
         const notesVal = item.leader_notes || '';
-        const notesBadge = notesVal
-          ? `<span class="tag tag-amber btn-edit-notes" style="cursor:pointer;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="Ghi chú: ${_esc(notesVal)} (Click để sửa)">📌 ${_esc(notesVal)} ✎</span>`
-          : `<span class="tag btn-edit-notes" style="cursor:pointer;opacity:0.8;" title="Thêm ghi chú ca trưởng">📌 Ghi chú ✎</span>`;
+        const notesBadge = canEdit
+          ? (notesVal
+              ? `<span class="tag tag-amber btn-edit-notes" style="cursor:pointer;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="Ghi chú: ${_esc(notesVal)} (Click để sửa)">📌 ${_esc(notesVal)} ✎</span>`
+              : `<span class="tag btn-edit-notes" style="cursor:pointer;opacity:0.8;" title="Thêm ghi chú ca trưởng">📌 Ghi chú ✎</span>`)
+          : (notesVal ? `<span class="tag tag-amber" style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="Ghi chú: ${_esc(notesVal)}">📌 ${_esc(notesVal)}</span>` : '');
         metaHtml = `${toneBadge} ${chordBadge} ${bpmBadge} ${versesBadge} ${durBadge} ${notesBadge}`;
       } else {
         const typeBadge = `<span class="tag tag-purple">🔖 ${typeInfo.badge}</span>`;
         const notesVal = item.leader_notes || '';
-        const notesBadge = notesVal
-          ? `<span class="tag tag-amber btn-edit-notes" style="cursor:pointer;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="Ghi chú: ${_esc(notesVal)} (Click để sửa)">📌 ${_esc(notesVal)} ✎</span>`
-          : `<span class="tag btn-edit-notes" style="cursor:pointer;opacity:0.8;" title="Thêm ghi chú ca trưởng">📌 Ghi chú ✎</span>`;
+        const notesBadge = canEdit
+          ? (notesVal
+              ? `<span class="tag tag-amber btn-edit-notes" style="cursor:pointer;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="Ghi chú: ${_esc(notesVal)} (Click để sửa)">📌 ${_esc(notesVal)} ✎</span>`
+              : `<span class="tag btn-edit-notes" style="cursor:pointer;opacity:0.8;" title="Thêm ghi chú ca trưởng">📌 Ghi chú ✎</span>`)
+          : (notesVal ? `<span class="tag tag-amber" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="Ghi chú: ${_esc(notesVal)}">📌 ${_esc(notesVal)}</span>` : '');
         metaHtml = `${typeBadge} ${durBadge} ${notesBadge}`;
       }
 
-      const saveBpmBtn = (isSong && String(item.song_id) === String(window.App?.getCurrentSongId?.() || window.Store?.get?.('currentSong')?.id || ''))
+      const saveBpmBtn = (canEdit && isSong && String(item.song_id) === String(window.App?.getCurrentSongId?.() || window.Store?.get?.('currentSong')?.id || ''))
         ? `<button class="icon-btn-xs btn-save-bpm" title="Lưu Tone & BPM đang tập vào bài này" style="color:var(--accent);font-size:.7rem;padding:.25rem .5rem;font-weight:700;touch-action:manipulation;">💾 Lưu Tập</button>`
+        : '';
+      const delItemBtn = canEdit
+        ? `<button class="icon-btn-xs text-danger btn-del-item" title="Xóa khỏi list">✕</button>`
         : '';
 
       el.innerHTML = `
@@ -233,16 +249,21 @@ const SetlistDetail = (() => {
         </div>
         <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
           ${saveBpmBtn}
-          <button class="icon-btn-xs text-danger btn-del-item" title="Xóa khỏi list">✕</button>
+          ${delItemBtn}
         </div>
       `;
 
       el.addEventListener('click', async (e) => {
-        if (e.target.closest('.btn-del-item, .btn-save-bpm, .btn-edit-tone, .btn-edit-bpm, .btn-edit-verses, .btn-edit-notes, .btn-edit-duration')) return;
+        if (canEdit && e.target.closest('.btn-del-item, .btn-save-bpm, .btn-edit-tone, .btn-edit-bpm, .btn-edit-verses, .btn-edit-notes, .btn-edit-duration')) return;
         ctx.setCurrentIndex?.(idx);
         await renderSetlistItems();
         ctx.playCurrentItem?.();
       });
+
+      if (!canEdit) {
+        itemsEl.appendChild(el);
+        return;
+      }
 
       el.querySelector('.btn-edit-duration')?.addEventListener('click', async (e) => {
         e.stopPropagation();

@@ -17,7 +17,8 @@ class SetlistPublicReadService {
         if (!$plan) return null;
         $plan['items'] = DB::run("SELECT i.id, i.setlist_id, i.song_id, i.display_order,
             i.chord_profile, i.transpose_key, i.bpm, i.beats_per_measure, i.item_type,
-            i.custom_title, i.duration_minutes, i.selected_verses, so.title AS song_title
+            i.custom_title, i.duration_minutes, i.selected_verses,
+            so.title AS song_title, so.defaultKey, so.httlvnId
             FROM setlist_items i LEFT JOIN songs so ON so.id=i.song_id
             WHERE i.setlist_id=? ORDER BY i.display_order, i.id", [$id])->fetchAll(PDO::FETCH_ASSOC);
         return $plan;

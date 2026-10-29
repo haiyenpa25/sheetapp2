@@ -237,6 +237,9 @@ const Auth = (() => {
     document.getElementById('btn-new-chord-set')?.classList.toggle('hidden', !canEditChords);
     // Nút tạo Setlist — Leader + Admin
     const isSetlistTab = !document.getElementById('tab-content-setlist')?.classList.contains('hidden');
+    // Chương trình chỉ dành cho người đã đăng nhập: khách không thấy tab; đang đứng ở tab này thì quay về thư viện.
+    document.querySelector('.sidebar-tab[data-tab="setlist"]')?.classList.toggle('hidden', !loggedIn);
+    if (!loggedIn && isSetlistTab) document.querySelector('.sidebar-tab[data-tab="library"]')?.click();
     document.body.classList.toggle('has-member-access', canEditChords);
     document.getElementById('btn-create-setlist')?.classList.toggle('hidden', !(canEditChords && isSetlistTab));
     document.getElementById('btn-toolbar-editor')?.classList.toggle('hidden', !canEditChords);

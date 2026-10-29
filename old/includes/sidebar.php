@@ -88,6 +88,7 @@
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
           <h3 id="setlist-detail-title" class="setlist-detail-title">Setlist</h3>
+          <button id="btn-share-setlist" class="icon-btn-xs" title="Copy link chương trình (người nhận cần đăng nhập để xem)"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="3" r="2"/><circle cx="3" cy="7" r="2"/><circle cx="11" cy="11" r="2"/><line x1="4.7" y1="6" x2="9.3" y2="4"/><line x1="4.7" y1="8" x2="9.3" y2="10"/></svg></button>
           <button id="btn-play-setlist" class="btn btn-sm btn-primary">Phát</button>
         </div>
         <div id="setlist-items" class="setlist-items"></div>

@@ -68,13 +68,15 @@ const LyricExtractor = (() => {
     // Hợp âm chữ dùng cùng cách viết thăng/giáng với tông hiển thị.
     const xmlKey = doc.querySelector('key');
     const fifthsText = xmlKey?.querySelector('fifths')?.textContent;
-    const sourceKey = fifthsText == null
-      ? window.Store?.get?.('currentSong')?.defaultKey
-      : Number(fifthsText);
+    const defaultKey = window.Store?.get?.('currentSong')?.defaultKey;
+    const fifthsNum = fifthsText == null ? NaN : Number(fifthsText);
+    const sourceKey = (isNaN(fifthsNum) || (fifthsNum === 0 && defaultKey && !['C', 'Am'].includes(defaultKey)))
+      ? (defaultKey || 0)
+      : fifthsNum;
     const xmlMode = xmlKey?.querySelector('mode')?.textContent?.trim().toLowerCase();
     const isMinor = xmlMode ? xmlMode === 'minor' : null;
     const targetKey = window.KeyService?.displayKey?.(sourceKey, transposeOffset, isMinor) || '';
-    const useFlats = targetKey ? targetKey.includes('b') : null;
+    const useFlats = targetKey ? (targetKey.includes('b') || targetKey === 'F' || targetKey === 'Dm') : null;
 
     const measures = part.querySelectorAll('measure');
     const verseMap   = {};

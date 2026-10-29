@@ -398,6 +398,27 @@ body.fullscreen-mode .osmd-container { max-width: 100%; padding: 1rem; margin-to
 .setlist-items { display: flex; flex-direction: column; gap: 0.25rem; }
 .setlist-add-container { margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.25rem; }
 .setlist-add-container.hidden { display: none; }
+
+/* Dòng chương trình có 2 tầng (tên bài + nhãn Tone/hợp âm/BPM): .song-item mặc định cao cố định
+   26px (44px trên màn cảm ứng) + overflow:hidden nên nhãn bị cắt và dính sát nhau. */
+#setlist-list .song-item,
+.setlist-items .song-item,
+.setlist-search-results .song-item,
+#add-to-setlist-options .song-item {
+  height: auto; min-height: 44px; padding: 8px 10px; gap: 8px;
+  align-items: center; overflow: visible;
+}
+#setlist-list .song-item.active,
+.setlist-items .song-item.active { padding-left: 7px; }
+#setlist-list .song-item-title,
+.setlist-items .song-item-title { line-height: 1.35; white-space: normal; overflow-wrap: anywhere; }
+#setlist-list .song-item-meta,
+.setlist-items .song-item-meta { display: flex; flex-wrap: wrap; gap: 4px 6px; margin-top: 4px; line-height: 1.3; color: var(--text-secondary); font-size: .78rem; font-weight: 400; }
+.setlist-items .tag { padding: 2px 6px; line-height: 1.3; white-space: nowrap; }
+.tag-blue { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+body.dark-mode .tag-blue { background: #172554; color: #93c5fd; border-color: #1e3a8a; }
+.setlist-items .btn-save-bpm { min-height: 32px; padding: .25rem .5rem !important; touch-action: manipulation; }
+.setlist-items .btn-del-item { min-width: 32px; min-height: 32px; touch-action: manipulation; }
 .setlist-search-results {
   width: 100%; max-height: 250px; overflow-y: auto;
   background: var(--bg-surface); border: 1px solid var(--border);

@@ -35,17 +35,16 @@ class Auth {
         try {
             require_once __DIR__ . '/DB.php';
             $pdo = DB::get();
-            $stmt = $pdo->prepare("SELECT role, status, chord_code, display_name FROM users WHERE id = ?");
+            $stmt = $pdo->prepare("SELECT username, role, status, chord_code, display_name FROM users WHERE id = ?");
             $stmt->execute([(int)$_SESSION['user_id']]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             if (!$row || ($row['status'] ?? 'active') !== 'active') {
                 $_SESSION = [];
                 return;
             }
+            $_SESSION['username'] = (string)($row['username'] ?? ($_SESSION['username'] ?? ''));
             $_SESSION['role'] = $row['role'];
-            if (isset($row['chord_code'])) {
-                $_SESSION['chord_code'] = $row['chord_code'];
-            }
+            $_SESSION['chord_code'] = (string)($row['chord_code'] ?? '');
             if (!empty($row['display_name'])) {
                 $_SESSION['display_name'] = $row['display_name'];
             }

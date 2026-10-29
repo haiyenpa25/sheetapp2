@@ -168,6 +168,33 @@ const SetlistUI = (() => {
     }
   }
 
+  async function shareSetlistLink(setId = null) {
+    const id = setId || _currentSetlist?.id;
+    if (!id) {
+      window.App?.showToast?.('Chưa chọn chương trình để chia sẻ', 'warning');
+      return '';
+    }
+    const url = new URL(window.location.origin + window.location.pathname);
+    url.searchParams.set('setlist', String(id));
+    const shareUrl = url.href;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = shareUrl;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+      }
+      window.App?.showToast?.('🔗 Đã copy link Chương trình! Khách mở link này sẽ vào đánh ngay không cần đăng nhập.', 'success');
+    } catch (_) {
+      window.prompt('Copy link Chương trình để gửi cho ban nhạc / khách:', shareUrl);
+    }
+    return shareUrl;
+  }
+
   function init() {
     _linkModules();
     ensureSongsLoaded();
@@ -205,6 +232,29 @@ const SetlistUI = (() => {
 
     document.getElementById('btn-print-setlist')?.addEventListener('click', printSetlist);
     document.getElementById('btn-copy-setlist-slide')?.addEventListener('click', copySetlistSlide);
+    document.getElementById('btn-share-setlist')?.addEventListener('click', () => shareSetlistLink());
+
+    window.EventBus?.on?.('auth:changed', () => {
+      if (_currentSetlist) {
+        const canEdit = Boolean(window.Auth && (window.Auth.isAdmin?.() || window.Auth.isBanhat?.()));
+        document.getElementById('setlist-add-container')?.classList.toggle('hidden', !canEdit);
+        window.ServicePlanUI?.renderServicePlanMeta?.(_currentSetlist, { onRefresh: (sId) => viewSetlistDetail(sId) });
+        renderSetlistItems();
+      }
+    });
+
+    const p = new URLSearchParams(window.location.search || '');
+    const deepSetlistId = p.get('setlist') || p.get('program');
+    if (deepSetlistId) {
+      setTimeout(async () => {
+        await switchToSetlistTab(deepSetlistId);
+        if (_currentSetlist?.items?.length && !p.get('song')) {
+          _currentIndex = 0;
+          await renderSetlistItems();
+          await playCurrentItem();
+        }
+      }, 120);
+    }
   }
 
   /* 
@@ -250,6 +300,7 @@ const SetlistUI = (() => {
     playCurrentItem,
     printSetlist,
     copySetlistSlide,
+    shareSetlistLink,
     renderSetlistItems,
     backToSetlists,
     endSetlist: (notify) => window.SetlistPlayer?.endSetlist?.(notify),
