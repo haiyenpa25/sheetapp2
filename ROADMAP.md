@@ -437,3 +437,22 @@ Rút từ ba báo cáo rà soát 2026-10-22. Người thực thi phải đọc l
 - **BUG-39** — nút Ghim trong `manager-community.js`, `manager-repertoire.js`, `manager-versions.js`: chỉ hiện cho `leader` và `admin`.
 - **BUG-40** — `old/assets/js/chord-canvas.js` `deleteSet`: xoá thất bại thì giữ bộ, báo lỗi, không chuyển sang HD. `old/assets/js/importer.js` ~234: dùng `SafeHtml.inlineJsString` cho tên file trong `onclick`.
 - **BUG-41** — `assets/js/learn/ui/learn-controls.js`: dựng link "Quay về" bằng `ApiService.resolveUrl` thay vì `/?song=`.
+
+
+---
+
+## Phụ lục B — Đợt R9 (2026-10-28): Luật Bất Biến (`RULE.md`), Phím Điều Khiển Ngoài Mặt Trước & Chương Trình Cho Khách
+
+> **Tài liệu luật bắt buộc đọc kèm:** `RULE.md` (5 nhóm quy tắc chống hồi quy).
+
+| Mã | Hạng mục | File chính | Trạng thái |
+|---|---|---|---|
+| **CORE-1** | Chuẩn hóa Transpose & Enharmonic (`A - 1 -> Ab`, `A + 1 -> Bb`, `Eb/Ab/Bb` cho hợp âm trưởng, `F#m/G#m/C#m` cho hợp âm thứ theo tông đích; `getKeyFifths` ưu tiên `defaultKey`) | `assets/js/core/KeyService.js`, `assets/js/transpose-engine.js`, `assets/js/chord-canvas-transpose.js`, `assets/js/display-settings.js`, `old/assets/js/chord-canvas.js` | ✅ |
+| **CORE-2** | Chấm tím `+` (`.cc-dot-btn`), quyền `hoaidinh`/`admin` sửa trực tiếp `HD` & tạo bộ mới (`showNewSetModal`), chống mất chấm/hợp âm khi load bài và chuẩn hóa tọa độ/cỡ chữ/màu sắc trên Treble staff | `assets/js/chord-canvas.js`, `assets/js/chord-canvas-dots.js`, `old/assets/js/chord-canvas.js`, `old/assets/js/auth.js` | ✅ |
+| **CORE-3** | Chống mất danh sách bài hát khi tìm kiếm trên Android & iPad (reset `scrollTop = 0`, sàn chiều cao `vh >= 320`, fallback tìm cục bộ trên `songs`) | `assets/js/library-ui.js`, `old/assets/js/library-ui.js`, `assets/js/core/LibrarySearch.js` | ✅ |
+| **UI-1** | Hiển thị đầy đủ 6 cụm điều khiển ngoài mặt trước trên Web Desktop (`≥1101px`), iPad (`681–1100px`) & Gig HUD (gỡ ẩn `#toolbar-zoom-pill`, `#btn-lock-zoom`, `#btn-gig-lock-zoom`, `#si-tempo-pill`) | `assets/css/library-polish.css`, `assets/css/layout.css`, `includes/toolbar.php`, `includes/sheet_viewer.php`, `assets/js/toolbar-controller.js` | ✅ |
+| **UI-2** | Đưa cụm Zoom (`%`) + Khóa Zoom (`🔒` `#btn-mobile-lock-zoom`) và Tempo (`♩ BPM` `#btn-mobile-tempo`) ra thanh ngoài `#mobile-thumb-bar` trên điện thoại (`≤680px`) | `includes/toolbar.php`, `assets/js/mobile-controller.js`, `assets/css/layout.css` | ✅ |
+| **UI-3** | Đồng bộ Zoom + Khóa Zoom (`#btn-lock-zoom`) và Tempo (`#btn-toolbar-metronome`) ra ngoài thanh công cụ Classic (`/old/`) | `old/includes/toolbar.php`, `old/assets/js/toolbar-controller.js`, `old/assets/js/app.js`, `old/assets/css/layout.css` | ✅ |
+| **PROG-1** | Cho phép khách (chưa đăng nhập) và `viewer` xem chi tiết đầy đủ (`defaultKey`, `httlvnId`, `leader_notes`) & tải gói Offline (`offline_package`) của chương trình `published` | `api/services/SetlistPublicReadService.php`, `api/controllers/SetlistController.php` | ✅ |
+| **PROG-2** | Chế độ Khách tham gia đánh Chương trình: ẩn nút sửa/xóa server cho khách, mở toàn bộ tính năng vào chơi (`▶ Vào chơi`, `#setlist-program-bar`, đổi tông/bộ hợp âm/tempo/zoom cục bộ, tải offline) | `assets/js/setlist-detail.js`, `assets/js/service-plan-ui.js`, `assets/js/song-info-bar.js`, `old/assets/js/setlist-ui.js` | ✅ |
+| **PROG-3** | Deep-link chia sẻ Chương trình (`?setlist=<id>` / `?program=<id>`) tự động nạp chương trình & vào bài số 1 cho khách không cần đăng nhập + nút Copy Link | `assets/js/url-state.js`, `assets/js/setlist-ui.js`, `includes/sidebar.php`, `old/includes/sidebar.php`, `old/assets/js/setlist-ui.js` | ✅ |

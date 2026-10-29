@@ -1,0 +1,39 @@
+=== 1. PHP Syntax Check (php -l) ===
+[PASS] No syntax errors detected in api/controllers/ChordSetController.php
+[PASS] No syntax errors detected in api/core/Auth.php
+[PASS] No syntax errors detected in api/services/SetlistPublicReadService.php
+[PASS] No syntax errors detected in api/services/UserService.php
+[PASS] No syntax errors detected in includes/sidebar.php
+[PASS] No syntax errors detected in includes/toolbar.php
+[PASS] No syntax errors detected in old/includes/sidebar.php
+[PASS] No syntax errors detected in old/includes/toolbar.php
+[PASS] No syntax errors detected in tests/r9_ui_transpose_chord_guest_setlist_regression.php
+
+=== 2. JS Syntax (node --check) & Line Budget (< 600 lines) ===
+[PASS] assets/js/chord-canvas-edit.js (syntax=OK, lines=596/600)
+[PASS] assets/js/chord-canvas-transpose.js (syntax=OK, lines=299/600)
+[PASS] assets/js/chord-canvas-ui.js (syntax=OK, lines=587/600)
+[PASS] assets/js/chord-canvas.js (syntax=OK, lines=581/600)
+[PASS] assets/js/core/KeyService.js (syntax=OK, lines=220/600)
+[PASS] assets/js/core/LibrarySearch.js (syntax=OK, lines=83/600)
+[PASS] assets/js/display-settings.js (syntax=OK, lines=584/600)
+[PASS] assets/js/library-ui.js (syntax=OK, lines=596/600)
+[PASS] assets/js/lyric-extractor.js (syntax=OK, lines=542/600)
+[PASS] assets/js/mobile-controller.js (syntax=OK, lines=351/600)
+[PASS] assets/js/service-plan-ui.js (syntax=OK, lines=389/600)
+[PASS] assets/js/setlist-detail.js (syntax=OK, lines=519/600)
+[PASS] assets/js/setlist-ui.js (syntax=OK, lines=312/600)
+[PASS] assets/js/song-info-bar.js (syntax=OK, lines=566/600)
+[PASS] assets/js/transpose-engine.js (syntax=OK, lines=303/600)
+[PASS] assets/js/url-state.js (syntax=OK, lines=98/600)
+[PASS] old/assets/js/auth.js (syntax=OK, lines=233/600)
+[PASS] old/assets/js/chord-canvas.js (syntax=OK, lines=596/600)
+[PASS] old/assets/js/library-ui.js (syntax=OK, lines=579/600)
+[PASS] old/assets/js/setlist-ui.js (syntax=OK, lines=568/600)
+[PASS] old/assets/js/toolbar-controller.js (syntax=OK, lines=225/600)
+
+=== 3. SW Manifest & CODE_MAP.md & EOL Gate ===
+[PASS] PASS: sw.js khớp manifest (146 files, hash d6f122c826, vendor e8b6692a09)
+[PASS] git diff --stat === git diff --ignore-cr-at-eol --stat
+
+OVERALL: PASS

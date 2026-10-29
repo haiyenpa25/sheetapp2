@@ -1,0 +1,6 @@
+admin clone target=HD => HTTP 403 {"success":false,"error":"Không được phép ghi đè bộ hợp âm chuẩn HD\/TLH bằng thao tác sao chép (Clone)!","_httpCode":403}
+RESULT=PASS
+
+=== FRONTEND ===
+Admin on TLH setAddMode(true) => targetSet=HD, hasOverwriteCallback=false
+RESULT=PASS

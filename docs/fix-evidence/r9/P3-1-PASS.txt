@@ -1,0 +1,9 @@
+P3-1: Ma trận kiểm thử toàn diện cho TransposeEngine + KeyService
+Status: PASS
+Combinations tested: 7,392 (14 roots [C, C#, Db, D, Eb, E, F, F#, Gb, G, Ab, A, Bb, B] × 8 suffixes ["", m, 7, maj7, m7, dim, sus4, /E] × 22 semitones [-11..+11 \ {0}] × 3 useFlats [null, true, false]).
+Invariants verified:
+  (a) Major, dominant 7, maj7, sus4 chords at chroma {3, 8, 10} NEVER output D#, G#, A# (always Eb, Ab, Bb).
+  (b) Round-trip transposeChord(transposeChord(chord, +n, uf), -n, uf) preserves original root chroma across all 7,392 combinations.
+  (c) Slash bass note (/E) shifts by exact semitones and preserves chroma.
+  (d) KeyService.displayKey('A', -1) === 'Ab', KeyService.displayKey('A', +1) === 'Bb', KeyService.displayKey('A#', 0) === 'Bb', KeyService.displayKey('G#', 0) === 'Ab', KeyService.displayKey('D#', 0) === 'Eb'.
+

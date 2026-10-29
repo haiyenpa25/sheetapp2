@@ -1,7 +1,7 @@
 # CODE_MAP.md — Gitnexus Codebase Knowledge Graph & Map (SheetApp)
 
 > **GITNEXUS SECOND BRAIN CODE MAP**
-> Bản đồ tri thức toàn bộ hệ thống SheetApp. Cập nhật tự động: 2026-10-22 18:55:44
+> Bản đồ tri thức toàn bộ hệ thống SheetApp. Cập nhật tự động: 2026-10-28 11:01:17
 > AI Agent BẮT BUỘC tra cứu sơ đồ phụ thuộc dưới đây trước khi chỉnh sửa file.
 
 ---
@@ -117,21 +117,27 @@ graph TD
 - `assets\js\chord-canvas.js`
 - `assets\js\compact-score.js`
 - `assets\js\core\ApiService.js`
+- `assets\js\core\AppRules.js`
 - `assets\js\core\AppShell.js`
 - `assets\js\core\AudioUnlocker.js`
+- `assets\js\core\BootRunner.js`
+- `assets\js\core\ChordCanvasCore.js`
 - `assets\js\core\ChordSetNames.js`
 - `assets\js\core\ErrorReporter.js`
 - `assets\js\core\EventBus.js`
 - `assets\js\core\FeatureFlags.js`
 - `assets\js\core\KeyService.js`
+- `assets\js\core\LibraryData.js`
 - `assets\js\core\LibrarySearch.js`
 - `assets\js\core\MidiEngine.js`
 - `assets\js\core\ModalManager.js`
 - `assets\js\core\ModeManager.js`
 - `assets\js\core\OfflineSetlistManager.js`
 - `assets\js\core\OfflineVault.js`
+- `assets\js\core\OSMDRenderCore.js`
 - `assets\js\core\PointerTap.js`
 - `assets\js\core\SafeHtml.js`
+- `assets\js\core\SafeStorage.js`
 - `assets\js\core\ScriptLoader.js`
 - `assets\js\core\ServiceWorkerManager.js`
 - `assets\js\core\SongLoaderCore.js`
@@ -233,5 +239,5 @@ graph TD
 
 ---
 
-## 5 · FILE REGISTRY INDEX (3457 files total)
-Total indexed files: 3457
+## 5 · FILE REGISTRY INDEX (3753 files total)
+Total indexed files: 3753

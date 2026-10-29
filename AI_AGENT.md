@@ -8,7 +8,7 @@
 ## 0 · WORKFLOW BẮT BUỘC (Theo thứ tự - Superpowers & Gitnexus Integrated)
 
 ```
-BƯỚC 1 → Đọc file này (AI_AGENT.md) & tra cứu GITNEXUS (CODE_MAP.md) — nắm quy tắc & bản đồ codebase
+BƯỚC 1 → Đọc file này (AI_AGENT.md), RULE.md & tra cứu GITNEXUS (CODE_MAP.md) — nắm quy tắc bất biến & bản đồ codebase
 BƯỚC 2 → Đọc CODING_STANDARDS.md & PROJECT_REGISTRY.md          — hiểu tiêu chuẩn code & cấu trúc
 BƯỚC 3 → [SUPERPOWERS: PLAN] Phân tích yêu cầu & Impact Analysis — kiểm tra các file ảnh hưởng
 BƯỚC 4 → [SUPERPOWERS: DEV] Code đúng tiêu chuẩn standards      — không gõ bừa, không xóa nhầm logic
@@ -82,8 +82,9 @@ Nếu yêu cầu mơ hồ hoặc thiếu thông tin → **hỏi ngay**, không t
 - Mọi bài hát LUÔN có bộ "HD" (dù rỗng) — tạo tự động qua `tools/create_hd_sets.php` (hoặc `create_hd.sh`)
 - Khi load bài: ChordCanvas tự động chọn set "HD"
 - Nếu HD có hợp âm (>0): render HD, ẩn TLH gốc
-- Nếu HD rỗng: fallback hiện TLH gốc (không inject empty map)
-- **File:** `chord-canvas.js` (loadSong), `app.js` (hasCustomChords guard)
+- Nếu HD rỗng: hiện bản nhạc SẠCH, không còn fallback sang TLH (quyết định chủ dự án 2026-10-29, thay luật cũ "fallback TLH"). Bật lại luật cũ bằng cờ `AppRules.HD_EMPTY_SHOWS_TLH = true`. TLH vẫn xem được khi chọn bộ `default`.
+- Mọi người (kể cả khách) mở bài đều vào HD; bộ HD của các bài được khởi tạo từ hợp âm TLH trong XML bằng `tools/clone_tlh_to_hd.php`.
+- **File:** `chord-canvas.js` (loadSong, _build), `core/AppRules.js` (cờ), `core/ChordSetNames.js`, `song-info-bar.js`, `old/assets/js/chord-canvas.js`
 
 ### RULE 2: Tông Gốc = 0 Luôn Luôn
 - Khi load bài mới: `currentTranspose` LUÔN = 0

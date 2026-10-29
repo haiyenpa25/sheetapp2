@@ -1,0 +1,10 @@
+﻿  [PASS:S] [R9-RULE] RULE.md tồn tại và định nghĩa đầy đủ 5 nhóm quy tắc bất biến chống hồi quy
+  [PASS:B] [R9-P2-1-2] P2-1 & P2-2 (HTTP): banhat thường & HoaiDinh không có chord_code bị chặn 403; clone vào HD bị chặn 403; chủ sở hữu chord_code=HD và Admin lưu HD đạt 200
+  [PASS:B] [R9-P3-1] CORE-1 & P3-1: Ma trận 7392 phép dịch giọng (12 gốc × 8 hậu tố × -11..+11 × useFlats) không có A#/G#/D# trưởng và bảo toàn chroma 2 chiều
+  [PASS:B] [R9-P2-5] CORE-1 & P2-5 (F4): ChordCanvasTranspose.getKeyFifths tôn trọng <fifths>0</fifths> của XML, chặn đọc nhầm bài cũ, và fallback sang defaultKey khi thiếu <fifths>
+  [PASS:B] [R9-P3-3] CORE-2, P2-2, P2-4 & P3-3: hoaidinh và admin bật sửa trực tiếp HD, đứng ở TLH không có nút ghi đè HD, banhat ở BH không mở modal tên tự do (F6), applyPreloaded kiểm tra SVG trước khi gọi _build
+  [PASS:B] [R9-P2-3] CORE-3 & P2-3 (F3): LibrarySearch.run giữ nguyên scrollTop=420 khi bấm "Xem thêm", reset scrollTop=0 khi đổi từ khóa tìm kiếm, và fallback khi FTS5 rỗng
+  [PASS:B] [R9-P3-2-UI] UI-1..3 & P3-2: Thực thi hành vi thật của MobileController & Classic ToolbarController (Khóa Zoom, Chọn %, Tempo) và hiển thị đủ trên Web, iPad, Điện thoại, Gig HUD, /old/
+  [PASS:B] [R9-P3-2-PROG] PROG-1..3 & P3-2: Khách chưa đăng nhập nhận đủ defaultKey/httlvnId/chord_profile/transpose_key/bpm (ẩn assignments) và thực thi đúng giao diện khách tham gia đánh qua ?setlist=<id>
+
+SUITE_COMPLETE total=8

@@ -1102,3 +1102,14 @@
 
 
 [2026-10-17] — Lập `ROADMAP6.md` (bản mới, tiền tố ticket TV) cho trang Thư viện sau rà soát mã, dữ liệu chỉ đọc và chạy Chromium khách ở 4 kích thước; gồm 16 lỗi có bằng chứng (B1–B16), lộ trình TV0–TV7, thang nghiệm thu và 8 quyết định chờ chủ dự án. Chỉ tạo tài liệu, không sửa mã/dữ liệu; chưa commit.
+
+
+## 2026-10-20 — Phát hành đầy đủ thư viện và CSDL sạch lên main
+
+- Theo yêu cầu chủ dự án: đưa source/storage cần thiết lên main, gồm đủ 1.731 MusicXML và 7 danh mục (Biệt Thánh Ca: 206 bài). Thêm 828 file bản nhạc chưa được Git theo dõi, JSON hợp âm/ghi chú, registry nhạc cụ, cấu hình feature và XML phiên bản được CSDL tham chiếu.
+- Chủ dự án chọn CSDL phát hành đã làm sạch vì repo công khai. `storage/seed/library.sqlite` chứa 1.737 bộ hợp âm, 388 đoạn nhạc, bản phối/phiên bản công khai; không chứa mật khẩu/email/hồ sơ/histories nguồn. Contributor ẩn danh bị khóa, không dùng để đăng nhập. DB thật vẫn bị ignore và giữ checksum.
+- `tools/export_library_seed.py` xuất snapshot read-only, scrub dữ liệu, secure-delete/VACUUM, kiểm tra byte thô và xuất manifest; `tools/install_library.php` cài mới và tạo admin riêng; `tools/update_library.php --apply` sao lưu rồi bổ sung dữ liệu còn thiếu trong transaction, giữ tài khoản, chương trình và hợp âm hiện có.
+- Thêm `tests/library_bundle_regression.php`, `tests/library_seed_export_test.py`, `e2e/library-tv-bundle.spec.js` và helper checksum JSON. Cập nhật test cũ để kiểm tra nội dung file thay vì đếm thư mục rỗng; RBAC dùng fixture riêng, dò LiveSync bỏ đúng `.`/`..`. CI cài seed trước khi chạy bộ PHP.
+- Nghiệm thu bản cuối trên bản cài từ Git index: PHP 176/176 suite / 3.473 check, 337 PHP lint; trình duyệt Chromium/WebKit 20/20; Python export 2/2; 1.731 XML parse không lỗi; JS spec syntax/ESLint và diff-check PASS. Bằng chứng tại `docs/instrument-annotations-evidence/library-bundle-{final,red}.txt`.
+- Đồng bộ thêm commit remote `5f8cbb1` trước khi push, giữ cả phần sửa hiển thị/cache. Bản ghép: PHP 176/176 / 3.473 check; 74 ca trình duyệt đã đạt qua lượt tổng và lượt chạy lại PWA sau sửa guard tên fixture; JS syntax 332 file PASS. Bằng chứng: `docs/instrument-annotations-evidence/library-bundle-merged-final.txt`.
+- Hướng dẫn cài mới/server cũ và phạm vi dữ liệu: `docs/LIBRARY_DATA_RELEASE.md`; README bỏ hướng dẫn chmod 777/tự sync. Không chạy migration hoặc thay DB thật; không xác nhận triển khai production.

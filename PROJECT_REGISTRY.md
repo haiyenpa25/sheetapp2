@@ -34,6 +34,7 @@ Môi trường:
 ```
 SheetApp/
 ├── AI_AGENT.md               ← Đọc đầu tiên (quy tắc làm việc & Core Rules)
+├── RULE.md                   ← Quy tắc bất biến chống hồi quy (Transpose, Chấm tím +, Android/iPad, UI 6 tính năng, Chương trình khách)
 ├── CODING_STANDARDS.md       ← Đọc thứ hai (tiêu chuẩn code, EventBus, API)
 ├── PROJECT_REGISTRY.md       ← File này. Bản đồ dự án (nhật ký cũ: docs/history/CHANGELOG_2026.md)
 ├── CODE_MAP.md               ← Bản đồ tri thức codebase (tự sinh bởi Gitnexus)
@@ -446,6 +447,22 @@ Ghi chú nằm trong `storage/data/annotations/*.json`; settings/notes theo user
 
 > Chỉ giữ 5 mục mới nhất. Nhật ký đầy đủ: `docs/history/CHANGELOG_2026.md`. Khi thêm mục mới, đưa mục cũ nhất ở đây sang file đó.
 
+## 2026-10-29 — Tài khoản bannhac, chương trình chỉ cho người đăng nhập, HD mặc định, kiểm chồng lấn hợp âm
+
+- Tài khoản: `tools/create_band_user.php` (CLI, dry-run mặc định, mật khẩu lấy từ biến môi trường `SHEETAPP_USER_PASSWORD`, sao lưu trước khi ghi). Đã tạo `bannhac` (role `bannhac`, chord_code `BN`) trên CSDL local; CSDL web chạy cùng lệnh.
+- Chương trình: khách chưa đăng nhập không thấy gì — mọi `GET` route `setlists` yêu cầu đăng nhập (401), tab Chương trình ẩn (Modern + `/old/`); `viewer` đã đăng nhập vẫn nhận bản rút gọn của chương trình `published`. Sửa `RULE.md` §5.2 và `tests/library_tv41_public_setlists_regression.php`.
+- HD mặc định: HD rỗng hiện bản nhạc sạch (cờ `AppRules.HD_EMPTY_SHOWS_TLH = false`, thay Core Rule 1 cũ). `tools/clone_tlh_to_hd.php` + `tools/xml_chords_to_json.cjs` sao chép hợp âm XML vào HD: 1.449 bài (38.539 hợp âm) được ghi, 135 bài XML không có hợp âm giữ HD rỗng; sao lưu và 1.449 dòng lịch sử. Test mới `tests/hd_empty_clean_regression.php`.
+- Hợp âm/chấm `+` (R9 P4-3): sàn chữ 12px, hợp âm xếp độc lập với chấm, chấm nhường chữ; `e2e/r9-chord-overlap.spec.js`; danh sách chương trình Classic hết dính nhau (`old/assets/css/layout.css`); `TransposeHelper.php` đồng bộ quy tắc Bb/Ab/Eb với JS.
+- Seed phát hành: sau khi clone HD đã sinh lại `storage/seed/library.sqlite` + `library.manifest.json` (đúng 1.449 bộ HD đổi, 1.737 bộ hợp âm, 1.455 file JSON khớp manifest). Xoá 2 bộ rác test (`BH_TEST_R29`, `BH_POLYPHONIC_TEST`) khỏi CSDL local; sửa `library_r29`/`library_r210` truyền `userId` cho `deleteSet` nên không còn rò vào CSDL thật. Bộ test strict: 241/243 suite, chỉ còn `library_tv2_gzip` và `liturgical_export_and_usage` lỗi sẵn ở HEAD.
+- Chưa làm (cần chủ dự án quyết): danh mục riêng + tải XML riêng tư, đồng bộ dữ liệu GitHub — xem phương án trong phiên 2026-10-29.
+
+## 2026-10-28 — Nghiệm thu đợt fix R9 theo ROADMAP_R9_REVIEW (F1–F9, Q1–Q3, P0–P5)
+
+- Phân quyền & chống mất dữ liệu bộ hợp âm chuẩn HD (`F1`, `F2`, `Q1`, `Q2`): đồng bộ `username` và `chord_code` từ CSDL trong `Auth::checkDb()`; tìm kiếm người dùng không phân biệt hoa thường ở `UserService::findByUsername`; `ChordSetController` chỉ cấp quyền sửa trực tiếp bộ `HD` cho Admin hoặc chủ sở hữu có `chord_code = 'HD'` (chặn tài khoản giả mạo `HoaiDinh` không có `chord_code` với HTTP 403). Cấm ghi đè bộ `HD` bằng thao tác sao chép (`action === 'clone'` trả 403, ẩn nút `#cc-clone-copy` khi đích là `HD`).
+- Sửa lỗi cuộn danh sách bài khi bấm "Xem thêm" (`F3`, `P2-3`) và quyền tạo bộ mới / chuyển bài (`F6`, `F8`, `P2-4`): `LibrarySearch.run` truyền `searchAppend: offset > 0`, `LibraryUI.render` (Modern & Classic) giữ nguyên `scrollTop` khi nạp thêm trang; nhạc công Ban Hát đã ở bộ cá nhân gọi `showNewSetModal()` bật sửa ngay trên bộ của mình thay vì mở modal báo lỗi 403; Classic `/old/` tắt `_editEnabled` khi chuyển sang bộ không có quyền sửa trực tiếp; `applyPreloaded` kiểm tra `#osmd-container svg` trước khi gọi `_build()`.
+- Chuẩn hoá tông & dịch giọng (`F4`, `F7`, `Q3`, `P2-5`, `P3-1`): tôn trọng `<fifths>0</fifths>` trong MusicXML (chỉ fallback sang `defaultKey` khi XML thiếu `<fifths>` và `currentSong.id` khớp bài đang mở); kiểm chứng ma trận 7.392 phép thử `TransposeEngine.transposeChord` & `KeyService.displayKey` (không bao giờ xuất `A#`, `G#`, `D#` cho giọng/hợp âm trưởng).
+- Khôi phục `assets/js/chord-canvas-dots.js` về HEAD & chuẩn hoá EOL (`F5`, `F9`, `P0-3`): xoá diff 1.169 dòng do đổi CRLF/LF; nâng cấp `tests/r9_ui_transpose_chord_guest_setlist_regression.php` lên kiểm thử hành vi thật (8/8 PASS); lưu đầy đủ bằng chứng `P0`–`P5` tại `docs/fix-evidence/r9/`.
+
 ## 2026-10-22 — Hoàn tất Giai đoạn 1 (BUG-01…41) & gia cố bảo mật PHP (CVE-2026-109618/109619)
 
 - Gia cố bảo mật khẩn cấp trước CVE-2026-109618 & CVE-2026-109619 (PHP2Shell): rà soát `storage/` (0 file `.php*`) và `access.log` (chỉ có truy cập nội bộ), tắt `expose_php` và `session.upload_progress.enabled` trong `php.ini` cục bộ cùng `.htaccess` (`Header always unset X-Powered-By`, `php_flag session.upload_progress.enabled Off`).
@@ -476,25 +493,3 @@ Ghi chú nằm trong `storage/data/annotations/*.json`; settings/notes theo user
 - Căn hợp âm HD (cả hai): cộng dồn đoạn dòng kẻ cùng hàng để không sót hệ có ô nhịp ngắn; Classic lọc nốt theo hệ gần nhất và bỏ lọc theo viewport.
 - Kiểm chứng (Chromium headless): 5.000+ lượt đặt hợp âm HD qua 50–200% hai giao diện, máy tính và điện thoại; 10 tổ hợp thiết bị không tràn ngang/chồng lấn/lỗi console. PHP suite: không có suite FAIL mới so với HEAD trên cùng server (19 suite FAIL sẵn do môi trường CLI/HTTP, cũng FAIL ở HEAD). DB nguồn giữ nguyên checksum. Chưa commit.
 - Còn mở: điện thoại zoom ≥ 125% làm OSMD nén nốt chồng nhau (cả hai giao diện) — chờ chủ dự án chọn hướng.
-## 2026-10-20 — Phát hành đầy đủ thư viện và CSDL sạch lên main
-
-- Theo yêu cầu chủ dự án: đưa source/storage cần thiết lên main, gồm đủ 1.731 MusicXML và 7 danh mục (Biệt Thánh Ca: 206 bài). Thêm 828 file bản nhạc chưa được Git theo dõi, JSON hợp âm/ghi chú, registry nhạc cụ, cấu hình feature và XML phiên bản được CSDL tham chiếu.
-- Chủ dự án chọn CSDL phát hành đã làm sạch vì repo công khai. `storage/seed/library.sqlite` chứa 1.737 bộ hợp âm, 388 đoạn nhạc, bản phối/phiên bản công khai; không chứa mật khẩu/email/hồ sơ/histories nguồn. Contributor ẩn danh bị khóa, không dùng để đăng nhập. DB thật vẫn bị ignore và giữ checksum.
-- `tools/export_library_seed.py` xuất snapshot read-only, scrub dữ liệu, secure-delete/VACUUM, kiểm tra byte thô và xuất manifest; `tools/install_library.php` cài mới và tạo admin riêng; `tools/update_library.php --apply` sao lưu rồi bổ sung dữ liệu còn thiếu trong transaction, giữ tài khoản, chương trình và hợp âm hiện có.
-- Thêm `tests/library_bundle_regression.php`, `tests/library_seed_export_test.py`, `e2e/library-tv-bundle.spec.js` và helper checksum JSON. Cập nhật test cũ để kiểm tra nội dung file thay vì đếm thư mục rỗng; RBAC dùng fixture riêng, dò LiveSync bỏ đúng `.`/`..`. CI cài seed trước khi chạy bộ PHP.
-- Nghiệm thu bản cuối trên bản cài từ Git index: PHP 176/176 suite / 3.473 check, 337 PHP lint; trình duyệt Chromium/WebKit 20/20; Python export 2/2; 1.731 XML parse không lỗi; JS spec syntax/ESLint và diff-check PASS. Bằng chứng tại `docs/instrument-annotations-evidence/library-bundle-{final,red}.txt`.
-- Đồng bộ thêm commit remote `5f8cbb1` trước khi push, giữ cả phần sửa hiển thị/cache. Bản ghép: PHP 176/176 / 3.473 check; 74 ca trình duyệt đã đạt qua lượt tổng và lượt chạy lại PWA sau sửa guard tên fixture; JS syntax 332 file PASS. Bằng chứng: `docs/instrument-annotations-evidence/library-bundle-merged-final.txt`.
-- Hướng dẫn cài mới/server cũ và phạm vi dữ liệu: `docs/LIBRARY_DATA_RELEASE.md`; README bỏ hướng dẫn chmod 777/tự sync. Không chạy migration hoặc thay DB thật; không xác nhận triển khai production.
-
-
-## 2026-10-20 — Màu riêng từng ghi chú, liên thông Classic/Modern trên main
-
-- Theo lựa chọn chủ dự án: từng ghi chú có `customColor` tùy chọn, mặc định theo nhạc cụ. Ô soạn có bảng màu/tùy chọn và nút quay về màu nhạc cụ; giữ bản nháp màu khi lỗi, không đổi các ghi chú khác.
-- Nhãn sheet, thẻ chi tiết và viền editor cùng dùng màu hiệu lực. Editor căn giữa trên điện thoại, mở gần nốt trên màn hình rộng. Metadata màu/icon cũ được giữ.
-- Chuyển giao diện giữ bài, tông, kiểu xem/lời, bộ hợp âm và compact; bắt đầu soạn nhớ lớp đang hiện. Thêm `URLState.interfaceUrl()` dùng chung ba liên kết chuyển giao diện và test `e2e/library-tv-interface-links.spec.js`.
-- PHP service kiểm tra hex và lưu màu riêng cùng cơ chế revision hiện hữu; không migration DB, không đổi quyền. Xem kết quả và bằng chứng ở mục mới nhất trong `docs/INSTRUMENT_ANNOTATIONS_ACCEPTANCE.md`.
-- Nghiệm thu bản cuối: PHP 175/175 suite / 3.434 check; Chromium 133/133, WebKit 34/34; thành phần riêng 48/48; JS syntax 331 file và ESLint PASS. Vá việc đổi màu mặc định chưa cập nhật nhãn ngay; màu riêng giữ nguyên. SW hash `cfb9c9eb0c`. Bản cài thử đã đưa lại ra ngoài webroot, DB nguồn giữ checksum.
-
-
-
-

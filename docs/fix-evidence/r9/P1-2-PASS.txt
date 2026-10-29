@@ -1,0 +1,4 @@
+=== P1-2: AUDIT ChordSetService::cloneSet & cloneAndStartEditing ===
+1. ChordSetService::cloneSet($songId, $sourceName, $targetName) chặn isReservedName('HD') (trả về false) và KHÔNG ghi vào bảng chord_set_history.
+2. Tuy nhiên ở frontend (assets/js/chord-canvas-edit.js dòng 148-155), khi sourceSet === 'default' (TLH), cloneAndStartEditing() lại gọi thẳng ApiService.chordSets.save(songId, targetSet, arr) KHÔNG truyền baseChecksum, dẫn đến việc nếu Admin hoặc chủ HD chọn 'Sao chép TLH sang HD (ghi đè)' thì toàn bộ bộ HD bị ghi đè bằng hợp âm XML của TLH.
+Kết luận P1-2: Cần chặn hoàn toàn việc ghi đè HD từ TLH/clone (ẩn nút 'Sao chép ... ghi đè' khi targetSet === 'HD' và chặn action='clone' với target='HD' ở backend).

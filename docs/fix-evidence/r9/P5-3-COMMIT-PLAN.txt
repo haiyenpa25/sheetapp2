@@ -1,0 +1,83 @@
+P5-3: Kế hoạch tách 7 commit theo nhóm thay đổi (sẵn sàng cho Chủ dự án duyệt merge)
+
+Commit 1 (docs/RULE.md):
+  Files:
+    - RULE.md
+    - ROADMAP.md
+    - ROADMAP_R9_REVIEW.md
+    - AI_AGENT.md
+    - CODE_MAP.md
+    - PROJECT_REGISTRY.md
+  Message:
+    docs(r9): thiết lập RULE.md chống hồi quy & cập nhật ROADMAP_R9_REVIEW (P0-P5)
+
+Commit 2 (transpose/key — CORE-1, F4, F7, P2-5, P3-1):
+  Files:
+    - assets/js/core/KeyService.js
+    - assets/js/transpose-engine.js
+    - assets/js/chord-canvas-transpose.js
+    - assets/js/lyric-extractor.js
+    - assets/js/song-info-bar.js
+    - assets/js/display-settings.js
+  Message:
+    fix(transpose): chuẩn hoá Bb/Ab/Eb trưởng & tôn trọng <fifths>0</fifths> của MusicXML (F4, F7, P2-5, P3-1)
+    Evidence: docs/fix-evidence/r9/P2-5-FAIL.txt, docs/fix-evidence/r9/P2-5-PASS.txt, docs/fix-evidence/r9/P3-1-PASS.txt
+
+Commit 3 (quyền HD & chord canvas — CORE-2, F1, F2, F5, F6, F8, F9, P2-1, P2-2, P2-4):
+  Files:
+    - api/core/Auth.php
+    - api/services/UserService.php
+    - api/controllers/ChordSetController.php
+    - assets/js/chord-canvas.js
+    - assets/js/chord-canvas-ui.js
+    - assets/js/chord-canvas-edit.js
+    - old/assets/js/auth.js
+    - old/assets/js/chord-canvas.js
+  Message:
+    fix(chord-sets): chặn giả mạo username sửa HD & cấm ghi đè HD bằng clone (F1, F2, F6, F8, P2-1, P2-2, P2-4)
+    Evidence: docs/fix-evidence/r9/P2-1-FAIL.txt, docs/fix-evidence/r9/P2-1-PASS.txt, docs/fix-evidence/r9/P2-2-FAIL.txt, docs/fix-evidence/r9/P2-2-PASS.txt, docs/fix-evidence/r9/P2-4-FAIL.txt, docs/fix-evidence/r9/P2-4-PASS.txt
+
+Commit 4 (tìm kiếm & virtual scroll — CORE-3, F3, P2-3):
+  Files:
+    - assets/js/core/LibrarySearch.js
+    - assets/js/library-ui.js
+    - old/assets/js/library-ui.js
+  Message:
+    fix(library): giữ vị trí cuộn khi bấm Xem thêm & chống trắng danh sách trên mobile/iPad (F3, P2-3)
+    Evidence: docs/fix-evidence/r9/P2-3-FAIL.txt, docs/fix-evidence/r9/P2-3-PASS.txt
+
+Commit 5 (toolbar UI — UI-1..3, P3-2, P4-1):
+  Files:
+    - includes/toolbar.php
+    - old/includes/toolbar.php
+    - assets/css/layout.css
+    - assets/css/library-polish.css
+    - assets/js/mobile-controller.js
+    - old/assets/js/toolbar-controller.js
+    - sw.js
+  Message:
+    feat(toolbar): đưa Khóa Zoom, Chọn %, Tempo ra mặt trước Web/iPad/Mobile/Classic (UI-1..3, P4-1)
+    Evidence: docs/fix-evidence/r9/P3-2-PASS.txt, docs/fix-evidence/r9/P4-1-PASS.txt
+
+Commit 6 (chương trình cho khách — PROG-1..3, P3-2, P4-5):
+  Files:
+    - api/services/SetlistPublicReadService.php
+    - includes/sidebar.php
+    - old/includes/sidebar.php
+    - assets/js/url-state.js
+    - assets/js/service-plan-ui.js
+    - assets/js/setlist-detail.js
+    - assets/js/setlist-ui.js
+    - old/assets/js/setlist-ui.js
+  Message:
+    feat(setlist): cho phép khách xem & tham gia đánh chương trình published qua ?setlist=<id> (PROG-1..3, P4-5)
+    Evidence: docs/fix-evidence/r9/P3-2-PASS.txt, docs/fix-evidence/r9/P4-5-PASS.txt
+
+Commit 7 (tests — P3-1..P3-3):
+  Files:
+    - tests/r9_ui_transpose_chord_guest_setlist_regression.php
+    - docs/fix-evidence/r9/
+  Message:
+    test(r9): nâng cấp suite R9 lên kiểm thử hành vi thật & ma trận 7392 phép dịch giọng (P3-1..P3-3)
+    Evidence: docs/fix-evidence/r9/P3-1-PASS.txt, docs/fix-evidence/r9/P3-2-PASS.txt, docs/fix-evidence/r9/P3-3-PASS.txt
+

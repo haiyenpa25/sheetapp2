@@ -1,0 +1,43 @@
+P5-1 (kiểm chứng độc lập 2026-10-29): php tests/run_all_tests.php --strict --js
+
+Ghi chú: P5-1-PASS.txt trước đó chỉ chứa php -l / node --check / EOL, KHÔNG chạy bộ test đầy đủ.
+Lượt chạy đầy đủ đầu tiên (trước khi sửa): 4125 passed, 13 failed, 15 hạng mục lỗi.
+
+Hồi quy do đợt R9 gây ra (sạch ở HEAD e19a001, lỗi ở working tree) và cách xử lý:
+  - library_l013_accented_vietnamese_sidebar / library_r11_lucide_icons:
+      sidebar.php (Modern + /old/) đổi "Chỉ Quản trị mới có thể tạo" và nhãn "Phát", thêm emoji trần.
+      -> khôi phục 2 dòng chữ gốc; nút chia sẻ dùng icon('share-2') / SVG thay emoji.
+  - chordpro_export_regression (parity PHP/JS 756 phép):
+      api/services/TransposeHelper.php vẫn dùng quy tắc thăng/giáng cũ, lệch TransposeEngine (A#/D# so với Bb/Eb).
+      -> port _resolveRootSpell/_resolveBassSpell/_noteChroma/_isMinorOrDimSuffix sang PHP. File ChordPro xuất ra nay khớp màn hình.
+  - chord_save_capo_transpose_regression:
+      test mong đợi "D#" cho C + capo 3; RULE.md §1.1 quy định "Eb". -> đổi kỳ vọng thành "Eb".
+  - chord_save_context_regression + core_rules CR3-a:
+      stub document của tests/js/chord_save_context.cjs thiếu querySelector (code mới gọi document.querySelector('#osmd-container svg')).
+      -> thêm querySelector() { return null; } vào stub.
+  - library_l56_service_worker_precache: sw.js lệch manifest -> php tools/generate_sw_manifest.php (hash 86c29520c9).
+  - F1 còn sót: ChordSetController.php + chord-canvas.js (Modern, /old/) còn nhánh so sánh username 'hoaidinh'
+      -> bỏ hẳn; quyền HD chỉ dựa vào Admin hoặc chord_code='HD'.
+
+Kết quả sau khi sửa: 4154 passed, 6 failed, 9 hạng mục còn lại (không do R9):
+  Phụ thuộc Apache http://localhost/sheetapp2 (Apache không chạy, HTTP 000):
+    - tests/http/live_sync_route_http_regression.php          (SKIPPED strict)
+    - tests/http/live_sync_session_lock_http_regression.php   (SKIPPED strict)
+    - tests/http/song_search_contract_http_regression.php     (SKIPPED strict)
+    - tests/http/web_surface_http_regression.php              (SKIPPED strict)
+    - tests/http/live_sync_last_event_id_regression.php       (SSE qua HTTP)
+    - tests/library_r37_search_alias_matching_regression.php  (2 check HTTP API search)
+    - tests/chordpro_export_regression.php                    (bước 6/6 HTTP export; bước 1-5 PASS, parity 756/756)
+  Lỗi sẵn có ở HEAD e19a001 (không do R9):
+    - tests/library_tv2_gzip_regression.php   (gunzip layout.css không giống byte)
+    - tests/liturgical_export_and_usage_regression.php
+
+Việc còn lại cần chủ dự án / môi trường: bật Apache rồi chạy lại 7 mục HTTP; quyết định xử lý 2 lỗi sẵn có.
+
+=== Cập nhật cuối 2026-10-29 (có Apache) ===
+php tests/run_all_tests.php --strict --js: 242 suite, Pass 240, Skip 0, Fail 2; 4213 check đạt.
+7 hạng mục HTTP (chordpro bước 6, r37, 4 suite http/, live_sync_last_event_id): PASS khi bật Apache (XAMPP httpd, cổng 80).
+Còn lại, lỗi sẵn ở HEAD e19a001: library_tv2_gzip_regression, liturgical_export_and_usage_regression.
+Sửa thêm: chord-canvas-dots.js (sàn chữ 12px; hợp âm xếp độc lập, chấm "+" nhường chữ; 597 dòng),
+  tests/library_l11 (11px -> 12px), tests/chordpro_export (G# -> Ab), old/assets/css/layout.css (danh sách chương trình Classic).
+P4-3b: e2e/r9-chord-overlap.spec.js, 2 trình duyệt x 4 mức zoom: 0 chồng lấn, 0 ngoài vùng, chữ >= 12px.

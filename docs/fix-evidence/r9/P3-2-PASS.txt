@@ -1,0 +1,6 @@
+P3-2: Chuyển 4 check dò chuỗi trong r9_ui_transpose_chord_guest_setlist_regression.php thành check hành vi thật
+Status: PASS
+Verified in tests/r9_ui_transpose_chord_guest_setlist_regression.php:
+  - R9-P3-2-UI ([PASS:B]): Thực thi MobileController.init() và Classic ToolbarController.init() trong Node VM trên DOM thật trích từ includes/toolbar.php, includes/sheet_viewer.php, old/includes/toolbar.php. Kiểm chứng click khóa zoom (#btn-mobile-lock-zoom / #btn-lock-zoom), đổi mức thu phóng (#mobile-zoom-select / #btn-zoom-in), và bật tempo (#btn-mobile-tempo).
+  - R9-P3-2-PROG ([PASS:B]): Thực thi URLState.get(), ServicePlanUI, và SetlistDetail.viewSetlistDetail(42) với Auth.isLoggedIn() === false. Kiểm chứng ẩn #setlist-add-container, hiện banner "Chế độ Khách tham gia", hiện nút chia sẻ link (#btn-sp-share-link), ẩn nút phân công (#btn-sp-assign) và nút xóa/sửa BPM (#btn-del-item, #btn-save-bpm), hiển thị đúng Tone/Tập/Bộ hợp âm/BPM/Khổ.
+

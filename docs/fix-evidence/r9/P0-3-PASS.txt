@@ -1,0 +1,73 @@
+=== git diff --stat ===
+AI_AGENT.md                               |   2 +-
+ CODE_MAP.md                               |  12 +++-
+ PROJECT_REGISTRY.md                       |   1 +
+ ROADMAP.md                                |  19 ++++++
+ api/controllers/ChordSetController.php    |  10 ++-
+ api/services/SetlistPublicReadService.php |   3 +-
+ assets/css/layout.css                     |   4 --
+ assets/css/library-polish.css             |  34 +++++++---
+ assets/js/chord-canvas-dots.js            |  51 +++++++-------
+ assets/js/chord-canvas-transpose.js       |  31 ++++++++-
+ assets/js/chord-canvas.js                 |  30 ++++++---
+ assets/js/core/KeyService.js              |  33 ++++++++-
+ assets/js/core/LibrarySearch.js           |   4 +-
+ assets/js/display-settings.js             |   5 +-
+ assets/js/library-ui.js                   |  17 +++--
+ assets/js/lyric-extractor.js              |  10 +--
+ assets/js/mobile-controller.js            |  46 +++++++++++++
+ assets/js/service-plan-ui.js              |  13 +++-
+ assets/js/setlist-detail.js               |  61 +++++++++++------
+ assets/js/setlist-ui.js                   |  51 ++++++++++++++
+ assets/js/song-info-bar.js                |   6 +-
+ assets/js/transpose-engine.js             | 108 ++++++++++++++++++++++--------
+ assets/js/url-state.js                    |   5 +-
+ includes/sidebar.php                      |   5 +-
+ includes/toolbar.php                      |  19 +++++-
+ old/assets/js/auth.js                     |   8 ++-
+ old/assets/js/chord-canvas.js             |   9 ++-
+ old/assets/js/library-ui.js               |  11 +--
+ old/assets/js/setlist-ui.js               |  47 ++++++++++---
+ old/assets/js/toolbar-controller.js       |  25 +++++++
+ old/includes/sidebar.php                  |   5 +-
+ old/includes/toolbar.php                  |  48 +++++++------
+ sw.js                                     |   2 +-
+ 33 files changed, 555 insertions(+), 180 deletions(-)
+
+=== git diff --ignore-cr-at-eol --stat ===
+AI_AGENT.md                               |   2 +-
+ CODE_MAP.md                               |  12 +++-
+ PROJECT_REGISTRY.md                       |   1 +
+ ROADMAP.md                                |  19 ++++++
+ api/controllers/ChordSetController.php    |  10 ++-
+ api/services/SetlistPublicReadService.php |   3 +-
+ assets/css/layout.css                     |   4 --
+ assets/css/library-polish.css             |  34 +++++++---
+ assets/js/chord-canvas-dots.js            |  51 +++++++-------
+ assets/js/chord-canvas-transpose.js       |  31 ++++++++-
+ assets/js/chord-canvas.js                 |  30 ++++++---
+ assets/js/core/KeyService.js              |  33 ++++++++-
+ assets/js/core/LibrarySearch.js           |   4 +-
+ assets/js/display-settings.js             |   5 +-
+ assets/js/library-ui.js                   |  17 +++--
+ assets/js/lyric-extractor.js              |  10 +--
+ assets/js/mobile-controller.js            |  46 +++++++++++++
+ assets/js/service-plan-ui.js              |  13 +++-
+ assets/js/setlist-detail.js               |  61 +++++++++++------
+ assets/js/setlist-ui.js                   |  51 ++++++++++++++
+ assets/js/song-info-bar.js                |   6 +-
+ assets/js/transpose-engine.js             | 108 ++++++++++++++++++++++--------
+ assets/js/url-state.js                    |   5 +-
+ includes/sidebar.php                      |   5 +-
+ includes/toolbar.php                      |  19 +++++-
+ old/assets/js/auth.js                     |   8 ++-
+ old/assets/js/chord-canvas.js             |   9 ++-
+ old/assets/js/library-ui.js               |  11 +--
+ old/assets/js/setlist-ui.js               |  47 ++++++++++---
+ old/assets/js/toolbar-controller.js       |  25 +++++++
+ old/includes/sidebar.php                  |   5 +-
+ old/includes/toolbar.php                  |  48 +++++++------
+ sw.js                                     |   2 +-
+ 33 files changed, 555 insertions(+), 180 deletions(-)
+
+MATCH=YES
