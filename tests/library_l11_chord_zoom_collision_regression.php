@@ -40,7 +40,8 @@ checkStatic(
 // 2. Preset-based sizing replaced the fixed multiplier in baseline 623b745.
 // Real font sizes and collision boxes are checked in library-tv0-chord-geometry.spec.js.
 $hasScaledFontSize = str_contains($dotsJs, '18 * scale * presetMultiplier')
-    && str_contains($dotsJs, 'Math.max(11, Math.min(34');
+    && str_contains($dotsJs, 'Math.max(MIN_CHORD_FONT_PX, Math.min(34')
+    && str_contains($dotsJs, 'MIN_CHORD_FONT_PX = 12'); // RULE.md §3.2: sàn 12px (trước đây ghim 11px)
 checkStatic(
     'chord_dots_fontsize_tracks_preset_and_zoom',
     $hasScaledFontSize,

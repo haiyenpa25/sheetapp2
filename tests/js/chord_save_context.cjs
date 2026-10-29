@@ -3,7 +3,7 @@ const root = path.resolve(__dirname, '../..');
 let total = 0, failed = 0;
 function check(ok, message) { total++; if (!ok) failed++; console.log(`${ok ? '[PASS:B]' : '[FAIL:B]'} ${message}`); }
 const chip = { setAttribute() {}, querySelector() { return { textContent: '' }; } };
-const document = { getElementById() { return null; }, querySelectorAll() { return []; }, addEventListener() {},
+const document = { getElementById() { return null; }, querySelector() { return null; }, querySelectorAll() { return []; }, addEventListener() {},
   createElement() { return chip; }, body: { contains() { return true; }, appendChild() {}, classList: { contains() { return false; } } } };
 const timers = new Map(); let timerId = 0;
 const w = { addEventListener() {}, Auth: { isAdmin: () => true }, App: { getCurrentSongId: () => song, showToast() {} } };

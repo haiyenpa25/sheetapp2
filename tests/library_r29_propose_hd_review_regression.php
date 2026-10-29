@@ -175,7 +175,8 @@ assertCheck(
 
 // Dọn dẹp dữ liệu test
 $pdo->prepare("DELETE FROM review_requests WHERE id = ?")->execute([$reviewRequestId]);
-ChordSetService::deleteSet($testSongId, $testSetName);
+// deleteSet yêu cầu người sở hữu: không truyền thì bước dọn không làm gì và bộ test rò vào CSDL thật.
+ChordSetService::deleteSet($testSongId, $testSetName, $testUserId);
 
 echo "\nKết quả kiểm thử R2-9: $passedChecks/$totalChecks checks passed ($behavioralChecks behavioral, $staticChecks static).\n";
 echo "SUITE_COMPLETE total=$totalChecks passed=$passedChecks failed=$failedChecks behavioral=$behavioralChecks static=$staticChecks\n";

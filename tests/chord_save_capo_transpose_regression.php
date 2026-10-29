@@ -93,7 +93,8 @@ assert.strictEqual(r1, 'C#', 'tông +2, capo 3, gõ "C": phải lưu đúng "C#"
 // 2. Chỉ có Capo, KHÔNG dịch tông (semitones=0): trước đây bị BỎ QUA hoàn toàn vì code cũ
 //    chỉ kiểm tra "semitones !== 0". Capo 3 một mình vẫn phải đảo ngược +3 semitone.
 const r2 = saveReverse('C', 0, 3, false);
-assert.strictEqual(r2, 'D#', 'chỉ có capo=3 (semitones=0), gõ "C": phải lưu "D#" ở tông gốc, không được giữ nguyên "C" (nhận được "' + r2 + '")');
+// RULE.md §1.1: hợp âm trưởng ở bậc bán cung 3 luôn là "Eb", không bao giờ là "D#".
+assert.strictEqual(r2, 'Eb', 'chỉ có capo=3 (semitones=0), gõ "C": phải lưu "Eb" ở tông gốc, không được giữ nguyên "C" (nhận được "' + r2 + '")');
 assert.notStrictEqual(r2, 'C', 'lỗi B7 tái diễn nếu capo một mình không làm hợp âm lưu thay đổi gì');
 
 // 3. Round-trip: hiển thị thuận rồi lưu ngược phải cho lại đúng hợp âm gốc ban đầu,

@@ -311,7 +311,8 @@ foreach ($loadedChords as $item) {
 assertCheck("Hợp âm ô 11_4 vẫn giữ nguyên giá trị 'Bb' sau khi lưu qua ChordSetService", isset($loadedDict['11_4']) && $loadedDict['11_4'] === 'Bb', true);
 
 // Dọn dẹp
-ChordSetService::deleteSet($testSongId, $testSetName);
+// deleteSet yêu cầu người sở hữu (user 1 = banhat đã tạo bộ ở trên); thiếu thì bộ test rò vào CSDL thật.
+ChordSetService::deleteSet($testSongId, $testSetName, 1);
 @rmdir(__DIR__ . '/../storage/data/chord_sets/' . $testSongId);
 
 echo "\nKết quả kiểm thử R2-10: $passedChecks/$totalChecks checks passed ($behavioralChecks behavioral, $staticChecks static).\n";

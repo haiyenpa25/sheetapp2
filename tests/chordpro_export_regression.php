@@ -159,7 +159,8 @@ check($httpCode === 200, "API trả về HTTP 200");
 check(str_contains($headers, 'text/plain'), "Header Content-Type là text/plain");
 check(str_contains($headers, '.chordpro'), "Header Content-Disposition có tên file .chordpro");
 check(str_contains($body, '{title: HỠI THÁNH VƯƠNG, KÍP NGỰ LAI}'), "Nội dung trả về là văn bản ChordPro hợp lệ");
-check(str_contains($body, '{key: G#}'), "Dịch giọng +1 bán âm (G -> G#) qua HTTP query params thành công");
+// RULE.md §1.1: tông trưởng ở bậc bán cung 8 luôn là "Ab", không bao giờ là "G#".
+check(str_contains($body, '{key: Ab}'), "Dịch giọng +1 bán âm (G -> Ab) qua HTTP query params thành công");
 
 // 6.2: Gọi định dạng JSON (as_json=1)
 $chJson = curl_init("{$baseUrl}/api/index.php?route=export&format=chordpro&song_id=thanh-ca-001&as_json=1");
