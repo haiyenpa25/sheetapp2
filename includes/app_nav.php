@@ -14,9 +14,8 @@
 
 require_once __DIR__ . '/icons.php';
 
-if (session_status() === PHP_SESSION_NONE) {
-    @session_start();
-}
+require_once __DIR__ . '/../api/core/Session.php';
+Session::start();
 
 // Lấy thông tin user hiện tại từ Auth hoặc Session
 $currentUser = null;

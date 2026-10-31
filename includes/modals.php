@@ -225,8 +225,7 @@
           <button type="button" id="btn-do-logout" class="btn btn-danger" style="flex: 1; padding: 8px 12px; font-size: 0.85rem; font-weight: 600;">
             Đăng Xuất
           </button>
-        </div>
-        <button type="button" id="btn-logout-all" class="btn btn-ghost w-full" style="min-height:36px;font-size:.78rem;touch-action:manipulation;margin-top:6px;">Đăng xuất khỏi mọi thiết bị</button>
+        </div><button type="button" id="btn-logout-all" class="btn btn-ghost w-full" style="min-height:36px;font-size:.78rem;touch-action:manipulation;margin-top:6px;">Đăng xuất khỏi mọi thiết bị</button>
       </div>
 
       <!-- KHUNG BẮT BUỘC ĐỔI MẬT KHẨU YẾU / MẶC ĐỊNH -->

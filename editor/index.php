@@ -3,9 +3,8 @@
  * editor/index.php — SheetApp MusicXML Note Editor Pro (Ultra-Simplified)
  * Tối giản · Tập trung nốt nhạc · 3 Bước: Chọn nốt -> Chọn bè -> Chỉnh cao độ/trường độ
  */
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/../api/core/Session.php';
+Session::start();
 require_once __DIR__ . '/../api/core/Auth.php';
 require_once __DIR__ . '/../api/core/Config.php';
 $currentUser = Auth::username() ?: 'banhat';

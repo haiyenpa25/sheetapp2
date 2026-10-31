@@ -5,9 +5,8 @@
  * Standalone Live Performance & Rehearsal Command Center
  * Route: https://sheet.hyb.io.vn/live-band/
  */
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/../api/core/Session.php';
+Session::start();
 require_once __DIR__ . '/../api/core/Auth.php';
 $currentUser = Auth::username() ?: 'Ca Trưởng';
 

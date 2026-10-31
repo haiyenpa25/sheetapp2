@@ -17,7 +17,17 @@ final class Session {
         ];
     }
 
+    /** .htaccess `Header` không được máy chủ (OpenLiteSpeed) áp dụng → gửi các header an toàn từ PHP. */
+    public static function sendSecurityHeaders(): void {
+        if (PHP_SAPI === 'cli' || headers_sent()) return;
+        header('X-Content-Type-Options: nosniff');
+        header('X-Frame-Options: SAMEORIGIN');
+        header('Referrer-Policy: strict-origin-when-cross-origin');
+        header_remove('X-Powered-By');
+    }
+
     public static function start(): void {
+        self::sendSecurityHeaders();
         if (session_status() === PHP_SESSION_ACTIVE) return;
         ini_set('session.use_strict_mode', '1');
         ini_set('session.use_only_cookies', '1');

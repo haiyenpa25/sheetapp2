@@ -7,9 +7,8 @@
  * Integrated with Service Plan (Epic 3.4) & SSE Live Sync Transport.
  * Route: /live-band/projector.php?room=CODE
  */
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/../api/core/Session.php';
+Session::start();
 $roomParam = isset($_GET['room']) ? htmlspecialchars(trim($_GET['room']), ENT_QUOTES, 'UTF-8') : '';
 $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
 $appBase = rtrim(dirname($scriptDir), '/');

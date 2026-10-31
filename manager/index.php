@@ -5,9 +5,8 @@ function mgrAssetV(string $rel): int { return (int)@filemtime(__DIR__ . '/' . $r
  * sheet.hyb.io.vn/manager/
  * Trung Tâm Quản Lý Kho Nhạc, Phân Quyền & Không Gian Cộng Tác Hợp Âm
  */
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/../api/core/Session.php';
+Session::start();
 $isLoggedIn = isset($_SESSION['user_id']);
 $username   = $_SESSION['username'] ?? '';
 $userRole   = $_SESSION['role'] ?? 'viewer';

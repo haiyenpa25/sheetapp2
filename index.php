@@ -1,8 +1,7 @@
 <?php
 // index.php — Smart Sheet Music WebApp
-if (session_status() === PHP_SESSION_NONE) {
-    @session_start();
-}
+require_once __DIR__ . '/api/core/Session.php';
+Session::start();
 require_once __DIR__ . '/includes/asset_version.php';
 $appAssetVersion = sheetapp_asset_version(__FILE__); // mốc sửa mới nhất của mọi JS dùng chung (nạp lười cần ?v= đổi theo)
 $appBase = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/');

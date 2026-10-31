@@ -1,8 +1,7 @@
 <?php
 // old/index.php — SheetApp Classic UI (v1) sharing SheetApp2 Backend & Database
-if (session_status() === PHP_SESSION_NONE) {
-    @session_start();
-}
+require_once __DIR__ . '/../api/core/Session.php';
+Session::start();
 $scriptDir = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/');
 $appBase   = rtrim(dirname($scriptDir), '/\\');
 if ($appBase === '/' || $appBase === '\\' || $appBase === '.') $appBase = '';
