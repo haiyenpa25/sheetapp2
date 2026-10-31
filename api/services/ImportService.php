@@ -5,6 +5,7 @@
 require_once __DIR__ . '/../core/DB.php';
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/SongService.php';
+require_once __DIR__ . '/ChordSetService.php';
 require_once __DIR__ . '/../import_helpers.php';
 require_once __DIR__ . '/../import_scrapers.php';
 
@@ -12,29 +13,54 @@ class ImportService {
     private const MAX_NAME_ATTEMPTS = 10;
 
     /**
-     * Trả về thư mục lưu trữ MusicXML hợp lệ thuộc vùng quản lý storage/users/<user>/imported
-     * @return array{absDir: string, relDir: string}
+     * Trả về thư mục lưu trữ MusicXML công khai theo danh mục: storage/Thanh ca/<category-slug>/
+     * @return array{absDir: string, relDir: string, catSlug: string}
      */
-    private static function resolveImportDir(): array {
-        $username = Auth::username() ?: 'admin';
-        $safeUser = preg_replace('/[^a-zA-Z0-9_\-]/', '_', strtolower($username)) ?: 'admin';
-        $relDir   = 'storage/users/' . $safeUser . '/imported/';
-        $absDir   = dirname(__DIR__, 2) . '/' . $relDir;
+    private static function resolveImportDir(int $categoryId = 1): array {
+        $catSlug = 'thanh-ca';
+        if ($categoryId > 1) {
+            try {
+                $row = DB::run('SELECT slug, name FROM categories WHERE id = ?', [$categoryId])->fetch();
+                if ($row) {
+                    $rawSlug = trim((string)($row['slug'] ?? ''));
+                    $catSlug = preg_replace('/[^a-z0-9\-]/', '', strtolower($rawSlug))
+                        ?: (_slugify((string)($row['name'] ?? '')) ?: 'thanh-ca');
+                }
+            } catch (Throwable $e) {
+                $catSlug = 'thanh-ca';
+            }
+        }
+        $relDir = ($categoryId <= 1 || $catSlug === 'thanh-ca')
+            ? 'storage/Thanh ca/'
+            : ('storage/Thanh ca/' . $catSlug . '/');
+        $absDir = dirname(__DIR__, 2) . '/' . $relDir;
         if (!is_dir($absDir) && !@mkdir($absDir, 0775, true) && !is_dir($absDir)) {
-            throw new Exception('Không thể khởi tạo thư mục lưu trữ bản nhạc trên máy chủ');
+            throw new Exception('Không thể khởi tạo thư mục lưu trữ bản nhạc theo danh mục trên máy chủ');
         }
-        $usersRoot = realpath(dirname(__DIR__, 2) . '/storage/users');
+        $libraryRoot = realpath(dirname(__DIR__, 2) . '/storage/Thanh ca');
         $resolvedDir = realpath($absDir);
-        if ($usersRoot === false || $resolvedDir === false ||
-            !str_starts_with($resolvedDir, $usersRoot . DIRECTORY_SEPARATOR)) {
-            throw new RuntimeException('Thư mục nhập nhạc nằm ngoài vùng được quản lý');
+        if ($libraryRoot === false || $resolvedDir === false ||
+            ($resolvedDir !== $libraryRoot && !str_starts_with($resolvedDir, $libraryRoot . DIRECTORY_SEPARATOR))) {
+            throw new RuntimeException('Thư mục nhập nhạc nằm ngoài vùng thư viện được quản lý');
         }
-        return ['absDir' => $resolvedDir . DIRECTORY_SEPARATOR, 'relDir' => $relDir];
+        return ['absDir' => $resolvedDir . DIRECTORY_SEPARATOR, 'relDir' => $relDir, 'catSlug' => $catSlug];
     }
 
     private static function finalizeImportedSong(array $song): void {
         if (!empty($song['id'])) {
-            SongService::syncSongFts((string)$song['id']);
+            $songId = (string)$song['id'];
+            SongService::syncSongFts($songId);
+            if (($song['visibility'] ?? 'public') === 'public') {
+                try {
+                    $existingHd = DB::run("SELECT COUNT(*) FROM user_chord_sets WHERE song_id = ? AND set_name = 'HD'", [$songId])->fetchColumn();
+                    if ((int)$existingHd === 0) {
+                        DB::run(
+                            "INSERT INTO user_chord_sets (song_id, user_id, username, set_name, chord_count, chords_json, checksum, attribution, is_public, is_recommended) VALUES (?, 1, 'system', 'HD', 0, '[]', ?, 'Khởi tạo khi thêm bài', 1, 1)",
+                            [$songId, md5('[]')]
+                        );
+                    }
+                } catch (Throwable $e) {}
+            }
         }
         SongService::invalidateCache();
     }
@@ -77,7 +103,7 @@ class ImportService {
         if ($effective['visibility'] !== 'public') {
             return self::storePrivateSong($content, $metadata);
         }
-        $dir = self::resolveImportDir();
+        $dir = self::resolveImportDir($categoryId);
         [$filename, $path, $handle] = self::reserveImportFile($dir, $metadata);
         try {
             $written = fwrite($handle, $content);
@@ -90,7 +116,8 @@ class ImportService {
         }
         try {
             $key = _detectKey($content);
-            $song = _saveSong(DB::pdo(), $metadata['title'], $dir['relDir'] . $filename, $key, $metadata['source'], $metadata);
+            $saveMeta = $metadata + ['category_slug' => $dir['catSlug'] ?? 'thanh-ca'];
+            $song = _saveSong(DB::pdo(), $metadata['title'], $dir['relDir'] . $filename, $key, $metadata['source'], $saveMeta);
         } catch (Throwable $error) {
             @unlink($path);
             throw $error;

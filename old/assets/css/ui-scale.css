@@ -1,0 +1,128 @@
+/**
+ * old/assets/css/ui-scale.css — Cỡ chữ, vùng chạm và icon của giao diện Classic (/old/)
+ *
+ * Bản sắc Classic: phẳng, vuông, dày đặc. Nhưng cỡ KHÔNG còn tự đặt rải rác (trước đây 9–10px,
+ * nút 24px): mọi điều khiển lấy từ 3 token dưới đây.
+ *   - Chuột (desktop):        cao 30px, chữ 12px
+ *   - Cảm ứng / màn ≤ 900px:  cao 40px, chữ 14px (vùng chạm đủ cho ngón tay, chữ đọc được trên iPad/điện thoại)
+ * Icon là SVG từ sprite chung (assets/icons/lucide.svg) tính theo em của chữ nên luôn co cùng cỡ chữ,
+ * đổi màu theo theme; không dùng emoji làm icon nút (cỡ phụ thuộc phông, máy thiếu phông hiện ô vuông).
+ * NẠP SAU CÙNG vì các CSS cũ đặt cỡ bằng !important.
+ */
+
+:root {
+  --o-h: 30px;
+  --o-fs: 12px;
+  --o-fs-sm: 11px;
+}
+@media (pointer: coarse), (max-width: 900px) {
+  :root { --o-h: 40px; --o-fs: 14px; --o-fs-sm: 12px; }
+}
+
+/* ── Icon SVG ──────────────────────────────────────────────────────────────── */
+.icon {
+  width: 1.2em; height: 1.2em; display: inline-block; flex: none; vertical-align: -0.2em;
+  stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none;
+}
+button .icon, a .icon { pointer-events: none; }
+.song-fav-btn.fav-active { color: #d97706; }
+.song-pin-btn.pin-active { color: var(--accent); }
+.o-btn-text { white-space: nowrap; }
+
+/* ── Combobox danh mục + tông (thay dải chip) ──────────────────────────────── */
+.filter-row-compact { gap: 4px; }
+.o-combo { position: relative; flex: 1 1 0; min-width: 0; font-size: var(--o-fs); }
+.o-combo--key { flex: 0 0 7.6em; }
+.o-combo--block { flex: none; width: 100%; margin-bottom: 4px; }
+.filter-row-compact .search-box { flex: 1 1 0; min-width: 0; }
+.sidebar-search .o-combo select {
+  -webkit-appearance: none; appearance: none;
+  display: block; width: 100% !important; height: var(--o-h) !important; min-height: var(--o-h) !important;
+  padding: 0 2em 0 .6em !important; font-size: var(--o-fs) !important; font-weight: 600; font-family: inherit;
+  border: 1px solid var(--border) !important; border-radius: 3px; background: #f8fafc !important; color: var(--text-primary);
+  text-overflow: ellipsis; white-space: nowrap; cursor: pointer;
+}
+.sidebar-search .o-combo--icon select { padding-left: 2.2em !important; }
+/* layout.css ép #category-filter = auto, #key-filter = 98px theo id: đặt lại để wrapper .o-combo quyết định bề rộng */
+.sidebar-search #category-filter, .sidebar-search #key-filter { flex: none; width: 100% !important; min-width: 0; }
+.sidebar-search #key-filter { font-family: var(--font-mono); }
+.sidebar-search .o-combo select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.o-combo-icon, .o-combo-chev { position: absolute; top: 50%; transform: translateY(-50%); display: inline-flex; pointer-events: none; }
+.o-combo-icon { left: .6em; color: var(--accent); }
+.o-combo-chev { right: .5em; color: var(--text-muted); }
+/* Dòng đã có tiền tố danh mục ("TC 003"): nhãn "Thánh Ca" chỉ lặp lại và chiếm chỗ của tên bài */
+.song-item-num.has-catalog-prefix ~ .song-cat-badge { display: none; }
+/* Chế độ tối: sidebar cũ để nền trắng cứng với chữ sáng (gần như vô hình) — dùng biến nền tối đã có trong sheet.css */
+body.dark-mode .sidebar-header, body.dark-mode .sidebar-tabs, body.dark-mode .sidebar-search,
+body.dark-mode .quick-jump, body.dark-mode .sidebar-actions { background: var(--bg-sidebar, var(--bg-surface)); border-color: var(--border); }
+body.dark-mode .sidebar-tab.active, body.dark-mode .search-box,
+body.dark-mode .sidebar-search .o-combo select { background: var(--bg-surface) !important; color: var(--text-primary); border-color: var(--border) !important; }
+body.dark-mode .quick-jump-btn, body.dark-mode .btn-lyric-mode, body.dark-mode .sidebar-auth-btn,
+body.dark-mode #btn-header-manager { background: var(--bg-surface); color: var(--text-primary); border-color: var(--border); }
+body.dark-mode .o-combo-icon { color: var(--accent); }
+/* Đã chọn một danh mục: nhãn danh mục trên từng dòng chỉ lặp lại → ẩn cho tên bài dài hơn */
+.song-list.cat-filtered .song-cat-badge { display: none; }
+
+/* ── Sidebar ───────────────────────────────────────────────────────────────── */
+.sidebar-tab, .sidebar-auth-btn, #btn-header-manager, #btn-sidebar-manager, .btn-lyric-mode, .quick-jump-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .4em;
+  font-size: var(--o-fs); box-sizing: border-box;
+}
+.sidebar-tab { height: var(--o-h); min-height: var(--o-h); }
+.sidebar-auth-btn, #btn-header-manager { height: var(--o-h); min-height: var(--o-h); padding: 0 .7em; }
+#btn-sidebar-manager { min-height: var(--o-h); }
+#btn-toggle-sidebar { width: var(--o-h); height: var(--o-h); min-width: var(--o-h); }
+#btn-toggle-sidebar svg { width: 1.3em; height: 1.3em; }
+.search-box { height: var(--o-h); }
+#search-input { font-size: var(--o-fs); }
+.btn-lyric-mode { height: calc(var(--o-h) - 6px); min-height: 0; padding: 0 .7em; font-size: var(--o-fs-sm); }
+.quick-jump-btn { height: calc(var(--o-h) - 4px); min-height: 0; padding: 0 .7em; font-size: var(--o-fs-sm); flex: 0 0 auto; }
+.song-item-actions .icon-btn-xs {
+  min-width: calc(var(--o-h) - 6px); height: calc(var(--o-h) - 6px); font-size: var(--o-fs);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+@media (max-width: 480px) {
+  #btn-header-manager .o-btn-text { display: none; }
+}
+
+/* ── Thanh công cụ ─────────────────────────────────────────────────────────── */
+#toolbar .icon-btn, #toolbar .btn, #toolbar select, #toolbar #btn-lyric-view, #toolbar #btn-toolbar-metronome,
+#toolbar #transpose-display, #toolbar #btn-transpose-reset, #toolbar #chord-set-selector, #toolbar #btn-song-info-toggle,
+#toolbar .deck-btn, #btn-metronome-tap, #metronome-sound-select {
+  font-size: var(--o-fs);
+}
+#toolbar .icon-btn, #toolbar .deck-btn, #toolbar .btn { min-height: var(--o-h); }
+#toolbar .icon-btn { min-width: calc(var(--o-h) - 2px); display: inline-flex; align-items: center; justify-content: center; }
+#toolbar .icon-btn svg, #toolbar .btn svg { width: 1.25em; height: 1.25em; }
+#toolbar .deck-btn svg { width: 1.25em; height: 1.25em; }
+#toolbar .btn .icon, #toolbar .icon-btn .icon { margin: 0; }
+#toolbar #zoom-slider { font-size: var(--o-fs); }
+#toolbar #btn-song-info-toggle { min-width: calc(var(--o-h) - 2px); }
+.btn-menu-item { min-height: var(--o-h); display: flex; align-items: center; gap: .55em; font-size: var(--o-fs); }
+.btn-menu-item .icon, .btn-menu-item svg { width: 1.25em; height: 1.25em; }
+
+/* ── Nút hẹp / chữ nhỏ còn sót ─────────────────────────────────────────────── */
+#toolbar .transpose-btn, #toolbar #transpose-display, #toolbar #btn-lyric-view,
+#toolbar #btn-more-options, #toolbar #btn-song-info-toggle { min-width: calc(var(--o-h) - 4px); }
+#toolbar #btn-transpose-reset, #toolbar #btn-song-info-toggle { font-size: var(--o-fs-sm); }
+#toolbar #zoom-slider { min-width: 5em; height: calc(var(--o-h) - 4px); }
+/* Panel metronome */
+#btn-close-metronome { min-width: calc(var(--o-h) - 6px); min-height: calc(var(--o-h) - 6px); font-size: 1.5em; line-height: 1; }
+.metronome-panel select, .metronome-panel button { min-height: calc(var(--o-h) - 6px); font-size: var(--o-fs); }
+.metronome-panel .icon { width: 1.2em; height: 1.2em; }
+
+/* Luật cũ ép bằng !important ở độ ưu tiên cao: đặt lại đúng các nút còn sót (#toolbar + .transpose-controls) */
+#toolbar .transpose-controls .transpose-btn { width: calc(var(--o-h) - 4px) !important; min-width: calc(var(--o-h) - 4px) !important; }
+#toolbar #btn-transpose-reset.pb-reset-btn, #toolbar #btn-transpose-reset { font-size: var(--o-fs-sm) !important; }
+#btn-song-info-toggle { font-size: var(--o-fs-sm); min-width: calc(var(--o-h) - 4px); }
+
+/* Liên kết trang Quản lý chỉ dành cho thành viên (trang đó yêu cầu đăng nhập) — khách không thấy nút lớn chiếm chỗ */
+body:not(.has-member-access) #btn-sidebar-manager,
+body:not(.has-member-access) #btn-header-manager { display: none !important; }
+
+/* Điện thoại: thư viện rộng gần hết màn hình (chừa 44px để chạm ra ngoài đóng) — tên bài trước đây chỉ còn ~125px */
+@media (max-width: 600px) {
+  body .sidebar { width: min(440px, calc(100vw - 44px)) !important; }
+  /* Khách + đã cài app: dòng hành động trống (nút Quản lý ẩn, nút Cài đặt ẩn) → bỏ luôn khoảng trống */
+  body:not(.has-member-access) .sidebar .sidebar-actions:has(> #btn-pwa-install.hidden) { display: none !important; }
+}

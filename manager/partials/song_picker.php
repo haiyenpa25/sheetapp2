@@ -40,6 +40,12 @@
               <button id="btn-save-song-cat" class="mgr-btn mgr-btn-ghost mgr-btn-xs" title="Lưu thay đổi thể loại">💾 Lưu</button>
             </div>
 
+            <button id="btn-sel-song-edit" class="mgr-btn mgr-btn-ghost mgr-btn-sm" onclick="window.ManagerCategories?.openEditSongModal?.(window.ManagerApp?.state?.selectedSong?.id)">
+              ✏️ Sửa Tên Bài
+            </button>
+            <button id="btn-sel-song-delete" class="mgr-btn mgr-btn-ghost mgr-btn-sm text-danger" onclick="window.ManagerCategories?.deleteSong?.(window.ManagerApp?.state?.selectedSong?.id, window.ManagerApp?.state?.selectedSong?.title)">
+              🗑️ Xóa Bài
+            </button>
             <button id="btn-sel-song-fork" class="mgr-btn mgr-btn-primary mgr-btn-sm">
               ✨ Tạo Bản Phối / Hợp Âm Mới
             </button>

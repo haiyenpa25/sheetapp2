@@ -54,3 +54,80 @@ body #toolbar#toolbar #toolbar-zoom-pill { gap: 2px; }
   .deck-btn { padding: 0 7px; }
   body #toolbar#toolbar { gap: 3px !important; }
 }
+
+.deck-btn.deck-btn-icon { padding: 0; width: 32px; min-width: 32px; justify-content: center; }
+.deck-btn.deck-btn-icon svg { width: 16px; height: 16px; }
+@media (max-width: 1024px) { .deck-btn.deck-btn-icon { width: 36px; } }
+@media (max-width: 680px) { #perf-notes-panel { bottom: 12px; } }
+
+/* Điện thoại hẹp: Gọn / Cuộn / Soạn chỉ còn icon để cả dải (kèm Ghi chú) vẫn nằm trong 3 hàng */
+@media (max-width: 480px) {
+  #btn-toolbar-compact > span, #btn-toolbar-scroll > span, #btn-toolbar-edit > span { display: none; }
+  #btn-toolbar-compact, #btn-toolbar-scroll, #btn-toolbar-edit { padding: 0; width: 36px; min-width: 36px; justify-content: center; }
+}
+
+/* ── Điện thoại hẹp: header gọn — mọi nút cao 40px, tự xuống 3 hàng đều nhau ─────────────────────────────
+ * .toolbar-controls dùng display:contents để ☰ và các nút cùng một dòng flex-wrap (hàng 1: ☰ Tông Gốc Bộ-hợp-âm Lời;
+ * hàng 2: Zoom BPM Ký-hiệu Gọn; hàng 3: Cuộn Ghi-chú Soạn … ◀ ▶ ⛶ ⋮). */
+@media (max-width: 480px) {
+  body #toolbar#toolbar { display: flex !important; flex-wrap: wrap !important; align-items: center !important; gap: 4px !important; padding: 4px 6px !important; }
+  body #toolbar#toolbar > .toolbar-left { display: none !important; }
+  body #toolbar#toolbar > .toolbar-controls { display: contents !important; }
+  body #toolbar#toolbar #btn-open-sidebar { position: static !important; }
+  body #toolbar#toolbar .icon-btn, body #toolbar#toolbar .deck-btn, body #toolbar#toolbar .btn,
+  body #toolbar#toolbar .transpose-controls, body #toolbar#toolbar .transpose-btn, body #toolbar#toolbar #transpose-display,
+  body #toolbar#toolbar #chord-set-selector, body #toolbar#toolbar #zoom-slider, body #toolbar#toolbar #btn-lyric-view,
+  body #toolbar#toolbar #btn-toolbar-metronome, body #toolbar#toolbar #btn-more-options, body #toolbar#toolbar #btn-fullscreen {
+    height: 40px !important; min-height: 40px !important; box-sizing: border-box;
+  }
+  body #toolbar#toolbar .icon-btn, body #toolbar#toolbar .transpose-btn, body #toolbar#toolbar #btn-lyric-view,
+  body #toolbar#toolbar #btn-open-sidebar, body #toolbar#toolbar #btn-more-options, body #toolbar#toolbar #btn-transpose-reset,
+  body #toolbar#toolbar #btn-toolbar-compact, body #toolbar#toolbar #btn-toolbar-scroll, body #toolbar#toolbar #btn-toolbar-edit,
+  body #toolbar#toolbar #btn-toolbar-notes { width: 40px !important; min-width: 40px !important; padding: 0 !important; justify-content: center !important; }
+  body #toolbar#toolbar .control-group { gap: 4px !important; margin: 0 !important; }
+  body #toolbar#toolbar .transpose-controls { gap: 0 !important; width: auto !important; }
+  body #toolbar#toolbar .transpose-controls .transpose-btn { width: 38px !important; min-width: 38px !important; }
+  body #toolbar#toolbar #transpose-display { min-width: 26px !important; width: 26px !important; padding: 0 !important; font-size: .9rem !important; }
+  /* "Gốc": chỉ mũi tên ↺ */
+  body #toolbar#toolbar #btn-transpose-reset { font-size: 0 !important; display: inline-flex !important; align-items: center; }
+  body #toolbar#toolbar #btn-transpose-reset::before { content: "↺"; font-size: 1.1rem; line-height: 1; }
+  body #toolbar#toolbar #btn-lyric-view .btn-text { display: none !important; }
+  body #toolbar#toolbar #btn-lyric-view svg { display: block !important; }
+  body #toolbar#toolbar #chord-set-selector { max-width: 104px !important; min-width: 0 !important; font-size: .82rem !important; }
+  body #toolbar#toolbar #zoom-slider { min-width: 0 !important; width: 64px !important; font-size: .82rem !important; }
+  body #toolbar#toolbar #toolbar-zoom-pill { gap: 0 !important; }
+  body #toolbar#toolbar #toolbar-zoom-pill .icon-btn { width: 40px !important; }
+  body #toolbar#toolbar #btn-toolbar-metronome { padding: 0 10px !important; }
+  body #toolbar#toolbar .nav-arrows { display: inline-flex !important; gap: 4px !important; margin: 0 !important; }
+  body #toolbar#toolbar .nav-arrows .icon-btn { width: 40px !important; min-width: 40px !important; }
+  /* Mỗi hàng giãn kín chiều ngang như lưới (không còn khoảng trống lệch một bên); cụm Tông/Zoom có khung như các nút */
+  body #toolbar#toolbar .toolbar-spacer { display: none !important; }
+  body #toolbar#toolbar > *:not(.toolbar-left):not(#instrument-annotations),
+  body #toolbar#toolbar > .toolbar-controls > *:not(.toolbar-spacer):not(.deck-hidden) { flex: 1 0 auto !important; }
+  body #toolbar#toolbar .icon-btn, body #toolbar#toolbar .deck-btn, body #toolbar#toolbar #btn-lyric-view,
+  body #toolbar#toolbar #btn-toolbar-metronome, body #toolbar#toolbar #btn-more-options, body #toolbar#toolbar #btn-transpose-reset {
+    width: auto !important; border: 1px solid var(--border, #e2e8f0) !important; border-radius: 8px !important; background: var(--bg-surface, #fff) !important;
+  }
+  body #toolbar#toolbar .nav-arrows .icon-btn, body #toolbar#toolbar #toolbar-zoom-pill .icon-btn, body #toolbar#toolbar .transpose-controls .transpose-btn { flex: 1 0 auto; }
+  body #toolbar#toolbar .transpose-controls, body #toolbar#toolbar #toolbar-zoom-pill {
+    display: inline-flex !important; border: 1px solid var(--border, #e2e8f0) !important; border-radius: 8px !important; background: var(--bg-surface, #fff); overflow: hidden;
+  }
+  body #toolbar#toolbar .transpose-controls .transpose-btn, body #toolbar#toolbar #toolbar-zoom-pill .icon-btn,
+  body #toolbar#toolbar #toolbar-zoom-pill #zoom-slider { border: 0 !important; border-radius: 0 !important; background: transparent !important; }
+  body #toolbar#toolbar #chord-set-selector { border: 1px solid var(--border, #e2e8f0) !important; border-radius: 8px !important; max-width: none !important; width: 100% !important; }
+  body #toolbar#toolbar > .toolbar-controls > .layer1-chord-group.layer1-chord-group { flex: 1 1 0 !important; min-width: 84px; }
+  body #toolbar#toolbar #chord-set-selector { text-overflow: ellipsis; padding-right: 22px !important; }
+  /* Nhóm 1 nút (Toàn màn hình, ⋮) giãn cả nút bên trong, không để lại khoảng trống */
+  body #toolbar#toolbar .control-group { display: inline-flex !important; }
+  body #toolbar#toolbar .control-group > .icon-btn, body #toolbar#toolbar .control-group > .btn { flex: 1 1 auto; }
+  body #toolbar#toolbar .layer1-transpose-group, body #toolbar#toolbar .nav-arrows { flex: 1 0 auto !important; display: inline-flex !important; }
+  body #toolbar#toolbar .layer1-transpose-group > .transpose-controls { flex: 1 0 auto; }
+  body #toolbar#toolbar .nav-arrows > .icon-btn { flex: 1 0 auto; }
+  body.dark-mode #toolbar#toolbar .icon-btn, body.dark-mode #toolbar#toolbar .deck-btn, body.dark-mode #toolbar#toolbar .transpose-controls,
+  body.dark-mode #toolbar#toolbar #toolbar-zoom-pill, body.dark-mode #toolbar#toolbar #btn-lyric-view,
+  body.dark-mode #toolbar#toolbar #btn-toolbar-metronome, body.dark-mode #toolbar#toolbar #btn-more-options { background: var(--bg-surface, #1e1e2a) !important; }
+}
+
+/* Toàn màn hình: header điện thoại (display:flex !important ở trên) và dải thông tin bài không được chiếm chỗ */
+body.sheet-only-mode #toolbar#toolbar,
+body.sheet-only-mode #song-info-strip.song-info-strip { display: none !important; }

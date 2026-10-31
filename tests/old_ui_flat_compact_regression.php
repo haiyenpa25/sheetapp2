@@ -10,7 +10,7 @@ declare(strict_types=1);
  * 3. Static: Toàn bộ file /old/ tuân thủ giới hạn < 600 dòng.
  * 4. Static: CSS /old/ phẳng 100% (--radius-*: 0px, .song-item 1 dòng 26px).
  * 5. Static: LibraryUI (/old/assets/js/library-ui.js) có Virtual Scrolling (_renderVirtualSlice, ROW_HEIGHT = 26),
- *    1-line _createSongItem, #category-flat-list, #key-filter, #quick-pin-bar, jumpByNumber.
+ *    1-line _createSongItem, combobox danh mục #category-filter (đã bỏ dải chip #category-flat-list), #key-filter, #quick-pin-bar, jumpByNumber.
  * 6. Static: App (/old/assets/js/app.js) có #quick-num-hud (_handleDigitJump) và phím tắt [ / ] chỉnh cỡ chữ hợp âm.
  */
 
@@ -104,7 +104,8 @@ $oldSidebar = (string)@file_get_contents($root . '/old/includes/sidebar.php');
 $oldToolbar = (string)@file_get_contents($root . '/old/includes/toolbar.php');
 $oldViewer  = (string)@file_get_contents($root . '/old/includes/sheet_viewer.php');
 
-checkS(str_contains($oldSidebar, 'id="category-flat-list"'), 'old/includes/sidebar.php có dải danh mục phẳng #category-flat-list');
+checkS(str_contains($oldSidebar, 'id="category-filter"') && str_contains($oldSidebar, 'id="category-filter-wrap"') && !str_contains($oldSidebar, 'category-flat-list'),
+    'old/includes/sidebar.php dùng MỘT combobox danh mục #category-filter, không còn dải chip #category-flat-list');
 checkS(str_contains($oldSidebar, 'id="key-filter"'), 'old/includes/sidebar.php có bộ lọc tông #key-filter');
 checkS(str_contains($oldViewer, 'id="quick-pin-bar"'), 'old/includes/sheet_viewer.php có thanh ghim nhanh #quick-pin-bar');
 checkS(str_contains($oldViewer, 'id="quick-num-hud"'), 'old/includes/sheet_viewer.php có HUD nhảy bài bằng phím số #quick-num-hud');
@@ -185,13 +186,15 @@ $mainSidebarPhp = (string)@file_get_contents($root . '/includes/sidebar.php');
 $mainToolbarPhp = (string)@file_get_contents($root . '/includes/toolbar.php');
 $mainInfoBarJs  = (string)@file_get_contents($root . '/assets/js/song-info-bar.js');
 checkS(
-    str_contains($mainSidebarPhp, 'id="category-flat-list"')
+    str_contains($mainSidebarPhp, 'id="category-filter"')
+    && !str_contains($mainSidebarPhp, 'category-flat-list')
+    && !str_contains($mainLibJs, 'cat-flat-btn')
     && str_contains($mainLibJs, 'song-cat-badge')
     && str_contains($oldLibJs, 'song-cat-badge')
     && str_contains($mainToolbarPhp, 'id="song-category"')
     && str_contains($mainToolbarPhp, 'id="si-pop-category"')
     && str_contains($mainInfoBarJs, 'si-category'),
-    'Hiển thị rõ Danh mục bài hát trên dải #category-flat-list, badge .song-cat-badge mỗi dòng bài hát và thanh thông tin bài hát'
+    'Hiển thị rõ Danh mục bài hát: combobox #category-filter (không dải chip), badge .song-cat-badge mỗi dòng bài hát và thanh thông tin bài hát'
 );
 
 $mainOsmdJs = (string)@file_get_contents($root . '/assets/js/osmd-renderer.js');

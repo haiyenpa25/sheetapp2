@@ -513,8 +513,13 @@ body.dark-mode .shell-notif-item.unread,
     display: none;
   }
 
+  /* Đã đăng nhập thêm chuông + tài khoản (~90px): thu khoảng cách để thanh không rộng hơn màn hình (trước đây tràn ngang 25px ở 390px) */
+  .shell-nav-inner { padding: 0 0.5rem; gap: 0.4rem; }
+  .shell-pillars { gap: 0.2rem; }
+  .shell-actions { gap: 0.3rem; }
+
   .shell-tab {
-    padding: 0.35rem 0.65rem;
+    padding: 0.35rem 0.5rem;
     min-width: 38px;
     justify-content: center;
   }

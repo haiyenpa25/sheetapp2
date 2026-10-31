@@ -412,26 +412,24 @@
 
   <!-- 5b. MODAL THÊM BÀI (MusicXML) VÀO DANH MỤC -->
   <div class="mgr-modal-overlay hidden" id="modal-upload-song">
-    <div class="mgr-modal-box" style="max-width: 520px;">
+    <div class="mgr-modal-box up-box">
       <div class="mgr-modal-header">
         <h3 class="mgr-modal-title">➕ Thêm bài (MusicXML)</h3>
-        <button class="mgr-modal-close" data-close="modal-upload-song">✕</button>
+        <button class="mgr-modal-close" data-close="modal-upload-song" aria-label="Đóng">✕</button>
       </div>
       <div class="mgr-modal-body">
         <form id="form-upload-song" class="mgr-form">
           <div class="mgr-form-group">
-            <label class="mgr-label">Danh mục</label>
+            <label class="mgr-label" for="upload-song-cat-select">Danh mục</label>
             <div id="upload-song-category"></div>
             <small id="upload-song-note" class="text-muted"></small>
           </div>
           <div class="mgr-form-group">
-            <label class="mgr-label">File MusicXML (chọn được nhiều file)</label>
+            <label class="mgr-label" for="upload-song-files">File MusicXML (chọn được nhiều file, thêm nhiều lần)</label>
             <input type="file" id="upload-song-files" class="mgr-input" accept=".xml,.musicxml,.mxl" multiple>
           </div>
-          <div class="mgr-form-group">
-            <label class="mgr-label">Tên bài (không bắt buộc — chỉ áp dụng khi chọn 1 file)</label>
-            <input type="text" id="upload-song-title" class="mgr-input" placeholder="Để trống: lấy tên trong file, nếu không có thì lấy tên file">
-          </div>
+          <!-- Danh sách chuẩn bị tải: mỗi file một dòng, sửa tên/số bài/tác giả trước khi tải (manager-upload.js) -->
+          <div id="upload-song-stage" class="up-stage" aria-live="polite"></div>
           <div id="upload-song-results" class="upload-results"></div>
           <div class="mgr-modal-actions">
             <button type="button" class="mgr-btn mgr-btn-ghost" data-close="modal-upload-song">Đóng</button>

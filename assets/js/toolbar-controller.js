@@ -197,9 +197,18 @@ const ToolbarController = (() => {
     }
 
     // Resize handler
+    // Bàn phím ảo (Android/iPad) chỉ đổi CHIỀU CAO nhưng vẫn bắn 'resize': không phải xoay/đổi cỡ màn hình, nếu không
+    // menu bài hát biến mất ngay khi chạm vào ô tìm. REAL_RESIZE_PX: đổi bề rộng từ ngần này mới là thật; NOISE: nhiễu.
+    const REAL_RESIZE_PX = 100, NOISE_WIDTH_PX = 2;
+    const _isTextEntryFocused = () => {
+      const a = document.activeElement;
+      return !!a && (a.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName));
+    };
     let _lastW = window.innerWidth;
     window.addEventListener('resize', _debounce(() => {
       const w = window.innerWidth;
+      const dw = Math.abs(w - _lastW);
+      if (dw < NOISE_WIDTH_PX || (dw < REAL_RESIZE_PX && _isTextEntryFocused())) { _lastW = w; return; }
       if (w <= 1440) {
         if (hasSongParam || w <= 1200) {
           if (!sidebar?.classList.contains('mobile-hidden')) {
@@ -229,9 +238,12 @@ const ToolbarController = (() => {
 
     if ('onorientationchange' in window) {
       window.addEventListener('orientationchange', () => {
-        // Xử lý xoay màn hình: đóng sidebar
-        if (window.innerWidth <= 900) _closeSidebar();
+        // Một số máy Android bắn sự kiện này khi bàn phím ảo chiếm màn hình: chỉ là xoay thật khi BỀ RỘNG đổi
+        const widthBefore = _lastW;
         setTimeout(() => {
+          const rotated = Math.abs(window.innerWidth - widthBefore) >= REAL_RESIZE_PX;
+          if (rotated && !_isTextEntryFocused() && window.innerWidth <= 900) _closeSidebar();
+          if (!rotated) return;
           if (!OSMDRenderer?.getIsLoaded?.()) return;
           try {
             // L5-1: ResizeObserver duy nhất làm chủ việc layout lại và render khi xoay thiết bị
@@ -584,4 +596,3 @@ const ToolbarController = (() => {
 })();
 
 window.ToolbarController = ToolbarController;
-

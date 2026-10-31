@@ -163,17 +163,11 @@ function check(cond, msg) {
     Boolean(registeredUrl && registeredUrl.includes('/sheetapp2/sw.js')),
     'M2-2 (Q-M1): ServiceWorkerManager.register() registers SW on Classic (/old/)',
   );
-  check(
-    typeof controllerChangeCb === 'function',
-    'M2-2: ServiceWorkerManager attaches controllerchange listener',
-  );
+  // 2026-10-30 (chủ dự án phản ánh "hay bị tải lại"): bản SW mới KHÔNG được tự reload trang dù đang rảnh
+  // hay đang phát — mã mới áp dụng ở lần mở trang kế tiếp (HTML network-first, CSS/JS có ?v=).
+  if (controllerChangeCb) { controllerChangeCb(); controllerChangeCb(); }
+  check(reloadCount === 0, 'M2-2: controllerchange never auto-reloads the page while idle');
 
-  // Trigger controllerchange while idle -> reloads once
-  controllerChangeCb();
-  controllerChangeCb();
-  check(reloadCount === 1, 'M2-2: controllerchange reloads page at most once when idle');
-
-  // 4b. Trigger controllerchange while playing -> does NOT reload
   reloadCount = 0;
   controllerChangeCb = null;
   const winBusy = makeWindow('/sheetapp2/', true);

@@ -134,7 +134,7 @@ $helpAnchor = match($activePillar) {
       <a href="<?= $appBase ?>/old/<?= $songQuery ?>"
          id="shell-switch-old-ui-btn"
          class="shell-help-btn"
-         onclick="if (window.URLState) { event.preventDefault(); window.location.href = URLState.interfaceUrl(true); }"
+         onclick="if (typeof window.URLState?.interfaceUrl === 'function') { event.preventDefault(); window.location.href = URLState.interfaceUrl(true); }"
          title="Chuyển sang Giao diện Cũ (SheetApp v1 đơn giản)">
         <span class="help-icon"><?= icon('layout') ?></span>
         <span class="help-text">Giao Diện Cũ</span>

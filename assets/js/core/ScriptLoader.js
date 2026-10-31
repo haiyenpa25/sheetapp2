@@ -25,7 +25,9 @@ const ScriptLoader = (() => {
       ? window.__APP_BASE__.replace(/\/+$/, '') + '/'
       : document.querySelector('base')?.getAttribute('href') || './';
     const cleanSrc = src.startsWith('/') ? src.slice(1) : src;
-    const fullUrl = cleanSrc.startsWith('http') ? cleanSrc : `${baseHref}${cleanSrc}`;
+    // ?v= theo mốc sửa file mới nhất (do máy chủ đặt): URL trần bị trình duyệt/CDN giữ cả năm → module lười chạy bản cũ
+    const ver = window.__ASSET_V__ ? `${cleanSrc.includes('?') ? '&' : '?'}v=${encodeURIComponent(window.__ASSET_V__)}` : '';
+    const fullUrl = cleanSrc.startsWith('http') ? cleanSrc : `${baseHref}${cleanSrc}${ver}`;
 
     const promise = new Promise((resolve, reject) => {
       const existing = document.querySelector(`script[src*="${src}"]`);

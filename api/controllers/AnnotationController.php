@@ -22,12 +22,14 @@ class AnnotationController {
 
             Response::error('action không hợp lệ');
         } elseif ($method === 'POST') {
-            Auth::requireAdmin();
+            // Thành viên (Ban Hát trở lên) ghi chú trên bản nhạc; danh mục/màu nhạc cụ vẫn chỉ Admin.
+            Auth::requireBanhat();
             $body = json_decode(file_get_contents('php://input'), true);
             if (!is_array($body)) { Response::error('Body không hợp lệ', 422); return; }
 
             $action = $body['action'] ?? '';
             if ($action === 'instrument_save') {
+                Auth::requireAdmin();
                 if (!is_string($body['instrumentId'] ?? '') || !is_string($body['name'] ?? null) || !is_string($body['registryRevision'] ?? null) || (isset($body['color']) && !is_string($body['color']))) {
                     Response::error('Dữ liệu nhạc cụ không hợp lệ', 422); return;
                 }
@@ -42,7 +44,15 @@ class AnnotationController {
                 if (!is_array($body['annotations'] ?? null) || !is_string($body['revision'] ?? null)) {
                     Response::error('Cần tải lại ghi chú trước khi lưu', 422); return;
                 }
-                Response::ok(AnnotationService::saveDocument($songId, $body['annotations'], $body['revision']));
+                Response::ok(AnnotationService::saveDocument($songId, $body['annotations'], $body['revision'], null, $this->actor()));
+                return;
+            }
+
+            if ($action === 'band_note_save') {
+                if (!is_array($body['bandNote'] ?? null) || !is_string($body['revision'] ?? null)) {
+                    Response::error('Cần tải lại ghi chú trước khi lưu', 422); return;
+                }
+                Response::ok(AnnotationService::saveBandNote($songId, $body['bandNote'], $body['revision'], null, $this->actor()));
                 return;
             }
 
@@ -50,6 +60,10 @@ class AnnotationController {
         } else {
             Response::methodNotAllowed();
         }
+    }
+
+    private function actor(): array {
+        return ['id' => Auth::userId(), 'name' => Auth::username(), 'admin' => Auth::isAdmin()];
     }
 
     private function songId(mixed $value): string {

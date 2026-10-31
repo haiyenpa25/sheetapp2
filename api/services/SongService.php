@@ -395,21 +395,51 @@ class SongService {
         }
     }
 
-    public static function delete(string $id): array {
+    public static function delete(string $id, bool $deleteLibraryXml = false): array {
         self::invalidateCache();
 
         try {
-            $song = self::getById($id);
-            if ($song && !empty($song['xmlPath'])) {
-                $xmlFile = self::resolveManagedXmlPath($song['xmlPath']);
-                if ($xmlFile !== null && file_exists($xmlFile)) {
-                    // Không xóa trực tiếp thư viện gốc, chỉ xóa nếu nằm trong uploads
-                    if (($up = realpath(__DIR__ . '/../../storage/uploads')) !== false && str_starts_with($xmlFile, rtrim($up, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR)) {
-                        @unlink($xmlFile);
+            $song = DB::run("SELECT * FROM songs WHERE id = ?", [$id])->fetch() ?: self::getById($id);
+            if ($song) {
+                $xmlPath = (string)($song['xmlPath'] ?? '');
+                if (class_exists('PrivateSongXmlService') && (str_starts_with($id, PrivateSongXmlService::ID_PREFIX) || str_starts_with($xmlPath, 'api/index.php?route=songs&action=xml'))) {
+                    PrivateSongXmlService::remove($id);
+                } elseif ($xmlPath !== '') {
+                    $xmlFile = self::resolveManagedXmlPath($xmlPath);
+                    if ($xmlFile !== null && file_exists($xmlFile)) {
+                        $canUnlink = false;
+                        foreach (['storage/uploads', 'storage/users'] as $relRoot) {
+                            $absRoot = realpath(__DIR__ . '/../../' . $relRoot);
+                            if ($absRoot !== false && str_starts_with($xmlFile, rtrim($absRoot, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR)) {
+                                $canUnlink = true;
+                                break;
+                            }
+                        }
+                        if (!$canUnlink && $deleteLibraryXml) {
+                            $libRoot = realpath(__DIR__ . '/../../storage/Thanh ca');
+                            if ($libRoot !== false && str_starts_with($xmlFile, rtrim($libRoot, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR)) {
+                                $canUnlink = true;
+                            }
+                        }
+                        if ($canUnlink) {
+                            @unlink($xmlFile);
+                        }
+                    }
+                }
+                if ($deleteLibraryXml) {
+                    $safeSongDir = __DIR__ . '/../../storage/data/chord_sets/' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', $id);
+                    if (is_dir($safeSongDir)) {
+                        foreach (glob($safeSongDir . '/*.json') ?: [] as $jf) {
+                            @unlink($jf);
+                        }
+                        @rmdir($safeSongDir);
                     }
                 }
             }
 
+            try {
+                DB::run("DELETE FROM user_chord_sets WHERE song_id = ?", [$id]);
+            } catch (\Throwable $e) {}
             DB::run("DELETE FROM songs WHERE id = ?", [$id]);
             try {
                 DB::run("DELETE FROM songs_fts WHERE song_id = ?", [$id]);

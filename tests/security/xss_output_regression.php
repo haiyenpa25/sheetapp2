@@ -86,7 +86,7 @@ check(str_contains($instruments, 'window.SafeHtml.escape(name)'), 'Instruments m
 check(str_contains($editor, 'window.SafeHtml.escape(v.version_name)'), 'Editor song version names are encoded');
 check(str_contains($editor, 'window.SafeHtml.escape(song.title)'), 'Editor picker song titles are encoded');
 check(str_contains($chordCard, 'window.SafeHtml.escape(sym'), 'Learn chord card symbols are encoded');
-check(str_contains($performanceNotes, 'window.SafeHtml.escape(setlist.title'), 'Performance notes encode setlist titles');
+check(str_contains($performanceNotes, 'noticeEl.textContent') && !str_contains($performanceNotes, 'noticeEl.innerHTML'), 'Performance notes write setlist titles as text (no HTML)');
 check(str_contains($importHelpers, "['script', 'iframe', 'object', 'embed', 'foreignobject']"), 'MusicXML blocks active-content elements');
 check(str_contains($importHelpers, "str_starts_with(\$name, 'on')"), 'MusicXML blocks event-handler attributes');
 

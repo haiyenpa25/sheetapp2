@@ -19,8 +19,10 @@ window.AnnotationPanel = (() => {
     node.style.setProperty('--instrument-color', colorFor(id));
     node.style.setProperty('--annotation-color', /^#[0-9a-f]{6}$/i.test(customColor || '') ? customColor : colorFor(id));
   }
+  // Classic ẩn nút gốc trong thanh công cụ và mở bằng #btn-toolbar-notes: neo menu theo nút đang hiện.
+  const anchor = () => (root.offsetParent ? root : document.getElementById('btn-toolbar-notes')) || root;
   function placeMenu() {
-    const rect = root.getBoundingClientRect();
+    const rect = anchor().getBoundingClientRect();
     body.style.left = `${Math.max(8, Math.min(rect.left, window.innerWidth - Math.min(420, window.innerWidth - 16) - 8))}px`;
     body.style.top = `${Math.max(8, Math.min(rect.bottom + 6, window.innerHeight - 180))}px`;
     body.style.maxHeight = `${Math.max(160, window.innerHeight - parseFloat(body.style.top) - 12)}px`;
@@ -45,9 +47,12 @@ window.AnnotationPanel = (() => {
     if (root) return;
     actions = callbacks;
     root = element('section', undefined, 'instrument-annotations'); root.id = 'instrument-annotations';
-    const toggle = button('Nhạc cụ', () => setOpen(!open), root);
+    const toggle = button('Ghi chú', () => setOpen(!open), root);
     toggle.id = 'btn-instrument-annotations';
-    toggle.title = 'Chọn nhạc cụ và ghi chú trên bản nhạc';
+    toggle.textContent = '';
+    toggle.setAttribute('aria-label', 'Ghi chú ban nhạc và nhạc cụ');
+    toggle.insertAdjacentHTML('afterbegin', '<svg class="icon icon-xs ano-icon" aria-hidden="true"><use href="#icon-clipboard-list"/></svg><span class="ano-label">Ghi chú</span>');
+    toggle.title = 'Ghi chú bài cho ban nhạc · ghi chú theo nhạc cụ trên bản nhạc';
     toggle.setAttribute('aria-expanded', 'false'); toggle.setAttribute('aria-controls', 'annotation-panel-body');
     body = element('div', undefined, 'ano-menu'); body.id = 'annotation-panel-body'; body.hidden = true;
     body.setAttribute('popover', 'auto'); root.append(body);
@@ -65,36 +70,124 @@ window.AnnotationPanel = (() => {
       if (item) { item.tabIndex = -1; item.scrollIntoView({ block: 'center' }); item.focus({ preventScroll: true }); }
     });
   }
+  const BAND_STYLES = ['Ballad', 'Slow', 'Slow rock', 'Pop', 'Valse', 'Boston', 'Bolero', 'Rumba', 'Chachacha', '6/8', 'Worship'];
+  let bandEditing = false;
   function render(next) {
     if (!root) return;
     state = next; root.firstElementChild.disabled = !state.songId;
     root.firstElementChild.classList.toggle('active', state.editing); decorate(root.firstElementChild, state.instrumentId);
+    // Chấm báo trên nút: bài có ghi chú chung/ghi chú nhạc cụ mà không tốn chỗ hiển thị
+    const hasNotes = !!(state.bandNote || state.notes.length), proxy = document.getElementById('btn-toolbar-notes');
+    root.firstElementChild.classList.toggle('ano-has-notes', hasNotes);
+    proxy?.classList.toggle('ano-has-notes', hasNotes); proxy?.classList.toggle('active', !!state.editing);
+    renderEditingBar();
     const focusKey = body.contains(document.activeElement) ? document.activeElement.dataset.focusKey : '';
+    if (bandEditing && body.querySelector('.ano-band-form')) return; // không xóa form đang gõ
     body.replaceChildren();
-    const status = element('p', state.error || (state.loading ? 'Đang tải ghi chú…' : 'Tick nhạc cụ muốn xem. Admin chọn nhạc cụ rồi bật Ghi chú để thêm tại dấu + vàng phía trên hợp âm.'));
-    status.setAttribute('role', state.error ? 'alert' : 'status'); body.append(status);
-    button(state.error ? 'Thử tải lại' : 'Tải lại ghi chú', () => actions.reload(), body);
+    if (state.error || state.loading) {
+      const status = element('p', state.error || 'Đang tải ghi chú…');
+      status.setAttribute('role', state.error ? 'alert' : 'status'); body.append(status);
+      if (state.error) button('Thử tải lại', () => actions.reload(), body);
+    }
     if (!state.loaded) return;
-    const filters = element('fieldset'); filters.append(element('legend', 'Nhạc cụ hiển thị'));
-    state.instruments.forEach(instrument => {
-      const label = element('label'), input = element('input'); input.type = 'checkbox';
-      input.checked = state.selected === null || state.selected.includes(instrument.id);
-      input.dataset.focusKey = instrument.id;
-      input.addEventListener('change', () => actions.filter(instrument.id, input.checked));
-      const count = state.notes.filter(note => note.instrumentId === instrument.id).length;
-      decorate(label, instrument.id); label.className = 'ano-instrument-chip';
-      label.append(input, document.createTextNode(`${instrument.name} (${count})`)); filters.append(label);
-    });
-    body.append(filters);
-    const controls = element('div', undefined, 'ano-controls'); body.append(controls);
-    button('Chọn tất cả', () => actions.filterAll(true), controls);
-    button('Ẩn tất cả', () => actions.filterAll(false), controls);
-    if (state.admin) renderAdmin(controls);
+    renderBand();
+    renderLayers();
+    if (state.admin) renderAdmin();
     const list = element('ul', undefined, 'ano-detail-list'); body.append(list);
     const visible = state.notes.filter(note => state.selected === null || state.selected.includes(note.instrumentId));
-    if (!visible.length) list.append(element('li', state.notes.length ? 'Các lớp đang chọn chưa có ghi chú.' : 'Bài này chưa có ghi chú.'));
+    if (!visible.length) list.append(element('li', state.notes.length ? 'Các nhạc cụ đang chọn chưa có ghi chú.' : 'Bài này chưa có ghi chú theo nhạc cụ.', 'ano-empty'));
     visible.forEach(note => renderNote(note, list));
     if (focusKey) Array.from(body.querySelectorAll('[data-focus-key]')).find(node => node.dataset.focusKey === focusKey)?.focus({ preventScroll: true });
+  }
+  let editingBar = null;
+  /* Thanh nổi khi đang đặt dấu +: biết đang ghi cho nhạc cụ nào và thoát nhanh, không cần mở lại panel */
+  function renderEditingBar() {
+    if (!state.editing) { editingBar?.remove(); editingBar = null; return; }
+    if (!editingBar) {
+      editingBar = element('div', undefined, 'ano-editing-bar'); editingBar.id = 'ano-editing-bar'; editingBar.setAttribute('role', 'status');
+      document.body.append(editingBar);
+    }
+    editingBar.replaceChildren();
+    const name = state.instruments.find(item => item.id === state.instrumentId)?.name || state.instrumentId;
+    editingBar.append(element('span', `Đang ghi: ${name}`, 'ano-editing-name'));
+    button('Đổi', () => setOpen(true), editingBar);
+    button('✓ Xong', () => actions.edit(false), editingBar).classList.add('ano-primary');
+    decorate(editingBar, state.instrumentId);
+  }
+  function section(title) {
+    const box = element('section', undefined, 'ano-section'); box.append(element('h3', title, 'ano-section-title'));
+    body.append(box); return box;
+  }
+  /* ① Ghi chú chung của bài cho cả ban nhạc */
+  function renderBand() {
+    const box = section('Ghi chú bài cho ban nhạc'), band = state.bandNote;
+    if (bandEditing && state.member) { bandForm(box, band || {}); return; }
+    if (band) {
+      const meta = element('div', undefined, 'ano-band-meta');
+      if (band.style) meta.append(element('span', band.style, 'ano-band-chip'));
+      if (band.tempo) meta.append(element('span', `♩ = ${band.tempo}`, 'ano-band-chip'));
+      if (meta.childElementCount) box.append(meta);
+      if (band.text) box.append(element('p', band.text, 'ano-band-text'));
+      if (band.updatedBy) box.append(element('p', `— ${band.updatedBy}`, 'ano-muted'));
+    } else box.append(element('p', state.member ? 'Chưa có. Ghi điệu, tempo, lời dặn chung cho cả ban.' : 'Chưa có ghi chú chung.', 'ano-muted'));
+    if (state.member) button(band ? 'Sửa ghi chú chung' : 'Thêm ghi chú chung', () => { bandEditing = true; render(state); body.querySelector('.ano-band-form input')?.focus(); }, box).classList.add('ano-small');
+  }
+  function bandForm(box, band) {
+    const form = element('form', undefined, 'ano-band-form');
+    const styleLabel = element('label', 'Điệu'), style = element('input'); style.maxLength = 40; style.value = band.style || '';
+    style.setAttribute('list', 'ano-band-styles'); style.placeholder = 'Ballad, Slow rock…';
+    const list = element('datalist'); list.id = 'ano-band-styles';
+    BAND_STYLES.forEach(value => { const option = element('option'); option.value = value; list.append(option); });
+    styleLabel.append(style, list);
+    const tempoLabel = element('label', 'Tempo'), tempo = element('input'); tempo.type = 'number'; tempo.min = '20'; tempo.max = '300';
+    tempo.inputMode = 'numeric'; tempo.placeholder = 'vd 72'; tempo.value = band.tempo || ''; tempoLabel.append(tempo);
+    const row = element('div', undefined, 'ano-band-row'); row.append(styleLabel, tempoLabel); form.append(row);
+    const textLabel = element('label', 'Lời dặn'), text = element('textarea'); text.maxLength = 1000; text.rows = 3;
+    text.placeholder = 'vd: Intro piano 4 ô, điệp khúc vào trống, kết chậm dần'; text.value = band.text || '';
+    textLabel.append(text); form.append(textLabel);
+    const error = element('p'); error.setAttribute('role', 'alert'); form.append(error);
+    const controls = element('div', undefined, 'ano-controls'); form.append(controls);
+    const submit = button('Lưu', () => {}, controls); submit.type = 'submit'; submit.classList.add('ano-primary');
+    button('Hủy', () => { bandEditing = false; render(state); }, controls);
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      const bpm = tempo.value.trim() ? parseInt(tempo.value, 10) : null;
+      if (bpm !== null && (!(bpm >= 20) || bpm > 300)) { error.textContent = 'Tempo cần từ 20 đến 300.'; tempo.focus(); return; }
+      submit.disabled = true;
+      try { await actions.saveBand({ style: style.value.trim(), tempo: bpm, text: text.value.trim() }); bandEditing = false; render(state); }
+      catch (e) { error.textContent = e.message; submit.disabled = false; }
+    });
+    box.append(form);
+  }
+  /* ② Ghi chú theo nhạc cụ: bật/tắt lớp hiển thị + ghi dấu + trên bản nhạc */
+  function renderLayers() {
+    const box = section('Ghi chú theo nhạc cụ');
+    if (state.member) {
+      const row = element('div', undefined, 'ano-write-row');
+      const { label, select } = selectInstrument(state.instrumentId, 'Tôi ghi cho');
+      select.disabled = state.saving; select.dataset.focusKey = 'instrument-select';
+      select.addEventListener('change', () => actions.instrument(select.value)); row.append(label);
+      const edit = button(state.editing ? '✓ Xong' : '＋ Ghi chú', () => { actions.edit(!state.editing); if (state.editing) setOpen(false); }, row);
+      edit.classList.add('ano-primary'); edit.setAttribute('aria-pressed', String(state.editing));
+      decorate(edit, state.instrumentId); box.append(row);
+      box.append(element('p', state.editing ? (state.relocating ? 'Chạm dấu + để đặt lại ghi chú đang chọn.' : 'Chạm dấu + vàng trên bản nhạc để ghi tại chỗ đó.')
+        : 'Chọn nhạc cụ → bấm Ghi chú → chạm dấu + trên bản nhạc.', 'ano-muted'));
+    }
+    const filters = element('div', undefined, 'ano-layer-chips'); filters.setAttribute('role', 'group'); filters.setAttribute('aria-label', 'Nhạc cụ hiển thị');
+    const all = state.selected === null;
+    const allChip = button('Tất cả', () => actions.filterAll(!all), filters);
+    allChip.classList.add('ano-layer-chip'); allChip.setAttribute('aria-pressed', String(all)); allChip.dataset.focusKey = 'layer-all';
+    state.instruments.forEach(instrument => {
+      const on = all || state.selected.includes(instrument.id);
+      const count = state.notes.filter(note => note.instrumentId === instrument.id).length;
+      const chip = button(`${instrument.name}${count ? ` · ${count}` : ''}`, () => actions.filter(instrument.id, !on), filters);
+      chip.classList.add('ano-layer-chip'); chip.setAttribute('aria-pressed', String(on)); chip.dataset.focusKey = instrument.id;
+      chip.title = on ? `Ẩn ghi chú ${instrument.name}` : `Hiện ghi chú ${instrument.name}`;
+      decorate(chip, instrument.id);
+    });
+    const none = button('Ẩn hết', () => actions.filterAll(false), filters);
+    none.classList.add('ano-layer-chip', 'ano-layer-none'); none.setAttribute('aria-pressed', String(state.selected?.length === 0));
+    box.append(filters);
   }
   function selectInstrument(value, labelText) {
     return choices(labelText, value, state.instruments);
@@ -127,21 +220,17 @@ window.AnnotationPanel = (() => {
     instrument.addEventListener('change', refresh); parent.append(field); refresh();
     return { value: () => customColor, refresh };
   }
-  function renderAdmin(controls) {
-    const edit = button(state.editing ? 'Kết thúc ghi' : 'Ghi chú', () => { actions.edit(!state.editing); if (state.editing) setOpen(false); }, controls);
-    edit.setAttribute('aria-pressed', String(state.editing));
-    const { label, select } = selectInstrument(state.instrumentId, 'Nhạc cụ đang soạn');
-    select.disabled = state.saving; select.dataset.focusKey = 'instrument-select';
-    select.addEventListener('change', () => actions.instrument(select.value)); body.append(label);
-    const colorLabel = element('label', 'Màu nhạc cụ'), color = element('input'); color.type = 'color'; color.dataset.focusKey = 'instrument-color'; color.disabled = state.saving; color.value = colorDrafts.get(state.instrumentId) || colorFor(state.instrumentId);
+  function renderAdmin() {
+    const box = element('details', undefined, 'ano-section ano-admin'); box.append(element('summary', 'Quản lý nhạc cụ (Admin)'));
+    body.append(box);
+    const colorLabel = element('label', `Màu ${state.instruments.find(item => item.id === state.instrumentId)?.name || ''}`), color = element('input'); color.type = 'color'; color.dataset.focusKey = 'instrument-color'; color.disabled = state.saving; color.value = colorDrafts.get(state.instrumentId) || colorFor(state.instrumentId);
     const colorInstrumentId = state.instrumentId;
     color.addEventListener('input', () => colorDrafts.set(colorInstrumentId, color.value));
-    color.setAttribute('aria-label', 'Màu nhạc cụ'); colorLabel.append(color); body.append(colorLabel);
-    const colorError = element('span'); colorError.setAttribute('role', 'alert'); body.append(colorError);
+    color.setAttribute('aria-label', 'Màu nhạc cụ'); colorLabel.append(color); box.append(colorLabel);
+    const colorError = element('span'); colorError.setAttribute('role', 'alert'); box.append(colorError);
     button('Lưu màu nhạc cụ', async () => {
       try { await actions.color(colorInstrumentId, colorDrafts.get(colorInstrumentId) || color.value); colorDrafts.delete(colorInstrumentId); } catch (e) { colorError.textContent = e.message; }
-    }, body).disabled = state.saving;
-    if (state.editing) body.append(element('p', state.relocating ? 'Chọn dấu + để đặt lại ghi chú đang chọn.' : 'Chạm dấu + tại nốt để thêm ghi chú. Có thể thêm nhiều ghi chú cùng vị trí.'));
+    }, box).disabled = state.saving;
     const form = element('form', undefined, 'ano-controls');
     const nameLabel = element('label', 'Nhạc cụ mới'), input = element('input'); input.maxLength = 40; input.required = true; input.value = instrumentNameDraft;
     input.addEventListener('input', () => { instrumentNameDraft = input.value; });
@@ -152,18 +241,19 @@ window.AnnotationPanel = (() => {
       event.preventDefault(); submit.disabled = true;
       try { await actions.createInstrument(input.value); instrumentNameDraft = ''; render(state); } catch (e) { error.textContent = e.message; }
       finally { submit.disabled = false; }
-    }); body.append(form);
+    }); box.append(form);
   }
   function renderNote(note, list) {
     const item = element('li'); item.dataset.annotationId = note.id;
     item.dataset.focusKey = `note:${note.id}`; item.tabIndex = -1;
     decorate(item, note.instrumentId, note.customColor);
     const name = state.instruments.find(instrument => instrument.id === note.instrumentId)?.name || note.instrumentId;
-    item.append(element('strong', `${name} · Ô ${note.measureIdx + 1} · Khuông ${(note.staffIdx || 0) + 1}`), element('p', `${note.icon || ''} ${note.text}`.trim()));
+    item.append(element('strong', `${name} · Ô ${note.measureIdx + 1}${note.author ? ` · ${note.author}` : ''}`), element('p', `${note.icon || ''} ${note.text}`.trim()));
     if (state.unplaced.includes(note.id)) item.append(element('p', 'Cần kiểm tra vị trí: bản nhạc đã thay đổi hoặc chưa tìm thấy điểm gắn.', 'ano-warning'));
-    if (state.admin) {
-      button('Sửa', () => actions.openEditor(note), item).dataset.action = 'edit';
-      button('Đặt lại vị trí', () => actions.relocate(note), item);
+    if (state.canEditNote?.(note)) {
+      const row = element('div', undefined, 'ano-controls'); item.append(row);
+      button('Sửa', () => actions.openEditor(note), row).dataset.action = 'edit';
+      button('Đổi vị trí', () => actions.relocate(note), row);
     }
     list.append(item);
   }
@@ -219,5 +309,5 @@ window.AnnotationPanel = (() => {
     }
     text.focus();
   }
-  return { init, render, show, editor, closeEditor, colorFor, decorate, hide: () => setOpen(false), isOpen: () => open };
+  return { init, render, show, toggle: () => setOpen(!open), editor, closeEditor, colorFor, decorate, hide: () => setOpen(false), isOpen: () => open };
 })();

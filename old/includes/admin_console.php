@@ -1,11 +1,14 @@
 <!-- ===== ADMIN CONSOLE MODAL ===== -->
 <div id="admin-modal" class="modal-overlay hidden">
   <div class="modal-box" style="max-width: 900px; width: 95%; height: 85vh; display: flex; flex-direction: column; overflow: hidden; padding: 0;">
-    <div class="modal-header" style="flex-shrink: 0; border-bottom: 1px solid var(--border); padding: 1rem 1.5rem;">
+    <div class="modal-header" style="flex-shrink: 0; border-bottom: 1px solid var(--border); padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
       <h3 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">⚙️ Bảng Điều Khiển Quản Trị</h3>
-      <button id="btn-close-admin" class="icon-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <a href="<?= ($baseHref ?? '../') ?>manager/#tab-categories" class="btn btn-primary btn-sm" style="text-decoration:none; font-weight:600;">📂 Mở Quản Lý Danh Mục &amp; Bài Hát (/manager/)</a>
+        <button id="btn-close-admin" class="icon-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
     </div>
     
     <div class="modal-body" style="padding: 0; display: flex; flex: 1; min-height: 0; flex-direction: row; align-items: stretch;">

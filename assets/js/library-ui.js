@@ -9,6 +9,7 @@ const LibraryUI = (() => {
   function init() {
     window.LibraryList?.bind({ element: listEl(), getItems: () => _lastRenderedSongs, getActive: () => activeSongId, select: selectSong, renderWindow: _renderVirtualChunk }); window.LibraryData?.loadPins?.(); document.getElementById('btn-pin-current-song')?.addEventListener?.('click', () => { if (activeSongId) togglePin(activeSongId); });
     if (window.HistoryManager?.init) window.HistoryManager.init(() => { _buildRecentlyViewed(); _buildQuickFavorites(); });
+    window.EventBus?.on?.('auth:changed', () => { _buildUpcomingSetlist(); });
     searchEl()?.addEventListener('input', () => { clearTimeout(_searchDebounce); _searchDebounce = setTimeout(_onSearch, 200); });
     searchEl()?.addEventListener('keydown', async (e) => {
       if (e.key === 'Enter') {
@@ -24,14 +25,14 @@ const LibraryUI = (() => {
     loadSongs();
     window.EventBus?.emit('navigation:library', { getItems: () => _lastRenderedSongs, getCatalog: () => songs, getCategory: () => categoryEl()?.value || '', getActiveId: () => activeSongId, select: selectSong });
     document.getElementById('btn-search-lyrics')?.addEventListener('click', _toggleSearchMode);
-    [categoryEl(), document.getElementById('sort-filter'), document.getElementById('season-filter'), document.getElementById('theme-filter')].forEach(el => el?.addEventListener('change', () => { _syncFlatCategoryActive(categoryEl()?.value || ''); _onSearch(); }));
+    [categoryEl(), document.getElementById('sort-filter'), document.getElementById('season-filter'), document.getElementById('theme-filter')].forEach(el => el?.addEventListener('change', _onSearch));
     const btnToggle = document.getElementById('btn-filter-toggle'), panel = document.getElementById('sidebar-filters-panel');
     btnToggle?.addEventListener('click', () => { const isH = panel?.classList.toggle('hidden'); btnToggle.setAttribute('aria-expanded', isH ? 'false' : 'true'); });
     document.getElementById('btn-clear-filters')?.addEventListener('click', () => {
       if (categoryEl()) categoryEl().value = '';
       const sEl = document.getElementById('season-filter'), tEl = document.getElementById('theme-filter');
       if (sEl) sEl.value = ''; if (tEl) tEl.value = '';
-      _syncFlatCategoryActive(''); _onSearch();
+      _onSearch();
     });
 
     // Sidebar tabs
@@ -73,7 +74,7 @@ const LibraryUI = (() => {
     const id = item.dataset.id, song = songs.find(s => s.id === id);
     if (!song) return;
     const added = HistoryManager.toggleFavorite(song);
-    btn.textContent = added ? '★' : '☆';
+    btn.innerHTML   = _icon(added ? 'star-fill' : 'star');
     btn.title       = added ? 'Bỏ yêu thích' : 'Thêm yêu thích';
     btn.classList.toggle('fav-active', added);
     App?.showToast(added ? '★ Đã thêm vào Yêu Thích' : 'Đã bỏ Yêu Thích', 'success');
@@ -213,7 +214,9 @@ const LibraryUI = (() => {
   }
 
   const _createBadge = (text, color) => { const b = document.createElement('span'); b.className = 'song-key-badge'; if (color) b.style.color = color; b.textContent = text; return b; };
-  const _createActionBtn = (cls, title, text) => { const btn = document.createElement('button'); btn.className = cls; btn.title = title; btn.textContent = text; return btn; };
+  // Icon SVG từ sprite chung (theo em của chữ, màu theo currentColor) — không dùng glyph ★ ☆ phụ thuộc phông
+  const _icon = (name) => `<svg class="icon" aria-hidden="true"><use href="#icon-${name}"/></svg>`;
+  const _createActionBtn = (cls, title, text, iconName) => { const btn = document.createElement('button'); btn.className = cls; btn.title = title; btn.setAttribute('aria-label', title); if (iconName) btn.innerHTML = _icon(iconName); else btn.textContent = text; return btn; };
 
   /** Tạo DOM node một song item */
   function _createSongItem(song, canAdmin, canEdit) {
@@ -255,7 +258,7 @@ const LibraryUI = (() => {
 
     const acts = document.createElement('div'); acts.className = 'song-item-actions';
     const isFav = window.HistoryManager?.isFavorite?.(song.id) ?? false;
-    acts.appendChild(_createActionBtn(`song-fav-btn icon-btn-xs${isFav ? ' fav-active' : ''}`, isFav ? 'Bỏ yêu thích' : 'Thêm yêu thích', isFav ? '★' : '☆'));
+    acts.appendChild(_createActionBtn(`song-fav-btn icon-btn-xs${isFav ? ' fav-active' : ''}`, isFav ? 'Bỏ yêu thích' : 'Thêm yêu thích', '', isFav ? 'star-fill' : 'star'));
     if (canEdit) acts.appendChild(_createActionBtn('song-add-setlist-btn icon-btn-xs', 'Thêm vào chương trình', '+'));
     if (canAdmin) acts.appendChild(_createActionBtn('song-delete-btn icon-btn-xs', 'Xóa bài hát', '🗑'));
     div.appendChild(acts);
@@ -304,11 +307,11 @@ const LibraryUI = (() => {
     const season = document.getElementById('season-filter')?.value || '';
     const theme  = document.getElementById('theme-filter')?.value || '';
     const mode   = document.getElementById('sort-filter')?.value || 'num';
-    const activeCount = (cat ? 1 : 0) + (season ? 1 : 0) + (theme ? 1 : 0);
+    const activeCount = (season ? 1 : 0) + (theme ? 1 : 0); // danh mục có combobox riêng, không tính vào nhãn Lọc
     const badge  = document.getElementById('filter-active-badge');
     if (badge) { badge.textContent = String(activeCount); badge.classList.toggle('hidden', activeCount === 0); }
     document.getElementById('btn-filter-toggle')?.classList.toggle('active', activeCount > 0);
-    _syncFlatCategoryActive(cat);
+    listEl()?.classList.toggle('cat-filtered', !!cat); // đã chọn danh mục → ẩn nhãn danh mục lặp trên từng dòng
 
     const catSongs = cat ? songs.filter(s => s.category === cat) : songs;
     _buildQuickJump(catSongs);
@@ -376,19 +379,11 @@ const LibraryUI = (() => {
     _onSearch();
   }
 
-  function _syncFlatCategoryActive(val) {
-    document.getElementById('category-flat-list')?.querySelectorAll('.cat-flat-btn').forEach(btn => {
-      const isAct = (btn.dataset.cat || '') === val;
-      btn.classList.toggle('active', isAct);
-      btn.setAttribute('aria-selected', isAct ? 'true' : 'false');
-    });
-  }
-
   // ── Dynamic Taxonomy & Category Filters (Ticket L2-3) ─────────
   function _buildCategoryFilter() {
     if (!songs || !songs.length) return;
-    const catCounts = {}, catOrder = {};
-    songs.forEach(s => { if (s.category) { catCounts[s.category] = (catCounts[s.category] || 0) + 1; if (!catOrder[s.category]) catOrder[s.category] = Number(s.category_id) || 99; } });
+    const catCounts = {}, catOrder = {}, catPublic = {};
+    songs.forEach(s => { if (s.category) { catCounts[s.category] = (catCounts[s.category] || 0) + 1; catPublic[s.category] = catPublic[s.category] || (s.visibility || 'public') === 'public'; if (!catOrder[s.category]) catOrder[s.category] = Number(s.category_id) || 99; } });
     const cats = Object.keys(catCounts).sort((a, b) => (catOrder[a] - catOrder[b]) || a.localeCompare(b, 'vi'));
     const seasons = [...new Set(songs.map(s => s.liturgical_season).filter(Boolean))].sort();
     const themes = [...new Set(songs.map(s => s.theme).filter(Boolean))].sort();
@@ -399,23 +394,13 @@ const LibraryUI = (() => {
       if (list.length <= minLen) el.value = '';
       else if (id === 'category-filter' || el.options.length <= 1) {
         const cur = el.value;
-        el.innerHTML = `<option value="">${label}</option>` + list.map(v => `<option value="${_esc(v)}"${v === cur ? ' selected' : ''}>${_esc(v)}${id === 'category-filter' ? ' (' + catCounts[v] + ')' : ''}</option>`).join('');
+        el.innerHTML = `<option value="">${label}</option>` + list.map(v => `<option value="${_esc(v)}"${v === cur ? ' selected' : ''}>${_esc(v)}${id === 'category-filter' ? ' · ' + catCounts[v] + (catPublic[v] ? '' : ' · nội bộ') : ''}</option>`).join('');
       }
     };
-    sync('category-filter', 'category-filter-wrap', cats, `Tất cả danh mục (${songs.length})`);
+    sync('category-filter', 'category-filter-wrap', cats, `Tất cả danh mục · ${songs.length}`);
     sync('season-filter', 'season-filter-wrap', seasons, 'Tất cả Dịp lễ');
     sync('theme-filter', 'theme-filter-wrap', themes, 'Tất cả Chủ Đề');
-    const flatEl = document.getElementById('category-flat-list'), curCat = categoryEl()?.value || '';
-    if (flatEl && cats.length > 0) {
-      flatEl.innerHTML = `<button type="button" role="tab" aria-selected="${!curCat}" class="cat-flat-btn${!curCat ? ' active' : ''}" data-cat="">Tất cả <span>${songs.length}</span></button>` +
-        cats.map(c => `<button type="button" role="tab" aria-selected="${c === curCat}" class="cat-flat-btn${c === curCat ? ' active' : ''}" data-cat="${_esc(c)}" title="${_esc(c)} (${catCounts[c]} bài)">${_esc(CAT_SHORT_NAMES[c] || c)} <span>${catCounts[c]}</span></button>`).join('');
-      flatEl.querySelectorAll('.cat-flat-btn').forEach(btn => window.LibraryGestures.bind(btn, () => {
-        const val = btn.dataset.cat || '';
-        if (categoryEl()) categoryEl().value = val;
-        _syncFlatCategoryActive(val); _onSearch();
-      }));
-    }
-    const avail = (cats.length > 1 ? 1 : 0) + (seasons.length > 0 ? 1 : 0) + (themes.length > 0 ? 1 : 0);
+    const avail = (seasons.length > 0 ? 1 : 0) + (themes.length > 0 ? 1 : 0);
     document.getElementById('filter-empty-hint')?.classList.toggle('hidden', avail > 0);
   }
 
@@ -445,6 +430,8 @@ const LibraryUI = (() => {
   async function _buildUpcomingSetlist() {
     const sec = document.getElementById('upcoming-setlist-section');
     if (!sec) return;
+    // Chương trình chỉ dành cho người đăng nhập (API trả 401 cho khách → lỗi đỏ ở console mỗi lần mở app)
+    if (!window.Auth?.isLoggedIn?.()) { sec.classList.add('hidden'); sec.style.display = 'none'; return; }
     try {
       const resp = await ApiService?.setlists?.list?.();
       const list = Array.isArray(resp) ? resp : (resp?.data ?? []);

@@ -1110,7 +1110,7 @@ body.manager-body {
   align-items: center;
   gap: 0.5rem;
   animation: toastIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  pointer-events: auto;
+  pointer-events: none; /* thông báo không chứa nút: không được che/chặn chạm vào nút bên dưới */
 }
 
 .mgr-toast-success { border-left: 3px solid var(--success); }
@@ -1536,3 +1536,47 @@ body.manager-body {
 .mgr-tabs-adv { display: contents; }
 .mgr-tabs-adv[hidden] { display: none; }
 #btn-add-category-modal[hidden] { display: none !important; }
+
+/* ── Thêm bài (manager-upload.js): danh sách chuẩn bị tải, sửa tên từng bài ─────────────── */
+.up-box { max-width: 680px; }
+.up-stage { display: flex; flex-direction: column; gap: .6rem; margin: .25rem 0 .75rem; } /* cuộn cùng cả hộp thoại, không lồng thanh cuộn */
+/* Nút Tải lên luôn thấy được dù danh sách dài */
+.up-box .mgr-modal-actions { position: sticky; bottom: -1.5rem; margin: 0 -1.5rem -1.5rem; padding: .75rem 1.5rem; background: var(--bg-surface); border-top: 1px solid var(--border); z-index: 1; }
+.up-stage:empty { display: none; }
+.up-row { display: grid; gap: .45rem; padding: .6rem .7rem; border: 1px solid var(--border); border-radius: 10px; background: rgba(255, 255, 255, .03); }
+.up-row-bad { border-color: #f87171; }
+.up-row-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.up-file { font-size: .8rem; color: var(--text-muted); word-break: break-all; }
+.up-remove { flex: none; min-width: 36px; min-height: 36px; border: 1px solid var(--border); border-radius: 8px; background: transparent; color: inherit; font-size: 1rem; cursor: pointer; touch-action: manipulation; }
+.up-field { display: grid; gap: .2rem; font-size: .78rem; color: var(--text-muted); }
+.up-field .mgr-input { min-height: 40px; font-size: .95rem; }
+.up-sub { display: grid; grid-template-columns: 110px 1fr; gap: .5rem; }
+.up-hint { font-size: .76rem; color: var(--text-muted); }
+.up-hint-warn { color: #fbbf24; }
+.up-hint-error { color: #f87171; }
+.up-invalid { border-color: #f87171 !important; box-shadow: 0 0 0 2px rgba(248, 113, 113, .25); }
+@media (max-width: 520px) { .up-sub { grid-template-columns: 1fr; } }
+
+/* Bảng bài theo danh mục: điện thoại ẩn cột đường dẫn XML (dài, chỉ để tra cứu), nút thao tác xuống dòng */
+@media (max-width: 700px) {
+  #mgr-cat-songs-table th:nth-child(4), #mgr-cat-songs-table td:nth-child(4) { display: none; }
+  #mgr-cat-songs-table th, #mgr-cat-songs-table td { width: auto !important; }
+  #mgr-cat-songs-table .table-actions { flex-wrap: wrap; }
+  #mgr-cat-songs-table .mgr-btn-xs { min-height: 36px; }
+}
+
+/* Điện thoại: 5 thẻ KPI xếp 2 cột, gọn và có chiều cao tối thiểu. Trước đây 1 cột chiếm ~1000px, đẩy tab
+   "Danh mục & Thêm bài" xuống rất xa và nội dung còn nhảy khi số liệu tải xong (bấm nhầm nút). */
+@media (max-width: 480px) {
+  .mgr-hero-kpi { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; padding: .6rem; }
+  .mgr-kpi-card { padding: .65rem; min-height: 96px; }
+  .mgr-kpi-icon { font-size: 1.2rem; margin-bottom: .25rem; }
+  .mgr-kpi-value { font-size: 1.4rem; }
+  .mgr-kpi-label { font-size: .75rem; }
+  .mgr-kpi-badge { display: none; }
+}
+
+/* Điện thoại: thông báo hiện ở đầu màn hình (dưới thanh điều hướng), không đè lên thanh nút Lưu/Tải lên ở đáy */
+@media (max-width: 700px) {
+  .mgr-toast-container { top: 3.6rem; bottom: auto; left: .75rem; right: .75rem; }
+}

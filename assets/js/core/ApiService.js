@@ -315,6 +315,10 @@ const ApiService = (() => {
       _annotationsCache.delete(songId); _annotationsInFlight.delete(songId);
       return _json('POST', 'api/index.php?route=annotations', { action:'save', songId, annotations: list, revision });
     },
+    saveBandNote: (songId, bandNote, revision) => {
+      _annotationsCache.delete(songId); _annotationsInFlight.delete(songId);
+      return _json('POST', 'api/index.php?route=annotations', { action: 'band_note_save', songId, bandNote, revision });
+    },
     saveInstrument: (data) => _json('POST', 'api/index.php?route=annotations', { action: 'instrument_save', ...data }).then(result => {
       _annotationsCache.clear(); _annotationsInFlight.clear(); return result;
     }),
@@ -436,6 +440,8 @@ const ApiService = (() => {
     forkSong:               (data)   => _json('POST', 'api/index.php?route=manager&action=fork_song', data),
     manageUser:             (data)   => _json('POST', 'api/index.php?route=manager&action=manage_user', data),
     manageCategory:         (data)   => _json('POST', 'api/index.php?route=manager&action=manage_category', data),
+    manageSong:             (data)   => { songs.invalidateCache(); return _json('POST', 'api/index.php?route=manager&action=manage_song', data); },
+    syncLibrary:            (data = {}) => { songs.invalidateCache(); return _json('POST', 'api/index.php?route=manager&action=sync_library', data); },
     myContributions:        ()       => _request('api/index.php?route=manager&action=my_contributions'),
     updateSongCategory:     (data)   => _json('POST', 'api/index.php?route=manager&action=update_song_category', data),
     bulkUpdateLabels:       (data)   => _json('POST', 'api/index.php?route=manager&action=bulk_update_labels', data),

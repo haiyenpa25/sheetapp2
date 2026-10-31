@@ -6,7 +6,28 @@
 
 ---
 
-## A · Nhật ký 2026-10-18 → 2026-10-20
+## A · Nhật ký 2026-10-18 → 2026-10-21
+
+## 2026-10-22 — Hoàn tất Giai đoạn 1 (BUG-01…41) & gia cố bảo mật PHP (CVE-2026-109618/109619)
+
+- Gia cố bảo mật khẩn cấp trước CVE-2026-109618 & CVE-2026-109619 (PHP2Shell): rà soát `storage/` (0 file `.php*`) và `access.log` (chỉ có truy cập nội bộ), tắt `expose_php` và `session.upload_progress.enabled` trong `php.ini` cục bộ cùng `.htaccess` (`Header always unset X-Powered-By`, `php_flag session.upload_progress.enabled Off`).
+- Khắc phục toàn bộ 41 lỗi `BUG-01…41` (7 Cao, 23 Trung bình, 11 Thấp) trên nhánh `fix/opt-review-20261021` theo đúng quyết định phân quyền của chủ dự án (2026-10-22): fork bộ hợp âm yêu cầu Ban Hát và chống đụng tên toàn bài (`BUG-01`), chặn lệch `target_type`/`review_action` (`BUG-02`), sửa xoá XML/quyền viewer chương trình/IDOR arrangement/quyền `leader_view` + ẩn người tắt chia sẻ/bổ sung target `create_from_plan` (`BUG-03…07`), diff review/checksum Manager/`respond_assignment`/`mark_done` (`BUG-08…11`).
+- Frontend Modern (`BUG-12…24`): xoá undo & đóng popup khi chuyển bài qua preload, chặn XSS ở chế độ Lời/Live Sync/Guitar Lens/Info Bar, đồng bộ cache preload với `chord_sets` & `versionId`, giữ thông số Lưu Tập theo đúng dòng setlist (Core Rule 4), giữ dịch giọng khi đang tải bài, huỷ listener `pointerdown` mồ côi, gắn `popstate` + reset URL follower, giữ tông/bộ khi chọn phiên bản, lấy đúng `xmlPath` khi preload, chống gửi trùng & kẹt 409 ở hàng đợi ngoại tuyến.
+- Classic & các ứng dụng phụ (`BUG-25…41`): thêm `resetUndo` và chặn XSS ở Classic/Importer, tải `version_xml` qua API có kiểm quyền trong Editor + cảnh báo chưa lưu (`beforeunload`), chống lặp cue/command và khởi động lại metronome ở Live-band/Projector, chuẩn hoá tông gốc `defaultKey`/reset tông (Core Rule 2)/nạp bộ HD (Core Rule 1)/chống nhân bản listener cuộn/xin lại WakeLock ở Live-band, giữ Core Rule 1 & chống rò bộ hợp âm ở Learn, thêm token chống race condition bất đồng bộ ở Live-band/Projector/Learn/Manager/Editor, chuẩn hoá quyền nút Ghim Manager và base path nút Quay về Learn.
+- Bằng chứng đầy đủ trước/sau cho cả 41 lỗi tại `docs/fix-evidence/r8/BUG-01..41-{FAIL,PASS}.txt` và báo cáo tổng `docs/fix-evidence/r8/final-suite.txt`. Cổng kiểm thử nghiêm ngặt (`php tests/run_all_tests.php --strict --js`): **222/222 suite PASS, 4.134 checks (1.078 Behavioral), 0 skip, 393 file PHP lint PASS**, CSDL thật bảo toàn nguyên vẹn tuyệt đối. SW manifest hash `cf5a6d56b0`.
+
+
+## 2026-10-21 — Dọn kho, gộp chỉ mục roadmap, phương án tối ưu toàn hệ thống
+
+- Đợt FIX: sửa review/alias, save context, XSS, privacy, offline/SW, pointer và test isolation. Thêm `PointerTap.js`, guard E2E, tool plan/apply/verify dữ liệu; Q-C/Q-D đã backup và áp dụng đúng manifest, không đổi chủ. Trạng thái từng FIX, bằng chứng và việc chủ dự án: [PHUONG_AN_2_EXECUTION](docs/PHUONG_AN_2_EXECUTION.md). Đồng bộ router/schema/load order; sinh lại SW manifest và CODE_MAP.
+
+- Theo phê duyệt riêng trong phiên: xoá 63 backup r34 cũ (470.441.984 byte), giữ 10 file với checksum không đổi; chặn alias xoá HD/TLH/default theo dòng DB thực tế ở ChordSetService và luồng Manager. Test riêng 161 checks PASS; lượt tổng strict + JS: 184/184 suite, 3.740 checks PASS, 0 SKIP; không đổi Core Rule 3. Bằng chứng trong `docs/opt-evidence/` và báo cáo OPT.
+- Rà soát lại OPT: R34 dùng fixture 903 bài, dry-run không đổi journal mode; audit/client log xoay vòng, test có đường dẫn log tạm; npm dùng `prepare:assets`; ngừng theo dõi cache/config/backup cá nhân, file local giữ nguyên. Catalog lưu ETag cạnh JSON, khóa snapshot chung; tool tempo/lời/chính tả/update_library xoá cache theo đúng DB qua SongService.
+- OPT-09 theo Q4 được duyệt trong phiên: bộ riêng tư chỉ chủ bộ đọc được (chords/metadata/checksum); chỉ xoá file khi DB xoá được dòng. OPT-11 đưa client log qua router, giới hạn body/IP và đăng ký theo IP, che lỗi nội bộ, export XML qua managed path. OPT-13 chuyển SQL Review/Setlist vào service và gom metadata schema vào DB.
+- Test mới trong `tests/`: `log_rotation_regression.php`, `schema_metadata_regression.php`, `controller_service_boundaries_regression.php`, `public_cache_snapshot_regression.php`, `tool_cache_invalidation_regression.php`, `http/chord_set_privacy_regression.php`, `http/client_log_regression.php`. Báo cáo trạng thái và bằng chứng: `docs/OPT_REVIEW_2026-10-21.md`, `docs/opt-evidence/`.
+- `ROADMAPS.md` là chỉ mục duy nhất (luật thực thi chép từ ROADMAP3 Phần 0); roadmap/báo cáo đã xong chuyển vào `docs/history/`. Kế hoạch toàn hệ thống: `PHUONG_AN_TOI_UU_HE_THONG.md` (OPT-01…26).
+- Test/tool không còn ghi vào storage thật: backup r34, `audit.log`, mail giả; runner chặn rò rỉ bằng cổng K2. Tool dọn backup `tools/prune_backups.php` (dry-run mặc định). `sync.sh`/`sync.bat` không còn commit/push.
+- Nhật ký cũ tách sang `docs/history/CHANGELOG_2026.md`.
 
 ## 2026-10-20 — Rà soát hiển thị Modern/Classic trên điện thoại, iPad, máy tính (server sheet.hyb.io.vn)
 

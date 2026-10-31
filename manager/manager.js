@@ -61,6 +61,7 @@ const ManagerApp = (() => {
     };
     window.ManagerRepertoire?.init(ctx);
     window.ManagerCategories?.init(ctx);
+    window.ManagerUpload?.init(ctx);
     window.ManagerCommunity?.init(ctx);
     window.ManagerVersions?.init(ctx);
     window.ManagerUsers?.init(ctx);
@@ -480,7 +481,7 @@ const ManagerApp = (() => {
     if (!container) return;
 
     const toast = document.createElement('div');
-    toast.className = `mgr-toast ${type}`;
+    toast.className = `mgr-toast mgr-toast-${type}`;
     const icon = type === 'success' ? '✅' : (type === 'error' ? '❌' : 'ℹ️');
     toast.innerHTML = `<span>${icon}</span><span>${_escape(message)}</span>`;
     container.appendChild(toast);

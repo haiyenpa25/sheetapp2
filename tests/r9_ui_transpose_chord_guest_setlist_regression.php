@@ -700,7 +700,7 @@ function loadScript(ctx, relPath) {
     const oldLockOk = (
       oldStorage.sheetapp_zoom_locked === '1' &&
       oldElements['btn-lock-zoom'].getAttribute('aria-pressed') === 'true' &&
-      oldElements['btn-lock-zoom'].textContent === '🔒'
+      String(oldElements['btn-lock-zoom'].innerHTML).includes('#icon-lock"') // icon SVG (sprite) thay emoji 🔒/🔓
     );
     oldElements['btn-lock-zoom'].click(); // unlock
     oldElements['btn-zoom-in'].click();

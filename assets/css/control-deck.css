@@ -165,6 +165,15 @@
   #sheet-container,
   #lyric-view-container { padding-bottom: calc(var(--dock-h) + 12px) !important; }
 
+  /* Sidebar đang mở: thanh dưới không đè lên danh sách bài (luật ẩn của library-polish bị luật hiển thị ở trên thắng) */
+  body.library-sidebar-open #mobile-thumb-bar.mobile-thumb-bar { display: none !important; }
+  /* Icon trong "viên gạch" 44px: theo em của chữ, không để 12px như SVG mặc định */
+  #mobile-thumb-bar button svg,
+  #mobile-thumb-bar .thumb-icon svg { width: 1.4em; height: 1.4em; flex-shrink: 0; }
+
   /* Thanh trên điện thoại: giữ gọn (tông/zoom... đã ở thanh dưới) */
   body #toolbar.unified-toolbar > #toolbar-controls { display: none !important; }
 }
+
+/* Biểu Diễn: thanh dưới bị luật `display:grid !important` ở trên thắng luật ẩn → che HUD. Ẩn lại với độ ưu tiên cao hơn. */
+body.sheet-only-mode #mobile-thumb-bar.mobile-thumb-bar { display: none !important; }

@@ -6,25 +6,12 @@
 
 const ServiceWorkerManager = (() => {
   let _deferredPrompt = null;
-  let _reloadedOnControllerChange = false;
-
-  function _isBusy() {
-    try {
-      if (window.Metronome?.isPlaying?.()) return true;
-      if (window.AutoScroller?.isRunning?.() || window.AutoScroller?.isActive?.()) return true;
-      if (window.SheetAudioPlayer?.isPlaying?.()) return true;
-      if (document.body?.classList?.contains?.('gig-mode')) return true;
-      if (document.body?.classList?.contains?.('sheet-only-mode')) return true;
-    } catch (_) {}
-    return false;
-  }
 
   function register() {
     if (!('serviceWorker' in navigator)) return;
 
     const doRegister = async () => {
       try {
-        const hadController = Boolean(navigator.serviceWorker.controller);
         const appBase = (typeof window.__APP_BASE__ === 'string') ? window.__APP_BASE__ : '';
         const swVer = (typeof window !== 'undefined' && window.SHEETAPP_CACHE_VERSION) ? window.SHEETAPP_CACHE_VERSION : 'v5';
         // CDN giữ nguyên bản sw.js theo URL: gắn mốc sửa đổi của sw.js để mỗi bản mới có URL riêng.
@@ -32,28 +19,10 @@ const ServiceWorkerManager = (() => {
         const swUrl = (appBase ? appBase : '') + '/sw.js?v=' + encodeURIComponent(swVer) + swRev;
         const swScope = (appBase ? appBase : '') + '/';
 
-        navigator.serviceWorker.addEventListener?.('controllerchange', () => {
-          if (!hadController || _reloadedOnControllerChange) return;
-          if (_isBusy()) {
-            window.App?.showToast?.('🔄 Có cập nhật mới! Tải lại để áp dụng.', 'info');
-            return;
-          }
-          _reloadedOnControllerChange = true;
-          window.location?.reload?.();
-        });
+        // KHÔNG tự tải lại trang khi bản mới kích hoạt (trước đây reload giữa lúc đang xem/tập, nhiều lần/ngày).
+        // HTML luôn lấy mới khi có mạng và CSS/JS có ?v= theo file, nên lần mở bài/mở app kế tiếp tự dùng mã mới.
+        await navigator.serviceWorker.register(swUrl, { scope: swScope });
 
-        const reg = await navigator.serviceWorker.register(swUrl, { scope: swScope });
-
-        // Kiểm tra update
-        reg?.addEventListener?.('updatefound', () => {
-          const newWorker = reg.installing;
-          newWorker?.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              // Có bản mới — thông báo nhẹ nhàng
-              window.App?.showToast?.('🔄 Có cập nhật mới! Tải lại để áp dụng.', 'info');
-            }
-          });
-        });
       } catch (e) {
         // SW không hỗ trợ — không crash app
       }

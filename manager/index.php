@@ -1,4 +1,6 @@
 <?php
+// Phiên bản asset theo filemtime: sửa file là URL đổi, CDN/trình duyệt không giữ bản cũ (trước đây ?v=2.x cứng).
+function mgrAssetV(string $rel): int { return (int)@filemtime(__DIR__ . '/' . $rel); }
 /**
  * sheet.hyb.io.vn/manager/
  * Trung Tâm Quản Lý Kho Nhạc, Phân Quyền & Không Gian Cộng Tác Hợp Âm
@@ -26,8 +28,8 @@ $instrument = $_SESSION['instrument'] ?? 'Guitar';
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="../assets/css/app-shell.css">
-  <link rel="stylesheet" href="manager.css?v=2.1.0">
+  <link rel="stylesheet" href="../assets/css/app-shell.css?v=<?= mgrAssetV('../assets/css/app-shell.css') ?>">
+  <link rel="stylesheet" href="manager.css?v=<?= mgrAssetV('manager.css') ?>">
 </head>
 <body class="manager-body">
   <?php $activePillar = 'manager'; require_once __DIR__ . '/../includes/app_nav.php'; ?>
@@ -70,19 +72,20 @@ $instrument = $_SESSION['instrument'] ?? 'Guitar';
     window.__SW_CACHE__ = <?= json_encode(Config::SHEETAPP_CACHE_NAME) ?>;
     window.__FEATURES__ = <?= json_encode(FeatureFlags::all(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
   </script>
-  <script src="../assets/js/core/FeatureFlags.js"></script>
-  <script src="../assets/js/core/AppShell.js"></script>
-  <script src="../assets/js/core/ModalManager.js"></script>
-  <script src="../assets/js/core/ApiService.js"></script>
-  <script src="../assets/js/core/SafeHtml.js"></script>
-  <script src="js/manager-repertoire.js?v=2.2.0"></script>
-  <script src="js/manager-categories.js?v=2.3.0"></script>
-  <script src="js/manager-community.js?v=2.2.0"></script>
-  <script src="js/manager-versions.js?v=2.2.0"></script>
-  <script src="js/manager-users.js?v=2.2.0"></script>
-  <script src="js/manager-usage.js?v=2.2.0"></script>
-  <script src="js/manager-reviews.js?v=2.2.0"></script>
-  <script src="js/manager-notifications.js?v=2.2.0"></script>
-  <script src="manager.js?v=2.2.0"></script>
+  <script src="../assets/js/core/FeatureFlags.js?v=<?= mgrAssetV('../assets/js/core/FeatureFlags.js') ?>"></script>
+  <script src="../assets/js/core/AppShell.js?v=<?= mgrAssetV('../assets/js/core/AppShell.js') ?>"></script>
+  <script src="../assets/js/core/ModalManager.js?v=<?= mgrAssetV('../assets/js/core/ModalManager.js') ?>"></script>
+  <script src="../assets/js/core/ApiService.js?v=<?= mgrAssetV('../assets/js/core/ApiService.js') ?>"></script>
+  <script src="../assets/js/core/SafeHtml.js?v=<?= mgrAssetV('../assets/js/core/SafeHtml.js') ?>"></script>
+  <script src="js/manager-repertoire.js?v=<?= mgrAssetV('js/manager-repertoire.js') ?>"></script>
+  <script src="js/manager-categories.js?v=<?= mgrAssetV('js/manager-categories.js') ?>"></script>
+  <script src="js/manager-upload.js?v=<?= mgrAssetV('js/manager-upload.js') ?>"></script>
+  <script src="js/manager-community.js?v=<?= mgrAssetV('js/manager-community.js') ?>"></script>
+  <script src="js/manager-versions.js?v=<?= mgrAssetV('js/manager-versions.js') ?>"></script>
+  <script src="js/manager-users.js?v=<?= mgrAssetV('js/manager-users.js') ?>"></script>
+  <script src="js/manager-usage.js?v=<?= mgrAssetV('js/manager-usage.js') ?>"></script>
+  <script src="js/manager-reviews.js?v=<?= mgrAssetV('js/manager-reviews.js') ?>"></script>
+  <script src="js/manager-notifications.js?v=<?= mgrAssetV('js/manager-notifications.js') ?>"></script>
+  <script src="manager.js?v=<?= mgrAssetV('manager.js') ?>"></script>
 </body>
 </html>

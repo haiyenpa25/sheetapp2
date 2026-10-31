@@ -132,6 +132,7 @@ function check(condition, message, details = '') {
         classList: { add() {}, remove() {}, toggle() {}, contains: () => false },
         appendChild() {},
       addEventListener() {},
+        setAttribute() {}, // nút icon SVG của dòng bài hát có aria-label
         remove() {},
         getBoundingClientRect: () => ({ height: 26 }),
       }),

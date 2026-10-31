@@ -210,8 +210,40 @@ const AppUI = (() => {
     const SVG_COMPRESS = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>`;
 
     if (btnFS) btnFS.innerHTML = isOn ? SVG_COMPRESS : SVG_EXPAND;
-    if (isOn) showToast('Sheet toàn màn hình — nhấn Esc hoặc nút góc để thoát', 'info');
+    if (isOn) { _enterNativeFullscreen(); showToast('Sheet toàn màn hình — nhấn Esc hoặc nút góc để thoát', 'info'); }
+    else _exitNativeFullscreen();
   }
+
+  /* Toàn màn hình thật khi trình duyệt cho phép (chuẩn / webkit iPad cũ); iPhone Safari không có API
+     nên chế độ chạy bằng CSS (sheet-only-mode) và thu thanh địa chỉ bằng một lần cuộn nhỏ. */
+  let _nativeFS = false;
+  const _fsElement = () => document.fullscreenElement || document.webkitFullscreenElement || null;
+  async function _enterNativeFullscreen() {
+    if (_fsElement()) return;
+    const el = document.documentElement, request = el.requestFullscreen || el.webkitRequestFullscreen;
+    try {
+      if (!request) throw new Error('no-api');
+      await request.call(el);
+      _nativeFS = true;
+    } catch (e) {
+      _nativeFS = false;
+      window.setTimeout(() => window.scrollTo(0, 1), 50);
+    }
+  }
+  function _exitNativeFullscreen() {
+    const was = _nativeFS; _nativeFS = false;
+    if (!was || !_fsElement()) return;
+    try {
+      if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+      else document.webkitExitFullscreen?.();
+    } catch (e) {}
+  }
+  // Người dùng thoát toàn màn hình bằng cử chỉ/Esc của trình duyệt → tắt luôn chế độ để nút & giao diện khớp
+  const _onNativeChange = () => {
+    if (!_fsElement() && _nativeFS && document.body.classList.contains('sheet-only-mode')) { _nativeFS = false; toggleFullscreen(); }
+  };
+  document.addEventListener('fullscreenchange', _onNativeChange);
+  document.addEventListener('webkitfullscreenchange', _onNativeChange);
 
   // Wire exit button (Esc xử lý tập trung trong _bindKeyboard của app.js)
   (function _initSheetOnly() {

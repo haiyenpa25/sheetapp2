@@ -268,8 +268,8 @@ const HarmonicNumeral = (() => {
     const btn = document.getElementById('btn-chord-notation');
     if (btn) {
       const labels = { standard: 'C', roman: 'I-V', nashville: '1-5' };
-      const icons = { standard: '🔤', roman: '🏛', nashville: '🔢' };
-      btn.innerHTML = `<span>${icons[_notationStyle] || '🔤'}</span> <span id="chord-notation-label">${labels[_notationStyle] || 'C'}</span>`;
+      // Cùng một icon SVG cho cả 3 kiểu (nhãn C / I-V / 1-5 đã phân biệt); emoji đổi cỡ theo phông nên bỏ
+      btn.innerHTML = `<svg class="icon" aria-hidden="true"><use href="#icon-type"/></svg> <span id="chord-notation-label">${labels[_notationStyle] || 'C'}</span>`;
       btn.title = `Chế độ hợp âm: ${_notationStyle} (Bấm để đổi Chuẩn / La Mã / Nashville)`;
       btn.classList.toggle('active', _notationStyle !== 'standard');
     }

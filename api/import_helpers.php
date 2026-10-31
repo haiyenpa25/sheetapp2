@@ -162,7 +162,27 @@ function _saveSong($pdo, string $title, string $xmlPath, string $key, string $so
         ? SongService::clampToCategory(SongService::normalizeVisibility($options, 'public'), $categoryId)
         : ['visibility' => 'public', 'is_public' => 1];
     $id = _slugify($title) ?: 'song-' . time();
-    if ($visInfo['visibility'] !== 'public' && class_exists('PrivateSongXmlService')) $id = PrivateSongXmlService::ID_PREFIX . $id;
+    if ($visInfo['visibility'] !== 'public' && class_exists('PrivateSongXmlService')) {
+        $id = PrivateSongXmlService::ID_PREFIX . $id;
+    } elseif ($visInfo['visibility'] === 'public' && $categoryId > 1) {
+        $catSlug = trim((string)($options['category_slug'] ?? ''));
+        if ($catSlug === '') {
+            try {
+                $catStmt = $pdo->prepare("SELECT slug, name FROM categories WHERE id = ?");
+                $catStmt->execute([$categoryId]);
+                $catRow = $catStmt->fetch(PDO::FETCH_ASSOC);
+                if ($catRow) {
+                    $catSlug = preg_replace('/[^a-z0-9\-]/', '', strtolower((string)($catRow['slug'] ?? '')))
+                        ?: _slugify((string)($catRow['name'] ?? ''));
+                }
+            } catch (Throwable $e) {
+                $catSlug = '';
+            }
+        }
+        if ($catSlug !== '' && $catSlug !== 'thanh-ca' && !str_starts_with($id, $catSlug . '--')) {
+            $id = $catSlug . '--' . $id;
+        }
+    }
     $baseId  = $id;
     $counter = 1;
     while (true) {

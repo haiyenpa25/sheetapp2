@@ -54,7 +54,7 @@ const ToolbarController = (() => {
       const syncLock = (locked) => {
         lockBtn.classList.toggle('active', locked);
         lockBtn.setAttribute('aria-pressed', String(locked));
-        lockBtn.textContent = locked ? '🔒' : '🔓';
+        lockBtn.innerHTML = `<svg class="icon" aria-hidden="true"><use href="#icon-${locked ? 'lock' : 'unlock'}"/></svg>`;
       };
       const initLocked = (window.SafeStorage ? window.SafeStorage.get('sheetapp_zoom_locked') : localStorage.getItem('sheetapp_zoom_locked')) === '1';
       syncLock(initLocked);
@@ -106,9 +106,17 @@ const ToolbarController = (() => {
       overlay?.classList.add('hidden');
     }
 
+    // Bàn phím ảo Android chỉ đổi chiều cao: không đóng menu khi người dùng chạm vào ô tìm (xem bản Modern).
+    const REAL_ROTATION_PX = 100;
+    const _isTextEntryFocused = () => {
+      const a = document.activeElement;
+      return !!a && (a.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName));
+    };
+    let _lastW = window.innerWidth;
     let _lastWasMobile = window.innerWidth <= 900;
     window.addEventListener('resize', () => {
       const isMobileNow = window.innerWidth <= 900;
+      _lastW = window.innerWidth;
       if (isMobileNow === _lastWasMobile) return;
       _lastWasMobile = isMobileNow;
       if (isMobileNow) {
@@ -122,7 +130,12 @@ const ToolbarController = (() => {
 
     if ('onorientationchange' in window) {
       window.addEventListener('orientationchange', () => {
-        if (window.innerWidth <= 900) _closeSidebar();
+        // Một số máy Android bắn sự kiện này khi bàn phím ảo chiếm màn hình: chỉ là xoay thật khi BỀ RỘNG đổi
+        const widthBefore = _lastW;
+        setTimeout(() => {
+          const rotated = Math.abs(window.innerWidth - widthBefore) >= REAL_ROTATION_PX;
+          if (rotated && !_isTextEntryFocused() && window.innerWidth <= 900) _closeSidebar();
+        }, 400);
       });
     }
 

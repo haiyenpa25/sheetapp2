@@ -80,3 +80,68 @@
 .ano-color-swatch::before { content: ''; display: inline-block; width: .8rem; height: .8rem; margin-right: .3rem; vertical-align: middle; background: var(--swatch-color); border: 1px solid #0005; border-radius: 50%; }
 .ano-color-swatch[aria-pressed=true] { outline: 2px solid var(--swatch-color); outline-offset: 1px; }
 .ano-note-colors p { margin: .4rem 0; font-size: .85rem; }
+
+/* Nút Nhạc cụ: icon + chữ; điện thoại chỉ icon để nhường chỗ tên bài */
+#toolbar .instrument-annotations > button { display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+.ano-icon { width: 16px; height: 16px; flex: none; }
+@media (max-width: 680px) {
+  body #toolbar#toolbar .instrument-annotations > button#btn-instrument-annotations { min-width: 44px !important; width: 44px !important; padding: 0 !important; }
+  #btn-instrument-annotations .ano-label { display: none; }
+  #btn-instrument-annotations .ano-icon { width: 20px; height: 20px; }
+}
+
+/* Điện thoại: header một hàng đều — ☰ · tên bài · Nhạc cụ · ⋯ ; nút Nhạc cụ phẳng như ☰/⋯ (trước đây nằm ngoài cùng bên trái, có viền) */
+@media (max-width: 680px) {
+  #toolbar.unified-toolbar > .instrument-annotations { order: 1; margin-left: 0; flex: none; }
+  #toolbar.unified-toolbar > .toolbar-right { order: 2; }
+  body #toolbar#toolbar .instrument-annotations > button#btn-instrument-annotations {
+    height: 44px !important; min-height: 44px !important; border-color: transparent; background: transparent; color: var(--accent, #4c4a7a);
+  }
+  body #toolbar#toolbar .instrument-annotations > button#btn-instrument-annotations.active { background: #fff3ba; border-radius: 8px; }
+}
+
+/* ── Panel Ghi chú: ① ghi chú chung cho ban nhạc ② ghi chú theo nhạc cụ (dấu + trên bản nhạc) ── */
+.ano-menu { display: flex; flex-direction: column; gap: .6rem; }
+.ano-menu[hidden] { display: none !important; }
+.ano-section { border: 1px solid var(--border, #ddd); border-radius: 10px; padding: .6rem .7rem; }
+.ano-section-title { margin: 0 0 .45rem; font-size: .78rem; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; color: var(--text-muted, #64748b); }
+.ano-muted { margin: .35rem 0; font-size: .8rem; color: var(--text-muted, #64748b); }
+.ano-band-meta { display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: .35rem; }
+.ano-band-chip { display: inline-flex; align-items: center; min-height: 26px; padding: 0 .6rem; border-radius: 999px; background: #ede9fe; color: #4c1d95; font-weight: 700; font-size: .82rem; }
+.ano-band-text { margin: .2rem 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: .9rem; }
+.ano-band-form { display: grid; gap: .45rem; }
+.ano-band-form label { display: grid; gap: .25rem; font-size: .78rem; font-weight: 600; min-height: 0; }
+.ano-band-form input, .ano-band-form textarea { width: 100%; box-sizing: border-box; min-height: 36px; font-size: .9rem; }
+.ano-band-row { display: grid; grid-template-columns: 1fr 92px; gap: .5rem; }
+.ano-write-row { display: flex; align-items: flex-end; gap: .5rem; }
+.ano-write-row label { flex: 1 1 auto; display: grid; gap: .25rem; font-size: .78rem; font-weight: 600; min-height: 0; }
+.ano-write-row select { width: 100%; min-height: 38px; }
+.ano-control.ano-primary { background: var(--instrument-color, #6d28d9); border-color: var(--instrument-color, #6d28d9); color: #fff; font-weight: 700; touch-action: manipulation; }
+.ano-control.ano-primary[aria-pressed=true] { background: #fff3ba; color: #302400; border-color: #866212; }
+.ano-control.ano-small { min-height: 32px; padding: .2rem .7rem; font-size: .8rem; margin-top: .3rem; }
+.ano-layer-chips { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .5rem; }
+.ano-control.ano-layer-chip { min-height: 32px; padding: 0 .65rem; border-radius: 999px; font-size: .8rem; font-weight: 600; touch-action: manipulation;
+  border-color: var(--instrument-color, var(--border, #aaa)); color: var(--text-muted, #64748b); background: transparent; opacity: .7; }
+.ano-control.ano-layer-chip[aria-pressed=true] { opacity: 1; color: #fff; background: var(--instrument-color, #475569); }
+.ano-control.ano-layer-none[aria-pressed=true] { background: #475569; border-color: #475569; }
+.ano-admin summary { cursor: pointer; font-size: .8rem; font-weight: 600; color: var(--text-muted, #64748b); min-height: 32px; display: flex; align-items: center; }
+.ano-detail-list { margin: 0; }
+.ano-detail-list li { padding: .45rem .6rem; }
+.ano-detail-list li strong { font-size: .78rem; }
+.ano-detail-list .ano-controls { margin: .2rem 0 0; }
+.ano-detail-list .ano-control { min-height: 32px; padding: 0 .6rem; font-size: .8rem; }
+.ano-empty { border-left-color: transparent !important; color: var(--text-muted, #64748b); font-size: .82rem; }
+@media (max-width: 680px) {
+  /* Điện thoại: panel thành bảng trượt từ đáy, không che header */
+  .ano-menu { left: 8px !important; right: 8px; width: auto; top: auto !important; bottom: 8px; max-height: 72dvh !important; border-radius: 14px; }
+}
+body.dark-mode .ano-band-chip { background: #2d1f52; color: #ddd6fe; }
+#btn-instrument-annotations, #btn-toolbar-notes { position: relative; }
+#btn-instrument-annotations.ano-has-notes::after, #btn-toolbar-notes.ano-has-notes::after { content: ''; position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; box-shadow: 0 0 0 2px var(--bg-surface, #fff); }
+.ano-editing-bar { position: fixed; left: 50%; transform: translateX(-50%); bottom: 16px; z-index: 1900; display: flex; align-items: center; gap: .4rem;
+  padding: .3rem .35rem .3rem .8rem; border-radius: 999px; background: var(--bg-surface, #fff); color: var(--text-primary, #222);
+  border: 2px solid var(--instrument-color, #6d28d9); box-shadow: 0 6px 20px #0003; font-size: .85rem; white-space: nowrap; }
+.ano-editing-name { font-weight: 700; color: var(--instrument-color, #6d28d9); }
+.ano-editing-bar .ano-control { min-height: 34px; padding: 0 .75rem; border-radius: 999px; font-size: .82rem; }
+@media (max-width: 680px) { body:has(#mobile-thumb-bar) .ano-editing-bar { bottom: calc(118px + env(safe-area-inset-bottom, 0px)); } }
+@media print { .ano-editing-bar { display: none !important; } }

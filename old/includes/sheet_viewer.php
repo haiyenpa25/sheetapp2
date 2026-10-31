@@ -123,7 +123,7 @@
       <!-- Nút Hệ Hợp Âm — chuyển đổi Chuẩn (C) / Số La Mã (I-V) / Nashville (1-5) -->
       <button id="btn-chord-notation" class="btn btn-xs btn-ghost pb-btn-icon-text"
               title="Chế độ hợp âm: Chuẩn / La Mã (I-IV-V) / Nashville (1-4-5)" disabled>
-        <span>🔤</span> <span id="chord-notation-label">C</span>
+        <?= icon('type') ?> <span id="chord-notation-label">C</span>
       </button>
       <!-- Xóa set — hiện khi set != default -->
       <button id="btn-delete-chord-set" class="btn btn-xs btn-danger" title="Xóa bộ hợp âm" style="display:none" onclick="ChordCanvas.confirmDeleteSet()">

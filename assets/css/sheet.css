@@ -3214,3 +3214,31 @@ body.dark-mode .half-page-divider-badge {
     max-width: none;
   }
 }
+
+/* ─── Ghi chú bài hát: gọn, theo từng nhạc cụ (dùng chung Modern + Classic) ───────────── */
+#perf-notes-panel { width: min(340px, calc(100vw - 16px)); max-height: calc(100dvh - 120px); display: flex; flex-direction: column; border-radius: var(--pnp-radius, 10px); }
+#perf-notes-panel .pnp-body { overflow-y: auto; gap: 8px; padding: 8px 10px 10px; -webkit-overflow-scrolling: touch; }
+#perf-notes-panel .pnp-header { padding: 6px 8px 6px 12px; }
+#perf-notes-panel .pnp-header button { min-width: 32px; min-height: 32px; color: #fff; touch-action: manipulation; }
+.pnp-notice { font-size: .72rem; line-height: 1.35; padding: 5px 8px; border-radius: 6px; color: var(--accent); background: rgba(109,40,217,.1); }
+.pnp-meta { display: flex; align-items: center; gap: 6px; }
+.pnp-meta label { display: flex; align-items: center; gap: 4px; font-size: .72rem; color: var(--text-muted); }
+.pnp-meta input { width: 62px; height: 32px; box-sizing: border-box; padding: 0 6px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-base); color: var(--text-primary); font-size: 16px; }
+.pnp-meta .pnp-chip-btn { margin-left: auto; }
+.pnp-tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; padding-bottom: 1px; }
+.pnp-tabs::-webkit-scrollbar { display: none; }
+.pnp-tab, .pnp-chip-btn { flex: 0 0 auto; min-height: 32px; padding: 0 10px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg-surface); color: var(--text-primary); font-size: .75rem; font-weight: 600; cursor: pointer; touch-action: manipulation; }
+.pnp-chip-btn { font-weight: 500; color: var(--text-muted); }
+.pnp-tab { position: relative; }
+.pnp-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.pnp-tab-dot { display: none; position: absolute; top: 3px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: #f59e0b; }
+.pnp-tab.has-note .pnp-tab-dot { display: block; }
+#pnp-text { width: 100%; box-sizing: border-box; resize: vertical; min-height: 84px; padding: 6px 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-base); color: var(--text-primary); font: inherit; font-size: 16px; line-height: 1.45; }
+.pnp-presets { display: flex; flex-wrap: wrap; gap: 4px; }
+.pnp-presets:empty { display: none; }
+.pnp-actions .btn { min-height: 34px; }
+@media (max-width: 680px) {
+  #perf-notes-panel { left: 8px; right: 8px; width: auto; bottom: calc(var(--dock-h, 104px) + 6px); max-height: 58dvh; }
+}
+
+#perf-notes-panel .pnp-sub { font-weight: 500; font-size: .72rem; opacity: .7; margin-left: 4px; }

@@ -8,6 +8,8 @@ const BootRunner = (() => {
   'use strict';
 
   const DEFAULT_WATCHDOG_MS = 8000;
+  // Mạng chậm (4G yếu, lần đầu vào): trang còn đang tải file thì chưa phải lỗi — chờ thêm tới mức trần này.
+  const SLOW_NETWORK_MAX_MS = 45000;
   const BANNER_ID = 'boot-watchdog-banner';
   const _failures = [];
   let _isReady = false;
@@ -128,12 +130,24 @@ const BootRunner = (() => {
       : DEFAULT_WATCHDOG_MS;
     const ms = Number(customTimeoutMs) > 0 ? Number(customTimeoutMs) : configured;
 
-    _watchdogTimer = setTimeout(() => {
+    const startedAt = Date.now();
+    const check = () => {
       _watchdogTimer = null;
-      if (!_isReady) {
-        _showWatchdogBanner();
+      if (_isReady) return;
+      if (_stillDownloading() && Date.now() - startedAt < SLOW_NETWORK_MAX_MS) {
+        _watchdogTimer = setTimeout(check, Math.min(ms, 4000));
+        return;
       }
-    }, ms);
+      _showWatchdogBanner();
+    };
+    _watchdogTimer = setTimeout(check, ms);
+  }
+
+  /* Trang chưa tải xong tài nguyên và chưa có script nào hỏng → đang chậm chứ không phải lỗi. */
+  function _stillDownloading() {
+    if (typeof document === 'undefined' || typeof window === 'undefined') return false;
+    const failed = Array.isArray(window.__failedScripts) && window.__failedScripts.length > 0;
+    return !failed && document.readyState !== 'complete';
   }
 
   function markReady() {

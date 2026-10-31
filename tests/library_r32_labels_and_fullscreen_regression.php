@@ -98,7 +98,7 @@ it("library-ui.js toast dùng 'Chưa có chương trình nào được tạo'", 
 it("library-ui.js hỗ trợ gõ tìm 'setlist' để chuyển tab chương trình", str_contains($libraryUi, "qRaw === 'setlist'") || str_contains($libraryUi, "qVal === 'setlist'"));
 
 $perfNotes = file_get_contents($root . '/assets/js/performance-notes.js');
-it("performance-notes.js nhãn dùng 'Ghi chú phục vụ / bài tập'", str_contains($perfNotes, 'Ghi chú phục vụ / bài tập'));
+it("performance-notes.js là 'Ghi chú cá nhân' (ghi chú ban nhạc/nhạc cụ ở AnnotationPanel)", str_contains($perfNotes, 'Ghi chú cá nhân'));
 
 $sessTracker = file_get_contents($root . '/assets/js/session-tracker.js');
 it("session-tracker.js dùng 'Quản lý nhật ký phục vụ'", str_contains($sessTracker, 'Quản lý nhật ký phục vụ'));

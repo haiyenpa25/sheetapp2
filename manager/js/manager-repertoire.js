@@ -204,6 +204,10 @@
     const currentUserId = app.state?.currentUser?.user_id;
     const isAdmin = app.state?.currentUser?.role === 'admin';
     const isBanhat = app.state?.currentUser?.role === 'leader' || isAdmin;
+    const editBtn = document.getElementById('btn-sel-song-edit');
+    const delBtn = document.getElementById('btn-sel-song-delete');
+    if (editBtn) editBtn.hidden = !isBanhat;
+    if (delBtn) delBtn.hidden = !isAdmin;
 
     userChords.forEach(c => {
       const isOwner = currentUserId && (c.user_id == currentUserId);
@@ -342,6 +346,11 @@
       return;
     }
 
+    const isAdmin = app.state?.currentUser?.role === 'admin';
+    const isBanhat = app.state?.currentUser?.role === 'leader' || isAdmin;
+    const repUploadBtn = document.getElementById('btn-repertoire-upload-song');
+    if (repUploadBtn) repUploadBtn.hidden = !isAdmin;
+
     let html = '';
     songs.forEach(song => {
       const userChords = song.user_chord_sets || [];
@@ -400,6 +409,8 @@
           </td>
           <td style="text-align:right;" onclick="event.stopPropagation()">
             <div class="table-actions">
+              ${isBanhat ? `<button class="mgr-btn mgr-btn-ghost mgr-btn-xs" title="Sửa tên bài hát" onclick="window.ManagerCategories?.openEditSongModal?.('${_escapeInlineJs(song.id)}')">✏️ Sửa</button>` : ''}
+              ${isAdmin ? `<button class="mgr-btn mgr-btn-ghost mgr-btn-xs text-danger" title="Xóa bài hát" onclick="window.ManagerCategories?.deleteSong?.('${_escapeInlineJs(song.id)}', '${_escapeInlineJs(song.title)}')">🗑️ Xóa</button>` : ''}
               <button class="mgr-btn mgr-btn-primary mgr-btn-xs" onclick="ManagerApp.openForkModal('${_escapeInlineJs(song.id)}', '${_escapeInlineJs(song.title)}')">✨ Clone</button>
               <button class="mgr-btn mgr-btn-ghost mgr-btn-xs" onclick="ManagerApp.selectSong('${song.id}')">🎯 Chọn</button>
               <a href="../index.php?song=${encodeURIComponent(song.id)}" class="mgr-btn mgr-btn-ghost mgr-btn-xs" title="Xem Sheet">👁️</a>

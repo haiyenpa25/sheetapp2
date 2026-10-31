@@ -2,7 +2,7 @@
  * library-ui.js — Thư viện bài hát (Giao Diện Cũ: Phẳng, Gọn, Mật Độ Cao)
  * Hỗ trợ:
  *  - Danh sách 1 dòng (Số bài + Tên bài + Tông + Ghim 📌 + Yêu thích ★)
- *  - Dải danh mục phẳng 1 chạm (#category-flat-list) + Bộ lọc Tông (#key-filter)
+ *  - Combobox danh mục (#category-filter, thay dải chip) + Bộ lọc Tông (#key-filter)
  *  - Thanh Ghim Nhanh Bài Hát Buổi Lễ (#quick-pin-bar)
  *  - Nhảy nhanh theo số bài (jumpByNumber)
  */
@@ -54,10 +54,7 @@ const LibraryUI = (() => {
 
     window.EventBus?.emit('navigation:library', { getItems: () => _vList, getCatalog: () => songs, getCategory: () => categoryEl()?.value || '', getActiveId: () => activeSongId, select: selectSong });
     document.getElementById('btn-search-lyrics')?.addEventListener('click', _toggleSearchMode);
-    categoryEl()?.addEventListener('change', () => {
-      _syncFlatCategoryActive(categoryEl()?.value || '');
-      _onSearch();
-    });
+    categoryEl()?.addEventListener('change', _onSearch);
     keyEl()?.addEventListener('change', _onSearch);
     document.getElementById('btn-pin-current-song')?.addEventListener('click', () => {
       if (activeSongId) togglePin(activeSongId);
@@ -175,6 +172,9 @@ const LibraryUI = (() => {
     if (confirm(`Xoá "${name}" khỏi thư viện?`)) deleteSong(id);
   }
 
+  // Icon SVG từ sprite chung: cỡ theo em của chữ, màu theo currentColor (thay emoji ★ 📌 phụ thuộc phông)
+  const _icon = (name) => `<svg class="icon" aria-hidden="true"><use href="#icon-${name}"/></svg>`;
+
   function _handleFav(btn) {
     const item = btn.closest('.song-item');
     if (!item || !window.HistoryManager) return;
@@ -182,7 +182,7 @@ const LibraryUI = (() => {
     const song = songs.find(s => s.id === id);
     if (!song) return;
     const added = HistoryManager.toggleFavorite(song);
-    btn.textContent = added ? '★' : '☆';
+    btn.innerHTML = _icon(added ? 'star-fill' : 'star');
     btn.title       = added ? 'Bỏ yêu thích' : 'Thêm yêu thích';
     btn.classList.toggle('fav-active', added);
     App?.showToast(added ? '★ Đã lưu vào Yêu Thích' : 'Đã bỏ Yêu Thích', 'success');
@@ -306,14 +306,14 @@ const LibraryUI = (() => {
 
     const acts = document.createElement('div');
     acts.className = 'song-item-actions';
-    const addBtn = (cls, txt, ttl) => { const b = document.createElement('button'); b.className = cls; b.textContent = txt; b.title = ttl; acts.appendChild(b); };
+    const addBtn = (cls, iconName, ttl) => { const b = document.createElement('button'); b.className = cls; b.innerHTML = _icon(iconName); b.title = ttl; b.setAttribute('aria-label', ttl); acts.appendChild(b); };
 
     const pinned = isPinned(song.id);
-    addBtn(`song-pin-btn icon-btn-xs${pinned ? ' pin-active' : ''}`, '📌', pinned ? 'Bỏ ghim' : 'Ghim bài này lên thanh Ghim nhanh');
+    addBtn(`song-pin-btn icon-btn-xs${pinned ? ' pin-active' : ''}`, 'pin', pinned ? 'Bỏ ghim' : 'Ghim bài này lên thanh Ghim nhanh');
     const isFav = window.HistoryManager?.isFavorite?.(song.id) ?? false;
-    addBtn(`song-fav-btn icon-btn-xs${isFav ? ' fav-active' : ''}`, isFav ? '★' : '☆', isFav ? 'Bỏ yêu thích' : 'Thêm yêu thích');
-    if (canEdit) addBtn('song-add-setlist-btn icon-btn-xs', '+', 'Thêm vào Setlist');
-    if (canAdmin) addBtn('song-delete-btn icon-btn-xs', '×', 'Xoá bài hát');
+    addBtn(`song-fav-btn icon-btn-xs${isFav ? ' fav-active' : ''}`, isFav ? 'star-fill' : 'star', isFav ? 'Bỏ yêu thích' : 'Thêm yêu thích');
+    if (canEdit) addBtn('song-add-setlist-btn icon-btn-xs', 'plus', 'Thêm vào Setlist');
+    if (canAdmin) addBtn('song-delete-btn icon-btn-xs', 'x', 'Xoá bài hát');
 
     div.appendChild(acts);
     return div;
@@ -325,6 +325,7 @@ const LibraryUI = (() => {
     window.LibrarySearch?.cancel();
     const q = (searchEl()?.value || '').trim().toLowerCase(), cat = categoryEl()?.value || '', key = keyEl()?.value || '';
     let filtered = songs;
+    listEl()?.classList.toggle('cat-filtered', !!cat); // đã chọn danh mục → ẩn nhãn danh mục lặp trên từng dòng
     if (cat) filtered = filtered.filter(s => s.category === cat);
     if (key) filtered = filtered.filter(s => (s.defaultKey || s.keySignature || '') === key);
     _buildQuickJump(filtered);
@@ -362,41 +363,24 @@ const LibraryUI = (() => {
     _onSearch();
   }
 
-  // ── Category Filter (Select + Flat Strip) ────────────────────
+  // ── Category Filter (một combobox) ───────────────────────────
   function _buildCategoryFilter() {
     const sel = categoryEl();
     if (!sel || songs.length === 0) return;
-    const catCounts = {}, catOrder = {};
+    const catCounts = {}, catOrder = {}, catPublic = {};
     songs.forEach(s => {
       if (s.category) {
         catCounts[s.category] = (catCounts[s.category] || 0) + 1;
+        catPublic[s.category] = catPublic[s.category] || (s.visibility || 'public') === 'public';
         if (!catOrder[s.category]) catOrder[s.category] = Number(s.category_id) || 99;
       }
     });
     const cats = Object.keys(catCounts).sort((a, b) => (catOrder[a] - catOrder[b]) || a.localeCompare(b, 'vi'));
+    const wrap = document.getElementById('category-filter-wrap');
+    if (wrap) wrap.style.display = cats.length > 1 ? '' : 'none'; // chỉ 1 danh mục thì không cần chọn
     const current = sel.value;
-    sel.innerHTML = `<option value="">Tất cả danh mục (${songs.length})</option>` +
-      cats.map(c => `<option value="${_esc(c)}"${c === current ? ' selected' : ''}>${_esc(c)} (${catCounts[c]})</option>`).join('');
-
-    const flatEl = document.getElementById('category-flat-list');
-    if (flatEl) {
-      flatEl.innerHTML = `<button type="button" class="cat-flat-btn${!current ? ' active' : ''}" data-cat="">Tất cả <span>${songs.length}</span></button>` +
-        cats.map(c => `<button type="button" class="cat-flat-btn${c === current ? ' active' : ''}" data-cat="${_esc(c)}" title="${_esc(c)} (${catCounts[c]} bài)">${_esc(CAT_SHORT_NAMES[c] || c)} <span>${catCounts[c]}</span></button>`).join('');
-      flatEl.querySelectorAll('.cat-flat-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const val = btn.dataset.cat || '';
-          if (sel) sel.value = val;
-          _syncFlatCategoryActive(val);
-          _onSearch();
-        });
-      });
-    }
-  }
-
-  function _syncFlatCategoryActive(val) {
-    document.getElementById('category-flat-list')?.querySelectorAll('.cat-flat-btn').forEach(btn => {
-      btn.classList.toggle('active', (btn.dataset.cat || '') === val);
-    });
+    sel.innerHTML = `<option value="">Mọi danh mục</option>` +
+      cats.map(c => `<option value="${_esc(c)}"${c === current ? ' selected' : ''}>${_esc(c)} · ${catCounts[c]}${catPublic[c] ? '' : ' · nội bộ'}</option>`).join('');
   }
 
   // ── Key Filter (Lọc nhanh theo Tông) ─────────────────────────
@@ -406,7 +390,7 @@ const LibraryUI = (() => {
     const keyCounts = {};
     songs.forEach(s => { const k = s.defaultKey || s.keySignature || ''; if (k) keyCounts[k] = (keyCounts[k] || 0) + 1; });
     const keys = Object.keys(keyCounts).sort((a, b) => a.localeCompare(b)), current = sel.value;
-    sel.innerHTML = `<option value="">Tông: Tất cả</option>` +
+    sel.innerHTML = `<option value="">Mọi tông</option>` +
       keys.map(k => `<option value="${_esc(k)}"${k === current ? ' selected' : ''}>${_esc(k)} (${keyCounts[k]})</option>`).join('');
   }
 

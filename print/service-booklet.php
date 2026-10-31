@@ -150,7 +150,7 @@ $pageTitle = 'Tập chương trình thờ phượng — ' . htmlspecialchars($se
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="booklet.css?v=2.2.0">
+  <link rel="stylesheet" href="booklet.css?v=<?= (int)@filemtime(__DIR__ . '/booklet.css') ?>">
   <style>@media print { .booklet-page { page-break-after: always; break-after: page; } }</style>
 </head>
 <body>

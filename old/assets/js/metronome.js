@@ -4,6 +4,7 @@
  */
 const Metronome = (() => {
   'use strict';
+  const _ico = (name) => `<svg class="icon" aria-hidden="true"><use href="#icon-${name}"/></svg>`; // icon SVG theo em của chữ
 
   let _audioContext = null;
   let _isPlaying = false;
@@ -331,14 +332,14 @@ const Metronome = (() => {
     const panelPlayBtn = document.getElementById('btn-metronome-toggle-play');
     if (panelPlayBtn) {
       panelPlayBtn.classList.toggle('active', _isPlaying);
-      panelPlayBtn.innerHTML = _isPlaying ? '⏸ Dừng nhịp' : '🔊 Bật nhịp';
+      panelPlayBtn.innerHTML = _isPlaying ? `${_ico('pause')}<span>Dừng nhịp</span>` : `${_ico('volume-2')}<span>Bật nhịp</span>`;
     }
 
     // 2. Sync button phụ trên thanh công cụ Audio Settings Panel
     const toolbarBtn = document.getElementById('btn-metronome');
     if (toolbarBtn) {
       toolbarBtn.classList.toggle('active', _isPlaying);
-      toolbarBtn.innerHTML = _isPlaying ? '⏸ Dừng' : '🔊 Bật';
+      toolbarBtn.innerHTML = _isPlaying ? `${_ico('pause')}<span>Dừng</span>` : `${_ico('volume-2')}<span>Bật</span>`;
       toolbarBtn.style.color = _isPlaying ? 'var(--danger)' : '';
     }
 

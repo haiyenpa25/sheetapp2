@@ -183,6 +183,7 @@
       </button>
     </div>
 
+
     <button id="btn-mobile-edit" class="mobile-edit-btn hidden" type="button" title="Soạn hợp âm trên bản nhạc" aria-label="Soạn hợp âm" aria-pressed="false" disabled>
       <?= icon('pencil') ?> <span>Soạn</span>
     </button>
@@ -380,9 +381,9 @@
         <!-- NHÓM 5: KHÁC (Other) -->
         <div class="menu-section-header" role="presentation">KHÁC</div>
 
-        <button id="btn-menu-session-panel" class="btn btn-ghost btn-sm btn-menu-item" title="Nhật ký phục vụ & Ghi chú tập đàn">
+        <button id="btn-menu-session-panel" class="btn btn-ghost btn-sm btn-menu-item" title="Ghi chú cá nhân: tông, BPM, lời nhắc riêng (chỉ mình bạn thấy)">
           <?= icon('clipboard-list') ?>
-          <span>Nhật ký phục vụ</span>
+          <span>Ghi chú cá nhân</span>
         </button>
 
         <button id="btn-menu-quick-numpad" class="btn btn-ghost btn-sm btn-menu-item" title="Bàn phím số nhanh (#)">
@@ -413,7 +414,7 @@
 
         <div class="menu-sticky-footer" role="group" aria-label="Nhóm cuối cố định">
           <a href="<?= $bHref ?>old/" id="btn-menu-old-ui" class="btn btn-ghost btn-sm btn-menu-item"
-             onclick="if (window.URLState) { event.preventDefault(); window.location.href = URLState.interfaceUrl(true); }"
+             onclick="if (typeof window.URLState?.interfaceUrl === 'function') { event.preventDefault(); window.location.href = URLState.interfaceUrl(true); }"
              title="Chuyển sang Giao diện Cũ (SheetApp v1 đơn giản)">
             <?= icon('layout') ?>
             <span>Đổi giao diện</span>

@@ -485,44 +485,98 @@ body.chord-edit-mode .toast-container .toast:not(.error) { display: none !import
   border-color: transparent;
 }
 .song-cat-pill.hidden { display: none !important; }
-.category-flat-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 6px;
-}
-.cat-flat-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  height: 26px;
-  padding: 0 8px;
-  border: 1px solid var(--lp-border);
-  border-radius: 999px;
+/* ─── Combobox danh mục + điều khiển sidebar đồng cỡ ─────────────────
+   Thay dải chip danh mục (nhiều hàng) bằng MỘT combobox. Cỡ điều khiển lấy
+   từ --lp-h (32px chuột / 40px cảm ứng); icon tính theo em nên luôn co theo chữ. */
+.sidebar { --lp-ctl-font: 13px; }
+@media (pointer: coarse) { .sidebar { --lp-ctl-font: 14px; } }
+.lp-combo { position: relative; display: block; flex: 1 1 auto; min-width: 0; }
+.lp-combo-select {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: var(--lp-h);
+  min-height: var(--lp-h);
+  padding: 0 calc(var(--lp-ctl-font) * 2.3) 0 12px;
+  border: 1px solid var(--lp-border-strong);
+  border-radius: var(--lp-radius);
   background: var(--lp-surface);
-  color: var(--lp-muted);
+  color: var(--lp-ink);
   font-family: inherit;
-  font-size: 12px;
+  font-size: var(--lp-ctl-font);
   font-weight: 600;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   cursor: pointer;
   touch-action: manipulation;
-  transition: background .15s ease, color .15s ease, border-color .15s ease;
+  transition: border-color .15s ease, background .15s ease;
 }
-.cat-flat-btn span {
-  font-size: 12px;
-  font-weight: 500;
-  opacity: 1;
-  font-variant-numeric: tabular-nums;
+.lp-combo--icon .lp-combo-select { padding-left: calc(var(--lp-ctl-font) * 1.25 + 22px); }
+.lp-combo-select:hover { border-color: var(--lp-accent); }
+.lp-combo-select:focus-visible { outline: 2px solid var(--lp-accent); outline-offset: 1px; }
+.lp-combo-select option { font-weight: 500; } /* màu kế thừa từ select: đúng cả chế độ sáng/tối */
+.lp-combo-icon, .lp-combo-chev {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  pointer-events: none;
 }
-.cat-flat-btn:hover {
-  background: var(--lp-hover);
+.lp-combo-icon { left: 11px; font-size: calc(var(--lp-ctl-font) * 1.25); color: var(--lp-accent); }
+.lp-combo-chev { right: 10px; font-size: calc(var(--lp-ctl-font) * 1.2); color: var(--lp-faint); }
+.sidebar .sidebar-controls-row { gap: var(--lp-gap); align-items: stretch; }
+.sidebar .btn-filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--lp-h);
+  min-height: var(--lp-h);
+  padding: 0 12px;
+  gap: .4em;
+  border: 1px solid var(--lp-border-strong);
+  border-radius: var(--lp-radius);
+  background: var(--lp-surface);
   color: var(--lp-ink);
+  font-size: var(--lp-ctl-font);
+  font-weight: 600;
+  flex-shrink: 0;
+  touch-action: manipulation;
 }
-.cat-flat-btn.active {
-  background: var(--lp-accent-soft);
-  border-color: var(--lp-accent);
-  color: var(--lp-accent);
+.sidebar .btn-filter-toggle .icon { font-size: 1.15em; }
+.sidebar .btn-filter-toggle.active { border-color: var(--lp-accent); color: var(--lp-accent); background: var(--lp-accent-soft); }
+.sidebar .sidebar-filter-select { height: var(--lp-h); font-size: var(--lp-ctl-font); border-radius: var(--lp-radius); }
+.sidebar .sidebar-filter-label { font-size: 12px; }
+.sidebar .btn-clear-filters { min-height: calc(var(--lp-h) - 8px); font-size: 12px; padding: 0 12px; }
+/* Ô tìm kiếm cùng cỡ chữ/độ cao với combobox, nút # và ♪ theo token */
+.sidebar .sidebar-search-box { height: var(--lp-h); min-height: var(--lp-h); padding-top: 0; padding-bottom: 0; display: flex; align-items: center; box-sizing: border-box; }
+.sidebar .sidebar-search-box #search-input { font-size: var(--lp-ctl-font); min-height: 0; height: calc(var(--lp-h) - 4px); }
+.sidebar .sidebar-search-box .search-icon { width: 1.25em; height: 1.25em; font-size: var(--lp-ctl-font); }
+.sidebar .sidebar-search-actions .icon-btn-xs,
+.sidebar .sidebar-search-actions .btn-quick-numpad {
+  width: calc(var(--lp-h) - 6px) !important; height: calc(var(--lp-h) - 6px) !important;
+  min-width: calc(var(--lp-h) - 6px) !important; min-height: calc(var(--lp-h) - 6px) !important;
+  font-size: var(--lp-ctl-font) !important;
 }
+.sidebar .sidebar-search-actions .icon-btn-xs svg { width: 1.25em; height: 1.25em; }
+.sidebar .sidebar-search-box { padding-right: calc(2 * (var(--lp-h) - 6px) + 16px); }
+/* Sao yêu thích bật: màu hổ phách (SVG đặc), tắt: viền mảnh */
+.song-item .song-fav-btn.fav-active { color: #d97706; }
+/* Đã chọn một danh mục: nhãn danh mục trên từng dòng chỉ lặp lại → ẩn cho tên bài dài hơn */
+.song-list.cat-filtered .song-cat-badge { display: none; }
+/* Nhảy nhanh: một dòng cuộn ngang thay vì nhiều hàng chip */
+.quick-jump-btns {
+  flex-wrap: nowrap !important;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
+}
+.quick-jump-btns::-webkit-scrollbar { display: none; }
+.quick-jump-btn { flex: 0 0 auto; }
+/* Mờ dần mép phải: gợi ý còn mục cuộn được */
+.quick-jump-btns { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent); }
 .song-item-meta .song-key-badge ~ .song-key-badge {
   background: transparent !important;
   color: var(--lp-muted) !important;
@@ -593,12 +647,16 @@ body.chord-edit-mode .toast-container .toast:not(.error) { display: none !import
   .toast-container {
     left: 16px !important;
     right: 16px !important;
-    top: auto !important;
-    bottom: calc(76px + env(safe-area-inset-bottom, 0px)) !important;
+    /* Hiện ở đầu màn hình: thanh điều khiển 2 hàng ở đáy (~104px) từng bị toast che mất nút −/+ Tông */
+    top: calc(52px + env(safe-area-inset-top, 0px)) !important;
+    bottom: auto !important;
     transform: none !important;
     align-items: stretch !important;
     z-index: var(--z-toast, 2000) !important;
   }
+  /* Toast không nuốt cú chạm; chỉ nút × nhận chạm */
+  .toast-container .toast { pointer-events: none; }
+  .toast-container .toast .toast-dismiss { pointer-events: auto; min-width: 36px; min-height: 36px; }
 }
 .toast-container .toast {
   max-width: min(420px, calc(100vw - 32px)) !important;
@@ -2501,4 +2559,17 @@ body.dark-mode #main-dropdown-menu .icon-btn-xs {
     padding: 0 4px !important;
     font-size: 12px !important;
   }
+}
+
+/* Panel metronome: chữ nút TAP / đếm vào không nhỏ hơn 12px */
+#btn-metronome-tap, #btn-metronome-count-in { font-size: 12px; }
+
+/* ── Điện thoại: thư viện rộng gần hết màn hình (chừa 44px để chạm ra ngoài đóng) để tên bài không bị cắt cụt;
+   phần đầu gọn hơn để thấy nhiều bài hơn. Danh sách ảo đo chiều cao 1 dòng nên tên vẫn giữ 1 dòng. ── */
+@media (max-width: 600px) {
+  body .sidebar { width: min(440px, calc(100vw - 44px)) !important; }
+  .sidebar .quick-jump-label { display: none !important; }
+  .sidebar .quick-jump { padding-top: 4px !important; padding-bottom: 4px !important; }
+  .sidebar .sidebar-actions { padding-top: 4px !important; padding-bottom: 0 !important; }
+  .sidebar .sidebar-actions:not(:has(> :not(.hidden):not([type=file]))) { display: none !important; }
 }

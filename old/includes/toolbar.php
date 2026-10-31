@@ -44,6 +44,11 @@
       <span class="btn-text">Lời</span>
     </button>
 
+    <!-- ③a GHI CHÚ: ghi chú chung cho ban nhạc + ghi chú theo nhạc cụ (dấu + trên bản nhạc) — mở AnnotationPanel dùng chung -->
+    <button type="button" id="btn-toolbar-notes" class="deck-btn deck-btn-icon" title="Ghi chú ban nhạc &amp; theo nhạc cụ" aria-label="Ghi chú ban nhạc và nhạc cụ" onclick="window.AnnotationCanvas?.open?.()">
+      <?= icon('clipboard-list') ?>
+    </button>
+
     <!-- ③b THU PHÓNG + KHÓA ZOOM & TEMPO (R9 UI-3: Đưa ra ngoài mặt trước) -->
     <div class="control-group layer1-zoom-group" id="toolbar-zoom-pill" role="group" aria-label="Thu phóng và khóa" style="display:inline-flex;align-items:center;gap:2px;">
       <button id="btn-zoom-out" class="icon-btn" title="Thu nhỏ (-)" aria-label="Thu nhỏ">−</button>
@@ -63,11 +68,11 @@
       </select>
       <span id="zoom-value-label" style="display:none">100%</span>
       <button id="btn-zoom-in" class="icon-btn" title="Phóng to (+)" aria-label="Phóng to">+</button>
-      <button id="btn-lock-zoom" class="icon-btn" title="Khóa tỷ lệ phóng to (giữ nguyên khi đổi bài)" aria-label="Khóa thu phóng" aria-pressed="false">🔓</button>
+      <button id="btn-lock-zoom" class="icon-btn" title="Khóa tỷ lệ phóng to (giữ nguyên khi đổi bài)" aria-label="Khóa thu phóng" aria-pressed="false"><?= icon('unlock') ?></button>
     </div>
 
     <button id="btn-toolbar-metronome" class="btn btn-ghost btn-sm" title="Nhịp độ (BPM) &amp; Đếm nhịp (Metronome)" onclick="document.getElementById('btn-metronome')?.click()">
-      <span>♩ BPM</span>
+      <span class="o-btn-text">♩ BPM</span>
     </button>
 
     <!-- ③c DẢI ĐIỀU KHIỂN LUÔN HIỆN: Ký hiệu · Gọn nhẹ · Cuộn · Soạn (nút ủy quyền → ControlDeck bấm nút gốc trong menu ⋮) -->
@@ -211,9 +216,9 @@
           <span>Mixer Nhạc Cụ</span>
         </button>
 
-        <button id="menu-instrument-annotations" class="btn btn-ghost btn-sm btn-menu-item" title="Ghi chú nhạc cụ trên bản nhạc">
-          <span>🎸</span>
-          <span>Ghi chú nhạc cụ</span>
+        <button id="menu-instrument-annotations" class="btn btn-ghost btn-sm btn-menu-item" title="Ghi chú chung cho ban nhạc và ghi chú theo nhạc cụ trên bản nhạc">
+          <?= icon('clipboard-list') ?>
+          <span>Ghi chú ban nhạc &amp; nhạc cụ</span>
         </button>
 
         <div class="classic-menu-section-title">Hợp âm &amp; Buổi lễ</div>
@@ -224,7 +229,7 @@
         </button>
 
         <button id="menu-chord-notation" class="btn btn-ghost btn-sm btn-menu-item" title="Hệ ký hiệu hợp âm: Chuẩn / La Mã / Nashville">
-          <span>🔤</span>
+          <?= icon('type') ?>
           <span>Hệ ký hiệu hợp âm</span>
         </button>
 
@@ -255,13 +260,13 @@
         </button>
 
         <button id="menu-pin-song" class="btn btn-ghost btn-sm btn-menu-item" title="Ghim bài này lên thanh Ghim nhanh (phím G)">
-          <span>📌</span>
+          <?= icon('pin') ?>
           <span>Ghim bài hát</span>
         </button>
 
         <button id="btn-session-panel" class="btn btn-ghost btn-sm btn-menu-item" disabled title="Nhật ký biểu diễn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          <span>Nhật ký biểu diễn</span>
+          <span>Ghi chú cá nhân</span>
         </button>
 
         <button id="btn-print" class="btn btn-ghost btn-sm btn-menu-item" disabled title="In sheet nhạc">
@@ -277,17 +282,17 @@
         </button>
 
         <?php $mgrHref = ($baseHref ?? '../') . 'manager/'; ?>
-        <a id="btn-menu-manager" href="<?= $mgrHref ?>#tab-categories" target="_blank" class="btn btn-ghost btn-sm btn-menu-item hidden"
-           title="Quản lý danh mục, thêm bài hát (XML), kho nhạc & thành viên">
+        <a id="btn-menu-manager" href="<?= $mgrHref ?>#tab-categories" class="btn btn-ghost btn-sm btn-menu-item"
+           title="Quản lý danh mục, thêm/sửa/xóa bài hát (XML), kho nhạc & thành viên">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
           <span>Quản lý danh mục &amp; thêm bài</span>
         </a>
 
         <a id="btn-switch-new-ui" href="<?= $baseHref ?? '../' ?>" class="btn btn-primary btn-sm btn-menu-item"
-           onclick="if (window.URLState) { event.preventDefault(); window.location.href = URLState.interfaceUrl(false); }"
+           onclick="if (typeof window.URLState?.interfaceUrl === 'function') { event.preventDefault(); window.location.href = URLState.interfaceUrl(false); }"
            title="Chuyển sang Giao diện Mới (SheetApp 2.0 đầy đủ)"
            style="text-decoration:none;display:inline-flex;align-items:center;gap:.35rem;font-weight:600;white-space:nowrap;">
-          <span>✨ Giao Diện Mới</span>
+          <?= icon('layout') ?><span>Giao Diện Mới</span>
         </a>
       </div>
 
@@ -332,7 +337,7 @@
         <div class="audio-panel-row">
           <span class="audio-panel-label">Âm Lượng:</span>
           <label class="volume-label" title="Âm lượng">
-            <span class="volume-icon">🔊</span>
+            <span class="volume-icon"><?= icon('volume-2') ?></span>
             <input id="audio-volume" type="range" class="audio-volume-slider"
                    min="-20" max="24" step="1" value="18" disabled
                    title="Âm lượng (+18 dB mặc định — kéo sang phải để to hơn)">
@@ -341,7 +346,7 @@
 
         <div class="audio-panel-row" style="border-top: 1px solid var(--border); padding-top: .6rem; margin-top: .2rem;">
           <span class="audio-panel-label">Gõ Nhịp (Metronome):</span>
-          <button id="btn-metronome" class="btn btn-ghost btn-xs" title="Bật/Tắt máy gõ nhịp giữ nhịp cho trống">🔊 Bật</button>
+          <button id="btn-metronome" class="btn btn-ghost btn-xs" title="Bật/Tắt máy gõ nhịp giữ nhịp cho trống"><?= icon('volume-2') ?><span>Bật</span></button>
         </div>
       </div>
 

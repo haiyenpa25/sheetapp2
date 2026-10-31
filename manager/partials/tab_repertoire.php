@@ -7,7 +7,10 @@
           <!-- Dynamic Pills from API -->
         </div>
 
-        <div class="mgr-pane-filter-right">
+        <div class="mgr-pane-filter-right" style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+          <button id="btn-repertoire-upload-song" class="mgr-btn mgr-btn-primary mgr-btn-sm" onclick="window.ManagerCategories?.openUpload?.(window.ManagerApp?.state?.repertoire?.categoryId || 0)">
+            ➕ Upload Bài Hát (XML)
+          </button>
           <label class="mgr-switch-label">
             <input type="checkbox" id="chk-only-has-chords">
             <span>Chỉ bài có bản phối thành viên</span>

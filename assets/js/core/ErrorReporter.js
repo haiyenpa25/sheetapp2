@@ -112,6 +112,26 @@ const ErrorReporter = (() => {
     return true;
   }
 
+  // Lỗi không phải của app (script trình duyệt Zalo/Facebook chèn vào, script khác nguồn, cảnh báo
+  // ResizeObserver, mạng chập chờn/huỷ request khi đổi bài nhanh): vẫn ghi log nhưng KHÔNG hiện toast
+  // "Tải lại" — trước đây người dùng mở link từ Zalo luôn thấy báo lỗi và bấm tải lại vô ích.
+  const NOISE_PATTERNS = [/zaloJSV2/i, /^Script error\.?$/i, /ResizeObserver loop/i, /webkit\.messageHandlers/i,
+    /AbortError/i, /aborted/i, /Failed to fetch/i, /Load failed/i, /NetworkError/i, /network error/i, /timeout/i];
+  function _isNoise(message) {
+    const text = String(message || '');
+    return NOISE_PATTERNS.some(re => re.test(text));
+  }
+  function _isAppScript(source) {
+    const src = String(source || '');
+    if (!src) return false;
+    try {
+      const url = new URL(src, window.location.href);
+      return url.origin === window.location.origin && /\/assets\/js\/.+\.js$/.test(url.pathname);
+    } catch (_) {
+      return false;
+    }
+  }
+
   function init() {
     if (typeof window === 'undefined') return;
 
@@ -125,7 +145,7 @@ const ErrorReporter = (() => {
         stack: error && error.stack ? String(error.stack) : '',
       };
       report(errData);
-      _showReloadToast();
+      if (_isAppScript(source) && !_isNoise(message)) _showReloadToast();
     };
 
     window.onunhandledrejection = function (event) {
@@ -137,7 +157,8 @@ const ErrorReporter = (() => {
         stack: event && event.reason && event.reason.stack ? String(event.reason.stack) : '',
       };
       report(errData);
-      _showReloadToast();
+      const name = event && event.reason && event.reason.name ? String(event.reason.name) : '';
+      if (!_isNoise(reason) && !_isNoise(name)) _showReloadToast();
     };
   }
 

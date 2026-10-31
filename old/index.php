@@ -7,6 +7,8 @@ $scriptDir = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')
 $appBase   = rtrim(dirname($scriptDir), '/\\');
 if ($appBase === '/' || $appBase === '\\' || $appBase === '.') $appBase = '';
 $baseHref  = ($appBase ? $appBase : '') . '/';
+require_once __DIR__ . '/../includes/asset_version.php';
+$appAssetVersion = sheetapp_asset_version(__FILE__);
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -25,7 +27,7 @@ $baseHref  = ($appBase ? $appBase : '') . '/';
   <!-- iOS PWA icons -->
   <meta name="apple-mobile-web-app-title" content="SheetApp">
   <link rel="apple-touch-icon" href="../assets/img/icon-192.png">
-  <script>window.__APP_BASE__ = <?= json_encode($appBase, JSON_UNESCAPED_SLASHES) ?>; window.__failedScripts = []; window.addEventListener('error', function(e) { var t = e && e.target; if (t && t.tagName === 'SCRIPT' && t.src) window.__failedScripts.push(t.src); }, true); window.addEventListener('load', function() { var chk = function() { var hasList = document.querySelectorAll('#song-list .song-item').length > 0, hasSong = new URLSearchParams(window.location.search).has('song'), hasSvg = !!document.querySelector('#osmd-container svg'), sf = window.__failedScripts && window.__failedScripts.length > 0; if (sf && (!hasList || (hasSong && !hasSvg))) { if (!document.getElementById('boot-watchdog-banner')) { var b = document.createElement('div'); b.id = 'boot-watchdog-banner'; b.setAttribute('role', 'alert'); b.style.cssText = 'position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:999999;background:#1e293b;color:#f8fafc;border:1px solid #ef4444;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:8px;'; b.innerHTML = '<span>Ứng dụng chưa tải xong · </span><button id="boot-watchdog-reload-btn" type="button" style="background:#ef4444;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-weight:600;cursor:pointer;min-height:36px;">Tải lại</button>'; b.querySelector('#boot-watchdog-reload-btn').onclick = function() { window.location.reload(); }; (document.body || document.documentElement).appendChild(b); } } }; setTimeout(chk, 700); setTimeout(chk, 2000); });</script>
+  <script>window.__APP_BASE__ = <?= json_encode($appBase, JSON_UNESCAPED_SLASHES) ?>; window.__ASSET_V__ = '<?= $appAssetVersion ?>'; window.__failedScripts = []; window.addEventListener('error', function(e) { var t = e && e.target; if (t && t.tagName === 'SCRIPT' && t.src) window.__failedScripts.push(t.src); }, true); window.addEventListener('load', function() { var chk = function() { var hasList = document.querySelectorAll('#song-list .song-item').length > 0, hasSong = new URLSearchParams(window.location.search).has('song'), hasSvg = !!document.querySelector('#osmd-container svg'), sf = window.__failedScripts && window.__failedScripts.length > 0; if (sf && (!hasList || (hasSong && !hasSvg))) { if (!document.getElementById('boot-watchdog-banner')) { var b = document.createElement('div'); b.id = 'boot-watchdog-banner'; b.setAttribute('role', 'alert'); b.style.cssText = 'position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:999999;background:#1e293b;color:#f8fafc;border:1px solid #ef4444;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:8px;'; b.innerHTML = '<span>Ứng dụng chưa tải xong · </span><button id="boot-watchdog-reload-btn" type="button" style="background:#ef4444;color:#fff;border:none;border-radius:6px;padding:6px 12px;font-weight:600;cursor:pointer;min-height:36px;">Tải lại</button>'; b.querySelector('#boot-watchdog-reload-btn').onclick = function() { window.location.reload(); }; (document.body || document.documentElement).appendChild(b); } } }; setTimeout(chk, 700); setTimeout(chk, 2000); });</script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,6 +50,7 @@ echo cssTag('sheet.css');
 echo cssTag('components.css');
 echo '  <link rel="stylesheet" href="../assets/css/instrument-annotations.css?v=' . filemtime(__DIR__ . '/../assets/css/instrument-annotations.css') . '">' . "\n";
 echo cssTag('control-deck.css'); // Dải điều khiển luôn hiện (10 điều khiển) — luôn nạp sau cùng
+echo cssTag('ui-scale.css');    // Token cỡ chữ/vùng chạm/icon — nạp sau control-deck.css
 
 ?>
   <!-- ── Thư viện âm thanh và OSMD (local vendor, fallback CDN) ── -->
@@ -78,6 +81,12 @@ echo cssTag('control-deck.css'); // Dải điều khiển luôn hiện (10 đi�
 </head>
 <body>
 
+<?php require_once __DIR__ . '/../includes/icons.php'; define('LUCIDE_SPRITE_LOADED', true); ?>
+<!-- Bộ icon SVG dùng chung với giao diện mới: kích thước theo em của chữ, màu theo currentColor -->
+<div id="lucide-sprite-container" style="display:none;" aria-hidden="true">
+  <?php @readfile(__DIR__ . '/../assets/icons/lucide.svg'); ?>
+</div>
+
 <?php require_once __DIR__ . '/includes/sidebar.php'; ?>
 <div id="sidebar-overlay" class="sidebar-overlay hidden"></div>
 
@@ -94,7 +103,7 @@ echo cssTag('control-deck.css'); // Dải điều khiển luôn hiện (10 đi�
 <div id="metronome-panel" class="metronome-panel hidden">
   <div class="metronome-header">
     <div class="metronome-header-left">
-      <span class="metronome-icon-pulse">⚡</span>
+      <span class="metronome-icon-pulse"><?= icon('zap') ?></span>
       <span class="metronome-title">Giữ Nhịp (Tempo)</span>
     </div>
     <button id="btn-close-metronome" class="metronome-close-btn" title="Ẩn bộ giữ nhịp">&times;</button>
@@ -123,7 +132,7 @@ echo cssTag('control-deck.css'); // Dải điều khiển luôn hiện (10 đi�
     
     <!-- Metronome Controls: Play & TAP Tempo -->
     <div class="metronome-actions">
-      <button id="btn-metronome-toggle-play" class="btn-metronome-play" title="Bật/Tắt âm gõ nhịp">🔊 Bật nhịp</button>
+      <button id="btn-metronome-toggle-play" class="btn-metronome-play" title="Bật/Tắt âm gõ nhịp"><?= icon('volume-2') ?><span>Bật nhịp</span></button>
       <button id="btn-metronome-tap" class="btn-metronome-tap" title="Gõ liên tục theo tốc độ để tính BPM">TAP</button>
     </div>
 
@@ -131,7 +140,7 @@ echo cssTag('control-deck.css'); // Dải điều khiển luôn hiện (10 đi�
     <div id="metronome-save-bpm-row" class="metronome-setting-row" style="display:none;border-top:1px solid var(--border);padding-top:.55rem;margin-top:.2rem;">
       <span class="metronome-setting-label" style="font-size:.72rem;color:var(--text-muted);">Setlist:</span>
       <button id="btn-metronome-save-bpm" class="btn btn-primary btn-xs" style="font-size:.72rem;font-weight:700;padding:.2rem .6rem;" title="Lưu BPM này vào bài hát đang chọn trong Setlist">
-        💾 Lưu BPM
+        <?= icon('save') ?> Lưu BPM
       </button>
     </div>
 

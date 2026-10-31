@@ -62,11 +62,16 @@ const ModeManager = (() => {
       }
     });
 
-    document.addEventListener('fullscreenchange', () => {
-      if (!document.fullscreenElement && _currentMode === MODES.PERFORMANCE) {
+    // Chỉ thoát chế độ khi người dùng rời toàn màn hình THẬT mà ta đã vào (vuốt/Esc của trình duyệt);
+    // iPhone không có API nên chạy "toàn màn hình giả" bằng CSS và không bao giờ nhận sự kiện này.
+    const onNativeChange = () => {
+      if (!_fullscreenElement() && _nativeFullscreen && _currentMode === MODES.PERFORMANCE) {
+        _nativeFullscreen = false;
         resetToView();
       }
-    });
+    };
+    document.addEventListener('fullscreenchange', onNativeChange);
+    document.addEventListener('webkitfullscreenchange', onNativeChange);
 
     // Thoát tập trung qua ModeManager khi nhấn phím Escape (Ticket L0-16)
     document.addEventListener('keydown', (e) => {
@@ -309,25 +314,35 @@ const ModeManager = (() => {
     }
   }
 
+  let _nativeFullscreen = false;
+  const _fullscreenElement = () => document.fullscreenElement || document.webkitFullscreenElement || null;
+
+  /* Toàn màn hình thật nếu trình duyệt cho phép (chuẩn hoặc webkit trên iPad cũ). Không được (iPhone Safari,
+     bị từ chối) thì vẫn giữ chế độ Biểu Diễn bằng CSS — trước đây gọi resetToView() nên nút bấm như không có tác dụng. */
   async function _requestFullscreen() {
+    if (_fullscreenElement()) return;
+    const el = document.documentElement;
+    const request = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (!request) { _scrollAwayAddressBar(); return; }
     try {
-      if (!document.fullscreenElement) {
-        if (!document.documentElement.requestFullscreen) {
-          resetToView();
-          return;
-        }
-        await document.documentElement.requestFullscreen();
-      }
+      await request.call(el);
+      _nativeFullscreen = !!_fullscreenElement() || !!el.webkitRequestFullscreen;
     } catch (e) {
-      if (_currentMode === MODES.PERFORMANCE) resetToView();
+      _nativeFullscreen = false;
+      _scrollAwayAddressBar();
     }
   }
 
+  // Safari iPhone thu thanh địa chỉ khi trang cuộn một chút
+  function _scrollAwayAddressBar() {
+    window.setTimeout(() => window.scrollTo(0, 1), 50);
+  }
+
   async function _exitFullscreen() {
+    _nativeFullscreen = false;
     try {
-      if (document.fullscreenElement && document.exitFullscreen) {
-        await document.exitFullscreen();
-      }
+      if (document.fullscreenElement && document.exitFullscreen) await document.exitFullscreen();
+      else if (document.webkitFullscreenElement && document.webkitExitFullscreen) document.webkitExitFullscreen();
     } catch (e) {}
   }
 

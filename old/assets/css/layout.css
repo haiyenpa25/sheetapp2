@@ -772,7 +772,9 @@ body.dark-mode .tag-blue { background: #172554; color: #93c5fd; border-color: #1
    M4-9b: Gộp toolbar + page-bar thành một hàng Lớp 1; menu ⋮ đủ mục
    ============================================= */
 .page-bar { display: none !important; }
-.toolbar #instrument-annotations { display: none !important; }
+/* Nút gốc ẩn (Classic mở bằng #btn-toolbar-notes); khối giữ lại vì panel popover nằm bên trong — ẩn cả khối thì panel không hiện */
+.toolbar #instrument-annotations { position: absolute !important; width: 0; height: 0; overflow: visible; }
+.toolbar #instrument-annotations > #btn-instrument-annotations { display: none !important; }
 .toolbar { overflow-x: hidden !important; }
 .toolbar-left { display: none; }
 .toolbar-controls { width: auto !important; flex: 1 1 auto !important; min-width: 0; overflow-x: hidden !important; }

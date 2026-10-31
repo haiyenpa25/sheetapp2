@@ -6,6 +6,9 @@
       <span id="library-count" class="library-count-badge">...</span>
     </div>
     <div class="sidebar-header-actions">
+      <a id="btn-header-manager" href="<?= ($baseHref ?? '../') ?>manager/#tab-categories" class="sidebar-auth-btn" style="text-decoration:none;font-weight:600;" title="Mở trang Quản Lý Danh Mục & Thêm Bài Hát">
+        <?= icon('settings') ?><span class="o-btn-text">Quản Lý</span>
+      </a>
       <button id="btn-auth" class="sidebar-auth-btn" title="Đăng nhập / Phân quyền">
         <span id="auth-username" class="sidebar-auth-name">Khách</span>
         <span id="auth-role-badge" class="sidebar-role-badge hidden"></span>
@@ -20,29 +23,39 @@
   <div class="sidebar-tabs" id="sidebar-tabs">
     <button class="sidebar-tab active" id="sidebar-tab-lib" data-tab="library">Mục Lục</button>
     <button class="sidebar-tab" data-tab="setlist">Setlist</button>
-    <button class="sidebar-tab" id="sidebar-tab-favs" data-tab="favorites" title="Bài hát yêu thích">★ Đã lưu</button>
+    <button class="sidebar-tab" id="sidebar-tab-favs" data-tab="favorites" title="Bài hát yêu thích"><?= icon('star') ?><span class="o-btn-text">Đã lưu</span></button>
   </div>
 
   <!-- FLAT CATEGORY BAR + COMPACT SEARCH & KEY FILTER -->
   <div class="sidebar-search">
-    <div id="category-flat-list" class="category-flat-list" aria-label="Danh mục Thánh Ca"></div>
-    <div class="filter-row-compact">
+    <!-- Danh mục: MỘT combobox (thay dải chip), chiếm trọn hàng. Ẩn khi thư viện chỉ có 1 danh mục. -->
+    <div id="category-filter-wrap" class="o-combo o-combo--icon o-combo--block">
+      <span class="o-combo-icon"><?= icon('folder') ?></span>
       <select id="category-filter" class="form-input select-toolbar" title="Lọc theo danh mục" aria-label="Lọc theo danh mục bài hát">
-        <option value="">Tất cả danh mục</option>
+        <option value="">Mọi danh mục</option>
       </select>
-      <select id="key-filter" class="form-input select-toolbar key-filter-select" title="Lọc theo Tông nhạc" aria-label="Lọc theo tông nhạc">
-        <option value="">Tông: Tất cả</option>
-      </select>
+      <span class="o-combo-chev"><?= icon('chevron-down') ?></span>
     </div>
-    <div class="search-box">
+    <div class="filter-row-compact">
+      <div class="o-combo o-combo--key">
+        <select id="key-filter" class="form-input select-toolbar key-filter-select" title="Lọc theo Tông nhạc" aria-label="Lọc theo tông nhạc">
+          <option value="">Mọi tông</option>
+        </select>
+        <span class="o-combo-chev"><?= icon('chevron-down') ?></span>
+      </div>
+      <div class="search-box">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <label for="search-input" class="library-search-label">Tìm bài hát trong thư viện</label>
-      <input id="search-input" type="text" placeholder="Số bài, tên bài (/ để tìm)..." autocomplete="off">
+      <input id="search-input" type="text" placeholder="Tìm bài…" title="Số bài hoặc tên bài (phím / để tìm nhanh)" autocomplete="off">
       <button id="btn-search-lyrics" class="btn-lyric-mode" title="Tìm theo Lời bài hát">Lời</button>
+      </div>
     </div>
   </div>
 
   <div class="sidebar-actions">
+    <a id="btn-sidebar-manager" href="<?= ($baseHref ?? '../') ?>manager/#tab-categories" class="btn btn-primary btn-sm w-full" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-weight:600;margin-bottom:4px;" title="Mở trang Quản lý Danh mục, Thêm/Sửa/Xóa bài hát">
+      <?= icon('folder') ?><span class="o-btn-text">Quản Lý Danh Mục &amp; Thêm Bài</span>
+    </a>
     <button id="btn-pwa-install" class="btn btn-sm w-full hidden" title="Cài đặt ứng dụng">
       Cài Đặt Offline
     </button>

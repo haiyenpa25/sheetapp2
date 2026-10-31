@@ -38,26 +38,29 @@
       </div>
     </div>
 
-    <!-- Hàng điều khiển: Sắp xếp + Nút gom bộ lọc Lọc (Ticket L2-3) -->
-    <div class="mt-half sidebar-controls-row">
-      <select id="sort-filter" class="form-input select-toolbar sort-filter-select" title="Sắp xếp bài hát" aria-label="Sắp xếp danh sách bài hát">
-        <option value="num" selected>Số bài Thánh Ca</option>
-        <option value="title">Tên (A-Z)</option>
-        <option value="key">Tông gốc</option>
-      </select>
-      <button id="btn-filter-toggle" class="btn btn-sm btn-filter-toggle" aria-expanded="false" aria-controls="sidebar-filters-panel" aria-label="Gom bộ lọc bài hát" title="Mở bộ lọc">
-        <span><?= icon('filter') ?> Lọc</span>
-        <span id="filter-active-badge" class="filter-active-badge hidden">0</span>
-      </button>
-    </div>
-
-    <!-- Dải danh mục 1 chạm hiển thị trực tiếp -->
-    <div id="category-flat-list" class="category-flat-list mt-half" role="tablist" aria-label="Danh mục bài hát"></div>
-
-    <div id="category-filter-wrap" class="mt-half sidebar-filter-item">
-      <select id="category-filter" class="form-input select-toolbar sidebar-filter-select w-full" aria-label="Lọc theo danh mục bài hát" title="Chọn thể loại / tuyển tập bài hát">
+    <!-- Danh mục: MỘT combobox duy nhất (thay dải chip nhiều hàng). Ẩn khi thư viện chỉ có 1 danh mục. -->
+    <div id="category-filter-wrap" class="lp-combo lp-combo--icon mt-half">
+      <span class="lp-combo-icon"><?= icon('folder') ?></span>
+      <select id="category-filter" class="lp-combo-select" aria-label="Lọc theo danh mục bài hát" title="Chọn danh mục / tuyển tập">
         <option value="">Tất cả danh mục</option>
       </select>
+      <span class="lp-combo-chev"><?= icon('chevron-down') ?></span>
+    </div>
+
+    <!-- Hàng điều khiển: Sắp xếp + nút bộ lọc phụ (dịp lễ, chủ đề) -->
+    <div class="mt-half sidebar-controls-row">
+      <div class="lp-combo">
+        <select id="sort-filter" class="lp-combo-select sort-filter-select" title="Sắp xếp bài hát" aria-label="Sắp xếp danh sách bài hát">
+          <option value="num" selected>Số bài Thánh Ca</option>
+          <option value="title">Tên (A-Z)</option>
+          <option value="key">Tông gốc</option>
+        </select>
+        <span class="lp-combo-chev"><?= icon('chevron-down') ?></span>
+      </div>
+      <button id="btn-filter-toggle" class="btn btn-sm btn-filter-toggle" aria-expanded="false" aria-controls="sidebar-filters-panel" aria-label="Bộ lọc dịp lễ và chủ đề" title="Lọc theo dịp lễ, chủ đề">
+        <?= icon('filter') ?><span>Lọc</span>
+        <span id="filter-active-badge" class="filter-active-badge hidden">0</span>
+      </button>
     </div>
 
     <!-- PANEL GOM BỘ LỌC (TỰ ẨN KHI KHÔNG CÓ DỮ LIỆU - TICKET L2-3) -->
@@ -88,7 +91,7 @@
       </div>
 
       <div id="filter-empty-hint" class="filter-empty-hint hidden">
-        Toàn bộ bài hát thuộc Thánh ca (không có bộ lọc phụ)
+        Thư viện chưa có dịp lễ hay chủ đề để lọc thêm.
       </div>
 
       <button id="btn-clear-filters" class="btn btn-xs btn-clear-filters" title="Đặt lại bộ lọc">

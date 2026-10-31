@@ -244,6 +244,65 @@ class ManagerController {
                         }
                         return;
 
+                    case 'manage_song':
+                        $subAction = trim((string)($body['sub_action'] ?? ''));
+                        $songId = trim((string)($body['song_id'] ?? $body['id'] ?? ''));
+                        if (!$songId) {
+                            Response::error('Thiếu mã bài hát (song_id)');
+                            return;
+                        }
+                        if ($subAction === 'update') {
+                            Auth::requireLeader();
+                            $patch = [];
+                            if (array_key_exists('title', $body)) {
+                                $t = trim((string)$body['title']);
+                                if ($t === '') {
+                                    Response::error('Tên bài hát không được để trống');
+                                    return;
+                                }
+                                $patch['title'] = $t;
+                            }
+                            if (array_key_exists('httlvnId', $body)) {
+                                $patch['httlvnId'] = ($body['httlvnId'] !== '' && $body['httlvnId'] !== null) ? (int)$body['httlvnId'] : null;
+                            }
+                            if (array_key_exists('category_id', $body) && (int)$body['category_id'] > 0) {
+                                $patch['category_id'] = (int)$body['category_id'];
+                            }
+                            if (array_key_exists('defaultKey', $body) && trim((string)$body['defaultKey']) !== '') {
+                                $patch['defaultKey'] = trim((string)$body['defaultKey']);
+                            }
+                            if (array_key_exists('composer', $body)) {
+                                $patch['composer'] = trim((string)$body['composer']);
+                            }
+                            $res = SongService::update($songId, $patch);
+                            if (!empty($res['success'])) {
+                                Response::ok(['song' => SongService::getById($songId)], $res['message'] ?? 'Đã cập nhật bài hát');
+                            } else {
+                                Response::error($res['message'] ?? 'Không thể cập nhật bài hát');
+                            }
+                            return;
+                        }
+                        if ($subAction === 'delete') {
+                            Auth::requireAdmin();
+                            $res = SongService::delete($songId, true);
+                            if (!empty($res['success'])) {
+                                Response::ok([], $res['message'] ?? 'Đã xóa bài hát');
+                            } else {
+                                Response::error($res['message'] ?? 'Không thể xóa bài hát');
+                            }
+                            return;
+                        }
+                        Response::error('Thao tác manage_song không hợp lệ');
+                        return;
+
+                    case 'sync_library':
+                        Auth::requireAdmin();
+                        require_once __DIR__ . '/../services/LibrarySyncService.php';
+                        $pushGit = !empty($body['push_git']);
+                        $res = LibrarySyncService::syncAll($pushGit);
+                        Response::ok($res, $res['message'] ?? 'Đồng bộ thư viện thành công');
+                        return;
+
                     default:
                         Response::error('Action POST không hợp lệ');
                         return;

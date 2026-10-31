@@ -176,7 +176,18 @@ foreach ($appAssets as $a) {
     $appLines[] = "  '/{$a}',";
 }
 
+// Hash từng file tĩnh: sw.js chỉ tải lại file đã đổi. HTML/API không có mục (tự làm mới lúc chạy).
+$fileHashes = [];
+foreach ($manifestItems as $relPath => $item) {
+    if ($relPath === '' || str_ends_with($relPath, '.php') || str_starts_with($relPath, 'api/')) continue;
+    $fileHashes['/' . $relPath] = $item['hash'];
+}
+// Một dòng JSON (dữ liệu sinh tự động) để sw.js giữ ngân sách < 600 dòng
+$fileHashJson = json_encode((object) $fileHashes, JSON_UNESCAPED_SLASHES);
+
 $replacements = [
+    '/const PRECACHE_FILE_HASH = \{[\s\S]*?\};/' =>
+        "const PRECACHE_FILE_HASH = {$fileHashJson};",
     '/const PRECACHE_VENDOR = \[[\s\S]*?\]\.map\(p => SW_BASE \+ p\);/' =>
         "const PRECACHE_VENDOR = [\n" . implode("\n", $vendorLines) . "\n].map(p => SW_BASE + p);",
     '/const PRECACHE_APP = \[[\s\S]*?\]\.map\(p => \(SW_BASE && !p\.startsWith\(SW_BASE\)\) \? SW_BASE \+ p : p\);/' =>

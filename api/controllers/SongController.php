@@ -241,7 +241,7 @@ class SongController {
                     Auth::requireAdmin();
                     $id = $_GET['id'] ?? null;
                     if (!$id) { Response::error('Missing id'); return; }
-                    $result = SongService::delete($id);
+                    $result = SongService::delete($id, true);
                     if (!$result['success']) Response::error($result['message'], 400);
                     else Response::ok(['data' => $result] + $result);
                     break;

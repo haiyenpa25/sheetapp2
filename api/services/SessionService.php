@@ -4,6 +4,8 @@
  */
 class SessionService {
     private const DIR = __DIR__ . '/../../storage/data/sessions/';
+    private const MAX_INSTRUMENT_NOTES = 12;
+    private const MAX_INSTRUMENT_NOTE_CHARS = 600;
 
     public static function load(string $songId, int $userId = 0): array {
         if ($userId <= 0) return self::defaults($songId);
@@ -35,10 +37,25 @@ class SessionService {
             'key'       => substr(trim($notes['key']  ?? ''), 0, 20),
             'bpm'       => substr(trim($notes['bpm']  ?? ''), 0, 10),
             'text'      => substr(trim($notes['text'] ?? ''), 0, 2000),
+            'instruments' => self::sanitizeInstrumentNotes($notes['instruments'] ?? []),
             'updatedAt' => $notes['updatedAt'] ?? date('c'),
         ];
         self::write($songId, $userId, array_merge($existing, ['lastSaved' => date('c'), 'perfNotes' => $safe]));
         return $safe;
+    }
+
+    /** Ghi chú theo nhạc cụ: { guitar: '...', drums: '...' } — id an toàn, bỏ dòng rỗng, giới hạn kích thước. */
+    private static function sanitizeInstrumentNotes(mixed $raw): array {
+        if (!is_array($raw)) return [];
+        $clean = [];
+        foreach ($raw as $id => $text) {
+            if (count($clean) >= self::MAX_INSTRUMENT_NOTES) break;
+            $id = is_string($id) ? strtolower($id) : '';
+            if (!preg_match('/^[a-z0-9_-]{1,24}$/', $id) || !is_string($text)) continue;
+            $text = mb_substr(trim($text), 0, self::MAX_INSTRUMENT_NOTE_CHARS);
+            if ($text !== '') $clean[$id] = $text;
+        }
+        return $clean;
     }
 
     private static function file(string $songId, int $userId): string {
