@@ -305,6 +305,7 @@ const OSMDRenderer = (() => {
       _applyCompactMode();
       if (transposeValue !== 0 && osmd.Sheet && opensheetmusicdisplay.TransposeCalculator) {
         osmd.TransposeCalculator = new opensheetmusicdisplay.TransposeCalculator();
+        window.OsmdTransposeSpeller?.install?.(osmd.TransposeCalculator);
         osmd.Sheet.Transpose = transposeValue;
         osmd.updateGraphic?.();
       }
@@ -347,6 +348,7 @@ const OSMDRenderer = (() => {
 
       if (osmd.Sheet && opensheetmusicdisplay.TransposeCalculator) {
           osmd.TransposeCalculator = new opensheetmusicdisplay.TransposeCalculator();
+          window.OsmdTransposeSpeller?.install?.(osmd.TransposeCalculator);
           osmd.Sheet.Transpose = transposeValue;
           osmd.updateGraphic?.();
       }

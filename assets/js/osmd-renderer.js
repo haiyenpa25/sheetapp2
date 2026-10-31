@@ -222,6 +222,7 @@ const OSMDRenderer = (() => {
     if (transposeValue === 0 && !force) return;
     if (!osmd.TransposeCalculator) {
       osmd.TransposeCalculator = new opensheetmusicdisplay.TransposeCalculator();
+      window.OsmdTransposeSpeller?.install?.(osmd.TransposeCalculator);
     }
     osmd.Sheet.Transpose = transposeValue;
     osmd.updateGraphic?.();

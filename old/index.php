@@ -211,6 +211,7 @@ echo jsTag('core/OSMDRenderCore.js', false);
 echo jsTag('core/ServiceWorkerManager.js', false);
 
 // ── 2. Renderers & Engines (defer OK) ──
+echo jsTag('osmd-transpose-speller.js');
 echo jsTag('osmd-renderer.js');
 echo jsTag('lyric-extractor.js');
 echo jsTag('transpose-engine.js');
