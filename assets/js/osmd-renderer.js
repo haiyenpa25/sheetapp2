@@ -8,7 +8,7 @@ const OSMDRenderer = (() => {
 
   let osmd = null, containerId = null, currentXmlString = null, currentZoom = 1.0;
   let isLoaded = false, _onReadyCallbacks = [], _isCompactMode = false, _titleCompacted = false;
-  let _compactVisibility = null, _compactBassHidden = false; let _renderToken = 0;
+  let _compactVisibility = null, _compactBassHidden = false; let _renderToken = 0; let _appliedTranspose = 0;
   let _renderCount = 0, _lastContainerWidth = 0, _pendingRender = false, _initOptions = {};
   const OSMD_LOCAL_SRC = 'assets/js/vendor/opensheetmusicdisplay.min.js', OSMD_CDN_SRC = 'https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.6/build/opensheetmusicdisplay.min.js';
   function _createInstanceSync() {
@@ -175,7 +175,7 @@ const OSMDRenderer = (() => {
     isLoaded = false;
 
     try {
-      await osmd.load(processedInput);
+      await osmd.load(processedInput); _appliedTranspose = 0;
       if (token !== _renderToken) return osmd; // Bị hủy bởi lần load mới hơn
 
       osmd.zoom = currentZoom;
@@ -215,8 +215,7 @@ const OSMDRenderer = (() => {
    * @param {string} xmlString - Nội dung XML đã được xử lý
    * @param {number} transposeValue - Số nửa cung để dịch
    */
-  // osmd.load() đã dựng GraphicalMusicSheet: chỉ gán Transpose rồi render() thì nốt đổi
-  // nhưng chữ hợp âm giữ tông cũ → phải updateGraphic() để TransposeCalculator áp lên hợp âm.
+  // load() đã dựng GraphicalMusicSheet: gán Transpose rồi phải updateGraphic() để nốt và chữ hợp âm cùng đổi.
   function _applyTranspose(transposeValue, force = false) {
     if (!osmd?.Sheet || !opensheetmusicdisplay.TransposeCalculator) return;
     if (transposeValue === 0 && !force) return;
@@ -224,7 +223,7 @@ const OSMDRenderer = (() => {
       osmd.TransposeCalculator = new opensheetmusicdisplay.TransposeCalculator();
       window.OsmdTransposeSpeller?.install?.(osmd.TransposeCalculator);
     }
-    osmd.Sheet.Transpose = transposeValue;
+    osmd.Sheet.Transpose = transposeValue; _appliedTranspose = transposeValue;
     osmd.updateGraphic?.();
   }
 
@@ -234,7 +233,7 @@ const OSMDRenderer = (() => {
     if (xmlString) currentXmlString = xmlString;
     try {
       const processedXml = preprocessXML(currentXmlString);
-      await osmd.load(processedXml);
+      await osmd.load(processedXml); _appliedTranspose = 0;
       if (token !== _renderToken) return osmd; // Bị hủy bởi lần reload mới hơn
 
       osmd.zoom = currentZoom;
@@ -275,6 +274,10 @@ const OSMDRenderer = (() => {
    */
   async function transpose(transposeValue = 0) {
     if (!osmd || !osmd.Sheet) throw new Error('OSMD chưa load Sheet để transpose');
+    // Về tông gốc: OSMD giữ khoá nhạc đã dịch trong bản vẽ → nốt hiện ♮/♯ thừa; dựng lại từ XML gốc cho sạch.
+    if (transposeValue === 0 && _appliedTranspose !== 0) {
+      await reload(null, 0); window.ChordCanvasDots?.clearGeomCache?.(); window.ChordCanvas?.reposition?.(); window.ChordOverlay?.onOSMDRendered?.(); return osmd;
+    }
     const token = ++_renderToken;
     try {
       _applyTranspose(transposeValue, true);
