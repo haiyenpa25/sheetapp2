@@ -339,11 +339,12 @@
 
       if (roleBadge) {
         roleBadge.className = `mgr-user-role role-${u.role}`;
-        roleBadge.textContent = u.role === 'admin' ? 'Quản Trị' : (u.role === 'banhat' ? 'Ban Hát' : 'Viewer');
+        roleBadge.textContent = { admin: 'Quản Trị', leader: 'Ca Trưởng', bannhac: 'Ban Nhạc', banhat: 'Ban Hát' }[u.role] || 'Viewer';
       }
 
       if (tabUsers) {
-        tabUsers.style.display = (u.role === 'admin' || u.role === 'banhat') ? '' : 'none';
+        // Khớp máy chủ: route manager&action=users yêu cầu Ban Hát trở lên.
+        tabUsers.style.display = ['admin', 'leader', 'bannhac', 'banhat'].includes(u.role) ? '' : 'none';
       }
     } else {
       authGuestBox?.classList.remove('hidden');

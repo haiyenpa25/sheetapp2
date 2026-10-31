@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-10-28 — Nghiệm thu đợt fix R9 theo ROADMAP_R9_REVIEW (F1–F9, Q1–Q3, P0–P5)
+
+- Phân quyền & chống mất dữ liệu bộ hợp âm chuẩn HD (`F1`, `F2`, `Q1`, `Q2`): đồng bộ `username` và `chord_code` từ CSDL trong `Auth::checkDb()`; tìm kiếm người dùng không phân biệt hoa thường ở `UserService::findByUsername`; `ChordSetController` chỉ cấp quyền sửa trực tiếp bộ `HD` cho Admin hoặc chủ sở hữu có `chord_code = 'HD'` (chặn tài khoản giả mạo `HoaiDinh` không có `chord_code` với HTTP 403). Cấm ghi đè bộ `HD` bằng thao tác sao chép (`action === 'clone'` trả 403, ẩn nút `#cc-clone-copy` khi đích là `HD`).
+- Sửa lỗi cuộn danh sách bài khi bấm "Xem thêm" (`F3`, `P2-3`) và quyền tạo bộ mới / chuyển bài (`F6`, `F8`, `P2-4`): `LibrarySearch.run` truyền `searchAppend: offset > 0`, `LibraryUI.render` (Modern & Classic) giữ nguyên `scrollTop` khi nạp thêm trang; nhạc công Ban Hát đã ở bộ cá nhân gọi `showNewSetModal()` bật sửa ngay trên bộ của mình thay vì mở modal báo lỗi 403; Classic `/old/` tắt `_editEnabled` khi chuyển sang bộ không có quyền sửa trực tiếp; `applyPreloaded` kiểm tra `#osmd-container svg` trước khi gọi `_build()`.
+- Chuẩn hoá tông & dịch giọng (`F4`, `F7`, `Q3`, `P2-5`, `P3-1`): tôn trọng `<fifths>0</fifths>` trong MusicXML (chỉ fallback sang `defaultKey` khi XML thiếu `<fifths>` và `currentSong.id` khớp bài đang mở); kiểm chứng ma trận 7.392 phép thử `TransposeEngine.transposeChord` & `KeyService.displayKey` (không bao giờ xuất `A#`, `G#`, `D#` cho giọng/hợp âm trưởng).
+- Khôi phục `assets/js/chord-canvas-dots.js` về HEAD & chuẩn hoá EOL (`F5`, `F9`, `P0-3`): xoá diff 1.169 dòng do đổi CRLF/LF; nâng cấp `tests/r9_ui_transpose_chord_guest_setlist_regression.php` lên kiểm thử hành vi thật (8/8 PASS); lưu đầy đủ bằng chứng `P0`–`P5` tại `docs/fix-evidence/r9/`.
+
 ## A · Nhật ký 2026-10-18 → 2026-10-21
 
 ## 2026-10-22 — Hoàn tất Giai đoạn 1 (BUG-01…41) & gia cố bảo mật PHP (CVE-2026-109618/109619)

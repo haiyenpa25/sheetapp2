@@ -64,6 +64,10 @@
           <label class="form-label">Mật khẩu</label>
           <input id="auth-password-input" type="password" class="form-input" placeholder="Mật khẩu" autocomplete="current-password">
         </div>
+        <div class="auth-remember" style="display:flex;flex-direction:column;gap:4px;">
+          <label style="display:flex;align-items:center;gap:8px;min-height:36px;font-size:.78rem;line-height:1.3;cursor:pointer;touch-action:manipulation;"><input type="checkbox" id="auth-save-username" style="width:18px;height:18px;flex:none;"> <span>Lưu tài khoản</span></label>
+          <label style="display:flex;align-items:center;gap:8px;min-height:36px;font-size:.78rem;line-height:1.3;cursor:pointer;touch-action:manipulation;"><input type="checkbox" id="auth-keep-login" style="width:18px;height:18px;flex:none;"> <span>Giữ đăng nhập trên thiết bị này (30 ngày) <small>— không bật trên máy dùng chung</small></span></label>
+        </div>
         <p id="auth-error" class="text-sm text-danger mt-half hidden"></p>
         <button id="btn-do-login" class="btn btn-primary w-full mt-1">Đăng Nhập</button>
       </div>
@@ -71,6 +75,7 @@
         <p class="text-muted mb-1">Đang đăng nhập với quyền <strong id="auth-role-display"></strong></p>
         <p id="auth-perm-summary" class="text-xs text-muted" style="line-height:1.7; margin-bottom:.75rem; text-align:left; padding:.5rem .75rem; background:var(--bg-overlay); border-radius:var(--radius-sm); border:1px solid var(--border);"></p>
         <button id="btn-do-logout" class="btn btn-danger w-full">Đăng Xuất</button>
+        <button type="button" id="btn-logout-all" class="btn btn-ghost w-full" style="min-height:36px;font-size:.78rem;touch-action:manipulation;margin-top:6px;">Đăng xuất khỏi mọi thiết bị</button>
       </div>
     </div>
   </div>

@@ -41,7 +41,7 @@
             <div class="mgr-user-info">
               <span class="mgr-user-name">@<?= htmlspecialchars($username) ?></span>
               <span class="mgr-user-role role-<?= htmlspecialchars($userRole) ?>">
-                <?= $userRole === 'admin' ? '🛡️ Quản Trị' : ($userRole === 'banhat' ? '🎸 Ban Hát' : '👁️ Thành Viên') ?>
+                <?= ['admin' => '🛡️ Quản Trị', 'leader' => '🎼 Ca Trưởng', 'bannhac' => '🎸 Ban Nhạc', 'banhat' => '🎤 Ban Hát'][$userRole] ?? '👁️ Thành Viên' ?>
               </span>
             </div>
             <button class="mgr-btn mgr-btn-ghost mgr-btn-xs" id="btn-open-profile" title="Quản lý hồ sơ & đổi mật khẩu">

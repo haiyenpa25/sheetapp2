@@ -383,7 +383,7 @@ const ApiService = (() => {
     login:         (data)     => { _clearAuthCaches(); return _json('POST', 'api/index.php?route=auth&action=login', data); },
     register:      (data)     => _json('POST', 'api/index.php?route=auth&action=register', data),
     updateProfile: (data)     => _json('POST', 'api/index.php?route=auth&action=update_profile', data),
-    logout:        ()         => { _clearAuthCaches(); return _request('api/index.php?route=auth&action=logout', { method: 'POST' }); },
+    logout:        (opts)     => { _clearAuthCaches(); return opts?.allDevices ? _json('POST', 'api/index.php?route=auth&action=logout', { all_devices: true }) : _request('api/index.php?route=auth&action=logout', { method: 'POST' }); },
   };
 
   const omr = {

@@ -156,8 +156,11 @@ class ManagerRepertoireHelper {
                 $name = trim($data['name'] ?? '');
                 $icon = trim($data['icon'] ?? '🎵');
                 $desc = trim($data['description'] ?? '');
-                $order = (int)($data['display_order'] ?? 0);
                 if (!$id || !$name) return ['success' => false, 'message' => 'Thiếu dữ liệu'];
+                // Không gửi display_order thì giữ thứ tự hiện có (trước đây bị ghi đè về 0 → nhảy lên đầu).
+                $order = isset($data['display_order']) && $data['display_order'] !== ''
+                    ? (int)$data['display_order']
+                    : (int)$pdo->query('SELECT display_order FROM categories WHERE id = ' . $id)->fetchColumn();
 
                 try {
                     $res = CategoryService::update($id, $name, isset($data['visibility']) ? (string)$data['visibility'] : null);

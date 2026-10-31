@@ -126,3 +126,7 @@ body:not(.has-member-access) #btn-header-manager { display: none !important; }
   /* Khách + đã cài app: dòng hành động trống (nút Quản lý ẩn, nút Cài đặt ẩn) → bỏ luôn khoảng trống */
   body:not(.has-member-access) .sidebar .sidebar-actions:has(> #btn-pwa-install.hidden) { display: none !important; }
 }
+
+/* Sàn cỡ chữ 11px cho nhãn nhỏ (số bài, tông, đếm, đơn vị tempo...) — trước đây 8,75–10px khó đọc trên điện thoại */
+body .song-item-num, body .song-key-badge, body .library-count-badge, body .tempo-unit,
+body .deck-glyph, body .feat-icon, body small, body .btn-sm, body .btn-xs { font-size: max(11px, 1em); }

@@ -184,6 +184,10 @@
             <label class="form-label" class="text-xs text-muted font-semibold d-block mb-1">Mật khẩu</label>
             <input id="auth-password-input" type="password" class="form-input" placeholder="Mật khẩu" autocomplete="current-password" class="p-btn-sm">
           </div>
+          <div class="auth-remember" style="display:flex;flex-direction:column;gap:4px;">
+            <label style="display:flex;align-items:center;gap:8px;min-height:36px;font-size:.78rem;line-height:1.3;cursor:pointer;touch-action:manipulation;"><input type="checkbox" id="auth-save-username" style="width:18px;height:18px;flex:none;"> <span>Lưu tài khoản</span></label>
+            <label style="display:flex;align-items:center;gap:8px;min-height:36px;font-size:.78rem;line-height:1.3;cursor:pointer;touch-action:manipulation;"><input type="checkbox" id="auth-keep-login" style="width:18px;height:18px;flex:none;"> <span>Giữ đăng nhập trên thiết bị này (30 ngày) <small>— không bật trên máy dùng chung</small></span></label>
+          </div>
           <p id="auth-error" class="text-sm text-danger hidden" style="margin: 0; font-size: 0.75rem;"></p>
           <button id="btn-do-login" class="btn btn-primary w-full" style="padding: 8px 12px; font-size: 0.85rem; font-weight: 700; margin-top: 3px;">
             <?= icon('lock', 'icon-xs') ?> Đăng Nhập (Để Sửa Hợp Âm Riêng)
@@ -222,6 +226,7 @@
             Đăng Xuất
           </button>
         </div>
+        <button type="button" id="btn-logout-all" class="btn btn-ghost w-full" style="min-height:36px;font-size:.78rem;touch-action:manipulation;margin-top:6px;">Đăng xuất khỏi mọi thiết bị</button>
       </div>
 
       <!-- KHUNG BẮT BUỘC ĐỔI MẬT KHẨU YẾU / MẶC ĐỊNH -->

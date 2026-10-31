@@ -1,0 +1,53 @@
+<?php
+declare(strict_types=1);
+// SUITE_TYPE: behavioral
+require_once __DIR__.'/fixtures/test_db_fixture.php';
+require_once __DIR__.'/../api/core/Session.php';
+require_once __DIR__.'/../api/core/RememberLogin.php';
+$pdo=createTestDatabase();DB::setPdo($pdo);$total=0;$failed=0;
+function rl(bool $ok,string $m):void{global $total,$failed;$total++;if(!$ok)$failed++;echo($ok?'[PASS:B] ':'[FAIL:B] ').$m."\n";}
+$uid=(int)$pdo->query("SELECT id FROM users WHERE status='active' LIMIT 1")->fetchColumn();
+rl($uid>0,'Có user hoạt động trong fixture');
+$c=RememberLogin::issue($pdo,$uid,'UA');
+rl((bool)preg_match('/^[a-f0-9]{18}:[a-f0-9]{64}$/',$c),'Cookie có dạng selector:validator');
+$stored=(string)$pdo->query("SELECT token_hash FROM auth_remember_tokens")->fetchColumn();
+rl(strpos($c,$stored)===false && strlen($stored)===64,'CSDL chỉ lưu băm, không lưu validator');
+$r=RememberLogin::consume($pdo,$c,'UA');
+rl($r!==null && (int)$r['user']['id']===$uid,'Token hợp lệ trả đúng user');
+rl($r!==null && $r['cookie']!==$c && explode(':',$r['cookie'])[0]===explode(':',$c)[0],'Validator được xoay, selector giữ nguyên');
+$g=RememberLogin::consume($pdo,$c,'UA');
+rl($g!==null && $g['cookie']===null && (int)$g['user']['id']===$uid,'Request song song mang cookie cũ trong 20s ân hạn vẫn vào được, không xoay lần nữa');
+rl((int)$pdo->query("SELECT COUNT(*) FROM auth_remember_tokens")->fetchColumn()===1,'Ân hạn không làm mất token');
+$pdo->exec("UPDATE auth_remember_tokens SET prev_until=".(time()-1));
+$extra=RememberLogin::issue($pdo,$uid);
+rl(RememberLogin::consume($pdo,$c,'UA')===null,'Cookie cũ quá ân hạn bị từ chối');
+rl((int)$pdo->query("SELECT COUNT(*) FROM auth_remember_tokens")->fetchColumn()===0,'Dùng cookie cũ quá hạn hủy MỌI token của user (nghi bị đánh cắp)');
+rl(RememberLogin::consume($pdo,$extra)===null,'Token thiết bị khác của user cũng bị hủy');
+$c=RememberLogin::issue($pdo,$uid);
+RememberLogin::revokeCookie($pdo,$c);
+rl(RememberLogin::consume($pdo,$c)===null,'Đăng xuất (revokeCookie) vô hiệu token');
+$c=RememberLogin::issue($pdo,$uid);
+$pdo->exec("UPDATE auth_remember_tokens SET expires_at=".(time()-5));
+rl(RememberLogin::consume($pdo,$c)===null,'Token hết hạn bị từ chối');
+$c=RememberLogin::issue($pdo,$uid);
+$pdo->prepare("UPDATE users SET status='locked' WHERE id=?")->execute([$uid]);
+rl(RememberLogin::consume($pdo,$c)===null,'Tài khoản bị khóa không dùng được token');
+$pdo->prepare("UPDATE users SET status='active' WHERE id=?")->execute([$uid]);
+$a=RememberLogin::issue($pdo,$uid);$b=RememberLogin::issue($pdo,$uid);
+RememberLogin::revokeAllForUser($pdo,$uid);
+rl(RememberLogin::consume($pdo,$a)===null&&RememberLogin::consume($pdo,$b)===null,'Đổi mật khẩu hủy mọi thiết bị');
+rl(RememberLogin::consume($pdo,'rác')===null&&RememberLogin::consume($pdo,str_repeat('a',18).':'.str_repeat('b',64))===null,'Cookie rác/không tồn tại bị từ chối');
+$_COOKIE=[];$_SESSION=[];$c=RememberLogin::issue($pdo,$uid);$_COOKIE[RememberLogin::COOKIE]=$c;
+RememberLogin::restoreSession();
+rl((int)($_SESSION['user_id']??0)===$uid && !empty($_SESSION['role']),'restoreSession dựng lại phiên từ cookie');
+$ui=file_get_contents(__DIR__.'/../includes/modals.php').file_get_contents(__DIR__.'/../old/includes/modals.php');
+rl(substr_count($ui,'id="auth-save-username"')===2&&substr_count($ui,'id="auth-keep-login"')===2,'Cả 2 giao diện có 2 ô: Lưu tài khoản + Giữ đăng nhập');
+rl(strpos($ui,'id="auth-keep-login" style')!==false && !preg_match('/id="auth-keep-login"[^>]*checked/',$ui),'Giữ đăng nhập mặc định TẮT');
+foreach(['assets/js/auth.js','old/assets/js/auth.js'] as $f){$j=file_get_contents(__DIR__.'/../'.$f);
+ rl(strpos($j,'remember: choices.keepLogin')!==false&&strpos($j,'sheetapp_saved_username')!==false,"$f gửi remember và lưu tên tài khoản");
+ rl(!preg_match('/localStorage[^;]*password/i',$j),"$f không lưu mật khẩu vào máy");}
+$mh=file_get_contents(__DIR__.'/../api/services/ManagerUserHelper.php');
+rl(substr_count($mh,'RememberLogin::revokeAllForUser')>=4,'Admin: đặt lại mật khẩu/sửa hồ sơ có mật khẩu/xóa/khóa đều hủy token giữ đăng nhập');
+rl(substr_count($ui,'id="btn-logout-all"')===2,'Cả 2 giao diện có nút Đăng xuất khỏi mọi thiết bị');
+rl(strpos(file_get_contents(__DIR__.'/../assets/js/core/ApiService.js'),'all_devices: true')!==false,'ApiService.logout gửi all_devices');
+echo "SUITE_COMPLETE total={$total}\n";exit($failed?1:0);

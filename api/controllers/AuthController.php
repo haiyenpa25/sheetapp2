@@ -3,8 +3,10 @@
  * api/controllers/AuthController.php
  */
 require_once __DIR__ . '/../core/Response.php';
+require_once __DIR__ . '/../core/DB.php';
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../core/LoginRateLimiter.php';
+require_once __DIR__ . '/../core/RememberLogin.php';
 require_once __DIR__ . '/../services/UserService.php';
 
 class AuthController {
@@ -42,8 +44,21 @@ class AuthController {
                     $_SESSION['voice_part']           = $user['voice_part'] ?? null;
                     $_SESSION['must_change_password'] = $mustChange;
 
+                    // Mặc định KHÔNG giữ đăng nhập (máy dùng chung); chỉ khi người dùng tích chọn.
+                    $remember = !empty($data['remember']) && !$mustChange;
+                    try {
+                        $pdo = DB::get();
+                        if (!empty($_COOKIE[RememberLogin::COOKIE])) RememberLogin::revokeCookie($pdo, (string)$_COOKIE[RememberLogin::COOKIE]);
+                        if ($remember) {
+                            RememberLogin::setCookie(RememberLogin::issue($pdo, (int)$user['id'], (string)($_SERVER['HTTP_USER_AGENT'] ?? '')));
+                        } else {
+                            RememberLogin::setCookie('', 0);
+                        }
+                    } catch (Throwable $e) { /* đăng nhập vẫn thành công, chỉ không giữ phiên */ }
+
                     Response::ok([
                         'user_id'              => $user['id'],
+                        'remembered'           => $remember,
                         'role'                 => $user['role'],
                         'username'             => $user['username'],
                         'display_name'         => $user['display_name'] ?? $user['username'],
@@ -143,6 +158,8 @@ class AuthController {
                     if ($instrument !== null) $_SESSION['instrument'] = $instrument;
                     if (!empty($newPass)) {
                         $_SESSION['must_change_password'] = false;
+                        // Đổi mật khẩu: mọi thiết bị đang "giữ đăng nhập" phải đăng nhập lại.
+                        try { RememberLogin::revokeAllForUser(DB::get(), (int)$userId); RememberLogin::setCookie('', 0); } catch (Throwable $e) {}
                     }
                     Response::ok(array_merge($updatedUser, [
                         'must_change_password' => !empty($_SESSION['must_change_password']),
@@ -159,6 +176,14 @@ class AuthController {
 
             case 'logout':
                 if ($method !== 'POST') { Response::methodNotAllowed(); return; }
+                try {
+                    $pdo = DB::get();
+                    if (!empty($_COOKIE[RememberLogin::COOKIE])) RememberLogin::revokeCookie($pdo, (string)$_COOKIE[RememberLogin::COOKIE]);
+                    if (!empty($_POST['all_devices']) || (json_decode(file_get_contents('php://input'), true)['all_devices'] ?? false)) {
+                        if (Auth::isLoggedIn()) RememberLogin::revokeAllForUser($pdo, (int)Auth::userId());
+                    }
+                } catch (Throwable $e) {}
+                RememberLogin::setCookie('', 0);
                 $_SESSION = [];
                 if (ini_get('session.use_cookies')) {
                     $params = session_get_cookie_params();

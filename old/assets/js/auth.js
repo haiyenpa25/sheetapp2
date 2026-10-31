@@ -30,10 +30,41 @@ const Auth = (() => {
     }
   }
 
+
+  // Lưu tài khoản (chỉ TÊN, không bao giờ lưu mật khẩu) + tùy chọn giữ đăng nhập trên thiết bị này.
+  const LS_SAVED_USER = 'sheetapp_saved_username';
+  const LS_KEEP_LOGIN = 'sheetapp_keep_login';
+  function _lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function _lsSet(k, v) { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) { /* chế độ riêng tư */ } }
+
+  function _applyLoginPrefs() {
+    const saved = _lsGet(LS_SAVED_USER);
+    const userInput = document.getElementById('auth-username-input');
+    const saveBox = document.getElementById('auth-save-username');
+    const keepBox = document.getElementById('auth-keep-login');
+    if (saveBox) saveBox.checked = !!saved;
+    if (keepBox) keepBox.checked = _lsGet(LS_KEEP_LOGIN) === '1';
+    if (saved && userInput && !userInput.value) userInput.value = saved;
+  }
+
+  function _rememberChoices() {
+    return {
+      saveUsername: !!document.getElementById('auth-save-username')?.checked,
+      keepLogin: !!document.getElementById('auth-keep-login')?.checked,
+    };
+  }
+
+  function _persistLoginPrefs(username, { saveUsername, keepLogin }) {
+    _lsSet(LS_SAVED_USER, saveUsername ? username : null);
+    _lsSet(LS_KEEP_LOGIN, keepLogin ? '1' : null);
+  }
+
   async function doLogin(username, password) {
     try {
-      const data = await window.ApiService.auth.login({ username, password });
+      const choices = _rememberChoices();
+      const data = await window.ApiService.auth.login({ username, password, remember: choices.keepLogin });
       if (data.success) {
+        _persistLoginPrefs(username.trim(), choices);
         _currentUser = data.username;
         _role = data.role;
         _chordCode = data.chord_code || null;
@@ -53,8 +84,9 @@ const Auth = (() => {
     }
   }
 
-  async function doLogout() {
-    await window.ApiService.auth.logout();
+  // allDevices === true: hủy luôn "giữ đăng nhập" trên mọi thiết bị (tham số khác, vd. event click, bị bỏ qua).
+  async function doLogout(allDevices) {
+    await window.ApiService.auth.logout({ allDevices: allDevices === true });
     _currentUser = null;
     _role = 'viewer';
     _chordCode = null;
@@ -199,7 +231,10 @@ const Auth = (() => {
       if (e.key === 'Enter') document.getElementById('btn-do-login').click();
     });
 
-    document.getElementById('btn-do-logout')?.addEventListener('click', doLogout);
+    document.getElementById('btn-do-logout')?.addEventListener('click', () => doLogout());
+    document.getElementById('btn-logout-all')?.addEventListener('click', () => {
+      if (confirm('Đăng xuất khỏi TẤT CẢ thiết bị đang giữ đăng nhập?')) doLogout(true);
+    });
     
     checkSession();
   }
@@ -207,6 +242,7 @@ const Auth = (() => {
   function openModal() {
     const el = document.getElementById('auth-error');
     if (el) el.classList.add('hidden');
+    _applyLoginPrefs();
     document.getElementById('auth-modal')?.classList.remove('hidden');
   }
 

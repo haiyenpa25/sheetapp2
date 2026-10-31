@@ -165,6 +165,8 @@ class UserService {
                 "UPDATE users SET display_name = ?, instrument = ?, chord_code = ?, role = ?, voice_part = ?, password_hash = ? WHERE id = ?",
                 [$displayName, $instrument, $chordCode, $role, $voicePart, $hash, $id]
             );
+            require_once __DIR__ . '/../core/RememberLogin.php';
+            RememberLogin::revokeAllForUser(DB::get(), (int)$id);
         } else {
             DB::run(
                 "UPDATE users SET display_name = ?, instrument = ?, chord_code = ?, role = ?, voice_part = ? WHERE id = ?",

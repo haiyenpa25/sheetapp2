@@ -70,7 +70,7 @@ const AdminUI = (() => {
   async function loadCategories() {
     try {
       const res = await window.ApiService.categories.list();
-      currentCategories = res.data || [];
+      currentCategories = Array.isArray(res) ? res : (res.data || []);
       
       const tbody = document.querySelector('#admin-categories-table tbody');
       if (!tbody) return;
@@ -242,6 +242,8 @@ const AdminUI = (() => {
             <td>
               <select class="form-input" ${amIOwner ? 'disabled' : ''} style="padding:0.2rem; font-size:0.8rem;" onchange="AdminUI.updateUserRole(${u.id}, this.value)">
                 <option value="admin"  ${u.role === 'admin'  ? 'selected' : ''}>Admin (Quản Trị)</option>
+                <option value="leader" ${u.role === 'leader' ? 'selected' : ''}>Ca Trưởng (duyệt, giao bài)</option>
+                <option value="bannhac" ${u.role === 'bannhac' ? 'selected' : ''}>Ban Nhạc (hợp âm riêng)</option>
                 <option value="banhat" ${u.role === 'banhat' ? 'selected' : ''}>Ban Hát (thêm hợp âm)</option>
                 <option value="viewer" ${u.role === 'viewer' ? 'selected' : ''}>Viewer (Khách)</option>
               </select>

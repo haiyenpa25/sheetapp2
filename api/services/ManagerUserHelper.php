@@ -9,6 +9,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../core/DB.php';
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../core/AuditLogger.php';
+require_once __DIR__ . '/../core/RememberLogin.php';
 require_once __DIR__ . '/UserService.php';
 
 class ManagerUserHelper {
@@ -138,6 +139,7 @@ class ManagerUserHelper {
                     $hash = password_hash($newPass, PASSWORD_DEFAULT);
                     $upd = $pdo->prepare("UPDATE users SET display_name = ?, instrument = ?, chord_code = ?, role = ?, voice_part = ?, password_hash = ? WHERE id = ?");
                     $upd->execute([$displayName, $instrument, $chordCode, $newRole, $newVoicePart, $hash, $userId]);
+                    RememberLogin::revokeAllForUser($pdo, $userId);
                 } else {
                     $upd = $pdo->prepare("UPDATE users SET display_name = ?, instrument = ?, chord_code = ?, role = ?, voice_part = ? WHERE id = ?");
                     $upd->execute([$displayName, $instrument, $chordCode, $newRole, $newVoicePart, $userId]);
@@ -211,6 +213,7 @@ class ManagerUserHelper {
                 $hash = password_hash($newPass, PASSWORD_DEFAULT);
                 $upd = $pdo->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
                 $upd->execute([$hash, $userId]);
+                RememberLogin::revokeAllForUser($pdo, $userId);
 
                 AuditLogger::log('user_password_reset', Auth::userId(), $userId, []);
 
@@ -236,6 +239,7 @@ class ManagerUserHelper {
 
                 $del = $pdo->prepare("DELETE FROM users WHERE id = ?");
                 $del->execute([$userId]);
+                RememberLogin::revokeAllForUser($pdo, $userId);
 
                 AuditLogger::log('user_delete', Auth::userId(), $userId, [
                     'username' => $target['username']
@@ -263,6 +267,7 @@ class ManagerUserHelper {
 
                 $upd = $pdo->prepare("UPDATE users SET status = ? WHERE id = ?");
                 $upd->execute([$newStatus, $userId]);
+                if ($newStatus === 'locked') RememberLogin::revokeAllForUser($pdo, $userId);
 
                 AuditLogger::log('user_status_toggle', Auth::userId(), $userId, [
                     'new_status' => $newStatus

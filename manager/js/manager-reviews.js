@@ -41,7 +41,8 @@
 
     const app = _getApp();
     const role = app?.state?.currentUser?.role;
-    if (role !== 'admin' && role !== 'banhat') return;
+    // Khớp máy chủ (AuthPolicy review_chord_set): chỉ Ca Trưởng và Admin xem hàng đợi phê duyệt.
+    if (role !== 'admin' && role !== 'leader') return;
 
     const tbody = document.getElementById('tbody-reviews-queue');
     if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="mgr-table-loading"><div class="mgr-spinner"></div>Đang tải hàng đợi phê duyệt...</td></tr>';
