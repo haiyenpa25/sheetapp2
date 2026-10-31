@@ -388,6 +388,16 @@ class SongService {
         try {
             DB::run($sql, $params);
             self::syncSongFts($id);
+            if (array_key_exists('category_id', $data) || array_key_exists('visibility', $data) || array_key_exists('is_public', $data)) {
+                // Đổi danh mục/quyền: đưa file XML về đúng thư mục công khai hoặc kho riêng (lỗi không làm hỏng cập nhật).
+                try {
+                    require_once __DIR__ . '/SongXmlRelocator.php';
+                    SongXmlRelocator::relocate($id);
+                    self::invalidateCache();
+                } catch (\Throwable $e) {
+                    error_log('SheetApp relocate XML failed: ' . $e->getMessage());
+                }
+            }
             return ['success' => true, 'message' => 'Cập nhật thành công'];
         } catch (\PDOException $e) {
             error_log('SheetApp song update failed: ' . $e->getMessage());

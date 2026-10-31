@@ -136,6 +136,11 @@
         throw abortErr;
       }
 
+      // Đường dẫn trả về trang lỗi/HTML hoặc file nén (.mxl chưa giải nén) → báo rõ thay vì đưa chuỗi hỏng cho OSMD.
+      if (typeof xml === 'string' && (xml.startsWith('PK') || /^\s*(?:<!doctype\s+html|<html)/i.test(xml))) {
+        throw new Error('Tệp bản nhạc không phải MusicXML hợp lệ (có thể là .mxl chưa giải nén hoặc đường dẫn bị lỗi).');
+      }
+
       if (!songObj.versionId && rawXmlPath && window.OfflineVault?.saveXml) {
         try { window.OfflineVault.saveXml(rawXmlPath, xml); } catch (_) {}
       }

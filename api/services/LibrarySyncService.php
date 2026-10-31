@@ -81,6 +81,10 @@ class LibrarySyncService {
                 }
             }
 
+            // Bài đã đổi danh mục nhưng file còn ở thư mục danh mục cũ → chuyển sang đúng thư mục.
+            require_once __DIR__ . '/SongXmlRelocator.php';
+            if (SongXmlRelocator::relocate($songId, $pdo)['moved']) $movedFiles++;
+
             // Đảm bảo có bộ hợp âm HD chuẩn trên DB (và trên đĩa nếu có hợp âm > 0)
             $hdStmt = $pdo->prepare("SELECT chord_count, chords_json FROM user_chord_sets WHERE song_id = ? AND set_name = 'HD' LIMIT 1");
             $hdStmt->execute([$songId]);
@@ -298,6 +302,22 @@ class LibrarySyncService {
      * 3) Tùy chọn commit & push lên GitHub để Web và Local dùng chung 1 kho dữ liệu
      */
     public static function syncAll(bool $pushGit = false): array {
+        // Chống bấm đúp / hai người đồng bộ cùng lúc (tránh .git/index.lock làm kẹt kho Git).
+        $lockDir = self::rootDir() . '/storage/logs';
+        if (!is_dir($lockDir)) @mkdir($lockDir, 0775, true);
+        $lock = @fopen($lockDir . '/library_sync.lock', 'c');
+        if ($lock && !flock($lock, LOCK_EX | LOCK_NB)) {
+            fclose($lock);
+            return ['success' => false, 'message' => 'Đang có một lần đồng bộ khác chạy, vui lòng thử lại sau ít phút.', 'busy' => true];
+        }
+        try {
+            return self::syncAllLocked($pushGit);
+        } finally {
+            if ($lock) { flock($lock, LOCK_UN); fclose($lock); }
+        }
+    }
+
+    private static function syncAllLocked(bool $pushGit): array {
         $norm = self::normalizePublicSongs();
         $seed = self::exportSeed();
 
@@ -314,9 +334,10 @@ class LibrarySyncService {
         $gitInfo['changed'] = count(array_filter($statusOut, static fn($l) => trim($l) !== ''));
 
         if ($pushGit && $gitInfo['changed'] > 0) {
-            $gitCmd = "git -C {$cmdRoot} add -- \"storage/Thanh ca\" storage/data/chord_sets storage/seed/library.sqlite storage/seed/library.manifest.json 2>&1"
+            // GIT_TERMINAL_PROMPT=0: không treo chờ nhập mật khẩu; timeout 120 giây cho cả chuỗi lệnh.
+            $gitCmd = "GIT_TERMINAL_PROMPT=0 timeout 120 sh -c " . escapeshellarg("git -C {$cmdRoot} add -- \"storage/Thanh ca\" storage/data/chord_sets storage/seed/library.sqlite storage/seed/library.manifest.json 2>&1"
                 . " && git -C {$cmdRoot} commit -m " . escapeshellarg('chore(library): sync categories, songs XML & library seed') . " 2>&1"
-                . " && git -C {$cmdRoot} push origin main 2>&1";
+                . " && git -C {$cmdRoot} push origin main 2>&1");
             $pushOut = [];
             $pushCode = 0;
             @exec($gitCmd, $pushOut, $pushCode);

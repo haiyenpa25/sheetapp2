@@ -208,7 +208,37 @@ class ChordSetService {
         // 2. Ghi ra file disk (Write-through cache)
         $file = self::getSetFile($songId, $name, true);
         $jsonPretty = json_encode($chords, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-        return file_put_contents($file, $jsonPretty) !== false;
+        $written = file_put_contents($file, $jsonPretty) !== false;
+        if ($written && $name === 'HD') self::refreshManifestHash($file);
+        return $written;
+    }
+
+    /**
+     * Bộ HD chuẩn nằm trong gói seed (library.manifest.json khóa SHA-256 từng file). Sửa HD trên Web mà không cập nhật
+     * hash sẽ làm kho và các test kiểm tra kho lệch nhau → cập nhật đúng dòng của file vừa ghi (chỉ khi file đã có trong manifest).
+     */
+    private static function refreshManifestHash(string $absFile): void {
+        try {
+            $root = realpath(dirname(__DIR__, 2));
+            $real = realpath($absFile);
+            $manifest = $root . '/storage/seed/library.manifest.json';
+            if (!$root || !$real || !str_starts_with($real, $root . DIRECTORY_SEPARATOR) || !is_file($manifest)) return;
+            $rel = str_replace('\\', '/', substr($real, strlen($root) + 1));
+            $fh = fopen($manifest, 'c+');
+            if (!$fh) return;
+            if (!flock($fh, LOCK_EX)) { fclose($fh); return; }
+            $data = json_decode((string)stream_get_contents($fh), true);
+            if (is_array($data) && isset($data['chord_files'][$rel])) {
+                $data['chord_files'][$rel] = hash('sha256', str_replace("\r\n", "\n", (string)file_get_contents($real)));
+                ftruncate($fh, 0);
+                rewind($fh);
+                fwrite($fh, json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
+            }
+            flock($fh, LOCK_UN);
+            fclose($fh);
+        } catch (Throwable $e) {
+            // Không để lỗi manifest làm hỏng việc lưu hợp âm.
+        }
     }
 
     /**

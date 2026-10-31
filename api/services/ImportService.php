@@ -97,7 +97,42 @@ class ImportService {
             'visibility' => $song['visibility'], 'is_public' => $song['is_public'], 'song' => $song];
     }
 
+    /**
+     * .mxl là ZIP: lấy MusicXML bên trong (theo META-INF/container.xml) để lưu thành .xml thuần.
+     * Nhờ vậy trình phát không phải đọc nhị phân bằng res.text() (gây "Invalid MXL file") và đọc được tông gốc <fifths>.
+     */
+    public static function unpackMxl(string $content): string {
+        if (substr($content, 0, 2) !== 'PK') return $content;
+        if (!class_exists('ZipArchive')) throw new RuntimeException('Máy chủ chưa hỗ trợ giải nén .mxl');
+        $tmp = tempnam(sys_get_temp_dir(), 'mxl');
+        try {
+            file_put_contents($tmp, $content);
+            $zip = new ZipArchive();
+            if ($zip->open($tmp) !== true) throw new RuntimeException('File .mxl bị hỏng, không giải nén được');
+            $inner = null;
+            $container = $zip->getFromName('META-INF/container.xml');
+            if ($container !== false && preg_match('/full-path="([^"]+)"/', $container, $m)) $inner = $m[1];
+            if ($inner === null) {
+                for ($n = 0; $n < $zip->numFiles; $n++) {
+                    $name = (string)$zip->getNameIndex($n);
+                    if (!str_starts_with($name, 'META-INF/') && preg_match('/\.(xml|musicxml)$/i', $name)) { $inner = $name; break; }
+                }
+            }
+            $xml = $inner !== null ? $zip->getFromName($inner) : false;
+            $zip->close();
+            if ($xml === false || $xml === '') throw new RuntimeException('Không tìm thấy MusicXML bên trong file .mxl');
+            if (!_isValidMusicXML($xml, 'xml')) throw new RuntimeException('MusicXML bên trong .mxl không hợp lệ');
+            return $xml;
+        } finally {
+            @unlink($tmp);
+        }
+    }
+
     private static function storeImportedSong(string $content, array $metadata): array {
+        if (($metadata['ext'] ?? '') === 'mxl' || substr($content, 0, 2) === 'PK') {
+            $content = self::unpackMxl($content);
+            $metadata['ext'] = 'xml';
+        }
         $categoryId = !empty($metadata['category_id']) ? (int)$metadata['category_id'] : 1;
         $effective = SongService::clampToCategory(SongService::normalizeVisibility($metadata, 'public'), $categoryId);
         if ($effective['visibility'] !== 'public') {
@@ -219,7 +254,8 @@ class ImportService {
         if (!_isValidMusicXML($content, $ext)) { throw new Exception('File không hợp lệ — không phải MusicXML'); }
 
         // Tên bài: ưu tiên tên người nhập, rồi tên trong file (bỏ tên mặc định của phần mềm soạn nhạc), cuối cùng là tên file.
-        if (!$title && $ext !== 'mxl') $title = self::titleFromMusicXml($content);
+        if ($ext === 'mxl') { $content = self::unpackMxl($content); $ext = 'xml'; }
+        if (!$title) $title = self::titleFromMusicXml($content);
         if (!$title) $title = pathinfo($file['name'], PATHINFO_FILENAME);
 
         $meta = array_merge($options, [

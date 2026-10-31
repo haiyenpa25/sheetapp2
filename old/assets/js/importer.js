@@ -155,7 +155,7 @@ const Importer = (() => {
     _showProgress('Đang truy cập trang bài hát...');
 
     try {
-      const data = await window.ApiService.importer.search(url);
+      const data = await window.ApiService.importer.search(url, { title });
 
       if (!data.success) throw new Error(data.message || 'Scrape thất bại');
 
@@ -209,7 +209,7 @@ const Importer = (() => {
     _showProgress('Đang tải file XML...');
 
     try {
-      const data = await window.ApiService.importer.fetch(url);
+      const data = await window.ApiService.importer.fetch(url, { title });
 
       if (!data.success) throw new Error(data.message || 'Tải file thất bại');
 
@@ -306,7 +306,7 @@ const Importer = (() => {
     try {
       // Vì file XML đang nằm thư mục storage/omr_workspace, ta trick dùng "Direct URL" load vào library
       // URL có thể là file tĩnh hoặc API
-      const xmlUrl = window.location.origin + window.location.pathname.replace(/\/index\.php$/, '') + '/storage/omr_workspace/' + id + '.mxl';
+      const xmlUrl = window.location.origin + window.location.pathname.replace(/\/(?:old\/)?(?:index\.php)?$/, '') + '/storage/omr_workspace/' + id + '.mxl';
       
       const data = await window.ApiService.importer.fetch(xmlUrl);
       if (!data.success) throw new Error(data.message || 'Lưu kho thất bại');
@@ -327,7 +327,7 @@ const Importer = (() => {
 
   function _previewOmrResult() {
     const id = document.getElementById('omr-review-id').value;
-    const xmlUrl = window.location.origin + window.location.pathname.replace(/\/index\.php$/, '') + '/storage/omr_workspace/' + id + '.mxl';
+    const xmlUrl = window.location.origin + window.location.pathname.replace(/\/(?:old\/)?(?:index\.php)?$/, '') + '/storage/omr_workspace/' + id + '.mxl';
     window.open(xmlUrl, '_blank');
   }
 

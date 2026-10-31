@@ -77,7 +77,10 @@ class CategoryService {
         if (!$row) throw new InvalidArgumentException('Không tìm thấy danh mục.');
         $newName = $name !== null ? self::cleanName($name) : (string)$row['name'];
         if ($name !== null) self::assertNameFree($newName, $id);
-        $slug = $name !== null ? self::slugify($newName) : (string)$row['slug'];
+        // Danh mục đã có bài: giữ slug (là tên thư mục storage/Thanh ca/<slug>/ và nằm trong xmlPath của các bài).
+        // Danh mục còn trống chưa có file nào → slug đi theo tên mới.
+        $hasSongs = (int)DB::run('SELECT COUNT(*) FROM songs WHERE category_id = ?', [$id])->fetchColumn() > 0;
+        $slug = ($hasSongs && trim((string)$row['slug']) !== '') || $name === null ? (string)$row['slug'] : self::slugify($newName);
         $currentVis = $row['visibility'] ?? 'public';
         $newVis = $visibility !== null ? self::cleanVisibility($visibility) : $currentVis;
 
@@ -96,6 +99,15 @@ class CategoryService {
         } catch (Throwable $error) {
             if ($pdo->inTransaction()) $pdo->rollBack();
             throw $error;
+        }
+        if ($newVis !== $currentVis) {
+            // Công khai ↔ nội bộ: di chuyển thật file XML (nội bộ không được nằm trong storage/Thanh ca đưa lên GitHub).
+            try {
+                require_once __DIR__ . '/SongXmlRelocator.php';
+                SongXmlRelocator::relocateCategory($id);
+            } catch (Throwable $e) {
+                error_log('SheetApp category relocate failed: ' . $e->getMessage());
+            }
         }
         SongService::invalidateCache();
         return ['id' => $id, 'name' => $newName, 'slug' => $slug, 'visibility' => $newVis, 'songs_changed' => $changed];

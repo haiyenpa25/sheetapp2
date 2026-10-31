@@ -29,6 +29,7 @@ final class Session {
     public static function start(): void {
         self::sendSecurityHeaders();
         if (session_status() === PHP_SESSION_ACTIVE) return;
+        if (headers_sent()) { @session_start(); return; } // đã có đầu ra (CLI/test): không đổi được tham số cookie
         ini_set('session.use_strict_mode', '1');
         ini_set('session.use_only_cookies', '1');
         session_set_cookie_params(self::cookieOptions());

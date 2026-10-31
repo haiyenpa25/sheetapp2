@@ -300,6 +300,7 @@ class ManagerController {
                         require_once __DIR__ . '/../services/LibrarySyncService.php';
                         $pushGit = !empty($body['push_git']);
                         $res = LibrarySyncService::syncAll($pushGit);
+                        if (!empty($res['busy'])) { Response::error($res['message'], 409); return; }
                         Response::ok($res, $res['message'] ?? 'Đồng bộ thư viện thành công');
                         return;
 
