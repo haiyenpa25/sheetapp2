@@ -456,7 +456,7 @@ const LibraryUI = (() => {
     opts.querySelectorAll('.song-item').forEach(item => {
       item.addEventListener('click', async () => {
         modal.classList.add('hidden');
-        const currentSet = window.ChordCanvas?.getCurrentSet?.() || 'HD';
+        const currentSet = window.ChordSetNames?.HD || 'HD'; // mặc định HD cho bài mới trong chương trình
         const currentTranspose = window.Store?.get?.('currentTranspose') ?? 0;
         const result = await ApiService.setlists.addItem({ setlist_id: parseInt(item.dataset.id), song_id: songId, chord_profile: currentSet, transpose_key: currentTranspose });
         if (result) window.App?.showToast('Đã thêm bài hát vào Setlist', 'success');

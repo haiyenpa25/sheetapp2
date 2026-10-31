@@ -167,7 +167,7 @@ class SetlistController {
                 }
 
                 $songId       = $data['song_id'] ?? '';
-                $chordProfile = $data['chord_profile'] ?? 'HD';
+                $chordProfile = trim((string)($data['chord_profile'] ?? '')) ?: 'HD';
                 $transposeKey = isset($data['transpose_key']) ? (int)$data['transpose_key'] : 0;
                 $bpm          = isset($data['bpm']) && $data['bpm'] !== '' ? (int)$data['bpm'] : null;
                 $beats        = isset($data['beats_per_measure']) && $data['beats_per_measure'] !== '' ? (int)$data['beats_per_measure'] : null;

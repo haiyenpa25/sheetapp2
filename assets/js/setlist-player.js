@@ -191,7 +191,7 @@ const SetlistPlayer = (() => {
     const hasPreloaded = window.SongPreloader?.has?.(songId, item.chord_profile || 'HD');
 
     // Đưa cả profile lẫn transpose_key qua bên App và chờ load hoàn tất (Core Rule 4, Fix F1)
-    await window.App?.loadSongWithProfile?.(songObj, item.chord_profile, item.transpose_key, { instant: hasPreloaded });
+    await window.App?.loadSongWithProfile?.(songObj, item.chord_profile || 'HD', item.transpose_key, { instant: hasPreloaded });
     if (token !== _playToken) return;
     document.querySelector('.toolbar-left')?.classList.add('in-setlist');
 

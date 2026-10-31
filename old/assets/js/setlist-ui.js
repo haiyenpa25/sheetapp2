@@ -241,7 +241,7 @@ const SetlistUI = (() => {
     }
 
     // Đưa cả profile lẫn transpose_key qua bên App
-    await window.App?.loadSongWithProfile?.(songObj, item.chord_profile, item.transpose_key);
+    await window.App?.loadSongWithProfile?.(songObj, item.chord_profile || 'HD', item.transpose_key);
     if (token !== _playToken || _currentSetlist?.items[_currentIndex] !== item) return;
     document.querySelector('.toolbar-left')?.classList.add('in-setlist');
 
@@ -298,7 +298,8 @@ const SetlistUI = (() => {
       transpose_key = parseInt(toneStr) || 0;
     }
 
-    const currentSet = window.ChordCanvas?.getCurrentSet?.() || 'HD';
+    // Bài mới vào chương trình luôn mặc định bộ HD (không lấy bộ cá nhân đang xem).
+    const currentSet = window.ChordSetNames?.HD || 'HD';
 
     try {
       const data = await window.ApiService.setlists.addItem({ setlist_id: setId, song_id: songId, order_index: songIndex, transpose_key: transpose_key, chord_profile: currentSet });

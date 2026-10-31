@@ -430,7 +430,8 @@ const SetlistDetail = (() => {
     }
 
     try {
-      const curSet = window.ChordCanvas?.getCurrentSet?.() || 'HD';
+      // Bài mới vào chương trình luôn mặc định bộ HD (không lấy bộ cá nhân đang xem); đổi bộ bằng Lưu Tập.
+      const curSet = window.ChordSetNames?.HD || 'HD';
       const data = await window.ApiService.setlists.addItem({
         setlist_id: setId, song_id: songId, order_index: songIndex,
         transpose_key: transpose_key, chord_profile: curSet, bpm: songBpm
