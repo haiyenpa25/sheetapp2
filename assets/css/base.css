@@ -37,6 +37,24 @@
   --shadow-sm:     0 1px 6px rgba(0,0,0,.08);
   --transition:    .2s cubic-bezier(.4,0,.2,1);
 
+  /* ─── THANG KÍCH THƯỚC CHUẨN (G1) ─ nguồn duy nhất cho khoảng cách, chữ, ô điều khiển ─── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --fs-xs:  12px;  /* sàn chữ nhãn nhỏ (RULE §3 / chữ hợp âm tối thiểu 12px) */
+  --fs-sm:  13px;
+  --fs-md:  14px;
+  --fs-lg:  16px;
+  --fs-xl:  18px;
+  --fs-2xl: 22px;
+  --ctl-h:       32px;  /* chiều cao ô điều khiển (chuột) */
+  --ctl-h-inner: 26px;
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 12px;
+
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: ui-monospace, 'Menlo', 'Consolas', monospace; /* Không cần tải font ngoài */
 
@@ -62,6 +80,11 @@
 
   /* ─── FOCUS & ACCESSIBILITY ─────────────────────────────────────── */
   --focus-ring:    0 0 0 3px rgba(124, 58, 237, 0.4);
+}
+
+/* Cảm ứng (iPad/điện thoại): ô điều khiển cao hơn để chạm chắc tay (CODING_STANDARDS §4.6) */
+@media (pointer: coarse) {
+  :root { --ctl-h: 40px; --ctl-h-inner: 32px; }
 }
 
 /* ─── FOCUS ACCESSIBILITY (TICKET L1-11: Viền focus 2px rõ ràng) ────── */

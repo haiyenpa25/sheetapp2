@@ -10,13 +10,14 @@
    ===================================================================== */
 
 :root {
-  --lp-h: 32px;
-  --lp-h-inner: 26px;
-  --lp-radius: 8px;
-  --lp-radius-sm: 6px;
+  /* Bí danh về thang chuẩn trong base.css (G1); tên --lp-* giữ để không vỡ luật cũ */
+  --lp-h: var(--ctl-h);
+  --lp-h-inner: var(--ctl-h-inner);
+  --lp-radius: var(--r-md);
+  --lp-radius-sm: var(--r-sm);
   --lp-gap: 6px;
-  --lp-font: 13px;
-  --lp-font-sm: 12px;
+  --lp-font: var(--fs-sm);
+  --lp-font-sm: var(--fs-xs);
   --lp-ink: #1f2330;
   --lp-muted: #4b5563;
   --lp-faint: #64748b;
@@ -31,9 +32,7 @@
   --lp-shadow-pop: 0 8px 28px rgba(20, 24, 40, 0.14);
 }
 
-@media (pointer: coarse) {
-  :root { --lp-h: 40px; --lp-h-inner: 32px; }
-}
+/* Cỡ ô điều khiển cho cảm ứng nay do base.css (--ctl-h) quyết định */
 
 body.dark-mode {
   --lp-ink: #f1f5f9;
