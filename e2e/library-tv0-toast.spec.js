@@ -18,7 +18,8 @@ for (const classic of [false, true]) {
       await expect.poll(() => page.locator('.toast').evaluate(toast => {
         const rect = toast.getBoundingClientRect();
         const [icon, text] = [...toast.querySelectorAll('span')].map(span => span.getBoundingClientRect());
-        return rect.top >= 80 && icon.right <= text.left + 1 && rect.right <= innerWidth;
+        // Toast điện thoại hiện ngay dưới thanh đỉnh (~52px, library-polish.css); máy tính nằm dưới trang
+        return rect.top >= 44 && icon.right <= text.left + 1 && rect.right <= innerWidth;
       })).toBe(true);
       await page.getByRole('button', { name: 'Đóng thông báo' }).click();
       await expect(page.locator('.toast')).toHaveCount(0);

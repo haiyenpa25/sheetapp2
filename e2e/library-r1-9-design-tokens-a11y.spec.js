@@ -70,7 +70,7 @@ test.describe('R1-9 · Design System Tokens, Neutral Chips & A11y Contrast', () 
     expect(seriousOrCritical).toHaveLength(0);
   });
 
-  test('3. Kích thước điều khiển & Bo góc (Button height 32px desktop, radius 8px)', async ({ page }) => {
+  test('3. Kích thước điều khiển & Bo góc (Button height 36px desktop (--ctl-h), radius 8px)', async ({ page }) => {
     await page.setViewportSize({ width: 1366, height: 768 });
     await page.goto('./?song=thanh-ca-001&v=sheet', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('#osmd-container svg').first()).toBeVisible({ timeout: 25000 });
@@ -87,7 +87,8 @@ test.describe('R1-9 · Design System Tokens, Neutral Chips & A11y Contrast', () 
 
     expect(buttonDimensions).not.toBeNull();
     if (buttonDimensions) {
-      expect(buttonDimensions.height).toBe(32);
+      // --ctl-h (base.css, G1) = 36px cho chuột; khoảng chuẩn dự án 32–36px (CODING_STANDARDS §4.6)
+      expect(buttonDimensions.height).toBe(36);
       expect(buttonDimensions.borderRadius).toBe(8);
     }
   });

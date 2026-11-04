@@ -34,6 +34,8 @@ test.describe('Epic 4.2: Quy Trình Phê Duyệt & Visual Diff Inspector', () =>
     await page.goto('./manager/', { waitUntil: 'domcontentloaded' });
 
     // 3. Tab Chờ Duyệt có sẵn nút trên thanh navigation
+    // Các tab phụ nằm trong nhóm "Nâng cao" (đóng sẵn): mở nhóm trước khi bấm, như người dùng thật.
+    await page.click('#mgr-adv-toggle');
     const reviewsTabBtn = page.locator('button[data-tab="tab-reviews"]');
     await expect(reviewsTabBtn).toBeVisible({ timeout: 10000 });
     await reviewsTabBtn.click();

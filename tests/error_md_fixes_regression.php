@@ -19,6 +19,14 @@ function ec(bool $ok, string $m): void { global $total, $failed; ++$total; if (!
 $xml = '<?xml version="1.0"?><score-partwise version="3.1"><part-list><score-part id="P1"><part-name>x</part-name></score-part></part-list><part id="P1"><measure number="1"><attributes><key><fifths>0</fifths></key></attributes></measure></part></score-partwise>';
 $tag = 'zz-reloc-' . bin2hex(random_bytes(2));
 $dirA = "storage/Thanh ca/{$tag}-a/"; $dirB = "storage/Thanh ca/{$tag}-b/";
+// Test ghi thư mục thật trong storage/Thanh ca: luôn dọn khi kết thúc, kể cả khi dừng giữa chừng.
+register_shutdown_function(static function () use ($root, $tag): void {
+    foreach (['a', 'b'] as $suffix) {
+        $dir = "{$root}/storage/Thanh ca/{$tag}-{$suffix}";
+        foreach (glob($dir . '/*') ?: [] as $file) @unlink($file);
+        @rmdir($dir);
+    }
+});
 $pdo->exec("INSERT INTO categories (id, name, slug, visibility, display_order) VALUES (901, 'ZZ A', '{$tag}-a', 'public', 7), (902, 'ZZ B', '{$tag}-b', 'public', 8)");
 @mkdir($root . '/' . $dirA, 0775, true);
 file_put_contents($root . '/' . $dirA . 'x.xml', $xml);
@@ -50,11 +58,17 @@ $res = ManagerRepertoireHelper::manageCategory('update', ['id' => 902, 'name' =>
 ec((int)$pdo->query('SELECT display_order FROM categories WHERE id=902')->fetchColumn() === 8, 'ERR-06: sửa danh mục không gửi display_order thì giữ nguyên thứ tự');
 
 // ERR-11: giải nén .mxl
-$tmpZip = tempnam(sys_get_temp_dir(), 'mxl'); $zip = new ZipArchive(); $zip->open($tmpZip, ZipArchive::CREATE | ZipArchive::OVERWRITE);
-$zip->addFromString('META-INF/container.xml', '<container><rootfiles><rootfile full-path="inner/song.xml"/></rootfiles></container>');
-$zip->addFromString('inner/song.xml', $xml); $zip->close();
-$un = ImportService::unpackMxl((string)file_get_contents($tmpZip));
-ec(str_contains($un, '<score-partwise') && substr($un, 0, 2) !== 'PK', 'ERR-11: .mxl được giải nén thành MusicXML thuần');
+$tmpZip = tempnam(sys_get_temp_dir(), 'mxl');
+if (class_exists('ZipArchive')) {
+    $zip = new ZipArchive(); $zip->open($tmpZip, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+    $zip->addFromString('META-INF/container.xml', '<container><rootfiles><rootfile full-path="inner/song.xml"/></rootfiles></container>');
+    $zip->addFromString('inner/song.xml', $xml); $zip->close();
+    $un = ImportService::unpackMxl((string)file_get_contents($tmpZip));
+    ec(str_contains($un, '<score-partwise') && substr($un, 0, 2) !== 'PK', 'ERR-11: .mxl được giải nén thành MusicXML thuần');
+} else {
+    fwrite(STDOUT, "[SKIP] ERR-11: PHP chưa bật extension zip (ZipArchive) nên không kiểm được giải nén .mxl
+");
+}
 ec(ImportService::unpackMxl($xml) === $xml, 'ERR-11: XML thường đi qua không đổi');
 $bad = false; try { ImportService::unpackMxl("PK\x03\x04rác"); } catch (Throwable $e) { $bad = true; }
 ec($bad, 'ERR-11: .mxl hỏng báo lỗi rõ ràng');

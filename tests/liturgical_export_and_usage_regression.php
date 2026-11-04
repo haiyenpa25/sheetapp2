@@ -112,13 +112,11 @@ check(!str_contains($htmlNoChord, 'class="chord"'), "Tùy chọn chords=0 ẩn h
 // ── 2. Kiểm tra Booklet Phụng Vụ (print/service-booklet.php) ──
 echo "\n[2/5] Kiểm tra Cuốn Booklet Phụng Vụ A4 (print/service-booklet.php)...\n";
 
-// Sử dụng setlist trong CSDL cô lập
-$testSetlistId = (int)DB::run("SELECT id FROM setlists ORDER BY id DESC LIMIT 1")->fetchColumn();
-if ($testSetlistId <= 0) {
-    DB::run("INSERT INTO setlists (title, created_by, status) VALUES ('Setlist Phụng Vụ Test', 1, 'published')");
-    $testSetlistId = (int)DB::pdo()->lastInsertId();
-    DB::run("INSERT INTO setlist_items (setlist_id, song_id, item_type, display_order, transpose_key, bpm) VALUES (?, 'thanh-ca-001', 'song', 1, 0, 80)", [$testSetlistId]);
-}
+// Luôn tự tạo một chương trình đã xuất bản trong CSDL cô lập: dòng mới nhất của CSDL có thể là bản nháp,
+// mà khách chỉ đọc được chương trình `published` nên booklet sẽ trả "không tồn tại".
+DB::run("INSERT INTO setlists (title, created_by, status) VALUES ('Setlist Phụng Vụ Test', 1, 'published')");
+$testSetlistId = (int)DB::pdo()->lastInsertId();
+DB::run("INSERT INTO setlist_items (setlist_id, song_id, item_type, display_order, transpose_key, bpm) VALUES (?, 'thanh-ca-001', 'song', 1, 0, 80)", [$testSetlistId]);
 DB::run("INSERT OR IGNORE INTO song_usage_history (song_id, setlist_id, service_date, chord_profile, transpose_key, created_at) VALUES ('thanh-ca-001', ?, date('now', '-7 days'), 'HD', 0, datetime('now', '-7 days'))", [$testSetlistId]);
 
 check($testSetlistId > 0, "Tìm thấy ít nhất 1 setlist trong cơ sở dữ liệu để test booklet");

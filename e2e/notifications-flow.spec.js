@@ -68,7 +68,7 @@ test.describe('Epic 4.0 — Lát 4.0-c: Trung tâm thông báo trong ứng dụn
     const notifItem = notifList.locator('.shell-notif-item').first();
     await expect(notifItem).toBeVisible({ timeout: 5000 });
     await expect(notifItem).toHaveClass(/unread/);
-    await expect(notifItem).toContainText('Chương trình Phụng vụ đã phát hành');
+    await expect(notifItem).toContainText('Chương trình thờ phượng đã phát hành');
     await expect(notifItem).toContainText(testData.plan_title);
 
     // 7. Click nút "Đọc tất cả"

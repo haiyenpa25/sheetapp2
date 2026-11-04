@@ -35,13 +35,16 @@ test.describe('Ticket T15b: Manager Portal tích hợp toàn diện ApiService',
     // 2. Vào Manager Portal
     await page.goto('./manager/', { waitUntil: 'domcontentloaded' });
 
-    // 3. Tab 1: Kho Bài Hát & Thể Loại (tab-repertoire)
+    // 3. Tab Kho Bài Hát & Thể Loại (tab-repertoire). Tab mặc định nay là Danh Mục & Thêm Bài nên bấm sang tab này.
+    await page.click('button[data-tab="tab-repertoire"]');
     const repertoireTab = page.locator('#mgr-songs-tbody');
     await expect(repertoireTab).toBeVisible({ timeout: 15000 });
     // Đợi ít nhất 1 bài hát xuất hiện trong tbody
     await expect(page.locator('#mgr-songs-tbody tr').first()).toBeVisible({ timeout: 10000 });
     console.log('✅ Tab Repertoire: Danh sách bài hát đã nạp thành công.');
 
+    // Các tab phụ nằm trong nhóm "Nâng cao" (đóng sẵn): mở nhóm trước khi bấm, như người dùng thật.
+    await page.click('#mgr-adv-toggle');
     // 4. Tab 2: Bộ Hợp Âm Cộng Đồng (tab-community)
     await page.click('button[data-tab="tab-community"]');
     const communityGrid = page.locator('#mgr-community-grid');

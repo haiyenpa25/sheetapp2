@@ -50,7 +50,7 @@ test.describe('Ticket T15c: Editor MusicXML tích hợp ApiService', () => {
     // 6. Thử tìm kiếm bài hát theo từ khóa
     const searchInput = page.locator('#song-search-input');
     await searchInput.fill('002');
-    await expect(page.locator('#modal-song-list .song-list-item')).toBeVisible();
+    await expect(page.locator('#modal-song-list .song-list-item').first()).toBeVisible();
 
     // Chọn bài đầu tiên trong kết quả lọc
     const firstFiltered = page.locator('#modal-song-list .song-list-item').first();

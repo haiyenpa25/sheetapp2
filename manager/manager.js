@@ -428,6 +428,13 @@ const ManagerApp = (() => {
       btn.classList.toggle('active', btn.dataset.tab === tabId);
     });
 
+    // Tab đích nằm trong nhóm "Nâng cao" đang đóng (vd. đổi #hash khi trang đã mở): mở nhóm để người dùng thấy tab đang xem.
+    const advBox = document.getElementById('mgr-tabs-adv');
+    if (advBox?.hidden && advBox.querySelector(`[data-tab="${tabId}"]`)) {
+      advBox.hidden = false;
+      document.getElementById('mgr-adv-toggle')?.setAttribute('aria-expanded', 'true');
+    }
+
     document.querySelectorAll('.mgr-tab-pane').forEach(pane => {
       pane.classList.toggle('active', pane.id === tabId);
     });

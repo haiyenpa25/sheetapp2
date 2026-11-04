@@ -82,9 +82,9 @@
   --focus-ring:    0 0 0 3px rgba(124, 58, 237, 0.4);
 }
 
-/* Cảm ứng (iPad/điện thoại): ô điều khiển cao hơn để chạm chắc tay (CODING_STANDARDS §4.6) */
+/* Cảm ứng (iPad/điện thoại): vùng chạm 44px (chuẩn nghiệm thu M6/R1-5; CODING_STANDARDS §4.6 yêu cầu tối thiểu 32–36px) */
 @media (pointer: coarse) {
-  :root { --ctl-h: 40px; --ctl-h-inner: 32px; }
+  :root { --ctl-h: 44px; --ctl-h-inner: 36px; }
 }
 
 /* ─── FOCUS ACCESSIBILITY (TICKET L1-11: Viền focus 2px rõ ràng) ────── */

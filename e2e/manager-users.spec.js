@@ -63,7 +63,7 @@ test.describe('Ticket T15a: Quản lý thành viên qua ApiService trong Manager
     const updatedRoleSelect = reloadedRow.locator('select');
     await expect(updatedRoleSelect).toHaveValue(targetRole, { timeout: 10000 });
 
-    const expectedBadgeText = targetRole === 'banhat' ? '🎸 Ban Hát' : '👁️ Viewer';
+    const expectedBadgeText = targetRole === 'banhat' ? '🎤 Ban Hát' : '👁️ Guest / Viewer';
     await expect(reloadedRow.locator('.mgr-user-role')).toContainText(expectedBadgeText);
 
     console.log(`✅ Xác nhận thành công: User @khach đã mang vai trò mới "${targetRole}" sau khi reload!`);

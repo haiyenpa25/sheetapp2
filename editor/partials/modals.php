@@ -4,7 +4,7 @@
       <div class="modal-header">
         <div class="modal-header-title">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
-          <span>Lưu Bản Chỉnh Sửa (Tài khoản: <strong><?php echo htmlspecialchars($currentUser); ?></strong>)</span>
+          <span>Lưu Bản Chỉnh Sửa (Tài khoản: <strong><?php echo htmlspecialchars($editorUserName); ?></strong>)</span>
         </div>
         <button id="btn-close-save-modal" class="btn-modal-close" title="Đóng">&times;</button>
       </div>
@@ -13,7 +13,7 @@
         <div class="save-notice-box">
           <span class="notice-icon">🛡️</span>
           <div class="notice-text">
-            <strong>Bản gốc luôn an toàn 100%:</strong> Các thay đổi sẽ được lưu thành phiên bản của tài khoản <strong><?php echo htmlspecialchars($currentUser); ?></strong> để sử dụng trong SheetApp.
+            <strong>Bản gốc luôn an toàn 100%:</strong> Các thay đổi sẽ được lưu thành phiên bản của tài khoản <strong><?php echo htmlspecialchars($editorUserName); ?></strong> để sử dụng trong SheetApp.
           </div>
         </div>
 

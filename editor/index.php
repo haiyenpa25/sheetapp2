@@ -7,7 +7,8 @@ require_once __DIR__ . '/../api/core/Session.php';
 Session::start();
 require_once __DIR__ . '/../api/core/Auth.php';
 require_once __DIR__ . '/../api/core/Config.php';
-$currentUser = Auth::username() ?: 'banhat';
+// Không dùng tên $currentUser: includes/app_nav.php gán lại biến này thành mảng người dùng khi đã đăng nhập.
+$editorUserName = Auth::username() ?: 'banhat';
 $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
 $appBase = rtrim(dirname($scriptDir), '/');
 if ($appBase === '/' || $appBase === '\\') $appBase = '';
@@ -86,7 +87,7 @@ if ($appBase === '/' || $appBase === '\\') $appBase = '';
       <!-- Tag User -->
       <div class="user-badge" title="Tài khoản đang đăng nhập">
         <span class="user-dot"></span>
-        <span id="user-badge-name"><?php echo htmlspecialchars($currentUser); ?></span>
+        <span id="user-badge-name"><?php echo htmlspecialchars($editorUserName); ?></span>
       </div>
 
       <!-- Undo / Redo -->

@@ -430,7 +430,7 @@ body.chord-edit-mode .toast-container .toast:not(.error) { display: none !import
   font-weight: 600 !important;
 }
 @media (pointer: coarse) {
-  .quick-jump-btn { height: 30px !important; min-height: 30px !important; padding: 0 11px !important; }
+  .quick-jump-btn { height: 36px !important; min-height: 36px !important; padding: 0 11px !important; }
 }
 
 /* Dòng bài hát: gọn, một nhãn tông; nhãn mùa lễ/chủ đề chỉ hiện ở bài đang chọn */
@@ -2571,4 +2571,10 @@ body.dark-mode #main-dropdown-menu .icon-btn-xs {
   .sidebar .quick-jump { padding-top: 4px !important; padding-bottom: 4px !important; }
   .sidebar .sidebar-actions { padding-top: 4px !important; padding-bottom: 0 !important; }
   .sidebar .sidebar-actions:not(:has(> :not(.hidden):not([type=file]))) { display: none !important; }
+}
+
+/* ── Cảm ứng: các nút còn lại cũng đạt vùng chạm 44px (G2c) ── */
+@media (pointer: coarse) {
+  .toast-dismiss { min-height: 44px; min-width: 44px; }
+  #toolbar #btn-transpose-reset, #toolbar #scroll-speed, #toolbar #btn-chord-notation { min-height: 44px; min-width: 44px; }
 }

@@ -596,4 +596,3 @@
     <button id="btn-pwa-prompt-trigger" class="btn btn-primary w-full" style="background: linear-gradient(135deg, #10b981, #059669); border: none; font-weight: 700; height: 38px;">Cài Đặt Ngay</button>
   </div>
 </div>
-
