@@ -3,7 +3,7 @@
  *
  * Bản sắc Classic: phẳng, vuông, dày đặc. Nhưng cỡ KHÔNG còn tự đặt rải rác (trước đây 9–10px,
  * nút 24px): mọi điều khiển lấy từ 3 token dưới đây.
- *   - Chuột (desktop):        cao 30px, chữ 12px
+ *   - Chuột (desktop):        cao 32px, chữ 12px (G2: khớp CODING_STANDARDS §4.6, sàn chữ 12px)
  *   - Cảm ứng / màn ≤ 900px:  cao 40px, chữ 14px (vùng chạm đủ cho ngón tay, chữ đọc được trên iPad/điện thoại)
  * Icon là SVG từ sprite chung (assets/icons/lucide.svg) tính theo em của chữ nên luôn co cùng cỡ chữ,
  * đổi màu theo theme; không dùng emoji làm icon nút (cỡ phụ thuộc phông, máy thiếu phông hiện ô vuông).
@@ -11,9 +11,9 @@
  */
 
 :root {
-  --o-h: 30px;
+  --o-h: 32px;
   --o-fs: 12px;
-  --o-fs-sm: 11px;
+  --o-fs-sm: 12px;
 }
 @media (pointer: coarse), (max-width: 900px) {
   :root { --o-h: 40px; --o-fs: 14px; --o-fs-sm: 12px; }
@@ -129,4 +129,4 @@ body:not(.has-member-access) #btn-header-manager { display: none !important; }
 
 /* Sàn cỡ chữ 11px cho nhãn nhỏ (số bài, tông, đếm, đơn vị tempo...) — trước đây 8,75–10px khó đọc trên điện thoại */
 body .song-item-num, body .song-key-badge, body .library-count-badge, body .tempo-unit,
-body .deck-glyph, body .feat-icon, body small, body .btn-sm, body .btn-xs { font-size: max(11px, 1em); }
+body .deck-glyph, body .feat-icon, body small, body .btn-sm, body .btn-xs { font-size: max(12px, 1em); }

@@ -17,7 +17,7 @@
   font-size: .78rem; font-weight: 600; line-height: 1; white-space: nowrap; cursor: pointer; touch-action: manipulation;
 }
 .deck-btn svg { width: 15px; height: 15px; flex: none; }
-.deck-btn .deck-glyph { font-weight: 800; font-size: .74rem; opacity: .65; }
+.deck-btn .deck-glyph { font-weight: 800; font-size: 12px; opacity: .65; } /* sàn chữ 12px (G2) */
 .deck-btn:hover:not(:disabled) { background: #f1f5f9; }
 .deck-btn.active { background: #ede9fe; border-color: var(--accent, #6d28d9); color: var(--accent, #6d28d9); }
 .deck-btn:disabled { opacity: .45; cursor: default; }
@@ -42,6 +42,17 @@ body #toolbar#toolbar #btn-toolbar-metronome { display: inline-flex !important; 
 body #toolbar#toolbar #btn-lyric-view .btn-text,
 body #toolbar#toolbar #btn-toolbar-metronome > * { display: inline !important; }
 body #toolbar#toolbar #toolbar-zoom-pill { gap: 2px; }
+body #toolbar#toolbar #btn-transpose-reset { font-size: 12px; } /* sàn chữ 12px (G2) */
+
+/* ── Vùng chạm tối thiểu cho chuột (G2): nút icon thanh công cụ, ô tìm, nhảy nhanh = --o-h (32px) ── */
+body #toolbar#toolbar .icon-btn,
+body #toolbar#toolbar #transpose-display,
+body #toolbar#toolbar #zoom-slider,
+body .sidebar-search .search-box input,
+body #btn-search-lyrics,
+body .quick-jump-btn { min-height: var(--o-h, 32px); }
+body #toolbar#toolbar .icon-btn,
+body #toolbar#toolbar #transpose-display { min-width: var(--o-h, 32px); }
 
 /* ── iPad & điện thoại: nút cảm ứng ≥ 36px, vẫn xếp gọn ───────────────────── */
 @media (max-width: 1024px) {

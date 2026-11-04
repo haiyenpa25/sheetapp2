@@ -177,3 +177,6 @@
 
 /* Biểu Diễn: thanh dưới bị luật `display:grid !important` ở trên thắng luật ẩn → che HUD. Ẩn lại với độ ưu tiên cao hơn. */
 body.sheet-only-mode #mobile-thumb-bar.mobile-thumb-bar { display: none !important; }
+
+/* Sàn chữ 12px cho nhãn thanh công cụ (G2): nút Cuộn trước đây 11,48px */
+body #toolbar#toolbar #btn-auto-scroll { font-size: var(--fs-xs, 12px); }
