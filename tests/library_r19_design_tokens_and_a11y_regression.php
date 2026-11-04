@@ -44,28 +44,41 @@ $cssPath = __DIR__ . '/../assets/css/library-polish.css';
 assertCheck("File assets/css/library-polish.css tồn tại", file_exists($cssPath));
 $cssContent = file_get_contents($cssPath);
 
-// 1. Kiểm tra design tokens trong :root
+// 1. Kiểm tra design tokens: giá trị gốc ở base.css (thang chuẩn G1), --lp-* là bí danh trỏ về thang đó
+$baseContent = file_get_contents(__DIR__ . '/../assets/css/base.css');
+
+$px = static function (string $css, string $name): ?int {
+    return preg_match('/' . preg_quote($name, '/') . ':\s*(\d+)px;/', $css, $m) ? (int)$m[1] : null;
+};
+
+$ctlH = $px($baseContent, '--ctl-h');
 assertCheck(
-    "Token chiều cao nút desktop --lp-h là 32px",
-    (bool)preg_match('/--lp-h:\s*32px;/', $cssContent),
+    "Token chiều cao ô điều khiển --ctl-h nằm trong 32–36px (CODING_STANDARDS §4.6)",
+    $ctlH !== null && $ctlH >= 32 && $ctlH <= 36,
+    true
+);
+assertCheck(
+    "--lp-h là bí danh của --ctl-h",
+    (bool)preg_match('/--lp-h:\s*var\(--ctl-h\);/', $cssContent),
     true
 );
 
 assertCheck(
-    "Token bo góc --lp-radius là 8px",
-    (bool)preg_match('/--lp-radius:\s*8px;/', $cssContent),
+    "Token bo góc --r-md là 8px và --lp-radius trỏ về nó",
+    $px($baseContent, '--r-md') === 8 && (bool)preg_match('/--lp-radius:\s*var\(--r-md\);/', $cssContent),
     true
 );
 
 assertCheck(
-    "Token chữ nhãn --lp-font là 13px",
-    (bool)preg_match('/--lp-font:\s*13px;/', $cssContent),
+    "Token chữ nhãn --fs-sm là 13px và --lp-font trỏ về nó",
+    $px($baseContent, '--fs-sm') === 13 && (bool)preg_match('/--lp-font:\s*var\(--fs-sm\);/', $cssContent),
     true
 );
 
+$fsXs = $px($baseContent, '--fs-xs');
 assertCheck(
-    "Token chữ phụ --lp-font-sm là 12px (không được < 12px)",
-    (bool)preg_match('/--lp-font-sm:\s*12px;/', $cssContent),
+    "Token chữ phụ --fs-xs >= 12px (không được < 12px) và --lp-font-sm trỏ về nó",
+    $fsXs !== null && $fsXs >= 12 && (bool)preg_match('/--lp-font-sm:\s*var\(--fs-xs\);/', $cssContent),
     true
 );
 

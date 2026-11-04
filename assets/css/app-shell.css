@@ -117,6 +117,7 @@ body.stage-clean-mode .app-shell-navbar {
   align-items: center;
   gap: 0.4rem;
   padding: 0.3rem 0.75rem;
+  min-height: 32px; /* vùng chạm tối thiểu cho thanh điều hướng (CODING_STANDARDS §4.6) */
   border-radius: 6px;
   text-decoration: none;
   font-size: 0.85rem;

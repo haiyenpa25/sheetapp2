@@ -635,7 +635,7 @@ body.chord-edit-mode .toast-container .toast:not(.error) { display: none !import
 /* ─── 4. Thông báo nổi: nhỏ, góc trên phải trên máy tính, không đè khuông nhạc ──────────── */
 .toast-container {
   left: auto !important;
-  right: 24px !important;
+  right: 88px !important; /* chừa chỗ cho nút nổi FAB (56px + lề) ở góc dưới phải */
   top: auto !important;
   bottom: 24px !important;
   transform: none !important;
