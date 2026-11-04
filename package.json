@@ -7,7 +7,9 @@
     "codemap": "node tools/generate_code_map.js",
     "lint": "eslint --no-error-on-unmatched-pattern assets/js old/assets/js editor manager live-band learn",
     "check:syntax": "node tools/check_syntax.js",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "ui:check": "node tools/ui-matrix.cjs --quick",
+    "ui:check:full": "node tools/ui-matrix.cjs --dark --axe"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
