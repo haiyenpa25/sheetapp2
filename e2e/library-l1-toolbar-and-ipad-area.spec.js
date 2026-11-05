@@ -29,8 +29,9 @@ test.describe('L1-3 · Thanh công cụ 48px & iPad Overlay (Chromium + WebKit)'
     const toolbarBox = await toolbar.boundingBox();
     expect(toolbarBox).not.toBeNull();
     if (toolbarBox) {
-      // Toolbar height chuẩn 48px (cho phép dung sai 4px do border)
-      expect(toolbarBox.height).toBeLessThanOrEqual(52);
+      // RULE §5: thanh công cụ hai hàng (mỗi hàng 48px)
+      expect(toolbarBox.height).toBeGreaterThanOrEqual(48);
+      expect(toolbarBox.height).toBeLessThanOrEqual(112);
     }
 
     // Nút popover ⓘ

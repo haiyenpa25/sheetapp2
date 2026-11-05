@@ -44,7 +44,7 @@ test.describe('Ticket T15b: Manager Portal tích hợp toàn diện ApiService',
     console.log('✅ Tab Repertoire: Danh sách bài hát đã nạp thành công.');
 
     // Các tab phụ nằm trong nhóm "Nâng cao" (đóng sẵn): mở nhóm trước khi bấm, như người dùng thật.
-    await page.click('#mgr-adv-toggle');
+    if ((await page.locator('#mgr-adv-toggle').getAttribute('aria-expanded')) !== 'true') await page.click('#mgr-adv-toggle');
     // 4. Tab 2: Bộ Hợp Âm Cộng Đồng (tab-community)
     await page.click('button[data-tab="tab-community"]');
     const communityGrid = page.locator('#mgr-community-grid');

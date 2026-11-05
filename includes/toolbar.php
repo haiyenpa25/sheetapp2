@@ -404,7 +404,7 @@
         <?php $bHref = $baseHref ?? '/'; ?>
         <a href="<?= $bHref ?>manager/#tab-categories" target="_blank" class="btn btn-ghost btn-sm btn-menu-item" title="Quản lý danh mục, thêm bài hát (XML) & kho nhạc">
           <?= icon('folder') ?>
-          <span>Quản lý danh mục &amp; thêm bài</span>
+          <span>Quản lý &amp; thêm bài</span>
         </a>
 
         <a href="<?= $bHref ?>manager/#tab-users" data-target="/manager/#tab-users" target="_blank" class="btn btn-ghost btn-sm btn-menu-item" title="Quản lý thành viên ban nhạc & bộ hợp âm">

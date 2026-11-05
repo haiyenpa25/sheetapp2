@@ -115,9 +115,8 @@ test.describe('R0-7 · Toolbar controls luôn bấm được trong tối đa 2 t
     await page.waitForTimeout(300);
     await expect.poll(() => page.evaluate(() => window.App?.getCurrentTranspose?.())).toBe(2);
 
-    await page.locator('#btn-more-options').click();
-    await expect(page.locator('#main-dropdown-menu')).toBeVisible({ timeout: 5000 });
-    await page.locator('#btn-menu-transpose-reset').click();
+    // RULE §5: nút "Gốc" luôn hiện ngay trên thanh (0 thao tác mở menu)
+    await page.locator('#btn-transpose-reset').click();
 
     await expect.poll(() => page.evaluate(() => window.App?.getCurrentTranspose?.())).toBe(0);
   });

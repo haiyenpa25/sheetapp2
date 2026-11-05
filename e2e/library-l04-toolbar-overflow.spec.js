@@ -139,8 +139,10 @@ test.describe('Ticket L0-4: Thanh công cụ không tràn dưới 1.300px', () =
         };
       });
 
-      expect(secondaryControls.zoomPillHidden, 'Cụm Thu Phóng (.zoom-pill) phải được thu gọn khỏi toolbar dưới 1300px').toBe(true);
-      expect(secondaryControls.scrollPillHidden, 'Cụm Cuộn (.scroll-pill) phải được thu gọn khỏi toolbar dưới 1300px').toBe(true);
+      // RULE §5: Zoom và Cuộn luôn hiện trên thanh (không thu vào ⋮)
+      // ≤680px: chuyển xuống thanh ngón cái (#mobile-thumb-bar) nên cụm trên toolbar ẩn
+      expect(secondaryControls.zoomPillHidden, 'Cụm Thu Phóng (.zoom-pill)').toBe(isMobileThumbBar);
+      expect(secondaryControls.scrollPillHidden, 'Cụm Cuộn (.scroll-pill)').toBe(isMobileThumbBar);
       expect(secondaryControls.authPillHidden, 'Nút Tài khoản (#btn-toolbar-auth) phải được thu gọn khỏi toolbar dưới 1300px').toBe(true);
     });
   }

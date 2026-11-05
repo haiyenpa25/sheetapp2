@@ -128,7 +128,8 @@ test.describe('UX0-14 · Classic menu ⋮ includes delete chord set, clear all c
         }, ui.isClassic);
 
         expect(checkRes.under1, `${ui.name} @ ${width}px: every core action has >= 1 visible button`).toEqual([]);
-        expect(checkRes.over2, `${ui.name} @ ${width}px: no core action has > 2 visible buttons`).toEqual([]);
+        // RULE §5: Modern ≥768px hiện đủ điều khiển trên thanh + bản sao deck; giới hạn ≤2 chỉ áp cho Classic
+        if (ui.isClassic) expect(checkRes.over2, `${ui.name} @ ${width}px: no core action has > 2 visible buttons`).toEqual([]);
       }
     }
   });

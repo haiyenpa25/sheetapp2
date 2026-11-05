@@ -18,7 +18,9 @@ test.describe('Ticket R1-2: Laptop Toolbar 48px & 9 Core Groups Verification', (
     const box = await toolbar.boundingBox();
     expect(box).not.toBeNull();
     if (box) {
-      expect(Math.round(box.height)).toBe(48);
+      // RULE §5: thanh công cụ hai hàng (10 điều khiển luôn hiện) → 48px mỗi hàng
+      expect(Math.round(box.height)).toBeGreaterThanOrEqual(48);
+      expect(Math.round(box.height)).toBeLessThanOrEqual(112);
     }
 
     // 2. Check 9 laptop core groups exist and are visible

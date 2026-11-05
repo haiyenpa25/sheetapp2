@@ -35,8 +35,10 @@ test.describe('Epic 4.2: Quy Trình Phê Duyệt & Visual Diff Inspector', () =>
 
     // 3. Tab Chờ Duyệt có sẵn nút trên thanh navigation
     // Các tab phụ nằm trong nhóm "Nâng cao" (đóng sẵn): mở nhóm trước khi bấm, như người dùng thật.
-    await page.click('#mgr-adv-toggle');
+    if ((await page.locator('#mgr-adv-toggle').getAttribute('aria-expanded')) !== 'true') await page.click('#mgr-adv-toggle');
     const reviewsTabBtn = page.locator('button[data-tab="tab-reviews"]');
+    // REVIEW_WORKFLOW mặc định TẮT (api/core/FeatureFlags.php) → tab Chờ Duyệt ẩn khi cờ chưa bật
+    test.skip(!(await reviewsTabBtn.isVisible()), 'Cờ REVIEW_WORKFLOW đang tắt trên môi trường này');
     await expect(reviewsTabBtn).toBeVisible({ timeout: 10000 });
     await reviewsTabBtn.click();
 

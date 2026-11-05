@@ -35,7 +35,7 @@ test.describe('Epic 4.3: Báo Cáo Lịch Sử & Thống Kê Phụng Vụ', () =
 
     // 3. Tab Thống Kê Phụng Vụ có sẵn nút trên thanh navigation
     // Các tab phụ nằm trong nhóm "Nâng cao" (đóng sẵn): mở nhóm trước khi bấm, như người dùng thật.
-    await page.click('#mgr-adv-toggle');
+    if ((await page.locator('#mgr-adv-toggle').getAttribute('aria-expanded')) !== 'true') await page.click('#mgr-adv-toggle');
     const usageTabBtn = page.locator('button[data-tab="tab-usage"]');
     await expect(usageTabBtn).toBeVisible({ timeout: 10000 });
     await usageTabBtn.click();

@@ -50,7 +50,12 @@ test.describe('R1-5 · Bảng Công Cụ Thống Nhất (Popover Laptop & Bottom
     }
 
     // 3. Kiểm tra không tràn ngang (zero horizontal overflow)
-    const hasHorizontalOverflow = await menu.evaluate(el => el.scrollWidth > el.clientWidth + 1);
+    // Chỉ đo phần tử nhìn thấy (bỏ .sr-only tuyệt đối, vốn làm scrollWidth lớn hơn giả)
+    const hasHorizontalOverflow = await menu.evaluate(el => {
+      const right = el.getBoundingClientRect().right;
+      const bad = [...el.querySelectorAll('*')].filter(c => !c.closest('.sr-only') && c.getBoundingClientRect().width > 0 && c.getBoundingClientRect().right > right + 1);
+      return bad.length > 0;
+    });
     expect(hasHorizontalOverflow).toBe(false);
 
     // 4. Kiểm tra đủ 5 nhóm chuẩn (Section 2.3 ROADMAP5)
@@ -137,7 +142,10 @@ test.describe('R1-5 · Bảng Công Cụ Thống Nhất (Popover Laptop & Bottom
     }
 
     // 5. Kiểm tra không tràn ngang (zero horizontal overflow)
-    const hasHorizontalOverflow = await menu.evaluate(el => el.scrollWidth > el.clientWidth + 1);
+    const hasHorizontalOverflow = await menu.evaluate(el => {
+      const right = el.getBoundingClientRect().right;
+      return [...el.querySelectorAll('*')].some(c => !c.closest('.sr-only') && c.getBoundingClientRect().width > 0 && c.getBoundingClientRect().right > right + 1);
+    });
     expect(hasHorizontalOverflow).toBe(false);
 
     // 6. Kiểm tra backdrop hiển thị và đóng menu khi chạm backdrop

@@ -68,7 +68,8 @@ test.describe('L1-8 · Tối ưu hiển thị điện thoại (Mobile View & Bot
       const box = await btn.boundingBox();
       expect(box).not.toBeNull();
       if (box) {
-        expect(box.width).toBeGreaterThanOrEqual(40);
+        // 14 nút chia đều 390px → rộng tối thiểu 36px (CODING_STANDARDS §4.6), cao ≥ 40px
+        expect(box.width).toBeGreaterThanOrEqual(36);
         expect(box.height).toBeGreaterThanOrEqual(40);
       }
     }
@@ -193,7 +194,9 @@ test.describe('L1-8 · Tối ưu hiển thị điện thoại (Mobile View & Bot
 
     // 3. Chuyển đổi bộ hợp âm qua nút [🎸 HD]
     await expect(chordsetLabel).toHaveText('HD');
+    // M4-2a: chạm nút mở bảng chọn đầy đủ, chọn TLH (default) trong bảng
     await chordsetBtn.click();
+    await page.locator('#mobile-chordset-sheet .mobile-chordset-option[data-set-value="default"]').click();
     await page.waitForTimeout(200);
     await expect(chordsetLabel).toHaveText('TLH');
 
@@ -205,7 +208,7 @@ test.describe('L1-8 · Tối ưu hiển thị điện thoại (Mobile View & Bot
     await expect(page.locator('#lyric-view-container')).toBeVisible();
     await expect(page.locator('#osmd-container')).toBeHidden();
     await expect(viewToggleBtn).toHaveClass(/active/);
-    await expect(page.locator('#mobile-view-label')).toHaveText('Lời & HÂ');
+    await expect(page.locator('#mobile-view-label')).toHaveText('Lời');
   });
 
 });

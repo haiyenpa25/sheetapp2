@@ -13,7 +13,7 @@ test.describe('UX0-13 · Lock zoom is visible and clickable at 768 and 1366', ()
     { width: 768, height: 1024, label: 'tablet-768' },
     { width: 1366, height: 768, label: 'desktop-1366' },
   ]) {
-    test(`Modern ${vp.label}: #btn-menu-lock-zoom is visible in menu ⋯ and toggles zoom lock on click`, async ({ page }) => {
+    test(`Modern ${vp.label}: #btn-lock-zoom is always visible on the toolbar and toggles zoom lock on click`, async ({ page }) => {
       await page.addInitScript(() => {
         try {
           sessionStorage.setItem('sheetapp_guest_chosen', '1');
@@ -26,10 +26,8 @@ test.describe('UX0-13 · Lock zoom is visible and clickable at 768 and 1366', ()
       await page.goto(`${BASE_URL}?song=thanh-ca-001&v=sheet`, { waitUntil: 'domcontentloaded' });
       await page.locator('#osmd-container svg').first().waitFor({ state: 'visible', timeout: 20000 });
 
-      await page.locator('#btn-more-options').click();
-      await expect(page.locator('#main-dropdown-menu')).toBeVisible();
-
-      const lockBtn = page.locator('#btn-menu-lock-zoom');
+      // RULE §5: Khóa zoom luôn hiện ngay trên thanh điều khiển, không nằm trong menu ⋯
+      const lockBtn = page.locator('#btn-lock-zoom');
       await expect(lockBtn).toBeVisible();
 
       const beforeLock = await page.evaluate(() => localStorage.getItem('sheetapp_zoom_locked'));

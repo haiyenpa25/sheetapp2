@@ -59,7 +59,7 @@ test.describe('L1-11 · Khả năng truy cập (Accessibility, Contrast, Focus R
     expect(domOrder).toBe(true);
 
     // 2. Kiểm tra Skip Links navigation
-    const skipLinkToolbar = page.locator('.skip-link[href="#unified-toolbar"]');
+    const skipLinkToolbar = page.locator('.skip-link[href="#toolbar"]');
     await expect(skipLinkToolbar).toBeAttached();
 
     // Focus vào skip link bằng bàn phím
@@ -69,7 +69,7 @@ test.describe('L1-11 · Khả năng truy cập (Accessibility, Contrast, Focus R
     // Kích hoạt skip link nhảy tới thanh công cụ
     await skipLinkToolbar.click();
     const urlHash = await page.evaluate(() => window.location.hash);
-    expect(urlHash).toBe('#unified-toolbar');
+    expect(urlHash).toBe('#toolbar');
   });
 
   test('3. Viền focus 2px rõ ràng (:focus-visible)', async ({ page }) => {

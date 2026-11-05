@@ -2517,7 +2517,7 @@ body.dark-mode #main-dropdown-menu .icon-btn-xs {
   }
   #main-dropdown-menu > .btn-menu-item,
   #main-dropdown-menu .tools-row {
-    min-height: 40px !important;
+    min-height: 44px !important; /* R1-5: vùng chạm bottom sheet >= 44px */
     padding: 4px 8px !important;
   }
   #main-dropdown-menu .menu-sticky-footer {
@@ -2576,5 +2576,9 @@ body.dark-mode #main-dropdown-menu .icon-btn-xs {
 /* ── Cảm ứng: các nút còn lại cũng đạt vùng chạm 44px (G2c) ── */
 @media (pointer: coarse) {
   .toast-dismiss { min-height: 44px; min-width: 44px; }
-  #toolbar #btn-transpose-reset, #toolbar #scroll-speed, #toolbar #btn-chord-notation { min-height: 44px; min-width: 44px; }
+  body #toolbar#toolbar #btn-transpose-reset, body #toolbar#toolbar #scroll-speed, body #toolbar#toolbar #btn-chord-notation { height: 44px !important; min-height: 44px; min-width: 44px; }
 }
+
+/* Menu ⋯: phần tử .sr-only (absolute) không được tạo thanh cuộn ngang ảo */
+#main-dropdown-menu { overflow-x: hidden; }
+body #main-dropdown-menu .menu-audio-actions #btn-play-audio { height: 44px !important; min-height: 44px !important; box-sizing: border-box; }

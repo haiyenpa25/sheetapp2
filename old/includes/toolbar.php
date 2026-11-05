@@ -285,7 +285,7 @@
         <a id="btn-menu-manager" href="<?= $mgrHref ?>#tab-categories" class="btn btn-ghost btn-sm btn-menu-item"
            title="Quản lý danh mục, thêm/sửa/xóa bài hát (XML), kho nhạc & thành viên">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-          <span>Quản lý danh mục &amp; thêm bài</span>
+          <span>Quản lý &amp; thêm bài</span>
         </a>
 
         <a id="btn-switch-new-ui" href="<?= $baseHref ?? '../' ?>" class="btn btn-primary btn-sm btn-menu-item"

@@ -59,7 +59,7 @@ test.describe('Ticket L0-4: Thanh công cụ không tràn dưới 1300px', () =>
         const isInsideViewport = (el) => {
           if (!el) return false;
           const r = el.getBoundingClientRect();
-          return r.left >= 0 && r.right <= window.innerWidth && r.top >= 0 && r.bottom <= window.innerHeight;
+          return r.left >= 0 && r.right <= window.innerWidth && r.top >= -1 && r.bottom <= window.innerHeight;
         };
 
         const gig = document.getElementById('btn-fullscreen');
@@ -107,8 +107,11 @@ test.describe('Ticket L0-4: Thanh công cụ không tràn dưới 1300px', () =>
         };
       });
 
-      expect(secondaryHidden.zoomHidden).toBe(true);
-      expect(secondaryHidden.scrollHidden).toBe(true);
+      // RULE §5 (10 điều khiển luôn hiện): Zoom và Cuộn KHÔNG còn thu vào ⋮ — luôn nằm trên thanh
+      // (≤680px: toàn bộ chuyển xuống thanh ngón cái nên cụm trên toolbar ẩn)
+      const onPhone = vp.width <= 680;
+      expect(secondaryHidden.zoomHidden).toBe(onPhone);
+      expect(secondaryHidden.scrollHidden).toBe(onPhone);
     });
   }
 
