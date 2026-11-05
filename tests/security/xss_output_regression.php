@@ -71,8 +71,10 @@ check(str_contains($learn, 'window.SafeHtml.escape(chordSym)'), 'Learn chord lab
 check(str_contains($safeHtml, 'function inlineJsString'), 'Shared encoder supports inline JavaScript string context');
 check(!preg_match('/onclick="[^"]*\$\{_escape\(/', $manager), 'Manager inline handlers do not use HTML-only escaping');
 check(str_contains($liveBandIndex, "liveBandJsTag('assets/js/core/SafeHtml.js'"), 'Live Band loads the shared output encoder');
-check(str_contains($liveBand, 'window.SafeHtml.escape(songTitle)'), 'Live Band teleprompter encodes song titles');
-check(str_contains($liveBand, 'window.SafeHtml.escape(line)'), 'Live Band teleprompter encodes lyric lines');
+// Bộ vẽ teleprompter nằm ở StageHud (tách khỏi live-band.js để giữ file dưới 600 dòng).
+$stageHud = source($root . '/live-band/js/stage-hud.js');
+check(str_contains($stageHud, 'window.SafeHtml.escape(songTitle)'), 'Live Band teleprompter encodes song titles');
+check(str_contains($stageHud, 'window.SafeHtml.escape(line)'), 'Live Band teleprompter encodes lyric lines');
 check(str_contains($appUi, 'window.SafeHtml.escape(message)'), 'Application toast messages are encoded');
 check(str_contains($appUi, 'window.SafeHtml.escape') && str_contains($appUi, 'history-item-date'), 'AppUI session history is encoded');
 check(str_contains($libraryUi, 'window.SafeHtml.escape'), 'LibraryUI escapes dynamic data via SafeHtml');
