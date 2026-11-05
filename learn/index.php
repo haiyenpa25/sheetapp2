@@ -165,6 +165,7 @@ function learnCssTag(string $file): string {
       </div>
       <button type="button" class="btn-picker-close" id="btn-picker-close" title="Đóng">✕</button>
     </div>
+    <div id="learn-week-plan" class="learn-week-plan hidden"></div>
     <input
       type="search"
       id="learn-song-search"
@@ -453,6 +454,7 @@ echo learnJsTag('assets/js/learn/transport/learn-transport-bridge.js', true);
 echo learnJsTag('assets/js/learn/ui/learn-controls.js', true);
 echo learnJsTag('assets/js/learn/ui/learn-dashboard-ui.js', true);
 echo learnJsTag('assets/js/learn/ui/learn-assignments-ui.js', true);
+echo learnJsTag('assets/js/learn/ui/learn-week-plan.js', true);
 echo learnJsTag('assets/js/learn/learn-app.js', true);
 ?>
 

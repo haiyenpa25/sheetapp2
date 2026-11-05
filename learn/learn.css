@@ -2573,6 +2573,24 @@ html, body {
 .learn-advanced > summary::before { content: '▸'; margin-right: 6px; transition: transform .15s; }
 .learn-advanced[open] > summary::before { transform: rotate(90deg); }
 
+/* Tập luyện v2: 3 chế độ — chỉ hiện thẻ của chế độ đang chọn (data-mode đặt bởi learn-controls.js) */
+.learn-side-panel[data-mode="piano"] #learn-melody-card,
+.learn-side-panel[data-mode="piano"] #learn-satb-card,
+.learn-side-panel[data-mode="melody"] #learn-pattern-card,
+.learn-side-panel[data-mode="melody"] #learn-satb-card,
+.learn-side-panel[data-mode="melody"] .chord-card-container,
+.learn-side-panel[data-mode="satb"] #learn-pattern-card,
+.learn-side-panel[data-mode="satb"] #learn-melody-card,
+.learn-side-panel[data-mode="satb"] .chord-card-container { display: none; }
+
+/* "Tuần này cần tập" ở đầu bảng chọn bài */
+.learn-week-plan { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; margin: 0 0 10px; border: 1px solid var(--learn-border); border-radius: 10px; background: rgba(139, 92, 246, .12); }
+.learn-week-plan.hidden { display: none; }
+.learn-week-title { font-size: 12px; font-weight: 700; color: var(--learn-accent, #a78bfa); }
+.learn-week-song { display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 40px; padding: 0 10px; border: 0; border-radius: 8px; background: rgba(255,255,255,.06); color: inherit; font: inherit; text-align: left; cursor: pointer; touch-action: manipulation; }
+.learn-week-song:hover { background: rgba(255,255,255,.12); }
+.learn-week-song small { color: var(--learn-text-dim, #9ca3af); }
+
 /* Tên bài không bị cắt còn "Ki…": thanh nav chung đã có "Tập Luyện" nên ẩn nhãn "Learn Studio" trên màn hình vừa, và giữ chỗ tối thiểu cho tên bài */
 @media (min-width: 701px) {
   .learn-song-info { min-width: 150px; }

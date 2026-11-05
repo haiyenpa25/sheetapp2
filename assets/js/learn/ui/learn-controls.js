@@ -126,6 +126,16 @@ const LearnControls = (() => {
     }
   }
 
+  /**
+   * 3 chế độ hiển thị: Nghe & Đệm (piano/chord cũ) · Chơi (melody) · Tập bè (satb).
+   * Chỉ thẻ của chế độ đang chọn hiện ra (CSS theo data-mode); engine không đổi.
+   */
+  function syncModeUi(mode) {
+    const shown = mode === 'chord' ? 'piano' : (mode || 'piano');
+    document.querySelectorAll('.btn-learn-mode').forEach((b) => b.classList.toggle('active', b.dataset.mode === shown));
+    document.querySelector('.learn-side-panel')?.setAttribute('data-mode', shown);
+  }
+
   /** Dòng tóm tắt "Điệu: …" hiện ngoài mục Nâng cao để người tập không phải mở bảng tùy chỉnh. */
   function updatePatternSummary() {
     const sel = document.getElementById('learn-pattern-select');
@@ -386,8 +396,7 @@ const LearnControls = (() => {
     document.querySelectorAll('.btn-learn-mode').forEach(btn => {
       btn.addEventListener('click', () => {
         const mode = btn.dataset.mode;
-        document.querySelectorAll('.btn-learn-mode').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+        syncModeUi(mode);
         if (window.LearnStore) LearnStore.set('mode', mode);
         const osmd = window.LearnScore ? LearnScore.getOsmd() : null;
 
@@ -425,6 +434,8 @@ const LearnControls = (() => {
         if (window.LearnStore) LearnStore.savePreferences();
       });
     });
+
+    syncModeUi(window.LearnStore ? LearnStore.get('mode') : 'piano');
 
     // 12. SATB Solo / Mute / Volume Sliders
     document.querySelectorAll('.btn-voice-solo').forEach(btn => {
@@ -475,6 +486,7 @@ const LearnControls = (() => {
       const panel = document.getElementById('learn-song-picker-panel');
       panel?.classList.toggle('hidden');
       if (!panel?.classList.contains('hidden')) {
+        window.WeekPlan?.refresh?.();
         document.getElementById('learn-song-search')?.focus();
       }
     });

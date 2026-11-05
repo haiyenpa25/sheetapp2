@@ -1,23 +1,19 @@
     <!-- ── Side Panel (Studio Controls) ───────────────────────────────── -->
-    <aside class="learn-side-panel">
+    <aside class="learn-side-panel" data-mode="piano">
 
       <!-- Mode selector -->
       <div class="learn-mode-bar">
-        <button class="btn-learn-mode active" data-mode="piano"  title="Học Piano">
+        <button class="btn-learn-mode active" data-mode="piano"  title="Nghe bài với đệm tự động và xem hợp âm">
           <svg viewBox="0 0 24 24" fill="currentColor" class="mode-icon"><path d="M20 5H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 10H9v-5h2v5zm4 0h-2v-5h2v5zm4 0h-2v-5h2v5z"/></svg>
-          Piano
+          Nghe &amp; Đệm
         </button>
-        <button class="btn-learn-mode"        data-mode="melody" title="Tập Nốt Giai Điệu (Giọng 1)">
+        <button class="btn-learn-mode"        data-mode="melody" title="Chơi nốt giai điệu trên đàn, chờ bạn bấm đúng">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mode-icon"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-          Giai Điệu
+          Chơi
         </button>
-        <button class="btn-learn-mode"        data-mode="chord"  title="Tập Đệm Hợp Âm">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mode-icon"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          Đệm Hát
-        </button>
-        <button class="btn-learn-mode"        data-mode="satb"   title="Luyện giọng Ca Đoàn SATB">
+        <button class="btn-learn-mode"        data-mode="satb"   title="Tập bè của bạn với ca đoàn SATB">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mode-icon"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-          Ca Đoàn
+          Tập bè
         </button>
       </div>
 
