@@ -2587,3 +2587,15 @@ body #main-dropdown-menu .menu-audio-actions #btn-play-audio { height: 44px !imp
 /* Nút đổi giao diện trên thanh công cụ: cạnh nút ⋯ */
 #more-options-group { display: inline-flex; align-items: center; gap: 4px; }
 #btn-toolbar-switch-ui { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; color: inherit; touch-action: manipulation; min-width: var(--ctl-h, 36px); min-height: var(--ctl-h, 36px); }
+/* Menu ⋯: nhãn "Khóa zoom", "Bè", "SATB" không bị cắt khi hàng hẹp — cho xuống dòng thay vì tràn */
+#main-dropdown-menu .tools-row { flex-wrap: wrap; row-gap: 4px; }
+#main-dropdown-menu .tools-zoom-controls,
+#main-dropdown-menu .menu-audio-actions { flex-wrap: wrap; justify-content: flex-end; min-width: 0; max-width: 100%; }
+
+/* G3: vùng chạm tối thiểu 32px cho nút phụ (thanh app, nhảy nhanh, đóng toast) */
+body #shell-switch-old-ui-btn, body #shell-context-help-btn, body #shell-btn-login,
+.quick-jump-btn, button.toast-dismiss { min-height: 32px; box-sizing: border-box; }
+a.shell-brand { min-height: 32px; }
+button.toast-dismiss { min-width: 32px; }
+body .quick-jump-btn { height: 32px !important; min-height: 32px !important; }
+@media (pointer: coarse) { body .quick-jump-btn { height: 36px !important; min-height: 36px !important; } body button.toast-dismiss { min-width: 44px; min-height: 44px; } }

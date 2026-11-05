@@ -213,7 +213,7 @@
             <button id="btn-menu-zoom-out" class="icon-btn-xs" title="Thu nhỏ" aria-label="Thu nhỏ">−</button>
             <span id="menu-zoom-val" class="menu-zoom-val">100%</span>
             <button id="btn-menu-zoom-in" class="icon-btn-xs" title="Phóng to" aria-label="Phóng to">+</button>
-            <button id="btn-menu-lock-zoom" class="icon-btn-xs" title="Khóa tỷ lệ zoom" aria-label="Khóa tỷ lệ zoom"><?= icon('unlock') ?> <span class="sr-only">Khóa zoom</span></button>
+            <button id="btn-menu-lock-zoom" class="icon-btn-xs" title="Khóa tỷ lệ zoom" aria-label="Khóa tỷ lệ zoom"><?= icon('unlock') ?> <span class="sr-only">Khóa</span></button>
           </div>
         </div>
 

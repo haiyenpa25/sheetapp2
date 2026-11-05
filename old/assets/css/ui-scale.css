@@ -130,3 +130,18 @@ body:not(.has-member-access) #btn-header-manager { display: none !important; }
 /* Sàn cỡ chữ 11px cho nhãn nhỏ (số bài, tông, đếm, đơn vị tempo...) — trước đây 8,75–10px khó đọc trên điện thoại */
 body .song-item-num, body .song-key-badge, body .library-count-badge, body .tempo-unit,
 body .deck-glyph, body .feat-icon, body small, body .btn-sm, body .btn-xs { font-size: max(12px, 1em); }
+
+/* G3: nút nhỏ Classic >= 32px (vùng chạm) */
+.song-pin-btn, .song-fav-btn, #btn-song-info-toggle { min-width: 32px; min-height: 32px; box-sizing: border-box; }
+#btn-transpose-down, #btn-transpose-up { min-width: 32px; }
+#transpose-display { min-width: 32px; min-height: 32px; }
+body .song-pin-btn, body .song-fav-btn { width: 32px !important; min-width: 32px !important; }
+body #toolbar#toolbar #btn-transpose-down, body #toolbar#toolbar #btn-transpose-up { min-width: 32px !important; width: 32px !important; }
+@media (pointer: coarse) {
+  body #toolbar#toolbar #btn-transpose-down, body #toolbar#toolbar #btn-transpose-up { min-width: 36px !important; width: 36px !important; }
+  body #btn-song-info-toggle { min-width: 36px; min-height: 36px; }
+  body .song-pin-btn, body .song-fav-btn { width: 36px !important; min-width: 36px !important; height: 36px; }
+}
+span.si-chip, #btn-transpose-reset, .btn-text { font-size: max(11px, 1em); }
+body #toolbar#toolbar #btn-transpose-reset, body #toolbar#toolbar #btn-transpose-reset * { font-size: max(11px, 1em) !important; }
+@media (pointer: coarse) { body #toolbar#toolbar #transpose-display { min-width: 32px !important; width: 32px !important; } }

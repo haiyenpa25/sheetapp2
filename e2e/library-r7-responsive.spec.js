@@ -81,11 +81,16 @@ test('phone fullscreen keeps view and transpose controls in a touch-friendly HUD
 test('library logo lives in the song picker on laptop', async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
   await page.goto('./?song=thanh-ca-002', { waitUntil: 'domcontentloaded' });
+  // Nút chỉ có tác dụng sau khi toolbar-controller gắn sự kiện (chờ bản nhạc render = app đã khởi động)
+  await expect(page.locator('#osmd-container svg').first()).toBeVisible({ timeout: 25000 });
   await page.locator('#btn-open-sidebar').click();
+  // chờ sidebar trượt vào hẳn (chậm hơn khi máy đang tải sau các test trước)
+  await expect.poll(() => page.evaluate(() => document.getElementById('sidebar').getBoundingClientRect().left), { timeout: 15000 }).toBeGreaterThanOrEqual(0);
   await expect(page.locator('.sidebar-header .logo-text')).toBeVisible();
   await expect(page.locator('#app-shell-navbar .shell-brand')).toBeHidden();
   await page.waitForTimeout(400);
   await page.screenshot({ path: 'test-results/r7-sidebar-1366.png' });
+  await expect(page.locator('#btn-toggle-sidebar')).toBeInViewport(); // chờ sidebar trượt xong
   await page.locator('#btn-toggle-sidebar').click();
   await expect(page.locator('#sidebar')).toHaveClass(/mobile-hidden/);
   await expect(page.locator('#btn-open-sidebar')).toBeFocused();
@@ -110,6 +115,8 @@ for (const width of [360, 390, 430]) {
       expect(b.right, b.id).toBeLessThanOrEqual(width);
       expect(b.height, b.id).toBeGreaterThanOrEqual(44);
     }
+    await expect(page.locator('#mobile-transpose-display')).not.toHaveText('0'); // chờ bài tải xong, hiện tên tông
+    await expect(page.locator('#osmd-container svg').first()).toBeVisible({ timeout: 25000 }); // transpose chỉ có tác dụng sau khi bản nhạc render
     const keyBefore = await page.locator('#mobile-transpose-display').textContent();
     await page.locator('#btn-mobile-transpose-up').click();
     await expect(page.locator('#mobile-transpose-display')).not.toHaveText(keyBefore);
