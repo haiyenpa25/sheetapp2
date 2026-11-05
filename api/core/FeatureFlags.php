@@ -14,6 +14,7 @@ class FeatureFlags {
         'NOTIFICATIONS_INAPP'  => false,
         'NOTIFICATIONS_EMAIL'  => false,
         'NOTIFICATIONS_PUSH'   => false,
+        'MULTI_CHURCH'         => false, // đa Hội Thánh: cô lập chương trình lễ theo HT (migration 018)
     ];
 
     private static ?array $flags = null;

@@ -9,6 +9,7 @@
  * - Revision-diffing (modified: false) for ultra-fast, low-bandwidth polling (< 40 bytes).
  */
 require_once __DIR__ . '/LiveSyncStorageHelper.php';
+require_once __DIR__ . '/../core/ChurchAccessGuard.php';
 
 class LiveSyncService {
     public const ROOM_EXPIRE_HOURS = LiveSyncStorageHelper::ROOM_EXPIRE_HOURS;
@@ -129,6 +130,7 @@ class LiveSyncService {
                 'lastEventId'     => 'EVT-' . $safeRoom . '-1',
                 'events'          => [],
                 'active'          => true,
+                'churchId'        => ChurchAccessGuard::churchForNewRecord(), // HT sở hữu phòng (dùng khi khóa phạm vi phòng ở bước Band)
                 'createdAt'       => time(),
                 'expiresAt'       => time() + (self::ROOM_EXPIRE_HOURS * 3600),
                 'serverTime'      => microtime(true),

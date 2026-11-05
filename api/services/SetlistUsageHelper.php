@@ -7,6 +7,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../core/DB.php';
+require_once __DIR__ . '/../core/ChurchAccessGuard.php';
 
 class SetlistUsageHelper {
 
@@ -52,15 +53,17 @@ class SetlistUsageHelper {
             return ['song_id' => $songId, 'total_used' => 0, 'last_used_date' => null, 'history' => []];
         }
 
-        $totalUsed = (int)DB::run("SELECT COUNT(*) FROM song_usage_history WHERE song_id = ?", [$songId])->fetchColumn();
-        $lastUsed = DB::run("SELECT MAX(service_date) FROM song_usage_history WHERE song_id = ?", [$songId])->fetchColumn();
+        [$scope, $scopeParams] = ChurchAccessGuard::setlistScope('setlist_id');
+        $totalUsed = (int)DB::run("SELECT COUNT(*) FROM song_usage_history WHERE song_id = ? {$scope}", array_merge([$songId], $scopeParams))->fetchColumn();
+        $lastUsed = DB::run("SELECT MAX(service_date) FROM song_usage_history WHERE song_id = ? {$scope}", array_merge([$songId], $scopeParams))->fetchColumn();
 
         $hasTheme = self::hasColumn('setlists', 'theme');
+        [$hScope, $hParams] = ChurchAccessGuard::setlistScope('h.setlist_id');
         $sql = $hasTheme
-            ? "SELECT h.*, s.title AS service_title, s.theme, s.status AS service_status FROM song_usage_history h JOIN setlists s ON s.id = h.setlist_id WHERE h.song_id = ? ORDER BY h.service_date DESC"
-            : "SELECT h.*, s.title AS service_title, '' AS theme, '' AS service_status FROM song_usage_history h JOIN setlists s ON s.id = h.setlist_id WHERE h.song_id = ? ORDER BY h.service_date DESC";
+            ? "SELECT h.*, s.title AS service_title, s.theme, s.status AS service_status FROM song_usage_history h JOIN setlists s ON s.id = h.setlist_id WHERE h.song_id = ? {$hScope} ORDER BY h.service_date DESC"
+            : "SELECT h.*, s.title AS service_title, '' AS theme, '' AS service_status FROM song_usage_history h JOIN setlists s ON s.id = h.setlist_id WHERE h.song_id = ? {$hScope} ORDER BY h.service_date DESC";
         
-        $history = DB::run($sql, [$songId])->fetchAll(PDO::FETCH_ASSOC);
+        $history = DB::run($sql, array_merge([$songId], $hParams))->fetchAll(PDO::FETCH_ASSOC);
 
         return [
             'song_id' => $songId,
@@ -91,15 +94,16 @@ class SetlistUsageHelper {
         }
 
         $thresholdDate = date('Y-m-d', strtotime("-{$weeks} weeks"));
+        [$rScope, $rParams] = ChurchAccessGuard::setlistScope('h.setlist_id');
         $sql = "
             SELECT h.*, s.title AS service_title, s.scheduled_date
             FROM song_usage_history h
             JOIN setlists s ON s.id = h.setlist_id
-            WHERE h.song_id = ?
+            WHERE h.song_id = ? {$rScope}
             ORDER BY h.service_date DESC, h.id DESC
             LIMIT 1
         ";
-        $lastRecord = DB::run($sql, [$songId])->fetch(PDO::FETCH_ASSOC);
+        $lastRecord = DB::run($sql, array_merge([$songId], $rParams))->fetch(PDO::FETCH_ASSOC);
 
         if (!$lastRecord || empty($lastRecord['service_date'])) {
             return [
@@ -170,6 +174,11 @@ class SetlistUsageHelper {
             $whereClauses[] = "h.service_date <= ?";
             $params[] = $toDate;
         }
+        [$cScope, $cParams] = ChurchAccessGuard::setlistScope('h.setlist_id');
+        if ($cScope !== '') {
+            $whereClauses[] = ltrim(substr($cScope, 5)); // bỏ "AND " đầu mệnh đề
+            $params = array_merge($params, $cParams);
+        }
         $whereSql = !empty($whereClauses) ? "WHERE " . implode(" AND ", $whereClauses) : "";
 
         // 1. KPIs
@@ -223,18 +232,19 @@ class SetlistUsageHelper {
         $dormantSongs = [];
         if ($hasSongTable) {
             $twelveWeeksAgo = date('Y-m-d', strtotime('-12 weeks'));
+            $cScopeJoin = $cScope; // cùng mệnh đề phạm vi HT, gắn vào điều kiện JOIN
             $dormantSql = "
                 SELECT so.id AS song_id, so.title AS song_title, so.defaultKey, so.httlvnId,
                        MAX(h.service_date) AS last_used_date,
                        COUNT(h.id) AS past_usage_count
                 FROM songs so
-                LEFT JOIN song_usage_history h ON h.song_id = so.id
+                LEFT JOIN song_usage_history h ON h.song_id = so.id {$cScopeJoin}
                 GROUP BY so.id
                 HAVING last_used_date IS NULL OR last_used_date < ?
                 ORDER BY last_used_date ASC, so.id ASC
                 LIMIT {$limit}
             ";
-            $dormantSongs = DB::run($dormantSql, [$twelveWeeksAgo])->fetchAll(PDO::FETCH_ASSOC);
+            $dormantSongs = DB::run($dormantSql, array_merge($cParams, [$twelveWeeksAgo]))->fetchAll(PDO::FETCH_ASSOC);
         }
 
         // 4. Recent Usage History (30 lần dùng gần nhất)
@@ -245,6 +255,7 @@ class SetlistUsageHelper {
                 FROM song_usage_history h
                 JOIN setlists s ON s.id = h.setlist_id
                 LEFT JOIN songs so ON so.id = h.song_id
+                WHERE 1=1 {$cScope}
                 ORDER BY h.service_date DESC, h.id DESC
                 LIMIT 30
             "
@@ -253,10 +264,11 @@ class SetlistUsageHelper {
                        h.song_id AS song_title, '' AS defaultKey
                 FROM song_usage_history h
                 JOIN setlists s ON s.id = h.setlist_id
+                WHERE 1=1 {$cScope}
                 ORDER BY h.service_date DESC, h.id DESC
                 LIMIT 30
             ";
-        $recentHistory = DB::run($historySql)->fetchAll(PDO::FETCH_ASSOC);
+        $recentHistory = DB::run($historySql, $cParams)->fetchAll(PDO::FETCH_ASSOC);
 
         return [
             'summary' => [

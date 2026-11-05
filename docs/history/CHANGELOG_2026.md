@@ -6,6 +6,15 @@
 
 ---
 
+## 2026-10-29 — Tài khoản bannhac, chương trình chỉ cho người đăng nhập, HD mặc định, kiểm chồng lấn hợp âm
+
+- Tài khoản: `tools/create_band_user.php` (CLI, dry-run mặc định, mật khẩu lấy từ biến môi trường `SHEETAPP_USER_PASSWORD`, sao lưu trước khi ghi). Đã tạo `bannhac` (role `bannhac`, chord_code `BN`) trên CSDL local; CSDL web chạy cùng lệnh.
+- Chương trình: khách chưa đăng nhập không thấy gì — mọi `GET` route `setlists` yêu cầu đăng nhập (401), tab Chương trình ẩn (Modern + `/old/`); `viewer` đã đăng nhập vẫn nhận bản rút gọn của chương trình `published`. Sửa `RULE.md` §5.2 và `tests/library_tv41_public_setlists_regression.php`.
+- HD mặc định: HD rỗng hiện bản nhạc sạch (cờ `AppRules.HD_EMPTY_SHOWS_TLH = false`, thay Core Rule 1 cũ). `tools/clone_tlh_to_hd.php` + `tools/xml_chords_to_json.cjs` sao chép hợp âm XML vào HD: 1.449 bài (38.539 hợp âm) được ghi, 135 bài XML không có hợp âm giữ HD rỗng; sao lưu và 1.449 dòng lịch sử. Test mới `tests/hd_empty_clean_regression.php`.
+- Hợp âm/chấm `+` (R9 P4-3): sàn chữ 12px, hợp âm xếp độc lập với chấm, chấm nhường chữ; `e2e/r9-chord-overlap.spec.js`; danh sách chương trình Classic hết dính nhau (`old/assets/css/layout.css`); `TransposeHelper.php` đồng bộ quy tắc Bb/Ab/Eb với JS.
+- Seed phát hành: sau khi clone HD đã sinh lại `storage/seed/library.sqlite` + `library.manifest.json` (đúng 1.449 bộ HD đổi, 1.737 bộ hợp âm, 1.455 file JSON khớp manifest). Xoá 2 bộ rác test (`BH_TEST_R29`, `BH_POLYPHONIC_TEST`) khỏi CSDL local; sửa `library_r29`/`library_r210` truyền `userId` cho `deleteSet` nên không còn rò vào CSDL thật. Bộ test strict: 241/243 suite, chỉ còn `library_tv2_gzip` và `liturgical_export_and_usage` lỗi sẵn ở HEAD.
+- Chưa làm (cần chủ dự án quyết): danh mục riêng + tải XML riêng tư, đồng bộ dữ liệu GitHub — xem phương án trong phiên 2026-10-29.
+
 ## 2026-10-28 — Nghiệm thu đợt fix R9 theo ROADMAP_R9_REVIEW (F1–F9, Q1–Q3, P0–P5)
 
 - Phân quyền & chống mất dữ liệu bộ hợp âm chuẩn HD (`F1`, `F2`, `Q1`, `Q2`): đồng bộ `username` và `chord_code` từ CSDL trong `Auth::checkDb()`; tìm kiếm người dùng không phân biệt hoa thường ở `UserService::findByUsername`; `ChordSetController` chỉ cấp quyền sửa trực tiếp bộ `HD` cho Admin hoặc chủ sở hữu có `chord_code = 'HD'` (chặn tài khoản giả mạo `HoaiDinh` không có `chord_code` với HTTP 403). Cấm ghi đè bộ `HD` bằng thao tác sao chép (`action === 'clone'` trả 403, ẩn nút `#cc-clone-copy` khi đích là `HD`).

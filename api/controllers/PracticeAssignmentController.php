@@ -11,6 +11,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../core/AuthPolicy.php';
 require_once __DIR__ . '/../core/Response.php';
+require_once __DIR__ . '/../core/ChurchAccessGuard.php';
 require_once __DIR__ . '/../services/PracticeAssignmentService.php';
 
 class PracticeAssignmentController {
@@ -30,6 +31,10 @@ class PracticeAssignmentController {
                 $setlistId = (int)($_GET['setlist_id'] ?? 0);
                 if ($setlistId <= 0) {
                     Response::error('Thiếu mã chương trình thờ phượng (setlist_id)');
+                    return;
+                }
+                if (!ChurchAccessGuard::canAccessSetlist($setlistId)) {
+                    Response::notFound('Chương trình không tồn tại');
                     return;
                 }
                 $board = PracticeAssignmentService::getTeamBoard($setlistId, (int)Auth::userId());
@@ -62,6 +67,10 @@ class PracticeAssignmentController {
                 $setlistId = (int)($body['setlist_id'] ?? 0);
                 if ($setlistId <= 0) {
                     Response::error('Thiếu mã chương trình thờ phượng (setlist_id)');
+                    return;
+                }
+                if (!ChurchAccessGuard::canAccessSetlist($setlistId)) {
+                    Response::notFound('Chương trình không tồn tại');
                     return;
                 }
                 try {

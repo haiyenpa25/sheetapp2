@@ -15,6 +15,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../core/DB.php';
 require_once __DIR__ . '/../core/AuditLogger.php';
+require_once __DIR__ . '/../core/ChurchAccessGuard.php';
 require_once __DIR__ . '/DomainEventService.php';
 require_once __DIR__ . '/SetlistUsageHelper.php';
 require_once __DIR__ . '/SetlistOfflineHelper.php';
@@ -73,6 +74,7 @@ class SetlistService {
      * Lấy toàn bộ danh sách setlists / service plans kèm thống kê
      */
     public static function getAll(?int $currentUserId = null): array {
+        [$scope, $scopeParams] = ChurchAccessGuard::setlistScope('s.id');
         if (self::hasTable('service_plan_assignments') && self::hasColumn('setlists', 'service_time')) {
             $sql = "
                 SELECT s.*,
@@ -85,18 +87,20 @@ class SetlistService {
                 FROM setlists s
                 LEFT JOIN users u ON u.id = s.created_by
                 LEFT JOIN users l ON l.id = s.leader_user_id
+                WHERE 1=1 {$scope}
                 ORDER BY s.scheduled_date DESC, s.created_at DESC
             ";
-            return DB::run($sql, [$currentUserId])->fetchAll(PDO::FETCH_ASSOC);
+            return DB::run($sql, array_merge([$currentUserId], $scopeParams))->fetchAll(PDO::FETCH_ASSOC);
         }
 
-        return DB::query("SELECT s.*, (SELECT COUNT(*) FROM setlist_items WHERE setlist_id = s.id) as item_count FROM setlists s ORDER BY s.created_at DESC");
+        return DB::run("SELECT s.*, (SELECT COUNT(*) FROM setlist_items WHERE setlist_id = s.id) as item_count FROM setlists s WHERE 1=1 {$scope} ORDER BY s.created_at DESC", $scopeParams)->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
      * Lấy chi tiết 1 service plan: bài hát, phân công, trạng thái
      */
     public static function getById(int $id): ?array {
+        if (!ChurchAccessGuard::canAccessSetlist($id)) return null; // HT khác: coi như không tồn tại
         $hasLeader = self::hasColumn('setlists', 'leader_user_id');
         $sql = $hasLeader
             ? "SELECT s.*, u.display_name AS creator_name, l.display_name AS leader_name FROM setlists s LEFT JOIN users u ON u.id = s.created_by LEFT JOIN users l ON l.id = s.leader_user_id WHERE s.id = ?"
@@ -168,6 +172,9 @@ class SetlistService {
             $stmt = DB::run("INSERT INTO setlists (title, scheduled_date, created_by) VALUES (?, ?, ?)", [$title, $date, $userId]);
         }
         $newId = (int)DB::lastId();
+        if (self::hasColumn('setlists', 'church_id')) {
+            DB::run('UPDATE setlists SET church_id = ? WHERE id = ?', [ChurchAccessGuard::churchForNewRecord(), $newId]);
+        }
 
         AuditLogger::log('service_plan_create', $userId, $newId, [
             'title' => $title,

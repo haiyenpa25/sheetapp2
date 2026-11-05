@@ -1,18 +1,21 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/../core/DB.php';
+require_once __DIR__ . '/../core/ChurchAccessGuard.php';
 
 /** Public programs expose an explicit performance view, never personnel or internal notes. */
 class SetlistPublicReadService {
     private const PLAN_COLUMNS = 's.id, s.title, s.scheduled_date, s.service_time, s.theme, s.status';
 
     public static function getAll(): array {
+        [$scope, $scopeParams] = ChurchAccessGuard::setlistScope('s.id');
         return DB::run('SELECT ' . self::PLAN_COLUMNS . ",
             (SELECT COUNT(*) FROM setlist_items WHERE setlist_id=s.id) AS item_count
-            FROM setlists s WHERE s.status='published' ORDER BY s.scheduled_date DESC, s.created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
+            FROM setlists s WHERE s.status='published' {$scope} ORDER BY s.scheduled_date DESC, s.created_at DESC", $scopeParams)->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public static function getById(int $id): ?array {
+        if (!ChurchAccessGuard::canAccessSetlist($id)) return null;
         $plan = DB::run('SELECT ' . self::PLAN_COLUMNS . " FROM setlists s WHERE s.id=? AND s.status='published'", [$id])->fetch(PDO::FETCH_ASSOC);
         if (!$plan) return null;
         $plan['items'] = DB::run("SELECT i.id, i.setlist_id, i.song_id, i.display_order,
@@ -27,10 +30,11 @@ class SetlistPublicReadService {
     }
 
     public static function getSongUsageHistory(string $songId): array {
+        [$scope, $scopeParams] = ChurchAccessGuard::setlistScope('h.setlist_id');
         $history = DB::run("SELECT h.id, h.song_id, h.setlist_id, h.service_date,
             h.chord_profile, h.transpose_key, s.title AS service_title, s.theme, s.status AS service_status
             FROM song_usage_history h JOIN setlists s ON s.id=h.setlist_id
-            WHERE h.song_id=? AND s.status='published' ORDER BY h.service_date DESC, h.id DESC", [$songId])->fetchAll(PDO::FETCH_ASSOC);
+            WHERE h.song_id=? AND s.status='published' {$scope} ORDER BY h.service_date DESC, h.id DESC", array_merge([$songId], $scopeParams))->fetchAll(PDO::FETCH_ASSOC);
         return ['song_id' => $songId, 'total_used' => count($history),
             'last_used_date' => $history[0]['service_date'] ?? null, 'history' => $history];
     }
