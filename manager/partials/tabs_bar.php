@@ -19,6 +19,9 @@
       <button class="mgr-tab-btn" data-tab="tab-users" id="mgr-nav-tab-users">
         <span class="tab-icon">👥</span> Thành Viên & Phân Quyền
       </button>
+      <button class="mgr-tab-btn" data-tab="tab-churches" id="mgr-nav-tab-churches">
+        <span class="tab-icon">⛪</span> Hội Thánh
+      </button>
       <button class="mgr-tab-btn" data-tab="tab-usage" id="mgr-nav-tab-usage">
         <span class="tab-icon">📊</span> Thống Kê Thờ Phượng
       </button>

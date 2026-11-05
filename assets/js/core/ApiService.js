@@ -542,13 +542,24 @@ const ApiService = (() => {
     save: (payload) => _json('POST', 'api/index.php?route=notification_preferences&action=save', payload),
   };
 
+  const churches = {
+    mine:           () => _request('api/index.php?route=churches'),
+    members:        (churchId) => _request(`api/index.php?route=churches&action=members&church_id=${encodeURIComponent(churchId)}`),
+    switchTo:       (churchId) => _json('POST', 'api/index.php?route=churches&action=switch', { church_id: churchId }),
+    join:           (code) => _json('POST', 'api/index.php?route=churches&action=join', { code }),
+    updateMember:   (payload) => _json('POST', 'api/index.php?route=churches&action=update_member', payload),
+    rename:         (churchId, name) => _json('POST', 'api/index.php?route=churches&action=rename', { church_id: churchId, name }),
+    regenerateCode: (churchId) => _json('POST', 'api/index.php?route=churches&action=regenerate_code', { church_id: churchId }),
+    create:         (name) => _json('POST', 'api/index.php?route=churches&action=create', { name }),
+  };
+
   return {
     DEFAULT_TIMEOUT_MS,
     _request,
     fetchXml,
     resolveUrl,
     getBaseUrl: _getBaseUrl,
-    songs, chordSets, sessions, annotations, setlists, servicePlans: setlists, categories, saveXml, omr, importer, practice, manager, users, auth, liveSync, arrangements, notifications, practiceAssignments, export: exportService, reviews, notificationPreferences, errors, reportError: errors.report
+    songs, chordSets, sessions, annotations, setlists, servicePlans: setlists, categories, saveXml, omr, importer, practice, manager, users, auth, liveSync, arrangements, notifications, practiceAssignments, export: exportService, reviews, notificationPreferences, churches, errors, reportError: errors.report
   };
 })();
 

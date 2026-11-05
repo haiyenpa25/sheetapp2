@@ -68,10 +68,17 @@ const ManagerApp = (() => {
     window.ManagerUsage?.init(ctx);
     window.ManagerReviews?.init(ctx);
     window.ManagerNotifications?.init(ctx);
+    window.ManagerChurches?.init(ctx);
 
     _bindEvents();
 
     if (window.FeatureFlags) {
+      if (!window.FeatureFlags.get('MULTI_CHURCH')) {
+        const churchNav = document.getElementById('mgr-nav-tab-churches');
+        if (churchNav) churchNav.style.display = 'none';
+        const churchTab = document.getElementById('tab-churches');
+        if (churchTab) churchTab.style.display = 'none';
+      }
       if (!window.FeatureFlags.get('REVIEW_WORKFLOW')) {
         const revNav = document.getElementById('mgr-nav-tab-reviews');
         if (revNav) revNav.style.display = 'none';
@@ -447,6 +454,8 @@ const ManagerApp = (() => {
       window.ManagerUsage?.loadUsageReport?.();
     } else if (tabId === 'tab-reviews') {
       window.ManagerReviews?.loadQueue?.();
+    } else if (tabId === 'tab-churches') {
+      window.ManagerChurches?.load?.();
     }
   }
 

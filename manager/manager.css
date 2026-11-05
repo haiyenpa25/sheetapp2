@@ -1580,3 +1580,12 @@ body.manager-body {
 @media (max-width: 700px) {
   .mgr-toast-container { top: 3.6rem; bottom: auto; left: .75rem; right: .75rem; }
 }
+
+/* Tab Hội Thánh */
+.mgr-church-bar, .mgr-church-join { display: grid; gap: .4rem; margin-bottom: 1rem; max-width: 520px; }
+.mgr-church-label { font-size: .85rem; font-weight: 600; color: var(--text-muted); }
+.mgr-church-row { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin-bottom: .75rem; }
+.mgr-church-row .mgr-input { flex: 1 1 200px; min-height: 40px; }
+.mgr-church-bar .mgr-input { min-height: 40px; }
+.mgr-church-code { font-size: 1.1rem; letter-spacing: .12em; padding: .2rem .5rem; background: rgba(127,127,127,.15); border-radius: 6px; }
+#church-members-tbody select.mgr-input { min-height: 36px; width: auto; }

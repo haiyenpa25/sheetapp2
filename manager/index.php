@@ -56,6 +56,8 @@ $instrument = $_SESSION['instrument'] ?? 'Guitar';
     <?php require_once __DIR__ . '/partials/tab_usage.php'; ?>
 
     <?php require_once __DIR__ . '/partials/tab_reviews.php'; ?>
+
+    <?php require_once __DIR__ . '/partials/tab_churches.php'; ?>
   </main>
 
   <?php require_once __DIR__ . '/partials/modals.php'; ?>
@@ -84,6 +86,7 @@ $instrument = $_SESSION['instrument'] ?? 'Guitar';
   <script src="js/manager-users.js?v=<?= mgrAssetV('js/manager-users.js') ?>"></script>
   <script src="js/manager-usage.js?v=<?= mgrAssetV('js/manager-usage.js') ?>"></script>
   <script src="js/manager-reviews.js?v=<?= mgrAssetV('js/manager-reviews.js') ?>"></script>
+  <script src="js/manager-churches.js?v=<?= mgrAssetV('js/manager-churches.js') ?>"></script>
   <script src="js/manager-notifications.js?v=<?= mgrAssetV('js/manager-notifications.js') ?>"></script>
   <script src="manager.js?v=<?= mgrAssetV('manager.js') ?>"></script>
 </body>
