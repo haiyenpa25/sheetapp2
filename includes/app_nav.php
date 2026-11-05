@@ -101,7 +101,7 @@ $helpAnchor = match($activePillar) {
          aria-selected="<?= $activePillar === 'live' ? 'true' : 'false' ?>"
          title="Phòng biểu diễn ban nhạc, đồng bộ trực tiếp Ca Trưởng - Nhạc Công, máy chiếu nhà thờ">
         <span class="pillar-icon"><?= icon('mic') ?></span>
-        <span class="pillar-label">Biểu Diễn</span>
+        <span class="pillar-label">Band nhạc</span>
       </a>
 
       <a href="<?= $appBase ?>/learn/<?= $songQuery ?>" 

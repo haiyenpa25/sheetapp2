@@ -10,7 +10,8 @@
   async function loadSongCatalog(onCatalogLoaded) {
     try {
       const res = await window.ApiService?.songs?.list?.();
-      const songsList = Array.isArray(res?.data) ? res.data : [];
+      // ApiService.songs.list() trả về mảng bài thẳng (không bọc {data}); vẫn nhận cả dạng {data} để chịu được cả hai.
+      const songsList = Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
       const dropdown = document.getElementById('host-song-dropdown');
       if (dropdown && songsList.length > 0) {
         dropdown.innerHTML = '<option value="">-- Chọn bản nhạc biểu diễn --</option>' +

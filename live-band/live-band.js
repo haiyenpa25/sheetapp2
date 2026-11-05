@@ -502,7 +502,7 @@ const LiveBandApp = (() => {
         let renderXml = xmlText; if (_currentChordSet !== 'default' && _currentChordSet?.toUpperCase() !== 'TLH' && window.ApiService?.chordSets?.load) { const csRes = await window.ApiService.chordSets.load(songId, _currentChordSet).catch(() => null); if (_tok !== _loadToken) return; const list = csRes?.chords || (Array.isArray(csRes) ? csRes : []); const cMap = {}; list.forEach(c => { if (c?.chord) cMap[`${c.measureIdx}_${c.noteIdx}`] = c.chord; }); if (Object.keys(cMap).length > 0 && window.ChordCanvasXML?.cloneAndInjectChords) renderXml = window.ChordCanvasXML.cloneAndInjectChords(xmlText, cMap); else if (_currentChordSet === 'HD' && setEl) setEl.textContent = 'Bộ: HD (TLH)'; } _currentXmlString = renderXml;
         await _osmd.load(renderXml); if (_tok !== _loadToken) return;
         _osmd.render();
-        window.MusicalPosition?.attachContainer?.('stage-viewport');
+        window.MusicalPosition?.attachContainer?.('stage-viewport', { containerId: 'stage-osmd-container', getOsmd: () => _osmd });
         _renderTeleprompterLyrics(_currentSongTitle, xmlText);
         if (window.StageCatalog) {
           await window.StageCatalog.loadSections(songId, (m) => {

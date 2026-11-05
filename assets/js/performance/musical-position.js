@@ -18,11 +18,34 @@ const MusicalPosition = (() => {
   /**
    * Tính toán và lưu cache tọa độ y của từng ô nhịp (1-indexed) trên giao diện hiện tại
    */
+  // Trang khác app chính (vd. /live-band/) có container riêng: đăng ký bằng attachContainer(); mặc định dùng của app chính.
+  let _custom = null;
+  const _wrapper   = () => _custom ? _custom.wrapper : document.querySelector('.sheet-viewer-wrapper');
+  const _container = () => _custom ? _custom.container : document.getElementById('osmd-container');
+  const _osmd      = () => _custom ? _custom.getOsmd?.() : window.OSMDRenderer?.getInstance?.();
+  const _zoom      = () => _custom ? (Number(_osmd()?.zoom) || 1) : (window.OSMDRenderer?.getCurrentZoom?.() || 1.0);
+
+  /**
+   * Gắn bộ cuộn theo ô nhịp vào container của trang khác (Live Band).
+   * @param {string} viewportId - phần tử có thanh cuộn (overflow-y: auto)
+   * @param {{containerId?: string, getOsmd?: Function}} [opts] - container chứa SVG và hàm trả về instance OSMD
+   */
+  function attachContainer(viewportId, opts = {}) {
+    const wrapper = document.getElementById(viewportId);
+    if (!wrapper) { _custom = null; return; }
+    _custom = {
+      wrapper,
+      container: (opts.containerId && document.getElementById(opts.containerId)) || wrapper,
+      getOsmd: opts.getOsmd,
+    };
+    computeMeasurePositions();
+  }
+
   function computeMeasurePositions() {
     _measurePositionsCache = [];
-    const container = document.getElementById('osmd-container');
-    const lyricView = document.getElementById('lyric-view-container');
-    const wrapper   = document.querySelector('.sheet-viewer-wrapper');
+    const container = _container();
+    const lyricView = _custom ? null : document.getElementById('lyric-view-container');
+    const wrapper   = _wrapper();
 
     if (!wrapper) return;
 
@@ -42,7 +65,7 @@ const MusicalPosition = (() => {
 
     // 2. Chế độ Bản Nhạc OSMD (SVG)
     if (!container) return;
-    const osmd = window.OSMDRenderer?.getInstance?.();
+    const osmd = _osmd();
     const sheet = osmd?.Sheet || osmd?.sheet;
     const measures = sheet?.SourceMeasures || [];
 
@@ -50,6 +73,8 @@ const MusicalPosition = (() => {
 
     const wrapRect = wrapper.getBoundingClientRect();
     const containerRect = container.getBoundingClientRect();
+    // Container riêng (Live Band) nằm lệch trong vùng cuộn (đệm quanh bản nhạc): cộng độ lệch để cuộn đúng chỗ.
+    const offsetY = _custom ? (containerRect.top - wrapRect.top + wrapper.scrollTop) : 0;
 
     // Duyệt qua GraphicalMeasures của OSMD
     const gMeasures = sheet?.GraphicSheet?.MeasureList || [];
@@ -61,8 +86,8 @@ const MusicalPosition = (() => {
           // OSMD đơn vị là Unit (10 Unit ~ 100px phụ thuộc zoom)
           // Tìm SVG element tương ứng hoặc tính qua bounding box
           const bbox = gm.PositionAndShape;
-          const zoom = window.OSMDRenderer?.getCurrentZoom?.() || 1.0;
-          const topPx = (bbox.AbsolutePosition.y * 10 * zoom);
+          const zoom = _zoom();
+          const topPx = (bbox.AbsolutePosition.y * 10 * zoom) + offsetY;
           _measurePositionsCache.push({
             measure: mIdx + 1,
             top: topPx
@@ -80,7 +105,7 @@ const MusicalPosition = (() => {
         for (let i = 0; i < measures.length; i++) {
           _measurePositionsCache.push({
             measure: i + 1,
-            top: i * perMeasure
+            top: (i * perMeasure) + offsetY
           });
         }
       }
@@ -92,11 +117,11 @@ const MusicalPosition = (() => {
    * (ở khoảng 25% - 35% từ đỉnh viewport xuống)
    */
   function getVisibleMeasure() {
-    const wrapper = document.querySelector('.sheet-viewer-wrapper');
+    const wrapper = _wrapper();
     if (!wrapper) return 1;
 
     // Nếu con trỏ OSMD đang chạy (AutoScroll / Audio Play)
-    const osmd = window.OSMDRenderer?.getInstance?.();
+    const osmd = _osmd();
     if (osmd?.cursor?.iterator && !osmd.cursor.isHidden) {
       const cur = osmd.cursor.iterator.CurrentMeasureIndex;
       if (cur !== undefined && cur >= 0) return cur + 1;
@@ -128,7 +153,7 @@ const MusicalPosition = (() => {
    * @param {boolean} smooth - Có sử dụng hiệu ứng smooth scroll không
    */
   function scrollToMeasure(measureNum, smooth = true) {
-    const wrapper = document.querySelector('.sheet-viewer-wrapper');
+    const wrapper = _wrapper();
     if (!wrapper) return;
 
     if (_measurePositionsCache.length === 0) {
@@ -162,6 +187,7 @@ const MusicalPosition = (() => {
   }
 
   return {
+    attachContainer,
     computeMeasurePositions,
     getVisibleMeasure,
     scrollToMeasure
