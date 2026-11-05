@@ -38,6 +38,10 @@ function callChurch(string $method, array $get = [], ?array $body = null): array
     return [http_response_code(), json_decode($out, true) ?? []];
 }
 
+// Chạy trực tiếp file này cũng không được ghi nhật ký kiểm toán giả vào storage/logs/audit.log thật.
+require_once $root . '/api/core/AuditLogger.php';
+AuditLogger::setLogPath(sys_get_temp_dir() . '/sheetapp_audit_accounts_' . bin2hex(random_bytes(4)) . '.log');
+
 $pdo = createTestDatabase();
 DB::setPdo($pdo);
 $migrate = require $root . '/api/migrations/018_multi_church.php';
