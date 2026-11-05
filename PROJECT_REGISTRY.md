@@ -234,6 +234,7 @@ SheetApp/
 | `ExportController` | `export` | GET | `ChordProService`; kiểm cờ EXPORT_CHORDPRO |
 | `ReviewController` | `reviews` | GET, POST | `ReviewService` |
 | `NotificationPreferenceController` | `notification_preferences` | GET, POST | `NotificationPreferenceService` |
+| `ChurchController` | `churches` (cờ MULTI_CHURCH) | GET (mine, members), POST (switch, join, update_member, rename, regenerate_code, create) | `ChurchService`, `ChurchAccessGuard` |
 
 ### Learn Studio Modules (`assets/js/learn/`)
 
@@ -453,6 +454,7 @@ Ghi chú nằm trong `storage/data/annotations/*.json`; settings/notes theo user
 - Thiết kế (chủ dự án chọn: 2–5 HT, kho bài chung + bài riêng từng HT, một người thuộc nhiều HT): quyền gắn vào **HT**, không gắn từng chương trình. Migration `018_multi_church.php` (bảng `churches`, `church_members`, cột `setlists.church_id`, `categories.church_id`; HT mặc định `mac-dinh`, mọi tài khoản cũ thành thành viên; chạy lại an toàn). **Chạy `php tools/migrate.php` trên web có sao lưu trước** — chưa chạy trên bản web.
 - `api/services/ChurchService.php` (HT, vai trò `church_admin|leader|member|viewer`, HT đang làm việc, mã mời) và `api/core/ChurchAccessGuard.php` (cờ tắt = luôn cho qua; bật = chỉ admin hệ thống hoặc thành viên hoạt động của HT). Khóa phạm vi: `SetlistController` (mọi hành động theo mã chương trình/mục/phân công → 404 khi HT khác), `SetlistService` (danh sách, chi tiết, tạo gắn `church_id`), `SetlistPublicReadService`, `SetlistUsageHelper` (lịch sử/báo cáo/cảnh báo dùng bài tính theo HT), `PracticeAssignmentController` (bảng ca viên, giao bài), phân công chỉ cho thành viên cùng HT, phòng Live ghi `churchId` (khóa phòng ở bước Band).
 - Test: `tests/multi_church_foundation_regression.php` (28 check), `tests/multi_church_isolation_regression.php` (30 check, gọi controller thật qua `mock_php_input`). Bộ strict 4.506 check đạt. **Chưa làm (S3–S6):** API quản lý HT/thành viên/mã mời, giao diện chọn HT + tab Quản lý, cache offline theo HT, danh mục riêng theo HT, ánh xạ vai trò HT vào `AuthPolicy`, cập nhật `RULE.md`. Bật cờ chỉ sau khi S3–S5 xong.
+- **S3 (đã làm):** `api/controllers/ChurchController.php` + route `churches` (404 khi cờ tắt). Người dùng: xem HT của mình/đang chờ duyệt, chọn HT đang làm việc, vào HT bằng mã mời (thành viên "chờ duyệt", sai quá 10 lần/phiên → 429, người đã bị khóa không tự mở lại). Quản trị HT (hoặc admin hệ thống): xem thành viên + mã mời, duyệt/đổi vai trò/khóa, đổi tên, đổi mã mời; không hạ/khóa được admin HT cuối cùng (409). Tạo HT mới chỉ admin hệ thống. `ChurchService` thêm `listAll/members/create/rename/regenerateInviteCode/join/updateMember`. Test `tests/multi_church_api_regression.php` (35 check); bộ strict 4.541 check đạt. **Còn lại:** ánh xạ vai trò HT vào `AuthPolicy` (chưa nối — quyền ghi vẫn theo vai trò hệ thống + chốt HT), S4 giao diện, S5 cache offline/danh mục theo HT, S6 `RULE.md`.
 
 ## 2026-10-31 (b) — Giữ đăng nhập trên thiết bị + lưu tài khoản (Modern + Classic), bộ HD mặc định cho bài trong chương trình
 

@@ -198,6 +198,16 @@ try {
             $controller->handle($action);
             break;
 
+        case 'churches':
+            if (!FeatureFlags::isEnabled('MULTI_CHURCH')) {
+                Response::notFound("Tính năng nhiều Hội Thánh hiện đang tắt.");
+                break;
+            }
+            require_once __DIR__ . '/controllers/ChurchController.php';
+            $controller = new ChurchController();
+            $controller->handleRequest($method);
+            break;
+
         default:
             Response::notFound("Endpoint /api/{$route} không tồn tại.");
             break;
