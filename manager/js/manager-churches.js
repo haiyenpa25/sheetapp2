@@ -11,6 +11,7 @@
 
   let _ctx = null;
   let _activeId = 0;
+  let _counts = null;
 
   const _esc = (s) => (window.SafeHtml ? window.SafeHtml.escape(s) : String(s ?? ''));
   const _byId = (id) => document.getElementById(id);
@@ -23,6 +24,8 @@
     _byId('btn-church-rename')?.addEventListener('click', _rename);
     _byId('btn-church-regen')?.addEventListener('click', _regenerate);
     _byId('btn-church-create')?.addEventListener('click', _create);
+    _byId('btn-church-delete')?.addEventListener('click', _delete);
+    _byId('btn-church-copy-accounts')?.addEventListener('click', _copyAccounts);
     _byId('btn-church-cat-create')?.addEventListener('click', _createCategory);
     _byId('church-cat-list')?.addEventListener('click', _onCategoryClick);
     _byId('church-members-tbody')?.addEventListener('change', _onMemberChange);
@@ -38,6 +41,7 @@
       _renderSelect(isSystemAdmin ? res.all_churches : (res.churches || []));
       _renderPending(res.pending || []);
       _byId('church-create-box').hidden = !isSystemAdmin;
+      _byId('btn-church-delete').hidden = !isSystemAdmin;
       await _loadMembers();
     } catch (e) {
       _toast('Không tải được Hội Thánh: ' + e.message, 'error');
@@ -68,6 +72,7 @@
       box.hidden = false;
       _byId('church-name').value = res.church?.name || '';
       _byId('church-invite-code').textContent = res.invite_code || '';
+      _counts = res.counts || null;
       _renderMembers(res.members || []);
       _byId('church-category-box').hidden = false;
       await _loadCategories();
@@ -84,7 +89,7 @@
     const all = await window.ApiService.categories.list();
     const mine = (Array.isArray(all) ? all : []).filter((c) => Number(c.church_id) === _activeId);
     list.innerHTML = mine.length
-      ? mine.map((c) => `<li data-id="${Number(c.id)}">${_esc(c.name)} · ${Number(c.song_count) || 0} bài <button type="button" class="mgr-btn mgr-btn-sm mgr-btn-ghost" data-act="del-cat">Xóa</button></li>`).join('')
+      ? mine.map((c) => `<li data-id="${Number(c.id)}"><span>${_esc(c.name)} · ${Number(c.song_count) || 0} bài</span><span><button type="button" class="mgr-btn mgr-btn-sm mgr-btn-primary" data-act="add-song">➕ Thêm bài (XML)</button> <button type="button" class="mgr-btn mgr-btn-sm mgr-btn-ghost" data-act="del-cat">Xóa</button></span></li>`).join('')
       : '<li class="text-muted">Chưa có danh mục riêng</li>';
   }
 
@@ -101,6 +106,8 @@
   }
 
   async function _onCategoryClick(e) {
+    const addSong = e.target.closest('button[data-act="add-song"]');
+    if (addSong) { window.ManagerUpload?.open?.(Number(addSong.closest('li').dataset.id)); return; }
     const btn = e.target.closest('button[data-act="del-cat"]');
     if (!btn) return;
     if (!window.confirm('Xóa danh mục này? Bài trong đó chuyển về danh mục mặc định.')) return;
@@ -194,10 +201,46 @@
 
   async function _create() {
     const input = _byId('church-new-name');
+    const abbr = _byId('church-new-abbr');
     try {
-      await window.ApiService.churches.create(input.value);
+      const res = await window.ApiService.churches.create(input.value, abbr.value);
       input.value = '';
+      abbr.value = '';
+      _showAccounts(res.accounts || []);
       _toast('Đã tạo Hội Thánh', 'success');
+      await load();
+    } catch (e) {
+      _toast(e.message, 'error');
+    }
+  }
+
+  /** Mật khẩu sinh ngẫu nhiên chỉ có trong phản hồi này — hiện ra để người tạo lưu lại. */
+  function _showAccounts(accounts) {
+    const box = _byId('church-new-accounts');
+    if (!box) return;
+    box.hidden = accounts.length === 0;
+    _byId('church-new-accounts-text').textContent = accounts.map((a) => `${a.username}   ${a.password}   (${a.label})`).join('\n');
+  }
+
+  async function _copyAccounts() {
+    try {
+      await navigator.clipboard.writeText(_byId('church-new-accounts-text').textContent);
+      _toast('Đã sao chép', 'success');
+    } catch (e) {
+      _toast('Không sao chép được, hãy bôi đen và copy', 'error');
+    }
+  }
+
+  /** Xóa HT: chương trình + quan hệ thành viên mất; tài khoản, bài hát, XML giữ nguyên. Hỏi xác nhận kèm số liệu. */
+  async function _delete() {
+    const name = _byId('church-name').value;
+    const c = _counts || {};
+    const msg = `Xóa Hội Thánh "${name}"?\n\nSẽ XÓA ${c.setlists || 0} chương trình và gỡ ${c.members || 0} thành viên.\nTài khoản, bài hát và file nhạc XML được giữ nguyên.\nKhông hoàn tác được.`;
+    if (!window.confirm(msg)) return;
+    try {
+      await window.ApiService.churches.remove(_activeId);
+      _toast('Đã xóa Hội Thánh', 'success');
+      _activeId = 0;
       await load();
     } catch (e) {
       _toast(e.message, 'error');

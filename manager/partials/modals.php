@@ -495,6 +495,30 @@
     </div>
   </div>
 
+  <!-- 7b. MODAL GÁN HỘI THÁNH CHO TÀI KHOẢN (cờ MULTI_CHURCH) -->
+  <div class="mgr-modal-overlay hidden" id="modal-user-churches">
+    <div class="mgr-modal-box" style="max-width: 460px;">
+      <div class="mgr-modal-header">
+        <h3 class="mgr-modal-title">⛪ Hội Thánh của <span id="uc-username">…</span></h3>
+        <button class="mgr-modal-close" data-close="modal-user-churches">✕</button>
+      </div>
+      <div class="mgr-modal-body">
+        <ul id="uc-list" class="mgr-uc-list"></ul>
+        <div class="mgr-church-row">
+          <select id="uc-church-select" class="mgr-input" aria-label="Hội Thánh"></select>
+          <select id="uc-role-select" class="mgr-input" aria-label="Vai trò trong Hội Thánh">
+            <option value="member">Thành viên</option>
+            <option value="leader">Ca trưởng</option>
+            <option value="church_admin">Quản trị HT</option>
+            <option value="viewer">Chỉ xem</option>
+          </select>
+          <button type="button" id="btn-uc-add" class="mgr-btn mgr-btn-primary">Thêm</button>
+        </div>
+        <p class="text-xs text-muted">Thêm/xóa/đổi tên Hội Thánh: tab <a href="#tab-churches" data-close="modal-user-churches">Hội Thánh</a> (Nâng cao).</p>
+      </div>
+    </div>
+  </div>
+
   <!-- 8. MODAL KIỂM TRA & PHÊ DUYỆT KHÁC BIỆT (REVIEW DIFF INSPECTOR) -->
   <div class="mgr-modal-overlay hidden" id="modal-review-diff">
     <div class="mgr-modal-box" style="max-width: 840px; max-height: 90vh; display: flex; flex-direction: column;">

@@ -14,6 +14,7 @@
             <tr>
               <th>Thành Viên</th>
               <th>Vai Trò</th>
+              <th class="col-churches" style="display:none;">Hội Thánh</th>
               <th>Nhạc Cụ Sở Trường</th>
               <th>Mã Hợp Âm</th>
               <th>Số Bộ Hợp Âm Đóng Góp</th>

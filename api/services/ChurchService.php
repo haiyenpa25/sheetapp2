@@ -170,6 +170,139 @@ final class ChurchService {
         DB::run('UPDATE church_members SET role = ?, status = ? WHERE church_id = ? AND user_id = ?', [$newRole, $newStatus, $churchId, $userId]);
     }
 
+    private const ABBR_PATTERN = '/^[a-z0-9]{2,10}$/';
+    private const PASSWORD_LENGTH = 12;
+    private const PASSWORD_ALPHABET = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // bỏ ký tự dễ nhầm: l I 1 O 0
+
+    /** Ba tài khoản mẫu của một HT: tiền tố → [vai trò hệ thống, vai trò trong HT, nhãn]. */
+    private const STARTER_ACCOUNTS = [
+        'banhat'  => ['banhat',  self::ROLE_MEMBER, 'Ban Hát'],
+        'bannhac' => ['bannhac', self::ROLE_MEMBER, 'Ban Nhạc'],
+        'admin'   => ['leader',  self::ROLE_ADMIN,  'Quản trị'],
+    ];
+
+    private static function randomPassword(): string {
+        $out = '';
+        $max = strlen(self::PASSWORD_ALPHABET) - 1;
+        for ($i = 0; $i < self::PASSWORD_LENGTH; $i++) $out .= self::PASSWORD_ALPHABET[random_int(0, $max)];
+        return $out;
+    }
+
+    /**
+     * Tạo HT cùng 3 tài khoản banhat.<abbr>, bannhac.<abbr>, admin.<abbr> (admin HT: vai trò hệ thống leader + quản trị HT).
+     * Mật khẩu ngẫu nhiên, chỉ trả về MỘT LẦN trong kết quả (không lưu bản rõ). Tất cả hoặc không có gì (giao dịch).
+     * @return array{church:array, accounts:array<int,array{username:string,password:string,label:string}>}
+     */
+    public static function createWithAccounts(string $name, string $abbr): array {
+        $abbr = strtolower(trim($abbr));
+        if (!preg_match(self::ABBR_PATTERN, $abbr)) {
+            throw new InvalidArgumentException('Viết tắt chỉ gồm chữ thường và số, 2–10 ký tự (vd. httml)');
+        }
+        $names = array_map(fn($prefix) => "{$prefix}.{$abbr}", array_keys(self::STARTER_ACCOUNTS));
+        foreach ($names as $username) {
+            if (DB::run('SELECT 1 FROM users WHERE LOWER(username) = ?', [$username])->fetchColumn()) {
+                throw new InvalidArgumentException("Tài khoản {$username} đã tồn tại, hãy chọn viết tắt khác");
+            }
+        }
+        require_once __DIR__ . '/UserService.php';
+        $pdo = DB::get();
+        $pdo->beginTransaction();
+        try {
+            $church = self::create($name);
+            $accounts = [];
+            foreach (self::STARTER_ACCOUNTS as $prefix => [$systemRole, $churchRole, $label]) {
+                $username = "{$prefix}.{$abbr}";
+                $password = self::randomPassword();
+                $userId = UserService::createWithProfile($username, $password, $systemRole, "{$label} " . strtoupper($abbr), 'Piano / Đệm Hát');
+                DB::run('INSERT INTO church_members (church_id, user_id, role, status) VALUES (?, ?, ?, ?)', [(int)$church['id'], $userId, $churchRole, self::STATUS_ACTIVE]);
+                $accounts[] = ['username' => $username, 'password' => $password, 'label' => "{$label} (" . ($churchRole === self::ROLE_ADMIN ? 'quản trị HT' : 'thành viên') . ')'];
+            }
+            $pdo->commit();
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            throw $e;
+        }
+        return ['church' => $church, 'accounts' => $accounts];
+    }
+
+    /** Số liệu để hiện trước khi xóa HT. */
+    public static function counts(int $churchId): array {
+        return [
+            'setlists'   => (int)DB::run('SELECT COUNT(*) FROM setlists WHERE church_id = ?', [$churchId])->fetchColumn(),
+            'members'    => (int)DB::run('SELECT COUNT(*) FROM church_members WHERE church_id = ?', [$churchId])->fetchColumn(),
+            'categories' => DB::hasColumn('categories', 'church_id') ? (int)DB::run('SELECT COUNT(*) FROM categories WHERE church_id = ?', [$churchId])->fetchColumn() : 0,
+        ];
+    }
+
+    /**
+     * Xóa HT: xóa chương trình lễ của HT và quan hệ thành viên (tài khoản GIỮ NGUYÊN). Bài hát, bộ hợp âm, file XML không đụng.
+     * Danh mục riêng của HT chuyển thành admin_only + bỏ gắn HT để không lộ bài riêng cho người khác (admin hệ thống gán lại sau).
+     */
+    public static function delete(int $churchId): array {
+        if (!self::find($churchId)) throw new InvalidArgumentException('Hội Thánh không tồn tại');
+        if ((int)DB::run('SELECT COUNT(*) FROM churches')->fetchColumn() <= 1) {
+            throw new DomainException('Không xóa được Hội Thánh duy nhất của hệ thống');
+        }
+        $counts = self::counts($churchId);
+        $pdo = DB::get();
+        $pdo->beginTransaction();
+        try {
+            $ids = DB::run('SELECT id FROM setlists WHERE church_id = ?', [$churchId])->fetchAll(PDO::FETCH_COLUMN);
+            foreach ($ids as $setlistId) {
+                foreach (['song_usage_history', 'service_plan_assignments', 'setlist_items'] as $table) {
+                    if (DB::hasTable($table)) DB::run("DELETE FROM {$table} WHERE setlist_id = ?", [(int)$setlistId]);
+                }
+            }
+            DB::run('DELETE FROM setlists WHERE church_id = ?', [$churchId]);
+            if (DB::hasColumn('categories', 'church_id')) {
+                DB::run("UPDATE categories SET church_id = NULL, visibility = 'admin_only' WHERE church_id = ?", [$churchId]);
+            }
+            DB::run('DELETE FROM church_members WHERE church_id = ?', [$churchId]);
+            DB::run('DELETE FROM churches WHERE id = ?', [$churchId]);
+            $pdo->commit();
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            throw $e;
+        }
+        return $counts;
+    }
+
+    /** Admin hệ thống gán người dùng vào HT (hoạt động ngay); đã là thành viên thì cập nhật vai trò. */
+    public static function addMember(int $churchId, int $userId, string $role): void {
+        if (!in_array($role, self::ROLES, true)) throw new InvalidArgumentException('Vai trò không hợp lệ');
+        if (!self::find($churchId)) throw new InvalidArgumentException('Hội Thánh không tồn tại');
+        if (!DB::run('SELECT 1 FROM users WHERE id = ?', [$userId])->fetchColumn()) throw new InvalidArgumentException('Người dùng không tồn tại');
+        if (DB::run('SELECT 1 FROM church_members WHERE church_id = ? AND user_id = ?', [$churchId, $userId])->fetchColumn()) {
+            self::updateMember($churchId, $userId, $role, self::STATUS_ACTIVE);
+            return;
+        }
+        DB::run('INSERT INTO church_members (church_id, user_id, role, status) VALUES (?, ?, ?, ?)', [$churchId, $userId, $role, self::STATUS_ACTIVE]);
+    }
+
+    /** Gỡ khỏi HT (không xóa tài khoản). Không gỡ admin HT cuối cùng. */
+    public static function removeMember(int $churchId, int $userId): void {
+        $cur = DB::run('SELECT role, status FROM church_members WHERE church_id = ? AND user_id = ?', [$churchId, $userId])->fetch(PDO::FETCH_ASSOC);
+        if (!$cur) throw new InvalidArgumentException('Không có thành viên này trong Hội Thánh');
+        if ($cur['role'] === self::ROLE_ADMIN && $cur['status'] === self::STATUS_ACTIVE && self::activeAdminCount($churchId) <= 1) {
+            throw new DomainException('Hội Thánh phải còn ít nhất một quản trị viên');
+        }
+        DB::run('DELETE FROM church_members WHERE church_id = ? AND user_id = ?', [$churchId, $userId]);
+    }
+
+    /** user_id → danh sách HT (cho cột "Hội thánh" ở tab người dùng). */
+    public static function membershipsByUser(): array {
+        if (!self::isReady()) return [];
+        $out = [];
+        $rows = DB::run(
+            "SELECT m.user_id, c.id AS church_id, c.name, m.role, m.status
+               FROM church_members m JOIN churches c ON c.id = m.church_id ORDER BY c.name"
+        )->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($rows as $r) {
+            $out[(int)$r['user_id']][] = ['church_id' => (int)$r['church_id'], 'name' => $r['name'], 'role' => $r['role'], 'status' => $r['status']];
+        }
+        return $out;
+    }
+
     private static function validName(string $name): string {
         $name = trim($name);
         if ($name === '' || mb_strlen($name) > 80) throw new InvalidArgumentException('Tên Hội Thánh không hợp lệ (1–80 ký tự)');

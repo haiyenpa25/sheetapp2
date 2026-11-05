@@ -69,6 +69,7 @@ const ManagerApp = (() => {
     window.ManagerReviews?.init(ctx);
     window.ManagerNotifications?.init(ctx);
     window.ManagerChurches?.init(ctx);
+    window.ManagerUserChurches?.init(ctx);
 
     _bindEvents();
 
@@ -456,6 +457,8 @@ const ManagerApp = (() => {
       window.ManagerReviews?.loadQueue?.();
     } else if (tabId === 'tab-churches') {
       window.ManagerChurches?.load?.();
+    } else if (tabId === 'tab-users') {
+      window.ManagerUsers?.loadUsers?.(); // tài khoản/HT có thể vừa đổi ở tab khác
     }
   }
 
@@ -541,6 +544,7 @@ const ManagerApp = (() => {
     openUploadSongs: (catId) => window.ManagerCategories?.openUpload?.(catId),
     updateUserRole: (uId, role) => window.ManagerUsers?.updateUserRole?.(uId, role),
     resetUserPass: (uId, uName) => window.ManagerUsers?.resetUserPass?.(uId, uName),
+    openUserChurches: (uId) => window.ManagerUserChurches?.open?.(uId),
     toggleUserStatus: (uId, uName) => window.ManagerUsers?.toggleUserStatus?.(uId, uName),
     deleteUser: (uId, uName) => window.ManagerUsers?.deleteUser?.(uId, uName),
     openEditUserModal: (u) => window.ManagerUsers?.openEditUserModal?.(u),

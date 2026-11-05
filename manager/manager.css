@@ -1590,4 +1590,11 @@ body.manager-body {
 .mgr-church-code { font-size: 1.1rem; letter-spacing: .12em; padding: .2rem .5rem; background: rgba(127,127,127,.15); border-radius: 6px; }
 #church-members-tbody select.mgr-input { min-height: 36px; width: auto; }
 .mgr-church-cats { list-style: none; margin: 0; padding: 0; display: grid; gap: .4rem; }
+.mgr-chip { display: inline-block; padding: 2px 8px; margin: 1px 2px; border-radius: 9999px; font-size: .75rem; background: rgba(99, 102, 241, .15); color: #6366f1; white-space: nowrap; }
+.mgr-chip.pending { background: rgba(245, 158, 11, .18); color: #d97706; }
+.mgr-uc-list { list-style: none; margin: 0 0 .75rem; padding: 0; display: grid; gap: .4rem; }
+.mgr-uc-list li { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.mgr-church-accounts { padding: .75rem; border: 1px dashed #f59e0b; border-radius: 8px; background: rgba(245, 158, 11, .08); }
+.mgr-church-accounts pre { margin: .5rem 0; white-space: pre-wrap; font-size: .85rem; user-select: all; }
+.mgr-btn-danger { color: #ef4444; border-color: rgba(239, 68, 68, .5); }
 .mgr-church-cats li { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }

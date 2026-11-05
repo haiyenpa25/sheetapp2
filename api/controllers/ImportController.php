@@ -7,8 +7,27 @@ require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../services/ImportService.php';
 
 class ImportController {
+    /**
+     * Tải bài lên: Admin hệ thống (mọi danh mục) hoặc Quản trị Hội Thánh (CHỈ vào danh mục riêng của HT mình).
+     * Danh mục riêng luôn ép quyền "private" nên bài không lộ ra ngoài HT. Các thao tác lấy bài từ web vẫn chỉ Admin.
+     */
+    public static function authorizeUpload(int $categoryId): void {
+        Auth::requireLogin();
+        if (Auth::isAdmin()) return;
+        require_once __DIR__ . '/../core/ChurchAccessGuard.php';
+        require_once __DIR__ . '/../core/DB.php';
+        $churchId = $categoryId > 0 && DB::hasColumn('categories', 'church_id')
+            ? (int)DB::run('SELECT church_id FROM categories WHERE id = ?', [$categoryId])->fetchColumn() : 0;
+        if ($churchId > 0 && ChurchAccessGuard::canManageChurch($churchId)) return;
+        Response::abort(403, 'Chỉ Admin, hoặc quản trị Hội Thánh (vào danh mục riêng của Hội Thánh mình), mới được thêm bài');
+    }
+
     public function handleRequest(string $method): void {
-        Auth::requireAdmin();
+        if ($method === 'POST' && ($_GET['type'] ?? '') === 'upload') {
+            self::authorizeUpload((int)($_POST['category_id'] ?? 0));
+        } else {
+            Auth::requireAdmin();
+        }
 
         try {
             if ($method === 'POST') {

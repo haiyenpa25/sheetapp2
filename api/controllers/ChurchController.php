@@ -46,6 +46,9 @@ class ChurchController {
                 'rename'          => $this->rename($body),
                 'regenerate_code' => $this->regenerateCode($body),
                 'create'          => $this->create($body),
+                'delete'          => $this->delete($body),
+                'add_member'      => $this->addMember($body),
+                'remove_member'   => $this->removeMember($body),
                 default           => Response::notFound('Action không hợp lệ'),
             };
         } catch (InvalidArgumentException $e) {
@@ -74,7 +77,7 @@ class ChurchController {
         $churchId = (int)($_GET['church_id'] ?? 0);
         if (!$this->canManage($churchId)) return;
         $church = ChurchService::find($churchId);
-        Response::ok(['church' => $church, 'members' => ChurchService::members($churchId), 'invite_code' => $church['invite_code'] ?? null]);
+        Response::ok(['church' => $church, 'members' => ChurchService::members($churchId), 'invite_code' => $church['invite_code'] ?? null, 'counts' => ChurchService::counts($churchId)]);
     }
 
     private function switchChurch(array $body): void {
@@ -122,9 +125,39 @@ class ChurchController {
         Response::ok(['invite_code' => ChurchService::regenerateInviteCode($churchId)]);
     }
 
+    /** Có `abbr` (viết tắt) → tạo luôn 3 tài khoản banhat/bannhac/admin.<abbr>; mật khẩu chỉ trả về lần này. */
     private function create(array $body): void {
         if (!Auth::isAdmin()) { Response::forbidden('Chỉ Admin hệ thống được tạo Hội Thánh'); return; }
-        Response::ok(['church' => ChurchService::create((string)($body['name'] ?? ''))]);
+        $name = (string)($body['name'] ?? '');
+        $abbr = trim((string)($body['abbr'] ?? ''));
+        if ($abbr !== '') { Response::ok(ChurchService::createWithAccounts($name, $abbr)); return; }
+        Response::ok(['church' => ChurchService::create($name)]);
+    }
+
+    /** Xóa HT: chương trình lễ + quan hệ thành viên; tài khoản, bài hát, XML giữ nguyên. Cần confirm=true. */
+    private function delete(array $body): void {
+        if (!Auth::isAdmin()) { Response::forbidden('Chỉ Admin hệ thống được xóa Hội Thánh'); return; }
+        $churchId = (int)($body['church_id'] ?? 0);
+        if (empty($body['confirm'])) {
+            if (!ChurchService::find($churchId)) { Response::notFound('Hội Thánh không tồn tại'); return; }
+            Response::error('Cần xác nhận xóa. Sẽ mất: ' . json_encode(ChurchService::counts($churchId)), 400);
+            return;
+        }
+        Response::ok(['deleted' => ChurchService::delete($churchId)]);
+    }
+
+    private function addMember(array $body): void {
+        if (!Auth::isAdmin()) { Response::forbidden('Chỉ Admin hệ thống được gán người vào Hội Thánh'); return; }
+        $churchId = (int)($body['church_id'] ?? 0);
+        ChurchService::addMember($churchId, (int)($body['user_id'] ?? 0), (string)($body['role'] ?? ChurchService::ROLE_MEMBER));
+        Response::ok(['members' => ChurchService::members($churchId)]);
+    }
+
+    private function removeMember(array $body): void {
+        $churchId = (int)($body['church_id'] ?? 0);
+        if (!$this->canManage($churchId)) return;
+        ChurchService::removeMember($churchId, (int)($body['user_id'] ?? 0));
+        Response::ok(['members' => ChurchService::members($churchId)]);
     }
 
     /** Trả false (đã gửi lỗi) nếu HT không tồn tại hoặc người dùng không quản lý được. */

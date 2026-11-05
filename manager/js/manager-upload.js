@@ -27,7 +27,11 @@
   let _pendingReads = Promise.resolve();
 
   const _app = () => _ctx || {};
-  const _categories = () => _app().state?.categories || [];
+  // Quản trị Hội Thánh (không phải Admin hệ thống) chỉ tải được vào danh mục riêng của HT mình (máy chủ cũng kiểm).
+  const _categories = () => {
+    const all = _app().state?.categories || [];
+    return _app().state?.currentUser?.role === 'admin' ? all : all.filter(c => c.church_id);
+  };
   const _find = (id) => _categories().find(c => Number(c.id) === Number(id));
   const _isPublic = (c) => (c?.visibility || VISIBILITY_PUBLIC) === VISIBILITY_PUBLIC;
   const _el = (id) => document.getElementById(id);

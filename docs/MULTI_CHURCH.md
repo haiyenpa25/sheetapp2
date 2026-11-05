@@ -4,7 +4,7 @@ Ngày: 2026-11-05. Cờ `MULTI_CHURCH` (mặc định **tắt**). Quy tắc bấ
 
 ## Mô hình
 
-- Kho bài thánh ca **dùng chung**. Mỗi HT có **chương trình lễ riêng**, thành viên riêng, và có thể thêm **danh mục bài riêng**.
+- Kho bài thánh ca và **bộ hợp âm dùng chung hết**. Mỗi HT có **chương trình lễ riêng**, thành viên riêng, và có thể có **danh mục bài riêng** (chỉ HT đó thấy; quản trị HT tự thêm bài XML vào đó).
 - Một người có thể thuộc **nhiều HT** với vai trò khác nhau. Admin hệ thống đứng trên mọi HT.
 - Vai trò trong HT: `church_admin` · `leader` · `member` · `viewer` (xem bảng quyền ở `RULE.md` §8.3). Đây là trần quyền cộng thêm vào vai trò hệ thống.
 - Người mới vào HT bằng **mã mời** (8 ký tự) → trạng thái "chờ duyệt" → quản trị HT duyệt và chọn vai trò. Quản trị HT đổi mã bất cứ lúc nào (mã cũ hết hiệu lực).
@@ -16,8 +16,10 @@ Ngày: 2026-11-05. Cờ `MULTI_CHURCH` (mặc định **tắt**). Quy tắc bấ
 | Chọn HT đang làm việc | Tab **Chương trình** của app chính (chỉ hiện khi thuộc từ 2 HT; Modern + Classic), hoặc `/manager/` → Nâng cao → **Hội Thánh** |
 | Xin vào HT bằng mã mời | `/manager/` → **Hội Thánh** |
 | Duyệt / đổi vai trò / khóa thành viên, xem & đổi mã mời, đổi tên HT | `/manager/` → **Hội Thánh** (quản trị HT hoặc admin hệ thống) |
-| Tạo HT mới | `/manager/` → **Hội Thánh** (chỉ admin hệ thống) |
-| Danh mục bài riêng của HT | `/manager/` → **Hội Thánh** → "Danh mục bài riêng" |
+| Tạo HT mới (+ 3 tài khoản `banhat/bannhac/admin.<viết tắt>`, mật khẩu hiện một lần) | `/manager/` → **Hội Thánh** (chỉ admin hệ thống) |
+| Xem HT của từng tài khoản, gán/gỡ/đổi vai trò | `/manager/` → **Thành viên** → cột *Hội Thánh* + nút **⛪ HT** (chỉ admin hệ thống) |
+| Xóa HT (xóa chương trình + quan hệ thành viên; giữ tài khoản, bài, XML) | `/manager/` → **Hội Thánh** → *Xóa Hội Thánh* (chỉ admin hệ thống, có xác nhận) |
+| Danh mục bài riêng của HT + thêm bài (XML) vào đó | `/manager/` → **Hội Thánh** → "Danh mục bài riêng" → ➕ Thêm bài (quản trị HT hoặc admin hệ thống) |
 
 API: route `churches` (xem `PROJECT_REGISTRY.md`), 404 khi cờ tắt.
 

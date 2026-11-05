@@ -18,6 +18,19 @@ class ManagerUserHelper {
      * Quản lý danh sách thành viên cho Admin & Ban Hát
      */
     public static function getUsersList(): array {
+        $rows = self::queryUsers();
+        // Cờ đa Hội Thánh bật: kèm danh sách HT của từng người (cột "Hội thánh" ở tab người dùng).
+        require_once __DIR__ . '/../core/ChurchAccessGuard.php';
+        if (ChurchAccessGuard::enabled()) {
+            require_once __DIR__ . '/ChurchService.php';
+            $byUser = ChurchService::membershipsByUser();
+            foreach ($rows as &$row) $row['churches'] = $byUser[(int)$row['id']] ?? [];
+            unset($row);
+        }
+        return $rows;
+    }
+
+    private static function queryUsers(): array {
         $pdo = DB::get();
         return $pdo->query("
             SELECT u.id, u.username, u.role, u.display_name, u.instrument, u.chord_code, u.voice_part, u.avatar_url, u.status, u.created_at,

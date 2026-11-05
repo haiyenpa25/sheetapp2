@@ -552,7 +552,10 @@ const ApiService = (() => {
     updateMember:   (payload) => _json('POST', 'api/index.php?route=churches&action=update_member', payload),
     rename:         (churchId, name) => _json('POST', 'api/index.php?route=churches&action=rename', { church_id: churchId, name }),
     regenerateCode: (churchId) => _json('POST', 'api/index.php?route=churches&action=regenerate_code', { church_id: churchId }),
-    create:         (name) => _json('POST', 'api/index.php?route=churches&action=create', { name }),
+    create:         (name, abbr = '') => _json('POST', 'api/index.php?route=churches&action=create', { name, abbr }),
+    remove:         (churchId) => _json('POST', 'api/index.php?route=churches&action=delete', { church_id: churchId, confirm: true }),
+    addMember:      (churchId, userId, role) => _json('POST', 'api/index.php?route=churches&action=add_member', { church_id: churchId, user_id: userId, role }),
+    removeMember:   (churchId, userId) => _json('POST', 'api/index.php?route=churches&action=remove_member', { church_id: churchId, user_id: userId }),
   };
 
   return {

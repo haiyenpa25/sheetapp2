@@ -31,7 +31,7 @@
 
     const tbody = document.getElementById('mgr-users-tbody');
     if (tbody) {
-      tbody.innerHTML = `<tr><td colspan="8" class="mgr-table-loading"><div class="mgr-spinner"></div><p>Đang nạp danh sách thành viên...</p></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="9" class="mgr-table-loading"><div class="mgr-spinner"></div><p>Đang nạp danh sách thành viên...</p></td></tr>`;
     }
 
     try {
@@ -49,6 +49,11 @@
     if (!tbody) return;
 
     const isAdmin = app.state?.currentUser?.role === 'admin';
+    // Đa Hội Thánh: cột "Hội Thánh" chỉ hiện khi cờ bật.
+    const showChurch = Boolean(window.FeatureFlags?.get?.('MULTI_CHURCH'));
+    document.querySelector('#mgr-users-table th.col-churches')?.style.setProperty('display', showChurch ? '' : 'none');
+    const churchCell = (u) => `<td class="col-churches" style="${showChurch ? '' : 'display:none;'}">${
+      (u.churches || []).map((c) => `<span class="mgr-chip${c.status !== 'active' ? ' pending' : ''}" title="${_escape(c.role)}">${_escape(c.name)}${c.role === 'church_admin' ? ' ★' : ''}</span>`).join(' ') || '<span class="text-muted text-xs">—</span>'}</td>`;
     const addBtn = document.getElementById('btn-add-user-modal');
     if (addBtn) addBtn.style.display = isAdmin ? '' : 'none';
 
@@ -91,6 +96,7 @@
             </span>
             ${u.status === 'locked' ? '<span class="key-badge" style="margin-left:4px; font-size:0.68rem; background:rgba(239,68,68,0.15); color:#ef4444;">🔒 Khóa</span>' : ''}
           </td>
+          ${churchCell(u)}
           <td>${safeInstrument}</td>
           <td>
             ${safeChordCode ? `<span class="mgr-chord-badge" title="Mã hợp âm cá nhân">${safeChordCode}</span>` : '<span class="text-muted text-xs">—</span>'}
@@ -102,6 +108,7 @@
             <div class="table-actions">
               ${isAdmin ? `
                 <button class="mgr-btn mgr-btn-ghost mgr-btn-xs" title="Chỉnh sửa thông tin" onclick="ManagerApp.openEditUserModal(${safeJsUser})">✏️ Sửa</button>
+                ${showChurch ? `<button class="mgr-btn mgr-btn-ghost mgr-btn-xs" title="Gán Hội Thánh cho tài khoản" onclick="ManagerApp.openUserChurches(${u.id})">⛪ HT</button>` : ''}
                 ${!isSelf ? `
                   <select class="mgr-input mgr-btn-xs" style="width:auto;" onchange="ManagerApp.updateUserRole(${u.id}, this.value)">
                     <option value="viewer" ${u.role === 'viewer' ? 'selected' : ''}>👁️ Guest</option>

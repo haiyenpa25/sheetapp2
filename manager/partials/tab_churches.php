@@ -25,6 +25,7 @@
         <div class="mgr-church-row">
           <input id="church-name" class="mgr-input" maxlength="80" aria-label="Tên Hội Thánh">
           <button id="btn-church-rename" type="button" class="mgr-btn mgr-btn-ghost">Đổi tên</button>
+          <button id="btn-church-delete" type="button" class="mgr-btn mgr-btn-ghost mgr-btn-danger" hidden>Xóa Hội Thánh</button>
         </div>
         <div class="mgr-church-row">
           <span class="mgr-church-label">Mã mời:</span>
@@ -59,7 +60,14 @@
         <label for="church-new-name" class="mgr-church-label">Tạo Hội Thánh mới (Admin hệ thống)</label>
         <div class="mgr-church-row">
           <input id="church-new-name" class="mgr-input" maxlength="80" placeholder="Tên Hội Thánh">
+          <input id="church-new-abbr" class="mgr-input" maxlength="10" placeholder="Viết tắt (vd. httml)" aria-label="Viết tắt" autocomplete="off">
           <button id="btn-church-create" type="button" class="mgr-btn mgr-btn-primary">Tạo</button>
+        </div>
+        <p class="text-xs text-muted">Có viết tắt: tự tạo 3 tài khoản <code>banhat.&lt;viết tắt&gt;</code>, <code>bannhac.&lt;viết tắt&gt;</code>, <code>admin.&lt;viết tắt&gt;</code> với mật khẩu ngẫu nhiên.</p>
+        <div id="church-new-accounts" class="mgr-church-accounts" hidden>
+          <strong>⚠ Lưu lại ngay — mật khẩu chỉ hiện một lần:</strong>
+          <pre id="church-new-accounts-text"></pre>
+          <button id="btn-church-copy-accounts" type="button" class="mgr-btn mgr-btn-ghost">Sao chép</button>
         </div>
       </div>
     </section>
