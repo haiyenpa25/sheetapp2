@@ -2560,6 +2560,28 @@ html, body {
   background: rgba(16, 185, 129, 0.3);
 }
 
+/* Tập luyện v2: tùy chỉnh đệm gom vào mục Nâng cao (thu gọn mặc định), ngoài chỉ còn dòng "Điệu: …" */
+.learn-pattern-summary { margin: 0; font-size: 13px; color: var(--learn-text-dim, #9ca3af); }
+.learn-pattern-summary strong { color: var(--learn-text, #e5e7eb); font-weight: 600; }
+.learn-advanced { display: flex; flex-direction: column; gap: 10px; }
+.learn-advanced > summary {
+  list-style: none; cursor: pointer; min-height: 40px; display: flex; align-items: center;
+  padding: 0 4px; font-size: 13px; font-weight: 600; color: var(--learn-accent, #a78bfa);
+  touch-action: manipulation;
+}
+.learn-advanced > summary::-webkit-details-marker { display: none; }
+.learn-advanced > summary::before { content: '▸'; margin-right: 6px; transition: transform .15s; }
+.learn-advanced[open] > summary::before { transform: rotate(90deg); }
+
+/* Tên bài không bị cắt còn "Ki…": thanh nav chung đã có "Tập Luyện" nên ẩn nhãn "Learn Studio" trên màn hình vừa, và giữ chỗ tối thiểu cho tên bài */
+@media (min-width: 701px) {
+  .learn-song-info { min-width: 150px; }
+  .btn-learn-song-picker, .learn-status-badge { white-space: nowrap; }
+}
+@media (min-width: 701px) and (max-width: 1500px) {
+  .learn-header-title { display: none; }
+}
+
 
 
 

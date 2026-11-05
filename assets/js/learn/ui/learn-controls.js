@@ -126,6 +126,15 @@ const LearnControls = (() => {
     }
   }
 
+  /** Dòng tóm tắt "Điệu: …" hiện ngoài mục Nâng cao để người tập không phải mở bảng tùy chỉnh. */
+  function updatePatternSummary() {
+    const sel = document.getElementById('learn-pattern-select');
+    const label = document.getElementById('learn-pattern-current');
+    if (!sel || !label) return;
+    const text = sel.options[sel.selectedIndex]?.textContent || '';
+    label.textContent = text.replace(/\s*\(.*\)\s*$/, '').trim() || 'Theo bài';
+  }
+
   function autoSelectPattern(beats, beatType) {
     const patternSelect = document.getElementById('learn-pattern-select');
     if (!patternSelect || !window.PatternEngine) return;
@@ -149,6 +158,7 @@ const LearnControls = (() => {
 
     patternSelect.value = targetPattern;
     PatternEngine.setPattern(targetPattern);
+    updatePatternSummary();
   }
 
   function _applyTranspose(delta, ctx) {
@@ -245,6 +255,7 @@ const LearnControls = (() => {
       if (window.PatternEngine) {
         PatternEngine.setPattern(e.target.value);
       }
+      updatePatternSummary();
     });
 
     document.querySelectorAll('.btn-meter-tab').forEach(btn => {

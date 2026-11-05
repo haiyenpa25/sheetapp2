@@ -36,6 +36,10 @@
           </label>
         </div>
 
+        <p class="learn-pattern-summary">Điệu: <strong id="learn-pattern-current">Theo bài</strong></p>
+
+        <details class="learn-advanced" id="learn-pattern-advanced">
+        <summary>Tùy chỉnh đệm (điệu, độ dày, âm lượng)</summary>
         <!-- Meter Filter Tabs -->
         <div class="learn-meter-tabs" id="learn-meter-tabs">
           <button type="button" class="btn-meter-tab active" data-meter="auto" title="Tự động theo nhịp bài hát">⭐ Theo bài</button>
@@ -101,6 +105,7 @@
             <input type="range" id="slider-vol-drum" min="-35" max="4" value="-4" title="Âm lượng Trống & Bộ gõ mộc">
           </div>
         </div>
+        </details>
       </div>
 
       <!-- Melody Practice Card -->
