@@ -38,6 +38,7 @@
     <div class="cue-banner-box">
       <span class="cue-banner-icon" id="cue-banner-icon">⚡</span>
       <div class="cue-banner-text" id="cue-banner-text">Chuẩn bị vào Điệp Khúc</div>
+      <button type="button" id="btn-cue-ack" class="btn-cue-ack hidden">✓ Đã nhận</button>
     </div>
   </div>
 

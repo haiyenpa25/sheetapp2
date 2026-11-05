@@ -69,10 +69,11 @@ class LiveSyncService {
             if (!empty($clientId)) {
                 $prev = $members[$clientId] ?? null;
                 if (!$prev || ($now - ($prev['lastSeen'] ?? 0)) >= 4 || ($prev['role'] ?? '') !== $role) {
-                    $members[$clientId] = [
+                    // Giữ các trường khác (vd. ack cue) khi làm mới nhịp tim.
+                    $members[$clientId] = array_merge(is_array($prev) ? $prev : [], [
                         'role'     => $role ?: 'viewer',
                         'lastSeen' => $now
-                    ];
+                    ]);
                     $dirty = true;
                 }
             }
@@ -350,6 +351,64 @@ class LiveSyncService {
                 'state'       => self::sanitizeForFollower($current)
             ];
         });
+    }
+
+    private const PRESENCE_TTL_SECONDS = 15;
+    private const ID_PATTERN = '/^[A-Za-z0-9_\-]{1,64}$/';
+
+    /** Chạy $fn($members) có khóa file presence; $fn trả về mảng thành viên mới (hoặc null = không đổi). */
+    private static function withPresence(string $safeRoom, callable $fn): array {
+        $pFile = self::presenceFile($safeRoom);
+        $fp = @fopen(self::roomDir() . '/' . strtolower($safeRoom) . '.presence.lock', 'c+');
+        if ($fp) @flock($fp, LOCK_EX);
+        try {
+            $members = self::readJsonSafe($pFile, 2) ?? [];
+            $updated = $fn($members);
+            if (is_array($updated)) {
+                self::writeJsonAtomic($pFile, $updated);
+                return $updated;
+            }
+            return $members;
+        } finally {
+            if ($fp) { @flock($fp, LOCK_UN); @fclose($fp); }
+        }
+    }
+
+    /** Thành viên báo "đã nhận" một lệnh (cue). Không cần token Host; chỉ ghi vào file presence, không đụng state của Host. */
+    public static function ackCue(string $room, string $clientId, string $cueId): array {
+        if (!preg_match(self::ID_PATTERN, $clientId) || !preg_match(self::ID_PATTERN, $cueId)) {
+            return ['success' => false, 'error' => 'Mã thiết bị hoặc mã lệnh không hợp lệ'];
+        }
+        $safeRoom = strtoupper(preg_replace('/[^a-zA-Z0-9_\-]/', '', $room));
+        if ($safeRoom === '' || !file_exists(self::roomFile($safeRoom))) {
+            return ['success' => false, 'error' => 'Phòng không tồn tại'];
+        }
+        $now = time();
+        self::withPresence($safeRoom, function (array $members) use ($clientId, $cueId, $now) {
+            $prev = is_array($members[$clientId] ?? null) ? $members[$clientId] : ['role' => 'viewer'];
+            $members[$clientId] = array_merge($prev, ['lastSeen' => $now, 'ack' => $cueId]);
+            return $members;
+        });
+        return ['success' => true];
+    }
+
+    /** Số thiết bị đang hoạt động đã báo nhận lệnh $cueId. */
+    public static function cueAcks(string $room, string $cueId): array {
+        if (!preg_match(self::ID_PATTERN, $cueId)) {
+            return ['success' => false, 'error' => 'Mã lệnh không hợp lệ'];
+        }
+        $safeRoom = strtoupper(preg_replace('/[^a-zA-Z0-9_\-]/', '', $room));
+        if ($safeRoom === '' || !file_exists(self::roomFile($safeRoom))) {
+            return ['success' => false, 'error' => 'Phòng không tồn tại'];
+        }
+        $now = time();
+        $total = 0; $acked = 0;
+        foreach (self::withPresence($safeRoom, fn(array $m) => null) as $info) {
+            if ($now - (int)($info['lastSeen'] ?? 0) > self::PRESENCE_TTL_SECONDS) continue;
+            $total++;
+            if (($info['ack'] ?? '') === $cueId) $acked++;
+        }
+        return ['success' => true, 'cueId' => $cueId, 'acked' => $acked, 'total' => $total];
     }
 
     public static function pollRoom(string $room, int $clientRevision = 0, string $clientId = '', string $role = ''): array {

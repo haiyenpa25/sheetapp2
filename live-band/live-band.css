@@ -838,6 +838,24 @@ body.stage-dark {
   letter-spacing: 0.3px;
 }
 
+/* Báo "đã nhận" lệnh: nút trên banner (banner mặc định không nhận chạm) + đếm ở máy Ca trưởng */
+.btn-cue-ack {
+  pointer-events: auto;
+  min-height: 44px;
+  padding: 0 1rem;
+  border: 2px solid #10b981;
+  border-radius: 9999px;
+  background: rgba(16, 185, 129, 0.18);
+  color: #6ee7b7;
+  font-weight: 800;
+  font-size: 1rem;
+  touch-action: manipulation;
+}
+.btn-cue-ack:disabled { opacity: .75; }
+.btn-cue-ack.hidden { display: none; }
+.cue-ack-status { margin-left: .5rem; font-weight: 700; color: var(--stage-amber); }
+.cue-ack-status.all-acked { color: #34d399; }
+
 @keyframes cueDrop {
   from { opacity: 0; transform: translate(-50%, -30px); }
   to { opacity: 1; transform: translate(-50%, 0); }

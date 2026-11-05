@@ -269,6 +269,7 @@ echo liveBandJsTag('assets/js/performance/musical-position.js', true);
 echo liveBandJsTag('assets/js/transpose-engine.js', true);
 echo liveBandJsTag('assets/js/lyric-extractor.js', true);
 echo liveBandJsTag('assets/js/performance/cue-engine.js', true);
+echo liveBandJsTag('live-band/js/stage-cue-ack.js', true);
 echo liveBandJsTag('assets/js/performance/count-in-engine.js', true);
 echo liveBandJsTag('assets/js/performance/arrangement-engine.js', true);
 echo liveBandJsTag('assets/js/performance/ambient-pad-engine.js', true);

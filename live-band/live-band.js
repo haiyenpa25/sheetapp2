@@ -37,6 +37,7 @@ const LiveBandApp = (() => {
   /* ── Initialization ───────────────────────────────────────── */
   async function init() {
     _clientId = _getOrCreateClientId();
+    window.StageCueAck?.init?.({ getRoom: () => _roomCode, getClientId: () => _clientId });
     _role     = localStorage.getItem(STORAGE_ROLE_KEY) || 'guitar';
 
     _transport = (typeof SSETransport !== 'undefined') ? new SSETransport(350) : new PollingTransport(350);
@@ -259,6 +260,11 @@ const LiveBandApp = (() => {
 
   function broadcastState(patch = {}) {
     if (_mode !== 'host' || !_roomCode) return;
+    if (patch.cue) {
+      // Mỗi lệnh có mã riêng để nhạc công báo "đã nhận" và Ca trưởng đếm (StageCueAck).
+      patch.cue.cueId = patch.cue.cueId || ('CUE-' + Math.random().toString(16).slice(2, 12));
+      window.StageCueAck?.watch?.(patch.cue.cueId);
+    }
     const payload = window.StageRoomManager.buildBroadcastPayload({
       clientId: _clientId,
       songId: _currentSongId,

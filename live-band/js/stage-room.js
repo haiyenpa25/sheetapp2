@@ -179,7 +179,7 @@
       }
     }
 
-    if (state.cue && state.cue.text) { const ck = String(state.cue.cueId || `${state.cue.type||''}:${state.cue.text}:${state.cue.sentAt||''}`); if (ck !== _lastCueKey && (!state.cue.expiresAt || Date.now() < state.cue.expiresAt)) { _lastCueKey = ck; window.StageRehearsal?.showCueBanner(state.cue.text, state.cue.icon || '⚡', state.cue.durationMs || 3000); } } if (false) {
+    if (state.cue && state.cue.text) { const ck = String(state.cue.cueId || `${state.cue.type||''}:${state.cue.text}:${state.cue.sentAt||''}`); if (ck !== _lastCueKey && (!state.cue.expiresAt || (window.TransportClock?.nowServerSeconds?.() || Date.now() / 1000) < state.cue.expiresAt)) { _lastCueKey = ck; window.StageRehearsal?.showCueBanner(state.cue.text, state.cue.icon || '⚡', state.cue.durationMs || 3000); window.StageCueAck?.onCue?.(state.cue); } } if (false) {
       window.StageRehearsal?.showCueBanner(state.cue.text, state.cue.icon || '⚡', state.cue.durationMs || 3000);
     }
 

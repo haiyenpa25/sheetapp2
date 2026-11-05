@@ -21,6 +21,11 @@ class LiveSyncController {
                     return;
                 }
 
+                if ($action === 'acks') {
+                    Response::ok(LiveSyncService::cueAcks($room, trim($_GET['cue'] ?? '')));
+                    return;
+                }
+
                 if ($action === 'events' || $action === 'sse') {
                     if (session_status() === PHP_SESSION_ACTIVE) {
                         session_write_close();
@@ -50,6 +55,16 @@ class LiveSyncController {
                     $res = LiveSyncService::createRoom($room, $body);
                     if (empty($res['success'])) {
                         Response::error($res['error'] ?? 'Không thể tạo phòng', 409);
+                        return;
+                    }
+                    Response::ok($res);
+                    return;
+                }
+
+                if ($action === 'ack') {
+                    $res = LiveSyncService::ackCue($room, trim($body['clientId'] ?? ''), trim($body['cue'] ?? ''));
+                    if (empty($res['success'])) {
+                        Response::error($res['error'] ?? 'Không ghi nhận được', 400);
                         return;
                     }
                     Response::ok($res);

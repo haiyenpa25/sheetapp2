@@ -470,6 +470,8 @@ const ApiService = (() => {
     },
     update: (room, hostToken, data)   => _json('POST', 'api/index.php?route=live_sync', { room, hostToken, ...data }),
     close:  (room, hostToken)         => _json('POST', 'api/index.php?route=live_sync&action=close', { room, hostToken }),
+    ack:    (room, clientId, cue)     => _json('POST', 'api/index.php?route=live_sync&action=ack', { room, clientId, cue }),
+    acks:   (room, cue)               => _request(`api/index.php?route=live_sync&action=acks&room=${encodeURIComponent(room)}&cue=${encodeURIComponent(cue)}`),
   };
 
   const errors = {

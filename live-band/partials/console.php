@@ -50,7 +50,7 @@
 
       <!-- Section 4: Cue Commander -->
       <div class="host-console-group host-cue-group">
-        <span class="group-label">Hiệu Lệnh Sân Khấu:</span>
+        <span class="group-label">Hiệu Lệnh Sân Khấu: <span id="cue-ack-status" class="cue-ack-status" aria-live="polite"></span></span>
         <div class="cue-buttons-wrap">
           <button class="btn-cue-trigger btn-cue-chorus" data-cue="chorus" title="Nhắc vào Điệp Khúc">⚡ Điệp Khúc</button>
           <button class="btn-cue-trigger btn-cue-repeat" data-cue="repeat" title="Lặp lại đoạn này">🔁 Lặp Lại</button>
