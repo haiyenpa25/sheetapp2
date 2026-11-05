@@ -1589,3 +1589,5 @@ body.manager-body {
 .mgr-church-bar .mgr-input { min-height: 40px; }
 .mgr-church-code { font-size: 1.1rem; letter-spacing: .12em; padding: .2rem .5rem; background: rgba(127,127,127,.15); border-radius: 6px; }
 #church-members-tbody select.mgr-input { min-height: 36px; width: auto; }
+.mgr-church-cats { list-style: none; margin: 0; padding: 0; display: grid; gap: .4rem; }
+.mgr-church-cats li { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }

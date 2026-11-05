@@ -190,8 +190,12 @@ function jsTag(string $file, bool $defer = true): string {
 }
 
 // ── 1. CORE Infrastructure (không defer — cần sớm nhất) ──
+// Cờ tính năng phía máy chủ cho JS (ChurchContext cần MULTI_CHURCH); cùng định dạng với index.php.
+require_once __DIR__ . '/../api/core/FeatureFlags.php';
+echo "<script>window.__FEATURES__ = " . json_encode(FeatureFlags::all(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) . ";</script>\n";
 echo jsTag('vendor/opensheetmusicdisplay.min.js');
 echo jsTag('vendor/tonal.min.js');
+echo jsTag('core/FeatureFlags.js', false);
 echo jsTag('core/ScriptLoader.js', false);
 echo jsTag('core/SafeHtml.js', false);
 echo jsTag('core/SafeStorage.js', false);
@@ -217,6 +221,7 @@ echo jsTag('transpose-engine.js');
 echo jsTag('harmonic-numeral.js');
 echo jsTag('session-tracker.js');
 echo jsTag('auth.js');
+echo jsTag('core/ChurchContext.js');
 echo jsTag('history-manager.js');
 echo jsTag('url-state.js');
 

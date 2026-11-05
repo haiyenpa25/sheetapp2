@@ -226,6 +226,7 @@ echo jsTag('lyric-extractor.js');
 echo jsTag('transpose-engine.js');
 echo jsTag('session-tracker.js');
 echo jsTag('auth.js');
+echo jsTag('core/ChurchContext.js');
 echo jsTag('history-manager.js');
 echo jsTag('url-state.js');
 

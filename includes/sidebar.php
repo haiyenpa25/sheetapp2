@@ -149,6 +149,7 @@
 
     <!-- TAB CONTENT: SETLIST -->
     <div id="tab-content-setlist" class="sidebar-tab-content hidden">
+      <div id="church-switcher" class="church-switcher hidden"></div>
       <div id="setlist-list" class="song-list">
         <div class="empty-state">
           <span class="empty-icon"><?= icon('file-text') ?></span>

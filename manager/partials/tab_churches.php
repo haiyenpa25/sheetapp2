@@ -46,6 +46,15 @@
         </div>
       </div>
 
+      <div id="church-category-box" class="mgr-church-join" hidden>
+        <label for="church-cat-name" class="mgr-church-label">Danh mục bài riêng của Hội Thánh này (chỉ thành viên HT thấy)</label>
+        <div class="mgr-church-row">
+          <input id="church-cat-name" class="mgr-input" maxlength="100" placeholder="Tên danh mục">
+          <button id="btn-church-cat-create" type="button" class="mgr-btn mgr-btn-primary">Thêm</button>
+        </div>
+        <ul id="church-cat-list" class="mgr-church-cats"></ul>
+      </div>
+
       <div id="church-create-box" class="mgr-church-join" hidden>
         <label for="church-new-name" class="mgr-church-label">Tạo Hội Thánh mới (Admin hệ thống)</label>
         <div class="mgr-church-row">

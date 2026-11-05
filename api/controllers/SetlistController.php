@@ -34,6 +34,13 @@ class SetlistController {
         return true;
     }
 
+    /** Vai trò trong HT không đủ để ghi: 403. true = đã chặn. */
+    private function deniedByChurchRole(bool $allowed): bool {
+        if ($allowed) return false;
+        Response::forbidden('Vai trò của bạn trong Hội Thánh này không cho phép thao tác này');
+        return true;
+    }
+
     public function handleRequest(string $method): void {
         $action = $_GET['action'] ?? '';
         $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -127,6 +134,7 @@ class SetlistController {
                     Response::forbidden('Bạn chưa thuộc Hội Thánh nào để tạo chương trình');
                     return;
                 }
+                if ($this->deniedByChurchRole(ChurchAccessGuard::canCreateInCurrentChurch())) return;
                 $newId = SetlistService::create($data, '', $userId);
                 Response::ok(['id' => $newId, 'message' => 'Đã tạo chương trình thành công']);
                 return;
@@ -137,6 +145,7 @@ class SetlistController {
                 Auth::requireLogin();
                 if ($id <= 0) { Response::error('Thiếu ID chương trình', 400); return; }
                 if ($this->blockedByChurch(ChurchAccessGuard::canAccessSetlist($id))) return;
+                if ($this->deniedByChurchRole(ChurchAccessGuard::canWriteSetlist($id, true))) return;
                 if (!Auth::isAdmin() && !SetlistService::isLeaderOrOwner($id, (int)$userId)) {
                     Response::forbidden('Chỉ Ca Trưởng hoặc Quản Trị Viên mới có quyền sửa chương trình này');
                     return;
@@ -150,6 +159,7 @@ class SetlistController {
             if ($method === 'POST' && $action === 'publish') {
                 if ($id <= 0) { Response::error('Thiếu ID chương trình', 400); return; }
                 if ($this->blockedByChurch(ChurchAccessGuard::canAccessSetlist($id))) return;
+                if ($this->deniedByChurchRole(ChurchAccessGuard::canWriteSetlist($id, true))) return;
                 if (!Auth::isAdmin() && !SetlistService::isLeaderOrOwner($id, (int)$userId)) {
                     Response::forbidden('Chỉ Ca Trưởng hoặc Quản Trị Viên mới có quyền phát hành chương trình này');
                     return;
@@ -164,6 +174,7 @@ class SetlistController {
                 Auth::requireLogin();
                 if ($id <= 0) { Response::error('Thiếu ID chương trình', 400); return; }
                 if ($this->blockedByChurch(ChurchAccessGuard::canAccessSetlist($id))) return;
+                if ($this->deniedByChurchRole(ChurchAccessGuard::canWriteSetlist($id, true))) return;
                 if (!Auth::isAdmin() && !SetlistService::isOwner($id, (int)$userId)) {
                     Response::forbidden('Bạn không có quyền xóa chương trình này');
                     return;
@@ -179,6 +190,7 @@ class SetlistController {
                 $setlistId = (int)($data['setlist_id'] ?? 0);
                 if ($setlistId <= 0) { Response::error('Thiếu setlist_id', 400); return; }
                 if ($this->blockedByChurch(ChurchAccessGuard::canAccessSetlist($setlistId))) return;
+                if ($this->deniedByChurchRole(ChurchAccessGuard::canWriteSetlist($setlistId))) return;
                 if (!Auth::isAdmin() && !SetlistService::isLeaderOrOwner($setlistId, (int)$userId)) {
                     Response::forbidden('Bạn không có quyền chỉnh sửa chương trình này');
                     return;
@@ -201,6 +213,7 @@ class SetlistController {
                 Auth::requireLogin();
                 if ($id <= 0) { Response::error('Thiếu item ID', 400); return; }
                 if ($this->blockedByChurch(ChurchAccessGuard::canAccessItem($id))) return;
+                if ($this->deniedByChurchRole(ChurchAccessGuard::canWriteItem($id))) return;
                 if (!Auth::isAdmin() && !SetlistService::isItemOwner($id, (int)$userId)) {
                     Response::forbidden('Bạn không sở hữu chương trình chứa mục này');
                     return;
@@ -219,6 +232,7 @@ class SetlistController {
                 Auth::requireLogin();
                 if ($id <= 0) { Response::error('Thiếu item ID', 400); return; }
                 if ($this->blockedByChurch(ChurchAccessGuard::canAccessItem($id))) return;
+                if ($this->deniedByChurchRole(ChurchAccessGuard::canWriteItem($id))) return;
                 if (!Auth::isAdmin() && !SetlistService::isItemOwner($id, (int)$userId)) {
                     Response::forbidden('Bạn không có quyền xóa mục này');
                     return;
@@ -240,6 +254,7 @@ class SetlistController {
                     return;
                 }
                 if ($this->blockedByChurch(ChurchAccessGuard::canAccessSetlist($setlistId))) return;
+                if ($this->deniedByChurchRole(ChurchAccessGuard::canWriteSetlist($setlistId, true))) return;
                 if (!Auth::isAdmin() && !SetlistService::isLeaderOrOwner($setlistId, (int)$userId)) {
                     Response::forbidden('Chỉ Ca Trưởng hoặc Quản Trị Viên mới có quyền phân công');
                     return;
@@ -260,6 +275,7 @@ class SetlistController {
                 $setlistId = SetlistService::getAssignmentSetlistId($id);
                 if ($setlistId === null) { Response::notFound('Không tìm thấy mục phân công'); return; }
                 if ($this->blockedByChurch(ChurchAccessGuard::canAccessSetlist($setlistId))) return;
+                if ($this->deniedByChurchRole(ChurchAccessGuard::canWriteSetlist($setlistId, true))) return;
 
                 if (!Auth::isAdmin() && !SetlistService::isLeaderOrOwner($setlistId, (int)$userId)) {
                     Response::forbidden('Bạn không có quyền gỡ phân công này');

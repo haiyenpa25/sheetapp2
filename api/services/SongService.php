@@ -181,6 +181,12 @@ class SongService {
             $allowed = Auth::isBanhat() ? "('public','private')" : "('public')";
             $categoryGuard = " AND COALESCE((SELECT cv.visibility FROM categories cv WHERE cv.id = {$prefix}category_id), 'public') IN {$allowed}";
         }
+        // Đa Hội Thánh: bài thuộc danh mục riêng của HT khác bị ẩn (rỗng khi cờ tắt hoặc chưa migration 018).
+        require_once __DIR__ . '/../core/ChurchAccessGuard.php';
+        $churchCond = ChurchAccessGuard::categoryChurchCond('cv');
+        if ($churchCond !== '') {
+            $categoryGuard .= " AND COALESCE((SELECT CASE WHEN {$churchCond} THEN 1 ELSE 0 END FROM categories cv WHERE cv.id = {$prefix}category_id), 1) = 1";
+        }
         if (Auth::isBanhat()) {
             return "(COALESCE({$prefix}visibility, 'public') != 'admin_only'" . $categoryGuard . ')';
         }
@@ -189,6 +195,11 @@ class SongService {
 
     /** Người xem hiện tại có được thấy danh mục này không (public → ai cũng; private → ban nhạc trở lên; admin_only → admin). */
     public static function viewerMayViewCategory(int $categoryId): bool {
+        require_once __DIR__ . '/../core/ChurchAccessGuard.php';
+        if (DB::hasColumn('categories', 'church_id')) {
+            $owner = DB::run('SELECT church_id FROM categories WHERE id = ?', [$categoryId])->fetchColumn();
+            if (!ChurchAccessGuard::viewerMayViewChurchOwned($owner === false ? null : (int)$owner)) return false;
+        }
         $vis = self::categoryVisibility($categoryId);
         if ($vis === 'public') return true;
         return $vis === 'admin_only' ? Auth::isAdmin() : Auth::isBanhat();

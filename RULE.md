@@ -109,3 +109,15 @@
 3. Bài không công khai có mã bắt đầu `pv-`; `.gitignore` loại `storage/private/`, `storage/data/chord_sets/pv-*/`, `storage/data/annotations/pv-*`. Không đưa bài có bản quyền lên repo công khai.
 4. Mọi route làm việc theo mã bài đi qua `SongAccessGuard` (gọi trong `api/index.php`); route mới theo mã bài **phải** thêm vào `SongAccessGuard::ROUTES`. Không đọc bài bằng SQL trực tiếp mà bỏ qua `SongService::getById` / `visibilitySqlClause`; không đổi `songs.category_id` bằng `UPDATE` trực tiếp (dùng `SongService::update` để ép quyền).
 5. Mã mới phải chạy đúng khi web **chưa chạy migration** (kiểm bằng `DB::hasColumn`, như `SongService::categoryVisibility`). Chi tiết và quy trình cập nhật web: `docs/PRIVATE_CATALOG.md`.
+
+---
+
+## 8. Quy tắc Đa Hội Thánh (cờ `MULTI_CHURCH`, mặc định TẮT — cập nhật 2026-11-05)
+
+1. **Cờ tắt = hành vi một Hội Thánh (HT) như cũ**, từng byte. Mọi mã đa HT phải qua `ChurchAccessGuard` (cờ tắt → luôn cho qua) và không được làm đổi kết quả khi cờ tắt. Chỉ bật cờ sau khi đã sao lưu và chạy `php tools/migrate.php` (migration 018).
+2. Quyền gắn vào **HT**, không gắn từng chương trình. Chương trình lễ (`setlists.church_id`), phân công, báo cáo/lịch sử dùng bài, bài tập, phòng Live đều thuộc một HT; người HT này gọi vào dữ liệu HT khác nhận **404** (không lộ sự tồn tại). Route mới theo mã chương trình/mục/phân công **phải** gọi `ChurchAccessGuard::canAccessSetlist/Item/Assignment`; truy vấn danh sách phải thêm `ChurchAccessGuard::setlistScope()`.
+3. Vai trò trong HT (`church_members.role`): `church_admin` (quản trị thành viên + mã mời), `leader` (tạo/sửa/phát hành/xóa chương trình, phân công, giao bài), `member` (thêm/sửa/xóa bài trong chương trình), `viewer` (chỉ xem). Đây là **trần quyền cộng thêm** vào vai trò hệ thống (`AuthPolicy`), không thay thế: người "leader" hệ thống nhưng chỉ "viewer" trong HT thì không ghi được ở HT đó. Admin hệ thống đứng trên mọi HT.
+4. Người dùng vào HT **chỉ bằng mã mời + quản trị HT duyệt** (trạng thái `pending` → `active`); người bị khóa không tự mở lại bằng mã. Không bao giờ để HT mất admin cuối cùng (409). Giới hạn nhập sai mã mời theo phiên.
+5. Kho bài chung toàn hệ thống; HT thêm **danh mục riêng** (`categories.church_id`, ép `private`, không đặt công khai được): chỉ thành viên HT đó và admin hệ thống thấy danh mục và bài trong đó (`SongService::visibilitySqlClause`, `viewerMayViewCategory`, `CategoryService::getAll`). Danh mục `church_id` trống = dùng chung.
+6. Phía JS: HT đang làm việc do `ChurchContext` giữ (khóa `sheetapp_active_church`); đổi HT tải lại trang, bỏ tham số `setlist`/`program`. Gói offline ghi `church_id` và chỉ liệt kê gói của HT đang làm việc.
+7. Mã mới phải chạy khi web **chưa chạy migration 018** (kiểm `DB::hasColumn/hasTable`, `ChurchService::isReady()`). Chi tiết và quy trình bật: `docs/MULTI_CHURCH.md`.

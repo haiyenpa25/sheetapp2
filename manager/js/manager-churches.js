@@ -23,6 +23,8 @@
     _byId('btn-church-rename')?.addEventListener('click', _rename);
     _byId('btn-church-regen')?.addEventListener('click', _regenerate);
     _byId('btn-church-create')?.addEventListener('click', _create);
+    _byId('btn-church-cat-create')?.addEventListener('click', _createCategory);
+    _byId('church-cat-list')?.addEventListener('click', _onCategoryClick);
     _byId('church-members-tbody')?.addEventListener('change', _onMemberChange);
     _byId('church-members-tbody')?.addEventListener('click', _onMemberClick);
   }
@@ -60,15 +62,53 @@
   async function _loadMembers() {
     const box = _byId('church-admin-box');
     if (!box) return;
-    if (!_activeId) { box.hidden = true; return; }
+    if (!_activeId) { box.hidden = true; _byId('church-category-box').hidden = true; return; }
     try {
       const res = await window.ApiService.churches.members(_activeId);
       box.hidden = false;
       _byId('church-name').value = res.church?.name || '';
       _byId('church-invite-code').textContent = res.invite_code || '';
       _renderMembers(res.members || []);
+      _byId('church-category-box').hidden = false;
+      await _loadCategories();
     } catch (e) {
       box.hidden = true;
+      _byId('church-category-box').hidden = true;
+    }
+  }
+
+  /** Danh mục riêng của HT đang chọn (API trả mọi danh mục người dùng được thấy, lọc theo church_id). */
+  async function _loadCategories() {
+    const list = _byId('church-cat-list');
+    if (!list) return;
+    const all = await window.ApiService.categories.list();
+    const mine = (Array.isArray(all) ? all : []).filter((c) => Number(c.church_id) === _activeId);
+    list.innerHTML = mine.length
+      ? mine.map((c) => `<li data-id="${Number(c.id)}">${_esc(c.name)} · ${Number(c.song_count) || 0} bài <button type="button" class="mgr-btn mgr-btn-sm mgr-btn-ghost" data-act="del-cat">Xóa</button></li>`).join('')
+      : '<li class="text-muted">Chưa có danh mục riêng</li>';
+  }
+
+  async function _createCategory() {
+    const input = _byId('church-cat-name');
+    try {
+      await window.ApiService.categories.create({ name: input.value, church_id: _activeId });
+      input.value = '';
+      _toast('Đã thêm danh mục riêng', 'success');
+      await _loadCategories();
+    } catch (e) {
+      _toast(e.message, 'error');
+    }
+  }
+
+  async function _onCategoryClick(e) {
+    const btn = e.target.closest('button[data-act="del-cat"]');
+    if (!btn) return;
+    if (!window.confirm('Xóa danh mục này? Bài trong đó chuyển về danh mục mặc định.')) return;
+    try {
+      await window.ApiService.categories.delete(Number(btn.closest('li').dataset.id));
+      await _loadCategories();
+    } catch (err) {
+      _toast(err.message, 'error');
     }
   }
 

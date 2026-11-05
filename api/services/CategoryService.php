@@ -20,8 +20,12 @@ class CategoryService {
         }
         $allowed = Auth::isAdmin() ? "('public','private','admin_only')" : (Auth::isBanhat() ? "('public','private')" : "('public')");
         $songClause = SongService::visibilitySqlClause('s');
+        // Đa Hội Thánh: ẩn danh mục riêng của HT khác (rỗng khi cờ tắt / admin hệ thống / chưa migration 018).
+        require_once __DIR__ . '/../core/ChurchAccessGuard.php';
+        $churchCond = ChurchAccessGuard::categoryChurchCond('c');
+        $churchClause = $churchCond !== '' ? " AND ({$churchCond})" : '';
         return DB::query("SELECT c.*, (SELECT COUNT(*) FROM songs s WHERE s.category_id = c.id AND {$songClause}) AS song_count
-            FROM categories c WHERE c.visibility IN {$allowed} ORDER BY COALESCE(c.display_order, c.id) ASC, c.id ASC");
+            FROM categories c WHERE c.visibility IN {$allowed}{$churchClause} ORDER BY COALESCE(c.display_order, c.id) ASC, c.id ASC");
     }
 
     private static function cleanName(string $name): string {
@@ -53,12 +57,21 @@ class CategoryService {
         }
     }
 
-    public static function create(string $name, string $visibility = 'public'): array {
+    /** $churchId: danh mục RIÊNG của một Hội Thánh (ép quyền xem "private"; chỉ thành viên HT đó thấy). */
+    public static function create(string $name, string $visibility = 'public', ?int $churchId = null): array {
         $name = self::cleanName($name);
+        if ($churchId) {
+            if (!DB::hasColumn('categories', 'church_id')) {
+                throw new InvalidArgumentException('Cơ sở dữ liệu chưa có cột church_id — chạy "php tools/migrate.php" (migration 018) trước.');
+            }
+            $visibility = 'private';
+        }
         $visibility = self::cleanVisibility($visibility);
         self::assertNameFree($name);
         $slug = self::slugify($name);
-        if (self::hasVisibility()) {
+        if ($churchId) {
+            DB::run("INSERT INTO categories (name, slug, visibility, church_id) VALUES (?, ?, ?, ?)", [$name, $slug, $visibility, $churchId]);
+        } elseif (self::hasVisibility()) {
             DB::run("INSERT INTO categories (name, slug, visibility) VALUES (?, ?, ?)", [$name, $slug, $visibility]);
         } else {
             DB::run("INSERT INTO categories (name, slug) VALUES (?, ?)", [$name, $slug]);
@@ -83,6 +96,9 @@ class CategoryService {
         $slug = ($hasSongs && trim((string)$row['slug']) !== '') || $name === null ? (string)$row['slug'] : self::slugify($newName);
         $currentVis = $row['visibility'] ?? 'public';
         $newVis = $visibility !== null ? self::cleanVisibility($visibility) : $currentVis;
+        if (!empty($row['church_id']) && $newVis === 'public') {
+            throw new InvalidArgumentException('Danh mục riêng của Hội Thánh không thể đặt công khai.');
+        }
 
         $pdo = DB::get();
         $pdo->beginTransaction();

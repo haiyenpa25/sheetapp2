@@ -37,6 +37,10 @@ class PracticeAssignmentController {
                     Response::notFound('Chương trình không tồn tại');
                     return;
                 }
+                if (!ChurchAccessGuard::canWriteSetlist($setlistId, true)) {
+                    Response::forbidden('Vai trò của bạn trong Hội Thánh này không cho phép giao bài');
+                    return;
+                }
                 $board = PracticeAssignmentService::getTeamBoard($setlistId, (int)Auth::userId());
                 Response::ok($board);
                 break;
@@ -71,6 +75,10 @@ class PracticeAssignmentController {
                 }
                 if (!ChurchAccessGuard::canAccessSetlist($setlistId)) {
                     Response::notFound('Chương trình không tồn tại');
+                    return;
+                }
+                if (!ChurchAccessGuard::canWriteSetlist($setlistId, true)) {
+                    Response::forbidden('Vai trò của bạn trong Hội Thánh này không cho phép giao bài');
                     return;
                 }
                 try {

@@ -83,7 +83,8 @@ const OfflineSetlistManager = (() => {
       item_count: data.total_songs || 0,
       package_version: data.package_version || '',
       is_ready: Boolean(data.is_ready),
-      saved_at: data.saved_at || new Date().toISOString()
+      saved_at: data.saved_at || new Date().toISOString(),
+      church_id: Number(data.setlist?.church_id) || 0
     });
     _saveIndex(index);
     return true;
@@ -311,7 +312,11 @@ const OfflineSetlistManager = (() => {
    * Liệt kê tất cả các gói đã lưu trên thiết bị
    */
   function listPackages() {
-    return _getIndex();
+    // Đa Hội Thánh: chỉ liệt kê gói của HT đang làm việc (gói cũ chưa ghi church_id vẫn hiện).
+    const active = Number(window.ChurchContext?.getActiveId?.()) || 0;
+    const index = _getIndex();
+    if (!active || !window.FeatureFlags?.get?.('MULTI_CHURCH')) return index;
+    return index.filter((item) => !item.church_id || Number(item.church_id) === active);
   }
 
   /**

@@ -35,6 +35,15 @@ test.describe('Tab Hội Thánh trong Quản lý', () => {
     await page.selectOption('#church-select', value);
     await expect(page.locator('#church-invite-code')).not.toHaveText(before || '');
 
+    // Danh mục riêng của HT mới: thêm rồi xóa
+    const catName = 'DM riêng ' + Date.now();
+    await page.fill('#church-cat-name', catName);
+    await page.click('#btn-church-cat-create');
+    await expect(page.locator('#church-cat-list li', { hasText: catName })).toHaveCount(1);
+    page.once('dialog', (d) => d.accept());
+    await page.locator('#church-cat-list li', { hasText: catName }).locator('button').click();
+    await expect(page.locator('#church-cat-list li', { hasText: catName })).toHaveCount(0);
+
     // Mã mời sai → báo lỗi, không văng lỗi JS
     await page.fill('#church-join-code', 'ZZZZZZZZ');
     await page.click('#btn-church-join');
