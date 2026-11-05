@@ -76,7 +76,13 @@ const StageCueAck = (() => {
     tick();
   }
 
-  return { init, onCue, watch };
+  /** Máy Ca trưởng: gắn mã cho lệnh sắp phát (nếu chưa có) và bắt đầu đếm người nhận. */
+  function stamp(cue) {
+    cue.cueId = cue.cueId || ('CUE-' + Math.random().toString(16).slice(2, 12));
+    watch(cue.cueId);
+  }
+
+  return { init, onCue, watch, stamp };
 })();
 
 window.StageCueAck = StageCueAck;

@@ -95,6 +95,9 @@ function liveBandCssTag(string $file): string {
           <option value="bass">🎸 Bass (Root & Slash Notes)</option>
           <option value="piano">🎹 Keyboard / Piano (Hợp âm & Dẫn)</option>
           <option value="drummer">🥁 Trống / Drums (Visual Metronome)</option>
+          <option value="trumpet">🎺 Trumpet / Clarinet Bb (nốt viết +2)</option>
+          <option value="altosax">🎷 Sax Alto Eb (nốt viết +9)</option>
+          <option value="horn">📯 Kèn Horn F (nốt viết +7)</option>
           <option value="viewer">👀 Nhạc công / Thành viên</option>
           <option value="vocal">🎤 Vocal / Ca Sĩ</option>
         </select>
@@ -270,6 +273,9 @@ echo liveBandJsTag('assets/js/transpose-engine.js', true);
 echo liveBandJsTag('assets/js/lyric-extractor.js', true);
 echo liveBandJsTag('assets/js/performance/cue-engine.js', true);
 echo liveBandJsTag('live-band/js/stage-cue-ack.js', true);
+echo liveBandJsTag('live-band/js/stage-autoturn.js', true);
+echo liveBandJsTag('assets/js/osmd-transpose-speller.js', true);
+echo liveBandJsTag('live-band/js/stage-score-transpose.js', true);
 echo liveBandJsTag('assets/js/performance/count-in-engine.js', true);
 echo liveBandJsTag('assets/js/performance/arrangement-engine.js', true);
 echo liveBandJsTag('assets/js/performance/ambient-pad-engine.js', true);

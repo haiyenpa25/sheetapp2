@@ -168,17 +168,7 @@ const LiveBandApp = (() => {
     }, { passive: true });
   }
 
-  function _updateSnapButton(show, currentM = 0, hostM = 0) {
-    const btn = document.getElementById('btn-snap-to-host');
-    const label = document.getElementById('snap-label');
-    if (!btn) return;
-    if (show) {
-      if (label) label.textContent = `Quay về Ca Trưởng (Bạn: Ô ${currentM} • Ca Trưởng: Ô ${hostM})`;
-      btn.classList.remove('hidden');
-    } else {
-      btn.classList.add('hidden');
-    }
-  }
+  const _updateSnapButton = (...args) => window.StageHud?.updateSnapButton?.(...args);
 
   function snapToHost() {
     _isDetached = false;
@@ -260,11 +250,7 @@ const LiveBandApp = (() => {
 
   function broadcastState(patch = {}) {
     if (_mode !== 'host' || !_roomCode) return;
-    if (patch.cue) {
-      // Mỗi lệnh có mã riêng để nhạc công báo "đã nhận" và Ca trưởng đếm (StageCueAck).
-      patch.cue.cueId = patch.cue.cueId || ('CUE-' + Math.random().toString(16).slice(2, 12));
-      window.StageCueAck?.watch?.(patch.cue.cueId);
-    }
+    if (patch.cue) window.StageCueAck?.stamp?.(patch.cue); // mã lệnh + đếm "Đã nhận" (StageCueAck)
     const payload = window.StageRoomManager.buildBroadcastPayload({
       clientId: _clientId,
       songId: _currentSongId,
@@ -323,10 +309,26 @@ const LiveBandApp = (() => {
     _currentSongTitle = song?.title || songId;
     if (chordSet) _currentChordSet = chordSet;
 
+    window.StageAutoTurn?.reset?.();
     _currentTranspose = 0; await _loadSong(songId, 0, _currentChordSet);
     broadcastState({
       song: { songId, songTitle: _currentSongTitle, chordSet: _currentChordSet },
       position: { measure: 1 }
+    });
+  }
+
+  /** Lật trang tự động theo nhịp (StageAutoTurn): mỗi ô nhịp mới → cuộn, phát vị trí cho cả ban nhạc, sáng đoạn đang chơi. */
+  function hostToggleAutoTurn() {
+    window.StageAutoTurn?.toggle({
+      getOsmd: () => _osmd,
+      getBpm: () => _currentBpm,
+      getCurrentMeasure: () => window.MusicalPosition?.getVisibleMeasure?.() || _currentMeasure || 1,
+      onMeasure: (m) => {
+        _currentMeasure = m;
+        window.MusicalPosition?.scrollToMeasure?.(m, true);
+        broadcastState({ position: { measure: m } });
+        window.StageCatalog?.highlightActiveSectionByMeasure(m);
+      }
     });
   }
 
@@ -379,49 +381,6 @@ const LiveBandApp = (() => {
     }
   }
 
-  /* ── Teleprompter Lyrics Renderer ─────────────────────────── */
-  function _renderTeleprompterLyrics(songTitle, xmlString) {
-    const container = document.getElementById('stage-lyric-wrapper');
-    if (!container) return;
-    if (!xmlString) {
-      container.innerHTML = '<div class="text-muted text-center py-2">Chưa có lời bài hát</div>';
-      return;
-    }
-
-    let lyricsHtml = '';
-    try {
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
-      const parts = xmlDoc.querySelectorAll('measure');
-      const currentStanza = [];
-
-      parts.forEach((m) => {
-        const lyrics = m.querySelectorAll('lyric text');
-        if (lyrics.length > 0) {
-          const words = Array.from(lyrics).map(l => l.textContent.trim()).filter(Boolean);
-          if (words.length > 0) currentStanza.push(words.join(' '));
-        }
-      });
-
-      const fontSize = window.StageHud?.getVocalFontSize?.() || 1.45;
-      if (currentStanza.length > 0) {
-        lyricsHtml = `
-          <div class="teleprompter-section active">
-            <div class="teleprompter-title">LỜI BÀI HÁT — ${window.SafeHtml.escape(songTitle)}</div>
-            <div class="teleprompter-lines" style="font-size: ${fontSize}rem;">
-              ${currentStanza.map(line => `<div class="teleprompter-line">${window.SafeHtml.escape(line)}</div>`).join('')}
-            </div>
-          </div>
-        `;
-      }
-    } catch (e) {}
-
-    if (!lyricsHtml) {
-      lyricsHtml = `<div class="teleprompter-section active"><div class="teleprompter-lines">(Xem bản nhạc để theo dõi lời bài hát)</div></div>`;
-    }
-    container.innerHTML = lyricsHtml;
-  }
-
   /* ── Tap Tempo Integration ────────────────────────────────── */
   function _handleTapTempo() {
     const tapBtn = document.getElementById('btn-tap-tempo');
@@ -452,17 +411,24 @@ const LiveBandApp = (() => {
     if (songBpmEl) songBpmEl.textContent = `${bpm} BPM`;
   }
 
+  /** Dịch giọng hiển thị trên máy này = tông chung + độ lệch nhạc cụ chuyển giọng (StageScoreTranspose). */
+  const _scoreTranspose = () => window.StageScoreTranspose?.effective?.(_currentTranspose, _role) ?? _currentTranspose;
+  const _reapplyScoreTranspose = () => window.StageScoreTranspose?.reapply?.(_osmd, _scoreTranspose(), () => window.MusicalPosition?.computeMeasurePositions?.());
+
   function _setTranspose(transpose, broadcast = false) {
     _currentTranspose = transpose;
+    _reapplyScoreTranspose();
     const valEl = document.getElementById('host-transpose-val');
     if (valEl) valEl.textContent = (transpose > 0 ? `+${transpose}` : String(transpose));
 
     let effKey = _currentBaseKey;
     if (window.TransposeEngine && transpose !== 0) {
-      effKey = window.TransposeEngine.transposeKey(_currentBaseKey, transpose) || _currentBaseKey;
+      effKey = window.TransposeEngine.calcKey(_currentBaseKey, transpose) || _currentBaseKey;
     }
     const keyBadge = document.getElementById('stage-current-key-badge') || document.getElementById('nav-song-key');
     if (keyBadge) keyBadge.textContent = keyBadge.id === 'nav-song-key' ? `Tông: ${effKey}` : effKey;
+    const hostKeyEl = document.getElementById('host-key-val');
+    if (hostKeyEl) hostKeyEl.textContent = `${effKey} (${transpose > 0 ? '+' : ''}${transpose})`;
 
     window.StageHud?.updateBassHud(_currentBaseKey, _currentTranspose);
     window.StageHud?.updatePianoHud(_currentBaseKey, _currentTranspose);
@@ -507,9 +473,10 @@ const LiveBandApp = (() => {
       if (xmlText && _osmd) {
         let renderXml = xmlText; if (_currentChordSet !== 'default' && _currentChordSet?.toUpperCase() !== 'TLH' && window.ApiService?.chordSets?.load) { const csRes = await window.ApiService.chordSets.load(songId, _currentChordSet).catch(() => null); if (_tok !== _loadToken) return; const list = csRes?.chords || (Array.isArray(csRes) ? csRes : []); const cMap = {}; list.forEach(c => { if (c?.chord) cMap[`${c.measureIdx}_${c.noteIdx}`] = c.chord; }); if (Object.keys(cMap).length > 0 && window.ChordCanvasXML?.cloneAndInjectChords) renderXml = window.ChordCanvasXML.cloneAndInjectChords(xmlText, cMap); else if (_currentChordSet === 'HD' && setEl) setEl.textContent = 'Bộ: HD (TLH)'; } _currentXmlString = renderXml;
         await _osmd.load(renderXml); if (_tok !== _loadToken) return;
+        window.StageScoreTranspose?.prepare?.(_osmd, _scoreTranspose());
         _osmd.render();
         window.MusicalPosition?.attachContainer?.('stage-viewport', { containerId: 'stage-osmd-container', getOsmd: () => _osmd });
-        _renderTeleprompterLyrics(_currentSongTitle, xmlText);
+        window.StageHud?.renderTeleprompterLyrics?.(_currentSongTitle, xmlText);
         if (window.StageCatalog) {
           await window.StageCatalog.loadSections(songId, (m) => {
             _currentMeasure = m;
@@ -527,6 +494,7 @@ const LiveBandApp = (() => {
 
   function setRole(newRole, notify = true) {
     _role = newRole;
+    _reapplyScoreTranspose();
     window.StageHud?.setRole(newRole, _mode, _currentSongId, _transport, window.StageRehearsal?.showCueBanner, (r) => {
       if (r === 'bass') window.StageHud?.updateBassHud(_currentBaseKey, _currentTranspose);
       if (r === 'piano') window.StageHud?.updatePianoHud(_currentBaseKey, _currentTranspose);
@@ -557,6 +525,7 @@ const LiveBandApp = (() => {
       onAdjustTranspose: (d) => hostAdjustTranspose(d),
       onAdjustBpm: (d) => hostAdjustBpm(d),
       onTriggerCountIn: hostTriggerCountIn,
+      onToggleAutoTurn: hostToggleAutoTurn,
       onPrevSong: hostPrevSong,
       onNextSong: hostNextSong,
       onSelectSong: (sId) => hostSelectSong(sId),
@@ -575,7 +544,7 @@ const LiveBandApp = (() => {
   /* ── Public API ───────────────────────────────────────────── */
   return {
     init, createHostRoom, joinRoom, leaveRoom, setRole,
-    hostSelectSong, hostAdjustTranspose, hostAdjustBpm,
+    hostSelectSong, hostAdjustTranspose, hostAdjustBpm, hostToggleAutoTurn,
     hostTriggerCountIn, hostSendCue, hostPrevSong, hostNextSong, snapToHost,
     showRoomModal: () => window.StageRoomManager.showRoomModal(_mode, _roomCode),
     hideRoomModal: window.StageRoomManager.hideRoomModal,

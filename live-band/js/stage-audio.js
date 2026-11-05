@@ -147,7 +147,7 @@
     if (!window.AmbientPadEngine) return false;
     let effectiveKey = baseKey;
     if (window.TransposeEngine && transpose !== 0) {
-      effectiveKey = window.TransposeEngine.transposeKey(baseKey, transpose) || baseKey;
+      effectiveKey = window.TransposeEngine.calcKey(baseKey, transpose) || baseKey;
     }
 
     const isNowPlaying = window.AmbientPadEngine.toggle(effectiveKey);

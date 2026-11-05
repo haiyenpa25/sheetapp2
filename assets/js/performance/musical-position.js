@@ -33,12 +33,24 @@ const MusicalPosition = (() => {
   function attachContainer(viewportId, opts = {}) {
     const wrapper = document.getElementById(viewportId);
     if (!wrapper) { _custom = null; return; }
+    _custom?.observer?.disconnect();
     _custom = {
       wrapper,
       container: (opts.containerId && document.getElementById(opts.containerId)) || wrapper,
       getOsmd: opts.getOsmd,
+      observer: null,
     };
     computeMeasurePositions();
+    // Lúc vẽ lần đầu khung bản nhạc có thể còn ẩn (kích thước 0) nên vị trí ô nhịp sai: tính lại mỗi khi khung đổi kích thước.
+    if (typeof ResizeObserver !== 'undefined') {
+      let queued = false;
+      _custom.observer = new ResizeObserver(() => {
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(() => { queued = false; computeMeasurePositions(); });
+      });
+      _custom.observer.observe(_custom.container);
+    }
   }
 
   function computeMeasurePositions() {

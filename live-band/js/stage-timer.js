@@ -103,6 +103,17 @@
         setTimeout(() => ledBar.classList.remove('flash'), 85);
       }
 
+      // Đèn nhịp trong giao diện: dải "GIỮ NHỊP" (.pulse-led) và HUD Trống (.beat-led).
+      document.querySelectorAll(`.pulse-led[data-beat="${_currentBeat}"]`).forEach((led) => {
+        const cls = isBeatOne ? 'flash-beat-1' : 'flash-beat-sub';
+        led.classList.add(cls);
+        setTimeout(() => led.classList.remove(cls), 110);
+      });
+      document.querySelectorAll(`.beat-led[data-beat="${_currentBeat}"]`).forEach((led) => {
+        led.classList.add('flash');
+        setTimeout(() => led.classList.remove('flash'), 110);
+      });
+
       if (typeof onPlayMetronomeClick === 'function') {
         onPlayMetronomeClick(isBeatOne);
       }

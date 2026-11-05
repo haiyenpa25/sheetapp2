@@ -856,6 +856,10 @@ body.stage-dark {
 .cue-ack-status { margin-left: .5rem; font-weight: 700; color: var(--stage-amber); }
 .cue-ack-status.all-acked { color: #34d399; }
 
+/* Lật trang tự động: nút sáng khi đang chạy, vùng chạm >= 40px */
+.autoturn-btn { min-height: 40px; touch-action: manipulation; }
+.autoturn-btn.active { background: rgba(16, 185, 129, 0.25); border-color: #10b981; color: #6ee7b7; }
+
 @keyframes cueDrop {
   from { opacity: 0; transform: translate(-50%, -30px); }
   to { opacity: 1; transform: translate(-50%, 0); }

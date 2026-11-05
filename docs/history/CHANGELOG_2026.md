@@ -6,6 +6,24 @@
 
 ---
 
+## 2026-10-30 — Một combobox danh mục, hệ cỡ/icon đồng nhất, thêm bài có sửa tên (Modern + Classic + Quản lý)
+
+- Danh mục: dải chip nhiều hàng (`#category-flat-list`, `.cat-flat-btn`) bị **gỡ khỏi cả hai giao diện**, thay bằng MỘT combobox `#category-filter` (nhãn "Tên · số bài", thêm "· nội bộ" cho danh mục không công khai, tự ẩn khi chỉ có 1 danh mục). Nhãn "Lọc" (Modern) chỉ đếm dịp lễ/chủ đề; chọn danh mục thì `#song-list.cat-filtered` ẩn nhãn danh mục lặp trên từng dòng. Nhảy nhanh (Modern) một dòng cuộn ngang. Classic: danh mục một hàng riêng, bộ lọc tông cạnh ô tìm kiếm.
+- Cỡ/icon: Modern đưa ô tìm, combobox, sắp xếp, nút Lọc vào token `--lp-h/--lp-ctl-font` (`library-polish.css`; trước đó mỗi nơi tự đặt 24–30px). Classic có `old/assets/css/ui-scale.css` (token `--o-h/--o-fs`: chuột 30px/12px, cảm ứng 40px/14px; chữ trước đây 8,75–10px). Icon-nút chuyển từ emoji/glyph (📌 ★ ☆ 🔓 🛠️ 📂 🔊 🔤…) sang sprite `assets/icons/lucide.svg` (thêm `star-fill`, `pin`), cỡ theo `em`; Classic nhúng sprite trong `old/index.php`. Thanh đáy điện thoại ẩn khi mở sidebar (luật ẩn bị `control-deck.css` thắng trước đây). Đo tự động 5 cỡ màn hình × 2 giao diện: chữ <11px 40→0, nút <32px (điện thoại) 52→6, emoji-icon 11→2.
+- Quản lý: thêm bài qua `manager/js/manager-upload.js` — danh sách chuẩn bị, mỗi file một dòng với **tên bài sửa được** (gợi ý từ `<work-title>`, bỏ "Untitled score"; nếu không có thì từ tên file, tách số đầu "012 Tên…"), số bài, tác giả; file sai định dạng bị đánh dấu; tên trống bị chặn; tải tuần tự, dòng lỗi giữ lại để tải lại. Nguyên nhân gốc bài "tai chinhe" (XML MuseScore để "Untitled score"). `manager-categories.js` chỉ còn ủy quyền (`openUpload`, `handleUploadSubmit`, `afterUpload`).
+- Lỗi giao diện Quản lý sửa kèm: trang tràn ngang 25px ở 390px khi đã đăng nhập (App Shell dùng chung; `app-shell.css`) làm chạm trượt nút; 5 thẻ KPI chiếm ~1000px trên điện thoại → lưới 2 cột; toast `pointer-events:auto` che nút "Tải lên"/"Lưu" → không chặn chạm, hiện ở đầu màn hình trên điện thoại; lớp toast `error` lệch với `mgr-toast-error`; `manager/index.php` dùng `?v=filemtime` thay `?v=2.x` cứng (CDN giữ 7 ngày nên JS sửa không đến người dùng).
+- Sinh lại `.gz` (`tools/generate_asset_gzip.php`; `layout.css.gz` đã lỗi thời từ trước) và manifest SW. Test cập nhật: `old_ui_flat_compact_regression.php` (khẳng định combobox, cấm dải chip). Kiểm chứng thêm bằng bản sao cô lập (DB + `storage/Thanh ca` riêng, đã xoá): sửa tên, tải 3 file, tên/số/tác giả lưu đúng, FTS tìm thấy.
+- **Chưa commit.** Working tree còn thay đổi của phiên trước (`LibrarySyncService`, `manage_song`, `storage/seed/*`, `CODE_MAP.md`…) — xem `git status`. Cần chủ dự án xem lại: nút "Đồng bộ GitHub" chạy `git add/commit/push origin main` từ yêu cầu web.
+
+## 2026-10-29 (b) — Danh mục riêng, thêm bài XML, chốt chặn quyền xem theo mã bài
+
+- Danh mục có quyền xem (`categories.visibility`: public/private/admin_only, migration 017 — **chạy `php tools/migrate.php` trên web**; trước đó mã vẫn chạy, coi mọi danh mục là công khai). Trang Quản lý → Quản Lý Thể Loại: nhãn quyền, đổi quyền đồng loạt (có xác nhận), nút "Thêm bài (XML)". Module mới `manager/js/manager-categories.js` (chuyển từ `manager-repertoire.js`).
+- Bài vào danh mục không công khai: ép riêng tư, mã `pv-…`, XML ở `storage/private/xml/` (`PrivateSongXmlService`, Apache chặn, Git bỏ qua), `xmlPath` là URL API `songs&action=xml&id=` kiểm quyền (404 cho người không được xem). `.gitignore` loại XML riêng và hợp âm/ghi chú `pv-*`.
+- Vá rò rỉ có sẵn: **không controller nào kiểm quyền xem bài theo mã** → thêm `api/core/SongAccessGuard.php` (hợp âm, ghi chú, xuất ChordPro, bản phối, tập luyện, phiên, đánh giá, chương trình); `ManagerRepertoireHelper` hết lộ danh mục riêng/đổi danh mục bỏ qua ép quyền; danh sách công khai, bộ nhớ đệm, chương trình cho viewer loại bài/danh mục không công khai; kiểm trùng tên danh mục tiếng Việt (SQLite `LOWER()` chỉ hạ ASCII).
+- Test: `tests/private_catalog_regression.php` (41 check), `e2e/private-catalog.spec.js` (Chromium + WebKit, bản sao cô lập), kiểm Apache 403 cho `storage/private/`. Bộ test strict: 242/244 (còn `library_tv2_gzip`, `liturgical_export_and_usage` lỗi sẵn). Hướng dẫn: `docs/PRIVATE_CATALOG.md`.
+
+
+
 ## 2026-10-29 — Tài khoản bannhac, chương trình chỉ cho người đăng nhập, HD mặc định, kiểm chồng lấn hợp âm
 
 - Tài khoản: `tools/create_band_user.php` (CLI, dry-run mặc định, mật khẩu lấy từ biến môi trường `SHEETAPP_USER_PASSWORD`, sao lưu trước khi ghi). Đã tạo `bannhac` (role `bannhac`, chord_code `BN`) trên CSDL local; CSDL web chạy cùng lệnh.

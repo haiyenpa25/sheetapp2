@@ -22,7 +22,7 @@
     if (select) select.value = newRole;
 
     const iconEl = document.getElementById('role-pill-icon');
-    const roleIcons = { leader: '👑', guitar: '🎸', bass: '🎸', piano: '🎹', vocal: '🎤', drummer: '🥁', viewer: '👀' };
+    const roleIcons = { leader: '👑', guitar: '🎸', bass: '🎸', piano: '🎹', vocal: '🎤', drummer: '🥁', viewer: '👀', trumpet: '🎺', altosax: '🎷', horn: '📯' };
     if (iconEl) iconEl.textContent = roleIcons[newRole] || '🎵';
 
     const isHost = currentMode === 'host' || newRole === 'leader';
@@ -85,7 +85,7 @@
   function updateBassHud(baseKey, transpose, currentChordText = null) {
     let effKey = baseKey;
     if (window.TransposeEngine && transpose !== 0) {
-      effKey = window.TransposeEngine.transposeKey(baseKey, transpose) || baseKey;
+      effKey = window.TransposeEngine.calcKey(baseKey, transpose) || baseKey;
     }
 
     const scaleRootsMap = {
@@ -147,7 +147,7 @@
   function updatePianoHud(baseKey, transpose) {
     let effKey = baseKey;
     if (window.TransposeEngine && transpose !== 0) {
-      effKey = window.TransposeEngine.transposeKey(baseKey, transpose) || baseKey;
+      effKey = window.TransposeEngine.calcKey(baseKey, transpose) || baseKey;
     }
 
     const voicingsMap = {
@@ -204,11 +204,15 @@
     document.getElementById('stage-role-select')?.addEventListener('change', (e) => h.onSetRole(e.target.value));
     document.getElementById('btn-snap-to-host')?.addEventListener('click', h.onSnapToHost);
 
-    document.getElementById('btn-host-trans-down')?.addEventListener('click', () => h.onAdjustTranspose(-1));
-    document.getElementById('btn-host-trans-up')?.addEventListener('click', () => h.onAdjustTranspose(1));
-    document.getElementById('btn-host-bpm-down')?.addEventListener('click', () => h.onAdjustBpm(-5));
-    document.getElementById('btn-host-bpm-up')?.addEventListener('click', () => h.onAdjustBpm(5));
-    document.getElementById('btn-host-countin')?.addEventListener('click', h.onTriggerCountIn);
+    // Id thật trong console.php; id cũ giữ lại để không vỡ nếu nơi khác còn dùng.
+    const bindAny = (ids, handler) => ids.forEach((id) => document.getElementById(id)?.addEventListener('click', handler));
+    bindAny(['btn-host-transpose-down', 'btn-host-trans-down'], () => h.onAdjustTranspose(-1));
+    bindAny(['btn-host-transpose-up', 'btn-host-trans-up'], () => h.onAdjustTranspose(1));
+    bindAny(['btn-host-bpm-dec', 'btn-host-bpm-down'], () => h.onAdjustBpm(-5));
+    bindAny(['btn-host-bpm-inc', 'btn-host-bpm-up'], () => h.onAdjustBpm(5));
+    bindAny(['btn-host-countin-trigger', 'btn-host-countin'], h.onTriggerCountIn);
+    bindAny(['btn-host-pad-toggle'], h.onTogglePad);
+    bindAny(['btn-host-autoturn'], h.onToggleAutoTurn);
     document.getElementById('btn-host-prev-song')?.addEventListener('click', h.onPrevSong);
     document.getElementById('btn-host-next-song')?.addEventListener('click', h.onNextSong);
 
@@ -270,6 +274,57 @@
     pill.querySelector('.wakelock-text').textContent = isActive ? 'Sáng' : 'Tắt';
   }
 
+  /** Nút "Quay về Ca Trưởng" khi người xem cuộn lệch khỏi vị trí Ca trưởng. */
+  function updateSnapButton(show, currentM = 0, hostM = 0) {
+    const btn = document.getElementById('btn-snap-to-host');
+    const label = document.getElementById('snap-label');
+    if (!btn) return;
+    if (show && label) label.textContent = `Quay về Ca Trưởng (Bạn: Ô ${currentM} • Ca Trưởng: Ô ${hostM})`;
+    btn.classList.toggle('hidden', !show);
+  }
+
+  function renderTeleprompterLyrics(songTitle, xmlString) {
+    const container = document.getElementById('stage-lyric-wrapper');
+    if (!container) return;
+    if (!xmlString) {
+      container.innerHTML = '<div class="text-muted text-center py-2">Chưa có lời bài hát</div>';
+      return;
+    }
+
+    let lyricsHtml = '';
+    try {
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
+      const parts = xmlDoc.querySelectorAll('measure');
+      const currentStanza = [];
+
+      parts.forEach((m) => {
+        const lyrics = m.querySelectorAll('lyric text');
+        if (lyrics.length > 0) {
+          const words = Array.from(lyrics).map(l => l.textContent.trim()).filter(Boolean);
+          if (words.length > 0) currentStanza.push(words.join(' '));
+        }
+      });
+
+      const fontSize = window.StageHud?.getVocalFontSize?.() || 1.45;
+      if (currentStanza.length > 0) {
+        lyricsHtml = `
+          <div class="teleprompter-section active">
+            <div class="teleprompter-title">LỜI BÀI HÁT — ${window.SafeHtml.escape(songTitle)}</div>
+            <div class="teleprompter-lines" style="font-size: ${fontSize}rem;">
+              ${currentStanza.map(line => `<div class="teleprompter-line">${window.SafeHtml.escape(line)}</div>`).join('')}
+            </div>
+          </div>
+        `;
+      }
+    } catch (e) {}
+
+    if (!lyricsHtml) {
+      lyricsHtml = `<div class="teleprompter-section active"><div class="teleprompter-lines">(Xem bản nhạc để theo dõi lời bài hát)</div></div>`;
+    }
+    container.innerHTML = lyricsHtml;
+  }
+
   window.StageHud = {
     setRole,
     applyViewMode,
@@ -278,6 +333,8 @@
     updateBassHud,
     updatePianoHud,
     bindStageUI,
+    renderTeleprompterLyrics,
+    updateSnapButton,
     initWakeLock,
     getVocalFontSize: () => _vocalFontSize,
     getVocalViewMode: () => _vocalViewMode

@@ -34,6 +34,7 @@
           <span id="host-bpm-val" class="host-bpm-val">80 BPM</span>
           <button id="btn-host-bpm-inc" class="btn-host-step">+5</button>
         </div>
+        <button id="btn-host-autoturn" type="button" class="btn-host-pill autoturn-btn" aria-pressed="false" title="Tự cuộn bản nhạc qua từng ô nhịp theo BPM (cả ban nhạc tự theo)">⏯ Tự lật trang</button>
         <button id="btn-host-countin-trigger" class="btn-host-countin-trigger" title="Đếm nhịp chuẩn bị 1-2-3-4 cho toàn ban nhạc">
           <span class="countin-fire-icon">🔥</span>
           <span>ĐẾM NHỊP VÀO</span>
