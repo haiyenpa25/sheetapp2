@@ -767,7 +767,8 @@ body.dark-mode .toast-container .toast { background: #22222b; color: var(--lp-in
 /* ─── 7. Menu Công Cụ (⋯): Popover laptop 320px, Bottom sheet mobile (R1-5) ── */
 #main-dropdown-menu {
   width: 320px; box-sizing: border-box; max-width: calc(100vw - 16px);
-  max-height: calc(100vh - 64px); overflow-y: auto; overflow-x: hidden;
+  /* Menu mở dưới 2 hàng thanh công cụ (~100px): giới hạn để đáy (Đổi giao diện/Đăng nhập) không bị cắt */
+  max-height: calc(100vh - 104px); max-height: calc(100dvh - 104px); overflow-y: auto; overflow-x: hidden;
   overscroll-behavior: contain; background: var(--lp-surface, #ffffff);
   color: var(--lp-text, #0f172a); border-radius: 12px;
   border: 1px solid var(--lp-border, #e2e8f0);
@@ -2582,3 +2583,7 @@ body.dark-mode #main-dropdown-menu .icon-btn-xs {
 /* Menu ⋯: phần tử .sr-only (absolute) không được tạo thanh cuộn ngang ảo */
 #main-dropdown-menu { overflow-x: hidden; }
 body #main-dropdown-menu .menu-audio-actions #btn-play-audio { height: 44px !important; min-height: 44px !important; box-sizing: border-box; }
+
+/* Nút đổi giao diện trên thanh công cụ: cạnh nút ⋯ */
+#more-options-group { display: inline-flex; align-items: center; gap: 4px; }
+#btn-toolbar-switch-ui { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; color: inherit; touch-action: manipulation; min-width: var(--ctl-h, 36px); min-height: var(--ctl-h, 36px); }

@@ -134,6 +134,7 @@ test.describe('R1-5 · Bảng Công Cụ Thống Nhất (Popover Laptop & Bottom
     const rowCount = await rows.count();
     expect(rowCount).toBeGreaterThan(10);
 
+    await page.waitForTimeout(600); // chờ hết hiệu ứng trượt của bottom sheet
     const minHeights = await rows.evaluateAll(elements => elements
       .filter(el => getComputedStyle(el).display !== 'none')
       .map(el => Math.round(el.getBoundingClientRect().height)));

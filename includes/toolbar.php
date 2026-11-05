@@ -190,6 +190,11 @@
 
     <!-- Nhóm 9: Menu Công Cụ & Cài Đặt (Phím ?) -->
     <div class="control-group more-options-group" id="more-options-group">
+      <?php $swHref = ($baseHref ?? '/') . 'old/'; ?>
+      <a id="btn-toolbar-switch-ui" class="icon-btn" href="<?= $swHref ?>" title="Đổi sang Giao diện Cũ" aria-label="Đổi giao diện"
+         onclick="if (typeof window.URLState?.interfaceUrl === 'function') { event.preventDefault(); window.location.href = URLState.interfaceUrl(true); }">
+        <?= icon('layout') ?>
+      </a>
       <button id="btn-more-options" class="icon-btn" title="Menu Công Cụ & Cài Đặt">
         <?= icon('more-horizontal') ?>
       </button>
