@@ -137,11 +137,11 @@
               <input type="hidden" id="omr-review-id">
               <div class="form-row">
                 <label class="form-label">Tên hiển thị</label>
-                <input id="omr-review-title" type="text" class="form-input" placeholder="Tên bài hát">
+                <input id="omr-review-title" type="text" class="form-input" placeholder="Tên bài hát" aria-label="Tên bài hát sau khi nhận dạng">
               </div>
               <div class="form-row mt-1">
                 <label class="form-label">Danh mục (Category)</label>
-                <select id="omr-review-category" class="form-input"></select>
+                <select id="omr-review-category" class="form-input" aria-label="Danh mục"></select>
               </div>
               <div style="display:flex; gap:.5rem; margin-top:1rem;">
                 <button id="btn-omr-publish" class="btn btn-primary flex-1">Đưa Vào Kho</button>
@@ -186,7 +186,7 @@
           <div style="display:flex; justify-content:space-between; margin-bottom:1rem; align-items:center; gap: 0.75rem; flex-wrap:wrap;">
              <h4 style="margin:0; white-space:nowrap;">Cơ Sở Bài Hát</h4>
              <div style="display:flex; gap:0.5rem; align-items:center; flex:1; justify-content:flex-end;">
-               <input type="text" id="admin-song-search" class="form-input" placeholder="Tìm tên bài hát..." style="max-width: 260px;">
+               <input type="text" id="admin-song-search" class="form-input" placeholder="Tìm tên bài hát..." style="max-width: 260px;" aria-label="Tìm bài hát để quản lý">
                <button id="btn-admin-quick-upload-xml" class="btn btn-sm btn-primary" title="Upload file MusicXML tạo bài mới">+ Upload Bài XML</button>
              </div>
           </div>
@@ -220,17 +220,17 @@
               
               <div>
                 <label class="form-label" style="display:flex; justify-content:space-between;">Size Hợp Âm <span id="lbl-chord-size" style="color:var(--accent); font-weight:bold;">3.0</span></label>
-                <input type="range" id="chord-size-slider" min="1.0" max="6.0" step="0.1" value="3.0" style="width:100%;">
+                <input type="range" id="chord-size-slider" min="1.0" max="6.0" step="0.1" value="3.0" style="width:100%;" aria-label="Cỡ chữ hợp âm">
               </div>
               
               <div>
                 <label class="form-label" style="display:flex; justify-content:space-between;">Chiều Cao Từ Khuông Lên <span id="lbl-chord-y" style="color:var(--accent); font-weight:bold;">1.5</span></label>
-                <input type="range" id="chord-y-slider" min="0.0" max="6.0" step="0.1" value="1.5" style="width:100%;">
+                <input type="range" id="chord-y-slider" min="0.0" max="6.0" step="0.1" value="1.5" style="width:100%;" aria-label="Vị trí dọc của hợp âm">
               </div>
 
               <div>
                 <label class="form-label">Màu Sắc Hợp Âm</label>
-                <input type="color" id="chord-color-picker" value="#dc2626" style="width: 100%; height: 40px; border: none; border-radius: var(--radius-sm); cursor: pointer;">
+                <input type="color" id="chord-color-picker" value="#dc2626" style="width: 100%; height: 40px; border: none; border-radius: var(--radius-sm); cursor: pointer;" aria-label="Màu hợp âm">
               </div>
 
               <div style="margin-top: auto;">
@@ -262,7 +262,7 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr 1.2fr auto; gap: 0.75rem; align-items: end;">
               <div>
                 <label class="form-label">Tên đăng nhập</label>
-                <input type="text" id="admin-new-user-name" class="form-input w-full" placeholder="VD: guitarnam">
+                <input type="text" id="admin-new-user-name" class="form-input w-full" placeholder="VD: guitarnam" aria-label="Tên đăng nhập tài khoản mới">
               </div>
               <div>
                 <label class="form-label">Mật khẩu</label>
@@ -270,7 +270,7 @@
               </div>
               <div>
                 <label class="form-label">Phân quyền (4 nhóm tài khoản)</label>
-                <select id="admin-new-user-role" class="form-input w-full">
+                <select id="admin-new-user-role" class="form-input w-full" aria-label="Vai trò tài khoản mới">
                   <option value="bannhac" selected>🎸 Ban Nhạc (Nhạc công / Hợp âm &amp; Setlist)</option>
                   <option value="banhat">🎤 Ban Hát (Ca viên / Tập bè SATB)</option>
                   <option value="viewer">👁️ Guest / Khách (Chỉ xem bài Public)</option>
