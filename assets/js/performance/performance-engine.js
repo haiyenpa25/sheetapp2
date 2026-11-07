@@ -20,7 +20,6 @@ const PerformanceEngine = (() => {
     MusicalPosition.computeMeasurePositions();
     _bindHostListeners();
     _bindGlobalEvents();
-    console.log('[PerformanceEngine] Protocol V2 Engine initialized');
   }
 
   function _bindHostListeners() {
@@ -198,7 +197,6 @@ const PerformanceEngine = (() => {
           countInBars: state.transport.countInBars || 1,
           startAtServer: startAt,
           onComplete: () => {
-            console.log('[PerformanceEngine] Follower count-in completed -> Entering playback');
           }
         });
       }

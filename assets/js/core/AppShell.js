@@ -171,7 +171,6 @@
 
     _initNotifications();
 
-    console.log('[AppShell] Initialized. Active Pillar:', pillar);
   }
 
   let _notifications = [];

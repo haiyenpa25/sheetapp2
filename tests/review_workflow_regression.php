@@ -47,9 +47,9 @@ function check(bool $cond, string $msg, array &$failures, int &$totalChecks): vo
     $totalChecks++;
     if (!$cond) {
         $failures[] = $msg;
-        echo "  ❌ FAIL: {$msg}\n";
+        echo "  [FAIL:B] {$msg}\n";
     } else {
-        echo "  ✅ PASS: {$msg}\n";
+        echo "  [PASS:B] {$msg}\n";
     }
 }
 

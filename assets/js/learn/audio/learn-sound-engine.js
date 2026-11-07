@@ -115,7 +115,6 @@ const LearnSoundEngine = (() => {
           baseUrl: (window.__APP_BASE__ || '') + '/assets/audio/piano/',
           onload: () => {
             _pianoSamplerLoaded = true;
-            console.log('[LearnSoundEngine] Acoustic Grand Piano samples loaded from local storage');
           },
           onerror: (err) => {
             console.warn('[LearnSoundEngine] Local sampler failed, fallback sang warm PolySynth', err);
@@ -234,7 +233,6 @@ const LearnSoundEngine = (() => {
       }).connect(shakerFilter);
 
       _initialized = true;
-      console.log('[LearnSoundEngine] Professional Audio Engine + Grand Piano + Reverb + Rhythm Drums ready');
     } catch (e) {
       console.warn('[LearnSoundEngine] Init failed (awaiting user gesture):', e);
     }
@@ -251,7 +249,6 @@ const LearnSoundEngine = (() => {
   function setHandPractice(mode) {
     if (mode === 'both' || mode === 'left' || mode === 'right') {
       _handPractice = mode;
-      console.log('[LearnSoundEngine] Hand practice set to:', mode);
     }
   }
 

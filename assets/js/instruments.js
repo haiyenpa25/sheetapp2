@@ -23,7 +23,6 @@ const InstrumentMixer = (() => {
       window.EventBus.on('osmd:rendered', updateBtnState);
       window.EventBus.on('song:loaded', updateBtnState);
     }
-    console.log('[Mixer] init OK');
   }
 
   function openMixer() {

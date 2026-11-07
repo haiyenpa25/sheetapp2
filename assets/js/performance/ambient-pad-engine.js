@@ -234,7 +234,6 @@ const AmbientPadEngine = (() => {
     _activeKey = key;
     _isPlaying = true;
 
-    console.log(`[AmbientPadEngine] Playing key: ${key} (Fade-in: ${fadeInDuration}s)`);
   }
 
   /**
@@ -248,7 +247,6 @@ const AmbientPadEngine = (() => {
     _isPlaying = false;
     _activeKey = null;
 
-    console.log(`[AmbientPadEngine] Stopped with ${fadeDuration}s fade-out`);
   }
 
   function toggle(key) {

@@ -18,7 +18,6 @@ const CueEngine = (() => {
   function init() {
     _createCueBannerDOM();
     _bindEvents();
-    console.log('[CueEngine] Initialized');
   }
 
   function _createCueBannerDOM() {

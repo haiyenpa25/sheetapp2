@@ -58,7 +58,8 @@ check($caughtWarning === null, "updateRoom với cue không có durationMs chạ
 
 // ── 2. Kiểm tra mã nguồn ping theo thời gian thực (15s) ──
 echo "\n-- 2. Kiểm tra mã nguồn ping thời gian thực 15s --\n";
-$serviceCode = file_get_contents(__DIR__ . '/../../api/services/LiveSyncService.php') ?: '';
+$serviceCode = (file_get_contents(__DIR__ . '/../../api/services/LiveSyncService.php') ?: '')
+    . (file_get_contents(__DIR__ . '/../../api/services/LiveSyncStreamHelper.php') ?: ''); // vòng lặp SSE nằm ở helper
 
 $has15sPing = str_contains($serviceCode, '15') && (str_contains($serviceCode, 'microtime') || str_contains($serviceCode, '$lastPingTime'));
 $noModulo5 = !str_contains($serviceCode, '% 5 === 0');

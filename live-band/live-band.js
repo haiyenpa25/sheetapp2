@@ -77,7 +77,6 @@ const LiveBandApp = (() => {
 
     const roleParam = new URLSearchParams(window.location.search).get('role');
     setRole(roleParam || _role, false);
-    console.log('[LiveBandApp] Initialized successfully. Client ID:', _clientId);
   }
 
   function _getOrCreateClientId() {

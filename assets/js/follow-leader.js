@@ -231,7 +231,6 @@ const FollowLeader = (() => {
   }
 
   async function join(roomCode) {
-    console.log('[FollowLeader] join called with:', roomCode);
     if (!roomCode) return;
     await _ensureLiveLoaded();
     _roomCode = roomCode.toUpperCase();
@@ -334,7 +333,6 @@ const FollowLeader = (() => {
     const roomTag = document.getElementById('fl-room-code-tag');
     const dot = document.getElementById('fl-pulse-dot');
 
-    console.log('[FollowLeader] _updateBannerUI banner exists:', !!banner, 'isFollowing:', _isFollowing);
     if (banner) {
       banner.classList.toggle('hidden', !_isFollowing);
       banner.classList.toggle('is-paused', _isPaused);

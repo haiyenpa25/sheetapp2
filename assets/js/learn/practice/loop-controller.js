@@ -185,7 +185,6 @@ const LoopController = (() => {
       // Khi chạm đến ô nhịp cuối của vòng lặp và quay lại
       if (measure === _startMeasure && _lastCompletedMeasure === _endMeasure) {
         _loopsCompleted++;
-        console.log(`[LoopController] Loop completed: ${_loopsCompleted}/${_loopsTargetForAdvance}`);
 
         if (_loopsCompleted >= _loopsTargetForAdvance) {
           _loopsCompleted = 0;
@@ -197,7 +196,6 @@ const LoopController = (() => {
             MusicTransport.setBpm(nextBpm);
             const bpmEl = document.getElementById('learn-bpm-value');
             if (bpmEl) bpmEl.textContent = nextBpm;
-            console.log('[LoopController] Auto-advanced BPM to:', nextBpm);
           }
         }
       }

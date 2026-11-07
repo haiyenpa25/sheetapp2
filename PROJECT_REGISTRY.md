@@ -123,6 +123,8 @@ SheetApp/
 │   │   ├── ManagerService.php          # Facade (< 600 dòng): Quản lý kho, cộng tác hợp âm & bản phối
 │   │   ├── ManagerUserHelper.php       # Helper: Phân quyền & tài khoản thành viên
 │   │   ├── ManagerRepertoireHelper.php # Helper: Kho bài hát, thể loại & tìm kiếm nhanh
+│   │   ├── ManagerVersionHelper.php    # Helper: Phiên bản MusicXML Fork (danh sách, xóa, ghim)
+│   │   ├── LiveSyncStreamHelper.php    # Helper: vòng lặp SSE của Live Sync (replay, state, ping)
 │   │   ├── ReviewService.php           # Phê duyệt hợp âm & visual diff
 │   │   ├── PracticeAssignmentService.php # Giao bài & tập bè ca đoàn
 │   │   ├── NotificationService.php     # In-app notifications
@@ -449,6 +451,14 @@ Ghi chú nằm trong `storage/data/annotations/*.json`; settings/notes theo user
 
 > Chỉ giữ 5 mục mới nhất. Nhật ký đầy đủ: `docs/history/CHANGELOG_2026.md`. Khi thêm mục mới, đưa mục cũ nhất ở đây sang file đó.
 
+## 2026-11-08 — Dọn chất lượng mã + độ tin cậy test
+
+- Tách file PHP vượt 600 dòng: `ManagerService` (634→512) giao 3 hàm phiên bản MusicXML cho `ManagerVersionHelper`; `LiveSyncService` (640→525) giao vòng lặp SSE cho `LiveSyncStreamHelper` (giữ `session_write_close`, `set_time_limit(40)` và đọc phòng ở service). Hành vi không đổi; test `live_sync_last_event_id` đọc cả hai file khi kiểm mã ping 15s.
+- Xóa 21 dòng `console.log` khởi tạo/gỡ lỗi ở 13 file JS (không đụng vendor). Các `fetch()` ngoài `ApiService` đều đã có chú thích `INTENTIONAL EXCEPTION` (tải XML tĩnh, dự phòng đăng xuất/practice) nên giữ nguyên. Cảnh báo "AudioContext was not allowed to start" ở /learn do chính `Tone.js` tạo khi nạp, không phải mã dự án.
+- Test: bật `extension=zip` (php.ini XAMPP) để ERR-11 chạy thật; `library_tv2_gzip_regression` tự dùng bản sao cô lập `<thư-mục>-e2e` khi thiếu `SHEETAPP_TEST_URL` (không đặt toàn cục vì suite HTTP Live Sync cần cùng kho dữ liệu); gắn nhãn hành vi cho `review_workflow` và `auth_matrix` (+89 check). Strict: 260 suite, 4.715 check, 0 lỗi, 0 skip.
+- Lưu ý: robocopy `/MIR` vào bản sao e2e phải thêm `/XF .sheetapp-e2e-isolated.json`, nếu không file đánh dấu bị xóa và Playwright từ chối chạy; chạy Playwright từ trong thư mục bản sao.
+- Kiểm lại đa Hội Thánh: `tools/verify_multi_church.php` ổn (2 HT, 0 chương trình mồ côi, 0 tài khoản chưa thuộc HT); 7 suite PHP và 16 e2e (Chromium + WebKit) đạt.
+
 ## 2026-11-07 (b) — Toàn màn hình không đổi sáng/tối + rà lỗi linh tinh (giao diện mới)
 
 - Bấm **Toàn màn hình/Biểu diễn** trước đây tự ép `dark-mode` (ticket L1-5) và ghi cứng nền `#0c0d14`; chủ dự án coi là lỗi. Nay `ModeManager.setMode` không đụng `dark-mode` (người dùng đang sáng thì vẫn sáng, đang tối thì vẫn tối, thoát ra không đổi); nền `sheet-only-mode` dùng `var(--bg-base)` (`layout.css`, `library-polish.css`); nút Thoát có luật tương phản riêng cho giao diện sáng (`body.sheet-only-mode:not(.dark-mode) #btn-gig-exit`). Đảo khẳng định cũ ở `tests/library_l15_gig_mode_regression.php` và `e2e/library-l1-gig-mode.spec.js`. Kiểm bằng Chromium thật (máy tính + giả lập iPhone 390px).
@@ -481,12 +491,3 @@ Ghi chú nằm trong `storage/data/annotations/*.json`; settings/notes theo user
 - **Band nhạc (`/live-band/`, nhãn trụ cột đổi từ "Biểu Diễn"):** sửa lỗi nặng — danh sách bài luôn rỗng (đọc `res.data` trong khi `songs.list()` trả mảng); mọi lệnh cuộn theo ô nhịp im lặng (`MusicalPosition` chỉ biết container app chính → thêm `attachContainer` + `ResizeObserver` tính lại vị trí); cue không bao giờ hiện ở máy nhạc công (so `expiresAt` giây với `Date.now()` ms); `TransposeEngine.transposeKey` không tồn tại → `calcKey`; nút Tông ±1, BPM ±5, Đếm nhịp, Pad của Ca trưởng lệch id nên không gắn được; đèn nhịp không nháy.
 - **Tính năng mới:** lệnh sân khấu có xác nhận "✓ Đã nhận" (`live_sync&action=ack|acks`, `LiveSyncService::ackCue/cueAcks`, `stage-cue-ack.js`; Ca trưởng thấy "Đã nhận X/Y"); dịch giọng THẬT cho bản nhạc (`stage-score-transpose.js`, trước đây chỉ đổi nhãn) kèm vai trò nhạc cụ chuyển giọng Trumpet/Clarinet Bb +2, Sax Alto Eb +9, Horn F +7 (chỉ trên máy người đó); lật trang tự động theo nhịp (`stage-autoturn.js`, nút "⏯ Tự lật trang", hỗ trợ 6/8 và vòng lặp A-B). Test: `tests/live_sync_cue_ack_regression.php` (15), `e2e/live-band-{scroll,cue-ack,instrument-transpose,autoturn}.spec.js`.
 - **Chưa làm:** con trỏ bản nhạc theo âm thanh (ScoreTimeline), âm thanh mẫu thật (cần duyệt bản quyền mẫu), rút 12 kiểu đệm còn 3, offline cho Band, khóa phòng Live theo Hội Thánh, lật trang theo nốt nghe được (tầng micro).
-
-## 2026-10-31 (b) — Giữ đăng nhập trên thiết bị + lưu tài khoản (Modern + Classic), bộ HD mặc định cho bài trong chương trình
-
-- Đăng nhập: form có 2 ô — **Lưu tài khoản** (chỉ lưu TÊN trong `localStorage`, không bao giờ lưu mật khẩu) và **Giữ đăng nhập trên thiết bị này (30 ngày)**, mặc định TẮT (máy dùng chung). Máy chủ: `api/core/RememberLogin.php` (token `selector:validator`, CSDL chỉ lưu SHA-256, bảng `auth_remember_tokens` tự tạo), cookie `sheet_remember` HttpOnly/SameSite=Lax/Secure khi HTTPS. `Session::start()` dựng lại phiên từ cookie; mỗi lần dùng validator được xoay; dùng lại cookie cũ → hủy token; đăng xuất, đổi mật khẩu (tự đổi hoặc Admin đặt lại), khóa tài khoản đều vô hiệu token. Test `tests/remember_login_regression.php` (19 check) + kiểm HTTP thật trên bản sao cô lập (đăng nhập nhớ → mất PHPSESSID vẫn vào được; không tích → không có cookie; đăng xuất → cookie cũ vô hiệu).
-- Rà `Error.md` (đã sửa): ERR-01 request song song mang cookie cũ không còn tự hủy token (ân hạn 20 giây, dùng lại quá hạn thì hủy mọi token của user); ERR-02 Quản lý (sửa hồ sơ có mật khẩu/đặt lại mật khẩu/xóa/khóa) hủy token giữ đăng nhập; ERR-03 nhãn/quyền 5 vai trò ở `/manager/` và `/old/` khớp `AuthPolicy`; ERR-06 sửa danh mục giữ `display_order`; ERR-12 modal Quản trị `/old/` đọc đúng danh mục. Nút **Đăng xuất khỏi mọi thiết bị** ở cả hai giao diện. Chưa làm: ERR-04, 07–11, 13–15.
-- Xử lý nốt `Error.md`: ERR-04 đồng bộ GitHub có `flock` (lần thứ hai nhận 409) + `timeout 120` + `GIT_TERMINAL_PROMPT=0`; ERR-07 đổi tên danh mục đã có bài giữ nguyên slug; ERR-08/09 `api/services/SongXmlRelocator.php` đưa XML về đúng chỗ khi đổi danh mục/quyền (công khai → `storage/Thanh ca/<slug>/`, nội bộ → `storage/private/xml`; bài `pv-` chuyển công khai giữ id nên chưa vào seed GitHub); ERR-10 `tools/update_library.php --apply --sync [--prune]` cập nhật tên/đường dẫn/tông/HD và dọn bài đã xóa; ERR-11 `.mxl` giải nén thành `.xml` khi nhập + trình tải chặn HTML/ZIP trước OSMD; ERR-13 importer Classic; ERR-15 lưu HD tự cập nhật hash trong `library.manifest.json`. ERR-14 giữ nguyên có chủ đích (tên nốt theo giọng ≠ tên hợp âm theo quy ước Bb/Ab/Eb). `tools/normalize_setlist_profiles.php` đưa dòng chương trình `default`/trống về HD (đã áp dụng 6 dòng, có sao lưu). Test `tests/error_md_fixes_regression.php`.
-- Chương trình: bài thêm mới luôn lưu `chord_profile = HD` (không lấy bộ cá nhân đang xem); phát bài dùng HD khi dòng chưa có bộ; máy chủ chuẩn hoá rỗng → HD. Dòng cũ giữ nguyên.
-- Classic: sàn chữ 11px cho nhãn nhỏ (`old/assets/css/ui-scale.css`).
-

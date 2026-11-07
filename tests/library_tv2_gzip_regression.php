@@ -29,6 +29,11 @@ foreach ($files as $file) {
     gzipCheck(strlen($compressed) < strlen($source) / 2, "sidecar cuts transport by more than half: {$file}");
 }
 $base = getenv('SHEETAPP_TEST_URL');
+// Không có URL → tự dùng bản sao cô lập "<thư-mục>-e2e" (đã có file đánh dấu); suite này đo header của máy chủ thật
+$isolatedCopy = dirname(__DIR__) . '-e2e';
+if (!$base && is_file($isolatedCopy . '/.sheetapp-e2e-isolated.json')) {
+    $base = 'http://localhost/' . basename($isolatedCopy);
+}
 if (!$base) { echo "[SKIP] HTTP requires explicit isolated SHEETAPP_TEST_URL\nSUITE_COMPLETE total={$checks}\n"; exit; }
 foreach ($files as $file) {
     $source = file_get_contents($root . '/' . $file);

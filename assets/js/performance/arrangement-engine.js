@@ -26,7 +26,6 @@ const ArrangementEngine = (() => {
     if (curSong?.id) {
       loadForSong(curSong.id);
     }
-    console.log('[ArrangementEngine] Initialized');
   }
   function _bindEvents() {
     if (typeof EventBus === 'undefined') return;

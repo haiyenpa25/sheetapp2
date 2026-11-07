@@ -101,7 +101,6 @@ const PracticeTracker = (() => {
 
       if (data?.session?.session_id) {
         _activeSessionId = data.session.session_id;
-        console.log('[PracticeTracker] Started practice session #', _activeSessionId);
       }
     } catch (e) {
       console.warn('[PracticeTracker] Start session offline fallback:', e);
@@ -248,7 +247,6 @@ const PracticeTracker = (() => {
         });
       }
 
-      console.log(`[PracticeTracker] Finished session #${sessionId}: ${duration}s, max BPM ${maxBpm}, acc ${accuracyTotal}% (${notesCorrect}/${notesTotal} notes)`);
     } catch (e) {
       console.warn('[PracticeTracker] Save session failed:', e);
     }

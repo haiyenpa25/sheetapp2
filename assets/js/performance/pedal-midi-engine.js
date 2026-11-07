@@ -37,7 +37,6 @@ const PedalMidiEngine = (() => {
     _loadSavedKeyMap();
     _bindKeyboardListener();
     _initWebMidi();
-    console.log('[PedalMidiEngine] Initialized with keyboard & Web MIDI support.');
   }
 
   function _loadSavedKeyMap() {
@@ -89,7 +88,6 @@ const PedalMidiEngine = (() => {
     const inputs = _midiAccess.inputs.values();
     for (const input of inputs) {
       input.onmidimessage = _handleMidiMessage;
-      console.log(`[PedalMidiEngine] Connected MIDI device: ${input.name}`);
     }
   }
 

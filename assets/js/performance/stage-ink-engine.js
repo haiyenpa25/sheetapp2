@@ -34,7 +34,6 @@ const StageInkEngine = (() => {
 
     _bindResizeObserver();
     _bindPointerEvents();
-    console.log('[StageInkEngine] Initialized with Apple Pencil & Vector Ink support.');
   }
 
   function _bindResizeObserver() {
