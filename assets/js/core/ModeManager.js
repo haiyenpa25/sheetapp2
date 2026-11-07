@@ -16,7 +16,6 @@ const ModeManager = (() => {
   };
 
   let _currentMode = MODES.VIEW;
-  let _wasDarkModeBeforeGig = false;
   let _hudFadeTimeout = null;
   const HUD_FADE_DELAY = 3000; // L1-5: HUD tự mờ sau 3 giây
 
@@ -168,9 +167,7 @@ const ModeManager = (() => {
     const isPerformance = (mode === MODES.PERFORMANCE);
     body.classList.toggle('sheet-only-mode', isPerformance);
     if (isPerformance) {
-      // Mặc định nền tối khi biểu diễn (L1-5)
-      _wasDarkModeBeforeGig = body.classList.contains('dark-mode');
-      body.classList.add('dark-mode');
+      // Toàn màn hình KHÔNG đổi giao diện sáng/tối (chủ dự án chốt 2026-11-07; trước đây ép dark-mode theo L1-5).
       _startHudTimer();
 
       _requestFullscreen();
@@ -187,10 +184,6 @@ const ModeManager = (() => {
       }
     } else if (prevMode === MODES.PERFORMANCE) {
       _clearHudTimer();
-      // Khôi phục trạng thái ban đầu của người dùng nếu trước đó không bật dark-mode
-      if (!_wasDarkModeBeforeGig) {
-        body.classList.remove('dark-mode');
-      }
       _exitFullscreen();
       _releaseWakeLock();
     }

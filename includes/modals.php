@@ -13,7 +13,7 @@
         <span id="session-date" class="tag"></span>
         <span id="session-tone" class="tag tag-purple"></span>
       </div>
-      <textarea id="session-note" placeholder="Ghi chú cho buổi hôm nay..." rows="3"></textarea>
+      <textarea id="session-note" placeholder="Ghi chú cho buổi hôm nay..." rows="3" aria-label="Ghi chú cho buổi hôm nay"></textarea>
       <button id="btn-save-session" class="btn btn-primary btn-sm"><?= icon('save', 'icon-xs') ?> Lưu Phiên</button>
     </div>
     <div class="session-history">
@@ -47,7 +47,7 @@
           <h4 class="m-0 text-accent font-semibold d-flex items-center gap-1"><?= icon('mic', 'icon-sm') ?> Ca Trưởng / Trưởng Nhóm (Host)</h4>
           <p class="text-xs text-muted mb-3">Mở phòng phát sóng. Khi bạn chọn bài, dịch giọng hay cuộn nhạc, cả ban nhạc sẽ chạy theo.</p>
           <div class="d-flex gap-2">
-            <input type="text" id="host-room-code-input" class="form-input flex-1 font-bold text-uppercase" placeholder="Mã phòng (VD: BAND-2026)">
+            <input type="text" id="host-room-code-input" class="form-input flex-1 font-bold text-uppercase" placeholder="Mã phòng (VD: BAND-2026)" aria-label="Mã phòng để tạo">
             <button id="btn-start-host-room" class="btn btn-primary btn-sm"><?= icon('radio', 'icon-xs') ?> Mở Phòng</button>
           </div>
         </div>
@@ -57,7 +57,7 @@
           <h4 class="m-0 text-success font-semibold d-flex items-center gap-1"><?= icon('music', 'icon-sm') ?> Thành Viên Ban Nhạc (Join)</h4>
           <p class="text-xs text-muted mb-3">Nhập mã phòng từ Ca Trưởng hoặc quét mã QR để đồng bộ màn hình.</p>
           <div class="d-flex gap-2">
-            <input type="text" id="join-room-code-input" class="form-input flex-1 font-bold text-uppercase" placeholder="Nhập Mã Phòng">
+            <input type="text" id="join-room-code-input" class="form-input flex-1 font-bold text-uppercase" placeholder="Nhập Mã Phòng" aria-label="Mã phòng để vào">
             <button id="btn-join-live-room" class="btn btn-sm btn-success-solid"><?= icon('share-2', 'icon-xs') ?> Tham Gia</button>
           </div>
         </div>
@@ -81,7 +81,7 @@
         <div class="w-full">
           <label class="text-xs text-muted d-block text-left mb-1 font-semibold">Link tham gia 1-chạm:</label>
           <div class="d-flex gap-2">
-            <input type="text" id="live-room-link-display" class="form-input" readonly class="form-input flex-1 text-sm bg-overlay">
+            <input type="text" id="live-room-link-display" class="form-input" readonly class="form-input flex-1 text-sm bg-overlay" aria-label="Liên kết phòng">
             <button id="btn-copy-live-link" class="btn btn-ghost btn-sm" title="Sao chép link"><?= icon('copy', 'icon-xs') ?> Copy</button>
           </div>
         </div>
@@ -89,7 +89,7 @@
         <!-- ROLE PREFERENCE -->
         <div class="card-surface p-2 mb-2 text-left">
           <label class="text-sm font-semibold d-block mb-1">Vai Trò Hiển Thị Của Bạn:</label>
-          <select id="live-role-select" class="form-select w-full">
+          <select id="live-role-select" class="form-select w-full" aria-label="Vai trò trong phòng">
             <option value="leader">Trưởng Ban / Ca Trưởng (Host)</option>
             <option value="guitar">Guitar (Hiện Hợp Âm & Capo)</option>
             <option value="piano">Piano / Organ (Bản Nhạc 2 Tay)</option>
@@ -178,11 +178,11 @@
         <div style="display: flex; flex-direction: column; gap: 7px;">
           <div>
             <label class="form-label" class="text-xs text-muted font-semibold d-block mb-1">Tài khoản</label>
-            <input id="auth-username-input" type="text" class="form-input" placeholder="Tên đăng nhập (VD: hoaidinh, admin...)" autocomplete="username" class="p-btn-sm">
+            <input id="auth-username-input" type="text" class="form-input" placeholder="Tên đăng nhập (VD: hoaidinh, admin...)" autocomplete="username" class="p-btn-sm" aria-label="Tên đăng nhập">
           </div>
           <div>
             <label class="form-label" class="text-xs text-muted font-semibold d-block mb-1">Mật khẩu</label>
-            <input id="auth-password-input" type="password" class="form-input" placeholder="Mật khẩu" autocomplete="current-password" class="p-btn-sm">
+            <input id="auth-password-input" type="password" class="form-input" placeholder="Mật khẩu" autocomplete="current-password" class="p-btn-sm" aria-label="Mật khẩu">
           </div>
           <div class="auth-remember" style="display:flex;flex-direction:column;gap:4px;">
             <label style="display:flex;align-items:center;gap:8px;min-height:36px;font-size:.78rem;line-height:1.3;cursor:pointer;touch-action:manipulation;"><input type="checkbox" id="auth-save-username" style="width:18px;height:18px;flex:none;"> <span>Lưu tài khoản</span></label>
@@ -234,9 +234,9 @@
           <strong style="color:var(--danger,#ef4444);"><?= icon('alert-triangle', 'icon-xs') ?> Cần đổi mật khẩu:</strong> Vui lòng đặt mật khẩu mới (tối thiểu 10 ký tự).
         </div>
         <form id="form-force-change-password" style="display:flex; flex-direction:column; gap:6px;">
-          <input id="force-current-password" type="password" class="form-input" placeholder="Mật khẩu vừa đăng nhập" required class="p-btn-sm">
-          <input id="force-new-password" type="password" class="form-input" placeholder="Mật khẩu mới (tối thiểu 10 ký tự)" minlength="10" required class="p-btn-sm">
-          <input id="force-confirm-password" type="password" class="form-input" placeholder="Xác nhận lại mật khẩu mới" minlength="10" required class="p-btn-sm">
+          <input id="force-current-password" type="password" class="form-input" placeholder="Mật khẩu vừa đăng nhập" required class="p-btn-sm" aria-label="Mật khẩu hiện tại" autocomplete="current-password">
+          <input id="force-new-password" type="password" class="form-input" placeholder="Mật khẩu mới (tối thiểu 10 ký tự)" minlength="10" required class="p-btn-sm" aria-label="Mật khẩu mới" autocomplete="new-password">
+          <input id="force-confirm-password" type="password" class="form-input" placeholder="Xác nhận lại mật khẩu mới" minlength="10" required class="p-btn-sm" aria-label="Xác nhận mật khẩu mới" autocomplete="new-password">
           <p id="force-password-error" class="text-sm text-danger hidden" style="margin:0; font-size:0.74rem;"></p>
           <button type="submit" id="btn-force-submit" class="btn btn-primary w-full" style="padding:7px; font-size:0.84rem; font-weight:700;"><?= icon('check', 'icon-xs') ?> Cập Nhật Mật Khẩu</button>
           <button type="button" id="btn-force-logout" class="btn btn-ghost w-full" style="padding:4px; font-size:0.76rem; color:var(--text-muted);">Đăng xuất</button>
@@ -276,21 +276,21 @@
         <form id="form-create-setlist" onsubmit="return false;">
           <div style="margin-bottom: 0.75rem;">
             <label class="form-label-bold">Tên Chương Trình / Setlist <span style="color:#ef4444;">*</span></label>
-            <input type="text" id="create-setlist-title-input" class="form-input text-xs w-full box-border" placeholder="VD: Thờ phượng Chúa Nhật 20/4, Lễ Tiệc Thánh, Ban Hát..." required autocomplete="off">
+            <input type="text" id="create-setlist-title-input" class="form-input text-xs w-full box-border" placeholder="VD: Thờ phượng Chúa Nhật 20/4, Lễ Tiệc Thánh, Ban Hát..." required autocomplete="off" aria-label="Tên chương trình">
           </div>
           <div style="display:flex; gap:0.5rem; margin-bottom: 0.75rem;">
             <div class="flex-1">
               <label class="form-label-bold">Ngày diễn ra</label>
-              <input type="date" id="create-setlist-date-input" class="form-input text-xs w-full box-border">
+              <input type="date" id="create-setlist-date-input" class="form-input text-xs w-full box-border" aria-label="Ngày">
             </div>
             <div style="width: 105px;">
               <label class="form-label-bold">Giờ bắt đầu</label>
-              <input type="time" id="create-setlist-time-input" class="form-input text-xs w-full box-border" value="08:30">
+              <input type="time" id="create-setlist-time-input" class="form-input text-xs w-full box-border" value="08:30" aria-label="Giờ">
             </div>
           </div>
           <div style="margin-bottom: 0.85rem;">
             <label class="form-label-bold">Chủ đề thờ phượng (Tùy chọn)</label>
-            <input type="text" id="create-setlist-theme-input" class="form-input text-xs w-full box-border" placeholder="VD: Tình Yêu Cứu Rỗi, Phục Sinh, Tạ Ơn...">
+            <input type="text" id="create-setlist-theme-input" class="form-input text-xs w-full box-border" placeholder="VD: Tình Yêu Cứu Rỗi, Phục Sinh, Tạ Ơn..." aria-label="Chủ đề">
           </div>
           <div style="display:flex;gap:0.5rem;">
             <button type="button" id="btn-cancel-create-setlist" class="btn btn-ghost flex-1">Hủy</button>
@@ -349,7 +349,7 @@
       <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.85rem;background:var(--bg-overlay);padding:6px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);">
         <label style="font-size:.82rem;color:var(--text-secondary);font-weight:500;">Tùy chỉnh số nửa cung:</label>
         <input id="transpose-pick-custom" type="number" min="-12" max="12" value="0"
-          class="form-input" style="width:75px;text-align:center;font-size:.95rem;font-weight:700;height:32px;">
+          class="form-input" style="width:75px;text-align:center;font-size:.95rem;font-weight:700;height:32px;" aria-label="Tông tập (số nửa cung)">
       </div>
 
       <!-- Chọn Tempo / BPM khi thêm bài vào Setlist -->
@@ -358,7 +358,7 @@
           <label style="font-size:.82rem;color:var(--text-secondary);font-weight:600;display:inline-flex;align-items:center;gap:4px;"><?= icon('clock', 'icon-xs') ?> Tốc độ (Tempo / BPM):</label>
           <div style="display:flex;align-items:center;gap:4px;">
             <button type="button" id="tp-bpm-dec" class="btn-tool-sm" title="Giảm 1 BPM">−</button>
-            <input id="transpose-pick-bpm" type="number" min="30" max="250" value="100" class="form-input" style="width:65px;text-align:center;font-size:.95rem;font-weight:700;height:30px;">
+            <input id="transpose-pick-bpm" type="number" min="30" max="250" value="100" class="form-input" style="width:65px;text-align:center;font-size:.95rem;font-weight:700;height:30px;" aria-label="Tempo tập (BPM)">
             <button type="button" id="tp-bpm-inc" class="btn-tool-sm" title="Tăng 1 BPM">+</button>
           </div>
         </div>
@@ -402,7 +402,7 @@
 
     <!-- Slider -->
     <div class="mb-4">
-      <input type="range" id="tempo-modal-slider" min="40" max="220" value="80" style="width:100%;cursor:pointer;touch-action:manipulation;">
+      <input type="range" id="tempo-modal-slider" min="40" max="220" value="80" style="width:100%;cursor:pointer;touch-action:manipulation;" aria-label="Thanh chỉnh tempo">
     </div>
 
     <!-- Presets -->

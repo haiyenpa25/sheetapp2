@@ -5,7 +5,7 @@ const { test, expect } = require('@playwright/test');
  * e2e/library-l1-gig-mode.spec.js
  *
  * Kiểm thử E2E cho Ticket L1-5 (ROADMAP 4):
- * - Mặc định nền tối (dark-mode), không thanh công cụ.
+ * - Giữ nguyên giao diện sáng/tối đang chọn (không tự đổi sang dark-mode), không thanh công cụ.
  * - HUD tự mờ sau 3 giây (opacity 0, pointer-events: none).
  * - Chạm giữa màn hình (#edge-tap-center) để hiện lại HUD.
  * - Khóa chạm ngoài vùng lật trang (vùng center 64%, 2 mép 18% lật trang).
@@ -38,9 +38,9 @@ test.describe('L1-5 · Chế độ Sân khấu thật (Gig Mode Hardening)', () 
     // Bấm Biểu Diễn (⚡)
     await btnGig.click();
 
-    // 1. Mặc định nền tối và chế độ sheet-only-mode
+    // 1. Chế độ sheet-only-mode; toàn màn hình KHÔNG tự đổi sang dark-mode (chốt 2026-11-07)
     await expect(page.locator('body')).toHaveClass(/sheet-only-mode/);
-    await expect(page.locator('body')).toHaveClass(/dark-mode/);
+    await expect(page.locator('body')).not.toHaveClass(/dark-mode/);
 
     // 2. Không thanh công cụ, không sidebar, không FAB
     const toolbar = page.locator('#toolbar');
@@ -163,7 +163,7 @@ test.describe('L1-5 · Chế độ Sân khấu thật (Gig Mode Hardening)', () 
     await btnGig.click();
 
     await expect(page.locator('body')).toHaveClass(/sheet-only-mode/);
-    await expect(page.locator('body')).toHaveClass(/dark-mode/);
+    await expect(page.locator('body')).not.toHaveClass(/dark-mode/);
 
     const hud = page.locator('#gig-floating-hud');
     await expect(hud).toBeVisible();
@@ -197,7 +197,7 @@ test.describe('L1-5 · Chế độ Sân khấu thật (Gig Mode Hardening)', () 
     const toolbar = page.locator('#toolbar');
     await expect(toolbar).toBeVisible();
 
-    // Do ban đầu là light-mode, sau khi thoát chế độ Biểu Diễn dark-mode phải được khôi phục
+    // Giao diện sáng ban đầu vẫn sáng sau khi thoát Biểu Diễn (không bao giờ bị đổi)
     await expect(page.locator('body')).not.toHaveClass(/dark-mode/);
   });
 

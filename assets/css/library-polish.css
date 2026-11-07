@@ -850,7 +850,7 @@ body.dark-mode .toast-container .toast { background: #22222b; color: var(--lp-in
    R1-6: Chế độ Biểu Diễn 100% Sạch (Clean Sheet & Blurred HUD)
    ========================================================================== */
 body.sheet-only-mode {
-  background: #0c0d14 !important;
+  background: var(--bg-base) !important;
   overflow: hidden !important;
 }
 
@@ -2356,6 +2356,18 @@ body:not(.has-member-access) #btn-open-session-from-popover,
 body:not(.has-member-access) #main-dropdown-menu a[href$="manager/"],
 body:not(.has-member-access) #main-dropdown-menu a[data-target="/manager/#tab-users"] {
   display: none !important;
+}
+
+/* Toàn màn hình giữ giao diện sáng: nút Thoát nổi trên nền sáng cần chữ/viền đậm (màu pastel chỉ đọc được trên nền tối). */
+body.sheet-only-mode:not(.dark-mode) #btn-gig-exit {
+  background: #fff !important;
+  color: #b91c1c !important;
+  border: 1px solid #b91c1c !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .18) !important;
+}
+body.sheet-only-mode:not(.dark-mode) #btn-gig-exit:hover {
+  background: #fee2e2 !important;
+  color: #991b1b !important;
 }
 
 /* M4-6: Gig HUD co vừa 360–1024; nút Thoát ở góc trên tách khỏi cụm điều khiển; thêm ◀ ▶ và zoom ở điện thoại */

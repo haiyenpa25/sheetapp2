@@ -297,7 +297,7 @@
           </div>
           <div class="audio-panel-row">
             <span class="audio-panel-label">Âm lượng:</span>
-            <input id="audio-volume" type="range" class="audio-volume-slider" min="-20" max="24" step="1" value="18" data-touch-allow="true" disabled>
+            <input id="audio-volume" type="range" class="audio-volume-slider" min="-20" max="24" step="1" value="18" data-touch-allow="true" disabled aria-label="Âm lượng">
           </div>
         </div>
 

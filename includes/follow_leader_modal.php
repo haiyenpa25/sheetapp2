@@ -104,7 +104,7 @@
 
           <!-- Link chia sẻ 1-chạm -->
           <div class="w-full d-flex gap-1">
-            <input type="text" id="fl-host-link-display" class="form-input fl-link-display" readonly>
+            <input type="text" id="fl-host-link-display" class="form-input fl-link-display" readonly aria-label="Liên kết của Ca trưởng">
             <button type="button" id="btn-fl-copy-share-link" class="btn btn-ghost btn-sm" title="Sao chép link">📋 Copy</button>
           </div>
 
@@ -137,7 +137,7 @@
             </div>
 
             <div class="d-flex gap-1">
-              <input type="text" id="fl-cue-custom-input" class="form-input text-xs fl-cue-custom-input" placeholder="Thông điệp tùy ý (VD: Ngắt tự do...)" maxlength="50">
+              <input type="text" id="fl-cue-custom-input" class="form-input text-xs fl-cue-custom-input" placeholder="Thông điệp tùy ý (VD: Ngắt tự do...)" maxlength="50" aria-label="Thông điệp tùy ý">
               <button type="button" id="btn-fl-send-custom-cue" class="btn btn-primary btn-xs fl-btn-send">Gửi</button>
             </div>
           </div>

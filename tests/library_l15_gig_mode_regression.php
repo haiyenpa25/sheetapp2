@@ -58,19 +58,24 @@ $appUiJs = file_exists($appUiJsPath) ? file_get_contents($appUiJsPath) : '';
 $indexPhp = file_exists($indexPhpPath) ? file_get_contents($indexPhpPath) : '';
 
 // 1. Mặc định nền tối khi vào PERFORMANCE mode trong ModeManager.js
-$hasDarkModeOnGig = str_contains($modeManagerJs, "body.classList.add('dark-mode')")
-    && str_contains($modeManagerJs, '_wasDarkModeBeforeGig');
-recordCheck("ModeManager tự động kích hoạt dark-mode mặc định khi vào Chế độ Biểu Diễn", $hasDarkModeOnGig, true);
+// (Chủ dự án chốt 2026-11-07) Toàn màn hình KHÔNG được tự đổi giao diện sáng/tối.
+$noForcedDarkOnGig = !str_contains($modeManagerJs, "classList.add('dark-mode')")
+    && !str_contains($modeManagerJs, "classList.remove('dark-mode')")
+    && !str_contains($modeManagerJs, '_wasDarkModeBeforeGig');
+recordCheck("ModeManager không ép/gỡ dark-mode khi vào/thoát Chế độ Biểu Diễn (giữ giao diện người dùng chọn)", $noForcedDarkOnGig, true);
 
-// 2. Khôi phục trạng thái dark-mode ban đầu khi thoát PERFORMANCE mode
-$hasRestoreDarkMode = str_contains($modeManagerJs, 'body.classList.remove(\'dark-mode\')')
-    && str_contains($modeManagerJs, '!_wasDarkModeBeforeGig');
-recordCheck("ModeManager khôi phục trạng thái dark-mode ban đầu của người dùng khi thoát Biểu Diễn", $hasRestoreDarkMode, true);
+// 2. Nền toàn màn hình theo biến giao diện, không ghi cứng màu tối
+$sheetOnlyBlock = '';
+if (preg_match('/body\.sheet-only-mode\s*\{[^}]*\}/', $layoutCss, $m)) $sheetOnlyBlock = $m[0];
+$polishCss = file_get_contents(dirname($layoutCssPath) . '/library-polish.css');
+$bgFollowsTheme = str_contains($sheetOnlyBlock, 'var(--bg-base)')
+    && !str_contains($layoutCss, 'background: #0c0d14')
+    && !str_contains($polishCss, 'background: #0c0d14');
+recordCheck("layout.css/library-polish.css: nền sheet-only-mode dùng var(--bg-base), không ghi cứng #0c0d14", $bgFollowsTheme, true);
 
-// 3. layout.css đặt nền tối nhất quán #0c0d14 cho body.sheet-only-mode
-$hasDarkSheetOnlyCss = str_contains($layoutCss, 'body.sheet-only-mode')
-    && str_contains($layoutCss, '#0c0d14');
-recordCheck("layout.css thiết lập background tối chống chói (#0c0d14) cho sheet-only-mode", $hasDarkSheetOnlyCss, true);
+// 3. Nút Thoát đọc được trên giao diện sáng
+$exitLightContrast = str_contains($polishCss, 'body.sheet-only-mode:not(.dark-mode) #btn-gig-exit');
+recordCheck("Nút Thoát có luật tương phản riêng cho giao diện sáng", $exitLightContrast, true);
 
 // 4. Ẩn hoàn toàn toolbar, sidebar, FAB trong sheet-only-mode
 $hasNoToolbarCss = str_contains($layoutCss, 'body.sheet-only-mode #toolbar')

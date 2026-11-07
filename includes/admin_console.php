@@ -39,17 +39,17 @@
           <div id="tab-url" class="tab-content active">
             <p class="help-text">Dán link bài hát từ <strong>thanhca.httlvn.org</strong></p>
             <div class="input-group">
-              <input id="import-url-input" type="url" class="form-input" placeholder="https://thanhca.httlvn.org/thanh-ca-1/ten-bai-hat?op=sheet">
+              <input id="import-url-input" type="url" class="form-input" placeholder="https://thanhca.httlvn.org/thanh-ca-1/ten-bai-hat?op=sheet" aria-label="Địa chỉ trang bài hát">
               <button id="btn-fetch-url" class="btn btn-primary">Tải Về</button>
             </div>
             <div class="form-row mt-1" style="display:grid; grid-template-columns: 1fr 180px; gap:0.75rem;">
               <div>
                 <label class="form-label">Tên hiển thị</label>
-                <input id="import-url-title" type="text" class="form-input" placeholder="VD: Cúi Xin Vua Thánh Ngự Lại">
+                <input id="import-url-title" type="text" class="form-input" placeholder="VD: Cúi Xin Vua Thánh Ngự Lại" aria-label="Tên bài hát">
               </div>
               <div>
                 <label class="form-label">Chế độ hiển thị</label>
-                <select id="import-url-visibility" class="form-input">
+                <select id="import-url-visibility" class="form-input" aria-label="Quyền xem">
                   <option value="public" selected>🌐 Public (Công khai)</option>
                   <option value="private">🔒 Private (Riêng tư)</option>
                 </select>
@@ -75,18 +75,18 @@
             </div>
             <div class="form-row mt-1">
               <label class="form-label">Tên bài hát hiển thị</label>
-              <input id="import-upload-title" type="text" class="form-input" placeholder="Nhập tên bài hát">
+              <input id="import-upload-title" type="text" class="form-input" placeholder="Nhập tên bài hát" aria-label="Tên bài hát">
             </div>
             <div class="form-row mt-1" style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem;">
               <div>
                 <label class="form-label">Danh mục (Thể loại)</label>
-                <select id="import-upload-category" class="form-input">
+                <select id="import-upload-category" class="form-input" aria-label="Danh mục">
                   <option value="1">Thánh ca</option>
                 </select>
               </div>
               <div>
                 <label class="form-label">Chế độ hiển thị (Public / Private)</label>
-                <select id="import-upload-visibility" class="form-input">
+                <select id="import-upload-visibility" class="form-input" aria-label="Quyền xem">
                   <option value="public" selected>🌐 Public (Công khai — Mọi người xem được)</option>
                   <option value="private">🔒 Private (Riêng tư — Ẩn khỏi Khách)</option>
                 </select>
@@ -98,17 +98,17 @@
           <div id="tab-direct" class="tab-content hidden">
             <p class="help-text">URL trực tiếp đến file .xml hoặc .mxl</p>
             <div class="input-group">
-              <input id="import-direct-input" type="url" class="form-input" placeholder="https://example.com/sheet.xml">
+              <input id="import-direct-input" type="url" class="form-input" placeholder="https://example.com/sheet.xml" aria-label="Địa chỉ bản nhạc">
               <button id="btn-fetch-direct" class="btn btn-primary">Tải Về</button>
             </div>
             <div class="form-row mt-1" style="display:grid; grid-template-columns: 1fr 180px; gap:0.75rem;">
               <div>
                 <label class="form-label">Tên hiển thị</label>
-                <input id="import-direct-title" type="text" class="form-input" placeholder="Nhập tên bài hát">
+                <input id="import-direct-title" type="text" class="form-input" placeholder="Nhập tên bài hát" aria-label="Tên bài hát">
               </div>
               <div>
                 <label class="form-label">Chế độ hiển thị</label>
-                <select id="import-direct-visibility" class="form-input">
+                <select id="import-direct-visibility" class="form-input" aria-label="Quyền xem">
                   <option value="public" selected>🌐 Public (Công khai)</option>
                   <option value="private">🔒 Private (Riêng tư)</option>
                 </select>
@@ -266,7 +266,7 @@
               </div>
               <div>
                 <label class="form-label">Mật khẩu</label>
-                <input type="password" id="admin-new-user-pass" class="form-input w-full" placeholder="Tối thiểu 4 ký tự">
+                <input type="password" id="admin-new-user-pass" class="form-input w-full" placeholder="Tối thiểu 4 ký tự" aria-label="Mật khẩu tài khoản mới" autocomplete="new-password">
               </div>
               <div>
                 <label class="form-label">Phân quyền (4 nhóm tài khoản)</label>

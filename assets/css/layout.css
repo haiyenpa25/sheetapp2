@@ -407,23 +407,24 @@ body.sheet-only-mode .fab-wrap,
 body.sheet-only-mode #fab-main-btn {
   display: none !important;
 }
+/* Nền theo giao diện đang chọn (sáng/tối); toàn màn hình không tự ép tối. */
 body.sheet-only-mode {
-  background: #0c0d14;
+  background: var(--bg-base);
 }
 body.sheet-only-mode .main-content {
   position: fixed; inset: 0; z-index: var(--z-modal-bg);
-  background: #0c0d14;
+  background: var(--bg-base);
   overflow: hidden;
 }
 body.sheet-only-mode .sheet-viewer-wrapper {
   position: absolute; inset: 0;
-  background: #0c0d14;
+  background: var(--bg-base);
   overflow-y: auto; overflow-x: hidden;
   height: 100%; max-height: 100%;
 }
 body.sheet-only-mode .osmd-container {
   max-width: 100%; padding: 1.5rem 2rem; margin-top: 0;
-  background: #0c0d14;
+  background: var(--bg-base);
 }
 /* Nút thoát nổi góc trên phải (Ticket L1-4, L1-5: Touch target >= 44x44px) */
 #btn-exit-sheet-only {

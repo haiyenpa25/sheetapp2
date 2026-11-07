@@ -449,6 +449,13 @@ Ghi chú nằm trong `storage/data/annotations/*.json`; settings/notes theo user
 
 > Chỉ giữ 5 mục mới nhất. Nhật ký đầy đủ: `docs/history/CHANGELOG_2026.md`. Khi thêm mục mới, đưa mục cũ nhất ở đây sang file đó.
 
+## 2026-11-07 (b) — Toàn màn hình không đổi sáng/tối + rà lỗi linh tinh (giao diện mới)
+
+- Bấm **Toàn màn hình/Biểu diễn** trước đây tự ép `dark-mode` (ticket L1-5) và ghi cứng nền `#0c0d14`; chủ dự án coi là lỗi. Nay `ModeManager.setMode` không đụng `dark-mode` (người dùng đang sáng thì vẫn sáng, đang tối thì vẫn tối, thoát ra không đổi); nền `sheet-only-mode` dùng `var(--bg-base)` (`layout.css`, `library-polish.css`); nút Thoát có luật tương phản riêng cho giao diện sáng (`body.sheet-only-mode:not(.dark-mode) #btn-gig-exit`). Đảo khẳng định cũ ở `tests/library_l15_gig_mode_regression.php` và `e2e/library-l1-gig-mode.spec.js`. Kiểm bằng Chromium thật (máy tính + giả lập iPhone 390px).
+- Trợ năng: thêm `aria-label` cho 31 ô nhập chỉ có placeholder (`includes/modals.php`, `toolbar.php`, `sidebar.php`, `follow_leader_modal.php`, `admin_console.php`) và `autocomplete` cho ô đổi mật khẩu bắt buộc/mật khẩu tài khoản mới.
+- Lưu ý vận hành: sửa asset xong PHẢI chạy `php tools/generate_asset_gzip.php` + `php tools/generate_sw_manifest.php`, nếu không Apache phát bản `.gz` cũ (đã gặp khi kiểm).
+- Bộ chạy test đặt `SHEETAPP_IGNORE_LOCAL_FEATURES=1` (`FeatureFlags::load` bỏ `features.local.json`) để cờ máy dev (vd. `MULTI_CHURCH`) không làm đổi kết quả.
+
 ## 2026-11-07 — Kho bài riêng của Hội Thánh: sửa/xóa/công khai, tài khoản HT, bắt đổi mật khẩu quản trị HT
 
 - Admin HT quản lý bài trong danh mục riêng của HT mình ở `/manager/` → Hội Thánh → 📂 Quản lý bài: sửa tên/tác giả/tempo, xóa, **chuyển công khai** (chọn danh mục công khai chung + hộp xác nhận bản quyền; file XML tự ra thư mục công khai). Quay lại riêng tư chỉ admin hệ thống. Mã: `api/services/ChurchSongService.php`, action `songs|song_update|song_delete|song_publish` ở `ChurchController`, `manager/js/manager-church-songs.js`, `ApiService.churches.{songs,updateSong,deleteSong,publishSong}`. Test `tests/church_songs_regression.php` (23 check), e2e `e2e/church-song-manage.spec.js`.
@@ -483,10 +490,3 @@ Ghi chú nằm trong `storage/data/annotations/*.json`; settings/notes theo user
 - Chương trình: bài thêm mới luôn lưu `chord_profile = HD` (không lấy bộ cá nhân đang xem); phát bài dùng HD khi dòng chưa có bộ; máy chủ chuẩn hoá rỗng → HD. Dòng cũ giữ nguyên.
 - Classic: sàn chữ 11px cho nhãn nhỏ (`old/assets/css/ui-scale.css`).
 
-## 2026-10-31 — Menu danh sách bài biến mất khi gõ tìm trên máy tính bảng Android + chống phiên bản cũ bị giữ cache
-
-- Nguyên nhân: bàn phím ảo Android bắn `resize` (chỉ đổi chiều cao, đôi máy còn bắn `orientationchange` giả) → `toolbar-controller.js` coi là xoay màn hình và đóng sidebar. Modern: chỉ xử lý `resize` khi bề rộng đổi ≥100px, bỏ qua khi đang focus ô nhập. Classic (`old/assets/js/toolbar-controller.js`): `orientationchange` chờ 400ms, chỉ đóng sidebar khi bề rộng thật sự đổi và không đang nhập liệu.
-- Cache: module tải lười qua `ScriptLoader` trước đây dùng URL trần (máy chủ cho hạn 1 năm + Cloudflare) nên giữ bản cũ. Nay thêm `?v=` lấy từ `window.__ASSET_V__` (`includes/asset_version.php` = mtime mới nhất của `assets/js/**` + file vào); `index.php`, `old/index.php`; Quản lý (`manager/index.php`, `mgrAssetV()`) và trang in dùng `?v=` theo mtime. KHÔNG nâng phiên bản SW v5→v6 vì sẽ xoá gói offline Chủ nhật của người dùng; URL đã có version nên không cần xoá cache Cloudflare.
-- Test mới `tests/android_keyboard_sidebar_regression.php` + `tests/js/android_keyboard_sidebar.cjs` (25 check, đã kiểm đột biến: chạy trên mã HEAD thì FAIL). Sinh lại manifest SW và `.gz`.
-- Dịch giọng (Modern): OSMD gốc ghi tên nốt không theo tông mới nên khi cộng/trừ tông bản nhạc lòi ♮, thăng/giáng thừa (vd G→F#: fa# thành fa♮ trong khóa 6 thăng). Thêm `assets/js/osmd-transpose-speller.js` (ghi tên nốt/hợp âm gần tông mới nhất trên vòng quãng 5, giữ đúng cao độ tuyệt đối), gắn vào `TransposeCalculator` ở `osmd-renderer.js`; kiểm 2.100 nốt (12 tông × ±12 × 7 bậc) bằng `tests/osmd_transpose_speller_regression.php`. Áp dụng cả Classic `/old/` (nạp cùng file, kiểm bằng Chromium 4 bài × 8 mức dịch ở cả hai giao diện).
-- Lưu ý chủ dự án: `LibrarySyncService` (nút "Đồng bộ GitHub") chạy `git add/commit/push` từ yêu cầu web.

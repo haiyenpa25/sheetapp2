@@ -173,7 +173,7 @@
 
         <div id="setlist-items" class="setlist-items"></div>
         <div id="setlist-add-container" class="setlist-add-container hidden">
-          <input type="text" id="setlist-search-song-input" class="form-input w-full" placeholder="Gõ tìm bài hát để thêm..." autocomplete="off">
+          <input type="text" id="setlist-search-song-input" class="form-input w-full" placeholder="Gõ tìm bài hát để thêm..." autocomplete="off" aria-label="Tìm bài hát để thêm vào chương trình">
           <div id="setlist-search-results" class="song-list hidden setlist-search-results"></div>
         </div>
       </div>
