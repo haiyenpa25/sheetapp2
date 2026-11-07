@@ -46,7 +46,9 @@ class FeatureFlags {
         self::$flags = self::DEFAULTS;
 
         $configDir = dirname(__DIR__, 2) . '/storage/config/';
-        foreach (['features.json', 'features.local.json'] as $name) {
+        // Bộ test đặt biến này để kết quả không phụ thuộc cờ máy dev (vd. bật MULTI_CHURCH ở features.local.json).
+        $files = getenv('SHEETAPP_IGNORE_LOCAL_FEATURES') ? ['features.json'] : ['features.json', 'features.local.json'];
+        foreach ($files as $name) {
             $configFile = $configDir . $name;
             if (!is_file($configFile)) continue;
             $content = @file_get_contents($configFile);

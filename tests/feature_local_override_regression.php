@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 // SUITE_TYPE: behavioral
+putenv('SHEETAPP_IGNORE_LOCAL_FEATURES'); // test này kiểm chính việc đọc features.local.json nên bỏ biến chặn của bộ chạy
 $dir=sys_get_temp_dir().'/sheetapp_flags_'.bin2hex(random_bytes(8));
 mkdir($dir.'/api/core',0775,true); mkdir($dir.'/storage/config',0775,true);
 copy(__DIR__.'/../api/core/FeatureFlags.php',$dir.'/api/core/FeatureFlags.php');

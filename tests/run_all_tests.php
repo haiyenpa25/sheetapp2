@@ -91,6 +91,7 @@ if (file_exists($realDbPath)) {
     if (file_exists($realDbPath . '-wal')) @copy($realDbPath . '-wal', $isolatedTempDb . '-wal');
     if (file_exists($realDbPath . '-shm')) @copy($realDbPath . '-shm', $isolatedTempDb . '-shm');
 }
+putenv('SHEETAPP_IGNORE_LOCAL_FEATURES=1'); // cờ tính năng của máy dev (features.local.json) không được làm đổi kết quả test
 putenv("SHEETAPP_DB_PATH={$isolatedTempDb}");
 $_ENV['SHEETAPP_DB_PATH'] = $isolatedTempDb;
 
