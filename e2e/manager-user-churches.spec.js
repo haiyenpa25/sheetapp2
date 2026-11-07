@@ -14,8 +14,13 @@ test('Tạo HT kèm tài khoản, thấy cột Hội Thánh, gán/gỡ, xóa HT'
   const abbr = 'e' + Date.now().toString(36).slice(-6);
   const churchName = 'HT Thử ' + abbr;
 
-  await page.goto('./manager/', { waitUntil: 'domcontentloaded' });
-  await page.click('#mgr-adv-toggle');
+  // Chờ 'load' (không phải 'domcontentloaded'): bấm "Nâng cao" quá sớm thì sự kiện chưa được gắn nên không bung ra.
+  await page.goto('./manager/', { waitUntil: 'load' });
+  const advToggle = page.locator('#mgr-adv-toggle');
+  await expect(async () => {
+    if ((await advToggle.getAttribute('aria-expanded')) !== 'true') await advToggle.click();
+    await expect(advToggle).toHaveAttribute('aria-expanded', 'true', { timeout: 500 });
+  }).toPass({ timeout: 15000 });
   await page.click('button[data-tab="tab-churches"]');
   await expect(page.locator('#church-create-box')).toBeVisible();
 

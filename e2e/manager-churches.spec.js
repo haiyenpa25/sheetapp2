@@ -14,8 +14,13 @@ test.describe('Tab Hội Thánh trong Quản lý', () => {
     const sessionId = require('./helpers/php-session').run(['admin', 'admin']).toString().trim();
     await page.context().addCookies([{ name: 'PHPSESSID', value: sessionId, domain: 'localhost', path: '/' }]);
 
-    await page.goto('./manager/', { waitUntil: 'domcontentloaded' });
-    await page.click('#mgr-adv-toggle');
+    // Chờ 'load' (không phải 'domcontentloaded'): bấm "Nâng cao" quá sớm thì sự kiện chưa được gắn nên không bung ra.
+    await page.goto('./manager/', { waitUntil: 'load' });
+    const advToggle = page.locator('#mgr-adv-toggle');
+    await expect(async () => {
+      if ((await advToggle.getAttribute('aria-expanded')) !== 'true') await advToggle.click();
+      await expect(advToggle).toHaveAttribute('aria-expanded', 'true', { timeout: 500 });
+    }).toPass({ timeout: 15000 });
     await page.click('button[data-tab="tab-churches"]');
     await expect(page.locator('#tab-churches')).toBeVisible();
 
@@ -41,7 +46,7 @@ test.describe('Tab Hội Thánh trong Quản lý', () => {
     await page.click('#btn-church-cat-create');
     await expect(page.locator('#church-cat-list li', { hasText: catName })).toHaveCount(1);
     page.once('dialog', (d) => d.accept());
-    await page.locator('#church-cat-list li', { hasText: catName }).locator('button').click();
+    await page.locator('#church-cat-list li', { hasText: catName }).locator('button[data-act="del-cat"]').click();
     await expect(page.locator('#church-cat-list li', { hasText: catName })).toHaveCount(0);
 
     // Mã mời sai → báo lỗi, không văng lỗi JS
