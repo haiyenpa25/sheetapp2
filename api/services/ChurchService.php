@@ -215,6 +215,8 @@ final class ChurchService {
                 $password = self::randomPassword();
                 $userId = UserService::createWithProfile($username, $password, $systemRole, "{$label} " . strtoupper($abbr), 'Piano / Đệm Hát');
                 DB::run('INSERT INTO church_members (church_id, user_id, role, status) VALUES (?, ?, ?, ?)', [(int)$church['id'], $userId, $churchRole, self::STATUS_ACTIVE]);
+                // Mật khẩu do hệ thống sinh và đã hiện trên màn hình: bắt đổi ở lần đăng nhập đầu.
+                UserService::setForcedPasswordChange($userId, true);
                 $accounts[] = ['username' => $username, 'password' => $password, 'label' => "{$label} (" . ($churchRole === self::ROLE_ADMIN ? 'quản trị HT' : 'thành viên') . ')'];
             }
             $pdo->commit();

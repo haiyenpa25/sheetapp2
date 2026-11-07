@@ -29,7 +29,7 @@ API: route `churches` (xem `PROJECT_REGISTRY.md`), 404 khi cờ tắt.
 2. Triển khai mã (nhánh đã duyệt) rồi chạy `php tools/migrate.php`. Migration 018 chạy lại an toàn: tạo `churches`, `church_members`, cột `church_id`; gom dữ liệu cũ vào HT "Hội Thánh mặc định" (`mac-dinh`); mọi tài khoản thành thành viên (admin→quản trị HT, leader→leader, bannhac/banhat→member, viewer→viewer).
 3. Chạy `php tools/verify_multi_church.php` — phải báo **Ổn** (mọi chương trình có HT, mọi HT có quản trị, không tài khoản nào lơ lửng).
 4. Đổi tên "Hội Thánh mặc định" cho đúng tên thật (tab Hội Thánh → Đổi tên).
-5. Tạo thêm HT, mời quản trị từng HT vào, gán quản trị HT (admin hệ thống đổi vai trò).
+5. Tạo thêm HT bằng tab Hội Thánh (tự sinh 3 tài khoản `banhat/bannhac/admin.<viết tắt>`; **chép mật khẩu ngay**, chỉ hiện một lần; tài khoản bị bắt đổi mật khẩu ở lần đăng nhập đầu nhờ cột `users.must_change_password`, cần chạy migration 019 — migration 018 và 019 đều chạy bằng `php tools/migrate.php`). Người đã có tài khoản thì gán vào HT bằng nút ⛪ HT ở tab Thành viên.
 6. Bật cờ: thêm `"MULTI_CHURCH": true` vào `storage/config/features.local.json`.
 7. Kiểm: đăng nhập bằng một tài khoản thường của HT A → không thấy chương trình của HT B; đổi HT ở tab Chương trình; mở `/manager/` → tab Hội Thánh.
 8. **Hoàn tác**: đặt `"MULTI_CHURCH": false` — mọi thứ về hành vi một HT như cũ (dữ liệu và cột mới nằm yên, vô hại).
@@ -44,4 +44,10 @@ API: route `churches` (xem `PROJECT_REGISTRY.md`), 404 khi cờ tắt.
 
 ## Kiểm thử
 
-`tests/multi_church_foundation_regression.php` (schema + chuyển dữ liệu), `multi_church_isolation_regression.php` (cô lập 11 điểm vào), `multi_church_api_regression.php` (API quản lý HT), `multi_church_roles_regression.php` (trần quyền theo vai trò HT), `multi_church_categories_regression.php` (danh mục riêng); e2e: `e2e/manager-churches.spec.js`, `e2e/church-switcher.spec.js` (chạy ở bản sao cô lập đã bật cờ).
+`tests/multi_church_foundation_regression.php` (schema + chuyển dữ liệu), `multi_church_isolation_regression.php` (cô lập 11 điểm vào), `multi_church_api_regression.php` (API quản lý HT), `multi_church_roles_regression.php` (trần quyền theo vai trò HT), `multi_church_categories_regression.php` (danh mục riêng), `multi_church_accounts_regression.php` (tạo HT kèm tài khoản, xóa HT, quyền tải bài); e2e: `e2e/manager-churches.spec.js`, `e2e/church-switcher.spec.js`, `e2e/manager-user-churches.spec.js`, `e2e/church-private-songs.spec.js` (chạy ở bản sao cô lập đã bật cờ; các spec này để lại HT/bài thử trong bản sao đó, không dọn).
+
+## Giới hạn đã biết
+
+- Cờ bắt đổi mật khẩu chỉ áp ở giao diện đăng nhập (như luật mật khẩu yếu có sẵn); máy chủ chưa chặn API cho tới khi đổi. Admin đặt lại mật khẩu cho người khác không tự bật cờ.
+- Quản trị HT chỉ **thêm** được bài vào danh mục riêng; sửa/xóa bài riêng vẫn do admin hệ thống.
+- Quyền riêng tư bài tải vào danh mục HT do máy chủ ép (`SongService::clampToCategory`), không phụ thuộc giao diện.

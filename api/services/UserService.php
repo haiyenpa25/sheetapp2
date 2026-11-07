@@ -215,6 +215,9 @@ class UserService {
             }
             $fields[] = "password_hash = ?";
             $params[] = password_hash($newPassword, PASSWORD_DEFAULT);
+            if (DB::hasColumn('users', 'must_change_password')) {
+                $fields[] = "must_change_password = 0";
+            }
         }
 
         if (!empty($fields)) {
@@ -251,6 +254,18 @@ class UserService {
             'old_role' => $existing['role'],
             'new_role' => $role
         ]);
+    }
+
+    /** Tài khoản có đang bị bắt đổi mật khẩu (mật khẩu do hệ thống tự sinh) không; false nếu chưa chạy migration 019. */
+    public static function hasForcedPasswordChange(int $id): bool {
+        if (!DB::hasColumn('users', 'must_change_password')) return false;
+        return (int)DB::run('SELECT must_change_password FROM users WHERE id = ?', [$id])->fetchColumn() === 1;
+    }
+
+    /** Đặt/xóa cờ bắt đổi mật khẩu; bỏ qua nếu chưa chạy migration 019. */
+    public static function setForcedPasswordChange(int $id, bool $forced): void {
+        if (!DB::hasColumn('users', 'must_change_password')) return;
+        DB::run('UPDATE users SET must_change_password = ? WHERE id = ?', [$forced ? 1 : 0, $id]);
     }
 
     public static function updatePassword(int $id, string $password): void {

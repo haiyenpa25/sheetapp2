@@ -67,6 +67,18 @@ checkAcc($names === ['admin.httml', 'banhat.httml', 'bannhac.httml'], 'Tên tài
 $byName = array_column($accounts, null, 'username');
 checkAcc(preg_match('/^[A-Za-z0-9]{12}$/', (string)$byName['banhat.httml']['password']) === 1, 'Mật khẩu ngẫu nhiên 12 ký tự');
 checkAcc(count(array_unique(array_column($accounts, 'password'))) === 3, 'Mỗi tài khoản một mật khẩu khác nhau');
+// Mật khẩu tự sinh đã hiện trên màn hình → bắt đổi ở lần đăng nhập đầu; đổi xong thì hết bị bắt.
+require_once $root . '/api/services/UserService.php';
+$firstAcc = $accounts[0];
+$sessionBefore = $_SESSION;
+$firstId = (int)DB::run('SELECT id FROM users WHERE username = ?', [$firstAcc['username']])->fetchColumn();
+checkAcc(UserService::hasForcedPasswordChange($firstId), 'Tài khoản tự tạo kèm HT bị bắt đổi mật khẩu lần đầu');
+checkAcc(!UserService::hasForcedPasswordChange(1), 'Tài khoản cũ không bị bắt đổi mật khẩu');
+asUser($firstId, 'leader');
+UserService::updateProfile($firstId, null, null, $firstAcc['password'], 'MatKhauMoi-Rat-Dai-2026!');
+checkAcc(!UserService::hasForcedPasswordChange($firstId), 'Tự đổi mật khẩu xong thì xóa cờ bắt đổi');
+$_SESSION = $sessionBefore;
+Auth::resetDbCache();
 $row = $pdo->query("SELECT id, role, password_hash FROM users WHERE username = 'admin.httml'")->fetch(PDO::FETCH_ASSOC);
 checkAcc(password_verify($byName['admin.httml']['password'], (string)$row['password_hash']), 'Mật khẩu trả về đăng nhập được, DB chỉ lưu băm');
 checkAcc($row['role'] === 'leader' && ChurchService::memberRole((int)$row['id'], $churchId) === 'church_admin', 'admin.<viết tắt>: vai trò hệ thống leader + quản trị HT');

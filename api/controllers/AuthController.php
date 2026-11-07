@@ -34,7 +34,8 @@ class AuthController {
                 if ($user && password_verify($password, $user['password_hash'])) {
                     LoginRateLimiter::clear($rateKey);
                     session_regenerate_id(true);
-                    $mustChange = UserService::isWeakPassword($password, $user['username']);
+                    $mustChange = UserService::isWeakPassword($password, $user['username'])
+                        || UserService::hasForcedPasswordChange((int)$user['id']);
                     $_SESSION['user_id']              = $user['id'];
                     $_SESSION['username']             = $user['username'];
                     $_SESSION['role']                 = $user['role'];
