@@ -89,7 +89,7 @@
     const all = await window.ApiService.categories.list();
     const mine = (Array.isArray(all) ? all : []).filter((c) => Number(c.church_id) === _activeId);
     list.innerHTML = mine.length
-      ? mine.map((c) => `<li data-id="${Number(c.id)}"><span>${_esc(c.name)} · ${Number(c.song_count) || 0} bài</span><span><button type="button" class="mgr-btn mgr-btn-sm mgr-btn-primary" data-act="add-song">➕ Thêm bài (XML)</button> <button type="button" class="mgr-btn mgr-btn-sm mgr-btn-ghost" data-act="del-cat">Xóa</button></span></li>`).join('')
+      ? mine.map((c) => `<li data-id="${Number(c.id)}"><span>${_esc(c.name)} · ${Number(c.song_count) || 0} bài</span><span><button type="button" class="mgr-btn mgr-btn-sm mgr-btn-ghost" data-act="list-songs">📂 Quản lý bài</button> <button type="button" class="mgr-btn mgr-btn-sm mgr-btn-primary" data-act="add-song">➕ Thêm bài (XML)</button> <button type="button" class="mgr-btn mgr-btn-sm mgr-btn-ghost" data-act="del-cat">Xóa</button></span></li>`).join('')
       : '<li class="text-muted">Chưa có danh mục riêng</li>';
   }
 
@@ -106,6 +106,8 @@
   }
 
   async function _onCategoryClick(e) {
+    const listSongs = e.target.closest('button[data-act="list-songs"]');
+    if (listSongs) { window.ManagerChurchSongs?.toggle(listSongs.closest('li'), _activeId, _toast); return; }
     const addSong = e.target.closest('button[data-act="add-song"]');
     if (addSong) { window.ManagerUpload?.open?.(Number(addSong.closest('li').dataset.id)); return; }
     const btn = e.target.closest('button[data-act="del-cat"]');

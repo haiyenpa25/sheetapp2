@@ -1597,4 +1597,8 @@ body.manager-body {
 .mgr-church-accounts { padding: .75rem; border: 1px dashed #f59e0b; border-radius: 8px; background: rgba(245, 158, 11, .08); }
 .mgr-church-accounts pre { margin: .5rem 0; white-space: pre-wrap; font-size: .85rem; user-select: all; }
 .mgr-btn-danger { color: #ef4444; border-color: rgba(239, 68, 68, .5); }
-.mgr-church-cats li { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.mgr-church-cats li { display: flex; align-items: center; justify-content: space-between; gap: .5rem; flex-wrap: wrap; }
+.mgr-church-songs { list-style: none; width: 100%; margin: .25rem 0 .5rem; padding: .5rem; display: grid; gap: .4rem; border-left: 3px solid rgba(127,127,127,.35); }
+.mgr-church-song { display: flex; align-items: center; justify-content: space-between; gap: .5rem; flex-wrap: wrap; }
+.mgr-church-song-actions { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; }
+.mgr-church-song-actions .mgr-input { min-height: 36px; }

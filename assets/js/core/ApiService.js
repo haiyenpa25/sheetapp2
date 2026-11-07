@@ -556,6 +556,10 @@ const ApiService = (() => {
     remove:         (churchId) => _json('POST', 'api/index.php?route=churches&action=delete', { church_id: churchId, confirm: true }),
     addMember:      (churchId, userId, role) => _json('POST', 'api/index.php?route=churches&action=add_member', { church_id: churchId, user_id: userId, role }),
     removeMember:   (churchId, userId) => _json('POST', 'api/index.php?route=churches&action=remove_member', { church_id: churchId, user_id: userId }),
+    songs:          (churchId) => _request(`api/index.php?route=churches&action=songs&church_id=${encodeURIComponent(churchId)}`),
+    updateSong:     (churchId, songId, fields) => _json('POST', 'api/index.php?route=churches&action=song_update', { ...fields, church_id: churchId, song_id: songId }),
+    deleteSong:     (churchId, songId) => _json('POST', 'api/index.php?route=churches&action=song_delete', { church_id: churchId, song_id: songId }),
+    publishSong:    (churchId, songId, targetCategoryId) => _json('POST', 'api/index.php?route=churches&action=song_publish', { church_id: churchId, song_id: songId, target_category_id: targetCategoryId }),
   };
 
   return {

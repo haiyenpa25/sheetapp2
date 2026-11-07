@@ -61,6 +61,7 @@ $r = callChurch('POST', ['action' => 'create'], ['name' => 'Hội thánh Thạnh
 $accounts = $r[1]['accounts'] ?? [];
 $churchId = (int)($r[1]['church']['id'] ?? 0);
 checkAcc($r[0] === 200 && $churchId > 0 && count($accounts) === 3, 'Tạo HT kèm 3 tài khoản');
+checkAcc((string)DB::run('SELECT slug FROM churches WHERE id = ?', [$churchId])->fetchColumn() === 'hoi-thanh-thanh-my-loi', 'Mã định danh HT bỏ dấu tiếng Việt đúng (không mất chữ)');
 $names = array_column($accounts, 'username');
 sort($names);
 checkAcc($names === ['admin.httml', 'banhat.httml', 'bannhac.httml'], 'Tên tài khoản theo quy ước <vai trò>.<viết tắt>');
@@ -69,14 +70,22 @@ checkAcc(preg_match('/^[A-Za-z0-9]{12}$/', (string)$byName['banhat.httml']['pass
 checkAcc(count(array_unique(array_column($accounts, 'password'))) === 3, 'Mỗi tài khoản một mật khẩu khác nhau');
 // Mật khẩu tự sinh đã hiện trên màn hình → bắt đổi ở lần đăng nhập đầu; đổi xong thì hết bị bắt.
 require_once $root . '/api/services/UserService.php';
-$firstAcc = $accounts[0];
+$firstAcc = array_column($accounts, null, 'username')['admin.httml'];
 $sessionBefore = $_SESSION;
 $firstId = (int)DB::run('SELECT id FROM users WHERE username = ?', [$firstAcc['username']])->fetchColumn();
-checkAcc(UserService::hasForcedPasswordChange($firstId), 'Tài khoản tự tạo kèm HT bị bắt đổi mật khẩu lần đầu');
+checkAcc(UserService::hasForcedPasswordChange($firstId), 'Tài khoản admin.<viết tắt> bị bắt đổi mật khẩu lần đầu');
+$sharedForced = 0;
+foreach (['banhat.httml', 'bannhac.httml'] as $shared) {
+    $sid = (int)DB::run('SELECT id FROM users WHERE username = ?', [$shared])->fetchColumn();
+    if (UserService::hasForcedPasswordChange($sid)) $sharedForced++;
+}
+checkAcc($sharedForced === 0, 'banhat/bannhac dùng chung KHÔNG bị bắt đổi mật khẩu (tránh khóa người còn lại)');
 checkAcc(!UserService::hasForcedPasswordChange(1), 'Tài khoản cũ không bị bắt đổi mật khẩu');
 asUser($firstId, 'leader');
+$originalHash = DB::run('SELECT password_hash FROM users WHERE id = ?', [$firstId])->fetchColumn();
 UserService::updateProfile($firstId, null, null, $firstAcc['password'], 'MatKhauMoi-Rat-Dai-2026!');
 checkAcc(!UserService::hasForcedPasswordChange($firstId), 'Tự đổi mật khẩu xong thì xóa cờ bắt đổi');
+DB::run('UPDATE users SET password_hash = ? WHERE id = ?', [$originalHash, $firstId]); // trả lại mật khẩu gốc cho các check sau
 $_SESSION = $sessionBefore;
 Auth::resetDbCache();
 $row = $pdo->query("SELECT id, role, password_hash FROM users WHERE username = 'admin.httml'")->fetch(PDO::FETCH_ASSOC);

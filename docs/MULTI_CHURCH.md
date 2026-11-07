@@ -20,6 +20,8 @@ Ngày: 2026-11-05. Cờ `MULTI_CHURCH` (mặc định **tắt**). Quy tắc bấ
 | Xem HT của từng tài khoản, gán/gỡ/đổi vai trò | `/manager/` → **Thành viên** → cột *Hội Thánh* + nút **⛪ HT** (chỉ admin hệ thống) |
 | Xóa HT (xóa chương trình + quan hệ thành viên; giữ tài khoản, bài, XML) | `/manager/` → **Hội Thánh** → *Xóa Hội Thánh* (chỉ admin hệ thống, có xác nhận) |
 | Danh mục bài riêng của HT + thêm bài (XML) vào đó | `/manager/` → **Hội Thánh** → "Danh mục bài riêng" → ➕ Thêm bài (quản trị HT hoặc admin hệ thống) |
+| Sửa tên/tác giả/tempo, xóa, **chuyển công khai** bài riêng | Cùng chỗ → 📂 Quản lý bài (quản trị HT của HT đó hoặc admin hệ thống). Công khai = chọn danh mục công khai chung → hộp xác nhận bản quyền → bài rời kho riêng, mọi khách và HT khác thấy |
+| Đưa bài đã công khai về riêng tư | Chỉ admin hệ thống (qua quản lý bài hát); quản trị HT phải liên hệ admin |
 
 API: route `churches` (xem `PROJECT_REGISTRY.md`), 404 khi cờ tắt.
 
@@ -49,5 +51,7 @@ API: route `churches` (xem `PROJECT_REGISTRY.md`), 404 khi cờ tắt.
 ## Giới hạn đã biết
 
 - Cờ bắt đổi mật khẩu chỉ áp ở giao diện đăng nhập (như luật mật khẩu yếu có sẵn); máy chủ chưa chặn API cho tới khi đổi. Admin đặt lại mật khẩu cho người khác không tự bật cờ.
-- Quản trị HT chỉ **thêm** được bài vào danh mục riêng; sửa/xóa bài riêng vẫn do admin hệ thống.
+- Quản trị HT sửa/xóa/công khai được bài riêng của HT mình (API `churches`: `songs`, `song_update`, `song_delete`, `song_publish`; mã trong `ChurchSongService`). Sửa chỉ gồm tên, tác giả, tempo; không đổi được danh mục/quyền. Chưa có: thay file XML của bài đã tải, chuyển bài giữa hai danh mục riêng.
+- Tài khoản dùng chung (`banhat.<tt>`, `bannhac.<tt>`) đăng nhập được trên nhiều thiết bị cùng lúc, và **không** bị bắt đổi mật khẩu lần đầu (chỉ `admin.<tt>` bị bắt). Giới hạn đăng nhập sai (10 lần/15 phút) tính theo IP + tên tài khoản: cả nhà thờ dùng chung một wifi thì vài lần gõ sai có thể khóa tài khoản chung tạm thời.
+- Quyền sửa bài qua `PUT songs` (yêu cầu Ca trưởng trở lên) chưa kiểm HT: Ca trưởng có thể đổi thông tin/danh mục của bất kỳ bài nào. Đã có từ trước, chưa thu hẹp.
 - Quyền riêng tư bài tải vào danh mục HT do máy chủ ép (`SongService::clampToCategory`), không phụ thuộc giao diện.

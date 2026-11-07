@@ -19,6 +19,7 @@ require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../core/Response.php';
 require_once __DIR__ . '/../core/ChurchAccessGuard.php';
 require_once __DIR__ . '/../services/ChurchService.php';
+require_once __DIR__ . '/../services/ChurchSongService.php';
 
 class ChurchController {
     /** Số lần nhập sai mã mời tối đa mỗi phiên, tránh dò mã. */
@@ -32,6 +33,7 @@ class ChurchController {
                 match ($action) {
                     'mine'    => $this->mine(),
                     'members' => $this->members(),
+                    'songs'   => $this->songs(),
                     default   => Response::notFound('Action không hợp lệ'),
                 };
                 return;
@@ -49,7 +51,10 @@ class ChurchController {
                 'delete'          => $this->delete($body),
                 'add_member'      => $this->addMember($body),
                 'remove_member'   => $this->removeMember($body),
-                default           => Response::notFound('Action không hợp lệ'),
+                'song_update'     => $this->songUpdate($body),
+                'song_delete'     => $this->songDelete($body),
+                'song_publish'    => $this->songPublish($body),
+                default          => Response::notFound('Action không hợp lệ'),
             };
         } catch (InvalidArgumentException $e) {
             Response::error($e->getMessage(), 400);
@@ -158,6 +163,54 @@ class ChurchController {
         if (!$this->canManage($churchId)) return;
         ChurchService::removeMember($churchId, (int)($body['user_id'] ?? 0));
         Response::ok(['members' => ChurchService::members($churchId)]);
+    }
+
+    private function songs(): void {
+        $churchId = (int)($_GET['church_id'] ?? 0);
+        if (!$this->canManage($churchId)) return;
+        Response::ok(['songs' => ChurchSongService::list($churchId)]);
+    }
+
+    private function songUpdate(array $body): void {
+        $songId = $this->ownedSongId($body);
+        if ($songId === null) return;
+        ChurchSongService::update($songId, $body);
+        Response::ok(['updated' => $songId]);
+    }
+
+    private function songDelete(array $body): void {
+        $songId = $this->ownedSongId($body);
+        if ($songId === null) return;
+        ChurchSongService::delete($songId);
+        $this->auditSong('church_song_delete', $songId, $body);
+        Response::ok(['deleted' => $songId]);
+    }
+
+    /** Chuyển bài riêng sang danh mục công khai chung — ai cũng thấy; quay lại riêng tư phải nhờ admin hệ thống. */
+    private function songPublish(array $body): void {
+        $songId = $this->ownedSongId($body);
+        if ($songId === null) return;
+        $target = (int)($body['target_category_id'] ?? 0);
+        ChurchSongService::publish($songId, $target);
+        $this->auditSong('church_song_publish', $songId, $body + ['target_category_id' => $target]);
+        Response::ok(['published' => $songId]);
+    }
+
+    /** Mã bài nếu người dùng quản lý HT đó VÀ bài nằm trong kho riêng của HT; ngược lại đã gửi lỗi và trả null. */
+    private function ownedSongId(array $body): ?string {
+        $churchId = (int)($body['church_id'] ?? 0);
+        if (!$this->canManage($churchId)) return null;
+        $songId = trim((string)($body['song_id'] ?? ''));
+        if ($songId === '' || !ChurchSongService::owns($churchId, $songId)) {
+            Response::notFound('Bài không nằm trong kho riêng của Hội Thánh này');
+            return null;
+        }
+        return $songId;
+    }
+
+    private function auditSong(string $action, string $songId, array $body): void {
+        require_once __DIR__ . '/../core/AuditLogger.php';
+        AuditLogger::log($action, (int)Auth::userId(), null, ['song_id' => $songId, 'church_id' => (int)($body['church_id'] ?? 0), 'target_category_id' => $body['target_category_id'] ?? null]);
     }
 
     /** Trả false (đã gửi lỗi) nếu HT không tồn tại hoặc người dùng không quản lý được. */

@@ -215,8 +215,9 @@ final class ChurchService {
                 $password = self::randomPassword();
                 $userId = UserService::createWithProfile($username, $password, $systemRole, "{$label} " . strtoupper($abbr), 'Piano / Đệm Hát');
                 DB::run('INSERT INTO church_members (church_id, user_id, role, status) VALUES (?, ?, ?, ?)', [(int)$church['id'], $userId, $churchRole, self::STATUS_ACTIVE]);
-                // Mật khẩu do hệ thống sinh và đã hiện trên màn hình: bắt đổi ở lần đăng nhập đầu.
-                UserService::setForcedPasswordChange($userId, true);
+                // Chỉ tài khoản quản trị HT bị bắt đổi mật khẩu lần đầu. banhat/bannhac là tài khoản DÙNG CHUNG
+                // nhiều người/thiết bị: nếu một người đổi thì những người còn lại mất quyền vào.
+                if ($churchRole === self::ROLE_ADMIN) UserService::setForcedPasswordChange($userId, true);
                 $accounts[] = ['username' => $username, 'password' => $password, 'label' => "{$label} (" . ($churchRole === self::ROLE_ADMIN ? 'quản trị HT' : 'thành viên') . ')'];
             }
             $pdo->commit();
@@ -311,9 +312,19 @@ final class ChurchService {
         return $name;
     }
 
+    /** Chữ có dấu tiếng Việt → chữ gốc (iconv//TRANSLIT làm mất dấu trên Windows/không có intl). */
+    private const VI_ASCII = [
+        'a' => 'àáảãạăắằẳẵặâấầẩẫậ', 'd' => 'đ', 'e' => 'èéẻẽẹêếềểễệ', 'i' => 'ìíỉĩị',
+        'o' => 'òóỏõọôốồổỗộơớờởỡợ', 'u' => 'ùúủũụưứừửữự', 'y' => 'ỳýỷỹỵ',
+    ];
+
     private static function uniqueSlug(string $name): string {
-        $ascii = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', str_replace(['đ', 'Đ'], ['d', 'D'], $name)) ?: '';
-        $base = trim((string)preg_replace('/[^a-z0-9]+/', '-', strtolower($ascii)), '-');
+        $map = [];
+        foreach (self::VI_ASCII as $plain => $accented) {
+            foreach (mb_str_split($accented) as $ch) $map[$ch] = $plain;
+        }
+        $ascii = strtr(mb_strtolower($name, 'UTF-8'), $map);
+        $base = trim((string)preg_replace('/[^a-z0-9]+/', '-', $ascii), '-');
         if ($base === '') $base = 'ht';
         $slug = $base;
         while (DB::run('SELECT 1 FROM churches WHERE slug = ?', [$slug])->fetchColumn()) {
