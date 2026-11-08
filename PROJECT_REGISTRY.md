@@ -130,6 +130,7 @@ SheetApp/
 │   │   ├── NotificationService.php     # In-app notifications
 │   │   ├── NotificationPreferenceService.php # Tùy chọn thông báo đa kênh
 │   │   ├── NotificationDeliveryService.php   # Dispatcher kênh webhook/email
+│   │   ├── MusicXmlHealthService.php   # Báo cáo chất lượng MusicXML + phát hiện bài trùng khi nhập
 │   │   ├── ImportService.php
 │   │   └── OmrService.php
 │   ├── omr_worker.php        # OMR background worker (Audiveris / OEMER)
@@ -451,6 +452,13 @@ Ghi chú nằm trong `storage/data/annotations/*.json`; settings/notes theo user
 
 > Chỉ giữ 5 mục mới nhất. Nhật ký đầy đủ: `docs/history/CHANGELOG_2026.md`. Khi thêm mục mới, đưa mục cũ nhất ở đây sang file đó.
 
+## 2026-11-08 (b) — Báo cáo chất lượng MusicXML + phát hiện bài trùng khi nhập
+
+- Đo kho 1.731 bài (chỉ đọc): 0 XML hỏng/thiếu, 0 phần nhạc rỗng; 10 bài có hợp âm trùng cùng vị trí, 2 bài có lời rỗng; 147 nhóm trùng tên chuẩn hoá (nhiều nhóm là cùng bài ở tuyển tập khác nhau) và 4 nhóm trùng nội dung XML y hệt nhưng khác tên.
+- `api/services/MusicXmlHealthService.php` (mới): `analyze()` báo hợp âm trùng, lời rỗng/không có lời, toàn dấu lặng, XML hỏng; `findDuplicates()` so tên chuẩn hoá (bỏ số đầu, dấu câu) và nội dung y hệt (so kích thước trước rồi mới băm). Chỉ so với bài công khai để không lộ tên bài riêng tư. CHỈ BÁO CÁO: không sửa XML, không chặn lưu.
+- `ImportService::storeImportedSong` tính báo cáo TRƯỚC khi lưu và trả thêm `warnings`/`duplicates` (cả đường công khai lẫn riêng tư; lỗi phân tích không làm hỏng việc nhập). `assets/js/importer.js` (chỉ Modern; Classic giữ nguyên vì trường mới là phụ thêm) hiện danh sách ⚠ dưới kết quả nhập.
+- Công cụ `tools/scan_library_health.php` (CLI, chỉ đọc) liệt kê toàn kho. Test `tests/musicxml_health_regression.php` (17 check). Chưa làm: tự sửa hợp âm trùng (cần chủ dự án duyệt từng bài), chặn/hợp nhất bài trùng.
+
 ## 2026-11-08 — Dọn chất lượng mã + độ tin cậy test
 
 - Tách file PHP vượt 600 dòng: `ManagerService` (634→512) giao 3 hàm phiên bản MusicXML cho `ManagerVersionHelper`; `LiveSyncService` (640→525) giao vòng lặp SSE cho `LiveSyncStreamHelper` (giữ `session_write_close`, `set_time_limit(40)` và đọc phòng ở service). Hành vi không đổi; test `live_sync_last_event_id` đọc cả hai file khi kiểm mã ping 15s.
@@ -485,10 +493,3 @@ Ghi chú nằm trong `storage/data/annotations/*.json`; settings/notes theo user
 - **S4 (bước đầu):** tab "Hội Thánh" ở `/manager/` (`manager/partials/tab_churches.php`, `manager/js/manager-churches.js`, `ApiService.churches`), chỉ hiện khi cờ MULTI_CHURCH bật: chọn HT đang làm việc, vào HT bằng mã mời, quản trị HT duyệt/đổi vai trò/khóa/đổi tên/đổi mã, admin hệ thống tạo HT. Phát `church:changed` trên EventBus. E2E `e2e/manager-churches.spec.js` (Chromium + WebKit, bản sao cô lập). **Chưa có:** nút đổi HT trong app chính (Modern/Classic). Lỗi sẵn có: header `/manager/` tràn ngang ~10px ở 390px.
 
 - **Quản lý HT trong tab Thành viên (2026-11-05, nhánh feat/church-admin):** cột "Hội Thánh" + nút ⛪ HT (gán/gỡ/đổi vai trò; `manager-user-churches.js`); tạo HT kèm 3 tài khoản `banhat/bannhac/admin.<viết tắt>` (`ChurchService::createWithAccounts`, mật khẩu ngẫu nhiên hiện một lần); xóa HT an toàn (`ChurchService::delete`: xóa chương trình + quan hệ thành viên, giữ tài khoản/bài/XML, danh mục riêng → admin_only); quản trị HT tải bài XML vào danh mục riêng của HT mình (`ImportController::authorizeUpload`). Bài hát và bộ hợp âm dùng chung hết. API `churches`: `delete`, `add_member`, `remove_member`, `create` nhận `abbr`. Test `tests/multi_church_accounts_regression.php` (44), e2e `manager-user-churches`, `church-private-songs`.
-
-## 2026-11-05 (b) — Tập luyện v2 + Band nhạc v2 (nhánh feat/learn-v2, feat/band-v2; chưa merge)
-
-- **Tập luyện (`/learn/`):** 3 chế độ Nghe & Đệm / Chơi / Tập bè (chỉ hiện thẻ của chế độ đang chọn, `data-mode` đặt bởi `learn-controls.js`; chế độ cũ `chord` gộp vào Nghe & Đệm); tùy chỉnh đệm (điệu, độ dày, âm lượng) gom vào mục Nâng cao thu gọn, ngoài chỉ còn dòng "Điệu: …"; thanh trên không cắt tên bài; `assets/js/learn/ui/learn-week-plan.js` — "Tuần này cần tập" lấy bài từ chương trình lễ đã phát hành gần ngày nhất. E2E `e2e/learn-v2.spec.js`.
-- **Band nhạc (`/live-band/`, nhãn trụ cột đổi từ "Biểu Diễn"):** sửa lỗi nặng — danh sách bài luôn rỗng (đọc `res.data` trong khi `songs.list()` trả mảng); mọi lệnh cuộn theo ô nhịp im lặng (`MusicalPosition` chỉ biết container app chính → thêm `attachContainer` + `ResizeObserver` tính lại vị trí); cue không bao giờ hiện ở máy nhạc công (so `expiresAt` giây với `Date.now()` ms); `TransposeEngine.transposeKey` không tồn tại → `calcKey`; nút Tông ±1, BPM ±5, Đếm nhịp, Pad của Ca trưởng lệch id nên không gắn được; đèn nhịp không nháy.
-- **Tính năng mới:** lệnh sân khấu có xác nhận "✓ Đã nhận" (`live_sync&action=ack|acks`, `LiveSyncService::ackCue/cueAcks`, `stage-cue-ack.js`; Ca trưởng thấy "Đã nhận X/Y"); dịch giọng THẬT cho bản nhạc (`stage-score-transpose.js`, trước đây chỉ đổi nhãn) kèm vai trò nhạc cụ chuyển giọng Trumpet/Clarinet Bb +2, Sax Alto Eb +9, Horn F +7 (chỉ trên máy người đó); lật trang tự động theo nhịp (`stage-autoturn.js`, nút "⏯ Tự lật trang", hỗ trợ 6/8 và vòng lặp A-B). Test: `tests/live_sync_cue_ack_regression.php` (15), `e2e/live-band-{scroll,cue-ack,instrument-transpose,autoturn}.spec.js`.
-- **Chưa làm:** con trỏ bản nhạc theo âm thanh (ScoreTimeline), âm thanh mẫu thật (cần duyệt bản quyền mẫu), rút 12 kiểu đệm còn 3, offline cho Band, khóa phòng Live theo Hội Thánh, lật trang theo nốt nghe được (tầng micro).

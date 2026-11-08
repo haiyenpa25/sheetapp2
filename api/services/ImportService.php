@@ -6,6 +6,7 @@ require_once __DIR__ . '/../core/DB.php';
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/SongService.php';
 require_once __DIR__ . '/ChordSetService.php';
+require_once __DIR__ . '/MusicXmlHealthService.php';
 require_once __DIR__ . '/../import_helpers.php';
 require_once __DIR__ . '/../import_scrapers.php';
 
@@ -133,10 +134,12 @@ class ImportService {
             $content = self::unpackMxl($content);
             $metadata['ext'] = 'xml';
         }
+        // Phải tính trước khi lưu, nếu không bài vừa nhập sẽ tự khớp với chính nó.
+        $health = self::healthReport($content, (string)($metadata['title'] ?? ''));
         $categoryId = !empty($metadata['category_id']) ? (int)$metadata['category_id'] : 1;
         $effective = SongService::clampToCategory(SongService::normalizeVisibility($metadata, 'public'), $categoryId);
         if ($effective['visibility'] !== 'public') {
-            return self::storePrivateSong($content, $metadata);
+            return array_merge(self::storePrivateSong($content, $metadata), $health);
         }
         $dir = self::resolveImportDir($categoryId);
         [$filename, $path, $handle] = self::reserveImportFile($dir, $metadata);
@@ -158,14 +161,31 @@ class ImportService {
             throw $error;
         }
         self::finalizeImportedSong($song);
-        return [
+        return array_merge([
             'success'    => true,
             'title'      => $metadata['title'],
             'key'        => $key,
             'visibility' => $song['visibility'] ?? 'public',
             'is_public'  => $song['is_public'] ?? 1,
             'song'       => $song
-        ];
+        ], $health);
+    }
+
+    /**
+     * Báo cáo chất lượng trước khi lưu (chỉ cảnh báo, không chặn, không sửa XML).
+     * Lỗi của bước phân tích không bao giờ được làm hỏng việc nhập bài.
+     * @return array{warnings: string[], duplicates: array}
+     */
+    private static function healthReport(string $content, string $title): array {
+        try {
+            return [
+                'warnings'   => MusicXmlHealthService::analyze($content),
+                'duplicates' => MusicXmlHealthService::findDuplicates(DB::pdo(), $title, $content, dirname(__DIR__, 2)),
+            ];
+        } catch (Throwable $error) {
+            error_log('[ImportService] healthReport failed: ' . $error->getMessage());
+            return ['warnings' => [], 'duplicates' => []];
+        }
     }
 
     public static function search(string $pageUrl, string $title = '', array $options = []): array {

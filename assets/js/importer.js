@@ -197,7 +197,7 @@ const Importer = (() => {
       _showProgress('Đã tìm thấy nhạc, đang lưu...', 80);
       await _delay(300);
       const visBadge = (data.song?.visibility === 'private') ? '🔒 Nội bộ (Private)' : '🌐 Công khai (Public)';
-      _showResult(`✅ Import thành công: <strong>${_esc(data.title)}</strong> <span class="tag">${visBadge}</span>`, 'success');
+      _showResult(`✅ Import thành công: <strong>${_esc(data.title)}</strong> <span class="tag">${visBadge}</span>${_noticeHtml(data)}`, 'success');
       _triggerSuccess(data.song);
 
     } catch (err) {
@@ -234,7 +234,7 @@ const Importer = (() => {
       if (!data.success) throw new Error(data.message || 'Upload thất bại');
 
       const visBadge = (data.song?.visibility === 'private') ? '🔒 Nội bộ (Private)' : '🌐 Công khai (Public)';
-      _showResult(`✅ Upload thành công: <strong>${_esc(data.title)}</strong> — ${visBadge}`, 'success');
+      _showResult(`✅ Upload thành công: <strong>${_esc(data.title)}</strong> — ${visBadge}${_noticeHtml(data)}`, 'success');
       _triggerSuccess(data.song);
 
     } catch (err) {
@@ -267,7 +267,7 @@ const Importer = (() => {
       if (!data.success) throw new Error(data.message || 'Tải file thất bại');
 
       const visBadge = (data.song?.visibility === 'private') ? '🔒 Nội bộ (Private)' : '🌐 Công khai (Public)';
-      _showResult(`✅ Import thành công: <strong>${_esc(data.title)}</strong> — ${visBadge}`, 'success');
+      _showResult(`✅ Import thành công: <strong>${_esc(data.title)}</strong> — ${visBadge}${_noticeHtml(data)}`, 'success');
       _triggerSuccess(data.song);
 
     } catch (err) {
@@ -422,6 +422,15 @@ const Importer = (() => {
     resultEl()?.classList.add('hidden');
     if (progressTxt()) progressTxt().textContent = text;
     if (progressBar()) progressBar().style.width = percent + '%';
+  }
+
+  /** Cảnh báo chất lượng XML + bài trùng từ server (chỉ thông báo, bài vẫn đã lưu). */
+  function _noticeHtml(data) {
+    const items = [];
+    (data.duplicates || []).forEach(d => items.push(`Có thể trùng bài <strong>${_esc(d.title)}</strong> (${_esc(d.reason)})`));
+    (data.warnings || []).forEach(w => items.push(_esc(w)));
+    if (!items.length) return '';
+    return `<ul class="import-notice">${items.map(i => `<li>⚠ ${i}</li>`).join('')}</ul>`;
   }
 
   function _showResult(html, type) {

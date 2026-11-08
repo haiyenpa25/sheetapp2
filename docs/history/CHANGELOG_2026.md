@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-11-05 (b) — Tập luyện v2 + Band nhạc v2 (nhánh feat/learn-v2, feat/band-v2; chưa merge)
+
+- **Tập luyện (`/learn/`):** 3 chế độ Nghe & Đệm / Chơi / Tập bè (chỉ hiện thẻ của chế độ đang chọn, `data-mode` đặt bởi `learn-controls.js`; chế độ cũ `chord` gộp vào Nghe & Đệm); tùy chỉnh đệm (điệu, độ dày, âm lượng) gom vào mục Nâng cao thu gọn, ngoài chỉ còn dòng "Điệu: …"; thanh trên không cắt tên bài; `assets/js/learn/ui/learn-week-plan.js` — "Tuần này cần tập" lấy bài từ chương trình lễ đã phát hành gần ngày nhất. E2E `e2e/learn-v2.spec.js`.
+- **Band nhạc (`/live-band/`, nhãn trụ cột đổi từ "Biểu Diễn"):** sửa lỗi nặng — danh sách bài luôn rỗng (đọc `res.data` trong khi `songs.list()` trả mảng); mọi lệnh cuộn theo ô nhịp im lặng (`MusicalPosition` chỉ biết container app chính → thêm `attachContainer` + `ResizeObserver` tính lại vị trí); cue không bao giờ hiện ở máy nhạc công (so `expiresAt` giây với `Date.now()` ms); `TransposeEngine.transposeKey` không tồn tại → `calcKey`; nút Tông ±1, BPM ±5, Đếm nhịp, Pad của Ca trưởng lệch id nên không gắn được; đèn nhịp không nháy.
+- **Tính năng mới:** lệnh sân khấu có xác nhận "✓ Đã nhận" (`live_sync&action=ack|acks`, `LiveSyncService::ackCue/cueAcks`, `stage-cue-ack.js`; Ca trưởng thấy "Đã nhận X/Y"); dịch giọng THẬT cho bản nhạc (`stage-score-transpose.js`, trước đây chỉ đổi nhãn) kèm vai trò nhạc cụ chuyển giọng Trumpet/Clarinet Bb +2, Sax Alto Eb +9, Horn F +7 (chỉ trên máy người đó); lật trang tự động theo nhịp (`stage-autoturn.js`, nút "⏯ Tự lật trang", hỗ trợ 6/8 và vòng lặp A-B). Test: `tests/live_sync_cue_ack_regression.php` (15), `e2e/live-band-{scroll,cue-ack,instrument-transpose,autoturn}.spec.js`.
+- **Chưa làm:** con trỏ bản nhạc theo âm thanh (ScoreTimeline), âm thanh mẫu thật (cần duyệt bản quyền mẫu), rút 12 kiểu đệm còn 3, offline cho Band, khóa phòng Live theo Hội Thánh, lật trang theo nốt nghe được (tầng micro).
+
+
 ## 2026-10-31 (b) — Giữ đăng nhập trên thiết bị + lưu tài khoản (Modern + Classic), bộ HD mặc định cho bài trong chương trình
 
 - Đăng nhập: form có 2 ô — **Lưu tài khoản** (chỉ lưu TÊN trong `localStorage`, không bao giờ lưu mật khẩu) và **Giữ đăng nhập trên thiết bị này (30 ngày)**, mặc định TẮT (máy dùng chung). Máy chủ: `api/core/RememberLogin.php` (token `selector:validator`, CSDL chỉ lưu SHA-256, bảng `auth_remember_tokens` tự tạo), cookie `sheet_remember` HttpOnly/SameSite=Lax/Secure khi HTTPS. `Session::start()` dựng lại phiên từ cookie; mỗi lần dùng validator được xoay; dùng lại cookie cũ → hủy token; đăng xuất, đổi mật khẩu (tự đổi hoặc Admin đặt lại), khóa tài khoản đều vô hiệu token. Test `tests/remember_login_regression.php` (19 check) + kiểm HTTP thật trên bản sao cô lập (đăng nhập nhớ → mất PHPSESSID vẫn vào được; không tích → không có cookie; đăng xuất → cookie cũ vô hiệu).
