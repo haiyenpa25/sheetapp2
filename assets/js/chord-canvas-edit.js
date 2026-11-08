@@ -244,7 +244,7 @@ const ChordCanvasEdit = (() => {
   const OFFLINE_QUEUE_KEY = 'sheetapp_offline_chord_queue_v1';
   let _offlineQueue = [];
   function _loadOfflineQueue() { try { const raw = localStorage.getItem(OFFLINE_QUEUE_KEY); if (raw) _offlineQueue = JSON.parse(raw); } catch (_) { _offlineQueue = []; } }
-  function _saveOfflineQueue() { try { localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(_offlineQueue)); } catch (_) {} }
+  function _saveOfflineQueue() { try { localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(_offlineQueue)); } catch (_) { /* localStorage bị chặn (chế độ riêng tư): chỉ mất ghi nhớ */ } }
   function _ensureStatusChip() {
     if (_statusChipEl && document.body.contains(_statusChipEl)) return _statusChipEl;
     let el = document.getElementById('cc-status-chip');

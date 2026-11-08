@@ -102,7 +102,7 @@ const AutoScroller = (() => {
           }
         }
       }
-    } catch(e) {}
+    } catch(e) { /* không đọc được tempo trong OSMD: dùng giá trị dự phòng bên dưới */ }
 
     return window.Metronome?.getBpm?.() || 80;
   }
@@ -191,7 +191,7 @@ const AutoScroller = (() => {
             const curMeasure    = osmd.cursor.iterator.CurrentMeasureIndex ?? 0;
             const totalMeasures = osmd.Sheet?.SourceMeasures?.length ?? 1;
             window.App?.updateMeasureProgress?.(curMeasure + 1, totalMeasures);
-          } catch(e) {}
+          } catch(e) { /* con trỏ OSMD chưa sẵn sàng: bỏ qua lần cập nhật tiến độ này */ }
 
           // Tính scroll target mới
           if (osmd.cursor.cursorElement) {

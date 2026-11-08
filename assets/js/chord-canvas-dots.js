@@ -359,7 +359,7 @@ const ChordCanvasDots = (() => {
           return y * unit * zoom;
         }
       }
-    } catch (_) {}
+    } catch (_) { /* không đọc được kích thước OSMD: trả null để nơi gọi dùng giá trị dự phòng */ }
     return null;
   }
 

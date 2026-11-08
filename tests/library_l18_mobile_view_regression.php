@@ -53,7 +53,8 @@ if (!file_exists($mobileControllerJsPath) || !file_exists($sheetCssPath) || !fil
 }
 
 $mobileControllerJs = file_get_contents($mobileControllerJsPath);
-$osmdRendererJs = file_get_contents($osmdRendererJsPath);
+// Phần gắn nhãn/ẩn chữ tiêu đề trong SVG nằm ở osmd-svg-text.js (tách khỏi renderer để dưới 600 dòng) nên đọc cả hai.
+$osmdRendererJs = file_get_contents($osmdRendererJsPath) . "\n" . file_get_contents($root . '/assets/js/osmd-svg-text.js');
 $songLoaderJs = file_get_contents($songLoaderJsPath);
 $appJs = file_get_contents($appJsPath);
 $sheetCss = file_get_contents($sheetCssPath);

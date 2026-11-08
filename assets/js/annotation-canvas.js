@@ -27,10 +27,10 @@ const AnnotationCanvas = (() => {
           selected = parsed; hasPreference = true;
         }
       }
-    } catch (_) {}
-    try { instrumentId = localStorage.getItem(MY_INSTRUMENT_KEY) || instrumentId; } catch (_) {}
+    } catch (_) { /* localStorage bị chặn (chế độ riêng tư): chỉ mất ghi nhớ */ }
+    try { instrumentId = localStorage.getItem(MY_INSTRUMENT_KEY) || instrumentId; } catch (_) { /* localStorage bị chặn (chế độ riêng tư): chỉ mất ghi nhớ */ }
     window.AnnotationPanel.init({ activate: () => { revealed = true; return ensureLoaded(); }, reload, filter, filterAll,
-      edit: setAddMode, instrument: id => { instrumentId = id; try { localStorage.setItem(MY_INSTRUMENT_KEY, id); } catch (_) {} if (editing && selected !== null && !selected.includes(id)) { selected.push(id); remember(); } else updatePanel(); },
+      edit: setAddMode, instrument: id => { instrumentId = id; try { localStorage.setItem(MY_INSTRUMENT_KEY, id); } catch (_) { /* localStorage bị chặn (chế độ riêng tư): chỉ mất ghi nhớ */ } if (editing && selected !== null && !selected.includes(id)) { selected.push(id); remember(); } else updatePanel(); },
       openEditor, relocate: note => { relocating = note; setAddMode(true); },
       save, createInstrument, color: saveInstrumentColor, saveBand });
     bindInteractions(); observeSheet(); updatePanel();
@@ -132,7 +132,7 @@ const AnnotationCanvas = (() => {
   function toggleAddMode() { setAddMode(!editing); }
   function remember() {
     hasPreference = true;
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(selected)); } catch (_) {}
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(selected)); } catch (_) { /* localStorage bị chặn (chế độ riêng tư): chỉ mất ghi nhớ */ }
     build();
   }
   function filter(id, checked) {

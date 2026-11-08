@@ -25,7 +25,7 @@ const ChordCanvas = (() => {
       getContainer: () => _containerEl
     });
 
-    try { _highlightMode = localStorage.getItem(HIGHLIGHT_KEY) === 'true'; } catch(e) {}
+    try { _highlightMode = localStorage.getItem(HIGHLIGHT_KEY) === 'true'; } catch(e) { /* localStorage bị chặn (chế độ riêng tư): chỉ mất ghi nhớ */ }
     const hlBtn = document.getElementById('btn-menu-chord-highlight') || document.getElementById('btn-chord-highlight'); if (hlBtn) { hlBtn.classList.toggle('active', _highlightMode); hlBtn.addEventListener('click', toggleHighlight); }
 
     const container = document.getElementById('osmd-container');
@@ -94,7 +94,7 @@ const ChordCanvas = (() => {
         try {
           const bb = sn.getBBox ? sn.getBBox() : null;
           if (bb && Math.abs(bb.y - sys.avgY) < 90 && bb.y < minNoteTop) minNoteTop = bb.y;
-        } catch(e) {}
+        } catch(e) { /* getBBox ném lỗi khi phần tử đang ẩn hoặc chưa gắn vào DOM: bỏ qua phần tử đó */ }
       });
       if (minNoteTop < Infinity && sys.minY + 4 >= minNoteTop - 6) {
         sys.minY = Math.min(sys.minY, minNoteTop - 12);
@@ -105,14 +105,14 @@ const ChordCanvas = (() => {
         let chordY = sys.minY;
         const curX = parseFloat(c.getAttribute('data-orig-x') || 0);
         let curW = 20;
-        try { curW = c.getBBox ? c.getBBox().width : (c.textContent.trim().length * 10); } catch(e){}
+        try { curW = c.getBBox ? c.getBBox().width : (c.textContent.trim().length * 10); } catch(e) { /* getBBox ném lỗi khi phần tử đang ẩn hoặc chưa gắn vào DOM: bỏ qua phần tử đó */ }
         staveNotes.forEach(sn => {
           try {
             const bb = sn.getBBox ? sn.getBBox() : null;
             if (bb && Math.abs(bb.y - sys.avgY) < 90 && !(bb.x + bb.width < curX || bb.x > curX + curW) && chordY + 3 >= bb.y - 4) {
               chordY = Math.min(chordY, bb.y - 12);
             }
-          } catch(e) {}
+          } catch(e) { /* getBBox ném lỗi khi phần tử đang ẩn hoặc chưa gắn vào DOM: bỏ qua phần tử đó */ }
         });
         c.setAttribute('y', chordY);
         if (curX < prevRight + 6) {
@@ -235,7 +235,7 @@ const ChordCanvas = (() => {
 
   function setHighlightMode(on) {
     _highlightMode = on;
-    try { localStorage.setItem(HIGHLIGHT_KEY, on ? 'true' : 'false'); } catch(e) {} (document.getElementById('btn-menu-chord-highlight') || document.getElementById('btn-chord-highlight'))?.classList?.toggle?.('active', !!on);
+    try { localStorage.setItem(HIGHLIGHT_KEY, on ? 'true' : 'false'); } catch(e) { /* localStorage bị chặn (chế độ riêng tư): chỉ mất ghi nhớ */ } (document.getElementById('btn-menu-chord-highlight') || document.getElementById('btn-chord-highlight'))?.classList?.toggle?.('active', !!on);
     _build();
   }
 
@@ -358,7 +358,7 @@ const ChordCanvas = (() => {
             r.chords.forEach(({ measureIdx, noteIdx, chord }) => { _customChords[`${measureIdx}_${noteIdx}`] = chord; });
           }
           window.ChordCanvasEdit?.setBaseChecksum?.(r?.checksum || '', _customChords);
-        } catch(e) {}
+        } catch(e) { console.error('[ChordCanvas] Không tải được bộ hợp âm:', e); }
       }
     }
     if (name === 'default' || _prevSet === 'default') {
@@ -488,7 +488,7 @@ const ChordCanvas = (() => {
         if (r?.success && Array.isArray(r.sets)) {
           sets = ['HD', 'default', ...r.sets.filter(s => s !== 'HD' && s !== 'default')];
         }
-      } catch(e) {}
+      } catch(e) { console.warn('[ChordCanvas] Không tải được danh sách bộ hợp âm, dùng HD/default:', e); }
     }
     if (songId !== window.App?.getCurrentSongId?.()) return;
 

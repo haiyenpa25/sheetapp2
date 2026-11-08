@@ -27,6 +27,8 @@ const OSMDRenderer = (() => {
     if (!osmd && (typeof opensheetmusicdisplay === 'undefined' || !opensheetmusicdisplay.OpenSheetMusicDisplay) && window.ScriptLoader?.loadWithFallback) await window.ScriptLoader.loadWithFallback(OSMD_LOCAL_SRC, OSMD_CDN_SRC);
     const inst = _createInstanceSync(); if (!inst) throw new Error('OSMD chưa được khởi tạo. Gọi init() trước.'); return inst;
   }
+  // Một subscriber lỗi không được chặn các subscriber sau, nhưng phải để lại dấu vết để dò lỗi hiển thị.
+  function _notifyReady() { _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch (err) { console.error('[OSMDRenderer] onReady callback lỗi:', err); } }); }
   /** L5-5: Kiểm tra container có đang hiển thị và có bề rộng hợp lệ để render OSMD hay không */
   function _canRender() {
     if (!containerId) return false;
@@ -72,7 +74,7 @@ const OSMDRenderer = (() => {
         if (window.ChordOverlay) window.ChordOverlay.onOSMDRendered();
         if (!isLoaded) {
           isLoaded = true;
-          _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} });
+          _notifyReady();
         }
       }
     }, window.OSMDRenderCore?.RESIZE_DEBOUNCE_MS || 250));
@@ -201,7 +203,7 @@ const OSMDRenderer = (() => {
       _compactTitleSVG();
       _tagChordSymbols();
       isLoaded = true;
-      _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} });
+      _notifyReady();
       return osmd;
     } catch (err) {
       if (token !== _renderToken) return osmd;
@@ -259,7 +261,7 @@ const OSMDRenderer = (() => {
       _titleCompacted = false;
       _compactTitleSVG();
       _tagChordSymbols();
-      _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} });
+      _notifyReady();
       return osmd;
     } catch (err) {
       if (token !== _renderToken) return osmd;
@@ -300,7 +302,7 @@ const OSMDRenderer = (() => {
       _titleCompacted = false; _compactTitleSVG(); _tagChordSymbols();
       if (window.ChordCanvas) window.ChordCanvas.reposition();
       if (window.ChordOverlay) window.ChordOverlay.onOSMDRendered();
-      _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} });
+      _notifyReady();
       return osmd;
     } catch (err) {
       if (token !== _renderToken) return osmd;
@@ -330,7 +332,7 @@ const OSMDRenderer = (() => {
       _titleCompacted = false; _compactTitleSVG(); _tagChordSymbols();
       if (window.ChordCanvas) window.ChordCanvas.reposition();
       if (window.ChordOverlay) window.ChordOverlay.onOSMDRendered();
-      _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} });
+      _notifyReady();
     }
   }
 
@@ -350,7 +352,7 @@ const OSMDRenderer = (() => {
     if (window.ChordOverlay) window.ChordOverlay.onOSMDRendered();
     if (!isLoaded) {
       isLoaded = true;
-      _onReadyCallbacks.forEach(cb => { try { cb(osmd); } catch(e) {} });
+      _notifyReady();
     }
     return true;
   }
@@ -374,64 +376,11 @@ const OSMDRenderer = (() => {
   /** Tinh chỉnh title SVG sau render — ẩn title bị duplicate, style đẹp hơn */
   const _svgText = () => (typeof OSMDSvgText !== 'undefined' ? OSMDSvgText : null);
   const CHORD_TEXT_REGEX = { test: s => !!_svgText()?.CHORD_TEXT_REGEX.test(s) };
-  const _getMetaTextNodes = () => _svgText()?.getMetaTextNodes(osmd) || { title: null, meta: [] };
   const _getLyricTextNodes = () => _svgText()?.getLyricTextNodes(osmd) || new Set();
 
   function _compactTitleSVG() {
     if (_titleCompacted) return;
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    const svg = container.querySelector('svg');
-    if (!svg) return;
-
-    const texts = Array.from(svg.querySelectorAll('text')).filter(t => !(t.getAttribute('font-family') || '').includes('OSMDChordFont'));
-    if (!texts.length) { _titleCompacted = true; return; }
-
-    // Ưu tiên node thật của OSMD. Đoán "chữ to nhất = tiêu đề" sai khi hợp âm
-    // được phóng to (preset Sân khấu) — hợp âm đầu tiên bị gắn nhầm class tiêu đề.
-    const { title: graphicTitle, meta: metaNodes } = _getMetaTextNodes();
-    let titleEl = graphicTitle;
-    let maxSize = titleEl ? parseFloat(titleEl.getAttribute('font-size') || '0') : 0;
-    if (!titleEl) {
-      // OSMD không vẽ tiêu đề (vd. chế độ điện thoại) → chỉ nhận chữ thật sự lớn hơn lời,
-      // có ≥3 ký tự chữ; nếu không có thì bỏ qua (tránh gắn nhầm dấu "-" hay hợp âm).
-      const lyricNodes = _getLyricTextNodes();
-      const lyricFs = Math.max(0, ...[...lyricNodes].map(t => parseFloat(t.getAttribute('font-size') || '0')));
-      texts.forEach(t => {
-        const s = t.textContent.trim();
-        if (lyricNodes.has(t) || CHORD_TEXT_REGEX.test(s) || s.length < 3 || !/\p{L}{2}/u.test(s)) return;
-        const fs = parseFloat(t.getAttribute('font-size') || '0');
-        if (fs > lyricFs + 2 && fs > maxSize) { maxSize = fs; titleEl = t; }
-      });
-    }
-
-    if (titleEl) {
-      titleEl.classList.add('osmd-title-text');
-      const tspan = titleEl.querySelector('tspan');
-      if (tspan) {
-        const raw = tspan.textContent.trim();
-        if (raw === raw.toUpperCase() && raw.length > 2 && !/^\d+$/.test(raw)) {
-          tspan.textContent = raw.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
-        }
-      }
-
-      const isMobile = typeof window !== 'undefined' && window.innerWidth <= 680;
-      const titleContent = (titleEl.querySelector('tspan') || titleEl).textContent.trim().toLowerCase();
-      texts.forEach(t => {
-        if (t === titleEl) return;
-        const content = t.textContent.trim().toLowerCase(), fs = parseFloat(t.getAttribute('font-size') || '0');
-        if (content === titleContent && fs < maxSize) t.style.display = 'none';
-      });
-      // Điện thoại: chỉ ẩn dòng tác giả/lời/bản quyền. Trước đây ẩn mọi chữ trong
-      // vòng 160 đơn vị quanh tiêu đề → mất luôn khổ 1–3 của hàng nhạc đầu tiên.
-      if (isMobile) metaNodes.forEach(t => { t.classList.add('osmd-meta-text'); t.style.display = 'none'; });
-    }
-
-    svg.querySelectorAll('rect').forEach(rect => {
-      const height = parseFloat(rect.getAttribute('height') || '999'), fill = rect.getAttribute('fill') || '', stroke = rect.getAttribute('stroke') || '';
-      if (height < 40 && stroke && stroke !== 'none' && fill === 'none') rect.style.display = 'none';
-    });
-    _titleCompacted = true;
+    _titleCompacted = !!_svgText()?.compactTitle(osmd, document.getElementById(containerId));
   }
 
   function _tagChordSymbols() {
@@ -500,25 +449,6 @@ const OSMDRenderer = (() => {
   }
   function getCompactMode() { return _isCompactMode; }
 
-  /**
-   * Ẩn/hiện chữ Điệp Khúc, Coda, D.C., Fine... trong SVG khi compact mode bật.
-   * Các text này xuất phát từ <rehearsal> hoặc <direction><words> trong MusicXML.
-   */
-  function _hideRepeatLabels(hide) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    const svg = container.querySelector('svg');
-    if (!svg) return;
-
-    const REPEAT_PATTERN = /^(đi[eệ]p\s*kh[úu]c|coda|d\.?c\.?|da\s*capo|fine|segno|d\.?s\.?|chorus|refrain)/i;
-
-    svg.querySelectorAll('text').forEach(t => {
-      const txt = t.textContent.trim();
-      if (REPEAT_PATTERN.test(txt)) {
-        t.style.display = hide ? 'none' : '';
-      }
-    });
-  }
 
   async function _ensureCompactLyricsReadable() {
     if (!_isCompactMode || !_compactBassHidden || !_compactVisibility) return;
@@ -585,7 +515,7 @@ const OSMDRenderer = (() => {
       drawComposer: drawCredits, drawCredits, drawSubtitle: drawCredits, drawLyricist: drawCredits,
       drawTitle: !compactPrefs.hideTitle, drawLyrics: !compactPrefs.hideLyrics, drawMeasureNumbers: !compactPrefs.hideMeasureNumbers
     });
-    setTimeout(() => _hideRepeatLabels(_isCompactMode), 400);
+    setTimeout(() => _svgText()?.hideRepeatLabels(document.getElementById(containerId), _isCompactMode), 400);
   }
   return {
     init, load, reload, transpose, setZoom, setZoomSilent, getInstance, getIsLoaded,

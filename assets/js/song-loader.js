@@ -16,7 +16,7 @@ const SongLoader = (() => {
     if (!song?.xmlPath) { AppUI.showToast('Bài hát chưa có file sheet nhạc', 'error'); return; }
 
     const loadToken = ++_currentLoadToken; _inFlightLoadToken = loadToken;
-    if (_currentAbortController) { try { _currentAbortController.abort(); } catch (e) {} }
+    if (_currentAbortController) { try { _currentAbortController.abort(); } catch (e) { /* abort() trên lượt tải đã kết thúc: bỏ qua */ } }
     _currentAbortController = window.SongLoaderCore?.beginLoad ? (window.SongLoaderCore.beginLoad().controller || new AbortController()) : new AbortController();
     const abortSignal = _currentAbortController.signal;
     profileOverride = profileOverride || 'HD';

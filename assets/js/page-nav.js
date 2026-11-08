@@ -46,7 +46,7 @@ const PageNav = (() => {
       if (savedMode === 'full' || savedMode === 'half') {
         _turnMode = savedMode;
       }
-    } catch(e) {}
+    } catch(e) { /* localStorage bị chặn (chế độ riêng tư): chỉ mất ghi nhớ */ }
 
     document.getElementById('btn-page-prev')?.addEventListener('click', goToPrev);
     document.getElementById('btn-page-next')?.addEventListener('click', goToNext);
@@ -277,7 +277,7 @@ const PageNav = (() => {
   function setTurnMode(mode) {
     if (mode !== 'half' && mode !== 'full') return;
     _turnMode = mode;
-    try { localStorage.setItem('sheetapp_page_turn_mode', mode); } catch(e) {}
+    try { localStorage.setItem('sheetapp_page_turn_mode', mode); } catch(e) { /* localStorage bị chặn (chế độ riêng tư): chỉ mất ghi nhớ */ }
     computePages();
   }
 
