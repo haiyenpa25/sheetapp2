@@ -358,7 +358,7 @@ const ChordCanvas = (() => {
             r.chords.forEach(({ measureIdx, noteIdx, chord }) => { _customChords[`${measureIdx}_${noteIdx}`] = chord; });
           }
           window.ChordCanvasEdit?.setBaseChecksum?.(r?.checksum || '', _customChords);
-        } catch(e) { console.error('[ChordCanvas] Không tải được bộ hợp âm:', e); }
+        } catch(e) { console.error('[ChordCanvas] Không tải được bộ hợp âm:', e); window.ChordCanvasEdit?.setBaseChecksum?.('__LOAD_ERROR__', _customChords); ['btn-add-chord-mode-bar', 'btn-menu-add-chord-mode'].forEach(id => { const b = document.getElementById(id); if (b) b.disabled = true; }); (window.App?.showToast || window.AppUI?.showToast)?.('Không tải được bộ hợp âm', 'error'); }
       }
     }
     if (name === 'default' || _prevSet === 'default') {
