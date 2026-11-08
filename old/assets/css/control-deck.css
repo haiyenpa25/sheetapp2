@@ -77,7 +77,7 @@ body #toolbar#toolbar #transpose-display { min-width: var(--o-h, 32px); }
   #btn-toolbar-compact, #btn-toolbar-scroll, #btn-toolbar-edit { padding: 0; width: 36px; min-width: 36px; justify-content: center; }
 }
 
-/* ── Điện thoại hẹp: header gọn — mọi nút cao 40px, tự xuống 3 hàng đều nhau ─────────────────────────────
+/* ── Điện thoại hẹp: header gọn — mọi nút cao 34px, tự xuống 3 hàng đều nhau ─────────────────────────────
  * .toolbar-controls dùng display:contents để ☰ và các nút cùng một dòng flex-wrap (hàng 1: ☰ Tông Gốc Bộ-hợp-âm Lời;
  * hàng 2: Zoom BPM Ký-hiệu Gọn; hàng 3: Cuộn Ghi-chú Soạn … ◀ ▶ ⛶ ⋮). */
 @media (max-width: 480px) {
@@ -89,15 +89,15 @@ body #toolbar#toolbar #transpose-display { min-width: var(--o-h, 32px); }
   body #toolbar#toolbar .transpose-controls, body #toolbar#toolbar .transpose-btn, body #toolbar#toolbar #transpose-display,
   body #toolbar#toolbar #chord-set-selector, body #toolbar#toolbar #zoom-slider, body #toolbar#toolbar #btn-lyric-view,
   body #toolbar#toolbar #btn-toolbar-metronome, body #toolbar#toolbar #btn-more-options, body #toolbar#toolbar #btn-fullscreen {
-    height: 40px !important; min-height: 40px !important; box-sizing: border-box;
+    height: 34px !important; min-height: 34px !important; box-sizing: border-box;
   }
   body #toolbar#toolbar .icon-btn, body #toolbar#toolbar .transpose-btn, body #toolbar#toolbar #btn-lyric-view,
   body #toolbar#toolbar #btn-open-sidebar, body #toolbar#toolbar #btn-more-options, body #toolbar#toolbar #btn-transpose-reset,
   body #toolbar#toolbar #btn-toolbar-compact, body #toolbar#toolbar #btn-toolbar-scroll, body #toolbar#toolbar #btn-toolbar-edit,
-  body #toolbar#toolbar #btn-toolbar-notes { width: 40px !important; min-width: 40px !important; padding: 0 !important; justify-content: center !important; }
+  body #toolbar#toolbar #btn-toolbar-notes { width: 34px !important; min-width: 34px !important; padding: 0 !important; justify-content: center !important; }
   body #toolbar#toolbar .control-group { gap: 4px !important; margin: 0 !important; }
   body #toolbar#toolbar .transpose-controls { gap: 0 !important; width: auto !important; }
-  body #toolbar#toolbar .transpose-controls .transpose-btn { width: 38px !important; min-width: 38px !important; }
+  body #toolbar#toolbar .transpose-controls .transpose-btn { width: 34px !important; min-width: 34px !important; }
   body #toolbar#toolbar #transpose-display { min-width: 26px !important; width: 26px !important; padding: 0 !important; font-size: .9rem !important; }
   /* "Gốc": chỉ mũi tên ↺ */
   body #toolbar#toolbar #btn-transpose-reset { font-size: 0 !important; display: inline-flex !important; align-items: center; }

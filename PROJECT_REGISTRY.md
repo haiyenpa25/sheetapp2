@@ -453,6 +453,13 @@ Ghi chú nằm trong `storage/data/annotations/*.json`; settings/notes theo user
 
 > Chỉ giữ 5 mục mới nhất. Nhật ký đầy đủ: `docs/history/CHANGELOG_2026.md`. Khi thêm mục mới, đưa mục cũ nhất ở đây sang file đó.
 
+## 2026-11-08 (e) — Thu nhỏ nút trên điện thoại/iPad (Modern thanh dưới, Classic toolbar)
+
+- Modern, điện thoại (≤680px): thanh dưới `#mobile-thumb-bar` hàng 44→36px, icon 1.4em→1.2em (≈16px), khe/lề 6→4px, `--dock-h` 104→84px (`assets/css/control-deck.css`): thanh cao 107→85px, chừa thêm chỗ cho bản nhạc. iPad dọc Modern dùng toolbar phía trên (không có thanh dưới) nên giữ nguyên.
+- Classic, `old/assets/css/ui-scale.css`: token riêng trên `#toolbar` (iPad/cảm ứng ≤1024px: nút 36px, chữ 13px; điện thoại ≤480px: 34px) — sidebar/modal vẫn 40px; `old/assets/css/control-deck.css` khối ≤480px: nút/transpose 40/38→34px. Toolbar điện thoại ~138→120px, iPad 85px.
+- Sàn vùng chạm theo CODING_STANDARDS §4.6 (32–36px). Nới ngưỡng e2e thanh dưới điện thoại 44/40→36: `m4-reader-layout` (M4-2a), `library-l1-mobile-view`, `library-r7-responsive`; HUD Biểu diễn và toolbar tablet Modern (M4-2c) vẫn 44. Test PHP không khóa các con số này.
+- Lưu ý: e2e `m4-reader-layout` M4-2c/M4-3/M4-5 (webkit) lỗi sẵn từ trước (đã xác nhận trên mã gốc), không do thay đổi này. Chạy e2e: robocopy bản sao bằng PowerShell (Git Bash làm hỏng cờ `/MIR`).
+
 ## 2026-11-08 (d) — Sheet nhạc: tách renderer, hết catch rỗng nuốt lỗi, chặn lưu đè khi tải bộ hợp âm lỗi
 
 - `osmd-renderer.js` 600→529 dòng: `compactTitle` và `hideRepeatLabels` chuyển sang `OSMDSvgText` (`osmd-svg-text.js`), renderer giữ hàm bọc `_compactTitleSVG`; 6 chỗ gọi callback sẵn sàng gom vào `_notifyReady()` có log lỗi. `/old/` dùng bản renderer riêng nên không đổi. Test L18 đọc cả hai file.
@@ -482,10 +489,3 @@ Ghi chú nằm trong `storage/data/annotations/*.json`; settings/notes theo user
 - Lưu ý: robocopy `/MIR` vào bản sao e2e phải thêm `/XF .sheetapp-e2e-isolated.json`, nếu không file đánh dấu bị xóa và Playwright từ chối chạy; chạy Playwright từ trong thư mục bản sao.
 - Dịch giọng (đề xuất mục 6): quét 55.440 phép dịch hợp âm (cả đường có Tonal và dự phòng) + 528 ca nhãn giọng — cao độ/hậu tố/bass đúng 100%. Sửa 2 chỗ nhãn giọng lệch hợp âm vẽ: `KeyService.displayKey` nay cho `D −1 = Db` (trước là `C#`, 7 thăng) và giọng thứ bậc 8 luôn `G#m` (trước `Abm` ở nguồn giáng); `performance-notes.js` (nút Tự đồng bộ) đi qua `KeyService` thay vì `transposeChord`. Test mới `tests/transpose_spelling_audit_regression.php` + `tests/js/transpose_spelling_audit.cjs`.
 - Kiểm lại đa Hội Thánh: `tools/verify_multi_church.php` ổn (2 HT, 0 chương trình mồ côi, 0 tài khoản chưa thuộc HT); 7 suite PHP và 16 e2e (Chromium + WebKit) đạt.
-
-## 2026-11-07 (b) — Toàn màn hình không đổi sáng/tối + rà lỗi linh tinh (giao diện mới)
-
-- Bấm **Toàn màn hình/Biểu diễn** trước đây tự ép `dark-mode` (ticket L1-5) và ghi cứng nền `#0c0d14`; chủ dự án coi là lỗi. Nay `ModeManager.setMode` không đụng `dark-mode` (người dùng đang sáng thì vẫn sáng, đang tối thì vẫn tối, thoát ra không đổi); nền `sheet-only-mode` dùng `var(--bg-base)` (`layout.css`, `library-polish.css`); nút Thoát có luật tương phản riêng cho giao diện sáng (`body.sheet-only-mode:not(.dark-mode) #btn-gig-exit`). Đảo khẳng định cũ ở `tests/library_l15_gig_mode_regression.php` và `e2e/library-l1-gig-mode.spec.js`. Kiểm bằng Chromium thật (máy tính + giả lập iPhone 390px).
-- Trợ năng: thêm `aria-label` cho 31 ô nhập chỉ có placeholder (`includes/modals.php`, `toolbar.php`, `sidebar.php`, `follow_leader_modal.php`, `admin_console.php`) và `autocomplete` cho ô đổi mật khẩu bắt buộc/mật khẩu tài khoản mới.
-- Lưu ý vận hành: sửa asset xong PHẢI chạy `php tools/generate_asset_gzip.php` + `php tools/generate_sw_manifest.php`, nếu không Apache phát bản `.gz` cũ (đã gặp khi kiểm).
-- Bộ chạy test đặt `SHEETAPP_IGNORE_LOCAL_FEATURES=1` (`FeatureFlags::load` bỏ `features.local.json`) để cờ máy dev (vd. `MULTI_CHURCH`) không làm đổi kết quả.

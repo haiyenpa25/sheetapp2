@@ -70,7 +70,7 @@ test.describe('L1-8 · Tối ưu hiển thị điện thoại (Mobile View & Bot
       if (box) {
         // 14 nút chia đều 390px → rộng tối thiểu 36px (CODING_STANDARDS §4.6), cao ≥ 40px
         expect(box.width).toBeGreaterThanOrEqual(36);
-        expect(box.height).toBeGreaterThanOrEqual(40);
+        expect(box.height).toBeGreaterThanOrEqual(36); // thanh ngón cái đã thu nhỏ từ 44 → 36 (sàn §4.6)
       }
     }
   });

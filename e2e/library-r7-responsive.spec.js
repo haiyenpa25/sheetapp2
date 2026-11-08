@@ -21,9 +21,9 @@ test('phone toolbar keeps every primary control reachable at 320px', async ({ pa
     expect(box).not.toBeNull();
     expect(box.x, id).toBeGreaterThanOrEqual(0);
     expect(box.x + box.width, id).toBeLessThanOrEqual(320);
-    // 5 điều khiển chia đều 320px → rộng tối thiểu 30px ở 320px (ngoại lệ máy nhỏ nhất của CODING_STANDARDS §4.6), cao theo hàng 44px
+    // 5 điều khiển chia đều 320px → rộng tối thiểu 30px ở 320px (ngoại lệ máy nhỏ nhất của CODING_STANDARDS §4.6), cao theo hàng 36px (đã thu nhỏ từ 44, sàn §4.6)
     expect(box.width, id).toBeGreaterThanOrEqual(30);
-    expect(box.height, id).toBeGreaterThanOrEqual(44);
+    expect(box.height, id).toBeGreaterThanOrEqual(36);
   }
   await expect(page.locator('#btn-mobile-view-toggle')).toHaveAttribute('aria-label', /Bản nhạc|Lời/);
   await page.screenshot({ path: 'test-results/r7-phone-320.png' });
@@ -113,7 +113,7 @@ for (const width of [360, 390, 430]) {
     for (const b of geometry.buttons) {
       expect(b.left, b.id).toBeGreaterThanOrEqual(0);
       expect(b.right, b.id).toBeLessThanOrEqual(width);
-      expect(b.height, b.id).toBeGreaterThanOrEqual(44);
+      expect(b.height, b.id).toBeGreaterThanOrEqual(36); // thanh dưới đã thu nhỏ từ 44 → 36 (sàn §4.6)
     }
     await expect(page.locator('#mobile-transpose-display')).not.toHaveText('0'); // chờ bài tải xong, hiện tên tông
     await expect(page.locator('#osmd-container svg').first()).toBeVisible({ timeout: 25000 }); // transpose chỉ có tác dụng sau khi bản nhạc render

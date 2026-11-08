@@ -97,6 +97,10 @@ body.dark-mode .o-combo-icon { color: var(--accent); }
 #toolbar .deck-btn svg { width: 1.25em; height: 1.25em; }
 #toolbar .btn .icon, #toolbar .icon-btn .icon { margin: 0; }
 #toolbar #zoom-slider { font-size: var(--o-fs); }
+/* Thanh công cụ trên iPad/điện thoại nhỏ hơn token chung 40px (quá bự, chiếm 3 hàng): iPad 36px, điện thoại 34px,
+   chữ 13px nên icon (1.25em) ≈16px. Gán token ngay trên #toolbar để chỉ thanh này đổi, sidebar/modal giữ 40px. */
+@media (pointer: coarse), (max-width: 1024px) { #toolbar { --o-h: 36px; --o-fs: 13px; } }
+@media (max-width: 480px) { #toolbar { --o-h: 34px; } }
 #toolbar #btn-song-info-toggle { min-width: calc(var(--o-h) - 2px); }
 .btn-menu-item { min-height: var(--o-h); display: flex; align-items: center; gap: .55em; font-size: var(--o-fs); }
 .btn-menu-item .icon, .btn-menu-item svg { width: 1.25em; height: 1.25em; }

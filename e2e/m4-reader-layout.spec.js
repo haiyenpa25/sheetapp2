@@ -96,8 +96,8 @@ test.describe('M4-1 · Viewport viewport-fit=cover & safe-area-inset trên iPhon
   });
 });
 
-test.describe('M4-2a · Modern Lớp 1 điện thoại: thanh dưới đủ 6 ô ≥ 44×44 + sheet chọn bộ hợp âm', () => {
-  test('M4-2a 390 bottom bar 6 controls >=44x44 and chordset sheet selects non-HD/TLH set', async ({ browser }, testInfo) => {
+test.describe('M4-2a · Modern Lớp 1 điện thoại: thanh dưới các ô ≥ 36×36 (sàn §4.6, đã thu nhỏ từ 44) + sheet chọn bộ hợp âm', () => {
+  test('M4-2a 390 bottom bar controls >=36x36 and chordset sheet selects non-HD/TLH set', async ({ browser }, testInfo) => {
     test.skip(testInfo.project.name !== 'webkit', 'M4-2a nghiệm thu trên 390 (iPhone 13 WebKit)');
     test.setTimeout(40000);
 
@@ -152,14 +152,14 @@ test.describe('M4-2a · Modern Lớp 1 điện thoại: thanh dưới đủ 6 ô
       });
       return {
         allExist: rects.every(r => !r.missing),
-        allAtLeast44: rects.every(r => r.w >= 44 && r.h >= 44),
+        allAtLeast36: rects.every(r => r.w >= 36 && r.h >= 36),
         outside: rects.filter(r => r.left < 0 || r.right > window.innerWidth + 1),
         rects,
       };
     });
 
     expect(barCheck.allExist).toBe(true);
-    expect(barCheck.allAtLeast44).toBe(true);
+    expect(barCheck.allAtLeast36).toBe(true);
     expect(barCheck.outside).toEqual([]);
 
     // Chạm nút Bộ hợp âm -> mở sheet chọn bộ hợp âm

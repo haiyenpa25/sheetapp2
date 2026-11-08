@@ -6,6 +6,13 @@
 
 ---
 
+## 2026-11-07 (b) — Toàn màn hình không đổi sáng/tối + rà lỗi linh tinh (giao diện mới)
+
+- Bấm **Toàn màn hình/Biểu diễn** trước đây tự ép `dark-mode` (ticket L1-5) và ghi cứng nền `#0c0d14`; chủ dự án coi là lỗi. Nay `ModeManager.setMode` không đụng `dark-mode` (người dùng đang sáng thì vẫn sáng, đang tối thì vẫn tối, thoát ra không đổi); nền `sheet-only-mode` dùng `var(--bg-base)` (`layout.css`, `library-polish.css`); nút Thoát có luật tương phản riêng cho giao diện sáng (`body.sheet-only-mode:not(.dark-mode) #btn-gig-exit`). Đảo khẳng định cũ ở `tests/library_l15_gig_mode_regression.php` và `e2e/library-l1-gig-mode.spec.js`. Kiểm bằng Chromium thật (máy tính + giả lập iPhone 390px).
+- Trợ năng: thêm `aria-label` cho 31 ô nhập chỉ có placeholder (`includes/modals.php`, `toolbar.php`, `sidebar.php`, `follow_leader_modal.php`, `admin_console.php`) và `autocomplete` cho ô đổi mật khẩu bắt buộc/mật khẩu tài khoản mới.
+- Lưu ý vận hành: sửa asset xong PHẢI chạy `php tools/generate_asset_gzip.php` + `php tools/generate_sw_manifest.php`, nếu không Apache phát bản `.gz` cũ (đã gặp khi kiểm).
+- Bộ chạy test đặt `SHEETAPP_IGNORE_LOCAL_FEATURES=1` (`FeatureFlags::load` bỏ `features.local.json`) để cờ máy dev (vd. `MULTI_CHURCH`) không làm đổi kết quả.
+
 ## 2026-11-07 — Kho bài riêng của Hội Thánh: sửa/xóa/công khai, tài khoản HT, bắt đổi mật khẩu quản trị HT
 
 - Admin HT quản lý bài trong danh mục riêng của HT mình ở `/manager/` → Hội Thánh → 📂 Quản lý bài: sửa tên/tác giả/tempo, xóa, **chuyển công khai** (chọn danh mục công khai chung + hộp xác nhận bản quyền; file XML tự ra thư mục công khai). Quay lại riêng tư chỉ admin hệ thống. Mã: `api/services/ChurchSongService.php`, action `songs|song_update|song_delete|song_publish` ở `ChurchController`, `manager/js/manager-church-songs.js`, `ApiService.churches.{songs,updateSong,deleteSong,publishSong}`. Test `tests/church_songs_regression.php` (23 check), e2e `e2e/church-song-manage.spec.js`.
