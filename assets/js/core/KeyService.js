@@ -148,7 +148,7 @@ var KeyService = (typeof window !== 'undefined' ? window.KeyService : null) || (
       // Major Keys enharmonic resolver
       switch (targetChroma) {
         case 0:  return 'C';
-        case 1:  return preferFlats ? 'Db' : (['D', 'B'].includes(origKeyInfo.root) ? 'C#' : 'Db');
+        case 1:  return 'Db'; // Db (5 giáng) thay C# (7 thăng); khớp họ giáng mà khung hợp âm dùng cho tông này
         case 2:  return 'D';
         case 3:  return 'Eb'; // Thánh ca và chuẩn lý thuyết luôn dùng Eb trưởng (không dùng D#)
         case 4:  return 'E';
@@ -172,7 +172,7 @@ var KeyService = (typeof window !== 'undefined' ? window.KeyService : null) || (
         case 5:  return 'Fm';
         case 6:  return 'F#m';
         case 7:  return 'Gm';
-        case 8:  return preferFlats ? 'Abm' : 'G#m';
+        case 8:  return 'G#m'; // G#m (5 thăng) thay Abm (7 giáng); khớp họ thăng mà khung hợp âm dùng
         case 9:  return 'Am';
         case 10: return 'Bbm';
         case 11: return 'Bm';

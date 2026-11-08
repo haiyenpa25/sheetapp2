@@ -153,8 +153,13 @@ const PerformanceNotes = (() => {
       const origKey = window.SongInfoBar?.getSongKey?.() || '';
       const curTranspose = window.Store?.get?.('currentTranspose') ?? 0;
       let curKey = origKey;
-      if (origKey && curTranspose !== 0 && window.TransposeEngine) {
-        curKey = window.TransposeEngine.transposeChord(origKey, curTranspose) || origKey;
+      if (origKey && curTranspose !== 0) {
+        // Nhãn tông phải đi qua KeyService (nguồn chuẩn, RULE.md §1.1.4) để khớp thanh thông tin và hợp âm
+        if (window.KeyService?.displayKey) {
+          curKey = window.KeyService.displayKey(origKey, curTranspose) || origKey;
+        } else if (window.TransposeEngine) {
+          curKey = window.TransposeEngine.transposeChord(origKey, curTranspose) || origKey;
+        }
       }
       const curBpm = window.Metronome?.getBpm?.() || '';
       if (curKey) _panel.querySelector('#pnp-key').value = curKey;
