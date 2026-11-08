@@ -453,6 +453,14 @@ Ghi chú nằm trong `storage/data/annotations/*.json`; settings/notes theo user
 
 > Chỉ giữ 5 mục mới nhất. Nhật ký đầy đủ: `docs/history/CHANGELOG_2026.md`. Khi thêm mục mới, đưa mục cũ nhất ở đây sang file đó.
 
+## 2026-11-08 (d) — Sheet nhạc: tách renderer, hết catch rỗng nuốt lỗi, chặn lưu đè khi tải bộ hợp âm lỗi
+
+- `osmd-renderer.js` 600→529 dòng: `compactTitle` và `hideRepeatLabels` chuyển sang `OSMDSvgText` (`osmd-svg-text.js`), renderer giữ hàm bọc `_compactTitleSVG`; 6 chỗ gọi callback sẵn sàng gom vào `_notifyReady()` có log lỗi. `/old/` dùng bản renderer riêng nên không đổi. Test L18 đọc cả hai file.
+- Rà 24 `catch` rỗng ở module bản nhạc: lỗi thật nay có log (callback OSMD, tải bộ hợp âm/danh sách bộ); chỗ cố ý (localStorage bị chặn, `getBBox` phần tử ẩn, `abort()`) giữ hành vi, thêm chú thích lý do.
+- `chord-canvas.js` nhánh dự phòng tải bộ hợp âm: lỗi nay đặt checksum `__LOAD_ERROR__`, khóa nút thêm hợp âm và báo toast như nhánh chính (trước đây nuốt lỗi, có thể lưu đè bộ thật).
+- Còn sát trần 600 dòng (581–597): `chord-canvas-dots`, `chord-canvas-edit`, `song-loader`, `chord-canvas-ui`, `chord-canvas` — tách file nào khi thêm tính năng vào file đó. Chưa làm: duyệt 10 bài hợp âm trùng + 4 nhóm XML y hệt (cần chủ dự án), đo render trên iPad/điện thoại thật.
+- Lưu ý: chạy lẻ `tests/core_rules_regression.php` trên máy dev báo `no such column: church_id` do cờ MULTI_CHURCH cục bộ; đặt `SHEETAPP_IGNORE_LOCAL_FEATURES=1` thì đạt. Strict: 263 suite, 4.755 check, 0 lỗi.
+
 ## 2026-11-08 (c) — Ẩn/hiện nút toolbar (Modern + Classic)
 
 - `assets/js/toolbar-customizer.js` (mới, dùng chung; Classic nạp qua `../assets/js`): người dùng vào menu ⋮ → **⚙ Tùy chỉnh thanh công cụ**, bỏ tick để ẩn 12 nhóm nút (tông, zoom, nhịp độ, bản nhạc↔lời, ghi chú, soạn hợp âm, ký hiệu, gọn nhẹ, cuộn, bài trước/sau, toàn màn hình, theo ca trưởng), gồm cả thanh ngón cái điện thoại. Chỉ liệt kê nút có thật trong giao diện đang mở.
@@ -481,11 +489,3 @@ Ghi chú nằm trong `storage/data/annotations/*.json`; settings/notes theo user
 - Trợ năng: thêm `aria-label` cho 31 ô nhập chỉ có placeholder (`includes/modals.php`, `toolbar.php`, `sidebar.php`, `follow_leader_modal.php`, `admin_console.php`) và `autocomplete` cho ô đổi mật khẩu bắt buộc/mật khẩu tài khoản mới.
 - Lưu ý vận hành: sửa asset xong PHẢI chạy `php tools/generate_asset_gzip.php` + `php tools/generate_sw_manifest.php`, nếu không Apache phát bản `.gz` cũ (đã gặp khi kiểm).
 - Bộ chạy test đặt `SHEETAPP_IGNORE_LOCAL_FEATURES=1` (`FeatureFlags::load` bỏ `features.local.json`) để cờ máy dev (vd. `MULTI_CHURCH`) không làm đổi kết quả.
-
-## 2026-11-07 — Kho bài riêng của Hội Thánh: sửa/xóa/công khai, tài khoản HT, bắt đổi mật khẩu quản trị HT
-
-- Admin HT quản lý bài trong danh mục riêng của HT mình ở `/manager/` → Hội Thánh → 📂 Quản lý bài: sửa tên/tác giả/tempo, xóa, **chuyển công khai** (chọn danh mục công khai chung + hộp xác nhận bản quyền; file XML tự ra thư mục công khai). Quay lại riêng tư chỉ admin hệ thống. Mã: `api/services/ChurchSongService.php`, action `songs|song_update|song_delete|song_publish` ở `ChurchController`, `manager/js/manager-church-songs.js`, `ApiService.churches.{songs,updateSong,deleteSong,publishSong}`. Test `tests/church_songs_regression.php` (23 check), e2e `e2e/church-song-manage.spec.js`.
-- Migration `019_users_must_change_password.php` (cột `users.must_change_password`): chỉ `admin.<viết tắt>` tạo kèm HT bị bắt đổi mật khẩu lần đầu; `banhat/bannhac.<viết tắt>` là tài khoản dùng chung nhiều thiết bị nên không bị bắt. **Chạy `php tools/migrate.php` trên web (có sao lưu).**
-- Slug HT bỏ dấu tiếng Việt đúng (`ChurchService::uniqueSlug`, trước đây mất chữ có dấu khi PHP không có `intl`).
-- Dữ liệu local: tạo HT "Hội Thánh Thạnh Mỹ Lợi" (`thanh-my-loi`) + `banhat.tml`, `bannhac.tml`, `admin.tml`; `hoaidinh` nâng lên admin hệ thống (cùng `admin`). Bản web làm riêng qua tab Hội Thánh (cờ `MULTI_CHURCH`).
-- Còn mở: bộ hợp âm riêng 1 bộ/HT (đặt tên, hiện mặc định khi HT đăng nhập — chưa chốt cách hòa với Core Rule 1 "mở bài vào HD"); admin HT tự gắn tài khoản có sẵn vào HT; `PUT songs` (Ca trưởng) chưa kiểm HT; e2e `manager-churches.spec.js` hỏng sẵn từ trước (click nút Nâng cao trước khi trang gắn xong sự kiện).

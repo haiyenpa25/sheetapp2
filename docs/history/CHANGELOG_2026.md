@@ -6,6 +6,14 @@
 
 ---
 
+## 2026-11-07 — Kho bài riêng của Hội Thánh: sửa/xóa/công khai, tài khoản HT, bắt đổi mật khẩu quản trị HT
+
+- Admin HT quản lý bài trong danh mục riêng của HT mình ở `/manager/` → Hội Thánh → 📂 Quản lý bài: sửa tên/tác giả/tempo, xóa, **chuyển công khai** (chọn danh mục công khai chung + hộp xác nhận bản quyền; file XML tự ra thư mục công khai). Quay lại riêng tư chỉ admin hệ thống. Mã: `api/services/ChurchSongService.php`, action `songs|song_update|song_delete|song_publish` ở `ChurchController`, `manager/js/manager-church-songs.js`, `ApiService.churches.{songs,updateSong,deleteSong,publishSong}`. Test `tests/church_songs_regression.php` (23 check), e2e `e2e/church-song-manage.spec.js`.
+- Migration `019_users_must_change_password.php` (cột `users.must_change_password`): chỉ `admin.<viết tắt>` tạo kèm HT bị bắt đổi mật khẩu lần đầu; `banhat/bannhac.<viết tắt>` là tài khoản dùng chung nhiều thiết bị nên không bị bắt. **Chạy `php tools/migrate.php` trên web (có sao lưu).**
+- Slug HT bỏ dấu tiếng Việt đúng (`ChurchService::uniqueSlug`, trước đây mất chữ có dấu khi PHP không có `intl`).
+- Dữ liệu local: tạo HT "Hội Thánh Thạnh Mỹ Lợi" (`thanh-my-loi`) + `banhat.tml`, `bannhac.tml`, `admin.tml`; `hoaidinh` nâng lên admin hệ thống (cùng `admin`). Bản web làm riêng qua tab Hội Thánh (cờ `MULTI_CHURCH`).
+- Còn mở: bộ hợp âm riêng 1 bộ/HT (đặt tên, hiện mặc định khi HT đăng nhập — chưa chốt cách hòa với Core Rule 1 "mở bài vào HD"); admin HT tự gắn tài khoản có sẵn vào HT; `PUT songs` (Ca trưởng) chưa kiểm HT; e2e `manager-churches.spec.js` hỏng sẵn từ trước (click nút Nâng cao trước khi trang gắn xong sự kiện).
+
 ## 2026-11-05 — Nền đa Hội Thánh (HT): bước S1–S2 (cờ MULTI_CHURCH, mặc định TẮT)
 
 - Thiết kế (chủ dự án chọn: 2–5 HT, kho bài chung + bài riêng từng HT, một người thuộc nhiều HT): quyền gắn vào **HT**, không gắn từng chương trình. Migration `018_multi_church.php` (bảng `churches`, `church_members`, cột `setlists.church_id`, `categories.church_id`; HT mặc định `mac-dinh`, mọi tài khoản cũ thành thành viên; chạy lại an toàn). **Chạy `php tools/migrate.php` trên web có sao lưu trước** — chưa chạy trên bản web.
