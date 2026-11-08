@@ -258,6 +258,7 @@ echo jsTag('song-info-bar.js');
 echo jsTag('song-loader.js');
 echo jsTag('keyboard-handler.js');
 echo jsTag('toolbar-controller.js');
+echo jsTag('toolbar-customizer.js');
 echo jsTag('app.js');
 ?>
 

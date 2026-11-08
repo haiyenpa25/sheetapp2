@@ -288,6 +288,7 @@ echo jsTag('song-preloader.js');
 echo jsTag('song-loader.js');
 echo jsTag('keyboard-handler.js');
 echo jsTag('toolbar-controller.js');
+echo jsTag('toolbar-customizer.js');
 echo jsTag('mobile-controller.js');
 echo jsTag('app.js');
 echo jsTag('fab.js');
